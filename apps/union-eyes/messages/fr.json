@@ -2658,7 +2658,7 @@
   },
   "adminGovernancePage": {
     "metaTitle": "Console de Gouvernance | UnionEyes",
-    "metaDescription": "Action dorée, questions réservées, audits et élections du conseil"
+    "metaDescription": "Matières réservées, contrôles syndicaux, audits et élections du conseil"
   },
   "loginPage": {
     "metaTitle": "Connexion | UnionEyes",
@@ -7258,7 +7258,7 @@
       "principle3Title": "La dignité humaine d'abord",
       "principle3Description": "Chaque grief représente une personne qui a été lésée. Nous traitons cela avec le sérieux qu'il mérite. Pas de ludification. Pas de gaieté d'entreprise. Juste du respect.",
       "principle4Title": "Gouvernance démocratique intégrée",
-      "principle4Description": "UnionEyes a une structure d'action dorée. Les membres du syndicat élisent des représentants qui peuvent opposer leur veto à toute vente ou changement de mission. Ce n'est pas du marketing — c'est dans notre accord d'actionnaires.",
+      "principle4Description": "UnionEyes a une structure de gouvernance à matières réservées. Les représentants élus par les membres détiennent des sièges de surveillance réservés et exercent un consentement des travailleurs en cas de changement de contrôle ou de mission. Ce n'est pas du marketing — c'est dans notre accord d'actionnaires.",
       "ctaHeading": "Prêt à voir si nous sommes le bon choix ?",
       "ctaBody": "Nous ne faisons pas de démonstrations. Nous faisons des conversations. Parlez-nous de vos défis. Nous serons honnêtes sur la capacité d'UnionEyes à vous aider — ou si autre chose vous servirait mieux.",
       "ctaPilot": "Demander un programme pilote",
@@ -8359,7 +8359,7 @@
     "complianceRate": "Taux de conformité",
     "invalidTransitionsBlocked": "Transitions invalides bloquées",
     "lastValidation": "Dernière validation",
-    "goldenShare": "Action privilégiée",
+    "goldenShare": "Matières réservées",
     "shareHolder": "Actionnaire",
     "reservedMatters": "Questions réservées",
     "auditTrail": "Piste d'audit",
@@ -8383,8 +8383,8 @@
     "roleBasedValidation": "Validation des transitions basée sur les rôles",
     "slaEnforcement": "Intégration de l'application des SLA",
     "governanceDescription": "Gouvernance démocratique",
-    "governanceDetails": "La structure d'action dorée garantit le contrôle syndical sur les décisions critiques.",
-    "goldenShareHolder": "Détenteur de l'action dorée :",
+    "governanceDetails": "La gouvernance à matières réservées garantit le contrôle syndical sur les décisions critiques.",
+    "goldenShareHolder": "Signataire des matières réservées :",
     "reservedMattersProtection": "Protection des questions réservées :",
     "lastElection": "Dernière élection :",
     "classVotingRights": "Droits de vote de classe B sur les décisions stratégiques",

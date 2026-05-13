@@ -2664,7 +2664,7 @@
   },
   "adminGovernancePage": {
     "metaTitle": "Governance Console | UnionEyes",
-    "metaDescription": "Golden share, reserved matters, audits, and council elections"
+    "metaDescription": "Reserved matters, labour-side controls, audits, and council elections"
   },
   "loginPage": {
     "metaTitle": "Login | UnionEyes",
@@ -7321,7 +7321,7 @@
       "principle3Title": "Human dignity comes first",
       "principle3Description": "Every grievance represents a person who was wronged. We treat that with the seriousness it deserves. No gamification. No corporate cheerfulness. Just respect.",
       "principle4Title": "Democratic governance baked in",
-      "principle4Description": "UnionEyes has a golden share structure. Union members elect representatives who can veto any sale or mission change. This isn't marketing — it's in our shareholder agreement.",
+      "principle4Description": "UnionEyes has a reserved-matter governance structure. Union-elected representatives hold reserved oversight seats and exercise worker consent on change of control or mission change. This isn't marketing — it's in our shareholder agreement.",
       "ctaHeading": "Ready to see if we're the right fit?",
       "ctaBody": "We don't do demos. We do conversations. Tell us about your challenges. We'll be honest about whether UnionEyes can help — or if something else would serve you better.",
       "ctaPilot": "Request a pilot program",
@@ -8638,7 +8638,7 @@
     "complianceRate": "Compliance Rate",
     "invalidTransitionsBlocked": "Invalid Transitions Blocked",
     "lastValidation": "Last Validation",
-    "goldenShare": "Golden Share",
+    "goldenShare": "Reserved matters",
     "shareHolder": "Share Holder",
     "reservedMatters": "Reserved Matters",
     "auditTrail": "Audit Trail",
@@ -8662,8 +8662,8 @@
     "roleBasedValidation": "Role-based transition validation",
     "slaEnforcement": "SLA enforcement integration",
     "governanceDescription": "Democratic Governance",
-    "governanceDetails": "Golden share structure ensures union control over mission-critical decisions.",
-    "goldenShareHolder": "Golden share holder:",
+    "governanceDetails": "Reserved-matter governance ensures labour-side control over mission-critical decisions.",
+    "goldenShareHolder": "Reserved-matter signatory:",
     "reservedMattersProtection": "Reserved matters protection:",
     "lastElection": "Last election:",
     "classVotingRights": "Class B voting rights on strategic decisions",

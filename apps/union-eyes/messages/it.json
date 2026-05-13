@@ -2658,7 +2658,7 @@
   },
   "adminGovernancePage": {
     "metaTitle": "Console di Governance | UnionEyes",
-    "metaDescription": "Quota d'oro, questioni riservate, audit e elezioni del consiglio"
+    "metaDescription": "Materie riservate, controlli sindacali, audit ed elezioni del consiglio"
   },
   "loginPage": {
     "metaTitle": "Accesso | UnionEyes",
@@ -7259,7 +7259,7 @@
       "principle3Title": "La dignità umana viene prima di tutto",
       "principle3Description": "Ogni reclamo rappresenta una persona che è stata danneggiata. Lo trattiamo con la serietà che merita. Nessuna gamification. Nessuna allegria aziendale. Solo rispetto.",
       "principle4Title": "Governance democratica integrata",
-      "principle4Description": "UnionEyes ha una struttura di azioni d'oro. I membri del sindacato eleggono rappresentanti che possono porre il veto a qualsiasi vendita o cambiamento di missione. Questo non è marketing — è nel nostro accordo con gli azionisti.",
+      "principle4Description": "UnionEyes ha una struttura di governance a materie riservate. I rappresentanti eletti dai membri detengono seggi di sorveglianza riservati ed esercitano il consenso dei lavoratori in caso di cambio di controllo o di missione. Questo non è marketing — è nel nostro accordo con gli azionisti.",
       "ctaHeading": "Pronto a vedere se siamo la scelta giusta?",
       "ctaBody": "Non facciamo demo. Facciamo conversazioni. Raccontaci delle tue sfide. Saremo onesti sul fatto che UnionEyes possa aiutarti — o se qualcos'altro ti servirebbe meglio.",
       "ctaPilot": "Richiedi un programma pilota",
@@ -8382,7 +8382,7 @@
     "complianceRate": "Tasso di Conformità",
     "invalidTransitionsBlocked": "Transizioni Non Valide Bloccate",
     "lastValidation": "Ultima Validazione",
-    "goldenShare": "Azione Dorata",
+    "goldenShare": "Materie riservate",
     "shareHolder": "Azionista",
     "reservedMatters": "Questioni Riservate",
     "auditTrail": "Traccia di Audit",
@@ -8406,8 +8406,8 @@
     "roleBasedValidation": "Validazione delle transizioni basata sui ruoli",
     "slaEnforcement": "Integrazione dell'applicazione SLA",
     "governanceDescription": "Governance Democratica",
-    "governanceDetails": "La struttura dell'azione dorata garantisce il controllo sindacale sulle decisioni critiche per la missione.",
-    "goldenShareHolder": "Detentore dell'azione dorata:",
+    "governanceDetails": "La governance a materie riservate garantisce il controllo sindacale sulle decisioni critiche per la missione.",
+    "goldenShareHolder": "Firmatario delle materie riservate:",
     "reservedMattersProtection": "Protezione delle questioni riservate:",
     "lastElection": "Ultima elezione:",
     "classVotingRights": "Diritti di voto di Classe B sulle decisioni strategiche",

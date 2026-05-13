@@ -1,0 +1,2142 @@
+{
+  "generatedAt": "2026-05-13T02:25:00.445Z",
+  "files": [
+    {
+      "ctx": {
+        "path": "app/[locale]/layout.tsx",
+        "isPublicSurface": true,
+        "label": "app/[locale]/layout.tsx"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/page.tsx",
+        "isPublicSurface": true,
+        "label": "app/[locale]/page.tsx"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 6,
+          "excerpt": "import { auth } from '@nzila/platform-auth/entra/server';"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 132,
+          "excerpt": "Built-in platform guarantees"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 65,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 10,
+              "continuity": 15,
+              "coordination": 4,
+              "trust": 14
+            },
+            "total": 43,
+            "shares": {
+              "governance": 0.23255813953488372,
+              "continuity": 0.3488372093023256,
+              "coordination": 0.09302325581395349,
+              "trust": 0.32558139534883723
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 73,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canada"
+            ]
+          }
+        }
+      ],
+      "maturity": 77
+    },
+    {
+      "ctx": {
+        "path": "messages/en-CA.json",
+        "isPublicSurface": true,
+        "label": "messages/en-CA.json",
+        "locale": "en-CA"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 1587,
+          "excerpt": "\"description\": \"Member relationship management and organizing platform integrations.\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2180,
+          "excerpt": "\"title\": \"Platform Analytics\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2249,
+          "excerpt": "\"title\": \"Platform Summary\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2680,
+          "excerpt": "\"metaDescription\": \"Sign in to UnionEyes - the intelligent labour relations platform for unions, locals, and federations.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2714,
+          "excerpt": "\"metaDescription\": \"Monitor platform migration runs and operational migration health\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2958,
+          "excerpt": "\"platform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3015,
+          "excerpt": "\"platform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3024,
+          "excerpt": "\"platform\": \"SaaS platform provider (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3107,
+          "excerpt": "\"platform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3116,
+          "excerpt": "\"platform\": \"SaaS platform provider (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3199,
+          "excerpt": "\"metaDescription\": \"Create your UnionEyes account - join the intelligent labour relations platform.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3245,
+          "excerpt": "\"metaDescription\": \"Manage platform and organization configuration settings\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3590,
+          "excerpt": "\"setupBillingDescription\": \"Create a billing account to enable platform invoicing and cost allocation. All billing is processed in Canadian Dollars (CAD).\","
+        },
+        {
+          "term": {
+            "term": "AI-powered",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3825,
+          "excerpt": "\"aiTriage\": \"AI-powered case triage & drafting\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 4506,
+          "excerpt": "\"activityTrackingDescription\": \"Help improve the platform with usage data\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 4608,
+          "excerpt": "\"platformLabel\": \"Platform & Goals (Optional)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 4979,
+          "excerpt": "\"noCasesFiledBody\": \"No cases have been filed across the platform yet.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 5849,
+          "excerpt": "\"platformSlasLink\": \"Platform SLAs\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 6010,
+          "excerpt": "\"description\": \"Our platform helps you manage union claims, track grievances, and collaborate with your team more effectively.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7050,
+          "excerpt": "\"nzilaPlatform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7110,
+          "excerpt": "\"platformAdminView\": \"Platform Admin View\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7111,
+          "excerpt": "\"viewingAsAdmin\": \"You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7166,
+          "excerpt": "\"heroDescription\": \"Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7168,
+          "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7179,
+          "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7199,
+          "excerpt": "\"governanceDescription\": \"Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7208,
+          "excerpt": "\"modulesBadge\": \"Platform Modules\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7230,
+          "excerpt": "\"missionDescription\": \"UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h"
+        },
+        {
+          "term": {
+            "term": "centralized",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7404,
+          "excerpt": "\"noGovernanceOversight\": \"No centralized governance oversight\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7426,
+          "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7428,
+          "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7432,
+          "excerpt": "\"platform\": \"Capabilities\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7484,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7518,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7553,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7583,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7593,
+          "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7643,
+          "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7657,
+          "excerpt": "\"pageDescription\": \"Terms and conditions governing the use of UnionEyes union management platform.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7660,
+          "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7662,
+          "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7666,
+          "excerpt": "\"liabilityDesc\": \"UnionEyes is provided \\\"as is\\\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7678,
+          "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7721,
+          "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7723,
+          "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7733,
+          "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7739,
+          "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7743,
+          "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\","
+        },
+        {
+          "term": {
+            "term": "disruption",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7749,
+          "excerpt": "\"disruptionTitle\": \"Operational disruption modeling\","
+        },
+        {
+          "term": {
+            "term": "centralized",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7887,
+          "excerpt": "\"ba3After\": \"Centralized campaign tracking with real-time progress\","
+        },
+        {
+          "term": {
+            "term": "AI-powered",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8633,
+          "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8785,
+          "excerpt": "\"platform\": {"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8789,
+          "excerpt": "\"operationsOverview\": \"Nzila Platform Operations — here's your overview.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8805,
+          "excerpt": "\"platformHealthIncidents\": \"Platform health & incidents\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8810,
+          "excerpt": "\"platformAnalytics\": \"Platform Analytics\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8817,
+          "excerpt": "\"platformSecurityPosture\": \"Platform security posture\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8820,
+          "excerpt": "\"platformHealth\": \"Platform Health\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8827,
+          "excerpt": "\"recentPlatformEvents\": \"Recent Platform Events\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8834,
+          "excerpt": "\"platformActivityAppears\": \"Platform activity will appear here\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9135,
+          "excerpt": "\"title\": \"Platform Operations\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9136,
+          "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9148,
+          "excerpt": "\"platformUptimeTitle\": \"Platform Uptime\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9209,
+          "excerpt": "\"platformAdoptionTitle\": \"Platform Adoption\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9210,
+          "excerpt": "\"moduleUsageDescription\": \"Module usage across the platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9246,
+          "excerpt": "\"featureAdoptionDescription\": \"Usage across the platform by feature\","
+        },
+        {
+          "term": {
+            "term": "AI-powered",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 10566,
+          "excerpt": "\"description\": \"AI-powered recommendations\""
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 4.9% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 226,
+              "continuity": 29,
+              "coordination": 130,
+              "trust": 203
+            },
+            "total": 588,
+            "shares": {
+              "governance": 0.3843537414965986,
+              "continuity": 0.04931972789115646,
+              "coordination": 0.22108843537414966,
+              "trust": 0.34523809523809523
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "fail",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Forbidden AI framing: \"autonomous decisions\".",
+              "suggestion": "Reframe as assistive intelligence under human oversight."
+            }
+          ],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "Canadian-hosted"
+            ],
+            "generalCanadianHits": [
+              "canada",
+              "canadian",
+              "québec",
+              "quebec",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 62
+    },
+    {
+      "ctx": {
+        "path": "messages/en.json",
+        "isPublicSurface": true,
+        "label": "messages/en.json",
+        "locale": "en"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 1593,
+          "excerpt": "\"description\": \"Member relationship management and organizing platform integrations.\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2186,
+          "excerpt": "\"title\": \"Platform Analytics\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2255,
+          "excerpt": "\"title\": \"Platform Summary\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2686,
+          "excerpt": "\"metaDescription\": \"Sign in to UnionEyes - the intelligent labour relations platform for unions, locals, and federations.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2720,
+          "excerpt": "\"metaDescription\": \"Monitor platform migration runs and operational migration health\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3021,
+          "excerpt": "\"platform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3078,
+          "excerpt": "\"platform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3087,
+          "excerpt": "\"platform\": \"SaaS platform provider (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3170,
+          "excerpt": "\"platform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3179,
+          "excerpt": "\"platform\": \"SaaS platform provider (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3262,
+          "excerpt": "\"metaDescription\": \"Create your UnionEyes account - join the intelligent labour relations platform.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3308,
+          "excerpt": "\"metaDescription\": \"Manage platform and organization configuration settings\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3653,
+          "excerpt": "\"setupBillingDescription\": \"Create a billing account to enable platform invoicing and cost allocation. All billing is processed in Canadian Dollars (CAD).\","
+        },
+        {
+          "term": {
+            "term": "AI-powered",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3888,
+          "excerpt": "\"aiTriage\": \"AI-powered case triage & drafting\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 4569,
+          "excerpt": "\"activityTrackingDescription\": \"Help improve the platform with usage data\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 4671,
+          "excerpt": "\"platformLabel\": \"Platform & Goals (Optional)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 5042,
+          "excerpt": "\"noCasesFiledBody\": \"No cases have been filed across the platform yet.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 5912,
+          "excerpt": "\"platformSlasLink\": \"Platform SLAs\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 6073,
+          "excerpt": "\"description\": \"Our platform helps you manage union claims, track grievances, and collaborate with your team more effectively.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7113,
+          "excerpt": "\"nzilaPlatform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7173,
+          "excerpt": "\"platformAdminView\": \"Platform Admin View\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7174,
+          "excerpt": "\"viewingAsAdmin\": \"You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7228,
+          "excerpt": "\"heroDescription\": \"Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7230,
+          "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7241,
+          "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7261,
+          "excerpt": "\"governanceDescription\": \"Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7270,
+          "excerpt": "\"modulesBadge\": \"Platform Modules\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7292,
+          "excerpt": "\"missionDescription\": \"UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h"
+        },
+        {
+          "term": {
+            "term": "centralized",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7457,
+          "excerpt": "\"noGovernanceOversight\": \"No centralized governance oversight\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7479,
+          "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7481,
+          "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
+        },
+        {
+          "term": {
+            "term": "centralized",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7591,
+          "excerpt": "\"ba3After\": \"Centralized campaign tracking with real-time progress\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7627,
+          "excerpt": "\"platform\": \"Capabilities\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7678,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7712,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7747,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7777,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7787,
+          "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7837,
+          "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7851,
+          "excerpt": "\"pageDescription\": \"Terms and conditions governing the use of UnionEyes union management platform.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7854,
+          "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7856,
+          "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7860,
+          "excerpt": "\"liabilityDesc\": \"UnionEyes is provided \\\"as is\\\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7872,
+          "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7915,
+          "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7917,
+          "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7927,
+          "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7933,
+          "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7937,
+          "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\""
+        },
+        {
+          "term": {
+            "term": "AI-powered",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8889,
+          "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9041,
+          "excerpt": "\"platform\": {"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9045,
+          "excerpt": "\"operationsOverview\": \"Nzila Platform Operations — here's your overview.\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9061,
+          "excerpt": "\"platformHealthIncidents\": \"Platform health & incidents\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9066,
+          "excerpt": "\"platformAnalytics\": \"Platform Analytics\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9073,
+          "excerpt": "\"platformSecurityPosture\": \"Platform security posture\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9076,
+          "excerpt": "\"platformHealth\": \"Platform Health\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9083,
+          "excerpt": "\"recentPlatformEvents\": \"Recent Platform Events\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9090,
+          "excerpt": "\"platformActivityAppears\": \"Platform activity will appear here\","
+        },
+        {
+          "term": {
+            "term": "AI-powered",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 10195,
+          "excerpt": "\"description\": \"AI-powered recommendations\""
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 10871,
+          "excerpt": "\"title\": \"Platform Operations\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 10872,
+          "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 10884,
+          "excerpt": "\"platformUptimeTitle\": \"Platform Uptime\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 10946,
+          "excerpt": "\"platformAdoptionTitle\": \"Platform Adoption\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 10947,
+          "excerpt": "\"moduleUsageDescription\": \"Module usage across the platform\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 10983,
+          "excerpt": "\"featureAdoptionDescription\": \"Usage across the platform by feature\","
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 48,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 4.2% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 222,
+              "continuity": 24,
+              "coordination": 129,
+              "trust": 203
+            },
+            "total": 578,
+            "shares": {
+              "governance": 0.38408304498269896,
+              "continuity": 0.04152249134948097,
+              "coordination": 0.2231833910034602,
+              "trust": 0.35121107266435986
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "fail",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Forbidden AI framing: \"autonomous decisions\".",
+              "suggestion": "Reframe as assistive intelligence under human oversight."
+            }
+          ],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "Canadian-hosted"
+            ],
+            "generalCanadianHits": [
+              "canada",
+              "canadian",
+              "québec",
+              "quebec",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "messages/fr-CA.json",
+        "isPublicSurface": true,
+        "label": "messages/fr-CA.json",
+        "locale": "fr-CA"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2958,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3015,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3024,
+          "excerpt": "\"platform\": \"Fournisseur de plateforme SaaS (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3107,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3116,
+          "excerpt": "\"platform\": \"Fournisseur de plateforme SaaS (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7432,
+          "excerpt": "\"platform\": \"Capacités\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8785,
+          "excerpt": "\"platform\": {"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 32,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 0.9% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 74,
+              "continuity": 2,
+              "coordination": 33,
+              "trust": 112
+            },
+            "total": 221,
+            "shares": {
+              "governance": 0.334841628959276,
+              "continuity": 0.00904977375565611,
+              "coordination": 0.1493212669683258,
+              "trust": 0.5067873303167421
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 76,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 82,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canada",
+              "québec",
+              "quebec",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 66
+    },
+    {
+      "ctx": {
+        "path": "messages/fr.json",
+        "isPublicSurface": true,
+        "label": "messages/fr.json",
+        "locale": "fr"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2958,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3015,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3024,
+          "excerpt": "\"platform\": \"Fournisseur de plateforme SaaS (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3107,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3116,
+          "excerpt": "\"platform\": \"Fournisseur de plateforme SaaS (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7422,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8762,
+          "excerpt": "\"platform\": {"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 31,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 0.9% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 74,
+              "continuity": 2,
+              "coordination": 32,
+              "trust": 110
+            },
+            "total": 218,
+            "shares": {
+              "governance": 0.3394495412844037,
+              "continuity": 0.009174311926605505,
+              "coordination": 0.14678899082568808,
+              "trust": 0.5045871559633027
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 76,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 82,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canada",
+              "québec",
+              "quebec",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 65
+    },
+    {
+      "ctx": {
+        "path": "messages/it.json",
+        "isPublicSurface": true,
+        "label": "messages/it.json",
+        "locale": "it"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2958,
+          "excerpt": "\"platform\": \"Piattaforma\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3015,
+          "excerpt": "\"platform\": \"Piattaforma\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3024,
+          "excerpt": "\"platform\": \"Fornitore di piattaforma SaaS (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3107,
+          "excerpt": "\"platform\": \"Piattaforma\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3116,
+          "excerpt": "\"platform\": \"Fornitore di piattaforma SaaS (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7432,
+          "excerpt": "\"platform\": \"Moduli\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8785,
+          "excerpt": "\"platform\": {"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 26,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 47.4% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            },
+            {
+              "message": "Continuity language under-represented: 0.4% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 118,
+              "continuity": 1,
+              "coordination": 31,
+              "trust": 99
+            },
+            "total": 249,
+            "shares": {
+              "governance": 0.4738955823293173,
+              "continuity": 0.004016064257028112,
+              "coordination": 0.12449799196787148,
+              "trust": 0.39759036144578314
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 76,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 82,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canada",
+              "québec",
+              "quebec",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 64
+    },
+    {
+      "ctx": {
+        "path": "messages/pt.json",
+        "isPublicSurface": true,
+        "label": "messages/pt.json",
+        "locale": "pt"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2958,
+          "excerpt": "\"platform\": \"Plataforma\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3015,
+          "excerpt": "\"platform\": \"Plataforma\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3024,
+          "excerpt": "\"platform\": \"Provedor de plataforma SaaS (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3107,
+          "excerpt": "\"platform\": \"Plataforma\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3116,
+          "excerpt": "\"platform\": \"Provedor de plataforma SaaS (Nzila Ventures)\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7432,
+          "excerpt": "\"platform\": \"Modulos\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8785,
+          "excerpt": "\"platform\": {"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 25,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 0.4% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 74,
+              "continuity": 1,
+              "coordination": 27,
+              "trust": 121
+            },
+            "total": 223,
+            "shares": {
+              "governance": 0.33183856502242154,
+              "continuity": 0.004484304932735426,
+              "coordination": 0.1210762331838565,
+              "trust": 0.5426008968609866
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 76,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 79,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canada",
+              "quebec",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 63
+    }
+  ],
+  "summary": {
+    "totalFiles": 8,
+    "publicFiles": 8,
+    "hardFails": 0,
+    "warnings": 161,
+    "ruleFailures": 2,
+    "averageMaturity": 66
+  }
+}
