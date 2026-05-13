@@ -155,25 +155,6 @@ export function MarketingHeroSection({
               </p>
             </ScrollReveal>
 
-            {contextNote ? (
-              <ScrollReveal delay={0.24} duration={0.9} distance={14} tempo={revealTempo}>
-                <div
-                  className={`mx-auto mb-7 max-w-3xl rounded-xl border px-4 py-3 text-left ${
-                    isDarkTone
-                      ? 'border-[#12324a]/20 bg-[#12324a]/5 text-[#12324a]'
-                      : 'border-white/30 bg-white/10 text-white'
-                  }`}
-                >
-                  {contextKicker ? (
-                    <p className={`mb-1 text-[11px] font-semibold tracking-[0.16em] uppercase ${isDarkTone ? 'text-[#12324a]/65' : 'text-white/75'}`}>
-                      {contextKicker}
-                    </p>
-                  ) : null}
-                  <p className="text-sm leading-relaxed">{contextNote}</p>
-                </div>
-              </ScrollReveal>
-            ) : null}
-
             {/* CTA / Additional Content */}
             {cta && (
               <ScrollReveal delay={0.28} duration={0.95} distance={14} tempo={revealTempo}>
