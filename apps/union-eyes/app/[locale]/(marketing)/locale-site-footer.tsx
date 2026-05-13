@@ -68,6 +68,7 @@ const FOOTER_COPY: Record<string, {
 
 export default function LocaleSiteFooter() {
   const t  = useTranslations('marketing.footer');
+  const tNav = useTranslations('marketing.nav.platformItems');
   const params = useParams();
   const pathname = usePathname() ?? '';
   const locale = (params?.locale as string) || 'en-CA';
@@ -76,14 +77,14 @@ export default function LocaleSiteFooter() {
 
   const footerLinks = {
     [t('platform') as string]: [
-      { name: 'Inbox',                href: `/${locale}/platform#inbox` },
-      { name: 'Work',                 href: `/${locale}/platform#work` },
-      { name: 'Priorities',           href: `/${locale}/platform#priorities` },
-      { name: 'Intelligence',         href: `/${locale}/platform#intelligence` },
-      { name: 'Cognition',            href: `/${locale}/platform#cognition` },
-      { name: 'Governance',           href: `/${locale}/platform#governance` },
-      { name: 'Corporate Memory',     href: `/${locale}/platform#institutional-memory` },
-      { name: 'Trust',                href: `/${locale}/platform#trust` },
+      { name: tNav('inbox.name'),        href: `/${locale}/platform#inbox` },
+      { name: tNav('work.name'),         href: `/${locale}/platform#work` },
+      { name: tNav('priorities.name'),   href: `/${locale}/platform#priorities` },
+      { name: tNav('intelligence.name'), href: `/${locale}/platform#intelligence` },
+      { name: tNav('cognition.name'),    href: `/${locale}/platform#cognition` },
+      { name: tNav('governance.name'),   href: `/${locale}/platform#governance` },
+      { name: tNav('memory.name'),       href: `/${locale}/platform#institutional-memory` },
+      { name: tNav('trust.name'),        href: `/${locale}/platform#trust` },
     ],
     [t('solutions') as string]: [
       { name: t('executiveLeadership'),   href: `/${locale}/solutions/executive-leadership` },
