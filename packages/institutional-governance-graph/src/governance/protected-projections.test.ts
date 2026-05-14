@@ -5,13 +5,13 @@
  * `redactProtectedFromProjections` (additive, read-only).
  */
 import { describe, expect, it } from 'vitest'
-import { IggEventKinds } from '../ontology/kinds.js'
+import { IggEventKinds } from '../ontology/kinds'
 import {
   IGG_PROTECTED_DECISION_CATEGORIES,
   IGG_PROTECTED_EVENT_KINDS,
   assertNoProtectedKindsInProjections,
   redactProtectedFromProjections,
-} from './protected.js'
+} from './protected'
 
 describe('Phase 4 — assertNoProtectedKindsInProjections', () => {
   it('passes on empty input', () => {

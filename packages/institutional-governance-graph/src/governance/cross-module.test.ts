@@ -21,16 +21,16 @@ import {
   IggEntityKinds,
   IggEventKinds,
   IggRelationshipKinds,
-} from '../ontology/kinds.js'
+} from '../ontology/kinds'
 import {
   buildContinuityTimeline,
   successionBreakpoints,
-} from './continuity.js'
+} from './continuity'
 import {
   buildEvidenceConvergence,
   summarizeCitations,
-} from './evidence.js'
-import { buildInstitutionalTimeline } from './timeline.js'
+} from './evidence'
+import { buildInstitutionalTimeline } from './timeline'
 
 // ── Fixture helpers ────────────────────────────────────────────────────────
 

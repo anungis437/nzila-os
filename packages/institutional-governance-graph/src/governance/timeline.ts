@@ -19,8 +19,8 @@
  */
 import type { DecisionNode } from '@nzila/platform-decision-graph'
 import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
-import { IggRelationshipKinds } from '../ontology/kinds.js'
-import { lineageChain, orderDecisionsChronologically } from './chronology.js'
+import { IggRelationshipKinds } from '../ontology/kinds'
+import { lineageChain, orderDecisionsChronologically } from './chronology'
 import {
   assertNoProtectedKindsInProjections,
   assertNoProtectedKindsInReadSurface,
@@ -28,8 +28,8 @@ import {
   isProtectedEventKind,
   isProtectedRelationshipKind,
   redactProtected,
-} from './protected.js'
-import { continuityCohort } from './queries.js'
+} from './protected'
+import { continuityCohort } from './queries'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 

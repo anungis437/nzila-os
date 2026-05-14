@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-non-literal-fs-filename */
 
 /**
  * Semantic Convergence — Entity ≡ Org Guard

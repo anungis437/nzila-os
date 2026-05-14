@@ -8,14 +8,14 @@
  * This projector emits flat edges only.
  */
 import type { EntityEdge } from '@nzila/platform-entity-graph'
-import type { VotingEligibilitySource } from '../adapters/source-adapter.js'
-import { normalizeLifecycleStatus } from '../lifecycle/normalize.js'
+import type { VotingEligibilitySource } from '../adapters/source-adapter'
+import { normalizeLifecycleStatus } from '../lifecycle/normalize'
 import {
   IggEntityKinds,
   IggRelationshipKinds,
   substrateRelationshipFor,
   substrateTypeFor,
-} from '../ontology/kinds.js'
+} from '../ontology/kinds'
 
 const VOTER_TYPE_KIND = {
   organization: IggEntityKinds.UNION,

@@ -33,20 +33,20 @@ import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
 import {
   type ContinuityEntry,
   buildContinuityTimeline,
-} from './continuity.js'
+} from './continuity'
 import {
   type EvidenceConvergenceEntry,
   buildEvidenceConvergence,
-} from './evidence.js'
+} from './evidence'
 import {
   assertNoProtectedKindsInProjections,
   assertNoProtectedKindsInReadSurface,
   redactProtected,
-} from './protected.js'
+} from './protected'
 import {
   type InstitutionalTimelineEntry,
   buildInstitutionalTimeline,
-} from './timeline.js'
+} from './timeline'
 
 // ── Public types ──────────────────────────────────────────────────────────
 

@@ -9,14 +9,14 @@
 import type { DecisionNode, DecisionType } from '@nzila/platform-decision-graph'
 import type { EntityEdge } from '@nzila/platform-entity-graph'
 import { describe, expect, it } from 'vitest'
-import { IggEventKinds, IggRelationshipKinds } from '../ontology/kinds.js'
+import { IggEventKinds, IggRelationshipKinds } from '../ontology/kinds'
 import {
   buildEvidenceConvergence,
   evidenceForDecision,
   evidenceForEntity,
   evidenceForOrganization,
   summarizeCitations,
-} from './evidence.js'
+} from './evidence'
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
 

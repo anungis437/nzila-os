@@ -16,17 +16,17 @@ import {
   hasForbiddenSemanticShape,
   isHoldForDemand,
   isProtectedCanonicalization,
-} from './canonicalization.js'
+} from './canonicalization'
 import {
   IGG_PROTECTED_DECISION_CATEGORIES,
   IGG_PROTECTED_ENTITY_KINDS,
   IGG_PROTECTED_EVENT_KINDS,
   IGG_PROTECTED_RELATIONSHIP_KINDS,
-} from '../governance/protected.js'
+} from '../governance/protected'
 import {
   IggEntityKinds,
   IggRelationshipKinds,
-} from './kinds.js'
+} from './kinds'
 
 describe('Workstream I — canonicalization deny-list (Tier 1)', () => {
   it('absolute deny-list is the union of all protected-semantics fences plus the WS-I gap-fill', () => {

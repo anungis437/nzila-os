@@ -13,7 +13,7 @@
  *   - Predictive / influence / caucus / profiling / behavioural / optimization queries.
  */
 import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
-import { IggRelationshipKinds } from '../ontology/kinds.js'
+import { IggRelationshipKinds } from '../ontology/kinds'
 
 function edgeKind(e: EntityEdge): string | undefined {
   return (e.metadata as Record<string, unknown> | undefined)?.iggKind as

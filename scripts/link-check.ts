@@ -1,5 +1,4 @@
 #!/usr/bin/env tsx
-/* eslint-disable security/detect-non-literal-fs-filename */
 
 /**
  * link-check.ts — Validate internal links across Markdown docs

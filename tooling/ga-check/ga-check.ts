@@ -50,7 +50,6 @@
  * NO BYPASS FLAGS. NO SKIP OPTIONS. ALL CHECKS MANDATORY.
  */
 
-/* eslint-disable security/detect-non-literal-fs-filename */
 import { readFileSync, existsSync, readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { execSync } from 'node:child_process'

@@ -10,35 +10,35 @@
  * projection objects.
  */
 
-export * from './ontology/kinds.js'
+export * from './ontology/kinds'
 // Workstream I — canonicalization deny-list & promotion-discipline guards.
-export * from './ontology/canonicalization.js'
-export * from './lifecycle/normalize.js'
-export * from './adapters/source-adapter.js'
-export * from './projection/organizations.js'
-export * from './projection/affiliations.js'
-export * from './projection/voting.js'
-export * from './projection/representation.js'
-export * from './projection/build.js'
-export * from './delegation/resolver.js'
-export * from './decisions/mapper.js'
+export * from './ontology/canonicalization'
+export * from './lifecycle/normalize'
+export * from './adapters/source-adapter'
+export * from './projection/organizations'
+export * from './projection/affiliations'
+export * from './projection/voting'
+export * from './projection/representation'
+export * from './projection/build'
+export * from './delegation/resolver'
+export * from './decisions/mapper'
 
 // Phase 3 — protected-semantics fence, chronology, and read-only query surfaces.
-export * from './governance/protected.js'
-export * from './governance/chronology.js'
-export * from './governance/queries.js'
+export * from './governance/protected'
+export * from './governance/chronology'
+export * from './governance/queries'
 
 // Phase 4 — institutional timeline (read-only convergence layer).
-export * from './governance/timeline.js'
+export * from './governance/timeline'
 
 // Phase 4 — evidence/knowledge/policy convergence (read-only citation layer).
-export * from './governance/evidence.js'
+export * from './governance/evidence'
 
 // Phase 4 — institutional continuity (read-only succession & tenure layer).
-export * from './governance/continuity.js'
+export * from './governance/continuity'
 
 // Phase 4 — trust & explainability (read-only provenance convergence layer).
-export * from './governance/trust.js'
+export * from './governance/trust'
 
 // Phase 4 — read-only institutional observability (counts-only, gated).
-export * from './observability/snapshot.js'
+export * from './observability/snapshot'

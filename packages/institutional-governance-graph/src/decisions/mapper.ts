@@ -21,9 +21,9 @@ import type {
   NegotiationSource,
   ReservedMatterVoteSource,
   RepresentationProtocolSource,
-} from '../adapters/source-adapter.js'
-import { normalizeLifecycleStatus } from '../lifecycle/normalize.js'
-import { IggEntityKinds, IggEventKinds, substrateTypeFor } from '../ontology/kinds.js'
+} from '../adapters/source-adapter'
+import { normalizeLifecycleStatus } from '../lifecycle/normalize'
+import { IggEntityKinds, IggEventKinds, substrateTypeFor } from '../ontology/kinds'
 
 export type InstitutionalDecisionCategory =
   | 'motion_outcome'

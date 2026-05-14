@@ -4,12 +4,12 @@
 import type { DecisionNode } from '@nzila/platform-decision-graph'
 import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
 import { describe, expect, it } from 'vitest'
-import { IggEntityKinds, IggEventKinds, IggRelationshipKinds } from '../ontology/kinds.js'
+import { IggEntityKinds, IggEventKinds, IggRelationshipKinds } from '../ontology/kinds'
 import {
   chronologyForEntity,
   lineageChain,
   orderDecisionsChronologically,
-} from './chronology.js'
+} from './chronology'
 import {
   IGG_PROTECTED_DECISION_CATEGORIES,
   IGG_PROTECTED_ENTITY_KINDS,
@@ -20,7 +20,7 @@ import {
   isProtectedEventKind,
   isProtectedRelationshipKind,
   redactProtected,
-} from './protected.js'
+} from './protected'
 import {
   continuityCohort,
   dependencyClosure,
@@ -28,7 +28,7 @@ import {
   hierarchyAncestors,
   hierarchyDescendants,
   nodesOfIggKind,
-} from './queries.js'
+} from './queries'
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 

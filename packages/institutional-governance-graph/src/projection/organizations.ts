@@ -5,15 +5,15 @@
  * `entityId` so downstream consumers can join back to the FK schema.
  */
 import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
-import type { OrganizationSource } from '../adapters/source-adapter.js'
-import { normalizeLifecycleStatus } from '../lifecycle/normalize.js'
+import type { OrganizationSource } from '../adapters/source-adapter'
+import { normalizeLifecycleStatus } from '../lifecycle/normalize'
 import {
   IggEntityKinds,
   IggRelationshipKinds,
   substrateRelationshipFor,
   substrateTypeFor,
   type IggEntityKind,
-} from '../ontology/kinds.js'
+} from '../ontology/kinds'
 
 const ORG_TYPE_TO_IGG_KIND: Record<
   OrganizationSource['organizationType'],

@@ -21,7 +21,7 @@
  */
 import type { DecisionNode } from '@nzila/platform-decision-graph'
 import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
-import { IggEntityKinds, IggEventKinds, IggRelationshipKinds } from '../ontology/kinds.js'
+import { IggEntityKinds, IggEventKinds, IggRelationshipKinds } from '../ontology/kinds'
 
 /** Entity kinds whose existence is itself protected. */
 export const IGG_PROTECTED_ENTITY_KINDS: readonly string[] = Object.freeze([

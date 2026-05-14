@@ -2,14 +2,14 @@
  * Affiliation projection — Congress memberships → affiliated_with edges.
  */
 import type { EntityEdge } from '@nzila/platform-entity-graph'
-import type { CongressMembershipSource } from '../adapters/source-adapter.js'
-import { normalizeLifecycleStatus } from '../lifecycle/normalize.js'
+import type { CongressMembershipSource } from '../adapters/source-adapter'
+import { normalizeLifecycleStatus } from '../lifecycle/normalize'
 import {
   IggEntityKinds,
   IggRelationshipKinds,
   substrateRelationshipFor,
   substrateTypeFor,
-} from '../ontology/kinds.js'
+} from '../ontology/kinds'
 
 export function projectAffiliationEdges(
   rows: readonly CongressMembershipSource[],

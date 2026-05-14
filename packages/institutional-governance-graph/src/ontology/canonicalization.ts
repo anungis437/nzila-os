@@ -35,8 +35,8 @@ import {
   IGG_PROTECTED_ENTITY_KINDS,
   IGG_PROTECTED_EVENT_KINDS,
   IGG_PROTECTED_RELATIONSHIP_KINDS,
-} from '../governance/protected.js'
-import { IggEntityKinds } from './kinds.js'
+} from '../governance/protected'
+import { IggEntityKinds } from './kinds'
 
 // ── Tier 1 — Absolute deny-list (protected governance metadata) ────────────
 

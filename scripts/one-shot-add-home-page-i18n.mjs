@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // One-shot: add `homePage` namespace to en-CA.json and fr-CA.json (Union Eyes).
 // Idempotent: re-running overwrites the homePage namespace with the canonical values.
-/* eslint-disable security/detect-non-literal-fs-filename */
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';

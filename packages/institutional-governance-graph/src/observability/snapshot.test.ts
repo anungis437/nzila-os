@@ -12,9 +12,9 @@ import { describe, expect, it } from 'vitest'
 import {
   IGG_PROTECTED_DECISION_CATEGORIES,
   IGG_PROTECTED_EVENT_KINDS,
-} from '../governance/protected.js'
-import { IggEventKinds, IggRelationshipKinds } from '../ontology/kinds.js'
-import { collectInstitutionalObservability } from './snapshot.js'
+} from '../governance/protected'
+import { IggEventKinds, IggRelationshipKinds } from '../ontology/kinds'
+import { collectInstitutionalObservability } from './snapshot'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────
 

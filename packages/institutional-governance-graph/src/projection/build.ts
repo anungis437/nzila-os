@@ -3,28 +3,28 @@
  */
 import type { DecisionNode } from '@nzila/platform-decision-graph'
 import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
-import type { InstitutionalGovernanceSourceAdapter } from '../adapters/source-adapter.js'
+import type { InstitutionalGovernanceSourceAdapter } from '../adapters/source-adapter'
 import {
   mapCbaRatificationDecision,
   mapMotionDecision,
   mapProtocolAmendmentDecision,
   mapReservedMatterVoteDecision,
-} from '../decisions/mapper.js'
+} from '../decisions/mapper'
 import {
   resolveDelegationChains,
   type DelegationEdgeInput,
   type DelegationResolution,
-} from '../delegation/resolver.js'
-import { projectAffiliationEdges } from './affiliations.js'
+} from '../delegation/resolver'
+import { projectAffiliationEdges } from './affiliations'
 import {
   projectOrganizationHierarchyEdges,
   projectOrganizationNodes,
-} from './organizations.js'
-import { projectRepresentationEdges } from './representation.js'
+} from './organizations'
+import { projectRepresentationEdges } from './representation'
 import {
   projectDelegationEdges,
   projectVotingEligibilityEdges,
-} from './voting.js'
+} from './voting'
 
 export interface GovernanceGraphProjection {
   readonly nodes: readonly EntityNode[]

@@ -9,7 +9,7 @@
  */
 import type { DecisionNode } from '@nzila/platform-decision-graph'
 import type { EntityEdge } from '@nzila/platform-entity-graph'
-import { IggRelationshipKinds } from '../ontology/kinds.js'
+import { IggRelationshipKinds } from '../ontology/kinds'
 
 export interface ChronologyEntry {
   readonly decisionId: string

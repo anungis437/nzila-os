@@ -13,27 +13,27 @@ import type {
   RepresentationProtocolSource,
   ReservedMatterVoteSource,
   VotingEligibilitySource,
-} from './adapters/source-adapter.js'
-import { mapInstitutionalDecision } from './decisions/mapper.js'
+} from './adapters/source-adapter'
+import { mapInstitutionalDecision } from './decisions/mapper'
 import {
   resolveDelegationChains,
   type DelegationEdgeInput,
-} from './delegation/resolver.js'
+} from './delegation/resolver'
 import {
   LifecycleStatuses,
   normalizeLifecycleStatus,
-} from './lifecycle/normalize.js'
-import { IggEntityKinds, IggRelationshipKinds } from './ontology/kinds.js'
-import { projectAffiliationEdges } from './projection/affiliations.js'
-import { buildGovernanceGraphProjection } from './projection/build.js'
+} from './lifecycle/normalize'
+import { IggEntityKinds, IggRelationshipKinds } from './ontology/kinds'
+import { projectAffiliationEdges } from './projection/affiliations'
+import { buildGovernanceGraphProjection } from './projection/build'
 import {
   projectOrganizationHierarchyEdges,
   projectOrganizationNodes,
-} from './projection/organizations.js'
+} from './projection/organizations'
 import {
   projectDelegationEdges,
   projectVotingEligibilityEdges,
-} from './projection/voting.js'
+} from './projection/voting'
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 

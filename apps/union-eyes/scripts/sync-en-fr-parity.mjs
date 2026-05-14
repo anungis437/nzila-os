@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-non-literal-fs-filename */
 
 // One-shot script: synchronise en/fr/en-CA/fr-CA messages.
 //   - Add 19 missing keys to en.json + fr.json (mirror en-CA / fr-CA shape)

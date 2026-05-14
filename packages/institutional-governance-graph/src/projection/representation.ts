@@ -12,14 +12,14 @@
  * per active representative-represented pair).
  */
 import type { EntityEdge } from '@nzila/platform-entity-graph'
-import type { RepresentationProtocolSource } from '../adapters/source-adapter.js'
-import { normalizeLifecycleStatus } from '../lifecycle/normalize.js'
+import type { RepresentationProtocolSource } from '../adapters/source-adapter'
+import { normalizeLifecycleStatus } from '../lifecycle/normalize'
 import {
   IggEntityKinds,
   IggRelationshipKinds,
   substrateRelationshipFor,
   substrateTypeFor,
-} from '../ontology/kinds.js'
+} from '../ontology/kinds'
 
 export function projectRepresentationEdges(
   rows: readonly RepresentationProtocolSource[],

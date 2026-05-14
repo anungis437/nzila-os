@@ -3,7 +3,6 @@
  *
  * CORE-001: Apps must NOT contain duplicate platform logic implementations
  */
-/* eslint-disable security/detect-non-literal-fs-filename */
 /**
  * CORE-002: Apps must NOT import from other apps (arch boundary)
  * CORE-003: Shared packages must have stable exports (no circular deps)

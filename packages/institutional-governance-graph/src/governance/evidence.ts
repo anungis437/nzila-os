@@ -24,14 +24,14 @@
 import type { DecisionNode } from '@nzila/platform-decision-graph'
 import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
 
-import { orderDecisionsChronologically } from './chronology.js'
+import { orderDecisionsChronologically } from './chronology'
 import {
   assertNoProtectedKindsInProjections,
   assertNoProtectedKindsInReadSurface,
   isProtectedEventKind,
   redactProtected,
-} from './protected.js'
-import { continuityCohort } from './queries.js'
+} from './protected'
+import { continuityCohort } from './queries'
 
 // ── Public types ──────────────────────────────────────────────────────────
 

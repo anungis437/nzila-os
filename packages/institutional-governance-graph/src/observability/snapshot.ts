@@ -32,18 +32,18 @@
 import type { DecisionNode } from '@nzila/platform-decision-graph'
 import type { EntityEdge, EntityNode } from '@nzila/platform-entity-graph'
 
-import { buildContinuityTimeline } from './../governance/continuity.js'
-import { buildEvidenceConvergence } from './../governance/evidence.js'
+import { buildContinuityTimeline } from './../governance/continuity'
+import { buildEvidenceConvergence } from './../governance/evidence'
 import {
   assertNoProtectedKindsInProjections,
   assertNoProtectedKindsInReadSurface,
   redactProtected,
-} from './../governance/protected.js'
-import { buildInstitutionalTimeline } from './../governance/timeline.js'
+} from './../governance/protected'
+import { buildInstitutionalTimeline } from './../governance/timeline'
 import {
   buildExplainabilityRecords,
   summarizeProvenanceCoverage,
-} from './../governance/trust.js'
+} from './../governance/trust'
 
 // ── Public types ──────────────────────────────────────────────────────────
 

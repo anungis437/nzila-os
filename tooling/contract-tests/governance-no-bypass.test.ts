@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-non-literal-fs-filename */
 
 /**
  * Contract Test — Governance Package No-Bypass Guards

@@ -12,7 +12,7 @@ import {
   IggEntityKinds,
   IggEventKinds,
   IggRelationshipKinds,
-} from '../ontology/kinds.js'
+} from '../ontology/kinds'
 import {
   buildInstitutionalTimeline,
   continuityTimeline,
@@ -21,7 +21,7 @@ import {
   timelineForDecision,
   timelineForOrganization,
   timelineForRepresentation,
-} from './timeline.js'
+} from './timeline'
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
 
