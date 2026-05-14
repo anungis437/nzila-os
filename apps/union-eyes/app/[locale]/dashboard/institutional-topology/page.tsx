@@ -200,26 +200,47 @@ export default async function InstitutionalTopologyPage() {
               {delegationUnresolved}
             </p>
             <ol className="divide-y divide-slate-100">
-              {view.delegation.map((entry, idx) => (
-                <li
-                  key={`${entry.votingSessionId}:${entry.originatorEntityId}:${idx}`}
-                  className="py-3"
-                >
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-                    <span className="text-sm font-medium text-slate-900">
-                      {dash(entry.originatorEntityId)} →{' '}
-                      {dash(entry.terminalEntityId ?? undefined)}
-                    </span>
-                    <span className="font-mono text-xs text-slate-500">
-                      {entry.state}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Session: {entry.votingSessionId} · Hops:{' '}
-                    {Math.max(entry.path.length - 1, 0)}
-                  </p>
-                </li>
-              ))}
+              {view.delegation.map((entry, idx) => {
+                const stateBadge =
+                  entry.state === 'resolved'
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                    : entry.state === 'cyclic'
+                    ? 'border-amber-200 bg-amber-50 text-amber-700'
+                    : 'border-slate-200 bg-slate-50 text-slate-600';
+                const stateLabel =
+                  entry.state === 'resolved'
+                    ? 'Resolved'
+                    : entry.state === 'cyclic'
+                    ? 'Cyclic (broken)'
+                    : 'Unresolved (dangling)';
+                const hops = Math.max(entry.path.length - 1, 0);
+                return (
+                  <li
+                    key={`${entry.votingSessionId}:${entry.originatorEntityId}:${idx}`}
+                    className="py-3"
+                  >
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                      <span className="text-sm font-medium text-slate-900">
+                        {dash(entry.originatorEntityId)} →{' '}
+                        {dash(entry.terminalEntityId ?? undefined)}
+                      </span>
+                      <span
+                        className={`inline-flex items-center rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${stateBadge}`}
+                      >
+                        {stateLabel}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Session: {entry.votingSessionId} · Hops: {hops}
+                    </p>
+                    {entry.path.length > 0 && (
+                      <p className="mt-1 break-all font-mono text-[11px] text-slate-500">
+                        Pathway: {entry.path.join(' → ')}
+                      </p>
+                    )}
+                  </li>
+                );
+              })}
             </ol>
           </>
         )}
