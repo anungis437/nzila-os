@@ -96,14 +96,14 @@ export function MarketingHeroSection({
         fill
         priority
         sizes="100vw"
-        className="object-cover object-top"
+        className="pointer-events-none object-cover object-top"
       />
 
       {/* Primary atmospheric overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(14,31,47,0.78)_0%,rgba(14,31,47,0.72)_46%,rgba(14,31,47,0.84)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(14,31,47,0.78)_0%,rgba(14,31,47,0.72)_46%,rgba(14,31,47,0.84)_100%)]" />
 
       {/* Warm institutional wash */}
-      <div className={`absolute inset-0 bg-[#12324a] ${washOpacityClass}`} />
+      <div className={`pointer-events-none absolute inset-0 bg-[#12324a] ${washOpacityClass}`} />
 
       {/* Content */}
       <div className="absolute inset-x-0 bottom-0 px-4 sm:px-6 lg:px-8 pb-6 pointer-events-none" aria-hidden>
