@@ -7170,10 +7170,10 @@
       },
       "pillars": "Piliers",
       "pillarItems": {
-        "governance": { "name": "Gouvernance & continuité", "desc": "Opérations constitutionnelles pour organisations fédérées" },
-        "conventions": { "name": "Congrès & gouvernance fédérée", "desc": "Coordination des délégués et décision fédérée" },
-        "continuity": { "name": "Mémoire institutionnelle", "desc": "Doctrine, précédents et archive de continuité" },
-        "trust": { "name": "Confiance & intendance", "desc": "Audit, souveraineté et engagements d'intendance" }
+        "governance": { "name": "Gouvernance & continuité", "desc": "Opérations constitutionnelles" },
+          "conventions": { "name": "Congrès & démocratie", "desc": "Coordination des délégués" },
+        "continuity": { "name": "Mémoire institutionnelle", "desc": "Précédents et doctrine" },
+        "trust": { "name": "Confiance & intendance", "desc": "Audit et souveraineté" }
       },
       "story": "Notre histoire",
       "platform": "Plateforme",
