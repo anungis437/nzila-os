@@ -77,6 +77,26 @@ export const TOPOLOGY_UX_REQUIRED: RewardTerm[] = [
   { term: "preserved institutional records", weight: 3 },
 ];
 
+// Workstream L: Governance Chronology UX.
+// Reward terms that signal governance-safe, continuity-aware, inspectable
+// chronology posture across procedural timelines, institutional evolution,
+// decision lineage, continuity progression, governance epochs, and
+// chronology explainability surfaces.
+export const CHRONOLOGY_UX_REQUIRED: RewardTerm[] = [
+  { term: "governance chronology", weight: 3 },
+  { term: "continuity progression", weight: 3 },
+  { term: "procedural history", weight: 3 },
+  { term: "chronology lineage", weight: 3 },
+  { term: "governance epochs", weight: 3 },
+  { term: "continuity-aware chronology", weight: 3 },
+  { term: "institutional evolution", weight: 2 },
+  { term: "preserved institutional records", weight: 3 },
+  { term: "chronology explainability", weight: 3 },
+  { term: "procedural timeline of record", weight: 3 },
+  { term: "epoch divider", weight: 2 },
+  { term: "lineage ladder", weight: 2 },
+];
+
 // Workstream J: Trust & Procurement Runtime Convergence.
 // Reward terms that signal coexistence-oriented, sovereignty-conscious,
 // federation-aware, continuity-safeguarded posture across onboarding,

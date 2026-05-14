@@ -274,6 +274,27 @@ const topologyUx: ForbiddenTerm[] = [
   { term: "network mapping", severity: "hard-fail", category: "surveillance-ai", suggestion: "affiliation structure | governance lineage" },
 ];
 
+// Workstream L: Governance Chronology UX guards.
+// Reject framings that reintroduce activity-stream / behavioural-monitoring /
+// productivity-analytics / executive-oversight posture into procedural
+// timelines, evolution rails, lineage ladders, continuity progression,
+// epoch dividers, or chronology explainability surfaces. Compound phrases
+// avoid false positives.
+const chronologyUx: ForbiddenTerm[] = [
+  { term: "activity stream", severity: "hard-fail", category: "surveillance-ai", suggestion: "procedural timeline of record" },
+  { term: "operational replay", severity: "hard-fail", category: "surveillance-ai", suggestion: "procedural history of record" },
+  { term: "governance analytics", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance chronology of record" },
+  { term: "productivity timeline", severity: "hard-fail", category: "surveillance-ai", suggestion: "procedural timeline of record" },
+  { term: "behavioural chronology", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance chronology of record" },
+  { term: "behavioral chronology", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance chronology of record" },
+  { term: "executive oversight timeline", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance chronology of record" },
+  { term: "governance optimization chronology", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance chronology of record" },
+  { term: "institutional scoring", severity: "hard-fail", category: "surveillance-ai", suggestion: "preserved institutional records | governance chronology of record" },
+  { term: "timeline analytics", severity: "hard-fail", category: "surveillance-ai", suggestion: "procedural timeline of record" },
+  { term: "chronology optimization", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance chronology of record" },
+  { term: "continuity scoring", severity: "hard-fail", category: "surveillance-ai", suggestion: "continuity progression of record" },
+];
+
 // Workstream I: Ontology reconciliation & institutional semantic governance.
 // Reject framings that re-introduce optimization / autonomous-AI / topology-
 // analytics / surveillance posture into governance language at the ontology
@@ -302,6 +323,7 @@ export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...ontologyReconciliation,
   ...trustProcurementRuntime,
   ...topologyUx,
+  ...chronologyUx,
   ...warningLevel,
 ];
 
