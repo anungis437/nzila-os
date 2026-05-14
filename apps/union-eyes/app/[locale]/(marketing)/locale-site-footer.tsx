@@ -94,9 +94,9 @@ export default function LocaleSiteFooter() {
       { name: t('policyAndLabour'),       href: `/${locale}/solutions/labour-leadership` },
       { name: t('procurement'),           href: `/${locale}/solutions/procurement` },
     ],
-    [t('governanceAndTrust') as string]: [
+    [t('trustAndStewardship') as string]: [
       { name: t('trustCenter'),               href: `/${locale}/trust` },
-      { name: t('governanceStructure'),       href: `/${locale}/governance` },
+      { name: t('stewardshipAppendix'),       href: `/${locale}/trust/stewardship-appendix` },
       { name: t('labourSafeAi'),              href: `/${locale}/trust#labour-safe` },
       { name: t('explainabilityStandards'),   href: `/${locale}/trust#explainability` },
     ],
@@ -225,6 +225,8 @@ export default function LocaleSiteFooter() {
             <Link href={`/${locale}/legal/privacy`} className="hover:text-gray-200 transition-colors">{t('privacy')}</Link>
             <span className="text-gray-500">·</span>
             <Link href={`/${locale}/legal/terms`} className="hover:text-gray-200 transition-colors">{t('terms')}</Link>
+            <span className="text-gray-500">·</span>
+            <Link href={`/${locale}/trust/stewardship-appendix`} className="hover:text-gray-200 transition-colors">{t('corporateStewardship')}</Link>
             <span className="text-gray-500">·</span>
             <Link href={`/${locale}/contact`} className="hover:text-gray-200 transition-colors">{t('contact')}</Link>
           </div>

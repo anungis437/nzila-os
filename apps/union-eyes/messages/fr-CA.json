@@ -7168,6 +7168,13 @@
           "desc": "Préparation au déploiement"
         }
       },
+      "pillars": "Piliers",
+      "pillarItems": {
+        "governance": { "name": "Gouvernance & continuité", "desc": "Opérations constitutionnelles pour organisations fédérées" },
+        "conventions": { "name": "Congrès & gouvernance fédérée", "desc": "Coordination des délégués et décision fédérée" },
+        "continuity": { "name": "Mémoire institutionnelle", "desc": "Doctrine, précédents et archive de continuité" },
+        "trust": { "name": "Confiance & intendance", "desc": "Audit, souveraineté et engagements d'intendance" }
+      },
       "story": "Notre histoire",
       "platform": "Plateforme",
       "platformItems": {
@@ -7483,6 +7490,9 @@
       "description": "Infrastructure institutionnelle de gouvernance et de continuité pour les syndicats canadiens — déployée par contrat, encadrée par habilitations et conçue pour la reddition de comptes.",
       "platform": "Capacités",
       "solutions": "Solutions",
+      "trustAndStewardship": "Confiance & intendance",
+      "corporateStewardship": "Intendance corporative",
+      "stewardshipAppendix": "Annexe d'intendance",
       "governanceAndTrust": "Gouvernance et confiance",
       "product": "Capacités",
       "resources": "Ressources",

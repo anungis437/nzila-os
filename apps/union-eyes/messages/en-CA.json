@@ -7168,6 +7168,13 @@
           "desc": "Deployment readiness"
         }
       },
+      "pillars": "Pillars",
+      "pillarItems": {
+        "governance": { "name": "Governance & Continuity", "desc": "Constitutional operations for federated organizations" },
+        "conventions": { "name": "Conventions & Federated Democratic Governance", "desc": "Delegate coordination and federated decision-making" },
+        "continuity": { "name": "Institutional Memory", "desc": "Doctrine, precedents, and continuity archive" },
+        "trust": { "name": "Trust & Stewardship", "desc": "Audit, sovereignty, and stewardship commitments" }
+      },
       "story": "Our Story",
       "platform": "Platform",
       "platformItems": {
@@ -7483,6 +7490,9 @@
       "description": "Institutional governance & continuity infrastructure for Canadian unions — contract-based deployment, governed access scopes, and audit-ready operations of record.",
       "platform": "Capabilities",
       "solutions": "Solutions",
+      "trustAndStewardship": "Trust & Stewardship",
+      "corporateStewardship": "Corporate stewardship",
+      "stewardshipAppendix": "Stewardship Appendix",
       "governanceAndTrust": "Governance & Trust",
       "product": "Capabilities",
       "resources": "Resources",
@@ -7502,7 +7512,7 @@
       "policyAndLabour": "Policy & Labour",
       "procurement": "Procurement",
       "trustCenter": "Trust Center",
-      "governanceStructure": "Governance Structure",
+      "governanceStructure": "Governance & Continuity",
       "labourSafeAi": "Labour-Safe AI",
       "explainabilityStandards": "Explainability Standards",
       "insights": "Insights",
