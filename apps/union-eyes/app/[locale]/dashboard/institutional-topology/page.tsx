@@ -70,6 +70,41 @@ export default async function InstitutionalTopologyPage() {
         </p>
       </header>
 
+      {/* Explainability overlay — what this view shows / does not show */}
+      <section
+        className="mb-6 rounded-md border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700"
+        aria-label="What this view shows and does not show"
+      >
+        <h2 className={SECTION_HEADER}>What this view shows / does not show</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              Shows
+            </h3>
+            <ul className="list-disc space-y-1 pl-5 text-xs text-slate-600">
+              <li>Preserved institutional hierarchy and sub-structure.</li>
+              <li>Preserved affiliation and representation relationships.</li>
+              <li>Delegation pathways with procedural state at resolution time.</li>
+              <li>Governance lineage chains computed from supersession and override edges.</li>
+              <li>Continuity-aware topology entries with kind classification.</li>
+              <li>Integer counts only — no ratios, percentages, or rankings.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-rose-700">
+              Does not show
+            </h3>
+            <ul className="list-disc space-y-1 pl-5 text-xs text-slate-600">
+              <li>Scores, weights, or rankings of any actor or relationship.</li>
+              <li>Predictions, projections, or recommendations.</li>
+              <li>Inferred or synthesized relationships not present in the read substrate.</li>
+              <li>Protected institutional semantics — redacted at the graph layer.</li>
+              <li>Influence networks, social topologies, or social graph framings.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* Panel 1 — Institutional hierarchy */}
       <section className={`${PANEL} mb-6`}>
         <h2 className={SECTION_HEADER}>Institutional hierarchy</h2>
