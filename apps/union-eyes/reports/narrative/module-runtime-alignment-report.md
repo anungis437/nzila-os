@@ -33,7 +33,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
 ## Per-Surface Detail
 
 ### sidebar/member-nav
-- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](apps/union-eyes/lib/dashboard/role-experience.ts#L78-L92)
+- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L78-L92)
 - Maturity: **78 / 100**
 - Posture: member-facing simplicity is acceptable; one operational verb to soften.
 - Scores by rule:
@@ -44,7 +44,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 60 (warn — no bilingual / sovereignty cue at nav level)
 
 ### sidebar/staff-nav
-- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](apps/union-eyes/lib/dashboard/role-experience.ts#L94-L110)
+- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L94-L110)
 - Maturity: **48 / 100** ← **largest single drift surface**
 - Posture: reads like a productivity/case-management SaaS. Highest reframe leverage.
 - Scores by rule:
@@ -55,7 +55,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 50 (warn)
 
 ### sidebar/executive-nav
-- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](apps/union-eyes/lib/dashboard/role-experience.ts#L112-L132)
+- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L112-L132)
 - Maturity: **75 / 100**
 - Posture: already well aligned (Continuity Insights, Governance Visibility, Trust & Oversight, Leadership Continuity). Two soft drifts.
 - Scores by rule:
@@ -66,7 +66,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 60 (warn)
 
 ### sidebar/governance-nav
-- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](apps/union-eyes/lib/dashboard/role-experience.ts#L134-L154)
+- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L134-L154)
 - Maturity: **88 / 100** ← **strongest aligned runtime surface**
 - Posture: reference standard for the rest of the dashboard (Trust & Explainability, Continuity Signals, Audit & Evidence, Policy Alignment).
 - Scores by rule:
@@ -77,7 +77,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 70 (warn)
 
 ### sidebar/admin-nav
-- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](apps/union-eyes/lib/dashboard/role-experience.ts#L156-L176)
+- Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L156-L176)
 - Maturity: **70 / 100**
 - Posture: admin chrome can stay operational; only "Pilot Configuration" is mildly off-narrative for the institutional reframe.
 - Scores by rule:
@@ -88,7 +88,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 60 (warn)
 
 ### mobile/bottom-nav
-- Path: [apps/union-eyes/components/mobile/BottomNav.tsx](apps/union-eyes/components/mobile/BottomNav.tsx#L12-L40)
+- Path: [apps/union-eyes/components/mobile/BottomNav.tsx](../../components/mobile/BottomNav.tsx#L12-L40)
 - Maturity: **35 / 100** ← **second-largest drift surface, plus structural bug**
 - Posture: hard-coded labels not driven by `getNavigationForExperience()`; uses insurance-SaaS vocabulary ("Claims") and the hrefs are missing the `/dashboard` prefix (likely already routing through middleware fallback).
 - Scores by rule:
@@ -100,7 +100,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
 - Structural note (not a copy issue): `/claims`, `/members`, `/messages`, `/more` are not under `/dashboard/*` — mobile nav diverges from the experience-gated route allowlists. Flag for Workstream B routing pass.
 
 ### platform-economics/modules
-- Path: [apps/union-eyes/services/platform-economics/entitlement-guard.ts](apps/union-eyes/services/platform-economics/entitlement-guard.ts#L1-L120)
+- Path: [apps/union-eyes/services/platform-economics/entitlement-guard.ts](../../services/platform-economics/entitlement-guard.ts#L1-L120)
 - Maturity: **58 / 100**
 - Posture: 19 PLATFORM_MODULES keys mix institutional language (`governance_suite`, `union_knowledge_suite`) with SaaS-economics language (`transaction_fees`, `commercial_reporting`, `allocation_engine`, `ai_advanced_insights`).
 - Scores by rule:
@@ -111,7 +111,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 60 (warn)
 
 ### narrative-vocabulary/runtime-coverage
-- Path: [apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts](apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts#L1-L200)
+- Path: [apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts](../../tooling/marketing/config/forbidden-vocabulary.ts#L1-L200)
 - Maturity: **55 / 100**
 - Posture: the lint catches drift in marketing only (`publicOnly: true` flag). Runtime nav, dashboard headings, and module identifiers are **not** scanned — which is exactly why the staff nav and BottomNav drift slipped through.
 - Scores by rule:
@@ -122,7 +122,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 40 (warn)
 
 ### packages/clc-executive-intelligence
-- Path: [packages/clc-executive-intelligence/src/index.ts](packages/clc-executive-intelligence/src/index.ts#L1-L20)
+- Path: [packages/clc-executive-intelligence/src/index.ts](../../../../packages/clc-executive-intelligence/src/index.ts#L1-L20)
 - Maturity: **80 / 100**
 - Posture: package name and exported domain (executive intelligence, governed reasoning, audit logger, NIL authority) are on-narrative. Internal "workflow" naming is architectural (not user-facing).
 - Scores by rule:
@@ -212,7 +212,7 @@ Identifier rename (L3) is high-cost. Recommendation: keep identifiers stable, ad
 
 ## Already-Aligned Surfaces (no action — confirm in Workstream I smoke)
 
-Routes already present in `PILOT_EXCLUDED_PREFIXES` ([role-experience.ts](apps/union-eyes/lib/dashboard/role-experience.ts)) — partial Phase 3/4 reframe is **already shipping** alongside the SaaS routes:
+Routes already present in `PILOT_EXCLUDED_PREFIXES` ([role-experience.ts](../../lib/dashboard/role-experience.ts)) — partial Phase 3/4 reframe is **already shipping** alongside the SaaS routes:
 
 - `/dashboard/cognition`
 - `/dashboard/institutional-intelligence`

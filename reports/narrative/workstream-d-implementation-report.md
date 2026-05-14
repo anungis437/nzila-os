@@ -27,7 +27,7 @@ optimization.
 
 ### 2.1 Entitlement registry — semantic overlay
 
-**File:** [apps/union-eyes/services/platform-economics/entitlement-guard.ts](apps/union-eyes/services/platform-economics/entitlement-guard.ts)
+**File:** [apps/union-eyes/services/platform-economics/entitlement-guard.ts](../../apps/union-eyes/services/platform-economics/entitlement-guard.ts)
 
 - `ModuleDisplay` type extended with three optional, additive fields:
   - `institutionalDescription` — institution-grade reframing of the module's
@@ -44,8 +44,8 @@ optimization.
 ### 2.2 Locale copy alignment
 
 **Files:**
-- [apps/union-eyes/messages/en.json](apps/union-eyes/messages/en.json)
-- [apps/union-eyes/messages/en-CA.json](apps/union-eyes/messages/en-CA.json)
+- [apps/union-eyes/messages/en.json](../../apps/union-eyes/messages/en.json)
+- [apps/union-eyes/messages/en-CA.json](../../apps/union-eyes/messages/en-CA.json)
 
 Aligned strings (both locales kept in lockstep):
 
@@ -65,12 +65,12 @@ relocated, or removed.
 Added institutional `description` fields to package manifests that were
 missing them:
 
-- [packages/ue-cognition/package.json](packages/ue-cognition/package.json):
+- [packages/ue-cognition/package.json](../../packages/ue-cognition/package.json):
   *"Reviewer-assisted institutional intelligence primitives — case-risk,
   workload, engagement, and precedent reasoning under entitlement
   governance. Surfaces signals for representative decision-making; never
   autonomous."*
-- [packages/ue-assistant/package.json](packages/ue-assistant/package.json):
+- [packages/ue-assistant/package.json](../../packages/ue-assistant/package.json):
   *"Reviewer-led representation assistant — role-aware intents, governed
   knowledge access, and domain-bound response policy. Augments
   representatives within entitlement and audit boundaries; never decides
@@ -82,7 +82,7 @@ with the doctrine; left untouched per additive-only principle.
 
 ### 2.4 Forbidden vocabulary — surveillance-AI extensions
 
-**File:** [apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts](apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts)
+**File:** [apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts](../../apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts)
 
 New **hard-fail** entries (`surveillance-ai` category):
 
@@ -141,3 +141,4 @@ the AI-copy reframes in §2.2 landed first.
   `packages/workload-intelligence` (descriptions already aligned).
 - No edits to non-union-eyes apps; the narrative-audit CLI scans
   `apps/union-eyes` only and that scope is preserved here.
+

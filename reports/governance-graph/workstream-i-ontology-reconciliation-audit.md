@@ -7,8 +7,8 @@
 **Doctrine:** Institutional semantic discipline. *Additive, classification-driven,
 explainable. No automation. No analytics. No exposure. No promotion of protected
 governance metadata.*
-
----
+[packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts).
+The canonical [packages/platform-ontology/src/types.ts](../../packages/platform-ontology/src/types.ts)
 
 ## 1. Why this audit exists
 
@@ -16,14 +16,11 @@ Workstreams A–G converged Union Eyes onto an Institutional Governance Graph (I
 that emits projections into the canonical platform substrate
 (`@nzila/platform-entity-graph`, `@nzila/platform-decision-graph`). IGG declares
 **~25 entity kinds, 20 relationship kinds and 16 event kinds** in
-[packages/institutional-governance-graph/src/ontology/kinds.ts](packages/institutional-governance-graph/src/ontology/kinds.ts).
-The canonical [packages/platform-ontology/src/types.ts](packages/platform-ontology/src/types.ts)
+The canonical [packages/platform-ontology/src/types.ts](../../packages/platform-ontology/src/types.ts)
 ships **34 entity types and 11 relationship types** keyed for cross-domain
 business operations (Tenant, Person, Case, Claim, EvidencePack, AuditEvent, …).
 
-Without explicit reconciliation, three failure modes accrue silently:
 
-1. **Quiet ontology drift** — IGG-local kinds bleed upward into the canonical
    substrate one PR at a time (e.g. someone adds `Congress` to
    `OntologyEntityTypes` for convenience).
 2. **Protected-semantic promotion** — Class B / golden-share / reserved-matter
@@ -34,16 +31,13 @@ Without explicit reconciliation, three failure modes accrue silently:
    veridian-care, producing untraceable behavioural divergence.
 
 Workstream I introduces **institutional semantic governance**: a classification
-matrix, a canonicalization deny-list, and a set of reconciliation tests that
 make every promotion deliberate, reviewable and reversible.
 
 ---
 
-## 2. Audit method
 
 For each candidate concept, the audit answers the ten verbatim questions
 from the Workstream I prompt:
-
 1. Is it substrate-worthy across multiple domains?
 2. Is it specific to institutional governance?
 3. Is it protected (founder protection / Class B / continuity safeguards)?
@@ -60,32 +54,29 @@ A concept is **only** classified as *Canonical ontology* when answers 1–2 are
 discipline". Any single failure pushes the concept into IGG-local, runtime
 overlay, observability, continuity, protected-metadata, historical-compat,
 or never-canonicalize.
-
 ---
-
 ## 3. Inventory at audit time
-
 ### 3.1 Canonical ontology — `@nzila/platform-ontology`
 
-Source: [packages/platform-ontology/src/types.ts](packages/platform-ontology/src/types.ts#L11)
+Source: [packages/platform-ontology/src/types.ts](../../packages/platform-ontology/src/types.ts#L11)
 
-- **Entity types (34):** Tenant, Organization, Person, User, Advisor, Member,
   Client, Family, Case, Claim, Program, Document, Communication, Task, Workflow,
   Decision, RiskEvent, Policy, Approval, EvidencePack, AuditEvent, Asset,
   Property, Deal, Invoice, Payment, Shipment, Product, Farmer, Parcel, Subsidy,
   RegistryRecord.
-- **Relationship types (11):** BELONGS_TO, HAS, REFERENCES, LINKS_TO, PRODUCES,
+The full enumeration with rationale per concept is in
+[reports/governance-graph/ontology-classification-matrix.md](../../reports/governance-graph/ontology-classification-matrix.md).
   DEPENDS_ON, PARENT_OF, CHILD_OF, ASSIGNED_TO, CREATED_BY, APPROVED_BY.
 - **Statuses (5):** active, inactive, archived, pending, suspended.
 
 The canonical registry is **closed-set** (TypeScript const enum). Adding kinds
 requires a substrate change — explicitly out of scope for IGG (see
-[packages/institutional-governance-graph/src/ontology/kinds.ts](packages/institutional-governance-graph/src/ontology/kinds.ts#L1)
+[packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts#L1)
 header comment).
 
 ### 3.2 IGG-local ontology — `@nzila/institutional-governance-graph`
 
-Source: [packages/institutional-governance-graph/src/ontology/kinds.ts](packages/institutional-governance-graph/src/ontology/kinds.ts#L19)
+Source: [packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts#L19)
 
 - **Entity kinds (25):** PLATFORM, CONGRESS, FEDERATION, UNION, LOCAL, REGION,
   DISTRICT, EMPLOYER, WORKSITE, BARGAINING_UNIT, COMMITTEE, MEMBER, STEWARD, LRO,
@@ -104,10 +95,9 @@ Source: [packages/institutional-governance-graph/src/ontology/kinds.ts](packages
   **GOLDEN_SHARE_SUNSET_PROGRESSION**, PROTOCOL_AMENDMENT.
 
 Bold entries are already enumerated as protected in
-[packages/institutional-governance-graph/src/governance/protected.ts](packages/institutional-governance-graph/src/governance/protected.ts#L26).
+[packages/institutional-governance-graph/src/governance/protected.ts](../../packages/institutional-governance-graph/src/governance/protected.ts#L26).
 
 ### 3.3 Existing fence
-
 The three-stage protected-semantics fence
 (`redactProtected → assertNoProtectedKindsInReadSurface → build* →
 assertNoProtectedKindsInProjections`) is the *only* defence in place today
@@ -117,15 +107,10 @@ against protected-kind exposure. There is **no** defence against:
   `OntologyEntityTypes` in `platform-ontology`.
 - A future PR routing `CongressMember` through the canonical `Member` kind
   with founder-protection metadata.
-- A future PR introducing canonicalized "InstitutionalScore",
-  "GovernanceForecast" or "InfluenceTopology" kinds.
-
 Workstream I closes those gaps.
-
 ---
 
 ## 4. Concept-by-concept classification rationale
-
 ### 4.1 Institutional structural concepts
 
 | Concept | Q1 substrate-worthy? | Q2 institution-specific? | Q3 protected? | Verdict |
@@ -134,13 +119,11 @@ Workstream I closes those gaps.
 | Federation | No | Yes | No | **IGG-local** |
 | Union | No | Yes | No | **IGG-local** |
 | Local | No | Yes | No | **IGG-local** |
-| BargainingUnit | No | Yes | No | **IGG-local** |
 | Committee | No | Yes | No | **IGG-local** |
 | Steward / LRO / NationalRep / Officer / Negotiator | Partial — already covered by `Person` / `Member` | Yes (role overlay) | No | **Runtime overlay** on canonical `Member` (kind preserved in `metadata.iggKind`) |
 | UMRC | No | Yes | No | **IGG-local** |
 | CLASS_B_SPECIAL_VOTING_SHARE | No | N/A — protected | **Yes** | **Protected governance metadata** — never canonical, never read-surface |
 | RESERVED_MATTER | No | N/A | **Yes** | **Protected governance metadata** |
-
 ### 4.2 Institutional relationship concepts
 
 | Concept | Q5 expressible canonically? | Q6 surface area? | Verdict |
@@ -160,15 +143,10 @@ Workstream I closes those gaps.
 | Concept | Verdict | Reason |
 |---|---|---|
 | InstitutionalTimeline | **Continuity abstraction** (IGG-local read view) | Composed from chronology entries; has no canonical equivalent and must remain read-only |
-| ContinuityTransition | **Continuity abstraction** | Founder-protection adjacent; never substrate, never analytical |
 | RoleTenure / SuccessionLink | **Continuity abstraction** | Modelled via `TENURED_AS` edges; lineage view only |
 | AffiliationTransition | **Continuity abstraction** | Already an IGG event kind |
 
-### 4.4 Observability & display abstractions
 
-| Concept | Verdict | Reason |
-|---|---|---|
-| InstitutionalObservabilitySnapshot | **Observability abstraction** | Counts-only, env-gated (`IGG_OBSERVABILITY_ENABLED=1`), never persisted, never canonical |
 | ModuleDisplayMetadata | **Observability abstraction** | Cosmetic surface, must not become an entity kind |
 | TrustExplainabilityRecord | **Observability abstraction** | Read-only convergence, no scoring, no rank, no weight |
 | GovernanceDecision (display projection) | **Observability abstraction** for the read view; the underlying `Decision` is canonical | Distinguish substrate `Decision` from the IGG read shape |
@@ -190,7 +168,7 @@ promoted to the canonical ontology, regardless of demand:
 ## 5. Audit answers (verbatim Q&A)
 
 The full enumeration with rationale per concept is in
-[reports/governance-graph/ontology-classification-matrix.md](reports/governance-graph/ontology-classification-matrix.md).
+[reports/governance-graph/ontology-classification-matrix.md](ontology-classification-matrix.md).
 The following are the consolidated answers across the inventory:
 
 1. **Substrate-worthy across multiple domains?** Only generic abstractions
@@ -207,7 +185,7 @@ The following are the consolidated answers across the inventory:
 5. **Expressible via existing canonical kinds?** Yes for the structural
    relationships (BELONGS_TO, REFERENCES, LINKS_TO, ASSIGNED_TO, HAS, DEPENDS_ON,
    PARENT_OF). Substrate fallback is already implemented at
-   [packages/institutional-governance-graph/src/ontology/kinds.ts](packages/institutional-governance-graph/src/ontology/kinds.ts#L160).
+   [packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts#L160).
 6. **Surface area expansion?** Promotion of any IGG kind would inject
    institutional semantics into every consumer of `platform-ontology`. **Not
    acceptable** without explicit cross-domain demand and a substrate proposal.
@@ -228,7 +206,7 @@ The following are the consolidated answers across the inventory:
 ## 6. Canonicalization deny-list (to be enforced in §F implementation)
 
 The deny-list is the *intent declaration*. The implementation in
-[packages/institutional-governance-graph/src/ontology/canonicalization.ts](packages/institutional-governance-graph/src/ontology/canonicalization.ts)
+[packages/institutional-governance-graph/src/ontology/canonicalization.ts](../../packages/institutional-governance-graph/src/ontology/canonicalization.ts)
 enforces it at test time and exposes inspection helpers.
 
 **Tier 1 — Absolute (protected governance metadata, never canonicalize):**
@@ -286,3 +264,4 @@ enforces it at test time and exposes inspection helpers.
 - Any UI exposure, dashboard, or analytical projection.
 - Any modification to the existing protected-semantics fence — Workstream I is
   *additive* and only layers the canonicalization deny-list above it.
+

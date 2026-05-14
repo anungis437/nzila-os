@@ -45,6 +45,7 @@ function collectFiles(dir: string, ext: string[]): string[] {
           'platform-entity-graph', 'platform-context-orchestrator',
           'platform-governed-ai', 'zonga-control-plane',
           'intelligence', 'fsm-core',
+          'institutional-governance-graph',
           'schema-core', 'governed-workflow',
         ].includes(e.name)) continue
         stack.push(full)
