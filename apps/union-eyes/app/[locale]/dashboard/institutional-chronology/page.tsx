@@ -285,6 +285,55 @@ export default async function InstitutionalChronologyPage() {
         )}
       </section>
 
+      {/* Panel 4 — Continuity progression */}
+      <section className={`${PANEL} mb-6`}>
+        <h2 className={SECTION_HEADER}>Continuity progression</h2>
+        <p className="mb-3 text-sm text-slate-600">
+          Institutional continuity rendered as preserved succession and tenure
+          progression. Breakpoints are procedural markers, not personnel
+          evaluations.
+        </p>
+
+        {view.continuity.length === 0 ? (
+          <div className={EMPTY}>No continuity progression entries are preserved.</div>
+        ) : (
+          <div className="space-y-4">
+            {view.continuity.map((cont) => (
+              <article
+                key={cont.organizationId || 'global'}
+                className="rounded border border-slate-200 p-4"
+              >
+                <p className="text-xs uppercase tracking-wide text-slate-500">
+                  Organization
+                </p>
+                <p className="break-all font-mono text-[11px] text-slate-700">
+                  {dash(cont.organizationId)}
+                </p>
+
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  <div className="rounded border border-slate-100 bg-slate-50 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                      Continuity entries
+                    </p>
+                    <p className="mt-1 text-sm text-slate-700">
+                      {cont.entries.length} preserved entry(ies)
+                    </p>
+                  </div>
+                  <div className="rounded border border-slate-100 bg-slate-50 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                      Succession breakpoints
+                    </p>
+                    <p className="mt-1 text-sm text-slate-700">
+                      {cont.breakpoints.length} preserved marker(s)
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
       <footer className="mt-8 border-t border-slate-200 pt-4 text-xs text-slate-500">
         This surface is governance-safe transparency over preserved
         institutional records. It does not evaluate, rank, predict, or
