@@ -20,6 +20,14 @@ See governance/ai/lifecycle-gates.md and governance/privacy/policies/data-classi
 
 <!-- Which apps / packages are affected? Note any cross-cutting impact. -->
 
+## AI workflow (gstack pilot)
+
+Complete this section if gstack was used for planning, implementation, review, QA, or security analysis in this PR.
+
+- [ ] gstack usage (if any) followed [CLAUDE.md](../CLAUDE.md) pilot policy and command boundaries
+- [ ] Restricted commands (`/ship`, `/land-and-deploy`, `/canary`, `/setup-deploy`, `/setup-gbrain`, `/sync-gbrain`, `/gstack-upgrade`) were not used without maintainer approval
+- [ ] Required repo checks still run and pass independently of gstack usage
+
 ---
 
 ## Privacy by Design checklist
