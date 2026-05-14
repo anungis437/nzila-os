@@ -334,6 +334,118 @@ export default async function InstitutionalChronologyPage() {
         )}
       </section>
 
+      {/* Panel 5 — Governance epochs */}
+      <section className={`${PANEL} mb-6`}>
+        <h2 className={SECTION_HEADER}>Governance epochs</h2>
+        <p className="mb-3 text-sm text-slate-600">
+          Epoch markers show preserved institutional transition points. These
+          are rendered as markers only, not duration periods or ranked phases.
+        </p>
+        {view.epochs.length === 0 ? (
+          <div className={EMPTY}>No governance epoch markers are preserved.</div>
+        ) : (
+          <ol className="divide-y divide-slate-100">
+            {view.epochs.map((epoch, idx) => (
+              <li key={`${epoch.sourceId}-${idx}`} className="py-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                  <span className="text-sm font-medium text-slate-900">
+                    {dash(epoch.summary)}
+                  </span>
+                  <span className="font-mono text-xs text-slate-500">
+                    {fmt(epoch.occurredAt)}
+                  </span>
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <span
+                    className={`inline-flex items-center rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${kindBadgeClass(epoch.kind)}`}
+                  >
+                    {epoch.kind}
+                  </span>
+                  {epoch.category && (
+                    <span className="font-mono text-[11px] text-slate-500">
+                      {epoch.category}
+                    </span>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+
+      {/* Panel 6 — Chronology explainability */}
+      <section className={`${PANEL} mb-6`}>
+        <h2 className={SECTION_HEADER}>Chronology explainability</h2>
+        <p className="mb-3 text-sm text-slate-600">
+          Provenance references for preserved chronology entries. This is
+          retrospective traceability only, never prediction or recommendation.
+        </p>
+
+        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded border border-slate-100 bg-slate-50 p-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Decisions</p>
+            <p className="mt-1 text-sm text-slate-700">
+              {view.provenanceCoverage.totalDecisions}
+            </p>
+          </div>
+          <div className="rounded border border-slate-100 bg-slate-50 p-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">With evidence</p>
+            <p className="mt-1 text-sm text-slate-700">
+              {view.provenanceCoverage.decisionsWithEvidence}
+            </p>
+          </div>
+          <div className="rounded border border-slate-100 bg-slate-50 p-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">With knowledge</p>
+            <p className="mt-1 text-sm text-slate-700">
+              {view.provenanceCoverage.decisionsWithKnowledge}
+            </p>
+          </div>
+          <div className="rounded border border-slate-100 bg-slate-50 p-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">With policy</p>
+            <p className="mt-1 text-sm text-slate-700">
+              {view.provenanceCoverage.decisionsWithPolicy}
+            </p>
+          </div>
+          <div className="rounded border border-slate-100 bg-slate-50 p-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">With lineage</p>
+            <p className="mt-1 text-sm text-slate-700">
+              {view.provenanceCoverage.decisionsWithLineage}
+            </p>
+          </div>
+          <div className="rounded border border-slate-100 bg-slate-50 p-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">With preceding event</p>
+            <p className="mt-1 text-sm text-slate-700">
+              {view.provenanceCoverage.decisionsWithPrecedingEvent}
+            </p>
+          </div>
+        </div>
+
+        {view.explainability.length === 0 ? (
+          <div className={EMPTY}>No explainability records are preserved.</div>
+        ) : (
+          <ul className="space-y-2">
+            {view.explainability.map((record) => {
+              const refs =
+                record.evidenceRefs.length +
+                record.knowledgeRefs.length +
+                record.policyRefs.length;
+              return (
+                <li
+                  key={record.decisionRef}
+                  className="rounded border border-slate-100 px-3 py-2 text-xs text-slate-600"
+                >
+                  <span className="break-all font-mono text-[11px]">
+                    {record.decisionRef}
+                  </span>{' '}
+                  · refs: {refs} · lineage refs: {record.lineageRefs.length} ·
+                  preceding events: {record.precedingEventRefs.length}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
       <footer className="mt-8 border-t border-slate-200 pt-4 text-xs text-slate-500">
         This surface is governance-safe transparency over preserved
         institutional records. It does not evaluate, rank, predict, or
