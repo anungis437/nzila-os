@@ -11,6 +11,8 @@
  */
 
 export * from './ontology/kinds.js'
+// Workstream I — canonicalization deny-list & promotion-discipline guards.
+export * from './ontology/canonicalization.js'
 export * from './lifecycle/normalize.js'
 export * from './adapters/source-adapter.js'
 export * from './projection/organizations.js'

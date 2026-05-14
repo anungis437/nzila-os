@@ -162,7 +162,7 @@ export default async function InstitutionalContinuityPage({
             </p>
             <p className="text-gray-700 text-lg leading-relaxed">
               UnionEyes Institutional Continuity transforms fragmented institutional knowledge
-              into governed, accessible, and explainable organizational intelligence — so your
+              into governed, accessible, and explainable continuity-aware structures — so your
               organization is stronger through every leadership transition.
             </p>
           </div>

@@ -52,6 +52,10 @@ export const OBSERVABILITY_DOCTRINE_REQUIRED: RewardTerm[] = [
   { term: "governance-safe transparency", weight: 3 },
   { term: "continuity safeguards", weight: 2 },
   { term: "inspectable institutional states", weight: 3 },
+  // Workstream I: Ontology reconciliation & institutional semantic governance.
+  { term: "institutional continuity", weight: 3 },
+  { term: "governance-safe visibility", weight: 3 },
+  { term: "continuity-aware structures", weight: 3 },
 ];
 
 export const LABOUR_SAFE_AI_FORBIDDEN: string[] = [

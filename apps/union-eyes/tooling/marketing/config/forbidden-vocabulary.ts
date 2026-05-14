@@ -230,6 +230,23 @@ const observabilityGuards: ForbiddenTerm[] = [
   { term: "average compliance", severity: "hard-fail", category: "observability-guard" },
 ];
 
+// Workstream I: Ontology reconciliation & institutional semantic governance.
+// Reject framings that re-introduce optimization / autonomous-AI / topology-
+// analytics / surveillance posture into governance language at the ontology
+// boundary. Compound phrases avoid false positives in unrelated marketing
+// copy. These extend (do not duplicate) prior surveillance-ai / observability
+// guards.
+const ontologyReconciliation: ForbiddenTerm[] = [
+  { term: "governance optimization", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance of record | continuity-aware governance" },
+  { term: "organizational intelligence", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional intelligence | continuity-aware reporting" },
+  { term: "topology analytics", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional structure of record" },
+  { term: "governance topology analytics", severity: "hard-fail", category: "surveillance-ai" },
+  { term: "governance AI", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-assisted governed reasoning under human oversight" },
+  { term: "governance command system", severity: "hard-fail", category: "surveillance-ai", suggestion: "continuity console | governance of record" },
+  { term: "governance command systems", severity: "hard-fail", category: "surveillance-ai" },
+  { term: "institutional surveillance", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional observability of record" },
+];
+
 export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...startupSaas,
   ...ripAndReplace,
@@ -238,6 +255,7 @@ export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...political,
   ...founderOptics,
   ...observabilityGuards,
+  ...ontologyReconciliation,
   ...warningLevel,
 ];
 
