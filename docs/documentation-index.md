@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-05-14T09:15:37.104Z
+Generated: 2026-05-14T09:27:43.460Z
 
 Total documents indexed: 1001
 Stale documents (>90 days since repo validation): 0
@@ -828,7 +828,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/README.md](docs/categories/README.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/builders/ARCHITECTURE_MAP.md](docs/categories/stakeholders/builders/ARCHITECTURE_MAP.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/builders/COMMANDS.md](docs/categories/stakeholders/builders/COMMANDS.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/builders/CONTRIBUTING.md](docs/categories/stakeholders/builders/CONTRIBUTING.md) | categories | 2026-05-11 | current |
+| [docs/categories/stakeholders/builders/CONTRIBUTING.md](docs/categories/stakeholders/builders/CONTRIBUTING.md) | categories | 2026-05-14 | current |
 | [docs/categories/stakeholders/builders/QUICKSTART.md](docs/categories/stakeholders/builders/QUICKSTART.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/buyers/buyer-faq.md](docs/categories/stakeholders/buyers/buyer-faq.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/buyers/deployment-models.md](docs/categories/stakeholders/buyers/deployment-models.md) | categories | 2026-05-11 | current |

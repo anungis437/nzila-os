@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-05-14T09:15:34.834Z",
-  "filesScanned": 1649,
-  "totalFindings": 2381,
+  "generatedAt": "2026-05-14T09:27:41.737Z",
+  "filesScanned": 1650,
+  "totalFindings": 2382,
   "findingsByRule": {
     "stale-reference": 1045,
     "stale-package-ref": 53,
-    "naming-inconsistency": 1176,
+    "naming-inconsistency": 1177,
     "missing-required-doc": 3,
     "missing-package-readme": 104
   },
   "findingsBySeverity": {
     "error": 0,
     "warning": 1205,
-    "info": 1176
+    "info": 1177
   },
   "findings": [
     {
@@ -82,56 +82,56 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "CONTRIBUTING.md",
-      "line": 64,
+      "line": 82,
       "message": "Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "CONTRIBUTING.md",
-      "line": 65,
+      "line": 83,
       "message": "Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "CONTRIBUTING.md",
-      "line": 66,
+      "line": 84,
       "message": "Possible broken link: [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "CONTRIBUTING.md",
-      "line": 67,
+      "line": 85,
       "message": "Possible broken link: [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "CONTRIBUTING.md",
-      "line": 68,
+      "line": 86,
       "message": "Possible broken link: [Evidence Lifecycle Policy](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "CONTRIBUTING.md",
-      "line": 69,
+      "line": 87,
       "message": "Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "CONTRIBUTING.md",
-      "line": 70,
+      "line": 88,
       "message": "Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "CONTRIBUTING.md",
-      "line": 71,
+      "line": 89,
       "message": "Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)"
     },
     {
@@ -7728,6 +7728,13 @@
       "file": "AWS_ZONGA_SETUP.md",
       "line": 339,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "CLAUDE.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",

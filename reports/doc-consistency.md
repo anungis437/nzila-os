@@ -1,22 +1,22 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-14T09:15:34.834Z
+> Generated: 2026-05-14T09:27:41.737Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1649 |
-| Total Findings | 2381 |
+| Files Scanned | 1650 |
+| Total Findings | 2382 |
 | Errors | 0 |
 | Warnings | 1205 |
-| Info | 1176 |
+| Info | 1177 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1176 |
+| naming-inconsistency | 1177 |
 | stale-reference | 1045 |
 | missing-package-readme | 104 |
 | stale-package-ref | 53 |
@@ -33,14 +33,14 @@
 - 🟡 `ARCHITECTURE.md:115` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
 - 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:12` — Possible broken link: [docs/repo-contract/README.md](docs/repo-contract/README.md)
-- 🟡 `CONTRIBUTING.md:64` — Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
-- 🟡 `CONTRIBUTING.md:65` — Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
-- 🟡 `CONTRIBUTING.md:66` — Possible broken link: [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)
-- 🟡 `CONTRIBUTING.md:67` — Possible broken link: [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)
-- 🟡 `CONTRIBUTING.md:68` — Possible broken link: [Evidence Lifecycle Policy](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
-- 🟡 `CONTRIBUTING.md:69` — Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)
-- 🟡 `CONTRIBUTING.md:70` — Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
-- 🟡 `CONTRIBUTING.md:71` — Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
+- 🟡 `CONTRIBUTING.md:82` — Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
+- 🟡 `CONTRIBUTING.md:83` — Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
+- 🟡 `CONTRIBUTING.md:84` — Possible broken link: [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)
+- 🟡 `CONTRIBUTING.md:85` — Possible broken link: [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)
+- 🟡 `CONTRIBUTING.md:86` — Possible broken link: [Evidence Lifecycle Policy](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
+- 🟡 `CONTRIBUTING.md:87` — Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)
+- 🟡 `CONTRIBUTING.md:88` — Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
+- 🟡 `CONTRIBUTING.md:89` — Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
 - 🟡 `README.md:151` — Possible broken link: [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md)
 - 🟡 `README.md:151` — Possible broken link: [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md)
 - 🟡 `README.md:171` — Possible broken link: [docs/builders/](docs/builders/)
@@ -1126,12 +1126,13 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 
-## naming-inconsistency (1176)
+## naming-inconsistency (1177)
 
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:233` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `AWS_ZONGA_SETUP.md:339` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `CLAUDE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `CONTRIBUTING.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:3` — "Nzila OS" should be "NzilaOS" (platform name)

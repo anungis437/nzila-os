@@ -73,3 +73,19 @@ Follow the pattern in existing `packages/` directories. Ensure:
 - [ ] `pnpm test:fast` passes
 - [ ] No governance drift (`pnpm validate:governance`)
 - [ ] README updated if public API changed
+
+## AI Workflow (gstack Pilot)
+
+gstack is enabled in optional pilot mode for this repository.
+
+- Use gstack for plan quality, review quality, QA reporting, and security analysis.
+- Do not use gstack as a replacement for required repository checks.
+- Maintainers control when deployment or shipping automation is permitted.
+
+Allowed during pilot:
+
+- `/office-hours`, `/autoplan`, `/plan-*`, `/review`, `/qa-only`, `/investigate`, `/cso`, `/retro`
+
+Restricted unless explicitly approved by a maintainer on the active PR or issue:
+
+- `/ship`, `/land-and-deploy`, `/canary`, `/setup-deploy`, `/setup-gbrain`, `/sync-gbrain`, `/gstack-upgrade`
