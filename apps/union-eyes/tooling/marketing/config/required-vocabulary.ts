@@ -58,6 +58,25 @@ export const OBSERVABILITY_DOCTRINE_REQUIRED: RewardTerm[] = [
   { term: "continuity-aware structures", weight: 3 },
 ];
 
+// Workstream K: Institutional Topology UX.
+// Reward terms that signal governance-safe, continuity-aware, inspectable
+// topology posture across hierarchy, affiliation, delegation,
+// representation, lineage, and continuity-aware structures.
+export const TOPOLOGY_UX_REQUIRED: RewardTerm[] = [
+  { term: "institutional topology", weight: 3 },
+  { term: "continuity pathways", weight: 3 },
+  { term: "governance lineage", weight: 3 },
+  { term: "procedural ancestry", weight: 3 },
+  { term: "continuity-aware structures", weight: 3 },
+  { term: "inspectable institutional relationships", weight: 3 },
+  { term: "governance-safe visibility", weight: 3 },
+  { term: "representation continuity", weight: 3 },
+  { term: "affiliation structure", weight: 2 },
+  { term: "institutional hierarchy", weight: 2 },
+  { term: "continuity-linked relationships", weight: 3 },
+  { term: "preserved institutional records", weight: 3 },
+];
+
 // Workstream J: Trust & Procurement Runtime Convergence.
 // Reward terms that signal coexistence-oriented, sovereignty-conscious,
 // federation-aware, continuity-safeguarded posture across onboarding,

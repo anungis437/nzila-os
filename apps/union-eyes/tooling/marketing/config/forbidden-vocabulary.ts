@@ -253,6 +253,27 @@ const trustProcurementRuntime: ForbiddenTerm[] = [
   { term: "evidence automation", severity: "hard-fail", category: "surveillance-ai", suggestion: "evidence provenance under reviewer oversight" },
 ];
 
+// Workstream K: Institutional Topology UX guards.
+// Reject framings that reintroduce social-graph / influence-mapping /
+// analytics-cockpit posture into hierarchy, affiliation, delegation,
+// representation, lineage, or continuity-aware topology surfaces. These
+// extend (do not duplicate) prior surveillance-ai / observability /
+// ontology guards. Compound phrases avoid false positives.
+const topologyUx: ForbiddenTerm[] = [
+  { term: "influence network", severity: "hard-fail", category: "surveillance-ai", suggestion: "affiliation structure | continuity-linked relationships" },
+  { term: "influence visualization", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional topology | inspectable institutional relationships" },
+  { term: "social topology", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional topology" },
+  { term: "social graph", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional topology | affiliation structure" },
+  { term: "power relationships", severity: "hard-fail", category: "surveillance-ai", suggestion: "continuity-linked relationships | governance lineage" },
+  { term: "leadership mapping", severity: "hard-fail", category: "surveillance-ai", suggestion: "representation continuity | governance lineage" },
+  { term: "organizational monitoring", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional observability of record" },
+  { term: "topology optimization", severity: "hard-fail", category: "surveillance-ai", suggestion: "inspectable institutional topology" },
+  { term: "enterprise hierarchy dashboard", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional hierarchy view" },
+  { term: "AI topology", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional topology under reviewer oversight" },
+  { term: "graph theater", severity: "hard-fail", category: "surveillance-ai", suggestion: "inspectable institutional topology" },
+  { term: "network mapping", severity: "hard-fail", category: "surveillance-ai", suggestion: "affiliation structure | governance lineage" },
+];
+
 // Workstream I: Ontology reconciliation & institutional semantic governance.
 // Reject framings that re-introduce optimization / autonomous-AI / topology-
 // analytics / surveillance posture into governance language at the ontology
@@ -280,6 +301,7 @@ export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...observabilityGuards,
   ...ontologyReconciliation,
   ...trustProcurementRuntime,
+  ...topologyUx,
   ...warningLevel,
 ];
 
