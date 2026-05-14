@@ -1,6 +1,6 @@
 # Portfolio Investor View
 
-Generated: 2026-05-11
+Generated: 2026-05-14
 Authority: governance/portfolio/product-catalog.json
 
 ## Active Revenue Wedges
@@ -47,3 +47,4 @@ Authority: governance/portfolio/product-catalog.json
 | Mobility Client Portal | frozen | Legacy mobility surface held only for archival continuity during retirement. | none | SUNSET |
 | Platform Admin | frozen | Legacy admin surface slated for retirement and minimal maintenance only. | none | SUNSET |
 | Test Scaffold GP | frozen | Internal scaffold template used to bootstrap new apps under the NzilaOS enforcement pipeline. Not a commercial product. | none | SUNSET |
+
