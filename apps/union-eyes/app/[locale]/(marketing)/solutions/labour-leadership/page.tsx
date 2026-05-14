@@ -1,3 +1,19 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ShieldCheck, Users, Eye, Scale, HeartHandshake, ArrowRight } from 'lucide-react';
@@ -8,7 +24,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Policy & Labour Leadership | Solutions | Union Eyes',
+    title: 'Policy & Labour Leadership | Solutions | UnionEyes',
     description:
       'Advance labour-safe modernization with human oversight, anti-surveillance safeguards, and democratic governance controls.',
     alternates: buildLocaleAlternates(locale, '/solutions/labour-leadership'),
@@ -61,11 +77,11 @@ export default function LabourLeadershipPage() {
           </span>
         }
         heading={<>Labour-safe modernization<br />without compromise.</>}
-        description="Union Eyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform."
+        description="UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               View Governance & Trust
@@ -128,7 +144,7 @@ export default function LabourLeadershipPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Build member trust into modernization</h2>
           <p className="text-white/70 mb-8">See a labour-safe implementation path in a guided demo.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

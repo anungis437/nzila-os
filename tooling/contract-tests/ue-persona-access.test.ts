@@ -326,7 +326,13 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'knowledge-transfer/page.tsx',                 minRole: 'officer',              description: 'Knowledge transfer index' },
   { path: 'knowledge-transfer/new/page.tsx',             minRole: 'officer',              description: 'Knowledge transfer create' },
   { path: 'knowledge-transfer/[id]/page.tsx',            minRole: 'officer',              description: 'Knowledge transfer detail' },
-  { path: 'longitudinal-cognition/page.tsx',             minRole: 'vice_president',       description: 'Longitudinal cognition workspace' },]
+  { path: 'longitudinal-cognition/page.tsx',             minRole: 'vice_president',       description: 'Longitudinal cognition workspace' },
+
+  // ── Institutional transparency (WS K & L) ─────────────────────────────
+  { path: 'institutional-chronology/page.tsx',           minRole: 'member',               description: 'Institutional chronology — procedural timeline, evolution, decision lineage, continuity, epochs' },
+  { path: 'institutional-observability/page.tsx',        minRole: 'member',               description: 'Institutional observability — chronology, lineage, continuity pathways, provenance' },
+  { path: 'institutional-topology/page.tsx',             minRole: 'member',               description: 'Institutional topology — hierarchy, affiliation, delegation, lineage, continuity-aware structures' },
+]
 
 // ── API routes backing dashboard pages ──────────────────────────────────────
 

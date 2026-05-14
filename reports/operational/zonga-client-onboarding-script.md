@@ -1,4 +1,5 @@
 # Zonga — Client Onboarding Script
+
 **Sprint**: Client Launch Readiness | **Date**: 2026-04-19
 
 > This document is for the Nzila OS / Zonga operator (founder / platform team). It covers the end-to-end process of onboarding a new client organisation onto the Zonga platform from first contact through the first 14 days of live operation.
@@ -8,11 +9,13 @@
 ## Section 1: Pre-Launch Intake
 
 ### Purpose
+
 Gather the minimum required information from the client before provisioning their platform instance.
 
 ### Intake Form / Discovery Call Agenda (60 min)
 
 **1. Client Identity**
+
 - [ ] Legal entity name
 - [ ] Primary contact name + email
 - [ ] Jurisdiction / country of incorporation
@@ -20,6 +23,7 @@ Gather the minimum required information from the client before provisioning thei
 - [ ] Preferred platform currency (client billing currency)
 
 **2. Business Model**
+
 - [ ] Creator-focused (music releases, royalties)? Or listener subscription-first?
 - [ ] Live events expected at launch? (Required for IVS configuration)
 - [ ] Expected catalog size at launch (# tracks)
@@ -28,12 +32,14 @@ Gather the minimum required information from the client before provisioning thei
 - [ ] M-Pesa support needed? (Which markets: TZ/MZ/LS/CD)
 
 **3. Content & Rights**
+
 - [ ] Does client own content or is it user-generated?
 - [ ] Existing catalog to migrate? (format, quantity)
 - [ ] Rights management: who handles takedown requests?
 - [ ] Artist/creator onboarding process: invite-only or open registration?
 
 **4. Payments**
+
 - [ ] Stripe account provided by client, or Nzila managing Stripe Connect?
 - [ ] Creator payout method: Stripe Connect, M-Pesa, or both?
 - [ ] Payout currency: local currency or USD?
@@ -41,17 +47,20 @@ Gather the minimum required information from the client before provisioning thei
 - [ ] Who is the designated `finance_admin` for payout approvals?
 
 **5. Legal**
+
 - [ ] ToS and Privacy Policy: client provides, or Nzila provides draft (from Legal Launch Pack)?
 - [ ] DMCA designated agent: client's or shared?
 - [ ] Data residency requirements: any restriction on processing in Canada/US?
 
 **6. Branding**
+
 - [ ] Platform name / subdomain preference
 - [ ] Logo (SVG preferred), colour palette (primary/secondary/accent)
 - [ ] Custom domain (requires DNS CNAME record; handled by client)
 - [ ] Email sender name and reply-to address
 
 **7. Operator Access**
+
 - [ ] Who will be `platform_operator`? (Name + email)
 - [ ] Who will be `client_admin`? (Name + email)
 - [ ] Who will be `finance_admin`? (Name + email)
@@ -157,6 +166,7 @@ If the client has an existing catalog to migrate:
 
 1. **Prepare migration package**: Directory structure `{artist}/{album}/{track.mp3}` + `metadata.csv` (title, artist, ISRC, release_date, genre, ownership_splits)
 2. **Upload via batch script** (contact Nzila for tooling):
+
    ```bash
    # Run batch upload (uses admin API key)
    node scripts/zonga-batch-upload.mjs \
@@ -164,6 +174,7 @@ If the client has an existing catalog to migrate:
      --org-id <CLIENT_ORG_ID> \
      --admin-token <ADMIN_TOKEN>
    ```
+
 3. **Verify**: Check each migrated track plays at standard quality
 4. **Ownership splits**: Record split rules in DB for all collaborative works
 5. **Metadata QA**: Spot-check 10% of migrated tracks for correct artist/title
@@ -186,43 +197,51 @@ If the client has an existing catalog to migrate:
 ### Agenda
 
 **[0:00 – 0:10] Welcome and introductions**
+
 - Confirm all attendees
 - Confirm technical prerequisites are met (everyone can access the platform URL)
 
 **[0:10 – 0:20] Platform walkthrough — Admin perspective**
+
 - Login as `client_admin` → show dashboard overview
 - Demonstrate: creator management, catalog management, event listing
 - Show: moderation queue, compliance panel
 
 **[0:20 – 0:35] Finance walkthrough**
+
 - Login as `finance_admin` → navigate to `/dashboard/payouts`
 - Demonstrate: payout request list, approval workflow
 - Show: earnings ledger view, revenue breakdown
 - Walk through: weekly payout review procedure (from Billing Report Section 4)
 
 **[0:35 – 0:45] Creator onboarding demo**
+
 - Register a test creator account
 - Upload a test track
 - Set ownership split
 - Check earnings dashboard
 
 **[0:45 – 0:55] Incident response briefing**
+
 - Share `/api/health` endpoint URL
 - Confirm uptime monitor is set up
 - Walk through: who to call in a P0 incident
 - Confirm: client has Nzila emergency contact info
 
 **[0:55 – 1:10] Legal review**
+
 - Confirm ToS/Privacy Policy URL is live
 - Confirm client has reviewed and approved legal documents
 - Confirm DMCA contact is live
 
 **[1:10 – 1:20] Creator communications**
+
 - Review draft welcome email for creators
 - Confirm platform support email is monitored
 - Set expectation: payout processing SLA (3–7 business days)
 
 **[1:20 – 1:30] Go / No-Go Decision**
+
 - Review checklist: all green?
 - If any blockers: triage and set timeline
 - **Operator signs off**: "Platform is ready for first creators"
@@ -237,6 +256,7 @@ For the first 14 days post-launch, the Nzila operator (founder) provides elevate
 ### Daily Check (Days 1–7)
 
 Every morning:
+
 - [ ] Check Azure Container Apps health: `az containerapp show -n nzila-os-zonga -g nzila-canada-staging-rg`
 - [ ] Check upload health panel: `GET /api/admin/health`
 - [ ] Review Stripe dashboard for failed payments
@@ -264,6 +284,7 @@ Every morning:
 ### Exit from Hypercare (Day 14)
 
 Criteria to exit hypercare:
+
 - [ ] Zero P0 incidents
 - [ ] At least 5 tracks uploaded and playing correctly
 - [ ] At least one payout completed end-to-end

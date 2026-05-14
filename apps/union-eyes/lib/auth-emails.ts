@@ -1,5 +1,5 @@
 /**
- * Auth-related email senders for Union Eyes.
+ * Auth-related email senders for UnionEyes.
  *
  * These are the last mile that turns a platform-auth token into an actual
  * email. They call the canonical Resend-backed `sendEmail` in
@@ -35,12 +35,12 @@ function wrap(bodyHtml: string, preheader: string): string {
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Union Eyes</title>
+    <title>UnionEyes</title>
   </head>
   <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f5f5f5; padding:24px; margin:0;">
     <span style="display:none !important; visibility:hidden; opacity:0; overflow:hidden; mso-hide:all; height:0; width:0; max-height:0; max-width:0; font-size:0;">${escape(preheader)}</span>
     <div style="max-width:560px; margin:0 auto; background:#ffffff; border-radius:12px; padding:32px;">
-      <div style="font-weight:700; font-size:20px; color:#111; margin-bottom:24px;">Union Eyes</div>
+      <div style="font-weight:700; font-size:20px; color:#111; margin-bottom:24px;">UnionEyes</div>
       ${bodyHtml}
       <hr style="border:none; border-top:1px solid #e5e5e5; margin:32px 0;" />
       <p style="color:#888; font-size:12px; line-height:1.5; margin:0;">
@@ -70,7 +70,7 @@ export async function sendMagicLinkEmail(opts: {
       Tap the button below to sign in. This link is valid for the next ${minutes} minutes and can only be used once.
     </p>
     <p style="margin:0 0 24px;">
-      <a href="${verifyUrl}" style="display:inline-block; background:#2563eb; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Sign in to Union Eyes</a>
+      <a href="${verifyUrl}" style="display:inline-block; background:#2563eb; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Sign in to UnionEyes</a>
     </p>
     <p style="color:#666; font-size:13px; line-height:1.5; margin:0 0 8px;">
       Or copy and paste this URL into your browser:
@@ -80,8 +80,8 @@ export async function sendMagicLinkEmail(opts: {
   `
   return sendEmail({
     to: [{ email: opts.to, name: opts.to }],
-    subject: 'Your Union Eyes sign-in link',
-    html: wrap(body, `Sign in to Union Eyes — valid for ${minutes} minutes`),
+    subject: 'Your UnionEyes sign-in link',
+    html: wrap(body, `Sign in to UnionEyes — valid for ${minutes} minutes`),
   })
 }
 
@@ -99,9 +99,9 @@ export async function sendInviteEmail(opts: {
   const who = opts.inviterName ? escape(opts.inviterName) : 'A colleague'
   const org = opts.organizationName ? escape(opts.organizationName) : 'their organization'
   const body = `
-    <h1 style="font-size:20px; color:#111; margin:0 0 16px;">You've been invited to Union Eyes</h1>
+    <h1 style="font-size:20px; color:#111; margin:0 0 16px;">You've been invited to UnionEyes</h1>
     <p style="color:#333; line-height:1.6; margin:0 0 8px;">
-      ${who} has invited you to join <strong>${org}</strong> on Union Eyes as <strong>${escape(opts.role)}</strong>.
+      ${who} has invited you to join <strong>${org}</strong> on UnionEyes as <strong>${escape(opts.role)}</strong>.
     </p>
     <p style="color:#333; line-height:1.6; margin:0 0 24px;">
       This invitation is valid for the next ${days} day${days === 1 ? '' : 's'}.
@@ -116,8 +116,8 @@ export async function sendInviteEmail(opts: {
   `
   return sendEmail({
     to: [{ email: opts.to, name: opts.to }],
-    subject: `Invitation to join Union Eyes`,
-    html: wrap(body, `${who} invited you to Union Eyes`),
+    subject: `Invitation to join UnionEyes`,
+    html: wrap(body, `${who} invited you to UnionEyes`),
   })
 }
 
@@ -132,7 +132,7 @@ export async function sendPasswordResetEmail(opts: {
   const body = `
     <h1 style="font-size:20px; color:#111; margin:0 0 16px;">Reset your password</h1>
     <p style="color:#333; line-height:1.6; margin:0 0 24px;">
-      We received a request to reset your Union Eyes password. Tap the button below to set a new one. This link is valid for ${minutes} minutes and can only be used once.
+      We received a request to reset your UnionEyes password. Tap the button below to set a new one. This link is valid for ${minutes} minutes and can only be used once.
     </p>
     <p style="margin:0 0 24px;">
       <a href="${resetUrl}" style="display:inline-block; background:#2563eb; color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Set new password</a>
@@ -144,8 +144,8 @@ export async function sendPasswordResetEmail(opts: {
   `
   return sendEmail({
     to: [{ email: opts.to, name: opts.to }],
-    subject: 'Reset your Union Eyes password',
-    html: wrap(body, 'Reset your Union Eyes password'),
+    subject: 'Reset your UnionEyes password',
+    html: wrap(body, 'Reset your UnionEyes password'),
   })
 }
 

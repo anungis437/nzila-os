@@ -1,4 +1,4 @@
-# LINEAGE FROZEN — Historical Union Eyes Drizzle Migrations
+# LINEAGE FROZEN — Historical UnionEyes Drizzle Migrations
 
 **Status:** **FROZEN — read-only historical lineage**
 **Effective:** 2026-05-09
@@ -8,7 +8,7 @@
 
 The migrations in this directory (`apps/union-eyes/db/migrations/`)
 represent the **pre-reconciliation Drizzle lineage**, generated when
-Drizzle was treated as the broad-schema ORM for Union Eyes. They are
+Drizzle was treated as the broad-schema ORM for UnionEyes. They are
 preserved here as **archaeological lineage** for audit, traceability,
 and historical reproducibility.
 

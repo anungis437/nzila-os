@@ -6,13 +6,11 @@ import {
   ConferenceStoryFlow,
   ContinuityFlowSignature,
   ContinuityMappingLanguage,
-  ExecutiveResonanceLayer,
   FragmentationToCoherenceSequence,
   MethodologyVisualizationSystem,
 } from '@/components/marketing/institutional-visual-systems';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import {
-  getInstitutionalModeProfile,
   rotateNarrativePathway,
   type InstitutionalMode,
   withInstitutionalContext,
@@ -126,7 +124,6 @@ const realizationMoments = [
 
 export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: InsightSectionPageProps) {
   const featuredInsights = getFeaturedInsights();
-  const profile = getInstitutionalModeProfile(contextMode);
   const adaptiveNarrativePathway = rotateNarrativePathway(narrativePathway, contextMode);
 
   return (
@@ -136,14 +133,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         tone="dark"
         revealTempo="conference"
         heading={<>Editorial standards and canonical story architecture</>}
-        description="The doctrine layer defines how Union Eyes frames governance-safe modernization, executive readability, and continuity-centered publication design."
-        contextKicker={`${profile.label} context`}
-        contextNote={(
-          <>
-            <span className="block font-semibold">Primary concern: {profile.concern}</span>
-            <span className="block mt-1">{profile.heroFraming}</span>
-          </>
-        )}
+        description="The doctrine layer defines how UnionEyes frames governance-safe modernization, executive readability, and continuity-centered publication design."
       />
 
       <InsightsHubSubmenu locale={locale} active="doctrine" contextMode={contextMode} />
@@ -152,14 +142,14 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4">Designed for institutional adoption confidence</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Designed for institutional adoption confidence</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              Union Eyes doctrine is structured for governance committees, executive leadership, operations stewards, and procurement stakeholders who require clarity before committing to modernization paths.
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-8">
+              UnionEyes doctrine is structured for governance committees, executive leadership, operations stewards, and procurement stakeholders who require clarity before committing to modernization paths.
             </p>
           </ScrollReveal>
-          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
             {editorialStandards.map((standard) => (
               <ScrollReveal key={standard.title} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <article className="institution-panel calm-elevation narrative-step p-5">
@@ -176,10 +166,10 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4">From institutional fragmentation to operational trust</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">From institutional fragmentation to operational trust</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
               Every doctrine article follows a strategic sequence built for executive cognition: problem framing, governance risk, continuity implications, and explainable implementation outcomes.
             </p>
           </ScrollReveal>
@@ -205,14 +195,14 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4">What leaders realize as visibility improves</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">What leaders realize as visibility improves</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
               This sequencing is designed to reveal fragility without alarmism, then stabilize through explainable continuity pathways.
             </p>
           </ScrollReveal>
-          <div className="grid md:grid-cols-3 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid md:grid-cols-3 gap-4 narrative-sequence [--sequence-step:110ms]">
             {realizationMoments.map((moment) => (
               <ScrollReveal key={moment.title} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <article className="institution-panel narrative-step p-5">
@@ -229,14 +219,14 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-3">Executive publications in active use</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3 text-center">Executive publications in active use</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl">
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center">
               These publications are used in governance workshops, modernization committees, procurement reviews, and transition planning cycles.
             </p>
           </ScrollReveal>
-          <div className="grid md:grid-cols-2 gap-6 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid md:grid-cols-2 gap-6 narrative-sequence [--sequence-step:110ms]">
             {featuredInsights.map((insight) => (
               <ScrollReveal key={insight.slug} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <Link
@@ -292,8 +282,6 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
 }
 
 export function InsightsMethodologyPageView({ locale, contextMode = 'executive' }: InsightSectionPageProps) {
-  const profile = getInstitutionalModeProfile(contextMode);
-
   return (
     <div className="institution-shell min-h-screen">
       <MarketingHeroSection
@@ -302,44 +290,9 @@ export function InsightsMethodologyPageView({ locale, contextMode = 'executive' 
         revealTempo="conference"
         heading={<>Continuity flow, transformation rhythm, and governance symbolism</>}
         description="This page holds the visual frameworks that make the insights doctrine legible: structure, continuity, and calm institutional motion."
-        contextKicker={`${profile.label} context`}
-        contextNote={(
-          <>
-            <span className="block font-semibold">Primary concern: {profile.concern}</span>
-            <span className="block mt-1">Priority framework: {profile.methodologyFocus}. {profile.continuityCallout}</span>
-          </>
-        )}
       />
 
       <InsightsHubSubmenu locale={locale} active="methodology" contextMode={contextMode} />
-
-      <section className="py-16 bg-white border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={0.85} distance={12} tempo="conference">          </ScrollReveal>
-          <ScrollReveal delay={0.06} duration={0.95} distance={14} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-4">Operational frameworks visualized for governance use</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.12} duration={0.95} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl">
-              The doctrine system translates methodology into deployment-ready guidance with implementation sequencing, governance checkpoints, and explainability boundaries.
-            </p>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      <section className="py-12 bg-[#f8f6f2] border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={0.82} distance={12} tempo="conference">
-            <article className="institution-panel p-5">
-              <p className="institution-kicker mb-2">Adaptive Methodology Emphasis</p>
-              <h3 className="text-lg font-semibold text-navy mb-2">{profile.methodologyFocus}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                This emphasis changes presentation order only. Core doctrine remains consistent and governance-safe for all stakeholders.
-              </p>
-            </article>
-          </ScrollReveal>
-        </div>
-      </section>
 
       <MethodologyVisualizationSystem />
 
@@ -377,8 +330,6 @@ export function InsightsMethodologyPageView({ locale, contextMode = 'executive' 
 }
 
 export function InsightsResonancePageView({ locale, contextMode = 'executive' }: InsightSectionPageProps) {
-  const profile = getInstitutionalModeProfile(contextMode);
-
   return (
     <div className="institution-shell min-h-screen">
       <MarketingHeroSection
@@ -387,20 +338,99 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
         revealTempo="conference"
         heading={<>Emotional memorability without theatrics</>}
         description="This section turns institutional continuity into a remembered idea: trust, resilience, clarity, and continuity flow."
-        contextKicker={`${profile.label} context`}
-        contextNote={(
-          <>
-            <span className="block font-semibold">Primary concern: {profile.concern}</span>
-            <span className="block mt-1">{profile.heroFraming}</span>
-          </>
-        )}
       />
 
       <InsightsHubSubmenu locale={locale} active="resonance" contextMode={contextMode} />
 
-      <ExecutiveResonanceLayer />
-
       <ContinuityMappingLanguage />
+
+      <section className="py-16 border-b border-slate-200/70 bg-[#f8f6f2]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">The four registers of institutional resonance</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-8">
+              Resonance is not decoration. It is the quiet architecture that makes governance-grade ideas memorable to executives, boards, and operating committees long after a meeting ends.
+            </p>
+          </ScrollReveal>
+          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
+            {[
+              { title: 'Tone of calm authority', detail: 'Every page reads at the cadence of a steady executive briefing — no alarmism, no theatrics, no marketing volume.' },
+              { title: 'Continuity over novelty', detail: 'Recurring symbols, palette, and rhythm signal that modernization is a steward of institutional memory, not its disruptor.' },
+              { title: 'Memorability without slogans', detail: 'Ideas land through structured contrast and quiet repetition rather than taglines, surviving the move from screen to boardroom conversation.' },
+              { title: 'Trust before transformation', detail: 'Resonance reassures governance audiences that the system understands their risk posture before it proposes any change.' },
+            ].map((item) => (
+              <ScrollReveal key={item.title} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+                <article className="institution-panel calm-elevation narrative-step p-5">
+                  <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">{item.detail}</p>
+                </article>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white border-b border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">How resonance is engineered, step by step</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
+              Resonance is composed deliberately. Each step strengthens the next, so the final impression on a leadership audience is coherent, calm, and remembered.
+            </p>
+          </ScrollReveal>
+          <div className="space-y-3">
+            {[
+              { stage: 'Anchor the frame', detail: 'Open every narrative on the institutional stakes — continuity, accountability, public trust — before introducing any tool or feature.' },
+              { stage: 'Hold a single rhythm', detail: 'Maintain one editorial cadence across hero, doctrine, methodology, and resonance so the reader never feels handed off between voices.' },
+              { stage: 'Repeat the symbols that matter', detail: 'Continuity language, palette, and structural motifs recur with intent — turning recognition into trust through quiet repetition.' },
+              { stage: 'Close with stewardship, not sales', detail: 'End each section by returning the reader to their governance role, not to a conversion funnel.' },
+            ].map((item, idx) => (
+              <ScrollReveal key={item.stage} delay={idx * 0.055} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+                <article className="institution-panel narrative-step px-5 py-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6">
+                    <span className="text-xs font-semibold text-slate-500 tracking-widest uppercase">Step {idx + 1}</span>
+                    <div>
+                      <h3 className="text-base font-semibold text-navy mb-1">{item.stage}</h3>
+                      <p className="text-sm text-slate-600 leading-relaxed">{item.detail}</p>
+                    </div>
+                  </div>
+                </article>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">What resonance produces inside an institution</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
+              When resonance is doing its work, leaders carry the ideas forward in their own language — across committees, briefings, and procurement reviews — without needing to consult the source material again.
+            </p>
+          </ScrollReveal>
+          <div className="grid md:grid-cols-3 gap-4 narrative-sequence [--sequence-step:110ms]">
+            {[
+              { title: 'Shared executive vocabulary', detail: 'Leadership conversations converge on a common, governance-safe way of describing continuity, risk, and modernization choices.' },
+              { title: 'Lower-friction governance review', detail: 'Boards and committees enter discussions already aligned on framing, so deliberation time focuses on decisions rather than definitions.' },
+              { title: 'Durable institutional memory', detail: 'The reasoning behind modernization choices remains legible to future leaders, auditors, and successors — long past the original engagement.' },
+            ].map((moment) => (
+              <ScrollReveal key={moment.title} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
+                <article className="institution-panel narrative-step p-5">
+                  <h3 className="text-sm font-semibold text-navy mb-2">{moment.title}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">{moment.detail}</p>
+                </article>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {contextMode === 'conference' ? <ConferenceMemoryAnchors /> : null}
 
@@ -433,7 +463,6 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
 
 export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }: InsightSectionPageProps) {
   const categoryCounts = getInsightCategoryCounts();
-  const profile = getInstitutionalModeProfile(contextMode);
 
   return (
     <div className="institution-shell min-h-screen">
@@ -443,13 +472,6 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
         revealTempo="conference"
         heading={<>Browse by governance domain</>}
         description="Use this section to move through the insight library by organizational need, not just by article title."
-        contextKicker={`${profile.label} context`}
-        contextNote={(
-          <>
-            <span className="block font-semibold">Primary concern: {profile.concern}</span>
-            <span className="block mt-1">{profile.continuityCallout}</span>
-          </>
-        )}
       />
 
       <InsightsHubSubmenu locale={locale} active="categories" contextMode={contextMode} />
@@ -458,9 +480,9 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-8">Browse the doctrine library by category</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-8 text-center">Browse the doctrine library by category</h2>
           </ScrollReveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence [--sequence-step:110ms]">
             {insightCategories.map((cat) => (
               <ScrollReveal key={cat.slug} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <Link
@@ -483,14 +505,14 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-3">Next in doctrine development</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3 text-center">Next in doctrine development</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl">
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center">
               These topics are under active development with governance and operations partners across labour institutions.
             </p>
           </ScrollReveal>
-          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
             {upcomingInsightTopics.map((topic) => (
               <ScrollReveal key={topic.slug} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <Link

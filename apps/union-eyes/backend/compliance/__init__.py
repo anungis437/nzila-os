@@ -1,5 +1,5 @@
 """
-Union Eyes Compliance Module
+UnionEyes Compliance Module
 
 Provides jurisdiction-aware validation for member employment records,
 benefits, pension contributions, and other labor law requirements.

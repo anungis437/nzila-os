@@ -1,5 +1,5 @@
 /**
- * Seed: Union Eyes CLC Demo Environment
+ * Seed: UnionEyes CLC Demo Environment
  *
  * Creates a canonical, institutionally believable demo environment
  * for the CLC convention pilot conversations and live demonstrations.
@@ -203,7 +203,7 @@ const CLC_PERSONAS = [
       clc_persona: 'admin',
       clc_demo: true,
       bio_note:
-        'James manages the Union Eyes platform configuration for Local 4279, including pilot scope settings, user roles, and security audit exports.',
+        'James manages the UnionEyes platform configuration for Local 4279, including pilot scope settings, user roles, and security audit exports.',
       continuity_priority: 'operational_stability',
       governance_involvement: 'technology_committee',
     },
@@ -404,7 +404,7 @@ import { assertNotProduction } from '@/lib/runtime/production-guard'
 assertNotProduction('seed-clc-demo-environment')
 
 async function main() {
-  console.log('🌱 Union Eyes — CLC Demo Environment Seed')
+  console.log('🌱 UnionEyes — CLC Demo Environment Seed')
   console.log('═'.repeat(56))
 
   // ── 1. Organization ─────────────────────────────────────────────────────────

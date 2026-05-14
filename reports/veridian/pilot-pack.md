@@ -59,6 +59,7 @@ clear entry and exit criteria.
 **Objective:** Establish the technical foundation and validate connector compatibility.
 
 **Activities:**
+
 - Integration readiness review: assessment of your existing EMR systems, data formats, and network
   topology against Veridian Care's connector requirements
 - Connector setup: configuration of FHIR R4 or HL7 v2 connectors in the staging environment using
@@ -68,6 +69,7 @@ clear entry and exit criteria.
 - IT point-of-contact briefing: environment access, credential management, and connectivity walkthrough
 
 **Exit Criteria:**
+
 - Integration readiness report delivered
 - At least one connector type validated against synthetic data
 - Staging environment accessible to designated pilot contacts
@@ -79,6 +81,7 @@ clear entry and exit criteria.
 **Objective:** Give clinical staff hands-on experience with the unified patient timeline and consent model.
 
 **Activities:**
+
 - Clinician portal access enabled for designated pilot users against the synthetic demo environment
 - Staff training sessions: role-based onboarding for clinicians, nurses, and admin staff covering
   timeline navigation, consent scope visibility, and break-glass protocol awareness
@@ -88,6 +91,7 @@ clear entry and exit criteria.
   identified gaps
 
 **Exit Criteria:**
+
 - Minimum 5 clinical pilot users onboarded and trained
 - Consent model review completed and documented
 - Feedback summary delivered to Veridian Care team
@@ -99,6 +103,7 @@ clear entry and exit criteria.
 **Objective:** Validate administrative controls and produce a pilot readiness report.
 
 **Activities:**
+
 - Network admin portal access for designated administrative users: site management, user provisioning,
   audit log review, and operational dashboard walkthrough
 - KPI baseline established: agreed metrics documented at pilot start to support post-go-live measurement
@@ -109,6 +114,7 @@ clear entry and exit criteria.
   model review outcomes, and recommended next steps
 
 **Exit Criteria:**
+
 - Admin portal validated by designated network administrator
 - KPI baseline documented
 - Pilot readiness report delivered and accepted

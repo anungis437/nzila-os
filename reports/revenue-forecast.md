@@ -26,4 +26,3 @@ As of 2026-04-19. Values are weighted by stage, probability, and source confiden
 | SMB Ops Group C | flow | proposal | $36,000 | 55% | Founder | Commercial review |
 | Operations Buyer D | flow | demo | $24,000 | 34% | Sales Lead | Pilot scope call |
 | Finance Team E | cfo | qualified | $22,000 | 27% | Founder | Discovery deep dive |
-

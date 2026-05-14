@@ -1,5 +1,5 @@
 /**
- * Operational Proving — Union Eyes pilot summary.
+ * Operational Proving — UnionEyes pilot summary.
  *
  * Pilot-focused proving summary. Calm, single-screen, locale-aware.
  *
@@ -14,7 +14,7 @@ import { loadPilotLedger } from '@/lib/rollout-governance';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Operational Proving — Union Eyes',
+  title: 'Operational Proving — UnionEyes',
   description: 'Pilot-focused operational proving summary.',
 };
 

@@ -56,44 +56,9 @@ export function InsightsHubSubmenu({
   active,
   contextMode = 'executive',
 }: InsightsHubSubmenuProps) {
-  const modeLabel: Record<InstitutionalMode, string> = {
-    executive: 'Executive',
-    governance: 'Governance',
-    operations: 'Operations',
-    procurement: 'Procurement',
-    conference: 'Conference',
-  };
-
-  const activeSection = insightsHubSections.find((section) => section.key === active);
-  // Conference mode is intentionally hidden from the audience selector;
-  // it remains a valid contextMode value carried via withInstitutionalContext.
-  const visibleModes = institutionalModes.filter((mode) => mode !== 'conference');
-
   return (
     <nav className="border-b border-slate-200/70 bg-white/95 backdrop-blur-sm sticky top-0 z-30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
-          {visibleModes.map((mode) => {
-            const isActiveMode = mode === contextMode;
-            const activeHref = activeSection ? activeSection.href(locale) : `/${locale}/insights`;
-
-            return (
-              <Link
-                key={mode}
-                href={withInstitutionalContext(activeHref, mode)}
-                aria-current={isActiveMode ? 'true' : undefined}
-                className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
-                  isActiveMode
-                    ? 'border-[#1f5b84] bg-[#1f5b84] text-white shadow-sm'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-[#12324a]'
-                }`}
-              >
-                {modeLabel[mode]}
-              </Link>
-            );
-          })}
-        </div>
-
         <div className="flex gap-2 overflow-x-auto pb-1">
           {insightsHubSections.map((section) => {
             const isActive = section.key === active;

@@ -186,7 +186,7 @@ export default function SiteNavigation() {
                         }`}
                       >
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                       </Link>
                     ))}
                   </motion.div>
@@ -227,7 +227,7 @@ export default function SiteNavigation() {
                         }`}
                       >
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                       </Link>
                     ))}
                   </motion.div>
@@ -316,7 +316,7 @@ export default function SiteNavigation() {
                       <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)}
                         className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:text-navy transition-colors">
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                       </Link>
                     ))}
                   </div>
@@ -338,7 +338,7 @@ export default function SiteNavigation() {
                       <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)}
                         className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:text-navy transition-colors">
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                       </Link>
                     ))}
                   </div>

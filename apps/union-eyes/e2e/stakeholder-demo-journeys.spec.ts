@@ -22,7 +22,7 @@ async function getVisiblePageText(page: Parameters<typeof assertNoTextExposure>[
   ).toLowerCase();
 }
 
-test.describe('Union Eyes stakeholder demo journeys', () => {
+test.describe('UnionEyes stakeholder demo journeys', () => {
   test.beforeAll(async ({ request }) => {
     await bootstrapE2EAuth(request);
   });
@@ -35,8 +35,8 @@ test.describe('Union Eyes stakeholder demo journeys', () => {
       { label: 'Executive Overview', href: '/dashboard/intelligence?scope=executive' },
       { label: 'Continuity Insights', href: '/dashboard/continuity-intelligence' },
       { label: 'Leadership Continuity', href: '/dashboard/leadership' },
-      { label: 'Operational Health', href: '/dashboard/executive-operating-intelligence' },
-      { label: 'Outcomes', href: '/dashboard/outcomes' },
+      { label: 'Continuity Operations', href: '/dashboard/executive-operating-intelligence' },
+      { label: 'Member Outcomes Ledger', href: '/dashboard/outcomes' },
     ];
 
     for (const step of path) {
@@ -54,8 +54,8 @@ test.describe('Union Eyes stakeholder demo journeys', () => {
     await gotoDashboardAsRole(page, 'steward');
 
     const path: Array<{ label: string; href: string }> = [
-      { label: 'Workbench', href: '/dashboard/work' },
-      { label: 'Cases', href: '/dashboard/inbox?type=intake' },
+      { label: 'Casework Console', href: '/dashboard/work' },
+      { label: 'Representation Cases', href: '/dashboard/inbox?type=intake' },
       { label: 'Communications', href: '/dashboard/correspondence' },
       { label: 'Assignments', href: '/dashboard/priorities' },
       { label: 'Documents', href: '/dashboard/documents' },
@@ -98,7 +98,7 @@ test.describe('Union Eyes stakeholder demo journeys', () => {
 
     const path: Array<{ label: string; href: string }> = [
       { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
-      { label: 'Submit Request', href: '/dashboard/claims/new' },
+      { label: 'Open Representation Case', href: '/dashboard/claims/new' },
       { label: 'Messages', href: '/dashboard/inbox?type=message' },
       { label: 'Documents', href: '/dashboard/documents' },
     ];
@@ -170,11 +170,16 @@ test.describe('Marketing-to-app continuity routes', () => {
 
   test('pilot request CTA remains actionable from context routes', async ({ page }) => {
     await page.goto(`/${locale}/proof?context=procurement`, { waitUntil: 'domcontentloaded' });
-    const cta = page.locator('main a[href*="pilot-request"]').first();
+    const cta = page
+      .locator('a[href*="/pilot-request"][href*="context=procurement"]')
+      .first();
     await expect(cta).toBeVisible({ timeout: 10000 });
-    await cta.click();
-    await page.waitForLoadState('domcontentloaded');
+    await Promise.all([
+      page.waitForURL(new RegExp(`/${locale}/pilot-request`)),
+      cta.evaluate((link: HTMLAnchorElement) => link.click()),
+    ]);
     await expect(page.url()).toContain(`/${locale}/pilot-request`);
+    await expect(page.url()).toContain('context=procurement');
   });
 
   test('executive and governance journeys avoid raw FSM language', async ({ page }) => {

@@ -2,6 +2,7 @@
   "name": "@nzila/ue-assistant",
   "version": "0.1.0",
   "private": true,
+  "description": "Reviewer-led representation assistant — role-aware intents, governed knowledge access, and domain-bound response policy. Augments representatives within entitlement and audit boundaries; never decides on behalf of workers.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

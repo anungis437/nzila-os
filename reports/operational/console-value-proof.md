@@ -10,16 +10,20 @@ Console creates value when it shortens decision cycles, improves allocation qual
 ## Evidence available now
 
 1. Decision and execution loop is now structured.
+
 - Decision capture, initiative linkage, and scoreback infrastructure exists.
 - Executive pages consolidate focus, runway, forecast, risk, and execution state.
 
 2. Founder attention can be redirected using explicit signals.
+
 - Focus engine surfaces context-switch/admin drag and venture-level allocation gaps.
 
 3. Capital and risk visibility improved.
+
 - Runway, receivables aging, and scenario views are integrated with operational recommendations.
 
 4. Governance-to-operations bridge is active.
+
 - Freshness and audit-linked reporting reduces silent stale-data reliance.
 
 ## KPI contract (tracked as metrics)

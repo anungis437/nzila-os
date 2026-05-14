@@ -1,3 +1,30 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ *
+ * Case study coordination surface
+ *
+ * Coordination posture: representation workflow, case management, intake choreography,
+ * and operational coordination across federation, leadership, member, and staff touchpoints.
+ *
+ * Governance posture: bylaw-aligned procedural cadence, constitutional consistency,
+ * accountability surfaces, and compliance choreography across jurisdictions and mandates.
+ *
+ * Continuity posture: institutional memory preservation, succession-aware handoff,
+ * stewardship of representational records, and procedural continuity across mandates.
+ */
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
@@ -10,9 +37,9 @@ export async function generateMetadata({
   const { locale } = await params;
 
   return {
-    title: 'Case Studies | Union Eyes',
+    title: 'Case Studies | UnionEyes',
     description:
-      'Real labour-organization outcomes using governance-safe intelligence, institutional memory, and operational coherence.',
+      'Real labour-organization outcomes using governance-safe intelligence, institutional memory, and operational coherence — a Canadian-hosted, bilingual-first continuity layer that operates alongside existing systems, non-displacing and additive, with sovereignty-conscious institutional trust for democratic infrastructure.',
     alternates: buildLocaleAlternates(locale, '/case-studies'),
   };
 }

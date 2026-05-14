@@ -16,4 +16,3 @@ Assumptions: Planning-mode cash calendar assumptions. Replace with live payroll,
 - Day 60: Obligations exceed receivables by 174,000.
 - Day 90: Cash falls below 75% of starting cash by day 90.
 - Day 90: Obligations exceed receivables by 104,000.
-

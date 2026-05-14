@@ -2,7 +2,7 @@
 title: The Anti-Fragmentation Governance Model for Modern Labour Organizations
 slug: anti-fragmentation-governance
 category: Governance Modernization
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 10 min
 format: Framework

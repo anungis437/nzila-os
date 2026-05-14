@@ -8,7 +8,7 @@ import {
 } from './helpers/role-fixtures';
 import { assertRedirectOrDenied } from './helpers/navigation-assertions';
 
-test.describe('Union Eyes hard pilot-mode gating', () => {
+test.describe('UnionEyes hard pilot-mode gating', () => {
   test.beforeAll(async ({ request }) => {
     await bootstrapE2EAuth(request);
   });

@@ -46,31 +46,31 @@ const STEPS = [
   {
     id: "overview",
     title: "System Overview",
-    description: "Understanding admin capabilities",
+    description: "Continuity-aware onboarding for inspectable operational posture",
     icon: Settings,
   },
   {
     id: "users",
     title: "User Management",
-    description: "Managing roles and permissions",
+    description: "Roles and permissions under operational stewardship",
     icon: Users,
   },
   {
     id: "security",
     title: "Security & Compliance",
-    description: "Protecting your organization",
+    description: "Sovereignty-conscious deployment with continuity safeguards",
     icon: Shield,
   },
   {
     id: "integrations",
     title: "Integrations",
-    description: "Connecting external systems",
+    description: "Federation-aware operations alongside existing systems",
     icon: Plug,
   },
   {
     id: "reporting",
     title: "Reporting",
-    description: "Using analytics effectively",
+    description: "Explainability-first reporting with chronology-linked trust",
     icon: BarChart3,
   },
 ];
@@ -127,7 +127,9 @@ export function AdminOnboardingWizard() {
           Administrator Onboarding
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
-          Welcome to your admin role. Let&apos;s configure your organization.
+          Welcome to your admin role. This continuity-aware onboarding configures your
+          organization through governance-safe deployment — additive to existing
+          institutional systems, under operational stewardship.
         </p>
       </div>
 
@@ -230,8 +232,9 @@ function OverviewStep({
       </div>
 
       <div className="space-y-3">
-        <label className="text-sm font-medium">Admin Level</label>
+        <label htmlFor="admin-level" className="text-sm font-medium">Admin Level</label>
         <select 
+          id="admin-level"
           className="w-full p-2 border rounded-md"
           value={data.adminLevel}
           onChange={(e) => setData({ ...data, adminLevel: e.target.value })}

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Continuity Planning',
   description:
-    'Prioritized organizational continuity planning workspace with transparent decision intelligence, resilience roadmap, and action tracking.',
+    'Reviewer-led institutional continuity planning workspace with explainable reasoning, resilience pathways, and traceable action chronology.',
 };
 
 export default async function ContinuityPlanningPage() {

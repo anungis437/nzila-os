@@ -28,6 +28,7 @@ Production releases: `production-release-YYYY-MM-DD.md`
 ## Release Frontmatter Schema
 
 All release notes must include:
+
 ```yaml
 platform: veridian-care
 type: staging-release | production-release

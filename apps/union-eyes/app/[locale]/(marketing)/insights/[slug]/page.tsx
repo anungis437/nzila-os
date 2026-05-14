@@ -1,3 +1,19 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { InsightArticleView } from '@/components/marketing/insight-article-view';
@@ -25,7 +41,7 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
 
   if (slug === 'doctrine') {
     return {
-      title: 'Doctrine | Insights | Union Eyes',
+      title: 'Doctrine | Insights | UnionEyes',
       description: 'Editorial standards and narrative architecture for institutional continuity insights.',
       alternates: buildLocaleAlternates(locale, '/insights/doctrine'),
     };
@@ -33,7 +49,7 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
 
   if (slug === 'methodology') {
     return {
-      title: 'Methodology | Insights | Union Eyes',
+      title: 'Methodology | Insights | UnionEyes',
       description: 'Canonical frameworks and continuity visualization for institutional modernization.',
       alternates: buildLocaleAlternates(locale, '/insights/methodology'),
     };
@@ -41,7 +57,7 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
 
   if (slug === 'resonance') {
     return {
-      title: 'Resonance | Insights | Union Eyes',
+      title: 'Resonance | Insights | UnionEyes',
       description: 'Executive emotional resonance, conference memory anchors, and continuity symbolism.',
       alternates: buildLocaleAlternates(locale, '/insights/resonance'),
     };
@@ -49,8 +65,8 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
 
   if (slug === 'categories') {
     return {
-      title: 'Categories | Insights | Union Eyes',
-      description: 'Browse the governance domains and topic pathways in the Union Eyes Insights system.',
+      title: 'Categories | Insights | UnionEyes',
+      description: 'Browse the governance domains and topic pathways in the UnionEyes Insights system.',
       alternates: buildLocaleAlternates(locale, '/insights/categories'),
     };
   }
@@ -59,14 +75,14 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
 
   if (!article) {
     return {
-      title: 'Insight Not Found | Union Eyes',
+      title: 'Insight Not Found | UnionEyes',
       description: 'The requested insight article could not be found.',
       alternates: buildLocaleAlternates(locale, `/insights/${slug}`),
     };
   }
 
   return {
-    title: `${article.title} | Insights | Union Eyes`,
+    title: `${article.title} | Insights | UnionEyes`,
     description: article.excerpt,
     alternates: buildLocaleAlternates(locale, `/insights/${slug}`),
   };

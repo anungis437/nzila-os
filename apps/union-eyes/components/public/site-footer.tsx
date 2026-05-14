@@ -46,7 +46,8 @@ const footerLinks = {
   Company: [
     { name: 'Our Story',      href: '/story' },
     { name: 'Insights',       href: '/en-CA/insights' },
-    { name: 'Case Studies',   href: '/case-studies' },
+    // Case studies hidden until pilots complete — re-enable via CASE_STUDIES_VISIBLE flag.
+    // { name: 'Case Studies',   href: '/case-studies' },
     { name: 'Pricing',        href: '/pricing' },
     { name: 'Contact Us',     href: '/contact' },
     { name: 'System Status',  href: '/en-CA/trust#system-status' },

@@ -68,11 +68,13 @@ A **GRC/ops monitoring tool** masquerading as a business operating system. It ha
 | `/console/finance/stripe` | Stripe admin | Low | Admin-only |
 
 ### Dead / Broken Surfaces
+
 - `/console` homepage: "Deployments" and "Security" tiles href to `/console` itself — circular dead links
 - `/platform` — page content unknown but nav label is vague
 - Multiple nav groups duplicate icon assignments (5× ShieldCheckIcon, 4× CpuChipIcon)
 
 ### Tech Inventory (lib/)
+
 | Module | Purpose | Reuse in BO |
 |---|---|---|
 | `server-data.ts` | Marketplace/integration data loaders | Keep |

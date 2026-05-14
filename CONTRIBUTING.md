@@ -27,6 +27,24 @@ Read [docs/repo-contract/README.md](docs/repo-contract/README.md) before contrib
 - [ ] If breaking change: MAJOR version bump + migration notes
 - [ ] If new invariant gap found: gate added before merging
 
+## AI Workflow (gstack Pilot)
+
+gstack is enabled in optional pilot mode for this repository.
+
+- You may use gstack for planning, review, QA reporting, and security analysis.
+- You must not rely on gstack to bypass repository governance requirements.
+- Maintainers decide when automation commands are allowed.
+
+Allowed during pilot:
+
+- `/office-hours`, `/autoplan`, `/plan-*`, `/review`, `/qa-only`, `/investigate`, `/cso`, `/retro`
+
+Restricted unless explicitly approved by a maintainer on the active PR or issue:
+
+- `/ship`, `/land-and-deploy`, `/canary`, `/setup-deploy`, `/setup-gbrain`, `/sync-gbrain`, `/gstack-upgrade`
+
+All PRs must still satisfy this repository's required checks and governance gates.
+
 ## Adding a New Package
 
 1. Create `packages/<name>/` with `package.json`, `tsconfig.json`, `src/index.ts`

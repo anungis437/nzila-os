@@ -19,7 +19,7 @@ import {
 
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
 
-test.describe('Union Eyes authenticated role-centric navigation', () => {
+test.describe('UnionEyes authenticated role-centric navigation', () => {
   test.beforeAll(async ({ request }) => {
     await bootstrapE2EAuth(request);
   });

@@ -40,7 +40,7 @@ COMMENT ON COLUMN applications.default_org_type IS 'Typical organization_type fo
 
 INSERT INTO applications (id, slug, display_name, description, status, default_org_type) VALUES
   -- Labour & Union Management
-  ('a0000001-0000-0000-0000-000000000001', 'union-eyes',             'Union Eyes',              'Labour union management — grievances, collective bargaining, member services',                'active',     'local'),
+  ('a0000001-0000-0000-0000-000000000001', 'union-eyes',             'UnionEyes',              'Labour union management — grievances, collective bargaining, member services',                'active',     'local'),
   ('a0000001-0000-0000-0000-000000000002', 'console',                'Console',                 'Platform administration console for NzilaOS operators',                                       'active',     'platform'),
   ('a0000001-0000-0000-0000-000000000003', 'control-plane',          'Control Plane',           'Infrastructure control plane — tenant provisioning, routing, observability',                   'active',     'platform'),
   ('a0000001-0000-0000-0000-000000000004', 'platform-admin',         'Platform Admin',          'Super-admin interface for cross-tenant operations',                                           'active',     'platform'),
@@ -83,7 +83,7 @@ CREATE INDEX IF NOT EXISTS idx_organizations_app_id ON organizations(app_id);
 
 -- ── 4. Back-fill Existing Organizations ─────────────────────────────────────
 
--- Union Eyes orgs: locals, unions, federations, districts, congress
+-- UnionEyes orgs: locals, unions, federations, districts, congress
 UPDATE organizations
 SET    app_id = 'a0000001-0000-0000-0000-000000000001'
 WHERE  organization_type IN ('local', 'union', 'federation', 'district', 'congress')

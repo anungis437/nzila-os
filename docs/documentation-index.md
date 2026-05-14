@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-05-12T12:33:26.882Z
+Generated: 2026-05-14T09:27:43.460Z
 
 Total documents indexed: 1001
 Stale documents (>90 days since repo validation): 0
@@ -828,7 +828,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/README.md](docs/categories/README.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/builders/ARCHITECTURE_MAP.md](docs/categories/stakeholders/builders/ARCHITECTURE_MAP.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/builders/COMMANDS.md](docs/categories/stakeholders/builders/COMMANDS.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/builders/CONTRIBUTING.md](docs/categories/stakeholders/builders/CONTRIBUTING.md) | categories | 2026-05-11 | current |
+| [docs/categories/stakeholders/builders/CONTRIBUTING.md](docs/categories/stakeholders/builders/CONTRIBUTING.md) | categories | 2026-05-14 | current |
 | [docs/categories/stakeholders/builders/QUICKSTART.md](docs/categories/stakeholders/builders/QUICKSTART.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/buyers/buyer-faq.md](docs/categories/stakeholders/buyers/buyer-faq.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/buyers/deployment-models.md](docs/categories/stakeholders/buyers/deployment-models.md) | categories | 2026-05-11 | current |
@@ -959,7 +959,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/tutorials/first-app.md](docs/categories/stakeholders/tutorials/first-app.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md](docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/tutorials/README.md](docs/categories/stakeholders/tutorials/README.md) | categories | 2026-05-11 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-11 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-14 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
@@ -1009,8 +1009,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-11 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-11 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-14 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-14 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
 | [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-12 | current |
 | [docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md](docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md) | platform | 2026-05-11 | current |

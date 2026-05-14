@@ -1,7 +1,6 @@
 /**
  * Phase 3 — Telemetry Enforcement (Manifest-Driven)
  */
-/* eslint-disable security/detect-non-literal-fs-filename */
 /**
  *
  * For every product whose manifest sets `telemetryRequired: true`

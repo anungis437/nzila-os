@@ -1,4 +1,20 @@
 /**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
+/**
  * /platform/operational-coherence — Wave 6 ontology collapse.
  * Canonical: /platform#priorities (operational cadence pillar).
  */
@@ -11,7 +27,7 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Redirecting | Union Eyes Platform',
+    title: 'Redirecting | UnionEyes Platform',
     description: 'This route redirects to the canonical platform section.',
     robots: {
       index: false,

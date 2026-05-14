@@ -107,8 +107,9 @@ export function EvidenceExport({
         </div>
         <CardDescription>
           Export sealed governance evidence packs for{' '}
-          <strong>{organizationName}</strong>. All exports are watermarked and
-          tamper-proofed.
+          <strong>{organizationName}</strong>. All exports preserve evidence
+          provenance and chronology-linked trust — watermarked, tamper-proofed,
+          and reviewable under operational stewardship.
         </CardDescription>
       </CardHeader>
 
@@ -211,6 +212,12 @@ export function EvidenceExport({
           </Badge>
           <Badge variant="outline" className="text-xs">
             Audit-logged
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            Evidence provenance
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            Chronology-linked trust
           </Badge>
         </div>
       </CardContent>

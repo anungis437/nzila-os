@@ -1,28 +1,28 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-11T04:58:04.972Z
+> Generated: 2026-05-14T09:31:36.949Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1649 |
-| Total Findings | 2404 |
+| Files Scanned | 1650 |
+| Total Findings | 2382 |
 | Errors | 0 |
-| Warnings | 1228 |
-| Info | 1176 |
+| Warnings | 1205 |
+| Info | 1177 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1176 |
-| stale-reference | 1068 |
+| naming-inconsistency | 1177 |
+| stale-reference | 1045 |
 | missing-package-readme | 104 |
 | stale-package-ref | 53 |
 | missing-required-doc | 3 |
 
-## stale-reference (1068)
+## stale-reference (1045)
 
 - 🟡 `ARCHITECTURE.md:92` — Possible broken link: [docs/architecture/STACK_AUTHORITY.md](./docs/architecture/STACK_AUTHORITY.md)
 - 🟡 `ARCHITECTURE.md:99` — Possible broken link: [docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md](./docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md)
@@ -33,14 +33,14 @@
 - 🟡 `ARCHITECTURE.md:115` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
 - 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:12` — Possible broken link: [docs/repo-contract/README.md](docs/repo-contract/README.md)
-- 🟡 `CONTRIBUTING.md:64` — Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
-- 🟡 `CONTRIBUTING.md:65` — Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
-- 🟡 `CONTRIBUTING.md:66` — Possible broken link: [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)
-- 🟡 `CONTRIBUTING.md:67` — Possible broken link: [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)
-- 🟡 `CONTRIBUTING.md:68` — Possible broken link: [Evidence Lifecycle Policy](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
-- 🟡 `CONTRIBUTING.md:69` — Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)
-- 🟡 `CONTRIBUTING.md:70` — Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
-- 🟡 `CONTRIBUTING.md:71` — Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
+- 🟡 `CONTRIBUTING.md:82` — Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
+- 🟡 `CONTRIBUTING.md:83` — Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
+- 🟡 `CONTRIBUTING.md:84` — Possible broken link: [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)
+- 🟡 `CONTRIBUTING.md:85` — Possible broken link: [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)
+- 🟡 `CONTRIBUTING.md:86` — Possible broken link: [Evidence Lifecycle Policy](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
+- 🟡 `CONTRIBUTING.md:87` — Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)
+- 🟡 `CONTRIBUTING.md:88` — Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
+- 🟡 `CONTRIBUTING.md:89` — Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
 - 🟡 `README.md:151` — Possible broken link: [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md)
 - 🟡 `README.md:151` — Possible broken link: [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md)
 - 🟡 `README.md:171` — Possible broken link: [docs/builders/](docs/builders/)
@@ -827,14 +827,6 @@
 - 🟡 `docs/INDEX.md:164` — Possible broken link: [platform/COVERAGE_REPORTING.md](platform/COVERAGE_REPORTING.md)
 - 🟡 `docs/INDEX.md:171` — Possible broken link: [proof-center/union-eyes-proof.md](proof-center/union-eyes-proof.md)
 - 🟡 `docs/INDEX.md:172` — Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)
-- 🟡 `docs/nzila-runtime-integrity/full-auth-role-lineage-audit.md:9` — Possible broken link: [Final Gating Philosophy](../union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)
-- 🟡 `docs/nzila-runtime-integrity/README.md:24` — Possible broken link: [Final Navigation & Monetization Access Matrix](../union-eyes/navigation-monetization-matrix/README.md)
-- 🟡 `docs/nzila-runtime-integrity/README.md:25` — Possible broken link: [Institutional Operating Infrastructure](../union-eyes/institutional-operating-infrastructure/README.md)
-- 🟡 `docs/nzila-runtime-integrity/README.md:26` — Possible broken link: [Tier 1 — Institutional Continuity Core](../union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md)
-- 🟡 `docs/nzila-runtime-integrity/README.md:27` — Possible broken link: [Tier 2 — Governance & Continuity Operations](../union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md)
-- 🟡 `docs/nzila-runtime-integrity/README.md:28` — Possible broken link: [Tier 3 — Institutional Operating Infrastructure](../union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
-- 🟡 `docs/nzila-runtime-integrity/README.md:29` — Possible broken link: [Tier 4 — Institutional Sovereignty Layer](../union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
-- 🟡 `docs/nzila-runtime-integrity/README.md:30` — Possible broken link: [Final Gating Philosophy](../union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)
 - 🟡 `docs/README.md:3` — Possible broken link: [archive/iterations](archive/iterations/)
 - 🟡 `docs/README.md:18` — Possible broken link: [Union Eyes](buyers/union-eyes-buyer-pack.md)
 - 🟡 `docs/README.md:18` — Possible broken link: [Flow](buyers/flow-buyer-pack.md)
@@ -846,21 +838,6 @@
 - 🟡 `docs/README.md:32` — Possible broken link: [Status Authority Model](platform/STATUS_AUTHORITY_MODEL.md)
 - 🟡 `docs/README.md:33` — Possible broken link: [CUPE Pilot Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
 - 🟡 `docs/README.md:38` — Possible broken link: [Golden Path Developer Guide](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md)
-- 🟡 `docs/union-eyes/runtime-convergence/fsm-pilot-module-runtime-reconvergence.md:11` — Possible broken link: [fsm-pilot-module-reconvergence.md (architecture layer)](../institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md)
-- 🟡 `docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md:35` — Possible broken link: [docs/union-eyes/clc/demo-scripts/](../clc/demo-scripts/)
-- 🟡 `docs/union-eyes/runtime-convergence/full-runtime-monetization-embodiment.md:23` — Possible broken link: [Institutional Continuity Core](../navigation-monetization-matrix/tier1-institutional-continuity-core.md)
-- 🟡 `docs/union-eyes/runtime-convergence/full-runtime-monetization-embodiment.md:24` — Possible broken link: [Governance & Continuity Operations](../navigation-monetization-matrix/tier2-governance-continuity-operations.md)
-- 🟡 `docs/union-eyes/runtime-convergence/full-runtime-monetization-embodiment.md:25` — Possible broken link: [Institutional Operating Infrastructure](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
-- 🟡 `docs/union-eyes/runtime-convergence/full-runtime-monetization-embodiment.md:26` — Possible broken link: [Institutional Sovereignty Layer](../navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
-- 🟡 `docs/union-eyes/runtime-convergence/full-sidebar-navigation-convergence.md:47` — Possible broken link: [tier3-institutional-operating-infrastructure.md](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
-- 🟡 `docs/union-eyes/runtime-convergence/README.md:9` — Possible broken link: [Final Navigation & Monetization Access Matrix](../navigation-monetization-matrix/README.md)
-- 🟡 `docs/union-eyes/runtime-convergence/README.md:10` — Possible broken link: [Institutional Operating Infrastructure](../institutional-operating-infrastructure/README.md)
-- 🟡 `docs/union-eyes/runtime-convergence/README.md:11` — Possible broken link: [Tier 1 — Institutional Continuity Core](../navigation-monetization-matrix/tier1-institutional-continuity-core.md)
-- 🟡 `docs/union-eyes/runtime-convergence/README.md:12` — Possible broken link: [Tier 2 — Governance & Continuity Operations](../navigation-monetization-matrix/tier2-governance-continuity-operations.md)
-- 🟡 `docs/union-eyes/runtime-convergence/README.md:13` — Possible broken link: [Tier 3 — Institutional Operating Infrastructure](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
-- 🟡 `docs/union-eyes/runtime-convergence/README.md:14` — Possible broken link: [Tier 4 — Institutional Sovereignty Layer](../navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
-- 🟡 `docs/union-eyes/runtime-convergence/README.md:15` — Possible broken link: [Final Gating Philosophy](../navigation-monetization-matrix/final-gating-philosophy.md)
-- 🟡 `docs/union-eyes/runtime-convergence/README.md:16` — Possible broken link: [FSM & Pilot Module Reconvergence (architecture)](../institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:279` — Possible broken link: [portfolio-5yr-projections.md](portfolio-5yr-projections.md)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:280` — Possible broken link: [flagship-unit-economics.md](flagship-unit-economics.md)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:281` — Possible broken link: [platform-revenue-models.md](platform-revenue-models.md)
@@ -1149,12 +1126,13 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 
-## naming-inconsistency (1176)
+## naming-inconsistency (1177)
 
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:233` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `AWS_ZONGA_SETUP.md:339` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `CLAUDE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `CONTRIBUTING.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:3` — "Nzila OS" should be "NzilaOS" (platform name)

@@ -1,5 +1,5 @@
 /**
- * Governance operations bindings for Union Eyes (UE Ops surface).
+ * Governance operations bindings for UnionEyes (UE Ops surface).
  *
  * Re-exports the governance operations primitives consumed by UE Ops
  * pilot posture, pilot attestations, pilot deployment verdicts, and

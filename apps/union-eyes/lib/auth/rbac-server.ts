@@ -61,7 +61,7 @@ function resolveNzilaRole(raw: string | null | undefined): UserRole | null {
 }
 
 /**
- * Map platform auth organization roles to Union Eyes app roles.
+ * Map platform auth organization roles to UnionEyes app roles.
  * These are roles stored in user_management.organization_users.role
  * and need to be normalized to UserRole equivalents.
  */

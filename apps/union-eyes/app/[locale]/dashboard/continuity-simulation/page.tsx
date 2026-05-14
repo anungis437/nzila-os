@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Continuity Simulation',
   description:
-    'Interactive workspace to explore organizational continuity fragility, simulate disruption scenarios, and compare mitigation strategies.',
+    'Reviewer-led workspace to explore institutional continuity fragility, simulate disruption scenarios, and compare continuity safeguard strategies.',
 };
 
 export default async function ContinuitySimulationPage() {

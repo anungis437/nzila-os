@@ -30,6 +30,7 @@
 ## Scenario Architecture
 
 Three scenarios are modeled across 24 months. All assume:
+
 - Primary product: Union Eyes (labour union grievance + case management)
 - Pricing: $12K CAD pilot → $4,500/month CAD ongoing (confirmed pricing framework)
 - Secondary products: Flow, ABR — contribute to upside only; not modelled in Base or Conservative
@@ -52,6 +53,7 @@ Three scenarios are modeled across 24 months. All assume:
 | Survival probability (no new capital) | Low — sub-12 months runway without raise | `scenario` |
 
 **Key risks**:
+
 - Union procurement cycles average 6–12 months; pilots don't compress this
 - Executive sponsor changes within the union during pilot
 - Platform maturity gaps (SOC 2, pen test) block IT approval
@@ -90,6 +92,7 @@ Three scenarios are modeled across 24 months. All assume:
 | Q4 2027 (M22–M24) | $180K–$230K | Flow traction + possible ABR pilot | `scenario` |
 
 **Decision gates**:
+
 - M6: If 0 conversions → revert to Conservative scenario; freeze Flow investment
 - M12: If ARR < $80K → fundraise immediately; do not proceed to Flow investment
 - M18: If ARR > $150K → begin structured fundraise at Series Seed terms

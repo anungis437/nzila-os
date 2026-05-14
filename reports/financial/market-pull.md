@@ -23,4 +23,3 @@
 | mobility-client-portal | 12 | no pull yet | inbound=0, repeat_demos=0, referrals=0, expansion_asks=0, avg_cycle_days=120 |
 
 Best product pull signal: union-eyes (strong pull)
-

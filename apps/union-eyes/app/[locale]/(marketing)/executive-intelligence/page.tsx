@@ -1,4 +1,20 @@
 /**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
+/**
  * Executive Intelligence — Strategic summaries & leadership continuity
  *
  * Exposes executive-grade operational clarity.
@@ -14,7 +30,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Executive Intelligence | Union Eyes',
+    title: 'Executive Intelligence | UnionEyes',
     description:
       'Calm, executive-grade strategic summaries and leadership continuity intelligence for union executives. Operational clarity without technical complexity.',
     alternates: buildLocaleAlternates(locale, '/executive-intelligence'),
@@ -59,7 +75,7 @@ const principles = [
   { label: 'Strategic',         desc: 'Focused on organizational direction and continuity' },
   { label: 'Explainable',       desc: 'Every summary traces back to evidence' },
   { label: 'Governance-safe',   desc: 'Full human oversight at all decision points' },
-  { label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },
+  { label: 'Labour-safe',       desc: 'Zero individual monitoring or worker conduct grading' },
   { label: 'Enterprise-grade',  desc: 'Built for institutional trust, not startup dashboards' },
 ];
 
@@ -82,7 +98,7 @@ export default function ExecutiveIntelligencePage() {
             href="/pilot-request"
             className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         }
       />
@@ -150,7 +166,7 @@ export default function ExecutiveIntelligencePage() {
                   'Communicate institutional health to boards with confidence',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
-                    <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5" />
                     {item}
                   </li>
                 ))}
@@ -179,13 +195,13 @@ export default function ExecutiveIntelligencePage() {
             Ready to lead with institutional clarity?
           </h2>
           <p className="text-white/70 mb-8">
-            Request a demo to see Executive Intelligence in action for your organization.
+            Request an institutional briefing to see Executive Intelligence in action for your organization.
           </p>
           <Link
             href="/pilot-request"
             className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
           >
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

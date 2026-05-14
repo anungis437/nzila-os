@@ -5,6 +5,7 @@
  * Responsive and optimized for mobile/tablet/desktop.
  */
 import ScrollReveal from '@/components/public/scroll-reveal';
+import Image from 'next/image';
 
 interface HeroSectionProps {
   /**
@@ -77,30 +78,32 @@ export function MarketingHeroSection({
   contextNote,
 }: HeroSectionProps) {
   const isDarkTone = tone === 'dark';
+  const washOpacityClass = overlayOpacity >= 0.75
+    ? 'opacity-[0.75]'
+    : overlayOpacity >= 0.65
+      ? 'opacity-[0.65]'
+      : overlayOpacity >= 0.55
+        ? 'opacity-[0.55]'
+        : 'opacity-[0.45]';
 
   return (
     <header
       className={`relative overflow-hidden pt-24 pb-20 sm:pt-28 sm:pb-24 ${className}`}
-      style={{
-        backgroundImage: `url(${imageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center top',
-      }}
     >
-      {/* Primary atmospheric overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(180deg, rgba(14,31,47,0.78) 0%, rgba(14,31,47,0.72) 46%, rgba(14,31,47,0.84) 100%)',
-        }}
+      <Image
+        src={imageUrl}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="pointer-events-none object-cover object-top"
       />
 
+      {/* Primary atmospheric overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(14,31,47,0.78)_0%,rgba(14,31,47,0.72)_46%,rgba(14,31,47,0.84)_100%)]" />
+
       {/* Warm institutional wash */}
-      <div
-        className="absolute inset-0"
-        style={{ opacity: overlayOpacity }}
-      />
+      <div className={`pointer-events-none absolute inset-0 bg-[#12324a] ${washOpacityClass}`} />
 
       {/* Content */}
       <div className="absolute inset-x-0 bottom-0 px-4 sm:px-6 lg:px-8 pb-6 pointer-events-none" aria-hidden>
@@ -154,25 +157,6 @@ export function MarketingHeroSection({
                 {description}
               </p>
             </ScrollReveal>
-
-            {contextNote ? (
-              <ScrollReveal delay={0.24} duration={0.9} distance={14} tempo={revealTempo}>
-                <div
-                  className={`mx-auto mb-7 max-w-3xl rounded-xl border px-4 py-3 text-left ${
-                    isDarkTone
-                      ? 'border-[#12324a]/20 bg-[#12324a]/5 text-[#12324a]'
-                      : 'border-white/30 bg-white/10 text-white'
-                  }`}
-                >
-                  {contextKicker ? (
-                    <p className={`mb-1 text-[11px] font-semibold tracking-[0.16em] uppercase ${isDarkTone ? 'text-[#12324a]/65' : 'text-white/75'}`}>
-                      {contextKicker}
-                    </p>
-                  ) : null}
-                  <p className="text-sm leading-relaxed">{contextNote}</p>
-                </div>
-              </ScrollReveal>
-            ) : null}
 
             {/* CTA / Additional Content */}
             {cta && (

@@ -1,5 +1,5 @@
 /**
- * Union Eyes ↔ @nzila/ue-cognition adapter.
+ * UnionEyes ↔ @nzila/ue-cognition adapter.
  *
  * Translates UE database rows (grievances, claims, stewards) into the
  * cognition input shapes WITHOUT leaking drizzle/postgres-js types into

@@ -1,4 +1,20 @@
 /**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
+/**
  * Institutional Continuity — Core platform capability page
  *
  * Positions UE as the institutional continuity intelligence platform.
@@ -18,15 +34,15 @@ import {
   institutionalRolloutSimulationFlow,
   operationalMaturityPathway,
   organizationalTransformationPathway,
-} from '@/lib/operational-legitimacy';
+} from '@/lib/institutional-legitimacy';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Institutional Continuity | Union Eyes',
+    title: 'Institutional Continuity | UnionEyes',
     description:
-      'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. Union Eyes Institutional Continuity platform.',
+      'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity platform.',
     alternates: buildLocaleAlternates(locale, '/institutional-continuity'),
   };
 }
@@ -92,14 +108,14 @@ export default async function InstitutionalContinuityPage({
           </span>
         }
         heading={<>Preserve what your organization<br />knows. Protect what it can do.</>}
-        description="Institutional Continuity is the Union Eyes capability that preserves organizational memory, strengthens resilience through transitions, and ensures governance structures survive beyond any individual leader."
+        description="Institutional Continuity is the UnionEyes capability that preserves organizational memory, strengthens resilience through transitions, and ensures governance structures survive beyond any individual leader."
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
             >
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link
               href={`/${locale}/governance`}
@@ -145,8 +161,8 @@ export default async function InstitutionalContinuityPage({
               that knowledge walks out with them.
             </p>
             <p className="text-gray-700 text-lg leading-relaxed">
-              Union Eyes Institutional Continuity transforms fragmented institutional knowledge
-              into governed, accessible, and explainable organizational intelligence — so your
+              UnionEyes Institutional Continuity transforms fragmented institutional knowledge
+              into governed, accessible, and explainable continuity-aware structures — so your
               organization is stronger through every leadership transition.
             </p>
           </div>
@@ -161,25 +177,28 @@ export default async function InstitutionalContinuityPage({
             </h2>
           </div>
           <div className="space-y-0">
-            {journeySteps.map((step, i) => (
-              <div
-                key={step.step}
-                className={`flex gap-6 py-6 ${i < journeySteps.length - 1 ? 'border-b border-gray-100' : ''}`}
-              >
-                <div className="flex-shrink-0 w-12">
-                  <span className="text-xs font-bold text-electric tracking-wider">{step.step}</span>
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-navy mb-1">{step.label}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{step.desc}</p>
-                </div>
-                {i < journeySteps.length - 1 && (
-                  <div className="flex-shrink-0 self-end pb-1">
-                    <ArrowRight className="h-4 w-4 text-gray-300" />
+            {journeySteps.map((step, i) => {
+              const hasNext = i < journeySteps.length - 1;
+              return (
+                <div
+                  key={step.step}
+                  className={`flex gap-6 py-6 ${hasNext ? 'border-b border-gray-100' : ''}`}
+                >
+                  <div className="w-12">
+                    <span className="text-xs font-bold text-electric tracking-wider">{step.step}</span>
                   </div>
-                )}
-              </div>
-            ))}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base font-bold text-navy mb-1">{step.label}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{step.desc}</p>
+                  </div>
+                  {hasNext ? (
+                    <div className="self-end pb-1">
+                      <ArrowRight className="h-4 w-4 text-gray-300" />
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -215,7 +234,7 @@ export default async function InstitutionalContinuityPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-3 gap-6 text-center">
             {[
-              { label: 'Labour-safe by design',     sub: 'Zero worker scoring or surveillance' },
+              { label: 'Labour-safe by design',     sub: 'Zero individual conduct grading or monitoring' },
               { label: 'Human oversight required',  sub: 'All intelligence is human-reviewed' },
               { label: 'Explainable intelligence',  sub: 'Every insight is evidence-traceable' },
             ].map((item) => (
@@ -234,7 +253,7 @@ export default async function InstitutionalContinuityPage({
       <section className="py-16 bg-gray-50 border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-3xl font-bold text-navy mb-3">Canonical deployment pathway for governed adoption</h2>
           <p className="text-gray-600 max-w-3xl mb-8">
-            Union Eyes rollout sequencing is intentionally calm, reviewable, and operationally realistic for institutional modernization environments.
+            UnionEyes rollout sequencing is intentionally calm, reviewable, and operationally realistic for institutional modernization environments.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-3">
             {institutionalRolloutPathway.map((stage, idx) => (
@@ -281,7 +300,7 @@ export default async function InstitutionalContinuityPage({
 
             <div>              <h3 className="text-2xl font-bold text-navy mb-3">Stabilizing institutional evolution sequence</h3>
               <p className="text-sm text-gray-600 mb-6">
-                Union Eyes focuses on coherent progression from fragmentation risk to continuity-centered resilience.
+                UnionEyes focuses on coherent progression from fragmentation risk to continuity-centered resilience.
               </p>
               <div className="space-y-3">
                 {organizationalTransformationPathway.map((stage, idx) => (
@@ -352,7 +371,7 @@ export default async function InstitutionalContinuityPage({
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8">
-            <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational transformation as a gradual pathway</h2>
+            <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational continuity as a gradual, governance-safe pathway</h2>
               <div className="space-y-2">
                 {institutionalBeforeAfterMap.map((stage, index) => (
                   <article key={stage} className="p-3 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-between">
@@ -387,7 +406,7 @@ export default async function InstitutionalContinuityPage({
             Ready to strengthen institutional continuity?
           </h2>
           <p className="text-white/70 mb-8">
-            See how Union Eyes preserves organizational memory and builds resilience
+            See how UnionEyes preserves organizational memory and builds resilience
             through your leadership transitions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -395,7 +414,7 @@ export default async function InstitutionalContinuityPage({
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link
               href={`/${locale}/platform/organizational-memory`}

@@ -841,7 +841,7 @@ export const objectionHandlingFramework = [
     concern: 'Is this AI surveillance?',
     handling: 'Labor-safe explainability',
     response:
-      'Union Eyes does not score or monitor workers. Intelligence remains institutional, explainable, and human-governed.',
+      'UnionEyes does not score or monitor workers. Intelligence remains institutional, explainable, and human-governed.',
   },
   {
     concern: 'Will this replace governance?',

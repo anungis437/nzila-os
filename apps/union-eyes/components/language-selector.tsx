@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import { locales } from '@/i18n';
-import { localeNames } from '@/i18n/config';
+import { localeNames, visibleLocales } from '@/i18n/config';
 import {
   Select,
   SelectContent,
@@ -28,11 +28,11 @@ export function LanguageSelector() {
 
   return (
     <Select value={locale} onValueChange={handleLocaleChange}>
-      <SelectTrigger className="w-[140px]">
+      <SelectTrigger className="w-35">
         <SelectValue placeholder={t('selectLanguage')} />
       </SelectTrigger>
       <SelectContent>
-        {locales.map((loc) => (
+        {visibleLocales.map((loc) => (
           <SelectItem key={loc} value={loc}>
             {localeNames[loc]}
           </SelectItem>

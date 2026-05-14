@@ -34,8 +34,9 @@
 ### Packages Present (130+)
 
 Key groupings confirmed physically:
+
 - **Platform core**: platform-auth, platform-billing, platform-revenue, platform-contracts, platform-evidence-pack, platform-governance, platform-policy-engine, platform-observability, platform-compliance-snapshots, platform-proof, evidence, db, os-core, org, audit
-- **Product-specific**: zonga-* (12 packages), agri-* (10 packages), commerce-* (9 packages), mobility-* (6 packages), ue-assistant, union-claims-financial, cfo-core, cfo-intelligence
+- **Product-specific**: zonga-*(12 packages), agri-* (10 packages), commerce-*(9 packages), mobility-* (6 packages), ue-assistant, union-claims-financial, cfo-core, cfo-intelligence
 - **Infra/tooling**: otel-core, security, secrets, config, events, webhooks, analytics, observability, blob, ingestion-core, data-lifecycle
 - **Thin wrappers / unclear value**: ai-control, ai-registry (very thin), chatops-slack, chatops-teams, crm-hubspot (likely thin), platform-rfp-generator, platform-rum
 
@@ -118,6 +119,7 @@ Surfaces scanned: README.md, ARCHITECTURE.md, docs/platform/what-is-nzila.md, do
 ### 2.6 Dead Links / Dead Docs
 
 Investigation found all internal links in docs/README.md reference files that physically exist. No dead-link P0s detected. Minor stale reference notes:
+
 - `docs/plans/studio-maturity-10-of-10.md` — aspirational plan doc, clearly labeled, low risk
 - `docs/archive/` — clearly labeled archive, low risk
 - `docs/backlog/` — clearly labeled backlog, low risk
@@ -200,11 +202,13 @@ No lorem ipsum or fake dashboard references found in top-level surfaces.
 ## 3. Priority Classification Summary
 
 ### P0 — Immediate Blockers (Fixed in this pass)
+
 - ~~Illegal claim: "production-deployed" for pilot apps in what-is-nzila.md~~ ✅ FIXED
 - ~~Wrong GA gate count (30 vs 23) in what-is-nzila.md~~ ✅ FIXED
 - ~~Wrong contract test count (380+ vs 1,900+) in what-is-nzila.md~~ ✅ FIXED
 
 ### P1 — Must Fix Now
+
 - [ ] Product catalog missing Phase 3 fields (value_prop, id, evidence_status, etc.)
 - [ ] No standalone revenue product brief for Union Eyes
 - [ ] No standalone revenue product brief for Flow  
@@ -213,12 +217,14 @@ No lorem ipsum or fake dashboard references found in top-level surfaces.
 - [ ] No docs entrypoint for "Revenue Products" audience
 
 ### P2 — Valuable Next
+
 - [ ] Claim verification tooling: add automated CI scan for docs changes
 - [ ] Package ownership audit (chatops-*, ai-control, platform-rfp-generator)
 - [ ] CFO pilot path documentation
 - [ ] Zonga commercial hypothesis document
 
 ### P3 — Later
+
 - [ ] Orchestrator-api product story or archive decision
 - [ ] Revenue runway modeling
 - [ ] NACP Exams strategic classification

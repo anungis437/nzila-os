@@ -1,4 +1,4 @@
-# Union Eyes — Phase A One-Shot Environment Provisioning
+# UnionEyes — Phase A One-Shot Environment Provisioning
 #
 # Provisions the four isolated environments (staging | demo | pilot | prod)
 # defined in apps/union-eyes/infra/environments/union-eyes-env.bicep.

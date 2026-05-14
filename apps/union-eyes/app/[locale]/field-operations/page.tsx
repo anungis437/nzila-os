@@ -1,5 +1,5 @@
 /**
- * Field Operations — Union Eyes pilot operator summary.
+ * Field Operations — UnionEyes pilot operator summary.
  *
  * Calm, sparse, single-screen view of the pilot operator's cadence
  * obligations, current continuity posture, and onboarding pacing.
@@ -16,7 +16,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Field Operations — Union Eyes',
+  title: 'Field Operations — UnionEyes',
   description:
     'Pilot operator cadence, continuity posture, and onboarding pacing.',
 };

@@ -18,7 +18,7 @@ import { runFullInstitutionalCognition } from '@/lib/institutional-operating-int
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Longitudinal Institutional Cognition · Union Eyes',
+  title: 'Longitudinal Institutional Cognition · UnionEyes',
   description:
     'Calm, domain-grouped institutional storytelling: governance evolution, continuity maturity, resilience progression, organizational adaptation.',
 };
@@ -57,7 +57,7 @@ export default async function LongitudinalCognitionPage() {
             Institutional Operating Intelligence · Longitudinal Surface
           </p>
           <h1 className="text-3xl font-semibold text-slate-900">
-            Institutional Cognition Storybook
+            Institutional Chronology Storybook
           </h1>
           <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
             A calm, organizationally scoped projection of how the institution&apos;s governance,

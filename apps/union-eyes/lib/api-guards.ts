@@ -1,6 +1,6 @@
 // cspell:words nzila
 /**
- * Union Eyes app API guards — authentication + audited database access.
+ * UnionEyes app API guards — authentication + audited database access.
  *
  * Provides the standard withAudit / createAuditedScopedDb wrappers
  * so case-management API routes use audited, Org-isolated writes.

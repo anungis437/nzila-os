@@ -24,6 +24,7 @@
 ### Repo Credibility: 8/10
 
 **What earns the 8:**
+
 - 17 apps, 130+ shared packages — real code, not stubs
 - 1,973 contract tests enforced in CI — rare depth at this stage
 - 23/23 GA gates passing — every health gate green
@@ -32,6 +33,7 @@
 - Zero illegal claims in public-facing docs (all P0s fixed this session)
 
 **What holds it below 10:**
+
 - Flow and CFO docs_entrypoint still points to portfolio-matrix.md, not dedicated READMEs
 - Some apps (mobility, nacp-exams, trade) have near-zero test coverage and low code maturity
 - `orchestrator-api` and `platform-admin` are scaffold-only — should be archived or moved to `research/`
@@ -43,6 +45,7 @@
 ### Commercial Credibility: 4/10
 
 **What earns the 4:**
+
 - CUPE pilot live and generating operational evidence — this is real
 - Full pilot runbook, readiness checklist, RBAC matrix, go/no-go review — professional buyer artifact set
 - Procurement pack exists and is buyer-ready
@@ -50,6 +53,7 @@
 - Revenue product profiles created this session (union-eyes, flow) — structured sales narrative exists
 
 **What holds it to 4:**
+
 - Zero paying customers — no contracted SaaS agreement yet
 - No documented pilot outcomes (cases managed, time-to-resolution, operator metrics)
 - Flow has no pilot evidence at all — code is ahead of commercial validation
@@ -62,6 +66,7 @@
 ### Governance Credibility: 9/10
 
 **What earns the 9:**
+
 - 1,973 contract tests across 23 test suites
 - 23/23 GA gates — all green, enforced in CI
 - Truth authority validator prevents illegal claim promotion
@@ -72,6 +77,7 @@
 - Procurement pack with governance evidence artifacts
 
 **What holds it below 10:**
+
 - Evidence status is "partial" for most pilot-tier products — no independently verified outcomes yet
 - No third-party security audit on record
 
@@ -82,6 +88,7 @@
 ### Investor Narrative Readiness: 6/10
 
 **What earns the 6:**
+
 - Investor brief created this session — honest, claim-safe, clear model explanation
 - Two "Sell Now" products with credible value props and evidence anchors
 - Shared-engine economics clearly articulated
@@ -89,6 +96,7 @@
 - Governance moat is real and differentiating
 
 **What holds it to 6:**
+
 - No revenue — pre-commercial platform
 - No pilot outcomes documented — CUPE is live but metrics not captured
 - CFO and Zonga have no commercial timeline
@@ -101,6 +109,7 @@
 ### Technical Leadership Discipline: 8/10
 
 **What earns the 8:**
+
 - Turbo monorepo pipeline with shared package architecture — sophisticated
 - Shared auth (`@nzila/platform-auth`), billing (`@nzila/platform-revenue`), evidence (`@nzila/evidence`) are foundational
 - Azure Container Apps deployment — modern, operationally clean
@@ -110,6 +119,7 @@
 - TypeScript-first across all apps and packages
 
 **What holds it below 10:**
+
 - Some packages have mixed test coverage
 - Django sidecars (union-eyes, agrimo) introduce Python maintenance burden
 - No documented API versioning strategy
@@ -139,18 +149,21 @@
 ## Sell/Build/Hold/Cut Matrix
 
 ### SELL NOW
+
 | Product | Rationale |
 |---------|-----------|
 | **UnionEyes** | CUPE pilot live, full governance docs, purpose-built moat, no credible competitor |
 | **Flow** | Full ops chain implemented, ICP defined, pilot path ready, Africa SMB segment underserved |
 
 ### BUILD NEXT
+
 | Product | Rationale |
 |---------|-----------|
 | **CFO** | Real integrations (QBO, Plaid), finance intelligence is high-value, but pilot path needs documentation |
 | **Partners** | Channel partner monetization multiplier; needs one pilot partner to validate |
 
 ### HOLD
+
 | Product | Rationale |
 |---------|-----------|
 | **Zonga** | Africa-first music platform is a compelling vision but needs market validation first |
@@ -161,6 +174,7 @@
 | **NACP Exams** | Assessment platform; hold until institutional partner engaged |
 
 ### CUT / ARCHIVE
+
 | Product | Rationale |
 |---------|-----------|
 | **platform-admin** | Scaffold-only, no active use case, creates maintenance surface with no return |
@@ -171,12 +185,14 @@
 ## 90-Day Execution Roadmap
 
 ### Month 1: Commercial Conversion
+
 - [ ] Execute CUPE pilot contract conversion — get signed SaaS agreement
 - [ ] Document CUPE pilot outcomes: cases managed, time-to-resolution, rep feedback
 - [ ] Identify 3 Flow operator pilot targets (ShopMoiCa-type)
 - [ ] Brief 2 union federation contacts on UnionEyes
 
 ### Month 2: Evidence and Expansion
+
 - [ ] Collect and publish first CUPE pilot outcome metrics
 - [ ] Run at least 1 Flow operator pilot
 - [ ] Start CFO pilot documentation (mirror union-eyes pilot playbook)
@@ -184,6 +200,7 @@
 - [ ] Update apps/web with product pages for union-eyes and flow
 
 ### Month 3: Revenue and Narrative
+
 - [ ] First paying customer — either UnionEyes contracted or Flow operator signed
 - [ ] Publish outcome metrics publicly (on web app or investor brief)
 - [ ] Define CFO commercial path and first pilot target

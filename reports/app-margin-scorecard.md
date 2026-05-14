@@ -24,4 +24,3 @@
 - Zonga bandwidth and artist payout exposure under high-scale scenario (~$9800/month).
 - Internal app overhead allocation drift above budget guardrails (~$6200/month).
 - Underpriced pilot implementation work (~$5300/month).
-

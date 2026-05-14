@@ -8,4 +8,3 @@
 | D — Founder unavailable 30 days | 6.8 months | 33.9% | Only replacement or directly revenue-linked hiring. | No major decision change |
 | E — Raise $500K | 10.7 months | 73.1% | Advance 1 focused hire into the strongest funded wedge. | No major decision change |
 | F — Lose largest prospect | 6.8 months | 51.1% | Freeze new hiring and protect current runway. | CFO: FUND NOW -> FUND NOW |
-

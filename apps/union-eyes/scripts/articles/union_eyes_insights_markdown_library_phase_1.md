@@ -4,7 +4,7 @@
 title: "The Continuity Crisis in Canadian Labour: What Happens When Institutional Knowledge Walks Out the Door"
 slug: continuity-crisis
 category: Institutional Continuity
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Executive Brief
@@ -198,7 +198,7 @@ It is strategic governance infrastructure.
 title: "What Labour-Safe AI Actually Means: Beyond the Buzzword"
 slug: labour-safe-ai-defined
 category: Labour-Safe AI
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 7 min
 format: Policy Note
@@ -371,7 +371,7 @@ The future of organizational intelligence in labour environments will depend les
 title: "Explainable Governance Intelligence: Why Because the AI Said So Is Never Acceptable"
 slug: explainable-governance
 category: Governance Modernization
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Executive Brief
@@ -525,7 +525,7 @@ Because institutional trust cannot survive opaque operational intelligence.
 title: "From Tribal Knowledge to Institutional Memory: A Continuity Framework for Union Locals"
 slug: tribal-to-institutional-memory
 category: Organizational Memory
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 9 min
 format: Framework
@@ -681,7 +681,7 @@ The transition from tribal knowledge to institutional memory is one of the most 
 title: Governance Resilience Checklist for Leadership Transitions
 slug: governance-resilience-checklist
 category: Governance Resilience
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 6 min
 format: Checklist
@@ -812,7 +812,7 @@ Organizations that invest in transition resilience today will be significantly b
 title: Early Warning Signals of Operational Fragility in Labour Organizations
 slug: operational-fragility-signals
 category: Operational Fragility
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Executive Brief
@@ -960,7 +960,7 @@ Continuity resilience begins long before disruption occurs.
 title: An Explainable Intelligence Procurement Standard for Labour Organizations
 slug: explainable-intelligence-procurement-standard
 category: Explainable Organizational Intelligence
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 9 min
 format: Framework
@@ -1112,7 +1112,7 @@ Explainability must become a core procurement standard for labour organizations 
 title: Board Succession Risk Scoring Without Surveillance Tradeoffs
 slug: board-succession-risk-scoring
 category: Governance Resilience
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 7 min
 format: Policy Note
@@ -1259,7 +1259,7 @@ The future of continuity modernization depends on balancing resilience with orga
 title: Designing Continuity Protocols That Survive Leadership Turnover
 slug: designing-continuity-protocols
 category: Institutional Continuity
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Guide
@@ -1399,7 +1399,7 @@ Organizations that operationalize continuity effectively become:
 title: How to Operationalize Explainable Intelligence in Policy Workflows
 slug: explainable-intelligence-policy-workflows
 category: Explainable Organizational Intelligence
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Guide
@@ -1531,7 +1531,7 @@ Organizations that operationalize explainable intelligence effectively will be s
 title: "Governance Modernization Without Surveillance: A New Model for Labour Organizations"
 slug: governance-modernization-without-surveillance
 category: Labour-Safe AI
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Executive Brief
@@ -1678,7 +1678,7 @@ Labour organizations can modernize responsibly by prioritizing:
 title: "Operational Memory Debt: The Hidden Cost of Fragmented Institutional Knowledge"
 slug: operational-memory-debt
 category: Operational Fragility
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 9 min
 format: Framework
@@ -1811,7 +1811,7 @@ Organizations that actively reduce continuity fragmentation become:
 title: Explainability Is Not a Feature. It Is a Governance Requirement.
 slug: explainability-as-governance
 category: Explainable Organizational Intelligence
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 7 min
 format: Policy Note
@@ -1930,7 +1930,7 @@ Inside governance environments, it is foundational operational infrastructure re
 title: The Anti-Fragmentation Governance Model for Modern Labour Organizations
 slug: anti-fragmentation-governance
 category: Governance Modernization
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 10 min
 format: Framework
@@ -2052,7 +2052,7 @@ Organizations that treat fragmentation as a measurable governance risk can moder
 title: Why Most Organizations Wait Too Long to Invest in Continuity Infrastructure
 slug: continuity-before-crisis
 category: Institutional Continuity
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 9 min
 format: Executive Brief
@@ -2171,7 +2171,7 @@ Organizations that invest before crisis conditions emerge avoid expensive emerge
 title: The Operational Cost of Governance Fragmentation in Distributed Labour Organizations
 slug: governance-fragmentation-costs
 category: Operational Fragility
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Policy Note
@@ -2286,7 +2286,7 @@ Organizations that quantify and reduce fragmentation costs improve resilience, s
 title: What Institutional Intelligence Means - And What It Does Not
 slug: institutional-intelligence-defined
 category: Explainable Organizational Intelligence
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Explainer
@@ -2403,7 +2403,7 @@ When defined precisely and governed well, it becomes a continuity and resilience
 title: Leadership Turnover Is Not the Problem. Continuity Fragility Is.
 slug: leadership-turnover-fragility
 category: Governance Resilience
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 7 min
 format: Executive Brief
@@ -2517,7 +2517,7 @@ Organizations that strengthen transition architecture reduce fragility, preserve
 title: "Operational Trust: The Missing Layer in Most Modernization Programs"
 slug: operational-trust-in-modernization
 category: Governance Modernization
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Strategy Note
@@ -2638,7 +2638,7 @@ Programs that design for trust from day one deliver modernization that is more r
 title: Institutional Continuity Is Infrastructure — Not Administrative Overhead
 slug: continuity-as-infrastructure
 category: Institutional Continuity
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Executive Brief
@@ -2710,7 +2710,7 @@ Institutional continuity is foundational infrastructure for long-term organizati
 title: Questions Labour Organizations Should Ask Before Buying Operational Intelligence Platforms
 slug: evaluating-ai-vendors
 category: Explainable Organizational Intelligence
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 9 min
 format: Guide
@@ -2782,7 +2782,7 @@ Operational intelligence procurement should strengthen institutional trust, not 
 title: Governance Must Always Outrank Automation
 slug: governance-over-automation
 category: Labour-Safe AI
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 7 min
 format: Policy Note
@@ -2852,7 +2852,7 @@ It should never outrank it.
 title: Governance-Safe Procurement in the Age of Operational Intelligence
 slug: governance-safe-procurement
 category: Governance Modernization
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Framework
@@ -2921,7 +2921,7 @@ Governance-safe procurement is becoming essential operational infrastructure for
 title: Why Organizational Coherence Matters More Than Digital Transformation
 slug: organizational-coherence-defined
 category: Governance Modernization
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Executive Brief

@@ -72,4 +72,3 @@ Generated from governance/portfolio/product-catalog.json plus governance/capital
 - Low churn/execution risk profile=66.7 support points.
 - Confidence penalty subtracts 6.7 points due to estimate-heavy or unavailable data.
 - Engineering execution signal 100 supports current allocation.
-

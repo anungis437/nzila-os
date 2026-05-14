@@ -8,4 +8,3 @@
 | cold_outreach | Cold outreach | 9 | $38,000 | $0 | $1,478 |
 
 Highest ROI lane: warm_intros
-

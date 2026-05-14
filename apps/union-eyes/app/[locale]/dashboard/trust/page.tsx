@@ -27,9 +27,9 @@ import { Shield, Lock, GitBranch, Scale, FileText, Download } from 'lucide-react
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-  title: 'Trust Dashboard | UnionEyes',
+  title: 'Trust & Sovereignty | UnionEyes',
   description:
-    'Verify UnionEyes trust infrastructure: immutability enforcement, RLS isolation, FSM validation, and governance transparency.',
+    'Transparency, verification, and institutional accountability for members.',
 };
 
 export default async function TrustPage() {
