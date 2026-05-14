@@ -170,11 +170,16 @@ test.describe('Marketing-to-app continuity routes', () => {
 
   test('pilot request CTA remains actionable from context routes', async ({ page }) => {
     await page.goto(`/${locale}/proof?context=procurement`, { waitUntil: 'domcontentloaded' });
-    const cta = page.locator('main a[href*="pilot-request"]').first();
+    const cta = page
+      .locator('a[href*="/pilot-request"][href*="context=procurement"]')
+      .first();
     await expect(cta).toBeVisible({ timeout: 10000 });
-    await cta.click();
-    await page.waitForLoadState('domcontentloaded');
+    await Promise.all([
+      page.waitForURL(new RegExp(`/${locale}/pilot-request`)),
+      cta.click(),
+    ]);
     await expect(page.url()).toContain(`/${locale}/pilot-request`);
+    await expect(page.url()).toContain('context=procurement');
   });
 
   test('executive and governance journeys avoid raw FSM language', async ({ page }) => {
