@@ -176,7 +176,7 @@ test.describe('Marketing-to-app continuity routes', () => {
     await expect(cta).toBeVisible({ timeout: 10000 });
     await Promise.all([
       page.waitForURL(new RegExp(`/${locale}/pilot-request`)),
-      cta.click(),
+      cta.evaluate((link: HTMLAnchorElement) => link.click()),
     ]);
     await expect(page.url()).toContain(`/${locale}/pilot-request`);
     await expect(page.url()).toContain('context=procurement');
