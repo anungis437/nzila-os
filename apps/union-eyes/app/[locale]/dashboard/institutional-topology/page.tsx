@@ -146,6 +146,35 @@ export default async function InstitutionalTopologyPage() {
                 </li>
               ))}
             </ol>
+            {cohortCount > 0 && (
+              <div className="mt-5 border-t border-slate-100 pt-4">
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Affiliation cohorts
+                </h3>
+                <p className="mb-3 text-xs text-slate-500">
+                  Cohorts are grouped affiliations preserved in the read
+                  substrate. Member counts are integers; no ranking or
+                  weighting is applied.
+                </p>
+                <ol className="divide-y divide-slate-100">
+                  {view.affiliationRepresentation.cohorts.map((cohort, idx) => (
+                    <li
+                      key={`${cohort.organizationId}-${idx}`}
+                      className="py-2"
+                    >
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                        <span className="text-sm font-medium text-slate-900">
+                          {dash(cohort.organizationId)}
+                        </span>
+                        <span className="font-mono text-xs text-slate-500">
+                          {cohort.memberEntityIds.length} preserved member(s)
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </>
         )}
       </section>
