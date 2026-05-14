@@ -273,9 +273,26 @@ export default async function InstitutionalTopologyPage() {
                     {chain.chain.length} preserved hop(s)
                   </span>
                 </div>
-                <p className="mt-1 break-all text-xs text-slate-500">
-                  Procedural ancestry: {chain.chain.join(' → ')}
-                </p>
+                {chain.chain.length > 0 && (
+                  <ol className="mt-2 flex flex-wrap items-center gap-1 text-xs text-slate-600">
+                    {chain.chain.map((step, stepIdx) => (
+                      <li
+                        key={`${step}-${stepIdx}`}
+                        className="flex items-center gap-1"
+                      >
+                        <span className="inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[11px]">
+                          <span className="text-slate-400">{stepIdx + 1}.</span>
+                          <span className="break-all text-slate-700">{step}</span>
+                        </span>
+                        {stepIdx < chain.chain.length - 1 && (
+                          <span aria-hidden className="text-slate-400">
+                            →
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                )}
               </li>
             ))}
           </ol>
@@ -297,28 +314,48 @@ export default async function InstitutionalTopologyPage() {
           </div>
         ) : (
           <ol className="divide-y divide-slate-100">
-            {view.continuityTopology.map((entry, idx) => (
-              <li
-                key={
-                  entry.decisionId ??
-                  entry.edgeId ??
-                  `${entry.entityRef}-${entry.occurredAt}-${idx}`
-                }
-                className="py-3"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-                  <span className="text-sm font-medium text-slate-900">
-                    {dash(entry.summary)}
-                  </span>
-                  <span className="font-mono text-xs text-slate-500">
-                    {fmt(entry.occurredAt)}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  Kind: {entry.kind} · Entity: {entry.entityRef}
-                </p>
-              </li>
-            ))}
+            {view.continuityTopology.map((entry, idx) => {
+              const kindLower = String(entry.kind).toLowerCase();
+              const kindBadge = kindLower.includes('breakpoint')
+                ? 'border-rose-200 bg-rose-50 text-rose-700'
+                : kindLower.includes('succession')
+                ? 'border-indigo-200 bg-indigo-50 text-indigo-700'
+                : kindLower.includes('supersed') ||
+                    kindLower.includes('override')
+                ? 'border-violet-200 bg-violet-50 text-violet-700'
+                : kindLower.includes('decision')
+                ? 'border-sky-200 bg-sky-50 text-sky-700'
+                : 'border-slate-200 bg-slate-50 text-slate-600';
+              return (
+                <li
+                  key={
+                    entry.decisionId ??
+                    entry.edgeId ??
+                    `${entry.entityRef}-${entry.occurredAt}-${idx}`
+                  }
+                  className="py-3"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                    <span className="text-sm font-medium text-slate-900">
+                      {dash(entry.summary)}
+                    </span>
+                    <span className="font-mono text-xs text-slate-500">
+                      {fmt(entry.occurredAt)}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <span
+                      className={`inline-flex items-center rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${kindBadge}`}
+                    >
+                      {entry.kind}
+                    </span>
+                    <span className="break-all">
+                      Entity: {entry.entityRef}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         )}
       </section>
