@@ -64,7 +64,7 @@ const socials = [
   { name: 'LinkedIn', href: 'https://linkedin.com/company/union-eyes', icon: Linkedin },
   { name: 'X (Twitter)', href: 'https://x.com/unioneyes', icon: Twitter },
   { name: 'GitHub', href: 'https://github.com/nzila-ventures', icon: Github },
-  { name: 'Email', href: 'mailto:hello@unioneyes.com', icon: Mail },
+  { name: 'Email', href: 'mailto:hello@unioneyes.app', icon: Mail },
 ];
 
 /* ────────────────── Component ────────────────── */

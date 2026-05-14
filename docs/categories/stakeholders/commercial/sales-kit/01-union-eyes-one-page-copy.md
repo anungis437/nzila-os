@@ -43,4 +43,4 @@ Start with a 90-day pilot, baseline current operations, define success KPIs, and
 
 ## CTA
 
-Book a pilot planning call: <hello@unioneyes.com>
+Book a pilot planning call: <hello@unioneyes.app>
