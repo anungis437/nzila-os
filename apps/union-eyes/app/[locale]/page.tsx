@@ -113,7 +113,7 @@ export default async function LocaleRootPage({
                   href={`/${locale}/pilot-request`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
-                  Request a Demo
+                  Request Executive Walkthrough
                 </Link>
                 <Link
                   href={`/${locale}/solutions`}
@@ -219,7 +219,7 @@ export default async function LocaleRootPage({
                   href={`/${locale}/pilot-request`}
                   className="inline-flex items-center justify-center px-10 py-5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
-                  Request a Demo
+                  Request Executive Walkthrough
                 </Link>
                 <Link
                   href={`/${locale}/trust`}
