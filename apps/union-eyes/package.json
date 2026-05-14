@@ -239,7 +239,7 @@
     "drizzle-kit": "^0.31.8",
     "eslint": "^10.1.0",
     "eslint-config-next": "16.2.2",
-    "glob": "^13.0.1",
+    "glob": "^13.0.6",
     "fast-glob": "^3.3.2",
     "husky": "^9.1.7",
     "js-yaml": "^4.1.1",
