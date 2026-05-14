@@ -133,6 +133,84 @@ export default async function InstitutionalChronologyPage() {
         )}
       </section>
 
+      {/* Panel 2 — Institutional evolution */}
+      <section className={`${PANEL} mb-6`}>
+        <h2 className={SECTION_HEADER}>Institutional evolution</h2>
+        <p className="mb-3 text-sm text-slate-600">
+          Preserved organization, affiliation, and representation transitions
+          rendered as procedural history rails. No trend rates, no analytics,
+          and no inferred changes.
+        </p>
+
+        <div className="grid gap-5 lg:grid-cols-3">
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Organizations
+            </h3>
+            {view.evolution.organizations.length === 0 ? (
+              <div className={EMPTY}>No organization evolution entries.</div>
+            ) : (
+              <ul className="space-y-3">
+                {view.evolution.organizations.map((org) => (
+                  <li key={org.organizationId} className="rounded border border-slate-200 p-3">
+                    <p className="break-all font-mono text-[11px] text-slate-600">
+                      {dash(org.organizationId)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {org.entries.length} preserved entry(ies)
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Affiliations
+            </h3>
+            {view.evolution.affiliations.length === 0 ? (
+              <div className={EMPTY}>No affiliation evolution entries.</div>
+            ) : (
+              <ul className="space-y-3">
+                {view.evolution.affiliations.map((aff) => (
+                  <li key={aff.affiliationEdgeId} className="rounded border border-slate-200 p-3">
+                    <p className="break-all font-mono text-[11px] text-slate-600">
+                      {dash(aff.affiliationEdgeId)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {aff.entries.length} preserved entry(ies)
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Representations
+            </h3>
+            {view.evolution.representations.length === 0 ? (
+              <div className={EMPTY}>No representation evolution entries.</div>
+            ) : (
+              <ul className="space-y-3">
+                {view.evolution.representations.map((rep) => (
+                  <li key={rep.representationEdgeId} className="rounded border border-slate-200 p-3">
+                    <p className="break-all font-mono text-[11px] text-slate-600">
+                      {dash(rep.representationEdgeId)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {rep.entries.length} preserved entry(ies)
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </section>
+
       <footer className="mt-8 border-t border-slate-200 pt-4 text-xs text-slate-500">
         This surface is governance-safe transparency over preserved
         institutional records. It does not evaluate, rank, predict, or
