@@ -230,6 +230,29 @@ const observabilityGuards: ForbiddenTerm[] = [
   { term: "average compliance", severity: "hard-fail", category: "observability-guard" },
 ];
 
+// Workstream J: Trust & Procurement Runtime Convergence.
+// Reject framings that re-introduce platform-dominance, command-and-control
+// deployment, monolithic-replacement, or autonomous-procurement posture into
+// onboarding, procurement, evidence, sovereignty, and continuity surfaces.
+// These extend (do not duplicate) prior startup-saas / surveillance-ai
+// guards — they harden the trust + procurement + runtime convergence boundary.
+const trustProcurementRuntime: ForbiddenTerm[] = [
+  { term: "transformation platform", severity: "hard-fail", category: "startup-saas", suggestion: "institutional continuity infrastructure | continuity overlay" },
+  { term: "platform dominance", severity: "hard-fail", category: "startup-saas" },
+  { term: "institutional monitoring", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional observability of record | inspectable operational posture" },
+  { term: "centralized control", severity: "hard-fail", category: "startup-saas", suggestion: "federation-aware operations | sovereignty-conscious deployment" },
+  { term: "command-and-control deployment", severity: "hard-fail", category: "startup-saas", suggestion: "governance-safe deployment | continuity-aware deployment" },
+  { term: "all-in-one replacement", severity: "hard-fail", category: "rip-and-replace", suggestion: "additive overlay | continuity layer" },
+  { term: "single-vendor lock-in", severity: "hard-fail", category: "startup-saas", suggestion: "sovereignty-conscious procurement | federation-aware operations" },
+  { term: "rip-and-replace deployment", severity: "hard-fail", category: "rip-and-replace", suggestion: "layered modernization | governance-safe deployment" },
+  { term: "vendor lock-in", severity: "hard-fail", category: "startup-saas", exceptions: ["avoids vendor lock-in", "no vendor lock-in", "without vendor lock-in"] },
+  { term: "AI-driven procurement", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-led procurement assisted by governed reasoning" },
+  { term: "autonomous deployment", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-led, governance-safe deployment" },
+  { term: "autonomous onboarding", severity: "hard-fail", category: "surveillance-ai", suggestion: "continuity-aware onboarding under reviewer oversight" },
+  { term: "procurement automation", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-assisted procurement of record" },
+  { term: "evidence automation", severity: "hard-fail", category: "surveillance-ai", suggestion: "evidence provenance under reviewer oversight" },
+];
+
 // Workstream I: Ontology reconciliation & institutional semantic governance.
 // Reject framings that re-introduce optimization / autonomous-AI / topology-
 // analytics / surveillance posture into governance language at the ontology
@@ -256,6 +279,7 @@ export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...founderOptics,
   ...observabilityGuards,
   ...ontologyReconciliation,
+  ...trustProcurementRuntime,
   ...warningLevel,
 ];
 

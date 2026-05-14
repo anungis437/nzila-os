@@ -58,6 +58,25 @@ export const OBSERVABILITY_DOCTRINE_REQUIRED: RewardTerm[] = [
   { term: "continuity-aware structures", weight: 3 },
 ];
 
+// Workstream J: Trust & Procurement Runtime Convergence.
+// Reward terms that signal coexistence-oriented, sovereignty-conscious,
+// federation-aware, continuity-safeguarded posture across onboarding,
+// procurement, evidence, deployment, and runtime trust surfaces.
+export const TRUST_PROCUREMENT_RUNTIME_REQUIRED: RewardTerm[] = [
+  { term: "coexistence", weight: 2 },
+  { term: "continuity safeguards", weight: 3 },
+  { term: "sovereignty-conscious deployment", weight: 3 },
+  { term: "federation-aware operations", weight: 3 },
+  { term: "explainability", weight: 2 },
+  { term: "operational stewardship", weight: 3 },
+  { term: "continuity-aware onboarding", weight: 3 },
+  { term: "governance-safe deployment", weight: 3 },
+  { term: "institutional resilience", weight: 2 },
+  { term: "inspectable operational posture", weight: 3 },
+  { term: "evidence provenance", weight: 3 },
+  { term: "chronology-linked trust", weight: 3 },
+];
+
 export const LABOUR_SAFE_AI_FORBIDDEN: string[] = [
   "autonomous decisions",
   "AI-led governance",
