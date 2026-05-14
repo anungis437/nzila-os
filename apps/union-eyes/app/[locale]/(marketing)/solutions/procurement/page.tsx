@@ -88,7 +88,7 @@ export default function ProcurementPage() {
           </span>
         }
         heading={<>Procurement clarity for<br />institutional deployment.</>}
-        description="UnionEyes gives procurement teams a practical, defensible path to selection: clear scope, governance-ready controls, and measurable outcomes for leadership confidence."
+        description="UnionEyes gives procurement teams a coexistence-oriented, sovereignty-conscious deployment path: clear scope, governance-safe deployment controls, federation-aware operations, and evidence provenance for leadership confidence."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
@@ -135,9 +135,9 @@ export default function ProcurementPage() {
       </section>
 
       <section className="py-16 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Build confidence through phased, governable deployment</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Build confidence through coexistence-safe, governance-safe deployment</h2>
           <p className="text-sm text-gray-600 max-w-3xl mb-6">
-            Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption.
+            Procurement teams can evaluate deployment safety through explicit implementation boundaries, continuity safeguards, sovereignty-conscious deployment pacing, and federation-aware operations — additive to existing institutional systems, never displacing them.
           </p>
           <div className="grid md:grid-cols-3 gap-4">
             <article className="p-5 rounded-xl bg-white border border-gray-100">
@@ -236,9 +236,9 @@ export default function ProcurementPage() {
       </section>
 
       <section className="py-16 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Due diligence content in one operational package</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Due diligence content as evidence provenance, not procurement theatre</h2>
           <p className="text-sm text-gray-600 max-w-3xl mb-6">
-            Procurement teams receive implementation-aware evidence organized for reviewability, governance confidence, and continuity-safe deployment decisions.
+            Procurement teams receive implementation-aware evidence organized for reviewability, chronology-linked trust, and continuity-aware, governance-safe deployment decisions — under operational stewardship, not vendor pressure.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
             {procurementEvidenceBinder.map((item) => (

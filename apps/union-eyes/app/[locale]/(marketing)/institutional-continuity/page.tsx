@@ -368,7 +368,7 @@ export default async function InstitutionalContinuityPage({
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8">
-            <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational transformation as a gradual pathway</h2>
+            <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational continuity as a gradual, governance-safe pathway</h2>
               <div className="space-y-2">
                 {institutionalBeforeAfterMap.map((stage, index) => (
                   <article key={stage} className="p-3 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-between">
