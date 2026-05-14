@@ -68,6 +68,7 @@ Scope: Current repository reality only (`apps/`, governance gates, truth artifac
 ## 3) Portfolio Score (Now)
 
 Scoring model used for this pass:
+
 - 30% governance integrity
 - 25% deployment/readiness evidence
 - 20% monetization readiness
@@ -108,6 +109,7 @@ Not in repo (scored as N/A): `the-button`, `courtlens`
 - Technical Debt Score (higher = more debt): **54/100**
 
 Interpretation:
+
 - Revenue motion is credible for top apps but not yet broad enterprise-grade across the portfolio.
 - Debt is moderate: governance debt is low, productization/operational debt remains significant in long-tail apps.
 

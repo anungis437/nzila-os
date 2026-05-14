@@ -145,4 +145,3 @@ Signals are labeled live, manual, estimate, or unavailable. No connector claims 
 | Mobility Client Portal | Gmail pipeline inbox | disabled | CAPITAL_ENABLE_GMAIL_PIPELINE is off. |
 | Mobility Client Portal | Supabase analytics | disabled | CAPITAL_ENABLE_SUPABASE_ANALYTICS is off. |
 | Mobility Client Portal | GitHub engineering activity | available | Derived from git activity in apps\mobility-client-portal and ops/outputs/dora-metrics.json. |
-

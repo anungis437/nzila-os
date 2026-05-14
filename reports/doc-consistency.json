@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-11T04:58:04.972Z",
+  "generatedAt": "2026-05-14T09:15:34.834Z",
   "filesScanned": 1649,
-  "totalFindings": 2404,
+  "totalFindings": 2381,
   "findingsByRule": {
-    "stale-reference": 1068,
+    "stale-reference": 1045,
     "stale-package-ref": 53,
     "naming-inconsistency": 1176,
     "missing-required-doc": 3,
@@ -11,7 +11,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1228,
+    "warning": 1205,
     "info": 1176
   },
   "findings": [
@@ -6010,62 +6010,6 @@
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/nzila-runtime-integrity/full-auth-role-lineage-audit.md",
-      "line": 9,
-      "message": "Possible broken link: [Final Gating Philosophy](../union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/nzila-runtime-integrity/README.md",
-      "line": 24,
-      "message": "Possible broken link: [Final Navigation & Monetization Access Matrix](../union-eyes/navigation-monetization-matrix/README.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/nzila-runtime-integrity/README.md",
-      "line": 25,
-      "message": "Possible broken link: [Institutional Operating Infrastructure](../union-eyes/institutional-operating-infrastructure/README.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/nzila-runtime-integrity/README.md",
-      "line": 26,
-      "message": "Possible broken link: [Tier 1 — Institutional Continuity Core](../union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/nzila-runtime-integrity/README.md",
-      "line": 27,
-      "message": "Possible broken link: [Tier 2 — Governance & Continuity Operations](../union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/nzila-runtime-integrity/README.md",
-      "line": 28,
-      "message": "Possible broken link: [Tier 3 — Institutional Operating Infrastructure](../union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/nzila-runtime-integrity/README.md",
-      "line": 29,
-      "message": "Possible broken link: [Tier 4 — Institutional Sovereignty Layer](../union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/nzila-runtime-integrity/README.md",
-      "line": 30,
-      "message": "Possible broken link: [Final Gating Philosophy](../union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
       "file": "docs/README.md",
       "line": 3,
       "message": "Possible broken link: [archive/iterations](archive/iterations/)"
@@ -6139,111 +6083,6 @@
       "file": "docs/README.md",
       "line": 38,
       "message": "Possible broken link: [Golden Path Developer Guide](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/fsm-pilot-module-runtime-reconvergence.md",
-      "line": 11,
-      "message": "Possible broken link: [fsm-pilot-module-reconvergence.md (architecture layer)](../institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md",
-      "line": 35,
-      "message": "Possible broken link: [docs/union-eyes/clc/demo-scripts/](../clc/demo-scripts/)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/full-runtime-monetization-embodiment.md",
-      "line": 23,
-      "message": "Possible broken link: [Institutional Continuity Core](../navigation-monetization-matrix/tier1-institutional-continuity-core.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/full-runtime-monetization-embodiment.md",
-      "line": 24,
-      "message": "Possible broken link: [Governance & Continuity Operations](../navigation-monetization-matrix/tier2-governance-continuity-operations.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/full-runtime-monetization-embodiment.md",
-      "line": 25,
-      "message": "Possible broken link: [Institutional Operating Infrastructure](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/full-runtime-monetization-embodiment.md",
-      "line": 26,
-      "message": "Possible broken link: [Institutional Sovereignty Layer](../navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/full-sidebar-navigation-convergence.md",
-      "line": 47,
-      "message": "Possible broken link: [tier3-institutional-operating-infrastructure.md](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/README.md",
-      "line": 9,
-      "message": "Possible broken link: [Final Navigation & Monetization Access Matrix](../navigation-monetization-matrix/README.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/README.md",
-      "line": 10,
-      "message": "Possible broken link: [Institutional Operating Infrastructure](../institutional-operating-infrastructure/README.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/README.md",
-      "line": 11,
-      "message": "Possible broken link: [Tier 1 — Institutional Continuity Core](../navigation-monetization-matrix/tier1-institutional-continuity-core.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/README.md",
-      "line": 12,
-      "message": "Possible broken link: [Tier 2 — Governance & Continuity Operations](../navigation-monetization-matrix/tier2-governance-continuity-operations.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/README.md",
-      "line": 13,
-      "message": "Possible broken link: [Tier 3 — Institutional Operating Infrastructure](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/README.md",
-      "line": 14,
-      "message": "Possible broken link: [Tier 4 — Institutional Sovereignty Layer](../navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/README.md",
-      "line": 15,
-      "message": "Possible broken link: [Final Gating Philosophy](../navigation-monetization-matrix/final-gating-philosophy.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/runtime-convergence/README.md",
-      "line": 16,
-      "message": "Possible broken link: [FSM & Pilot Module Reconvergence (architecture)](../institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md)"
     },
     {
       "rule": "stale-reference",

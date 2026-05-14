@@ -17,6 +17,7 @@ The release gate passes with 0 blockers.
 ## What Changed (6 PRs)
 
 ### PR1 — Runtime Standardisation
+
 | Deliverable | Detail |
 |-------------|--------|
 | `api-response.ts` | Standard error envelope (`ApiError`, `apiSuccess`, `apiError`) with Zod integration |
@@ -26,6 +27,7 @@ The release gate passes with 0 blockers.
 | `validate-runtime.ts` | Script validating middleware, env, health, os-core deps across all 16 apps |
 
 ### PR2 — Validation Severity Realism
+
 | Deliverable | Detail |
 |-------------|--------|
 | 6 severity escalations | `correlation-ids`, `config-fail-fast`, `platform-structure` (arch); `stale-reference`, `stale-package-ref`, `missing-package-readme` (docs) promoted info → warning |
@@ -34,6 +36,7 @@ The release gate passes with 0 blockers.
 | `validate-readmes.ts` | README coverage auditor for critical packages |
 
 ### PR3 — Documentation Normalisation
+
 14 substantive README files created for critical packages:
 
 `os-core` · `db` · `ui` · `ai-core` · `ai-sdk` · `ml-core` · `ml-sdk` · `blob` · `evidence` · `otel-core` · `platform-validation` · `platform-policy-engine` · `platform-isolation` · `config`
@@ -41,12 +44,14 @@ The release gate passes with 0 blockers.
 Each includes: purpose, exports table, usage examples, source layout.
 
 ### PR4 — Portfolio Leveling
+
 | Deliverable | Detail |
 |-------------|--------|
 | 2 health routes | `trade` and `platform-admin` — production-grade with DB probe, version/commit info, degraded status |
 | 4 smoke test suites | `trade` (4 tests), `agrimo` (5), `cora` (5), `platform-admin` (4) — middleware, health, org, instrumentation, deps |
 
 ### PR5 — Test & Governance Expansion
+
 | Test File | Tests | Coverage |
 |-----------|-------|----------|
 | `api-response.test.ts` | 10 | ApiError factories, envelope shapes, Zod conversion |
@@ -57,6 +62,7 @@ Each includes: purpose, exports table, usage examples, source layout.
 **Total: 254 tests across 15 test files — all passing.**
 
 ### PR6 — Final Reporting
+
 | Deliverable | Detail |
 |-------------|--------|
 | Portfolio Maturity Report | `reports/portfolio-maturity.{json,md}` |
@@ -127,6 +133,7 @@ Result:   PASSED
 ## Files Modified/Created
 
 ### New Files (38)
+
 - `packages/os-core/src/api-response.ts`
 - `packages/os-core/src/api-handler.ts`
 - `packages/os-core/src/__tests__/api-response.test.ts`
@@ -153,6 +160,7 @@ Result:   PASSED
 - 14× `packages/*/README.md` (os-core, db, ui, ai-core, ai-sdk, ml-core, ml-sdk, blob, evidence, otel-core, platform-validation, platform-policy-engine, platform-isolation, config)
 
 ### Modified Files (9)
+
 - `packages/os-core/src/config/env.ts` — 6 new app schemas
 - `packages/os-core/src/index.ts` — barrel exports for api-response, api-handler
 - `packages/os-core/package.json` — new export paths

@@ -1,4 +1,5 @@
 # Ontology Reconciliation Matrix
+
 ## Phase 3 — Institutional Governance Graph
 
 **Decision authority:** This document is the source of truth for which IGG kinds are promoted into `@nzila/platform-ontology`, which remain IGG-local metadata, and which are protected.
@@ -163,6 +164,7 @@ export const IGG_PROTECTED_KINDS = new Set<string>([
 ```
 
 A Phase 3 test (`protected-semantics.test.ts`) asserts:
+
 1. None of these strings appear in promoted ontology types.
 2. Public-tier query surfaces filter them out.
 3. Read-model serializers strip them when the caller is not in `governance_suite`.

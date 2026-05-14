@@ -25,7 +25,7 @@ Flow staging custom domain) remain explicitly classified and surfaced.
 | [packages/os-core/src/health.ts](../../packages/os-core/src/health.ts) | +runtime contract types & helpers (additive) |
 | [packages/os-core/src/index.ts](../../packages/os-core/src/index.ts) | re-export new symbols |
 | [apps/orchestrator-api/src/routes/health.ts](../../apps/orchestrator-api/src/routes/health.ts) | rewritten to use helper; critical/non-critical split |
-| [packages/os-core/src/__tests__/runtime-health.test.ts](../../packages/os-core/src/__tests__/runtime-health.test.ts) | new — 12 unit tests |
+| [packages/os-core/src/**tests**/runtime-health.test.ts](../../packages/os-core/src/__tests__/runtime-health.test.ts) | new — 12 unit tests |
 | [apps/orchestrator-api/Dockerfile](../../apps/orchestrator-api/Dockerfile) | reviewed only — `HEALTHCHECK` already targets `/health` (no change needed) |
 | [apps/orchestrator-api/src/api-guards.ts](../../apps/orchestrator-api/src/api-guards.ts) | reviewed only — `/health` & `/health/deep` already public (no change needed) |
 

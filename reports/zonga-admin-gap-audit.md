@@ -44,6 +44,7 @@ The Zonga admin surface was audited against pilot operational requirements. Core
 ## Pilot Risk Assessment
 
 The gaps identified do not block pilot operations:
+
 - Pilot partner count is small enough for manual moderation workflows
 - No content from non-vetted users is accepted during pilot
 - Admin team has direct DB access as fallback for all missing screens

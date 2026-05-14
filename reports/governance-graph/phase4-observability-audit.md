@@ -120,11 +120,13 @@ Source material reviewed (read-only):
 ### Q3. Which runtime surfaces are safe for observability?
 
 Safe (read-only, no protected leakage, no automation):
+
 - `app/[locale]/institutional-continuity/page.tsx` (existing).
 - A future read-only page rendering `buildInstitutionalTimeline` output (deferred under gated approval — todo item 8).
 - `api/activities`, `api/governance/events`, signature audit endpoints — already read-only, already hardened.
 
 Unsafe / explicitly out-of-scope:
+
 - Any path that would surface CLASS_B / RESERVED_MATTER / VETOES / HOLDS / OVERRIDES / CLASS_B_VETO / GOLDEN_SHARE_SUNSET_PROGRESSION mechanics.
 - `pilot-governance` page (operational, not institutional chronology).
 - Anything that aggregates per-actor behaviour over time.
@@ -168,6 +170,7 @@ Each must be a **pure read** over Phase 1–3 outputs plus thin adapters; no inf
 - Document chain-of-custody (correspondence schema) → linked via the same document-ID join.
 
 Explicitly **not** connected:
+
 - AI assistant audit log (different actor class).
 - Flow evidence adapter (different bounded context).
 - Billing replay (financial audit, not governance).
@@ -175,6 +178,7 @@ Explicitly **not** connected:
 ### Q8. Which observability surfaces risk drifting into surveillance?
 
 High risk — must be permanently forbidden:
+
 - Per-member behavioural timelines.
 - Per-steward "activity scoring".
 - Caucus / voting-bloc inference from `VOTE_CAST` events.
@@ -183,6 +187,7 @@ High risk — must be permanently forbidden:
 - Any heatmap or ranking of actors.
 
 Structural mitigation:
+
 - All Phase 4 chronology APIs accept an `entityId` (organization / decision / role) — **never** an actor id as primary key.
 - Public projections must redact actor identity beyond what is constitutionally required (e.g., a decision's `actorId` may surface as the role, not the person, on aggregate views).
 - `assertNoProtectedKindsInReadSurface` is extended to cover Phase 4 outputs.
@@ -209,6 +214,7 @@ Structural mitigation:
 ## 4. Hard Constraints (carry into every Phase 4 module)
 
 **DO NOT:**
+
 - Introduce governance automation.
 - Expose protected governance semantics (CLASS_B, RESERVED_MATTER, VETOES, HOLDS, OVERRIDES, CLASS_B_VETO, GOLDEN_SHARE_SUNSET_PROGRESSION, RESERVED_MATTER_RAISED, founder/Class-B continuity structures).
 - Build caucus, behavioural, predictive, influence, leadership-optimization, political-clustering, power-network, or strategic-simulation tooling.
@@ -221,35 +227,43 @@ Structural mitigation:
 ## 5. Phase 4 Work Plan (derived)
 
 ### 5.1 New module: `governance/timeline.ts`
+
 - `InstitutionalTimelineEntry` (discriminated union: decision | event | affiliation-transition | representation-transition).
 - `buildInstitutionalTimeline(input)` — pure function; redacts protected kinds; stable sort.
 - `timelineForOrganization`, `timelineForDecision`, `timelineForAffiliation`, `timelineForRepresentation`, `continuityTimeline`, `governanceEpochTimeline`.
 
 ### 5.2 New module: `governance/evidence.ts`
+
 - `decisionEvidenceRefs(decision)`, `lineageEvidenceRefs(decisions)`, `evidenceChronology(entityId, decisions)`, `continuityEvidenceMap(entityId, decisions, edges)`.
 - All return **only references** (IDs / URIs) — never re-seal, never compute hashes, never fetch contents.
 
 ### 5.3 New module: `governance/continuity.ts`
+
 - `continuityBreakpoints`, `representationGaps`, `unresolvedGovernanceTransitions`, `inactiveAffiliationChains`, `orphanedCommitteeRelationships`, `unresolvedDecisionDependencies`, `governanceStateDrift`.
 - All implemented as graph reads over Phase 2 projection outputs + Phase 3 chronology utilities.
 
 ### 5.4 Extended `governance/protected.ts`
+
 - Extend `assertNoProtectedKindsInReadSurface` to cover `InstitutionalTimelineEntry[]` and continuity output shapes.
 - Add `redactProtectedTimeline`, `redactProtectedContinuity`, `redactProtectedEvidence` thin wrappers.
 
 ### 5.5 Tests (`governance/governance.test.ts` extension or new file)
+
 - Round-trip tests for each new primitive.
 - Negative tests: every output passes `assertNoProtectedKindsInReadSurface`.
 - Lineage / chronology ordering invariants.
 - Continuity-break detection on synthetic gap fixtures.
 
 ### 5.6 Trust / explainability convergence layer
+
 - Copy + serializer that translates timeline / continuity outputs into archival, calm, governance-safe narrative form. Reuses `messages/*.json` lineage strings where applicable. Strictly read-only.
 
 ### 5.7 Read-only surface (DEFERRED — gated)
+
 - A new institutional-continuity-aligned page consuming the Phase 4 utilities. Only landed after explicit user approval; not part of the default Phase 4 deliverable.
 
 ### 5.8 `phase4-implementation-report.md`
+
 - Final report mirroring `phase2-projection-implementation-report.md` cadence.
 
 ---

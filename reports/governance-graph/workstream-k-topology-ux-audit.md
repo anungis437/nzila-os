@@ -307,4 +307,3 @@ panels (hierarchy, affiliation/representation, delegation, lineage,
 continuity-aware topology) across four existing dashboard routes, and
 (c) wiring an explainability overlay reused across all five — each
 gated by the protected fence and the ten-question acceptance grid above.
-

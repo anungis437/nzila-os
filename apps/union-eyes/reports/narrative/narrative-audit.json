@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T21:06:34.613Z",
+  "generatedAt": "2026-05-14T07:43:36.077Z",
   "files": [
     {
       "ctx": {
@@ -5144,15 +5144,6 @@
         },
         {
           "term": {
-            "term": "transformation",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 371,
-          "excerpt": "<div>              <h2 className=\"text-2xl font-bold text-navy mb-3\">Operational transformation as a gradual pathway</h2>"
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -5165,21 +5156,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 74,
+          "score": 75,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 17,
-              "continuity": 37,
+              "governance": 18,
+              "continuity": 39,
               "coordination": 20,
               "trust": 25
             },
-            "total": 99,
+            "total": 102,
             "shares": {
-              "governance": 0.1717171717171717,
-              "continuity": 0.37373737373737376,
-              "coordination": 0.20202020202020202,
-              "trust": 0.25252525252525254
+              "governance": 0.17647058823529413,
+              "continuity": 0.38235294117647056,
+              "coordination": 0.19607843137254902,
+              "trust": 0.24509803921568626
             }
           }
         },
@@ -6932,41 +6923,26 @@
         "isPublicSurface": true,
         "label": "marketing/solutions/procurement"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "disruption",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 140,
-          "excerpt": "Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption."
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
-          "status": "warn",
-          "score": 63,
-          "flags": [
-            {
-              "message": "Continuity language under-represented: 13.7% (target 30%).",
-              "suggestion": "Add institutional-continuity framing."
-            }
-          ],
+          "status": "pass",
+          "score": 64,
+          "flags": [],
           "detail": {
             "counts": {
               "governance": 25,
-              "continuity": 10,
+              "continuity": 12,
               "coordination": 13,
-              "trust": 25
+              "trust": 28
             },
-            "total": 73,
+            "total": 78,
             "shares": {
-              "governance": 0.3424657534246575,
-              "continuity": 0.136986301369863,
-              "coordination": 0.1780821917808219,
-              "trust": 0.3424657534246575
+              "governance": 0.32051282051282054,
+              "continuity": 0.15384615384615385,
+              "coordination": 0.16666666666666666,
+              "trust": 0.358974358974359
             }
           }
         },
@@ -6979,6 +6955,7 @@
             "matched": [
               "overlay infrastructure",
               "continuity layer",
+              "coexistence",
               "alongside existing systems",
               "non-displacing",
               "respects existing tools"
@@ -9840,7 +9817,7 @@
     "totalFiles": 96,
     "publicFiles": 85,
     "hardFails": 0,
-    "warnings": 229,
+    "warnings": 227,
     "ruleFailures": 0,
     "averageMaturity": 88
   }

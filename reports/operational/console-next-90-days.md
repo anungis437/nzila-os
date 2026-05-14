@@ -52,6 +52,7 @@ CREATE TABLE execution_initiatives (
 **Goal**: Capital page shows actual months of runway, not just infra burn.
 
 **Approach**:
+
 ```
 MONTHLY_TOTAL_BURN = INFRA_BURN + STAFF_BURN + CONTRACTOR_BURN
 RUNWAY_MONTHS = CASH_BALANCE / MONTHLY_TOTAL_BURN
@@ -90,6 +91,7 @@ RUNWAY_MONTHS = CASH_BALANCE / MONTHLY_TOTAL_BURN
 **Goal**: Monday morning email/Slack with the week's key metrics.
 
 **Content**:
+
 - OPS score vs last week
 - Revenue pipeline change (new pilots, closed pilots, new quotes)
 - 30d burn vs previous 30d
@@ -97,6 +99,7 @@ RUNWAY_MONTHS = CASH_BALANCE / MONTHLY_TOTAL_BURN
 - 1 critical risk if any
 
 **Implementation**:
+
 - `packages/platform-notifications` — new digest worker
 - Cron: Monday 6am (Azure Container Job or GitHub Actions schedule)
 - Email via Azure Communication Services (already provisioned: `nzila-canada-staging-rg`)
@@ -172,6 +175,7 @@ WEIGHTED_PIPELINE = Σ (quote.totalValue * probabilityByStatus)
 | Navigation | 9                | 9             | Stable                              |
 
 ### Success Criteria
+
 - [ ] Console answers "What should I focus on?" every morning — **TODAY**
 - [ ] Weekly digest in email by Monday 7am — **PHASE 3**
 - [ ] Revenue tracked from prospect to signed pilot — **PHASE 2/3**

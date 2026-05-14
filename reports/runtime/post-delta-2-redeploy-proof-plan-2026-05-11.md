@@ -14,7 +14,7 @@ This plan is the only path by which `orchestrator-api` may be reclassified from 
 - Live failure: three ACA fallback observations — `/`, `/health`, `/ready` — recorded in [reports/runtime/live-health-failure-matrix.json](live-health-failure-matrix.json).
 - Source fix: commit `4ad83815f` — [apps/orchestrator-api/src/routes/health.ts](../../apps/orchestrator-api/src/routes/health.ts) — adopts `@nzila/os-core/health` with critical / non-critical split (only `failing` returns 503; `degraded` keeps 200).
 - Shared contract: [packages/os-core/src/health.ts](../../packages/os-core/src/health.ts) — `RuntimeHealthCheck`, `HealthCheckState`, `RuntimeHealthStatus` ('healthy'|'degraded'|'failing'|'not_instrumented'); `ok = status !== 'failing'`.
-- Contract test suite: [packages/os-core/src/__tests__/runtime-health.test.ts](../../packages/os-core/src/__tests__/runtime-health.test.ts) — 12/12 passing on commit `4ad83815f`.
+- Contract test suite: [packages/os-core/src/**tests**/runtime-health.test.ts](../../packages/os-core/src/__tests__/runtime-health.test.ts) — 12/12 passing on commit `4ad83815f`.
 
 Until the redeploy evidence in §4 is captured, the latest legitimate observation remains the live failure matrix, and the classification stays `failing`.
 

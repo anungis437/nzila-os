@@ -1,4 +1,5 @@
 # Phase 2 — Institutional Governance Graph (IGG) Projection Layer
+
 ## Implementation Report
 
 **Package:** `@nzila/institutional-governance-graph` (v0.1.0)
@@ -51,20 +52,25 @@ Golden-share / founder-control / Class-B-veto mechanics remain **internal metada
 ## 3. Boundary Decisions
 
 ### 3.1 Local kind vocabulary, namespaced
+
 - All IGG kinds are stringly-typed with the `igg:` prefix (e.g. `igg:congress`, `igg:represents`).
 - Substrate consumers see only the canonical platform-ontology types (`Organization`, `Member`, `Decision`, `Document`, `EvidencePack`, `AuditEvent`, and standard relationships `PARENT_OF` / `BELONGS_TO` / `LINKS_TO` / `APPROVED_BY` / `ASSIGNED_TO` / `HAS` / `DEPENDS_ON` / `REFERENCES`).
 - IGG-specific kind retained on every node/edge as `metadata.iggKind` for downstream filtering without contaminating the ontology registry.
 
 ### 3.2 `substrateTypeFor` / `substrateRelationshipFor`
+
 Centralised in `ontology/kinds.ts` to keep the IGG → substrate translation in one auditable place. Tested by all 17 cases.
 
 ### 3.3 `parent_of` substrate type
+
 Mapped to substrate `'PARENT_OF'`. Caveat: the substrate ontology does not currently define an explicit `PARENT_OF` enum value — the projection emits the literal string and relies on consumers tolerating opaque relationship types. This is documented inline and forms part of the Phase-3 ontology-registry reconciliation.
 
 ### 3.4 Single test file
+
 All 17 tests consolidated into `src/projection.test.ts` (vs. one-per-module) to keep the cross-cutting projection invariants (decision counts, edge totals, lifecycle gating, delegation cycles) co-located. Per-module tests can be split out in Phase 3.
 
 ### 3.5 Decision mapping
+
 - `class_b_veto` → `DecisionTypes.REJECTION`
 - `motion_outcome` / `protocol_amendment` → `DecisionTypes.POLICY_EVALUATION`
 - `reserved_matter_vote` / `cba_ratification` → `DecisionTypes.APPROVAL`
@@ -72,6 +78,7 @@ All 17 tests consolidated into `src/projection.test.ts` (vs. one-per-module) to 
 - `knowledgeRefs` defaults to `[]` to satisfy strict optional-chain consumers.
 
 ### 3.6 Delegation resolver
+
 Walks the delegation chain to find the effective voter, with cycle detection via a visited-set guard. Returns the original voter on cycle to avoid infinite recursion or silent data loss.
 
 ---

@@ -1,4 +1,5 @@
 # Zonga — Admin Panel Gap Audit
+
 **Sprint**: Client Launch Readiness | **Date**: 2026-04-19
 
 ---
@@ -118,6 +119,7 @@ None of the missing items are hard launch blockers if the platform is founder-op
 The dashboard routes exist, but there is **no confirmed route-level role enforcement** in the UI layout. The backend API routes are now role-gated (after this sprint), but the UI allows navigation to all admin routes for any authenticated user.
 
 **Recommended Fix** (post-launch):
+
 - Add `requireRole()` check in the admin dashboard `layout.tsx` server component
 - Redirect to `/dashboard` with error toast if role insufficient
 

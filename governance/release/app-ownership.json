@@ -74,6 +74,14 @@
       "supportPrimary": "oncall-flow@nzila.ai",
       "escalation": "director-product@nzila.ai"
     },
+    "maestria": {
+      "businessOwner": "team-platform-admin@nzila.ai",
+      "technicalOwner": "team-platform-admin@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-platform@nzila.ai",
+      "escalation": "vp-platform@nzila.ai"
+    },
     "mobility": {
       "businessOwner": "team-mobility-business@nzila.ai",
       "technicalOwner": "team-mobility-engineering@nzila.ai",
@@ -97,6 +105,14 @@
       "releaseOwner": "team-platform-ops@nzila.ai",
       "supportPrimary": "oncall-platform@nzila.ai",
       "escalation": "director-product@nzila.ai"
+    },
+    "nzila-hq": {
+      "businessOwner": "team-platform-admin@nzila.ai",
+      "technicalOwner": "team-platform-admin@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-platform@nzila.ai",
+      "escalation": "vp-platform@nzila.ai"
     },
     "orchestrator-api": {
       "businessOwner": "team-platform-admin@nzila.ai",
@@ -129,6 +145,30 @@
       "releaseOwner": "team-platform-ops@nzila.ai",
       "supportPrimary": "oncall-trade@nzila.ai",
       "escalation": "director-product@nzila.ai"
+    },
+    "trustcore": {
+      "businessOwner": "team-platform-admin@nzila.ai",
+      "technicalOwner": "team-platform-admin@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-platform@nzila.ai",
+      "escalation": "vp-platform@nzila.ai"
+    },
+    "trustcore-trustops": {
+      "businessOwner": "team-platform-admin@nzila.ai",
+      "technicalOwner": "team-platform-admin@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-platform@nzila.ai",
+      "escalation": "vp-platform@nzila.ai"
+    },
+    "test-scaffold-gp": {
+      "businessOwner": "team-platform-admin@nzila.ai",
+      "technicalOwner": "team-platform-admin@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-platform@nzila.ai",
+      "escalation": "vp-platform@nzila.ai"
     },
     "union-eyes": {
       "businessOwner": "team-union-eyes-business@nzila.ai",
@@ -169,6 +209,14 @@
       "releaseOwner": "team-platform-ops@nzila.ai",
       "supportPrimary": "oncall-web@nzila.ai",
       "escalation": "director-engineering@nzila.ai"
+    },
+    "weekone": {
+      "businessOwner": "team-platform-admin@nzila.ai",
+      "technicalOwner": "team-platform-admin@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-platform@nzila.ai",
+      "escalation": "vp-platform@nzila.ai"
     },
     "zonga": {
       "businessOwner": "team-zonga-business@nzila.ai",

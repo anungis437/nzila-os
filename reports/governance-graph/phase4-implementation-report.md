@@ -84,22 +84,26 @@ protected `iggEventKind` through the surface.
 ## 4. Module summaries
 
 ### `governance/timeline.ts` — `buildInstitutionalTimeline`
+
 Chronological merge of decision events and entity-edge transitions. Sorted
 ascending by `occurredAt`. Each entry carries a stable `category` string and
 references back to the originating substrate node/edge/decision id. **No
 weights, no scores, no clustering.**
 
 ### `governance/evidence.ts` — `buildEvidenceConvergence`
+
 Per-decision projection of evidence / knowledge / policy / lineage references.
 Each entry exposes the underlying citation ids only — never source content,
 never an evaluative judgement.
 
 ### `governance/continuity.ts` — `buildContinuityTimeline`
+
 Succession / tenure / supersession lineage derived from entity-edge transitions
 plus decision lineage. Surfaces explicit *breakpoints* (succession gaps,
 revocations) without inferring "instability" or "leadership quality".
 
 ### `governance/trust.ts` — `buildExplainabilityRecords` + `summarizeProvenanceCoverage`
+
 Per-decision explainability record (provenance refs, lineage refs, preceding
 event id) plus a coverage summary that emits **integer counts only**:
 
@@ -114,6 +118,7 @@ No ratios, no percentages, no "trust score". The per-decision record carries
 the same booleans / counts and never an evaluative label.
 
 ### `observability/snapshot.ts` — `collectInstitutionalObservability`
+
 Gated counts-only snapshot. Returns `null` unless either:
 
 - `options.enabled === true`, or
@@ -170,7 +175,7 @@ Every field is a non-negative integer count or a stable string label.
   `stability`, `caucus`, `prediction`, `forecast`, `recommendation`,
   `trustscore`.
 - **Gate behaviour** — explicit `enabled:false` returns `null`; missing env
-  + missing option returns `null`; env `'1'` enables; explicit
+  - missing option returns `null`; env `'1'` enables; explicit
   `enabled:true` overrides missing env.
 
 ### Validation

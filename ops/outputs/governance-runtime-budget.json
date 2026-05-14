@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-11T04:55:05.843Z",
-  "start_ts": null,
-  "elapsed_minutes": null,
-  "max_minutes": 45,
-  "status": "unknown"
+  "timestamp": "2026-05-14T09:11:46.173Z",
+  "start_ts": 1778746306,
+  "elapsed_minutes": 60,
+  "max_minutes": 1,
+  "status": "over_budget"
 }

@@ -33,6 +33,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
 ## Per-Surface Detail
 
 ### sidebar/member-nav
+
 - Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L78-L92)
 - Maturity: **78 / 100**
 - Posture: member-facing simplicity is acceptable; one operational verb to soften.
@@ -41,9 +42,11 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - coexistence-positioning: 90 (pass)
   - procedural-neutrality: 70 (warn — "Submit Request" is generic SaaS verb)
   - labour-safe-ai: 100 (pass — no AI claims)
+
   - canadian-positioning: 60 (warn — no bilingual / sovereignty cue at nav level)
 
 ### sidebar/staff-nav
+
 - Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L94-L110)
 - Maturity: **48 / 100** ← **largest single drift surface**
 - Posture: reads like a productivity/case-management SaaS. Highest reframe leverage.
@@ -52,9 +55,11 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - coexistence-positioning: 60 (warn)
   - procedural-neutrality: 50 (warn — "Workbench" frames the institution as a worker tool, not a continuity layer)
   - labour-safe-ai: 90 (pass)
+
   - canadian-positioning: 50 (warn)
 
 ### sidebar/executive-nav
+
 - Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L112-L132)
 - Maturity: **75 / 100**
 - Posture: already well aligned (Continuity Insights, Governance Visibility, Trust & Oversight, Leadership Continuity). Two soft drifts.
@@ -63,9 +68,11 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - coexistence-positioning: 85 (pass)
   - procedural-neutrality: 70 (warn — "Operational Health" reads operational, not institutional)
   - labour-safe-ai: 90 (pass)
+
   - canadian-positioning: 60 (warn)
 
 ### sidebar/governance-nav
+
 - Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L134-L154)
 - Maturity: **88 / 100** ← **strongest aligned runtime surface**
 - Posture: reference standard for the rest of the dashboard (Trust & Explainability, Continuity Signals, Audit & Evidence, Policy Alignment).
@@ -74,9 +81,11 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - coexistence-positioning: 90 (pass)
   - procedural-neutrality: 90 (pass)
   - labour-safe-ai: 95 (pass — "Trust & Explainability" frames AI safely)
+
   - canadian-positioning: 70 (warn)
 
 ### sidebar/admin-nav
+
 - Path: [apps/union-eyes/lib/dashboard/role-experience.ts](../../lib/dashboard/role-experience.ts#L156-L176)
 - Maturity: **70 / 100**
 - Posture: admin chrome can stay operational; only "Pilot Configuration" is mildly off-narrative for the institutional reframe.
@@ -85,9 +94,11 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - coexistence-positioning: 70 (pass)
   - procedural-neutrality: 75 (pass)
   - labour-safe-ai: 100 (pass)
+
   - canadian-positioning: 60 (warn)
 
 ### mobile/bottom-nav
+
 - Path: [apps/union-eyes/components/mobile/BottomNav.tsx](../../components/mobile/BottomNav.tsx#L12-L40)
 - Maturity: **35 / 100** ← **second-largest drift surface, plus structural bug**
 - Posture: hard-coded labels not driven by `getNavigationForExperience()`; uses insurance-SaaS vocabulary ("Claims") and the hrefs are missing the `/dashboard` prefix (likely already routing through middleware fallback).
@@ -100,6 +111,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
 - Structural note (not a copy issue): `/claims`, `/members`, `/messages`, `/more` are not under `/dashboard/*` — mobile nav diverges from the experience-gated route allowlists. Flag for Workstream B routing pass.
 
 ### platform-economics/modules
+
 - Path: [apps/union-eyes/services/platform-economics/entitlement-guard.ts](../../services/platform-economics/entitlement-guard.ts#L1-L120)
 - Maturity: **58 / 100**
 - Posture: 19 PLATFORM_MODULES keys mix institutional language (`governance_suite`, `union_knowledge_suite`) with SaaS-economics language (`transaction_fees`, `commercial_reporting`, `allocation_engine`, `ai_advanced_insights`).
@@ -111,6 +123,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 60 (warn)
 
 ### narrative-vocabulary/runtime-coverage
+
 - Path: [apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts](../../tooling/marketing/config/forbidden-vocabulary.ts#L1-L200)
 - Maturity: **55 / 100**
 - Posture: the lint catches drift in marketing only (`publicOnly: true` flag). Runtime nav, dashboard headings, and module identifiers are **not** scanned — which is exactly why the staff nav and BottomNav drift slipped through.
@@ -122,6 +135,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
   - canadian-positioning: 40 (warn)
 
 ### packages/clc-executive-intelligence
+
 - Path: [packages/clc-executive-intelligence/src/index.ts](../../../../packages/clc-executive-intelligence/src/index.ts#L1-L20)
 - Maturity: **80 / 100**
 - Posture: package name and exported domain (executive intelligence, governed reasoning, audit logger, NIL authority) are on-narrative. Internal "workflow" naming is architectural (not user-facing).
@@ -139,6 +153,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
 Legend: **Drift risk** = Low | Med | High | Category. **Fix level**: L1 = copy/taxonomy, L2 = internal aliasing/route, L3 = structural rename.
 
 ### Sidebar — staff experience (HIGH leverage)
+
 | # | Current label | Proposed label | Drift risk | Fix | File / Line | Notes |
 |---|---|---|---|---|---|---|
 | 1 | Workbench | Casework Console | High | L1 | role-experience.ts:~96 | "Workbench" is SaaS productivity framing |
@@ -150,6 +165,7 @@ Legend: **Drift risk** = Low | Med | High | Category. **Fix level**: L1 = copy/t
 | 7 | Reports | Institutional Reports | Med | L1 | role-experience.ts:~108 | Drops SaaS-report framing |
 
 ### Sidebar — executive experience
+
 | # | Current label | Proposed label | Drift risk | Fix | File / Line | Notes |
 |---|---|---|---|---|---|---|
 | 8 | Operational Health | Continuity Operations | Med | L1 | role-experience.ts:~118 | "Health" reads ops-tooling |
@@ -157,23 +173,27 @@ Legend: **Drift risk** = Low | Med | High | Category. **Fix level**: L1 = copy/t
 | 10 | Reports | Leadership Briefings | Low | L1 | role-experience.ts:~128 | Optional |
 
 ### Sidebar — member experience
+
 | # | Current label | Proposed label | Drift risk | Fix | File / Line | Notes |
 |---|---|---|---|---|---|---|
 | 11 | Submit Request | Open Representation Case | Med | L1 | role-experience.ts:~84 | "Submit Request" is generic ticketing |
 | 12 | My Cases | My Representation | Low | L1 | role-experience.ts:~82 | Optional |
 
 ### Sidebar — governance experience
+
 | # | Current label | Proposed label | Drift risk | Fix | File / Line | Notes |
 |---|---|---|---|---|---|---|
 | 13 | Operational Review | Procedural Review | Low | L1 | role-experience.ts:~140 | Optional |
 | 14 | Reports | Governance Briefings | Low | L1 | role-experience.ts:~150 | Optional |
 
 ### Sidebar — admin experience
+
 | # | Current label | Proposed label | Drift risk | Fix | File / Line | Notes |
 |---|---|---|---|---|---|---|
 | 15 | Pilot Configuration | Continuity Pilot Setup | Low | L1 | role-experience.ts:~162 | Optional |
 
 ### Mobile bottom nav (HIGH leverage + structural fix)
+
 | # | Current label / href | Proposed label / href | Drift risk | Fix | File / Line | Notes |
 |---|---|---|---|---|---|---|
 | 16 | Claims → /claims | Cases → /dashboard/cases | Category | L1 + L2 | BottomNav.tsx:~25 | "Claims" is insurance vocab; href missing `/dashboard` |
@@ -184,6 +204,7 @@ Legend: **Drift risk** = Low | Med | High | Category. **Fix level**: L1 = copy/t
 | 21 | (architecture) | Drive BottomNav from `getNavigationForExperience()` | Category | L3 | BottomNav.tsx | Single source of truth — eliminates future drift |
 
 ### Platform-economics modules (PLATFORM_MODULES — 19 keys)
+
 Identifier rename (L3) is high-cost. Recommendation: keep identifiers stable, add `displayName` + `narrativeTagline` fields and surface those in entitlement UI / pricing pages.
 
 | # | Identifier | Proposed display name | Drift risk | Fix | File / Line | Notes |
@@ -204,6 +225,7 @@ Identifier rename (L3) is high-cost. Recommendation: keep identifiers stable, ad
 (Identifiers stay in code; only display surfaces change.)
 
 ### Vocabulary / lint coverage
+
 | # | Concern | Proposed action | Drift risk | Fix | File / Line | Notes |
 |---|---|---|---|---|---|---|
 | 34 | `publicOnly: true` flag exempts runtime from forbidden-vocab linting | Add `runtime` scope flag and run lint over `lib/dashboard/**`, `components/sidebar.tsx`, `components/mobile/**`, `services/platform-economics/**` | High | L2 | forbidden-vocabulary.ts:~? | Workstream E pre-req — without this, future drift returns silently |

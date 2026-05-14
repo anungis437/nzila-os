@@ -20,6 +20,7 @@ Audience: Executive leadership, enterprise buyers, diligence reviewers.
 | 90d | 125 | 50 | 40.0% |
 
 Notes:
+
 - Deploy workflow names filtered by `Deploy|GitOps`.
 - Current API sampling returned identical values across 30/60/90 windows due high run concentration in available dataset.
 
@@ -32,6 +33,7 @@ Notes:
 | 90d | 2000 | 1404 | 70.2% |
 
 Cross-check:
+
 - Canonical 30-day ops snapshot currently reports 81.5% from a smaller curated run sample.
 - Recommendation: standardize one calculation method and persist in automated artifact.
 
@@ -48,10 +50,10 @@ Current probes (2026-04-22):
 
 | Domain | HTTP | Health |
 |---|---:|---|
-| https://nzilaventures.com | 200 | Operational |
-| https://unioneyes.app | 200 | Operational |
-| https://partners.nzilaventures.com | 200 | Operational |
-| https://console.nzilaventures.com | 200 | Operational |
+| <https://nzilaventures.com> | 200 | Operational |
+| <https://unioneyes.app> | 200 | Operational |
+| <https://partners.nzilaventures.com> | 200 | Operational |
+| <https://console.nzilaventures.com> | 200 | Operational |
 
 Uptime percentage over 30/60/90 days: `source_needed` (requires automated uptime exporter).
 
@@ -67,6 +69,7 @@ Uptime percentage over 30/60/90 days: `source_needed` (requires automated uptime
 ## 6) Release Cadence
 
 Interpretation from deployment runs:
+
 - Active deployment cadence exists, but delivery reliability is below enterprise target.
 - Recommended enterprise target baseline: >95% successful deploys in rolling 30 days.
 
@@ -79,6 +82,7 @@ Interpretation from deployment runs:
 | 90d | 0 | source_needed | source_needed |
 
 Notes:
+
 - Current repository issue workflow appears not to be the primary incident/remediation tracker.
 - Add canonical ticket source mapping for executive reliability reporting.
 

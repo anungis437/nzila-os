@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-12T12:33:24.871Z",
-  "totalPackages": 213,
+  "generatedAt": "2026-05-14T08:03:44.458Z",
+  "totalPackages": 214,
   "criticalPackages": 89,
   "criticalMissing": [],
   "criticalStub": [],
@@ -620,6 +620,12 @@
       "critical": false,
       "hasReadme": true,
       "readmeLength": 2107
+    },
+    {
+      "package": "institutional-governance-graph",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 2271
     },
     {
       "package": "integrations-calendar",

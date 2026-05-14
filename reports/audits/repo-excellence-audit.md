@@ -35,4 +35,3 @@ Overall score: 8 / 10
 - [ci_efficiency] Workflow count remains 40.
 - [overengineering] Workflow surface remains larger than ideal for a disciplined canonical release path.
 - [dead_assets] Legacy app-specific deployment entry points remain present and should stay demoted to emergency/manual use only.
-

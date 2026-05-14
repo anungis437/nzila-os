@@ -1,4 +1,5 @@
 # Zonga — Go-Live Decision Report
+
 **Sprint**: Client Launch Readiness | **Date**: 2026-04-19
 **Evaluator**: Nzila OS Automation (Platform Engineering)
 
@@ -33,6 +34,7 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 ### 2.1 Authentication & RBAC — 8.5/10
 
 **What's working**:
+
 - Argon2id password hashing (OWASP-compliant)
 - Opaque session tokens in `auth_user_sessions`
 - Account lockout: 5 failed attempts → 15-min cooldown
@@ -40,6 +42,7 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 - `requireRole()` added this sprint — payout POST endpoint now role-gated (`finance_admin` only)
 
 **Gaps remaining**:
+
 - Admin dashboard routes lack server-side role enforcement in layout (UI shows all routes to all roles; backend blocks writes)
 - `orgId` from `auth()` returns Entra AD group GUID, not app org UUID — existing guard pattern correctly uses `requireOrgAccess()` instead
 
@@ -50,6 +53,7 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 ### 2.2 Billing & Payouts — 7.5/10
 
 **What's working**:
+
 - Double-entry earnings ledger: gross → fee → net
 - Revenue split rules (multi-artist, must sum to 100%)
 - Stripe Connect payout integration with African currency support
@@ -59,6 +63,7 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 - Fee schedule: streaming 30%, downloads 25%, tickets 15%, subscription 20%, tips 10%
 
 **Gaps**:
+
 - No automated refund API (use Stripe Dashboard manually)
 - No promo/discount codes
 - No automated invoice/receipt beyond Stripe defaults
@@ -71,6 +76,7 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 ### 2.3 Upload & Streaming — 8/10
 
 **What's working**:
+
 - File validation: MIME type whitelist, 500MB limit, 10MB artwork limit
 - SHA-256 duplicate detection
 - Async processing queue: metadata → fingerprint → transcode (4 tiers) → waveform
@@ -79,11 +85,13 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 - Entitlement-based quality clamping (free/standard/premium tier enforcement)
 
 **Launch blockers (config, not code)**:
+
 - AWS MediaConvert credentials must be configured in env vars before transcoding works
 - AWS CloudFront distribution must be configured before signed URL delivery works
 - Processing queue worker must be running (confirm before launch)
 
 **Recommended limits for first client**:
+
 - Max catalog: 500 tracks
 - Max concurrent listeners: 100
 - Live streaming: DISABLED until IVS confirmed configured and tested
@@ -93,11 +101,13 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 ### 2.4 Admin Panel — 7.5/10
 
 **What's working**:
+
 - 24+ dashboard routes covering all key workflows
 - Moderation, takedown, rights, events, payouts, creators, analytics, billing — all have UI surfaces
 - Backend services fully implemented for all features
 
 **Gaps**:
+
 - No user ban/force-logout UI
 - No system health/metrics dashboard UI (backend code exists, not wired to UI)
 - Admin UI routes lack server-side role enforcement (backend API is gated)
@@ -113,6 +123,7 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 **Hard requirement before launch**: All legal documents MUST be reviewed and approved by qualified legal counsel before being published to users.
 
 **Specific risks without counsel review**:
+
 - POPIA/NDPR/GDPR compliance requirements may not be fully addressed
 - Liability limitations may be unenforceable in client's jurisdiction
 - DMCA designated agent registration may be required (US clients)
@@ -125,6 +136,7 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 ### 2.6 Backup & Incident Response — 7/10
 
 **What's in place**:
+
 - Azure PostgreSQL automated backups (7-day default — must upgrade to 35-day)
 - Azure Blob Storage durable storage (soft-delete not yet configured)
 - Container Apps stateless — redeploy from ACR in <15 minutes
@@ -132,6 +144,7 @@ Zonga is launchable for a **single client, founder-operated, controlled deployme
 - IR runbook documented with P0–P3 severity matrix and response procedures
 
 **Actions required before launch**:
+
 1. `az postgres flexible-server update --backup-retention 35 --geo-redundant-backup Enabled`
 2. `az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 30`
 3. Configure Azure Monitor alerts (CPU, DB connections, 5xx rate)
@@ -174,6 +187,7 @@ The following restrictions apply to the initial launch:
 ## 5. Post-Launch Priority Roadmap
 
 ### Sprint A (First 30 days post-launch)
+
 - [ ] Add system health dashboard page (wire `observability-dashboard.ts` to admin UI)
 - [ ] Add user ban / force-logout UI
 - [ ] Automate refund API via Stripe refund endpoint
@@ -181,6 +195,7 @@ The following restrictions apply to the initial launch:
 - [ ] Add admin dashboard role enforcement in `layout.tsx`
 
 ### Sprint B (Days 30–90)
+
 - [ ] Payout scheduling automation (weekly batch trigger)
 - [ ] Invoice generation via Stripe Customer Portal
 - [ ] Promo/discount code system
@@ -188,6 +203,7 @@ The following restrictions apply to the initial launch:
 - [ ] Load test to confirm concurrent listener capacity
 
 ### Sprint C (90+ days)
+
 - [ ] Multi-client support (org isolation already in place)
 - [ ] Multi-tenant branding (theme per org)
 - [ ] Tax computation integration

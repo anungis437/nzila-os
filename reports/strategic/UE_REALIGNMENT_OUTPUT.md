@@ -103,6 +103,7 @@ draft → submitted → triage → investigation → negotiation
 ```
 
 **10 states** with meta-fields replacing sub-states:
+
 - `resolution_type`: `'settled'` | `'denied'` | `'withdrawn'` — replaces separate resolved/rejected/withdrawn states
 - `assigned_to`: steward/officer assignment — replaces `'assigned'` state
 - `intake_outcome`: `'converted'` | `'closed_no_case'` — replaces intake-only states

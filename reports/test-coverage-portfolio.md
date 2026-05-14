@@ -97,14 +97,17 @@ Remaining        █████████████████████
 ## Coverage Gaps & Recommendations
 
 ### High Priority
+
 1. **packages/evidence** — Zero tests for `computeMerkleRoot`, `generateSeal`, `verifySeal`. These are security-critical cryptographic functions used by all evidence packs.
 2. **packages/ml-core** — ML pipeline definitions untested. Add schema validation tests.
 
 ### Medium Priority
+
 3. **packages/blob** — Azure Blob operations untested. Add mock-based unit tests.
 4. **packages/trade-core** — Only 1 test file. Expand FSM transition tests.
 
 ### Low Priority (Acceptable)
+
 5. Thin SDK wrappers (ai-sdk, ml-sdk) — minimal logic to test
 6. Pure UI apps (mobility, mobility-client-portal) — no server logic
 7. automation package — tested via pytest, not vitest

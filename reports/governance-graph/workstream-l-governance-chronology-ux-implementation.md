@@ -1,9 +1,11 @@
 # Workstream L — Governance Chronology UX Implementation Report
 
 ## 1. Outcome
+
 WS L chronology UX is now implemented as a governance-safe, read-only chronology surface over preserved institutional records.
 
 Implemented chronology capabilities:
+
 - Procedural timeline.
 - Institutional evolution (organization, affiliation, representation views).
 - Decision lineage with per-decision drill counts.
@@ -14,11 +16,13 @@ Implemented chronology capabilities:
 - Route-deviation rationale documenting canonical chronology route consolidation.
 
 Implementation follows doctrine:
+
 - Retrospective and inspectable only.
 - No scoring, ranking, prediction, optimization, or recommendation.
 - Protected institutional semantics redacted before UI projection.
 
 ## 2. Deliverables
+
 - Step 1 audit: `reports/governance-graph/workstream-l-governance-chronology-ux-audit.md`.
 - Chronology vocabulary extension (Step 2):
   - `apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts`
@@ -33,6 +37,7 @@ Implementation follows doctrine:
   - `reports/governance-graph/workstream-l-route-deviation.md`
 
 ## 3. Validation Gates
+
 | Gate | Result |
 |---|---|
 | `pnpm narrative:audit` (union-eyes) | pass — hard-fail 0, warnings 227, maturity 88/100 |
@@ -42,6 +47,7 @@ Implementation follows doctrine:
 | `runTests` chronology guard file | pass — 2 tests |
 
 ## 4. Commit Trail (Steps 1–11)
+
 | Step | Commit | Message |
 |---|---|---|
 | 1 | `31231841d` | docs(ws-l): step 1 governance chronology UX audit |
@@ -57,7 +63,9 @@ Implementation follows doctrine:
 | 11 | pending | this report |
 
 ## 5. Convergence Note (WS J + WS K + WS L)
+
 WS L chronology delivery is intentionally centralized in `dashboard/institutional-chronology/` and prepared for convergence overlays:
+
 - WS J observability can consume chronology explainability slices from the same adapter.
 - WS K topology can consume chronology lineage slices from the same adapter.
 - Future convergence should remain adapter-led to avoid divergence across multiple chronology builders.

@@ -1,4 +1,5 @@
 # Persistence Strategy
+
 ## Phase 3 — Institutional Governance Graph
 
 **Question this document answers:** Where does the IGG live at rest, if anywhere?
@@ -30,7 +31,7 @@ This is the right starting point. The question is whether to add another persist
 
 ## 3. Recommended path
 
-### Phase 3: Strategy **A** (projection-only).
+### Phase 3: Strategy **A** (projection-only)
 
 Justification:
 
@@ -40,7 +41,7 @@ Justification:
 4. **Reversibility is total.** If Phase 3 finds the wrong abstraction, no data is left behind.
 5. **Procurement-safe.** No new infrastructure; nothing for an external auditor to question.
 
-### Phase 3.5 (deferred trigger): Strategy **B** (cached projection).
+### Phase 3.5 (deferred trigger): Strategy **B** (cached projection)
 
 Adopt only when **one of** the following triggers fires:
 
@@ -49,12 +50,13 @@ Adopt only when **one of** the following triggers fires:
 - **Chronology integration:** The decision-graph integration starts back-pressuring source reads (motion-outcome reconstruction over years of history).
 
 Cache invalidation rules (when triggered):
+
 - Cache is keyed by `(tenantId, projectionVersion)`.
 - Invalidation is *coarse* — any write to a tracked source table invalidates the whole tenant projection. No per-row diffing.
 - Cache lives in `entity_graph` / `decision_nodes` tables (already exist), tagged with `metadata.cachedFromIgg = true`.
 - A scheduled rebuild (daily) is the safety net.
 
-### Phase 4+ (no Phase 3 commitment): Strategies C, D, E.
+### Phase 4+ (no Phase 3 commitment): Strategies C, D, E
 
 Strategy C is plausible if the IGG develops independent write-side semantics (it currently has none).
 Strategies D and E are explicitly *not* on any Phase 3 or Phase 4 roadmap. Adopting either would require a separate platform initiative with its own governance review.

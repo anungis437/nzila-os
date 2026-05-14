@@ -1,4 +1,5 @@
 # Phase 3 — Architecture Audit
+
 ## Institutional Governance Graph (IGG) Initiative
 
 **Status:** Audit-only. No code changes.
@@ -38,6 +39,7 @@ Ontology promotion is a substrate mutation. Every promoted kind permanently wide
 ### Q2. Which kinds should remain metadata-only?
 
 Anything carrying constitutional or founder-protection semantics:
+
 - `class_b_special_voting_share`, `class_b_veto`, `golden_share_sunset_progression`, `reserved_matter`, `vetoes`, `holds`, `umrc`
 
 These remain `metadata.iggKind` strings inside the IGG package. They are read by admin-only surfaces (`governance_suite` entitlement) and never appear in the canonical ontology enum, never in public APIs, never in AI prompts.
@@ -104,6 +106,7 @@ Three theme families pass governance-safety review:
 - **Continuity** — representation continuity over time, role tenure (without political profiling)
 
 Each must be:
+
 - Admin/operator-only at minimum (`governance_suite` or new `governance_observability` entitlement)
 - Internally hosted (no public route)
 - Decorated with provenance (every node/edge displays its `sourceRecordId`)
@@ -123,6 +126,7 @@ PROTECTED:
 ```
 
 These can be referenced internally for chronology integrity, but:
+
 - Never surface in canonical ontology
 - Never expose via public or member-tier API
 - Never include in AI prompts or training inputs
@@ -135,6 +139,7 @@ A test in Phase 3 will assert that none of these strings appear in any non-admin
 Today: **none** are safe. The IGG is too young, the chronology integration is incomplete, and the protected-semantics fence is enforced only by convention.
 
 Future-safe (Phase 4+) candidates, in order of safety:
+
 1. *Chronology summarization* — given a series of `DecisionNode`s, produce a human-readable "how this state emerged" narrative. Read-only, no recommendation.
 2. *Affiliation drift detection* — anomaly flagging on affiliation transitions; alert humans, never act.
 3. *Procedural completeness checking* — given a motion, verify required quorum/notice steps were recorded. Compliance audit, not optimization.

@@ -1,4 +1,5 @@
 # Workstream I — Ontology Reconciliation & Institutional Semantic Governance
+
 ## Implementation Report
 
 **Status:** Complete (validation gates passing)
@@ -26,7 +27,9 @@ The reconciled ontology now expresses a single coherent doctrine in
 `packages/institutional-governance-graph/src/ontology/canonicalization.ts`:
 
 ### Tier 1 — Absolute deny-list (`ABSOLUTE_DENY_LIST`)
+
 Frozen union of:
+
 - `IGG_PROTECTED_ENTITY_KINDS` (`protected.ts`) — Class-B special voting share, reserved matter
 - `RESERVED_MATTER_TYPES`
 - `CLASS_B_VOTING_SCOPES`
@@ -37,6 +40,7 @@ Promotion of any of these names to a public canonical surface is a hard error
 (`assertCanonicalizationAllowed` throws).
 
 ### Tier 2 — Forbidden semantic shape (`FORBIDDEN_SEMANTIC_TOKENS`)
+
 ~30 lower-case tokens describing shapes the platform will not adopt regardless
 of namespace: `score`, `rank`, `weight`/`weighted`/`weighting`, `ratio`,
 `average`, `efficiency`, `stability`, `topology`, `surveillance`,
@@ -47,6 +51,7 @@ atom form; single-word tokens require **exact membership in the atom set**
 produced by `tokenize(name)`.
 
 ### Tier 3 — Hold-for-demand (`HOLD_FOR_DEMAND`)
+
 ~28 IGG-namespaced kinds that are *not* denied but require an explicit substrate
 proposal before promotion. `classifyCanonicalizationProposal` returns a
 `hold-for-demand` verdict so promotion tooling can surface the requirement
@@ -116,6 +121,7 @@ also enforces it. Tracked separately to keep this workstream additive.
 ## 5. Marketing vocabulary alignment
 
 ### Forbidden vocabulary additions
+
 `apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts` —
 new `wsiInstitutionalGovernance` group with hard-fail entries:
 
@@ -127,6 +133,7 @@ new `wsiInstitutionalGovernance` group with hard-fail entries:
 - `command system` (with documented exceptions)
 
 ### Required vocabulary additions
+
 `apps/union-eyes/tooling/marketing/config/required-vocabulary.ts` —
 appended to `OBSERVABILITY_DOCTRINE_REQUIRED`:
 
@@ -135,6 +142,7 @@ appended to `OBSERVABILITY_DOCTRINE_REQUIRED`:
 - `continuity-aware structures` (weight 2)
 
 ### Page fix
+
 `apps/union-eyes/app/[locale]/(marketing)/institutional-continuity/page.tsx` —
 replaced one occurrence of `organizational intelligence` with
 `continuity-aware structures` (the doctrinally aligned alternative).

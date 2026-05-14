@@ -44,6 +44,7 @@ optimization.
 ### 2.2 Locale copy alignment
 
 **Files:**
+
 - [apps/union-eyes/messages/en.json](../../apps/union-eyes/messages/en.json)
 - [apps/union-eyes/messages/en-CA.json](../../apps/union-eyes/messages/en-CA.json)
 
@@ -141,4 +142,3 @@ the AI-copy reframes in §2.2 landed first.
   `packages/workload-intelligence` (descriptions already aligned).
 - No edits to non-union-eyes apps; the narrative-audit CLI scans
   `apps/union-eyes` only and that scope is preserved here.
-

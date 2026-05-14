@@ -21,4 +21,3 @@ As of 2026-04-19. This report separates evidence (pipeline, pilot and retention 
 | Stripe | No | disabled | COMMERCIAL_ENABLE_STRIPE is off. |
 | QuickBooks | No | disabled | COMMERCIAL_ENABLE_QUICKBOOKS is off. |
 | CSV fallback | Yes | available | governance/commercial/*.json baseline loaded. |
-

@@ -33,36 +33,47 @@ The IGG already exposes a complete chronology substrate behind the protected-fen
 ## 2. Audit Questions
 
 ### Q1 — Are the procedural-chronology surfaces substrate-ready?
+
 **Yes.** Every targeted chronology surface maps to one or more existing IGG functions (see §1). No new graph primitives, no new edge kinds, no new entity kinds required.
 
 ### Q2 — Do the planned UX surfaces use institutional metaphors rather than operational metaphors?
+
 **Required.** Surfaces must read as *procedural history*, *decision lineage*, *continuity progression*, and *governance epochs* — not as feeds, streams, or ticks. Vocabulary governance (Part I) enforces this by extending forbidden-vocabulary tooling.
 
 ### Q3 — Is there activity-feed drift risk?
+
 **High default risk; mitigated by design rules.** A naive chronological list of decisions reads as a "feed". Mitigations: (a) entries grouped by *epoch* and *lineage*, not by recency; (b) no "new" / "unread" / "live" affordances; (c) no notification badges; (d) no auto-refresh; (e) entries are inspection rails, not action surfaces.
 
 ### Q4 — Are chronology surfaces continuity-safe?
+
 **Yes, by construction.** Continuity surfaces project `continuityTimeline` + `successionBreakpoints` + `continuityLineage`, which are inherently institutional (succession, tenure, lineage) rather than personnel-tracking. The protected fence redacts protected entity / relationship / event / decision-category kinds *before* projection, so no internal-only continuity semantics can leak.
 
 ### Q5 — Is explainability required on every chronology entry?
+
 **Yes.** Every rendered chronology entry must expose `evidenceRefs` / `knowledgeRefs` / `policyRefs` (from `EvidenceConvergenceEntry`) or its `ExplainabilityRecord` (from `trust.ts`). Entries with zero provenance render an `EMPTY` provenance affordance — they do not get hidden, but they are visually marked as unattested.
 
 ### Q6 — Are any governance semantics rendered implicitly?
+
 **No.** All decision categories, edge kinds, and event kinds rendered to the UI must come through `applyOptions` + `assertNoProtectedKindsInProjections`. The UI never infers, never re-derives, never re-categorises.
 
 ### Q7 — Is the chronology surface cognitively overwhelming?
+
 **Risk: High if rendered as a flat per-decision list.** Mitigations: (a) default view is *epoch-grouped*, not flat; (b) `since` / `until` / `kinds` options from `InstitutionalTimelineOptions` exposed as inspection filters (not analytics filters); (c) lineage ladders collapse by default to head + immediate predecessor; (d) per-entity chronology rails default to the entity's own decisions, not the organisation's full timeline.
 
 ### Q8 — How are governance epochs rendered?
+
 **As markers, not as periods.** The `epoch_marker` kind in `InstitutionalTimelineEntryKind` is rendered as a horizontal divider with epoch label and `occurredAt`. Epoch markers do not get start / end ranges, do not get duration calculations, and do not get inter-epoch comparison affordances.
 
 ### Q9 — What is the overreach risk?
+
 **Three identified risks:**
+
 1. *Surveillance drift* — if per-actor chronology rails are exposed. **Mitigation:** chronology rails are per-*entity* (organisation, agreement, decision lineage) only, never per-actor.
 2. *Predictive drift* — if "next decision" / "expected supersession" affordances are added. **Mitigation:** forbidden by Part F; explainability overlays are retrospective only.
 3. *Ranking drift* — if epochs or lineages are sorted by impact / outcome / score. **Mitigation:** sort is `occurredAt` ascending only; no scoring fields rendered.
 
 ### Q10 — Do the surfaces preserve procedural legitimacy?
+
 **Yes.** Every chronology entry traces to a decision, an edge, or an institutional event preserved in the IGG. No synthetic entries, no inferred entries, no aggregated entries. The chronology UX is a *window onto preserved institutional records*, not a constructed narrative.
 
 ---
@@ -120,6 +131,7 @@ The IGG already exposes a complete chronology substrate behind the protected-fen
 ## Part H — Design System Alignment
 
 **Components to add / extend:**
+
 - `ChronologyRail` — vertical epoch-grouped list of entries.
 - `LineageLadder` — collapsible predecessor chain.
 - `ContinuityRail` — continuity-specific rail with succession breakpoint markers.
@@ -141,6 +153,7 @@ The IGG already exposes a complete chronology substrate behind the protected-fen
 ## Part J — Observability & Topology Convergence
 
 WS L composes with WS J (observability) and WS K (topology):
+
 - WS J observability panels gain a chronology overlay (per-entity rail) sourced from `chronologyForEntity`.
 - WS K topology panels gain a per-node lineage drill sourced from `lineageChain` and `continuityLineage`.
 - WS L chronology pages gain a topology context strip sourced from WS K queries (`hierarchyAncestors`, `continuityCohort`).
@@ -150,6 +163,7 @@ WS L composes with WS J (observability) and WS K (topology):
 ## Part K — Runtime Narrative Governance Expansion
 
 Step 11 of WS L will:
+
 - Extend `forbidden-vocabulary.ts` with the Part I forbidden list.
 - Extend `required-vocabulary.ts` with the Part I rewarded themes.
 - Add CI gate assertions that `narrative:audit` covers `dashboard/institutional-memory/`, `dashboard/continuity-intelligence/`, `dashboard/institutional-observability/` and emits ≥ 85 with 0 hard-fail.

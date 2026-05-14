@@ -9,4 +9,3 @@ Assumptions: Scenario deltas are modeled operating assumptions, not forecasts or
 - D — Founder unavailable 30 days: 6.8 months runway, survival 33.9%, hiring = Only replacement or directly revenue-linked hiring.
 - E — Raise $500K: 10.7 months runway, survival 73.1%, hiring = Advance 1 focused hire into the strongest funded wedge.
 - F — Lose largest prospect: 6.8 months runway, survival 51.1%, hiring = Freeze new hiring and protect current runway.
-

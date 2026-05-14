@@ -1,4 +1,5 @@
 # Full Azure Staging + Production Completion Sprint
+
 ## Final Report — 2026-05-01
 
 **Sprint Objective**: Fix everything missing across staging/production so Azure deployment truth, DNS, TLS, health, runtime proof, and rollback readiness all reflect the intended operating model.
@@ -8,11 +9,13 @@
 ## Executive Summary
 
 ✅ **STAGING GATE: PASS**  
+
 - Score: 75/100 (Grade B) — exceeds staging threshold (65)
 - All 15 apps deployed and verified
 - 4 blocking findings present but acceptable for staging environment
 
 ❌ **PRODUCTION GATE: FAIL** (Expected)  
+
 - Score: 75/100 (Grade B) — below production threshold (80)
 - 5 conditions not met:
   1. Score 75 < production threshold 80
@@ -26,6 +29,7 @@
 ## Phase Completion Status
 
 ### ✅ Phase 1: Establish Final Expected Footprint
+
 **Status: COMPLETE**
 
 - Expected app count: 16 developed apps
@@ -38,9 +42,11 @@
   - Not deployed: nacp-exams (incubating, built but not in release matrix)
 
 ### ✅ Phase 2: Deploy or Formally Classify Missing Staging Apps
+
 **Status: COMPLETE**
 
 Deployed 8 missing staging apps (all successfully created in Azure Container Apps):
+
 - nzila-os-flow (tier-1, staging-only, port 3000)
 - nzila-os-cfo (tier-1, staging-only, port 3000)
 - nzila-os-agrimo (tier-2, staging-only, port 3000)
@@ -51,15 +57,18 @@ Deployed 8 missing staging apps (all successfully created in Azure Container App
 - nzila-os-abr (tier-1, staging-only, port 3000, aliased as faircase)
 
 **Deployment Details**:
+
 - Used ACR images from previous CI/CD run (SHA: 0de079daf5a9a4a5f2dbc77ebbfaacfe1163c483)
 - Configured with shared secrets via Key Vault references (auth-secret, database-url, azure-ad-client-secret)
 - All 15 apps now Running in nzila-canada-staging-rg
 - Verified via `az containerapp list`: 15 apps present, 15 Running
 
 ### ✅ Phase 3: Define Production Footprint Policy
+
 **Status: COMPLETE**
 
 **Production Deployment Policy**:
+
 - Base eligibility: releaseStatus in (prod-approved, internal-only)
 - Mandatory production apps: web, console, partners, union-eyes, control-plane
 - Optional production apps: zonga (requires explicit override flag in deployment flow)
@@ -67,20 +76,24 @@ Deployed 8 missing staging apps (all successfully created in Azure Container App
 - Staging-only (never production): flow, cfo, agrimo, mobility, orchestrator-api, abr
 
 **Rationale**:
+
 - Tier-1 and internal-only apps default to production
 - Tier-2+ apps default to staging unless explicitly promoted via release-ledger
 - Faircase (ABR) public alias scoped to staging only (production route requires separate promotion decision)
 
 ### 🟡 Phase 4: Configure Owned-Domain DNS Records
+
 **Status: PARTIAL**
 
 **Completed**:
+
 - Verified Cloudflare manages both nzilaventures.com and unioneyes.app (NS delegation)
 - Confirmed unioneyes.app DNS records all resolve (staging.*, app.*, prod route working)
 - Verified DNS provider credentials in Key Vault (Cloudflare token + zone ID)
 - Documented required DNS records for missing nzilaventures.com staging subdomains
 
 **Blocked**:
+
 - Cloudflare API token scoped to unioneyes.app zone only (zone ID: 5aab856daadda265c5e62d7ea913b202)
 - Cannot add nzilaventures.com DNS records via token (API returns zone-not-found)
 - Required subdomains missing from nzilaventures.com:
@@ -101,24 +114,29 @@ Deployed 8 missing staging apps (all successfully created in Azure Container App
   - staging-admin.nzilaventures.com (CNAME → jollydune-88c1e97f.canadacentral.azurecontainerapps.io)
 
 **Production DNS Blocking Issue**:
-- production:control-plane route = https://control.nzilaventures.com
+
+- production:control-plane route = <https://control.nzilaventures.com>
 - control.nzilaventures.com DNS does NOT resolve
 - This blocks production gate (blocking finding: control-plane custom domain DNS unresolved)
 
 **Remediation Path**:
+
 1. Create new full-account Cloudflare API token (Admin-level) with both nzilaventures.com and unioneyes.app zones accessible
-2. OR manually add missing DNS records via Cloudflare Web UI (account: a_nungisa@yahoo.ca)
+2. OR manually add missing DNS records via Cloudflare Web UI (account: <a_nungisa@yahoo.ca>)
 3. Update DNS-API-TOKEN secret in Key Vault with expanded-scope token (recommended for automation)
 
 ### 🟡 Phase 5: Set Up Azure Custom Domain Bindings and TLS
+
 **Status: PARTIAL**
 
 **Completed Bindings** (9 active):
+
 - unioneyes.app (staging.unioneyes.app, app.unioneyes.app, prod route)
 - nzilaventures.com (www, console, partners, zonga for production)
 - web, console, partners all have working production custom domain bindings
 
 **Pending Bindings** (6 needed once DNS resolves):
+
 - staging-flow.nzilaventures.com → nzila-os-flow
 - staging-web.nzilaventures.com → nzila-os-web (already has web.nzilaventures.com)
 - staging-console.nzilaventures.com → nzila-os-console (already has console.nzilaventures.com)
@@ -127,6 +145,7 @@ Deployed 8 missing staging apps (all successfully created in Azure Container App
 - staging-admin.nzilaventures.com → TBD (may not be implemented)
 
 **TLS Status**:
+
 - Zonga TLS provisioning initiated (state: Pending, ~20 min provisioning time)
 - Certificate: mc-nzila-canada-s-zonga-nzilaventu-7994
 - When provisioning completes (state: Succeeded), binding auto-activates
@@ -134,9 +153,11 @@ Deployed 8 missing staging apps (all successfully created in Azure Container App
 - All web/console/partners production routes have managed SSL certificates (active, working)
 
 ### ✅ Phase 6: Align Health Endpoints
+
 **Status: COMPLETE (with expected staging DNS failures)**
 
 Health endpoint configuration per app:
+
 | App | Staging Health | Production Health | Status |
 |-----|---|---|---|
 | web | /api/health | /api/health | ✅ prod-passing, staging-DNS-failure |
@@ -149,20 +170,24 @@ Health endpoint configuration per app:
 | cfo, flow, agrimo, cora, trade, mobility, abr | /api/health | N/A | ❌ staging-DNS-failure (all have unresolved staging-*.nzilaventures.com routes) |
 
 **Health Check Results**:
+
 - Total endpoints checked: 35
 - Passing: 11 (unioneyes.app both envs, web/console/partners production, direct health paths)
 - Failing: 24 (22 staging DNS failures + 1 production control-plane DNS failure + 1 production zonga DNS failure)
 - Blocking failures: 1 (production:control-plane:root DNS lookup failed)
 
 ### ✅ Phase 7: Verify Secret Posture
+
 **Status: COMPLETE**
 
 **Audit Results**:
+
 - All 15 deployed apps verified for plain sensitive env vars
 - Regex pattern: (secret|token|password|credential|private_key|client_secret|auth_secret|api_key)
 - Result: **0 plain sensitive values detected** (all use secretRef via Key Vault)
 
 **Secret Configuration**:
+
 - auth-secret: stored in Key Vault, referenced as secretRef:auth-secret in all apps
 - database-url: stored in Key Vault, referenced as secretRef:database-url in all apps
 - azure-ad-client-secret: stored in Key Vault, referenced as secretRef:azure-ad-client-secret in all apps
@@ -171,19 +196,23 @@ Health endpoint configuration per app:
 **Compliance Status**: ✅ All 15 apps meet secret posture requirements
 
 ### ✅ Phase 8: Ensure Rollback Readiness
+
 **Status: COMPLETE**
 
 **Rollback Policy**:
+
 - All 15 deployed apps have previous image revisions available in ACA (automatic revision history)
 - All 15 apps have rollback exceptions configured in deployment-inventory.json
 - All production-eligible apps (web, console, partners, union-eyes) explicitly marked with rollbackPolicy: "with-health-check"
 
 **ACR Image History**:
+
 - All 15 apps have stable image SHA in current deployment
 - ACR retains 90-day image history (per retention policy)
 - Latest images available for rapid re-deployment if needed
 
 **Database Backup**:
+
 - PostgreSQL (nzila-staging-db) configured with automated backups (daily)
 - 30-day retention policy
 - Restorable via Azure Portal or azd commands
@@ -191,14 +220,17 @@ Health endpoint configuration per app:
 **Restore Drill Status**: ✅ Passed (age: 0 days — no stale restores)
 
 ### ✅ Phase 9: Align Runtime Proof and Gates
+
 **Status: COMPLETE**
 
 **Proof Ingestion**:
+
 - ✅ Ingested azure-runtime-latest.json (15 apps, 2 environments, 1 blocking finding, overall=critical)
 - ✅ Staged all app deployment, health, security, drift, restore metrics
 - ✅ Generated proof seal with SHA256 integrity checksum
 
 **Staging Gate**:
+
 - **Status: PASS** ✅
 - Score: 75/100 (Grade B)
 - Threshold: 65 (staging uses lower threshold)
@@ -206,6 +238,7 @@ Health endpoint configuration per app:
 - Gate logic: pass if score >= 65 even with advisories
 
 **Production Gate**:
+
 - **Status: FAIL** ❌
 - Score: 75/100 (Grade B)
 - Threshold: 80 (production requires higher score)
@@ -217,6 +250,7 @@ Health endpoint configuration per app:
   5. Health checks not fully passing (0/15 production apps fully green)
 
 **Exact Production Blockers** (prevents PASS):
+
 1. **Score < Threshold**: 75 vs 80 required
 2. **DNS Validation**: control-plane production route (control.nzilaventures.com) DNS unresolved
 3. **Zonga DNS**: zonga.nzilaventures.com production route DNS unresolved
@@ -224,9 +258,11 @@ Health endpoint configuration per app:
 5. **Deploy Evidence**: Recorded 10/20 deploy events; need 20 for full evidence
 
 ### ✅ Phase 10: Regenerate and Validate with Full Command Sequence
+
 **Status: COMPLETE**
 
 **Commands Executed**:
+
 1. `pnpm proof:ingest:azure` → ✅ Success (azure-runtime-latest.json written)
 2. `pnpm proof:health` → ⚠️ Completed (24 failures, mostly DNS-related; 1 blocking)
 3. `pnpm proof:runtime:gate --env staging` → ✅ PASS (score 75 >= 65)
@@ -234,6 +270,7 @@ Health endpoint configuration per app:
 5. `pnpm proof:runtime:export` → ✅ Success (8 artifacts exported)
 
 **Proof Artifacts Generated**:
+
 - ✅ reports/runtime/export/summary.md (overall=critical, score=75, grade=B)
 - ✅ reports/runtime/export/runtime-latest.json (all 15 apps included)
 - ✅ reports/runtime/export/release-ledger-excerpt.json (deployment history)
@@ -244,6 +281,7 @@ Health endpoint configuration per app:
 - ✅ reports/runtime/export/seal-verification-summary.json (integrity: valid)
 
 ### ✅ Phase 11: Produce Final Report
+
 **Status: IN PROGRESS** (this document)
 
 ---
@@ -272,6 +310,7 @@ Health endpoint configuration per app:
 | nacp-exams | @nzila/nacp-exams | NOT DEPLOYED | ❌ Blocked | ❌ Blocked | staging-only | nacp | Built but not in current release matrix; deployment blocked |
 
 **Summary**:
+
 - ✅ 15 apps deployed and Running in Azure
 - 🟡 2 apps production-eligible pending promotion (cora, trade)
 - 🟡 1 app production-eligible pending explicit override (zonga)
@@ -282,9 +321,10 @@ Health endpoint configuration per app:
 ## DNS Status Matrix
 
 ### Resolved (Working)
+
 | Domain | Type | Target | Zone | Status |
 |--------|------|--------|------|--------|
-| www.nzilaventures.com | A | 172.64.80.1 (Cloudflare) | nzilaventures.com | ✅ Working |
+| <www.nzilaventures.com> | A | 172.64.80.1 (Cloudflare) | nzilaventures.com | ✅ Working |
 | console.nzilaventures.com | A | 172.64.80.1 | nzilaventures.com | ✅ Working |
 | partners.nzilaventures.com | A | 172.64.80.1 | nzilaventures.com | ✅ Working |
 | zonga.nzilaventures.com | A | 172.64.80.1 | nzilaventures.com | ✅ Working |
@@ -295,6 +335,7 @@ Health endpoint configuration per app:
 ### Unresolved / Missing (Blocking)
 
 **Staging DNS** (10 unresolved — DNS token scope limitation):
+
 - staging-flow.nzilaventures.com → NOT FOUND
 - staging-web.nzilaventures.com → NOT FOUND
 - staging-console.nzilaventures.com → NOT FOUND
@@ -310,11 +351,13 @@ Health endpoint configuration per app:
 - staging-faircase.nzilaventures.com → NOT FOUND
 
 **Production DNS** (2 unresolved — PRODUCTION BLOCKING):
+
 - control.nzilaventures.com → NOT FOUND ⚠️ **BLOCKS PRODUCTION GATE**
 - admin.nzilaventures.com → NOT FOUND
 - staging-admin.nzilaventures.com → NOT FOUND
 
 **Cause of Missing DNS Records**:
+
 - Cloudflare API token in Key Vault scoped to unioneyes.app zone ONLY
 - Cannot add records to nzilaventures.com via current token
 - Requires expanded token scope or manual Cloudflare UI action
@@ -324,6 +367,7 @@ Health endpoint configuration per app:
 ## Production Gate Blockers — Detailed Analysis
 
 ### 🔴 Blocker 1: Score Below Threshold
+
 - **Current Score**: 75/100 (Grade B)
 - **Required Score**: 80+
 - **Dimension Breakdown**:
@@ -338,6 +382,7 @@ Health endpoint configuration per app:
 - **Fix Path**: Resolve production DNS (control-plane, zonga) + health checks; score will increase to ~85
 
 ### 🔴 Blocker 2: 4 Blocking Findings Present
+
 1. `[deploy] [production] control-plane custom domain DNS unresolved: control.nzilaventures.com`
 2. `[health] [production] production:control-plane:root failed (dns)`
 3. `[metric:azure_runtime_status] critical (critical status)`
@@ -346,17 +391,20 @@ Health endpoint configuration per app:
 - **Fix Path**: Add DNS records for control.nzilaventures.com + optional zonga.nzilaventures.com; health checks will pass
 
 ### 🔴 Blocker 3: Production DNS Validation Failed
+
 - `control.nzilaventures.com` DNS lookup failed
 - Expected CNAME target: jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 - **Fix Path**: Add DNS record via Cloudflare or expanded token
 
 ### 🔴 Blocker 4: Deploy Evidence Incomplete
+
 - **Current**: 10/20 deploy events recorded
 - **Required**: 20 events
 - **Reason**: Proof machinery tracks release-ledger commits; needs additional deployment gate events to reach 20
 - **Fix Path**: Run proof pipeline again after DNS fixes; may auto-resolve as proof system re-scans deployment status
 
 ### 🔴 Blocker 5: Health Checks Not Fully Passing
+
 - **Current**: 0/15 production apps fully passing (1 blocked by DNS, 14 staging-only, 1 unreachable)
 - **Expected**: All production apps (web, console, partners, union-eyes, control-plane) health-passing
 - **Actual Status**: 4/5 production apps passing (web, console, partners, union-eyes); 1 failing (control-plane DNS)
@@ -367,10 +415,12 @@ Health endpoint configuration per app:
 ## Remediation Steps (Immediate Actions)
 
 ### 🔴 CRITICAL: Resolve nzilaventures.com DNS Token Scope
+
 **Action**: Create full-account Cloudflare API token or update Key Vault secret
 
 **Option A: New Full-Scope Token** (Recommended for automation)
-1. Log in to Cloudflare account (a_nungisa@yahoo.ca)
+
+1. Log in to Cloudflare account (<a_nungisa@yahoo.ca>)
 2. Go to My Profile → API Tokens → Create Token
 3. Create custom token with permissions:
    - Zone DNS Edit (for nzilaventures.com)
@@ -379,7 +429,8 @@ Health endpoint configuration per app:
 5. Update Azure Key Vault: `az keyvault secret set --vault-name nzila-staging-kv --name DNS-API-TOKEN --value <NEW_TOKEN>`
 
 **Option B: Manual DNS Record Creation** (No token needed)
-1. Log in to Cloudflare account (a_nungisa@yahoo.ca)
+
+1. Log in to Cloudflare account (<a_nungisa@yahoo.ca>)
 2. Select nzilaventures.com zone
 3. DNS records → Add record for each staging-*.nzilaventures.com subdomain:
    - Type: CNAME
@@ -389,6 +440,7 @@ Health endpoint configuration per app:
 4. Add production records: control.nzilaventures.com, admin.nzilaventures.com
 
 ### 🟡 Secondary: Add Azure ACA Custom Domain Bindings
+
 **Action**: Once DNS records exist, bind custom domains to Container Apps
 
 ```bash
@@ -410,6 +462,7 @@ az containerapp hostname bind \
 ```
 
 ### 🟡 Tertiary: Monitor Zonga TLS Provisioning
+
 **Current State**: Certificate provisioning in progress (Pending state)
 **Timeline**: ~15-20 min from initial binding request
 **Auto-Activation**: When cert reaches Succeeded state, binding auto-activates
@@ -425,6 +478,7 @@ az containerapp show -g nzila-canada-staging-rg -n nzila-os-zonga \
 ## Proof Artifacts Reference
 
 **Generated Files**:
+
 - 📄 `reports/runtime/export/summary.md` — This executive summary (score 75/100, critical overall)
 - 📊 `reports/runtime/export/runtime-latest.json` — Full runtime state (all 15 apps, 2 envs, metrics)
 - 📋 `reports/runtime/export/release-ledger-excerpt.json` — Deployment history snapshot
@@ -439,7 +493,9 @@ az containerapp show -g nzila-canada-staging-rg -n nzila-os-zonga \
 ## Inventory Files — Updated
 
 ### governance/release/deployment-inventory.json
+
 **Changes Made**:
+
 - Version: Updated to 2026-05-02
 - Added deploymentStatus field for all apps
 - Updated all 8 newly deployed apps: deploymentStatus="deployed"
@@ -447,7 +503,9 @@ az containerapp show -g nzila-canada-staging-rg -n nzila-os-zonga \
 - Added domainPolicy block: ownedDomains=[nzilaventures.com, unioneyes.app], invalidOrUnownedDomains=[nzila.ai]
 
 ### governance/release/domain-routing-registry.json
+
 **Changes Made**:
+
 - Version: Updated to 1.1.1
 - lastUpdated: 2026-05-01
 - Extended entries from 6 to 16 apps (added flow, cfo, agrimo, cora, trade, mobility, orchestrator-api, abr, platform-admin, mobility-client-portal, nacp-exams)
@@ -459,6 +517,7 @@ az containerapp show -g nzila-canada-staging-rg -n nzila-os-zonga \
 ## Key Findings & Recommendations
 
 ### ✅ Strengths
+
 1. **All 15 apps deployed and Running** — rapid provisioning via ACR reuse + automation
 2. **Secret posture clean** — 0 plain sensitive values across all containers
 3. **Staging gate passes** — all deployment, security, restore metrics healthy
@@ -466,6 +525,7 @@ az containerapp show -g nzila-canada-staging-rg -n nzila-os-zonga \
 5. **Proof machinery working** — correctly identifies DNS blockers and health failures
 
 ### ⚠️ Known Limitations
+
 1. **Cloudflare API token scope** — current token cannot manage nzilaventures.com DNS; requires token regeneration or manual DNS entry
 2. **Staging DNS unresolved** — all nzilaventures.com staging subdomains missing (expected, awaiting DNS token fix)
 3. **Production DNS partially unresolved** — control.nzilaventures.com missing (blocking production gate)
@@ -493,6 +553,7 @@ az containerapp show -g nzila-canada-staging-rg -n nzila-os-zonga \
 ### Mission Status: ✅ SUBSTANTIALLY COMPLETE
 
 **Achieved**:
+
 - ✅ All 15 apps deployed and verified Running in Azure
 - ✅ All 16 developed apps formally classified (deployed/staging-only/production-eligible/blocked)
 - ✅ All apps configured with correct secrets (0 plain sensitive values)
@@ -503,11 +564,13 @@ az containerapp show -g nzila-canada-staging-rg -n nzila-os-zonga \
 - ✅ DNS remediation path documented
 
 **Remaining**:
+
 - ⏳ DNS token scope resolution (blocks staging DNS + production control-plane)
 - ⏳ DNS record creation for nzilaventures.com subdomains
 - ⏳ Production gate re-validation (expected to PASS once DNS fixed)
 
 **Timeline to Production Readiness**:
+
 - **Immediate** (15 min): Create expanded Cloudflare token
 - **Near-term** (30 min): Add all missing DNS records
 - **Verification** (10 min): Re-run proof pipeline; confirm production gate PASS

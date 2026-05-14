@@ -232,8 +232,9 @@ function OverviewStep({
       </div>
 
       <div className="space-y-3">
-        <label className="text-sm font-medium">Admin Level</label>
+        <label htmlFor="admin-level" className="text-sm font-medium">Admin Level</label>
         <select 
+          id="admin-level"
           className="w-full p-2 border rounded-md"
           value={data.adminLevel}
           onChange={(e) => setData({ ...data, adminLevel: e.target.value })}

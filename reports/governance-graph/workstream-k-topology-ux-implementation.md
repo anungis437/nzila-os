@@ -20,17 +20,20 @@ on the upstream institutional graph.
 ## 2. Deliverables
 
 ### 2.1 Audit
+
 - [reports/governance-graph/workstream-k-topology-ux-audit.md](./workstream-k-topology-ux-audit.md)
   — substrate map, reference UX template, per-gap analyses (Parts C–G),
   explainability overlays, forbidden + required vocabulary.
 
 ### 2.2 Narrative vocabulary
+
 - [apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts](../../apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts)
   — `topologyUx` bucket forbidding influence/analytics/optimization/AI-topology terms.
 - [apps/union-eyes/tooling/marketing/config/required-vocabulary.ts](../../apps/union-eyes/tooling/marketing/config/required-vocabulary.ts)
   — `TOPOLOGY_UX_REQUIRED` (12 phrases) for the institutional-topology surface.
 
 ### 2.3 Substrate adapter
+
 - [apps/union-eyes/lib/institutional-topology/source.ts](../../apps/union-eyes/lib/institutional-topology/source.ts)
   — exports `InstitutionalTopologyView` + view types, `getInstitutionalGraph()`
   (placeholder empty graph), and `getInstitutionalTopologyView()` which:
@@ -41,6 +44,7 @@ on the upstream institutional graph.
   4. Returns integer substrate counts and an ISO `generatedAt`.
 
 ### 2.4 Read-surface
+
 - [apps/union-eyes/app/[[]locale[]]/dashboard/institutional-topology/page.tsx](../../apps/union-eyes/app/[locale]/dashboard/institutional-topology/page.tsx)
   — server component, `await requireUser()`, six `PANEL` blocks, integers
   only, `—` for empty values, lineage hop chips, continuity kind badges,
@@ -49,6 +53,7 @@ on the upstream institutional graph.
   rendered verbatim.
 
 ### 2.5 Protected-kind projection guard
+
 - [apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts](../../apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts)
   — 3 vitest cases: (a) placeholder graph empty + well-typed,
   (b) every projected view passes `assertNoProtectedKindsInProjections`
@@ -57,6 +62,7 @@ on the upstream institutional graph.
   substrate counts + ISO `generatedAt`.
 
 ### 2.6 Route deviation rationale
+
 - [reports/governance-graph/workstream-k-route-deviation.md](./workstream-k-route-deviation.md)
   — explains why the audit's per-gap five-route plan was consolidated
   into a single canonical `/dashboard/institutional-topology` route
@@ -94,14 +100,14 @@ workstream:
 
 ## 5. Doctrine compliance summary
 
-- **Governance-safe transparency only** — no scoring, no ranking, no
+- __Governance-safe transparency only__ — no scoring, no ranking, no
   predictions, no recommendations. Integers only. Empty values render `—`.
-- **Protected institutional semantics redacted at the graph layer** —
+- __Protected institutional semantics redacted at the graph layer__ —
   `redactProtected` runs once in the adapter; the projection guard test
   exercises `assertNoProtectedKindsInProjections` against every view
   shape on every test run.
-- **Single doctrine footer** — verbatim on the canonical route.
-- **Single explainability overlay** — "Shows / Does not show" statement
+- __Single doctrine footer__ — verbatim on the canonical route.
+- __Single explainability overlay__ — "Shows / Does not show" statement
   applies uniformly to every panel.
 
 ## 6. Forward notes

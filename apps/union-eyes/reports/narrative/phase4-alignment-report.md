@@ -51,6 +51,7 @@ This report enumerates the residual SaaS / operations drift after Phases 1–3 a
 ## 3. SaaS Drift Map (anchor evidence)
 
 ### 3a. Navigation — `app/[locale]/(marketing)/locale-site-navigation.tsx`
+
 The "Modules" mega-menu still reads as a productivity SaaS:
 
 | Pillar (current) | Drift signal |
@@ -64,11 +65,13 @@ The "Modules" mega-menu still reads as a productivity SaaS:
 Top-level: `Solutions | Modules | Insights | Proof | Pricing | Contact` — keep "Solutions/Insights/Proof", **rename "Modules" → "Platform"** or "Continuity Layer" and demote to last position; promote "Trust" (currently buried).
 
 ### 3b. Footer — `app/[locale]/(marketing)/locale-site-footer.tsx`
+
 - Pre-footer CTA copy: *"Ready to lead with clarity? See how UnionEyes turns **casework** into confident, data-backed decisions. Request a demo — no commitment."* → **"casework"** + **"demo"** are SaaS register.
 - French-CA strips diacritics: *"Pret a diriger avec clarte?"* (should be *"Prêt à diriger avec clarté ?"*) — same in `it`/`pt` (e.g. `decisoes`, `demonstracao`).
 - Footer "Capabilities" column lists Inbox/Work/Priorities/Intelligence — same SaaS pillars as nav.
 
 ### 3c. `proof/page.tsx` — strongest operational drift surface (20+ hits)
+
 | Line | Token |
 |---|---|
 | 19 | `governanceOperationalWalkthroughs` |
@@ -86,7 +89,9 @@ Top-level: `Solutions | Modules | Insights | Proof | Pricing | Contact` — keep
 | 184–185 | French parity strings repeat the drift |
 
 ### 3d. Messages — `messages/en-CA.json :: marketing.home`
+
 Copy itself is SaaS-flavored (not just JSX):
+
 - *"A Governed Operating System for Unions"*
 - *"Modules Available"*, *"5+ Modules"* framing
 - *"another SaaS tool"* (used as foil but reinforces register)
@@ -94,6 +99,7 @@ Copy itself is SaaS-flavored (not just JSX):
 - *"platform — total transparency"*
 
 ### 3e. Messages — `messages/en-CA.json :: marketing.footer`
+
 - `description`: *"A governed operating system for Canadian unions — contract-based deployment, **module-level entitlements**, and audit-ready operations."*
 - `tagline`: *"A governed operating system for unions."*
 - `features: "Modules"` (label drift)
@@ -136,6 +142,7 @@ Phase 4 must bring proof + platform + home up to ≥75/100 to match conventions.
 `narrative-audit.json :: rule = coexistence-positioning` warns at **50/100 platform-wide**.
 
 The required vocabulary is missing almost everywhere:
+
 - *"continuity layer"*
 - *"overlay infrastructure"*
 - *"alongside existing systems"*
@@ -189,6 +196,7 @@ From `apps/union-eyes/reports/narrative/narrative-audit.json` (87 files):
 ## 10. Trust–Stewardship Alignment
 
 `trust/page.tsx` carries the hard-fail above. Beyond that, the page lacks:
+
 - explicit Canadian-sovereignty statement (`canadian-positioning` rule warning)
 - coexistence paragraph (rule warning)
 - pre-approved labour-safe-AI disclaimer

@@ -75,7 +75,7 @@ the explainability overlay and the doctrine footer.
   is inherited unchanged.
 - The protected-fence enforcement contract (Part A.3) is strengthened,
   not weakened: the new guard test
-  [apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts](../../apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts)
+  [apps/union-eyes/lib/institutional-topology/**tests**/source.test.ts](../../apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts)
   exercises `assertNoProtectedKindsInProjections` against every projected
   view shape on every test run.
 

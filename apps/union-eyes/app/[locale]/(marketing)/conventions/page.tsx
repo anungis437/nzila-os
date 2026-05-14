@@ -188,7 +188,7 @@ export default async function ConventionsPage({
                 key={step.step}
                 className={`flex gap-6 py-6 ${i < journeySteps.length - 1 ? 'border-b border-gray-100' : ''}`}
               >
-                <div className="flex-shrink-0 w-12">
+                <div className="shrink-0 w-12">
                   <span className="text-xs font-bold text-electric tracking-wider">{step.step}</span>
                 </div>
                 <div>
@@ -196,7 +196,7 @@ export default async function ConventionsPage({
                   <p className="text-gray-600 text-sm leading-relaxed">{step.desc}</p>
                 </div>
                 {i < journeySteps.length - 1 && (
-                  <div className="flex-shrink-0 self-end pb-1">
+                  <div className="shrink-0 self-end pb-1">
                     <ArrowRight className="h-4 w-4 text-gray-300" />
                   </div>
                 )}

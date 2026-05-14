@@ -72,6 +72,7 @@ Other packages (`zonga-monetization`, `workload-intelligence`, `intelligence`, `
 Extend `apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts`:
 
 **Hard-fail:**
+
 - `AI-powered case triage`
 - `AI-powered grievance triage`
 - `AI-led decisioning`
@@ -81,6 +82,7 @@ Extend `apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts`:
 - `organizer scoring`
 
 **Warning:**
+
 - `AI credits`
 - `credits per billing cycle`
 
