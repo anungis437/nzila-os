@@ -25,6 +25,7 @@
 ## Severity Policy
 
 ### ERROR — Must fail release
+
 - Unsupported platform claims in buyer-facing docs
 - Missing env validation in production apps
 - Missing request correlation ID in API handlers
@@ -33,6 +34,7 @@
 - org_id from request body (tenant isolation violation)
 
 ### WARNING — Degrades score
+
 - Missing README for production-critical package
 - Production app without tests
 - Missing health route in production app
@@ -41,6 +43,7 @@
 - Config without Zod validation
 
 ### INFO — Non-blocking
+
 - Style issues
 - Optional docs
 - Minor naming inconsistencies

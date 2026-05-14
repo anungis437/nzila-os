@@ -1,8 +1,24 @@
 /**
- * Solutions — Stakeholder-Oriented Platform Journeys
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
+/**
+ * Solutions — Stakeholder-Oriented Institutional Journeys
  *
  * Enterprise IA: Solutions hub surfacing each stakeholder journey.
- * Hides platform sophistication. Exposes institutional outcomes.
+ * Hides operating-architecture sophistication. Exposes institutional outcomes.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -22,7 +38,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Solutions | Union Eyes',
+    title: 'Solutions | UnionEyes',
     description:
       'Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement.',
     alternates: buildLocaleAlternates(locale, '/solutions'),
@@ -84,7 +100,7 @@ const solutions = [
     href: 'solutions/labour-leadership',
     challenge: 'AI adoption in labour environments requires unambiguous labour-safe postures and human oversight.',
     outcomes: [
-      'Anti-surveillance by design — no worker scoring or monitoring',
+      'Anti-monitoring by design — no individual conduct grading',
       'Human oversight in all intelligence recommendations',
       'Labour-safe modernization with democratic governance controls',
     ],
@@ -117,7 +133,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
           </span>
         }
         heading="Built for every institutional stakeholder"
-        description="Union Eyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role."
+        description="UnionEyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role."
       />
 
       {/* ── Solutions Grid ── */}
@@ -128,7 +144,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
               key={sol.audience}
               className="flex flex-col md:flex-row gap-8 p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors"
             >
-              <div className="flex-shrink-0 flex items-start justify-center md:justify-start">
+              <div className="shrink-0 flex items-start justify-center md:justify-start">
                 <div className="w-14 h-14 rounded-2xl bg-electric/10 flex items-center justify-center">
                   <sol.icon className="h-6 w-6 text-electric" />
                 </div>
@@ -139,7 +155,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
                 <ul className="space-y-2 mb-6">
                   {sol.outcomes.map((outcome) => (
                     <li key={outcome} className="flex items-start gap-2 text-sm text-gray-700">
-                      <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 shrink-0" />
                       {outcome}
                     </li>
                   ))}
@@ -164,13 +180,13 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
             Ready to explore your stakeholder journey?
           </h2>
           <p className="text-white/70 mb-8">
-            Request a demo tailored to your role and institutional context.
+            Request an institutional briefing tailored to your role and institutional context.
           </p>
           <Link
             href={`/${locale}/pilot-request`}
             className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

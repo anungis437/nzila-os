@@ -150,8 +150,6 @@ export function InsightArticleView({
         }
         heading={<>{article.title}</>}
         description={article.excerpt}
-        contextKicker={`${profile.label} lens`}
-        contextNote={profile.heroFraming}
       />
 
       <div className="bg-white border-b border-slate-200/80">
@@ -261,7 +259,7 @@ export function InsightArticleView({
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal delay={0.03} duration={0.8} distance={12} tempo="conference">          </ScrollReveal>
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-2xl font-semibold text-navy mb-8">Continue the strategic reading path</h2>
+            <h2 className="text-2xl font-semibold text-navy mb-8 text-center">Continue the strategic reading path</h2>
           </ScrollReveal>
           <div className="grid md:grid-cols-3 gap-4 narrative-sequence">
             {related.map((item) => (

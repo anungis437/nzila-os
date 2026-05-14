@@ -307,7 +307,7 @@ export function ContinuityIntelligenceCockpit() {
 
       {/* Footer note */}
       <p className="text-xs text-muted-foreground text-center pb-4">
-        Continuity Intelligence · Nzila Union Eyes · Org-scoped, governance-aware, explainable.
+        Continuity Intelligence · Nzila UnionEyes · Org-scoped, governance-aware, explainable.
         Not for employee evaluation or disciplinary use.
       </p>
     </div>

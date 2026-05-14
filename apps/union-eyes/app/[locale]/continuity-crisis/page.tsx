@@ -12,13 +12,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
   if (!article) {
     return {
-      title: 'Insight Not Found | Union Eyes',
+      title: 'Insight Not Found | UnionEyes',
       description: 'The requested insight article could not be found.',
     };
   }
 
   return {
-    title: `${article.title} | Insights | Union Eyes`,
+    title: `${article.title} | Insights | UnionEyes`,
     description: article.excerpt,
   };
 }

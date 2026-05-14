@@ -1,5 +1,5 @@
 /**
- * Operational convergence bindings for Union Eyes.
+ * Operational convergence bindings for UnionEyes.
  *
  * Re-exports the canonical convergence contract so UE Ops governance
  * surfaces honour the canonical IA, cadence, and review workflow shapes.

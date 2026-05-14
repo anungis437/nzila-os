@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-non-literal-fs-filename */
 import { mkdirSync, existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { dirname, join, relative } from 'node:path'

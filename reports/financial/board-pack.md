@@ -49,4 +49,3 @@
 
 - Kill or pause: Web, Agrimo, Cora.
 - Double down: Union Eyes, Flow, CFO.
-

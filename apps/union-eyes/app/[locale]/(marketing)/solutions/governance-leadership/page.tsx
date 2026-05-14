@@ -1,3 +1,19 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ShieldCheck, Eye, FileCheck, GitBranch, Vote, ArrowRight } from 'lucide-react';
@@ -8,8 +24,8 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Governance Leadership | Solutions | Union Eyes',
-    description: 'Modernize governance operations with explainable intelligence, full audit trails, and democratic oversight controls. Union Eyes for governance leaders.',
+    title: 'Governance Leadership | Solutions | UnionEyes',
+    description: 'Modernize governance operations with explainable intelligence, full audit trails, and democratic oversight controls. UnionEyes for governance leaders.',
     alternates: buildLocaleAlternates(locale, '/solutions/governance-leadership'),
   };
 }
@@ -40,11 +56,11 @@ export default function GovernanceLeadershipPage() {
           </span>
         }
         heading={<>Governance modernization that<br />earns democratic trust.</>}
-        description="Union Eyes Governance Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic legitimacy."
+        description="UnionEyes Governance Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic legitimacy."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               Governance Intelligence Platform
@@ -71,7 +87,7 @@ export default function GovernanceLeadershipPage() {
 
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What governance leaders gain with Union Eyes</h2>
+          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What governance leaders gain with UnionEyes</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {outcomes.map((o) => (
               <div key={o.title} className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
@@ -126,7 +142,7 @@ export default function GovernanceLeadershipPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Modernize governance with confidence</h2>
           <p className="text-white/70 mb-8">See Governance Intelligence in a live pilot demonstration.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

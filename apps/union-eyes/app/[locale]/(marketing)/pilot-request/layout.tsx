@@ -10,9 +10,9 @@ export async function generateMetadata({
   const { locale } = await params;
 
   return {
-    title: 'Request a Pilot | Union Eyes',
+    title: 'Request a Pilot | UnionEyes',
     description:
-      'Start a structured pilot to validate Union Eyes for labour-safe, explainable executive intelligence.',
+      'Start a structured pilot to validate UnionEyes for labour-safe, explainable executive intelligence.',
     alternates: buildLocaleAlternates(locale, '/pilot-request'),
   };
 }

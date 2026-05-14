@@ -1,4 +1,5 @@
 # Zonga — Backup & Incident Response Plan
+
 **Sprint**: Client Launch Readiness | **Date**: 2026-04-19
 **Environment**: Nzila Canada Central (Azure Container Apps + PostgreSQL Flexible + Azure Blob Storage + AWS CloudFront/MediaConvert/IVS)
 
@@ -35,6 +36,7 @@
 | Geo-redundant backup | **Configure before launch** |
 
 **Recommended Change Before Launch**:
+
 ```bash
 az postgres flexible-server update \
   --resource-group nzila-canada-staging-rg \
@@ -44,6 +46,7 @@ az postgres flexible-server update \
 ```
 
 **Manual Backup Procedure** (before major deployments):
+
 ```powershell
 $env:PGPASSWORD = "nzila_dev"
 $timestamp = Get-Date -Format "yyyy-MM-dd-HHmm"
@@ -54,6 +57,7 @@ $timestamp = Get-Date -Format "yyyy-MM-dd-HHmm"
 ```
 
 **Restore Procedure**:
+
 ```bash
 # Option 1: Azure Portal — point-in-time restore
 # Azure Portal → PostgreSQL Flexible Server → Restore
@@ -71,6 +75,7 @@ pg_restore -U nzila -d nzila_automation_restore \
 - **Blob versioning**: Enable soft-delete with 30-day retention
 
 **Recommended Configuration Before Launch**:
+
 ```bash
 az storage account blob-service-properties update \
   --account-name nzilacanadastore \
@@ -83,6 +88,7 @@ az storage account blob-service-properties update \
 ### 2.3 Configuration / Secrets
 
 All secrets are stored in Azure Key Vault. Backups:
+
 - Source of truth: 1Password vault (shared with Nzila team)
 - Key Vault provides soft-delete by default (90-day recovery window)
 - GitHub Secrets are a secondary copy for CI/CD
@@ -105,12 +111,14 @@ All secrets are stored in Azure Key Vault. Backups:
 ### Step 1 — Detect
 
 **Automated signals (configure before launch)**:
+
 - Azure Monitor alert: Container App error rate >5% for 5 minutes
 - Azure Monitor alert: DB connection failures >10 in 60s
 - AWS CloudWatch: CloudFront 5xx rate >2%
 - Uptime monitor: [UptimeRobot / Better Uptime] ping `/api/health` every 60s
 
 **Manual check signals**:
+
 - User report via support email / Discord / in-app feedback
 - Failed payment Stripe webhook event
 
@@ -124,6 +132,7 @@ All secrets are stored in Azure Key Vault. Backups:
 ### Step 3 — Communicate
 
 **Internal**: Post in Slack/Teams #incident channel:
+
 ```
 [INCIDENT P{severity}] {date/time} — {brief description}
 Status: INVESTIGATING
@@ -151,6 +160,7 @@ On call: {name}
 ### Step 6 — Post-Incident
 
 Within 48 hours:
+
 - Write brief post-mortem (5-minute doc):
   - Timeline of detection → resolution
   - Root cause
@@ -195,29 +205,33 @@ az containerapp update \
 If a security breach is suspected:
 
 ### Immediate (0–15 min)
+
 1. **Invalidate all active sessions**: `DELETE FROM auth_user_sessions WHERE created_at < NOW()` — effectively logs out all users
 2. **Rotate auth secret**: Regenerate `AUTH_SECRET` and update in all Container Apps
 3. **Notify Nzila security lead**
 
 ### Short Term (15–60 min)
+
 4. Identify the attack vector from logs (Azure Log Analytics)
 5. Block suspicious IPs at the Container Apps edge or via Azure Front Door (if configured)
 6. Assess data exposure scope
 
 ### Regulatory Reporting
+
 - GDPR: 72-hour notification to supervisory authority if EU users' data is breached
 - POPIA (South Africa): notify Information Regulator within a reasonable time
 - NDPR (Nigeria): 72-hour notification if ≥100 Nigerian users affected
 - Notify affected users promptly once scope is known
 
 ### Contact List for Security Events
+
 | Role | Contact | Channel |
 |---|---|---|
 | Founder / CTO | [NAME] | [PHONE/EMAIL] |
 | Security Lead | [NAME] | [PHONE/EMAIL] |
 | Legal Counsel | [NAME] | [PHONE/EMAIL] |
 | Azure Support | Portal → New Support Request | P1 ticket |
-| Stripe Security | https://stripe.com/docs/security | security@stripe.com |
+| Stripe Security | <https://stripe.com/docs/security> | <security@stripe.com> |
 
 ---
 
@@ -226,6 +240,7 @@ If a security breach is suspected:
 Run this checklist on launch day before opening to clients:
 
 ### Pre-Launch (T-2 hours)
+
 - [ ] PostgreSQL backup verified (run manual pg_dump)
 - [ ] All Container Apps reporting healthy (200 on `/api/health`)
 - [ ] Test upload → transcode → playback end-to-end (one audio file)
@@ -237,12 +252,14 @@ Run this checklist on launch day before opening to clients:
 - [ ] Processing queue worker confirmed running (check `getUploadHealthPanel()`)
 
 ### Go-Live (T-0)
+
 - [ ] First client org created and org_members populated
 - [ ] finance_admin role assigned to appropriate user
 - [ ] Client walkthrough call completed (see onboarding script)
 - [ ] Incident response contacts confirmed with client
 
 ### Post-Launch Checks (T+1 hour, T+4 hours, T+24 hours)
+
 - [ ] Review Azure Container Apps logs for errors
 - [ ] Review Stripe dashboard for any failed payments
 - [ ] Check upload job health panel for stuck jobs

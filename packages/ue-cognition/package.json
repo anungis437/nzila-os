@@ -2,6 +2,7 @@
   "name": "@nzila/ue-cognition",
   "version": "0.1.0",
   "private": true,
+  "description": "Reviewer-assisted institutional intelligence primitives — case-risk, workload, engagement, and precedent reasoning under entitlement governance. Surfaces signals for representative decision-making; never autonomous.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

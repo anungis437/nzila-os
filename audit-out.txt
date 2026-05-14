@@ -1,0 +1,12 @@
+
+> @nzila/union-eyes@1.0.0 narrative:audit C:\APPS\nzila-automation\apps\union-eyes
+> tsx tooling/marketing/narrative-audit.ts
+
+
+UnionEyes ΓÇö Narrative CI Audit
+============================================================
+Files scanned        : 87
+Hard-fail violations : 0
+Warning violations   : 231
+Rule failures        : 0
+Institutional Maturity (avg) : 87/100

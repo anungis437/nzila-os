@@ -71,4 +71,3 @@
 - Customer comms: No active external customer communication required unless a dormant account reactivates.
 - Code archive plan: snapshot app path, tag final release, and move residual TODOs into governance backlog.
 - Reusable IP extraction: preserve workflow primitives, integration contracts, and UI patterns tied to legacy mobility surface held only for archival continuity during retirement.
-

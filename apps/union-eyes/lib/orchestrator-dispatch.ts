@@ -1,5 +1,5 @@
 /**
- * Union Eyes — Orchestrator Dispatch Client
+ * UnionEyes — Orchestrator Dispatch Client
  *
  * Submits domain workflow jobs to the Nzila Orchestrator API.
  * All dispatches are idempotent: the orchestrator deduplicates on

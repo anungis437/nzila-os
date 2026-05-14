@@ -1,5 +1,5 @@
 """
-Union Eyes Compliance Module — Jurisdiction-aware employment and member validation
+UnionEyes Compliance Module — Jurisdiction-aware employment and member validation
 
 Used for validating member employment records, leave, benefits, pension contributions
 against jurisdiction-specific labor law requirements.
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class JurisdictionConfig:
     """
-    Shared jurisdiction policy loader for Union Eyes backend.
+    Shared jurisdiction policy loader for UnionEyes backend.
     Mirrors the Agrimo implementation for consistency.
     """
 

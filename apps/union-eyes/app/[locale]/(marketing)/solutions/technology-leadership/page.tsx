@@ -1,3 +1,19 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Cpu, ShieldCheck, Lock, Eye, CheckCircle, ArrowRight } from 'lucide-react';
@@ -8,8 +24,8 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Technology Leadership | Solutions | Union Eyes',
-    description: 'Governance-safe AI with full explainability, enterprise security, and Canadian data residency. Union Eyes for technology leaders in labour organizations.',
+    title: 'Technology Leadership | Solutions | UnionEyes',
+    description: 'Governance-safe AI with full explainability, enterprise security, and Canadian data residency. UnionEyes for technology leaders in labour organizations.',
     alternates: buildLocaleAlternates(locale, '/solutions/technology-leadership'),
   };
 }
@@ -19,7 +35,7 @@ const outcomes = [
   { icon: Lock,        title: 'Enterprise security & data residency',   desc: 'Canadian data residency, SOC 2-aligned infrastructure, and full audit capabilities for compliance and regulatory requirements.' },
   { icon: Eye,         title: 'Full explainability guarantees',         desc: 'Every intelligence output is traceable to source evidence. No black-box outputs in a labour environment.' },
   { icon: Cpu,         title: 'Modular, safe deployment architecture',  desc: 'Deploy the modules your organization needs, in the sequence that matches your readiness — no big-bang implementations.' },
-  { icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally.' },
+  { icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the operating architecture can be repurposed for individual monitoring or worker conduct grading. Enforced architecturally.' },
 ];
 
 const technicalPrinciples = [
@@ -42,11 +58,11 @@ export default function TechnologyLeadershipPage() {
           </span>
         }
         heading={<>Enterprise-safe AI that your<br />institution can trust.</>}
-        description="Labour organizations need AI that is explainable, governed, labour-safe, and institutionally trustworthy — not experimental. Union Eyes is built to meet that standard at every architectural layer."
+        description="Labour organizations need AI that is explainable, governed, labour-safe, and institutionally trustworthy — not experimental. UnionEyes is built to meet that standard at every architectural layer."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               View Trust Center
@@ -72,7 +88,7 @@ export default function TechnologyLeadershipPage() {
 
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What technology leaders gain with Union Eyes</h2>
+          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What technology leaders gain with UnionEyes</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {outcomes.map((o) => (
               <div key={o.title} className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
@@ -106,9 +122,9 @@ export default function TechnologyLeadershipPage() {
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">AI your institution can trust</h2>
-          <p className="text-white/70 mb-8">Request a technical briefing or platform demonstration.</p>
+          <p className="text-white/70 mb-8">Request a technical briefing or live institutional walkthrough.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

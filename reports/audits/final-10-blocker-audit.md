@@ -6,25 +6,31 @@ Scope: Remaining blockers only (proof, truth drift, live data saturation, commer
 ## P0 Blockers (must clear for 10/10)
 
 1. External proof is incomplete for SELL NOW products.
+
 - Union Eyes has pilot evidence but no canonical proof dossier index with standardized metrics.
 - Flow has implementation maturity but no pilot-proof artifact with measurable outcomes.
 
 2. Canonical score/truth drift risk from legacy reports.
+
 - Historic scorecard/maturity artifacts remained in active reports directory and conflicted with current truth model.
 - CI previously had no dedicated canonical-truth gate.
 
 3. Commercial front door still too diffuse.
+
 - External readers could identify many products but not immediate sell-now concentration fast enough.
 
 ## P1 Blockers (highest ROI after P0)
 
 1. Live data saturation consistency gaps across executive surfaces.
+
 - Freshness signaling is present in some areas but not yet standardized as a single confidence contract on every KPI stream.
 
 2. Buyer trust packs were not standardized under one directory.
+
 - Buyer content existed, but not in concise, procurement-ready one-pagers grouped by SELL NOW products.
 
 3. Console leverage proof lacked one canonical value proof report.
+
 - Operational impact existed in fragments across scorecards and audits.
 
 ## P2 Optional Improvements

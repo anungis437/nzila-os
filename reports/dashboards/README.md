@@ -17,5 +17,6 @@ Operational and executive dashboards for real-time monitoring and status.
 ## Note
 
 Additional dashboards are located in other report categories:
+
 - FinOps dashboards → [financial/](../financial/)
 - SRE dashboards → [operational/](../operational/)

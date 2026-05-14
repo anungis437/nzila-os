@@ -27,28 +27,40 @@ const FOOTER_COPY: Record<string, {
   canadaBadge: string;
 }> = {
   'en-CA': {
-    ctaHeading: 'Ready to lead with clarity?',
-    ctaBody: 'See how UnionEyes turns casework into confident, data-backed decisions. Request a demo - no commitment.',
+    ctaHeading: 'Ready to lead with institutional clarity?',
+    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an institutional briefing.',
+    pilotBadge: 'Pilot Active',
+    canadaBadge: 'Canadian Made',
+  },
+  en: {
+    ctaHeading: 'Ready to lead with institutional clarity?',
+    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an institutional briefing.',
     pilotBadge: 'Pilot Active',
     canadaBadge: 'Canadian Made',
   },
   'fr-CA': {
-    ctaHeading: 'Pret a diriger avec clarte?',
-    ctaBody: 'Decouvrez comment UnionEyes transforme le travail syndical en decisions eclairees.',
+    ctaHeading: 'Prêt à diriger avec clarté institutionnelle?',
+    ctaBody: 'Découvrez comment UnionEyes transforme le travail syndical, la gouvernance et la continuité en un dossier institutionnel défendable. Demandez une séance d\'orientation institutionnelle.',
+    pilotBadge: 'Pilote actif',
+    canadaBadge: 'Fait au Canada',
+  },
+  fr: {
+    ctaHeading: 'Prêt à diriger avec clarté institutionnelle?',
+    ctaBody: 'Découvrez comment UnionEyes transforme le travail syndical, la gouvernance et la continuité en un dossier institutionnel défendable. Demandez une séance d\'orientation institutionnelle.',
     pilotBadge: 'Pilote actif',
     canadaBadge: 'Fait au Canada',
   },
   it: {
-    ctaHeading: 'Pronto a guidare con chiarezza?',
-    ctaBody: 'Scopri come UnionEyes trasforma il lavoro sindacale in decisioni sicure e supportate dai dati. Richiedi una demo senza impegno.',
+    ctaHeading: 'Pronto a guidare con chiarezza istituzionale?',
+    ctaBody: 'Scopri come UnionEyes trasforma casework, governance e continuità in un registro istituzionale difendibile. Richiedi una sessione di orientamento istituzionale.',
     pilotBadge: 'Pilota attivo',
     canadaBadge: 'Creato in Canada',
   },
   pt: {
-    ctaHeading: 'Pronto para liderar com clareza?',
-    ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical em decisoes confiantes e orientadas por dados. Solicite uma demonstracao sem compromisso.',
+    ctaHeading: 'Pronto para liderar com clareza institucional?',
+    ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical, a governança e a continuidade em um registro institucional defensável. Solicite uma sessão de orientação institucional.',
     pilotBadge: 'Piloto ativo',
-    canadaBadge: 'Feito no Canada',
+    canadaBadge: 'Feito no Canadá',
   },
 };
 
@@ -56,6 +68,7 @@ const FOOTER_COPY: Record<string, {
 
 export default function LocaleSiteFooter() {
   const t  = useTranslations('marketing.footer');
+  const tNav = useTranslations('marketing.nav.platformItems');
   const params = useParams();
   const pathname = usePathname() ?? '';
   const locale = (params?.locale as string) || 'en-CA';
@@ -64,14 +77,14 @@ export default function LocaleSiteFooter() {
 
   const footerLinks = {
     [t('platform') as string]: [
-      { name: 'Inbox',                href: `/${locale}/platform#inbox` },
-      { name: 'Work',                 href: `/${locale}/platform#work` },
-      { name: 'Priorities',           href: `/${locale}/platform#priorities` },
-      { name: 'Intelligence',         href: `/${locale}/platform#intelligence` },
-      { name: 'Cognition',            href: `/${locale}/platform#cognition` },
-      { name: 'Governance',           href: `/${locale}/platform#governance` },
-      { name: 'Corporate Memory',     href: `/${locale}/platform#institutional-memory` },
-      { name: 'Trust',                href: `/${locale}/platform#trust` },
+      { name: tNav('inbox.name'),        href: `/${locale}/platform#inbox` },
+      { name: tNav('work.name'),         href: `/${locale}/platform#work` },
+      { name: tNav('priorities.name'),   href: `/${locale}/platform#priorities` },
+      { name: tNav('intelligence.name'), href: `/${locale}/platform#intelligence` },
+      { name: tNav('cognition.name'),    href: `/${locale}/platform#cognition` },
+      { name: tNav('governance.name'),   href: `/${locale}/platform#governance` },
+      { name: tNav('memory.name'),       href: `/${locale}/platform#institutional-memory` },
+      { name: tNav('trust.name'),        href: `/${locale}/platform#trust` },
     ],
     [t('solutions') as string]: [
       { name: t('executiveLeadership'),   href: `/${locale}/solutions/executive-leadership` },
@@ -91,7 +104,8 @@ export default function LocaleSiteFooter() {
       { name: t('story'),        href: `/${locale}/story` },
       { name: t('insights'),     href: `/${locale}/insights` },
       { name: t('institutionalProof'), href: `/${locale}/proof` },
-      { name: t('caseStudies'),  href: `/${locale}/case-studies` },
+      // Case studies hidden until pilots complete — re-enable via CASE_STUDIES_VISIBLE flag.
+      // { name: t('caseStudies'),  href: `/${locale}/case-studies` },
       { name: t('pricing'),      href: `/${locale}/pricing` },
       { name: t('contact'),      href: `/${locale}/contact` },
       { name: t('systemStatus'), href: `/${locale}/trust#system-status` },

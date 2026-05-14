@@ -2,7 +2,7 @@
 title: "Operational Trust: The Missing Layer in Most Modernization Programs"
 slug: operational-trust-in-modernization
 category: Governance Modernization
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Strategy Note

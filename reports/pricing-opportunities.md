@@ -9,5 +9,3 @@
 | partners | restructure_packaging | gross margin -289.01% | Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons. |
 
 ## Immediate Increases
-
-

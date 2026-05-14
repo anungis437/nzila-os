@@ -52,6 +52,7 @@ Source: [reports/runtime/runtime-health-status-latest.json](runtime-health-statu
 | not_instrumented | 6 | platform-admin, veridian-admin, veridian-care, veridian-site, … |
 
 Counts verified: `apps=20 healthy=6 degraded=4 failing=4 not_instrumented=6`.
+
 - `requiresRedeploy=0` (no app waiting on a redeploy)
 - `requiresDnsOrInfra=3` (Veridian trio)
 - `stagedOrIncubating=4`

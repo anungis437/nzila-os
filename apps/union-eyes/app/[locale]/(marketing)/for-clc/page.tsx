@@ -1,4 +1,31 @@
 /**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ *
+ * Role coordination surface
+ *
+ * Coordination posture: representation workflow, case management, intake choreography,
+ * and operational coordination across federation, leadership, member, and staff touchpoints.
+ *
+ * Governance posture: bylaw-aligned procedural cadence, constitutional consistency,
+ * accountability surfaces, and compliance choreography across jurisdictions and mandates.
+ *
+ * Continuity posture: institutional memory preservation, succession-aware handoff,
+ * stewardship of representational records, and procedural continuity across mandates.
+ */
+/**
  * Locale-aware For CLC page.
  */
 export const dynamic = 'force-dynamic';
@@ -20,12 +47,12 @@ import {
   procurementFollowUpInfrastructure,
   qrJourneyArchitecture,
   stakeholderTalkTrackSystem,
-} from '@/lib/operational-legitimacy';
+} from '@/lib/institutional-legitimacy';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const CLC_COPY = {
   'en-CA': {
-    title: 'CLC Field Activation | Union Eyes',
+    title: 'CLC Field Activation | UnionEyes',
     description:
       'Convention-ready executive engagement, QR journeys, and procurement-safe follow-up architecture for CLC field conversion.',
     badge: 'CLC Conversion System',
@@ -38,7 +65,7 @@ const CLC_COPY = {
     tabFollowUp: 'Follow-Up',
   },
   'fr-CA': {
-    title: 'Activation terrain CLC | Union Eyes',
+    title: 'Activation terrain CLC | UnionEyes',
     description:
       'Architecture de conversion conventionnelle avec engagement executif, parcours QR et suivi achats gouvernable.',
     badge: 'Systeme de conversion CLC',
@@ -51,7 +78,7 @@ const CLC_COPY = {
     tabFollowUp: 'Suivi',
   },
   it: {
-    title: 'Attivazione campo CLC | Union Eyes',
+    title: 'Attivazione campo CLC | UnionEyes',
     description:
       'Architettura convention-ready con engagement executive, percorsi QR e follow-up procurement governance-safe.',
     badge: 'Sistema conversione CLC',
@@ -64,7 +91,7 @@ const CLC_COPY = {
     tabFollowUp: 'Follow-up',
   },
   pt: {
-    title: 'Ativacao de campo CLC | Union Eyes',
+    title: 'Ativacao de campo CLC | UnionEyes',
     description:
       'Arquitetura pronta para convencao com engajamento executivo, jornadas QR e follow-up de compras governance-safe.',
     badge: 'Sistema de conversao CLC',

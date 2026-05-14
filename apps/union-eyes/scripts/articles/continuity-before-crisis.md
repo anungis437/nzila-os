@@ -2,7 +2,7 @@
 title: Why Most Organizations Wait Too Long to Invest in Continuity Infrastructure
 slug: continuity-before-crisis
 category: Institutional Continuity
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 9 min
 format: Executive Brief

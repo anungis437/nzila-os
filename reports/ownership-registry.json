@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-11T04:58:06.835Z",
+  "generatedAt": "2026-05-14T09:27:42.622Z",
   "source": "governance/release/app-ownership.json",
-  "seriousAppCount": 21,
+  "seriousAppCount": 27,
   "coveragePct": 100,
   "missingApps": [],
   "roleCoverageFailures": [],
@@ -135,6 +135,22 @@
       }
     },
     {
+      "app": "maestria",
+      "name": "maestria",
+      "tier": "tier-4",
+      "releaseStatus": "not-deployed",
+      "track": "internal",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
+      }
+    },
+    {
       "app": "mobility",
       "name": "Mobility",
       "tier": "tier-2",
@@ -180,6 +196,22 @@
         "releaseOwner": "team-platform-ops@nzila.ai",
         "supportPrimary": "oncall-platform@nzila.ai",
         "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "nzila-hq",
+      "name": "nzila-hq",
+      "tier": "tier-3",
+      "releaseStatus": "not-deployed",
+      "track": "internal",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
       }
     },
     {
@@ -231,6 +263,22 @@
       }
     },
     {
+      "app": "test-scaffold-gp",
+      "name": "test-scaffold-gp",
+      "tier": "tier-5",
+      "releaseStatus": "deprecated",
+      "track": "internal",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
+      }
+    },
+    {
       "app": "trade",
       "name": "Trade",
       "tier": "tier-2",
@@ -244,6 +292,38 @@
         "releaseOwner": "team-platform-ops@nzila.ai",
         "supportPrimary": "oncall-trade@nzila.ai",
         "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "trustcore",
+      "name": "trustcore",
+      "tier": "tier-3",
+      "releaseStatus": "not-deployed",
+      "track": "internal",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
+      }
+    },
+    {
+      "app": "trustcore-trustops",
+      "name": "trustcore-trustops",
+      "tier": "tier-3",
+      "releaseStatus": "not-deployed",
+      "track": "internal",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
       }
     },
     {
@@ -324,6 +404,22 @@
         "releaseOwner": "team-platform-ops@nzila.ai",
         "supportPrimary": "oncall-web@nzila.ai",
         "escalation": "director-engineering@nzila.ai"
+      }
+    },
+    {
+      "app": "weekone",
+      "name": "weekone",
+      "tier": "tier-4",
+      "releaseStatus": "frozen",
+      "track": "internal",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
       }
     },
     {

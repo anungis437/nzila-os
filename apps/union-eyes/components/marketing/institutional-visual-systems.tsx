@@ -3,14 +3,14 @@ import ScrollReveal from '@/components/public/scroll-reveal';
 
 interface VisualPanelProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   children: ReactNode;
 }
 
 function VisualPanel({ title, subtitle, children }: VisualPanelProps) {
   return (
     <article className="institution-panel calm-elevation narrative-step p-5">
-      <p className="institution-kicker mb-2">{subtitle}</p>
+      {subtitle ? <p className="institution-kicker mb-2">{subtitle}</p> : null}
       <h3 className="text-base font-semibold text-navy mb-4 leading-tight">{title}</h3>
       {children}
     </article>
@@ -24,6 +24,15 @@ const continuityTransformation = [
   'Continuity',
   'Trust',
   'Resilience',
+];
+
+const CONTINUITY_DELAY_CLASSES = [
+  '[animation-delay:0ms]',
+  '[animation-delay:80ms]',
+  '[animation-delay:160ms]',
+  '[animation-delay:240ms]',
+  '[animation-delay:320ms]',
+  '[animation-delay:400ms]',
 ];
 
 export function PillarDiagram({
@@ -66,7 +75,7 @@ export function MethodologyVisualizationSystem() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={18}>
-          <h2 className="text-3xl font-semibold text-navy mb-4">Institutional doctrine, operationalized visually</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Institutional doctrine, operationalized visually</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.14} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
@@ -75,7 +84,7 @@ export function MethodologyVisualizationSystem() {
           </p>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: '95ms' }}>
+        <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:95ms]">
           <ScrollReveal delay={0.06} duration={0.9} distance={16}>
             <VisualPanel
               title="Institutional Continuity Intelligence Framework"
@@ -168,18 +177,18 @@ export function ContinuityFlowSignature() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4">Continuity Flow as institutional language</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Continuity Flow as institutional language</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            Union Eyes uses continuity flow to communicate a simple institutional truth: governance knowledge should move safely through time, never breaking at moments of transition.
+            UnionEyes uses continuity flow to communicate a simple institutional truth: governance knowledge should move safely through time, never breaking at moments of transition.
           </p>
         </ScrollReveal>
 
         <ScrollReveal delay={0.18} duration={1} distance={18}>
           <div className="continuity-flow-surface continuity-stage-flow p-5 sm:p-7 continuity-appear">
           <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6 items-center">
-            <div className="space-y-4 narrative-sequence" style={{ ['--sequence-step' as string]: '120ms' }}>
+            <div className="space-y-4 narrative-sequence [--sequence-step:120ms]">
               {flowNodes.map((node) => (
                 <article key={node.title} className="institution-panel continuity-node px-4 py-3">
                   <h3 className="text-sm font-semibold text-navy mb-1">{node.title}</h3>
@@ -208,57 +217,20 @@ export function FragmentationToCoherenceSequence() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4">Fragmentation to resilience, without disruption theatre</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Fragmentation to resilience, without disruption theatre</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            The Union Eyes modernization rhythm is calm and stabilizing: create visibility, align governance, protect continuity, and reinforce institutional trust.
+            The UnionEyes modernization rhythm is calm and stabilizing: create visibility, align governance, protect continuity, and reinforce institutional trust.
           </p>
         </ScrollReveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-3 narrative-sequence" style={{ ['--sequence-step' as string]: '95ms' }}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-3 narrative-sequence [--sequence-step:95ms]">
           {continuityTransformation.map((step, idx) => (
-            <article key={step} className="institution-panel p-4 text-center continuity-appear" style={{ animationDelay: `${idx * 80}ms` }}>
+            <article key={step} className={`institution-panel p-4 text-center continuity-appear ${CONTINUITY_DELAY_CLASSES[idx] ?? ''}`}>
               <p className="text-[11px] tracking-widest uppercase text-slate-500 mb-2">Phase {idx + 1}</p>
               <p className="text-xs sm:text-sm font-semibold text-navy leading-relaxed">{step}</p>
             </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export function ExecutiveResonanceLayer() {
-  const resonanceSignals = [
-    {
-      title: 'Operational reassurance',
-      detail: 'Leaders see continuity posture before disruption risk materializes.',
-    },
-    {
-      title: 'Governance confidence',
-      detail: 'Decision pathways remain explainable, reviewable, and procurement-safe.',
-    },
-    {
-      title: 'Institutional resilience',
-      detail: 'Modernization is experienced as stability amplification, not organizational turbulence.',
-    },
-  ];
-
-  return (
-    <section className="py-16 bg-white border-b border-slate-200/70">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
-        <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-8">Strategic calmness, made memorable</h2>
-        </ScrollReveal>
-        <div className="grid md:grid-cols-3 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: '110ms' }}>
-          {resonanceSignals.map((signal) => (
-            <ScrollReveal key={signal.title} duration={0.88} distance={16}>
-              <VisualPanel title={signal.title} subtitle="Resonance Signal">
-                <p className="text-sm text-slate-600 leading-relaxed">{signal.detail}</p>
-              </VisualPanel>
-            </ScrollReveal>
           ))}
         </div>
       </div>
@@ -278,9 +250,9 @@ export function ConferenceMemoryAnchors() {
   return (
     <section className="py-16 bg-[#12324a] text-white border-b border-[#0e2538]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p className="text-xs tracking-[0.2em] uppercase text-white/70 mb-3">Conference Recall Layer</p>
-        <h2 className="text-3xl font-semibold mb-4">Memory anchors for executive environments</h2>
-        <p className="text-sm text-white/80 mb-8 max-w-3xl leading-relaxed">
+        <p className="text-xs tracking-[0.2em] uppercase text-white/70 mb-3 text-center">Conference Recall Layer</p>
+        <h2 className="text-3xl font-semibold mb-4 text-center">Memory anchors for executive environments</h2>
+        <p className="text-sm text-white/80 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
           This is the language stakeholders should carry after every dialogue, briefing, and conference interaction.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -324,12 +296,12 @@ export function ContinuityMappingLanguage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4">A recognizable visual language for institutional resilience</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">A recognizable visual language for institutional resilience</h2>
         </ScrollReveal>
-        <div className="grid md:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: '110ms' }}>
+        <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
           {maps.map((map) => (
             <ScrollReveal key={map.title} duration={0.9} distance={16}>
-              <VisualPanel title={map.title} subtitle="Continuity Visual">
+              <VisualPanel title={map.title}>
                 <p className="text-sm text-slate-600 leading-relaxed">{map.detail}</p>
               </VisualPanel>
             </ScrollReveal>
@@ -356,14 +328,14 @@ export function ConferenceStoryFlow() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={12} tempo="conference">        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.95} distance={14} tempo="conference">
-          <h2 className="text-3xl font-semibold text-navy mb-4">Narrative choreography for executive environments</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Narrative choreography for executive environments</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.95} distance={14} tempo="conference">
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
             The live storytelling sequence below is optimized for under-five-second executive comprehension at each stage.
           </p>
         </ScrollReveal>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-3 narrative-sequence" style={{ ['--sequence-step' as string]: '110ms' }}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-3 narrative-sequence [--sequence-step:110ms]">
           {stages.map((stage, idx) => (
             <ScrollReveal
               key={stage}
@@ -413,9 +385,9 @@ export function StakeholderVisualPathways() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4">Role-aware visual emphasis by decision context</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Role-aware visual emphasis by decision context</h2>
         </ScrollReveal>
-        <div className="grid md:grid-cols-5 gap-3 narrative-sequence" style={{ ['--sequence-step' as string]: '95ms' }}>
+        <div className="grid md:grid-cols-5 gap-3 narrative-sequence [--sequence-step:95ms]">
           {pathways.map((pathway) => (
             <article key={pathway.stakeholder} className="institution-panel narrative-step p-4">
               <h3 className="text-sm font-semibold text-navy mb-2">{pathway.stakeholder}</h3>

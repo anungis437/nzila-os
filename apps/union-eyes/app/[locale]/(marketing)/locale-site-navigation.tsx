@@ -1,11 +1,15 @@
 'use client';
 
 /**
- * LocaleSiteNavigation — Enterprise institutional navigation for UnionEyes (locale-aware)
+ * LocaleSiteNavigation ΓÇö Enterprise institutional navigation for UnionEyes (locale-aware)
  * Used inside app/[locale]/(marketing)/ where NextIntlClientProvider is active.
  *
- * Enterprise IA (Phase 1 Operational Convergence):
- *   Solutions | Platform | Governance & Trust | Insights | Pilot Program | Contact
+ * Institutional IA (Phase 4 alignment ΓÇö institutional infrastructure with operational modules):
+ *   Solutions | Platform | Trust | Insights | Proof | Pricing | Contact
+ *
+ * Trust is a top-level institutional pillar (audit, sovereignty, explainability) and
+ * intentionally surfaced alongside Platform rather than nested inside it, signalling
+ * that institutional trust is a first-class concern ΓÇö not a sub-module.
  */
 
 import Image from 'next/image';
@@ -36,24 +40,26 @@ export default function LocaleSiteNavigation() {
     { name: t('solutionsItems.procurement.name'), href: `/${locale}/solutions/procurement`, desc: t('solutionsItems.procurement.desc') },
   ];
 
-  // Canonical 8-pillar spine (high-level marketing surface).
+  // Canonical 8-pillar institutional spine (Phase 4 nav IA).
   // All entries deep-link into the single /platform overview page; sub-pages
-  // will land in Wave 3 alongside the runtime module rename.
+  // will land in Wave 3 alongside the runtime module rename. Labels & descriptions
+  // are i18n-driven via marketing.nav.platformItems for full locale parity.
   const platformHref = `/${locale}/platform`;
-  const modulesLinks = [
-    { name: 'Inbox',                href: `${platformHref}#inbox`,                desc: 'Unified intake for cases and member messages' },
-    { name: 'Work',                 href: `${platformHref}#work`,                 desc: 'Active grievance and case workbench' },
-    { name: 'Priorities',           href: `${platformHref}#priorities`,           desc: 'Deadlines, commitments, and next actions' },
-    { name: 'Intelligence',         href: `${platformHref}#intelligence`,         desc: 'Executive, federation, and analytics views' },
-    { name: 'Cognition',            href: `${platformHref}#cognition`,            desc: 'Sovereign reasoning and memory queries' },
-    { name: 'Governance',           href: `${platformHref}#governance`,           desc: 'Charter, motions, and decisions of record' },
-    { name: 'Corporate Memory', href: `${platformHref}#institutional-memory`, desc: 'Doctrine, precedents, and continuity archive' },
-    { name: 'Trust',                href: `${platformHref}#trust`,                desc: 'Audit, explainability, and Canadian sovereignty' },
+  const platformLinks = [
+    { name: t('platformItems.inbox.name'),        href: `${platformHref}#inbox`,                desc: t('platformItems.inbox.desc') },
+    { name: t('platformItems.work.name'),         href: `${platformHref}#work`,                 desc: t('platformItems.work.desc') },
+    { name: t('platformItems.priorities.name'),   href: `${platformHref}#priorities`,           desc: t('platformItems.priorities.desc') },
+    { name: t('platformItems.intelligence.name'), href: `${platformHref}#intelligence`,         desc: t('platformItems.intelligence.desc') },
+    { name: t('platformItems.cognition.name'),    href: `${platformHref}#cognition`,            desc: t('platformItems.cognition.desc') },
+    { name: t('platformItems.governance.name'),   href: `${platformHref}#governance`,           desc: t('platformItems.governance.desc') },
+    { name: t('platformItems.memory.name'),       href: `${platformHref}#institutional-memory`, desc: t('platformItems.memory.desc') },
+    { name: t('platformItems.trust.name'),        href: `${platformHref}#trust`,                desc: t('platformItems.trust.desc') },
   ];
 
   const primaryNav = [
+    { name: t('trust'),    href: `/${locale}/trust` },
     { name: t('insights'), href: `/${locale}/insights` },
-    { name: t('proof'), href: `/${locale}/proof` },
+    { name: t('proof'),    href: `/${locale}/proof` },
     { name: t('pricing'),  href: `/${locale}/pricing` },
     { name: t('contact'),  href: `/${locale}/contact` },
   ];
@@ -112,7 +118,7 @@ export default function LocaleSiteNavigation() {
     >
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 md:h-20">
-          {/* ── Logo ── */}
+          {/* ΓöÇΓöÇ Logo ΓöÇΓöÇ */}
           <div className="flex items-center">
             <Link
               href={`/${locale}`}
@@ -140,7 +146,7 @@ export default function LocaleSiteNavigation() {
             </Link>
           </div>
 
-          {/* ── Desktop Navigation ── */}
+          {/* ΓöÇΓöÇ Desktop Navigation ΓöÇΓöÇ */}
           <div className="hidden xl:flex items-center space-x-5 whitespace-nowrap">
 
             {/* Solutions */}
@@ -171,7 +177,7 @@ export default function LocaleSiteNavigation() {
                         }`}
                       >
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                       </Link>
                     ))}
                   </motion.div>
@@ -179,14 +185,14 @@ export default function LocaleSiteNavigation() {
               </AnimatePresence>
             </div>
 
-            {/* Modules (high-level canonical pillars) */}
+            {/* Platform (8-pillar institutional spine) */}
             <div
               className="relative"
               onMouseEnter={() => { clearTimeout(modulesTimeout.current); setModulesOpen(true); }}
               onMouseLeave={() => { modulesTimeout.current = setTimeout(() => setModulesOpen(false), 150); }}
             >
               <button className={navLinkClass(pathname?.startsWith(`/${locale}/platform`) ?? false)}>
-                {t('modules')}
+                {t('platform')}
                 <ChevronDown className={`h-3.5 w-3.5 transition-transform ${modulesOpen ? 'rotate-180' : ''}`} />
               </button>
               <AnimatePresence>
@@ -198,12 +204,12 @@ export default function LocaleSiteNavigation() {
                     transition={{ duration: 0.15 }}
                     className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 p-2 z-50"
                   >
-                    {modulesLinks.map((link) => (
+                    {platformLinks.map((link) => (
                       <Link key={link.href} href={link.href}
                         className="block px-4 py-3 rounded-lg text-sm transition-colors text-gray-700 hover:bg-gray-50 hover:text-navy"
                       >
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                       </Link>
                     ))}
                   </motion.div>
@@ -251,8 +257,8 @@ export default function LocaleSiteNavigation() {
             <LanguageSwitcher />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`p-2 rounded-lg transition-colors ${scrolled ? 'text-gray-700' : 'text-white'}`}
-              aria-label="Toggle menu"
+              className={`p-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 ${scrolled ? 'text-gray-700 focus-visible:ring-offset-white' : 'text-white focus-visible:ring-offset-navy'}`}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -260,10 +266,11 @@ export default function LocaleSiteNavigation() {
         </div>
       </div>
 
-      {/* ── Mobile drawer ── */}
+      {/* ΓöÇΓöÇ Mobile drawer ΓöÇΓöÇ */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
+            id="ue-mobile-drawer"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -286,28 +293,28 @@ export default function LocaleSiteNavigation() {
                   {solutionsLinks.map((link) => (
                     <Link key={link.href} href={link.href} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
                       <span className="block font-medium leading-tight">{link.name}</span>
-                      <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                      <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                     </Link>
                   ))}
                 </div>
               )}
 
-              {/* Modules mobile */}
+              {/* Platform mobile */}
               <button
                 onClick={() => setMobileModulesOpen(!mobileModulesOpen)}
                 className={`flex w-full items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                   pathname?.startsWith(`/${locale}/platform`) ? 'bg-electric/10 text-electric' : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                {t('modules')}
+                {t('platform')}
                 <ChevronDown className={`h-4 w-4 transition-transform ${mobileModulesOpen ? 'rotate-180' : ''}`} />
               </button>
               {mobileModulesOpen && (
                 <div className="pl-4 space-y-1">
-                  {modulesLinks.map((link) => (
+                  {platformLinks.map((link) => (
                     <Link key={link.href} href={link.href} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
                       <span className="block font-medium leading-tight">{link.name}</span>
-                      <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                      <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                     </Link>
                   ))}
                 </div>

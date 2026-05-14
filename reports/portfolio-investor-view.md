@@ -1,6 +1,6 @@
 # Portfolio Investor View
 
-Generated: 2026-05-11
+Generated: 2026-05-14
 Authority: governance/portfolio/product-catalog.json
 
 ## Active Revenue Wedges

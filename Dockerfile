@@ -275,8 +275,16 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=builder /app/apps/orchestrator-api ./apps/orchestrator-api
-COPY --from=builder /app/packages/db ./packages/db
-COPY --from=builder /app/packages/config ./packages/config
+# orchestrator-api uses tsx (no compile step) and pulls in a deep graph of
+# workspace packages via @nzila/* symlinks in node_modules. Bulk-copy all
+# workspace package and service source so transitive imports resolve.
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/services ./services
+
+# The orchestrator-api start script uses `node --env-file=.env`, which throws ENOENT
+# if the file is missing. In Container Apps env vars are injected by the platform,
+# so provide an empty .env shim to satisfy the loader.
+RUN touch /app/apps/orchestrator-api/.env
 
 # Create non-root user
 RUN groupadd --system --gid 1001 nzila && \

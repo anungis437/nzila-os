@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Continuity Intelligence',
   description:
-    'Executive organizational continuity oversight: fragility analysis, expertise concentration risks, succession readiness, and governance intelligence.',
+    'Reviewer-assisted institutional continuity surface: continuity fragility signals, expertise continuity lineage, succession readiness, and chronology-aware continuity intelligence.',
 };
 
 export default async function ContinuityIntelligencePage() {

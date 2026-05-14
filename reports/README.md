@@ -16,6 +16,7 @@ Reports are organized by domain for easy discovery:
 | [**product-reports/**](./product-reports/) | Product-specific reports (union-eyes, zonga, console, agrimo) |
 
 Existing folders:
+
 - `archive/` — Legacy reports and historical artifacts
 - `commercial/` — Commercial strategy and positioning
 - `compliance/` — Compliance and regulatory reports

@@ -1,5 +1,5 @@
 /**
- * Union Eyes — Governance runtime bootstrap.
+ * UnionEyes — Governance runtime bootstrap.
  *
  * Wires `@nzila/governance-middleware` into the running process by
  * adding sinks (OTel adapter + in-memory mirror for E2E) and binding

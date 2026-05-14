@@ -21,7 +21,7 @@ import { runFullInstitutionalCognition } from '@/lib/institutional-operating-int
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Executive Operating Intelligence · Union Eyes',
+  title: 'Executive Operating Intelligence · UnionEyes',
   description:
     'Calm, strategic projection of institutional cognition: governance coherence, continuity momentum, resilience trajectory.',
 };

@@ -9,7 +9,7 @@ import { PilotApplicationInput } from '@/types/marketing';
 import {
   buildContinuityReadinessProfile,
   buildExecutiveReadinessOutputs,
-} from '@/lib/operational-legitimacy';
+} from '@/lib/institutional-legitimacy';
 
 export interface ReadinessAssessmentResult {
   score: number; // 0-100

@@ -1,3 +1,19 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Briefcase, FileCheck, CheckCircle2, BarChart3, Layers, ArrowRight } from 'lucide-react';
@@ -13,13 +29,13 @@ import {
   deploymentTimelines,
   executiveScenarioModels,
   procurementEvidenceBinder,
-} from '@/lib/operational-legitimacy';
+} from '@/lib/institutional-legitimacy';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Procurement Stakeholders | Solutions | Union Eyes',
+    title: 'Procurement Stakeholders | Solutions | UnionEyes',
     description:
       'Procurement-ready governance, clear implementation scope, and measurable value for institutional deployments.',
     alternates: buildLocaleAlternates(locale, '/solutions/procurement'),
@@ -58,7 +74,7 @@ const challenges = [
   'Procurement processes often miss governance and labour-safety requirements unique to unions',
   'Vendors present broad AI claims without explainability or audit-ready evidence',
   'Implementation risk rises when rollout plans ignore organizational readiness',
-  'Stakeholders struggle to compare options without clear continuity and trust criteria',
+  'Stakeholders find it difficult to compare options without clear continuity and trust criteria',
 ];
 
 export default function ProcurementPage() {
@@ -72,11 +88,11 @@ export default function ProcurementPage() {
           </span>
         }
         heading={<>Procurement clarity for<br />institutional deployment.</>}
-        description="Union Eyes gives procurement teams a practical, defensible path to selection: clear scope, governance-ready controls, and measurable outcomes for leadership confidence."
+        description="UnionEyes gives procurement teams a coexistence-oriented, sovereignty-conscious deployment path: clear scope, governance-safe deployment controls, federation-aware operations, and evidence provenance for leadership confidence."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               Review Trust Center
@@ -92,7 +108,7 @@ export default function ProcurementPage() {
             <ul className="space-y-3">
               {challenges.map((c) => (
                 <li key={c} className="flex items-start gap-3 text-gray-700 text-sm leading-relaxed">
-                  <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 shrink-0" />
                   {c}
                 </li>
               ))}
@@ -119,9 +135,9 @@ export default function ProcurementPage() {
       </section>
 
       <section className="py-16 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Build confidence through phased, governable deployment</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Build confidence through coexistence-safe, governance-safe deployment</h2>
           <p className="text-sm text-gray-600 max-w-3xl mb-6">
-            Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption.
+            Procurement teams can evaluate deployment safety through explicit implementation boundaries, continuity safeguards, sovereignty-conscious deployment pacing, and federation-aware operations — additive to existing institutional systems, never displacing them.
           </p>
           <div className="grid md:grid-cols-3 gap-4">
             <article className="p-5 rounded-xl bg-white border border-gray-100">
@@ -220,9 +236,9 @@ export default function ProcurementPage() {
       </section>
 
       <section className="py-16 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Due diligence content in one operational package</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Due diligence content as evidence provenance, not procurement theatre</h2>
           <p className="text-sm text-gray-600 max-w-3xl mb-6">
-            Procurement teams receive implementation-aware evidence organized for reviewability, governance confidence, and continuity-safe deployment decisions.
+            Procurement teams receive implementation-aware evidence organized for reviewability, chronology-linked trust, and continuity-aware, governance-safe deployment decisions — under operational stewardship, not vendor pressure.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
             {procurementEvidenceBinder.map((item) => (
@@ -274,7 +290,7 @@ export default function ProcurementPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Run an evidence-backed procurement process</h2>
           <p className="text-white/70 mb-8">Get a guided demo and implementation brief for your team.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

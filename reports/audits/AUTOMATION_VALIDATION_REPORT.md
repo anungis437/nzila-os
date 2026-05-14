@@ -83,6 +83,7 @@ tech-repo-scaffold/
 ## 4. Dependencies (requirements.txt) — ✅ Complete
 
 Core dependencies are properly specified:
+
 - **Azure SDK:** identity, resource, containerinstance, postgresql
 - **Testing:** pytest, pytest-cov, pytest-mock, pytest-asyncio
 - **CLI:** typer, rich, tqdm

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Institutional Memory',
   description:
-    'Navigate your organization\'s operational knowledge, procedures, and institutional history.',
+    'Navigate your institution\'s preserved context, procedural lineage, and continuity-aware records.',
 };
 
 export default async function InstitutionalMemoryPage() {

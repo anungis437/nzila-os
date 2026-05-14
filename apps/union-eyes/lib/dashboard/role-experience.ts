@@ -81,7 +81,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
     return [
       { label: 'Home', href: '/dashboard/inbox' },
       { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
-      { label: 'Submit Request', href: '/dashboard/claims/new' },
+      { label: 'Open Representation Case', href: '/dashboard/claims/new' },
       { label: 'Messages', href: '/dashboard/inbox?type=message' },
       { label: 'Documents', href: '/dashboard/documents' },
       { label: 'Profile & Settings', href: '/dashboard/settings' },
@@ -91,13 +91,13 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 
   if (experience === 'staff') {
     return [
-      { label: 'Workbench', href: '/dashboard/work' },
-      { label: 'Cases', href: '/dashboard/inbox?type=intake' },
-      { label: 'Priorities', href: '/dashboard/priorities' },
+      { label: 'Casework Console', href: '/dashboard/work' },
+      { label: 'Representation Cases', href: '/dashboard/inbox?type=intake' },
+      { label: 'Commitments & Deadlines', href: '/dashboard/priorities' },
       { label: 'Members', href: '/dashboard/members' },
       { label: 'Documents', href: '/dashboard/documents' },
       { label: 'Communications', href: '/dashboard/correspondence' },
-      { label: 'Reports', href: '/dashboard/reports' },
+      { label: 'Institutional Reports', href: '/dashboard/reports' },
       { label: 'Notifications', href: '/dashboard/notifications' },
       { label: 'Profile & Settings', href: '/dashboard/settings' },
     ];
@@ -107,9 +107,9 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
     return [
       { label: 'Executive Overview', href: '/dashboard/intelligence?scope=executive' },
       { label: 'Continuity Insights', href: '/dashboard/continuity-intelligence' },
-      { label: 'Operational Health', href: '/dashboard/executive-operating-intelligence' },
+      { label: 'Continuity Operations', href: '/dashboard/executive-operating-intelligence' },
       { label: 'Governance Visibility', href: '/dashboard/governance-center' },
-      { label: 'Outcomes', href: '/dashboard/outcomes' },
+      { label: 'Member Outcomes Ledger', href: '/dashboard/outcomes' },
       { label: 'Leadership Continuity', href: '/dashboard/leadership' },
       { label: 'Reports', href: '/dashboard/reports' },
       { label: 'Trust & Oversight', href: '/dashboard/trust' },

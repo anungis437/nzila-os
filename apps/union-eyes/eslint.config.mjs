@@ -99,7 +99,7 @@ const eslintConfig = defineConfig([
         patterns: disallowedDomains.flatMap((disallowedDomain) => ([
           {
             group: [`@/services/${disallowedDomain}`, `@/services/${disallowedDomain}/*`],
-            message: `Union Eyes ${domain} domain must not import ${disallowedDomain} directly. Use contracts, events, or API composition instead.`,
+            message: `UnionEyes ${domain} domain must not import ${disallowedDomain} directly. Use contracts, events, or API composition instead.`,
           },
         ])),
       }],
@@ -111,7 +111,7 @@ const eslintConfig = defineConfig([
       'no-restricted-imports': ['error', {
         patterns: disallowedClusters.map((disallowedCluster) => ({
           group: [`@/lib/services/${disallowedCluster}`, `@/lib/services/${disallowedCluster}/*`],
-          message: `Union Eyes lib/services/${cluster} cluster must not import lib/services/${disallowedCluster} directly. Use shared contracts or higher-level composition instead.`,
+          message: `UnionEyes lib/services/${cluster} cluster must not import lib/services/${disallowedCluster} directly. Use shared contracts or higher-level composition instead.`,
         })),
       }],
     },

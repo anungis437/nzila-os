@@ -1,3 +1,19 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
@@ -20,9 +36,9 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'The Platform | Eight Canonical Operational Surfaces | Union Eyes',
+    title: 'The Operating Architecture | Eight Canonical Institutional Surfaces | UnionEyes',
     description:
-      'Union Eyes is organized as eight canonical operational surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Institutional Memory, and Trust — composed into one institutional operating experience.',
+      'UnionEyes is organized as eight canonical institutional surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Corporate Memory, and Trust — composed into one continuous institutional operating record.',
     alternates: buildLocaleAlternates(locale, '/platform'),
   };
 }
@@ -118,9 +134,9 @@ export default async function PlatformOverviewPage({
   return (
     <main className="min-h-screen bg-white">
       <MarketingHeroSection
-        badge={<span className="text-xs uppercase tracking-wider text-white/80">The Platform</span>}
+        badge={<span className="text-xs uppercase tracking-wider text-white/80">The Operating Architecture</span>}
         heading="One institutional operating experience."
-        description="Union Eyes is organized as eight canonical operational surfaces — composed, not bundled — into one continuous institutional operating record."
+        description="UnionEyes is organized as eight canonical institutional surfaces — composed, not bundled — into one continuous operating record of governance, continuity, and trust."
         imageUrl={heroImagery.platform}
       />
 
@@ -130,15 +146,6 @@ export default async function PlatformOverviewPage({
       />
 
       <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="mb-16 max-w-3xl">
-          <p className="text-base leading-relaxed text-gray-700">
-            The runtime is not a collection of features. It is one operating
-            experience whose canonical surfaces correspond to the institutional
-            responsibilities a union, federation, or congress actually carries.
-            Each surface is a discipline of practice — not a tab.
-          </p>
-        </div>
-
         <div className="grid gap-10 md:grid-cols-2">
           {pillars.map((p) => {
             const Icon = p.icon;

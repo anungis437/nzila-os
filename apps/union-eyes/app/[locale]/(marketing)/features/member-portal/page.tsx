@@ -1,4 +1,20 @@
 /**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
+/**
  * Member Intake feature page.
  * Accessible at /{locale}/features/member-portal.
  * Members submit intake and follow lightweight status only.
@@ -136,7 +152,7 @@ export default async function LocaleMemberPortalPage({
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm"
             >
-              Request a Demo <ArrowRight className="h-4 w-4" />
+              Request an Institutional Briefing <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={`/${locale}/features/inbox`}

@@ -1,4 +1,19 @@
-import type { Metadata } from 'next';
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import Link from 'next/link';
 import { Shield, Users, FileText, Vote } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
@@ -8,33 +23,33 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Governance Structure | UnionEyes',
+    title: 'Governance & Continuity | UnionEyes',
     description:
-      'How the UnionEyes golden share works and how labour governance protections are enforced.',
+      'How UnionEyes is governed today and the labour-side controls being put in place to keep the platform worker-first.',
     alternates: buildLocaleAlternates(locale, '/governance'),
   };
 }
 
-const provisions = [
+const commitments = [
   {
     icon: Vote,
-    title: 'Veto on change of control',
-    body: 'The golden share gives the Labour Council authority to block any sale, merger, or transfer of controlling interest without affirmative labour consent.',
+    title: 'Worker consent on change of control',
+    body: 'Any sale, merger, or transfer of controlling interest will require affirmative consent from labour-elected representatives. The instrument that binds this is in development with partner unions.',
   },
   {
     icon: Shield,
     title: 'Mission lock',
-    body: 'Changes to the company mission require golden share consent, protecting worker-first purpose against investor or executive drift.',
+    body: 'Changes to the company mission will require labour-side approval, so worker-first purpose cannot be quietly redefined by investors or executives.',
   },
   {
     icon: Users,
-    title: 'Labour-elected council seats',
-    body: 'Reserved board seats are held by labour-elected representatives with full voting rights on strategic decisions.',
+    title: 'Labour-elected oversight seats',
+    body: 'The governance structure will include reserved seats for labour-elected representatives with full voting rights on strategic decisions.',
   },
   {
     icon: FileText,
     title: 'Reserved matters',
-    body: 'Critical decisions such as major pricing changes, data-sharing policy, and data residency shifts require golden share approval.',
+    body: 'Critical decisions — major pricing changes, data-sharing policy, data residency shifts — will require labour-side approval rather than executive discretion alone.',
   },
 ];
 
@@ -48,32 +63,32 @@ export default function GovernancePage() {
             Governance
           </span>
         }
-        heading="The golden share, explained"
-        description="This is a legal governance structure, not a brand claim. Here is what it protects and how."
+        heading="Governance & continuity"
+        description="How UnionEyes is governed today, and the labour-side controls being put in place to keep the platform worker-first."
       />
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-navy mb-4">What is a golden share?</h2>
+          <h2 className="text-2xl font-bold text-navy mb-4">Where things stand today</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            A golden share is a special class of equity with veto rights over defined decisions, regardless of ordinary share distribution.
+            UnionEyes is an incorporated company operating under standard corporate governance. The labour-side controls described on this page — worker consent on change of control, mission lock, reserved oversight seats, and reserved matters — are not yet adopted. They are the controls we have publicly committed to put in place, and which partner unions are entitled to hold us to.
           </p>
           <p className="text-gray-700 leading-relaxed">
-            In UnionEyes, this share is held by a Labour Council elected by partner unions. The structure was established at incorporation and cannot be removed without golden-shareholder consent.
+            Each instrument will be documented here with its effective date and the underlying agreement once adopted. Until then, this page reflects commitments rather than ratified governance.
           </p>
         </div>
 
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-navy mb-8">What the golden share protects</h2>
+          <h2 className="text-2xl font-bold text-navy mb-8">Labour-side controls being put in place</h2>
           <div className="space-y-6">
-            {provisions.map((p) => (
-              <div key={p.title} className="flex gap-5 p-6 rounded-2xl border border-gray-100 shadow-sm">
+            {commitments.map((c) => (
+              <div key={c.title} className="flex gap-5 p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <div className="shrink-0 w-12 h-12 rounded-xl bg-electric/10 text-electric flex items-center justify-center">
-                  <p.icon className="h-6 w-6" />
+                  <c.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-navy mb-2">{p.title}</h3>
-                  <p className="text-gray-700 leading-relaxed">{p.body}</p>
+                  <h3 className="text-lg font-semibold text-navy mb-2">{c.title}</h3>
+                  <p className="text-gray-700 leading-relaxed">{c.body}</p>
                 </div>
               </div>
             ))}
@@ -85,16 +100,16 @@ export default function GovernancePage() {
           <div className="space-y-6 divide-y divide-gray-100">
             {[
               {
-                q: 'What if UnionEyes raises venture capital?',
-                a: 'Investors can hold ordinary shares. The golden share is separate, non-dilutive, and remains in force.',
+                q: 'Are these labour-side controls in force today?',
+                a: 'No. UnionEyes is incorporated and operating, but the labour-side controls listed above have not yet been adopted into our governing instruments. Each will be added here with its effective date once in force.',
               },
               {
-                q: 'Can the governance model be changed later?',
-                a: 'Only with golden share consent. The protection is designed specifically to prevent unilateral changes.',
+                q: 'What if UnionEyes raises outside capital?',
+                a: 'Investor capital is expected to sit alongside — not above — labour-side governance. Any capital raise will be structured so worker oversight cannot be diluted away.',
               },
               {
-                q: 'Who provides governance oversight?',
-                a: 'A labour-elected council structure with reserved powers and documented oversight responsibilities.',
+                q: 'How can partner unions hold UnionEyes to these commitments?',
+                a: 'By treating this page as a public undertaking. Partner unions are invited to review the wording of each control as it is drafted and to challenge execution that drifts from intent.',
               },
             ].map(({ q, a }) => (
               <div key={q} className="pt-6 first:pt-0">

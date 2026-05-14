@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { insightArticles, insightCategories } from '@/lib/insights-content';
 import { defaultLocale, locales } from '@/lib/locales';
 import { localeMarketingPaths } from '@/lib/marketing-seo';
+import { CASE_STUDIES_VISIBLE } from '@/lib/marketing-feature-flags';
 import { getUnionEyesSiteTopology } from '@/lib/site-topology';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -24,18 +25,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/pilot-request', changeFrequency: 'weekly', priority: 0.9 },
     { path: '/trust', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/contact', changeFrequency: 'monthly', priority: 0.7 },
-    { path: '/case-studies', changeFrequency: 'monthly', priority: 0.8 },
+    ...(CASE_STUDIES_VISIBLE
+      ? [{ path: '/case-studies', changeFrequency: 'monthly' as const, priority: 0.8 }]
+      : []),
     { path: '/status', changeFrequency: 'weekly', priority: 0.7 },
     { path: '/proof', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/governance', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/institutional-continuity', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/executive-intelligence', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/conventions', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/for-clc', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/for-federations', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/for-leadership', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/for-members', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/for-representatives', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/platform', changeFrequency: 'monthly', priority: 0.7 },
+    { path: '/platform/explainable-intelligence', changeFrequency: 'monthly', priority: 0.7 },
+    { path: '/platform/governance-intelligence', changeFrequency: 'monthly', priority: 0.7 },
+    { path: '/platform/operational-coherence', changeFrequency: 'monthly', priority: 0.7 },
+    { path: '/platform/organizational-memory', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/solutions', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/solutions/executive-leadership', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/solutions/governance-leadership', changeFrequency: 'monthly', priority: 0.7 },

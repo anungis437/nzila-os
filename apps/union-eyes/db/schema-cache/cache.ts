@@ -3,7 +3,7 @@
  *
  * Per docs/architecture/orm-governance/drizzle-scope-reconstruction.md,
  * this file is the ONLY entrypoint that drizzle-kit resolves for the
- * Union Eyes Drizzle layer. Anything imported here becomes part of the
+ * UnionEyes Drizzle layer. Anything imported here becomes part of the
  * scoped schema. Anything not imported here is invisible to drizzle-kit.
  *
  * ALLOWED CATEGORIES (see orm-authority-governance.md):

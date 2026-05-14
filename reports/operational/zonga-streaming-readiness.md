@@ -1,4 +1,5 @@
 # Zonga — Upload / Streaming Readiness Report
+
 **Sprint**: Client Launch Readiness | **Date**: 2026-04-19
 
 ---
@@ -34,6 +35,7 @@ Zonga's media pipeline is multi-layered and production-conscious. It includes fo
 ### Processing Queue
 
 After upload, jobs are enqueued:
+
 1. `metadata_extract` (priority 10) — extract duration, sample rate, channels
 2. `fingerprint` (priority 9) — audio fingerprint for dedup
 3. `transcode` × 4 quality tiers: preview, standard, high, hifi (priority 5–8)
