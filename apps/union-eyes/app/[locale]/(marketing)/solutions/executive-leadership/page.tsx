@@ -16,10 +16,11 @@
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { TrendingUp, BookOpen, BarChart3, Users, ArrowRight, ShieldCheck } from 'lucide-react';
+import { TrendingUp, BookOpen, BarChart3, Users, ArrowRight, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
+import { getCarouselNav } from '@/lib/solutions-carousel';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
@@ -45,7 +46,9 @@ const challenges = [
   'Strategic continuity is at risk during every leadership transition',
 ];
 
-export default function ExecutiveLeadershipPage() {
+export default async function ExecutiveLeadershipPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const carousel = getCarouselNav('executive-leadership', locale);
   return (
     <div className="bg-white min-h-screen">
       <MarketingHeroSection
@@ -109,19 +112,16 @@ export default function ExecutiveLeadershipPage() {
         </div>
       </section>
 
-      {/* Adjacent Solutions */}
+      {/* Adjacent Solutions - Carousel Navigation */}
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-base font-bold text-navy mb-6">Explore related solutions</h3>
           <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              { label: 'Governance Leadership', href: './governance-leadership' },
-              { label: 'Operations Leadership', href: './operations-leadership' },
-            ].map((l) => (
-              <Link key={l.href} href={l.href} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 text-sm font-medium text-navy hover:text-electric transition-colors">
-                {l.label} <ArrowRight className="h-4 w-4" />
+            {carousel.next ? (
+              <Link href={carousel.next.href} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 text-sm font-medium text-navy hover:text-electric transition-colors">
+                {carousel.next.label} <ArrowRight className="h-4 w-4" />
               </Link>
-            ))}
+            ) : null}
           </div>
         </div>
       </section>

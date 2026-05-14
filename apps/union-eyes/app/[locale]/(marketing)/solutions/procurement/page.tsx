@@ -16,9 +16,10 @@
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Briefcase, FileCheck, CheckCircle2, BarChart3, Layers, ArrowRight } from 'lucide-react';
+import { Briefcase, FileCheck, CheckCircle2, BarChart3, Layers, ArrowRight, ArrowLeft } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { getCarouselNav } from '@/lib/solutions-carousel';
 import {
   governanceOperationalWalkthroughs,
   governanceMaturityDimensions,
@@ -77,7 +78,9 @@ const challenges = [
   'Stakeholders find it difficult to compare options without clear continuity and trust criteria',
 ];
 
-export default function ProcurementPage() {
+export default async function ProcurementPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const carousel = getCarouselNav('procurement', locale);
   return (
     <div className="bg-white min-h-screen">
       <MarketingHeroSection
@@ -273,14 +276,11 @@ export default function ProcurementPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-base font-bold text-navy mb-6">Explore related solutions</h3>
           <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              { label: 'Technology Leadership', href: './technology-leadership' },
-              { label: 'Policy & Labour Leadership', href: './labour-leadership' },
-            ].map((l) => (
-              <Link key={l.href} href={l.href} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 text-sm font-medium text-navy hover:text-electric transition-colors">
-                {l.label} <ArrowRight className="h-4 w-4" />
+            {carousel.previous ? (
+              <Link href={carousel.previous.href} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 text-sm font-medium text-navy hover:text-electric transition-colors">
+                <ArrowLeft className="h-4 w-4" /> {carousel.previous.label}
               </Link>
-            ))}
+            ) : null}
           </div>
         </div>
       </section>
