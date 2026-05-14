@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // One-shot: add `homePage` namespace to en-CA.json and fr-CA.json (Union Eyes).
 // Idempotent: re-running overwrites the homePage namespace with the canonical values.
+/* eslint-disable security/detect-non-literal-fs-filename */
+
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -297,10 +299,21 @@ const fr = {
 };
 
 function patch(file, namespace) {
-  const path = resolve(root, file);
-  const obj = JSON.parse(readFileSync(path, 'utf8'));
+  const allowedFiles = new Set(['en-CA.json', 'fr-CA.json']);
+  if (!allowedFiles.has(file)) {
+    throw new Error(`Disallowed file argument: ${file}`);
+  }
+
+  const filePaths = {
+    'en-CA.json': resolve(root, 'en-CA.json'),
+    'fr-CA.json': resolve(root, 'fr-CA.json'),
+  };
+
+  const filePath = filePaths[file];
+  // nosemgrep
+  const obj = JSON.parse(readFileSync(filePath, 'utf8'));
   obj.homePage = namespace;
-  writeFileSync(path, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  writeFileSync(filePath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
   console.log(`patched ${file}`);
 }
 

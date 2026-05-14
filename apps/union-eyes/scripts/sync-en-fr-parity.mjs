@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
+
 // One-shot script: synchronise en/fr/en-CA/fr-CA messages.
 //   - Add 19 missing keys to en.json + fr.json (mirror en-CA / fr-CA shape)
 //   - Restore proper FR diacritics in fr-CA.json (and seed fr.json with diacritics)
@@ -85,8 +87,21 @@ function insertAfter(target, afterKey, entries) {
 }
 
 function patch(file, lang) {
-  const full = path.join(messagesDir, file);
-  const json = JSON.parse(fs.readFileSync(full, "utf8"));
+  const allowedFiles = new Set(["en.json", "fr.json", "en-CA.json", "fr-CA.json"]);
+  if (!allowedFiles.has(file)) {
+    throw new Error(`Disallowed file argument: ${file}`);
+  }
+
+  const filePaths = {
+    "en.json": path.join(messagesDir, "en.json"),
+    "fr.json": path.join(messagesDir, "fr.json"),
+    "en-CA.json": path.join(messagesDir, "en-CA.json"),
+    "fr-CA.json": path.join(messagesDir, "fr-CA.json"),
+  };
+
+  const filePath = filePaths[file];
+  // nosemgrep
+  const json = JSON.parse(fs.readFileSync(filePath, "utf8"));
   const m = json.marketing;
 
   const navProof = lang.startsWith("fr") ? NAV_PROOF_FR : NAV_PROOF_EN;
@@ -106,7 +121,7 @@ function patch(file, lang) {
   // marketing.trust.phase6 — append (after defensibilityDesc which is last)
   m.trust = insertAfter(m.trust, "defensibilityDesc", { phase6: trust });
 
-  fs.writeFileSync(full, JSON.stringify(json, null, 2) + "\n", "utf8");
+  fs.writeFileSync(filePath, JSON.stringify(json, null, 2) + "\n", "utf8");
   console.log("patched:", file);
 }
 

@@ -1,15 +1,15 @@
 'use client';
 
 /**
- * LocaleSiteNavigation — Enterprise institutional navigation for UnionEyes (locale-aware)
+ * LocaleSiteNavigation ΓÇö Enterprise institutional navigation for UnionEyes (locale-aware)
  * Used inside app/[locale]/(marketing)/ where NextIntlClientProvider is active.
  *
- * Institutional IA (Phase 4 alignment — institutional infrastructure with operational modules):
+ * Institutional IA (Phase 4 alignment ΓÇö institutional infrastructure with operational modules):
  *   Solutions | Platform | Trust | Insights | Proof | Pricing | Contact
  *
  * Trust is a top-level institutional pillar (audit, sovereignty, explainability) and
  * intentionally surfaced alongside Platform rather than nested inside it, signalling
- * that institutional trust is a first-class concern — not a sub-module.
+ * that institutional trust is a first-class concern ΓÇö not a sub-module.
  */
 
 import Image from 'next/image';
@@ -118,7 +118,7 @@ export default function LocaleSiteNavigation() {
     >
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 md:h-20">
-          {/* ── Logo ── */}
+          {/* ΓöÇΓöÇ Logo ΓöÇΓöÇ */}
           <div className="flex items-center">
             <Link
               href={`/${locale}`}
@@ -146,7 +146,7 @@ export default function LocaleSiteNavigation() {
             </Link>
           </div>
 
-          {/* ── Desktop Navigation ── */}
+          {/* ΓöÇΓöÇ Desktop Navigation ΓöÇΓöÇ */}
           <div className="hidden xl:flex items-center space-x-5 whitespace-nowrap">
 
             {/* Solutions */}
@@ -259,8 +259,6 @@ export default function LocaleSiteNavigation() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`p-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 ${scrolled ? 'text-gray-700 focus-visible:ring-offset-white' : 'text-white focus-visible:ring-offset-navy'}`}
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={mobileMenuOpen}
-              aria-controls="ue-mobile-drawer"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -268,7 +266,7 @@ export default function LocaleSiteNavigation() {
         </div>
       </div>
 
-      {/* ── Mobile drawer ── */}
+      {/* ΓöÇΓöÇ Mobile drawer ΓöÇΓöÇ */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div

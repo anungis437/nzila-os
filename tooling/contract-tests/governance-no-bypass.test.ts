@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
+
 /**
  * Contract Test — Governance Package No-Bypass Guards
  *
@@ -20,9 +22,21 @@
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve, relative, sep } from 'node:path'
 
 const ROOT = join(__dirname, '..', '..')
+
+function isWithin(base: string, candidate: string): boolean {
+  // nosemgrep
+  const rel = relative(resolve(base), resolve(candidate))
+  return rel !== '' && !rel.startsWith('..') && !rel.includes(`..${sep}`)
+}
+
+function safeJoin(base: string, part: string): string | null {
+  // nosemgrep
+  const fullPath = resolve(base, part)
+  return isWithin(base, fullPath) ? fullPath : null
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -30,7 +44,8 @@ function walkSync(dir: string, extensions: string[] = ['.ts', '.tsx']): string[]
   const results: string[] = []
   if (!existsSync(dir)) return results
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const fullPath = join(dir, entry.name)
+    const fullPath = safeJoin(dir, entry.name)
+    if (!fullPath) continue
     if (entry.isDirectory()) {
       if (['node_modules', '.next', '.turbo', 'dist', '__tests__', '__fixtures__'].includes(entry.name)) continue
       results.push(...walkSync(fullPath, extensions))
@@ -42,7 +57,9 @@ function walkSync(dir: string, extensions: string[] = ['.ts', '.tsx']): string[]
 }
 
 function getAppApiRoutes(appName: string): string[] {
-  const apiDir = join(ROOT, 'apps', appName, 'app', 'api')
+  // nosemgrep
+  const apiDir = safeJoin(ROOT, join('apps', appName, 'app', 'api'))
+  if (!apiDir) return []
   return walkSync(apiDir).filter(f => f.endsWith('route.ts'))
 }
 

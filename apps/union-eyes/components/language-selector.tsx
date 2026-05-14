@@ -28,7 +28,7 @@ export function LanguageSelector() {
 
   return (
     <Select value={locale} onValueChange={handleLocaleChange}>
-      <SelectTrigger className="w-[140px]">
+      <SelectTrigger className="w-35">
         <SelectValue placeholder={t('selectLanguage')} />
       </SelectTrigger>
       <SelectContent>

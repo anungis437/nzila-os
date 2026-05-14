@@ -166,7 +166,7 @@ export default function ExecutiveIntelligencePage() {
                   'Communicate institutional health to boards with confidence',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
-                    <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5" />
                     {item}
                   </li>
                 ))}

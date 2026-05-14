@@ -144,7 +144,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
               key={sol.audience}
               className="flex flex-col md:flex-row gap-8 p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors"
             >
-              <div className="flex-shrink-0 flex items-start justify-center md:justify-start">
+              <div className="shrink-0 flex items-start justify-center md:justify-start">
                 <div className="w-14 h-14 rounded-2xl bg-electric/10 flex items-center justify-center">
                   <sol.icon className="h-6 w-6 text-electric" />
                 </div>
@@ -155,7 +155,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
                 <ul className="space-y-2 mb-6">
                   {sol.outcomes.map((outcome) => (
                     <li key={outcome} className="flex items-start gap-2 text-sm text-gray-700">
-                      <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 shrink-0" />
                       {outcome}
                     </li>
                   ))}

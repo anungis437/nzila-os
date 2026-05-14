@@ -26,6 +26,15 @@ const continuityTransformation = [
   'Resilience',
 ];
 
+const CONTINUITY_DELAY_CLASSES = [
+  '[animation-delay:0ms]',
+  '[animation-delay:80ms]',
+  '[animation-delay:160ms]',
+  '[animation-delay:240ms]',
+  '[animation-delay:320ms]',
+  '[animation-delay:400ms]',
+];
+
 export function PillarDiagram({
   nodes,
   accentClass = 'bg-[#1f5b84] text-white border-transparent',
@@ -75,7 +84,7 @@ export function MethodologyVisualizationSystem() {
           </p>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: '95ms' }}>
+        <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:95ms]">
           <ScrollReveal delay={0.06} duration={0.9} distance={16}>
             <VisualPanel
               title="Institutional Continuity Intelligence Framework"
@@ -179,7 +188,7 @@ export function ContinuityFlowSignature() {
         <ScrollReveal delay={0.18} duration={1} distance={18}>
           <div className="continuity-flow-surface continuity-stage-flow p-5 sm:p-7 continuity-appear">
           <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6 items-center">
-            <div className="space-y-4 narrative-sequence" style={{ ['--sequence-step' as string]: '120ms' }}>
+            <div className="space-y-4 narrative-sequence [--sequence-step:120ms]">
               {flowNodes.map((node) => (
                 <article key={node.title} className="institution-panel continuity-node px-4 py-3">
                   <h3 className="text-sm font-semibold text-navy mb-1">{node.title}</h3>
@@ -216,9 +225,9 @@ export function FragmentationToCoherenceSequence() {
           </p>
         </ScrollReveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-3 narrative-sequence" style={{ ['--sequence-step' as string]: '95ms' }}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-3 narrative-sequence [--sequence-step:95ms]">
           {continuityTransformation.map((step, idx) => (
-            <article key={step} className="institution-panel p-4 text-center continuity-appear" style={{ animationDelay: `${idx * 80}ms` }}>
+            <article key={step} className={`institution-panel p-4 text-center continuity-appear ${CONTINUITY_DELAY_CLASSES[idx] ?? ''}`}>
               <p className="text-[11px] tracking-widest uppercase text-slate-500 mb-2">Phase {idx + 1}</p>
               <p className="text-xs sm:text-sm font-semibold text-navy leading-relaxed">{step}</p>
             </article>
@@ -289,7 +298,7 @@ export function ContinuityMappingLanguage() {
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
           <h2 className="text-3xl font-semibold text-navy mb-4 text-center">A recognizable visual language for institutional resilience</h2>
         </ScrollReveal>
-        <div className="grid md:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: '110ms' }}>
+        <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
           {maps.map((map) => (
             <ScrollReveal key={map.title} duration={0.9} distance={16}>
               <VisualPanel title={map.title}>
@@ -326,7 +335,7 @@ export function ConferenceStoryFlow() {
             The live storytelling sequence below is optimized for under-five-second executive comprehension at each stage.
           </p>
         </ScrollReveal>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-3 narrative-sequence" style={{ ['--sequence-step' as string]: '110ms' }}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-3 narrative-sequence [--sequence-step:110ms]">
           {stages.map((stage, idx) => (
             <ScrollReveal
               key={stage}
@@ -378,7 +387,7 @@ export function StakeholderVisualPathways() {
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
           <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Role-aware visual emphasis by decision context</h2>
         </ScrollReveal>
-        <div className="grid md:grid-cols-5 gap-3 narrative-sequence" style={{ ['--sequence-step' as string]: '95ms' }}>
+        <div className="grid md:grid-cols-5 gap-3 narrative-sequence [--sequence-step:95ms]">
           {pathways.map((pathway) => (
             <article key={pathway.stakeholder} className="institution-panel narrative-step p-4">
               <h3 className="text-sm font-semibold text-navy mb-2">{pathway.stakeholder}</h3>

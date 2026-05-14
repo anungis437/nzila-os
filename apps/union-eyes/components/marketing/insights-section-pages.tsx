@@ -149,7 +149,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
               UnionEyes doctrine is structured for governance committees, executive leadership, operations stewards, and procurement stakeholders who require clarity before committing to modernization paths.
             </p>
           </ScrollReveal>
-          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
             {editorialStandards.map((standard) => (
               <ScrollReveal key={standard.title} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <article className="institution-panel calm-elevation narrative-step p-5">
@@ -202,7 +202,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
               This sequencing is designed to reveal fragility without alarmism, then stabilize through explainable continuity pathways.
             </p>
           </ScrollReveal>
-          <div className="grid md:grid-cols-3 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid md:grid-cols-3 gap-4 narrative-sequence [--sequence-step:110ms]">
             {realizationMoments.map((moment) => (
               <ScrollReveal key={moment.title} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <article className="institution-panel narrative-step p-5">
@@ -226,7 +226,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
               These publications are used in governance workshops, modernization committees, procurement reviews, and transition planning cycles.
             </p>
           </ScrollReveal>
-          <div className="grid md:grid-cols-2 gap-6 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid md:grid-cols-2 gap-6 narrative-sequence [--sequence-step:110ms]">
             {featuredInsights.map((insight) => (
               <ScrollReveal key={insight.slug} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <Link
@@ -354,7 +354,7 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
               Resonance is not decoration. It is the quiet architecture that makes governance-grade ideas memorable to executives, boards, and operating committees long after a meeting ends.
             </p>
           </ScrollReveal>
-          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
             {[
               { title: 'Tone of calm authority', detail: 'Every page reads at the cadence of a steady executive briefing — no alarmism, no theatrics, no marketing volume.' },
               { title: 'Continuity over novelty', detail: 'Recurring symbols, palette, and rhythm signal that modernization is a steward of institutional memory, not its disruptor.' },
@@ -415,7 +415,7 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
               When resonance is doing its work, leaders carry the ideas forward in their own language — across committees, briefings, and procurement reviews — without needing to consult the source material again.
             </p>
           </ScrollReveal>
-          <div className="grid md:grid-cols-3 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid md:grid-cols-3 gap-4 narrative-sequence [--sequence-step:110ms]">
             {[
               { title: 'Shared executive vocabulary', detail: 'Leadership conversations converge on a common, governance-safe way of describing continuity, risk, and modernization choices.' },
               { title: 'Lower-friction governance review', detail: 'Boards and committees enter discussions already aligned on framing, so deliberation time focuses on decisions rather than definitions.' },
@@ -482,7 +482,7 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <h2 className="text-3xl font-semibold text-navy mb-8 text-center">Browse the doctrine library by category</h2>
           </ScrollReveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence [--sequence-step:110ms]">
             {insightCategories.map((cat) => (
               <ScrollReveal key={cat.slug} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <Link
@@ -512,7 +512,7 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
               These topics are under active development with governance and operations partners across labour institutions.
             </p>
           </ScrollReveal>
-          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
+          <div className="grid sm:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
             {upcomingInsightTopics.map((topic) => (
               <ScrollReveal key={topic.slug} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <Link

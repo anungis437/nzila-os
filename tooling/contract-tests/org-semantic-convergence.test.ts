@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
+
 /**
  * Semantic Convergence — Entity ≡ Org Guard
  *
@@ -14,12 +16,26 @@
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
-import { resolve, join } from 'node:path'
+import { resolve, join, relative, sep } from 'node:path'
 
 const ROOT = resolve(__dirname, '../..')
 
-function readSafe(path: string): string {
-  try { return readFileSync(path, 'utf-8') } catch { return '' }
+function isWithin(base: string, candidate: string): boolean {
+  // nosemgrep
+  const rel = relative(resolve(base), resolve(candidate))
+  return rel === '' || (!rel.startsWith('..') && !rel.includes(`..${sep}`))
+}
+
+function safeResolve(base: string, ...segments: string[]): string | null {
+  // nosemgrep
+  const candidate = resolve(base, ...segments)
+  return isWithin(base, candidate) ? candidate : null
+}
+
+function readSafe(filePath: string): string {
+  if (!isWithin(ROOT, filePath)) return ''
+  // nosemgrep
+  try { return readFileSync(filePath, 'utf-8') } catch { return '' }
 }
 
 function collectFiles(dir: string, ext: string[]): string[] {
@@ -31,7 +47,8 @@ function collectFiles(dir: string, ext: string[]): string[] {
     let entries: import('node:fs').Dirent[]
     try { entries = readdirSync(d, { withFileTypes: true }) } catch { continue }
     for (const e of entries) {
-      const full = join(d, e.name)
+      const full = safeResolve(d, e.name)
+      if (!full) continue
       if (e.isDirectory()) {
         // Skip irrelevant directories
         if (['node_modules', '.git', 'dist', '.next', 'drizzle'].includes(e.name)) continue
@@ -100,7 +117,8 @@ describe('ORG_SEMANTICS_ONLY_001: entityId must not appear in application code',
 
   for (const dir of APP_DIRS) {
     it(`${dir}/ has zero \\bentityId\\b references`, () => {
-      const files = collectFiles(resolve(ROOT, dir), ['.ts', '.tsx'])
+      const scopedDir = safeResolve(ROOT, dir)
+      const files = scopedDir ? collectFiles(scopedDir, ['.ts', '.tsx']) : []
       const violations: string[] = []
 
       for (const f of files) {

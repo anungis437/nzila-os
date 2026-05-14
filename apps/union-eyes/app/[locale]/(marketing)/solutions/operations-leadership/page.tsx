@@ -76,7 +76,7 @@ export default function OperationsLeadershipPage() {
             <ul className="space-y-3">
               {challenges.map((c) => (
                 <li key={c} className="flex items-start gap-3 text-gray-700 text-sm leading-relaxed">
-                  <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 shrink-0" />
                   {c}
                 </li>
               ))}

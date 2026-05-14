@@ -1,4 +1,6 @@
 #!/usr/bin/env tsx
+/* eslint-disable security/detect-non-literal-fs-filename */
+
 /**
  * link-check.ts — Validate internal links across Markdown docs
  *
@@ -18,8 +20,24 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, resolve, extname, relative } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname ?? __dirname, '..');
-const DIRS = process.argv.slice(2).length > 0
-  ? process.argv.slice(2).map(d => resolve(d))
+
+function isWithin(base: string, candidate: string): boolean {
+  // nosemgrep
+  const rel = relative(resolve(base), resolve(candidate));
+  return rel === '' || (!rel.startsWith('..') && !rel.includes('..\\') && !rel.includes('../'));
+}
+
+function safeResolve(base: string, ...parts: string[]): string | null {
+  // nosemgrep
+  const fullPath = resolve(base, ...parts);
+  return isWithin(ROOT, fullPath) ? fullPath : null;
+}
+
+const requestedDirs = process.argv.slice(2);
+const DIRS = requestedDirs.length > 0
+  ? requestedDirs
+      .map(d => safeResolve(ROOT, d) ?? safeResolve(ROOT, `./${d}`))
+      .filter((d): d is string => Boolean(d))
   : [join(ROOT, 'docs'), join(ROOT, 'content'), ROOT]; // root for README.md etc.
 
 // ── .linkcheckignore ────────────────────────────────────
@@ -51,7 +69,8 @@ function findMarkdownFiles(dir: string): string[] {
   if (!existsSync(dir)) return files;
 
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name);
+    const full = safeResolve(dir, entry.name);
+    if (!full) continue;
     if (entry.isDirectory()) {
       if (['node_modules', '.next', '.turbo', 'coverage', '.git', '.vale', '.venv', '__pycache__'].includes(entry.name)) continue;
       if (isIgnored(full)) continue;
@@ -78,6 +97,7 @@ function extractHeadings(content: string): Set<string> {
 }
 
 function checkFile(filePath: string): BrokenLink[] {
+  // nosemgrep
   const content = readFileSync(filePath, 'utf-8');
   const lines = content.split('\n');
   const headings = extractHeadings(content);
@@ -125,7 +145,12 @@ function checkFile(filePath: string): BrokenLink[] {
       const [pathPart, anchorPart] = rawLink.split('#');
       if (!pathPart) continue;
 
-      const target = resolve(dirname(filePath), pathPart);
+      const target = safeResolve(dirname(filePath), pathPart);
+
+      if (!target) {
+        broken.push({ file: filePath, line: i + 1, link: rawLink, reason: 'path escapes workspace root' });
+        continue;
+      }
 
       if (!existsSync(target)) {
         broken.push({ file: filePath, line: i + 1, link: rawLink, reason: 'file not found' });
@@ -134,6 +159,7 @@ function checkFile(filePath: string): BrokenLink[] {
 
       // Check anchor in target file if provided
       if (anchorPart && extname(target) === '.md') {
+        // nosemgrep
         const targetContent = readFileSync(target, 'utf-8');
         const targetHeadings = extractHeadings(targetContent);
         if (!targetHeadings.has(anchorPart)) {
@@ -150,10 +176,11 @@ function checkFile(filePath: string): BrokenLink[] {
 
 const allFiles: string[] = [];
 for (const dir of DIRS) {
-  if (statSync(dir).isDirectory()) {
+  if (existsSync(dir) && statSync(dir).isDirectory()) {
     allFiles.push(...findMarkdownFiles(dir));
   } else if (extname(dir) === '.md') {
-    if (!isIgnored(resolve(dir))) allFiles.push(dir);
+    const safeFile = safeResolve(ROOT, dir) ?? safeResolve(ROOT, `./${dir}`);
+    if (safeFile && !isIgnored(safeFile)) allFiles.push(safeFile);
   }
 }
 

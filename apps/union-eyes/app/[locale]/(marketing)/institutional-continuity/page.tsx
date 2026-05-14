@@ -177,25 +177,28 @@ export default async function InstitutionalContinuityPage({
             </h2>
           </div>
           <div className="space-y-0">
-            {journeySteps.map((step, i) => (
-              <div
-                key={step.step}
-                className={`flex gap-6 py-6 ${i < journeySteps.length - 1 ? 'border-b border-gray-100' : ''}`}
-              >
-                <div className="flex-shrink-0 w-12">
-                  <span className="text-xs font-bold text-electric tracking-wider">{step.step}</span>
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-navy mb-1">{step.label}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{step.desc}</p>
-                </div>
-                {i < journeySteps.length - 1 && (
-                  <div className="flex-shrink-0 self-end pb-1">
-                    <ArrowRight className="h-4 w-4 text-gray-300" />
+            {journeySteps.map((step, i) => {
+              const hasNext = i < journeySteps.length - 1;
+              return (
+                <div
+                  key={step.step}
+                  className={`flex gap-6 py-6 ${hasNext ? 'border-b border-gray-100' : ''}`}
+                >
+                  <div className="w-12">
+                    <span className="text-xs font-bold text-electric tracking-wider">{step.step}</span>
                   </div>
-                )}
-              </div>
-            ))}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base font-bold text-navy mb-1">{step.label}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{step.desc}</p>
+                  </div>
+                  {hasNext ? (
+                    <div className="self-end pb-1">
+                      <ArrowRight className="h-4 w-4 text-gray-300" />
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
