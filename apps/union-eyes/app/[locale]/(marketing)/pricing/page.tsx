@@ -67,10 +67,10 @@ const operationalReality = [
   },
   {
     title: 'Steward overload',
-    body: 'Front-line representatives carrying corporate memory the institution itself does not retain.',
+    body: 'Front-line representatives carrying organizational memory the institution itself does not retain.',
   },
   {
-    title: 'Corporate memory loss',
+    title: 'Organizational memory loss',
     body: 'Precedents, doctrines, and prior decisions degrading every year they remain unrecorded.',
   },
 ];
@@ -120,14 +120,14 @@ const maturityTiers = [
     fit: 'National unions and federations preserving institutional memory across transitions.',
     feels: 'Durable. Inherited. Continuous.',
     focus: [
-      'Corporate memory preserved across leadership transitions',
+      'Organizational Memory preserved across leadership transitions',
       'Continuity preservation and operational resilience',
       'Succession continuity for officers, stewards, and staff',
       'Governance-safe cognition across the federation',
     ],
     surfaces: [
       'Governance Operations surfaces',
-      'Corporate Memory',
+      'Organizational Memory',
       'Continuity Intelligence',
       'Longitudinal Cognition',
       'Cross-Union Analytics',

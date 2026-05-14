@@ -32,7 +32,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 
 const outcomes = [
   { icon: TrendingUp, title: 'Strategic continuity through change',       desc: 'Maintain organizational direction and coherence through succession, reorganization, and strategic transitions.' },
-  { icon: BookOpen,   title: 'Corporate Memory at your fingertips',      desc: 'Decades of negotiation history, governance decisions, and precedents — accessible in executive-grade summaries.' },
+  { icon: BookOpen,   title: 'Organizational Memory at your fingertips',      desc: 'Decades of negotiation history, governance decisions, and precedents — accessible in executive-grade summaries.' },
   { icon: BarChart3,  title: 'Governance oversight with confidence',       desc: 'Understand governance health, continuity risks, and modernization progress without reading technical reports.' },
   { icon: Users,      title: 'Succession planning that works',             desc: 'Identify continuity vulnerabilities early and build knowledge transfer pathways before leadership transitions occur.' },
   { icon: ShieldCheck,'title': 'Labour-safe intelligence, guaranteed',     desc: 'All intelligence is explainable, human-reviewed, and built on anti-surveillance principles.' },
@@ -129,7 +129,7 @@ export default function ExecutiveLeadershipPage() {
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to lead with institutional clarity?</h2>
-          <p className="text-white/70 mb-8">Request an institutional briefing tailored to your executive leadership context.</p>
+          <p className="text-white/70 mb-8">Request an Executive Briefing tailored to your executive leadership context.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             Request an Institutional Briefing
           </Link>

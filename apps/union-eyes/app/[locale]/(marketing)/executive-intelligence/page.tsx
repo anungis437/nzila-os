@@ -65,7 +65,7 @@ const surfaces = [
   },
   {
     icon: Layers,
-    title: 'Corporate Memory Snapshots',
+    title: 'Organizational Memory Snapshots',
     desc: 'Point-in-time views of organizational knowledge, historical precedents, and institutional context available for executive review.',
   },
 ];
@@ -195,7 +195,7 @@ export default function ExecutiveIntelligencePage() {
             Ready to lead with institutional clarity?
           </h2>
           <p className="text-white/70 mb-8">
-            Request an institutional briefing to see Executive Intelligence in action for your organization.
+            Request an Executive Briefing to see Executive Intelligence in action for your organization.
           </p>
           <Link
             href="/pilot-request"

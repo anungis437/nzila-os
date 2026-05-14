@@ -28,13 +28,13 @@ const FOOTER_COPY: Record<string, {
 }> = {
   'en-CA': {
     ctaHeading: 'Ready to lead with institutional clarity?',
-    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an institutional briefing.',
+    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an Executive Briefing.',
     pilotBadge: 'Pilot Active',
     canadaBadge: 'Canadian Made',
   },
   en: {
     ctaHeading: 'Ready to lead with institutional clarity?',
-    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an institutional briefing.',
+    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an Executive Briefing.',
     pilotBadge: 'Pilot Active',
     canadaBadge: 'Canadian Made',
   },
@@ -52,13 +52,13 @@ const FOOTER_COPY: Record<string, {
   },
   it: {
     ctaHeading: 'Pronto a guidare con chiarezza istituzionale?',
-    ctaBody: 'Scopri come UnionEyes trasforma casework, governance e continuità in un registro istituzionale difendibile. Richiedi una sessione di orientamento istituzionale.',
+    ctaBody: 'Scopri come UnionEyes trasforma casework, governance e continuità in un registro istituzionale difendibile. Richiedi un Executive Briefing.',
     pilotBadge: 'Pilota attivo',
     canadaBadge: 'Creato in Canada',
   },
   pt: {
     ctaHeading: 'Pronto para liderar com clareza institucional?',
-    ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical, a governança e a continuidade em um registro institucional defensável. Solicite uma sessão de orientação institucional.',
+    ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical, a governança e a continuidade em um registro institucional defensável. Solicite um Executive Briefing.',
     pilotBadge: 'Piloto ativo',
     canadaBadge: 'Feito no Canadá',
   },

@@ -35,7 +35,7 @@ const outcomes = [
   { icon: RefreshCw,   title: 'Continuity through organizational change',  desc: 'Maintain operational coherence through reorganization, expansion, and leadership transitions without losing institutional context.' },
   { icon: Users,       title: 'Team continuity planning',                  desc: 'Identify knowledge gaps across teams and build transfer pathways before operational fragilities become crises.' },
   { icon: AlertCircle, title: 'Fragmentation risk made visible',           desc: 'Understand the organizational fragmentation patterns undermining long-term operational effectiveness.' },
-  { icon: Layers,      title: 'Corporate Memory for operations',        desc: 'Surface the operational precedents, decisions, and context that inform how your organization actually works.' },
+  { icon: Layers,      title: 'Organizational Memory for operations',        desc: 'Surface the operational precedents, decisions, and context that inform how your organization actually works.' },
 ];
 
 const challenges = [
@@ -60,7 +60,7 @@ export default function OperationsLeadershipPage() {
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request an Institutional Briefing
+              Request an Executive Briefing
             </Link>
             <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               Operational Coherence Architecture
@@ -123,7 +123,7 @@ export default function OperationsLeadershipPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Maintain coherence through every change</h2>
           <p className="text-white/70 mb-8">See Operational Coherence in a live pilot demonstration.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request an Institutional Briefing
+            Request an Executive Briefing
           </Link>
         </div>
       </section>

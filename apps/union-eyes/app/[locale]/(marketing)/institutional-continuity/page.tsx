@@ -50,7 +50,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 const pillars = [
   {
     icon: BookOpen,
-    title: 'Corporate Memory',
+    title: 'Organizational Memory',
     desc: 'Capture the institutional knowledge that lives in individuals — decisions, precedents, relationships, and operational history — and make it outlast any leadership transition.',
   },
   {
@@ -82,7 +82,7 @@ const pillars = [
 
 const journeySteps = [
   { step: '01', label: 'Fragmentation Problem',     desc: 'Knowledge fragmentation and continuity risk become visible across the organization.' },
-  { step: '02', label: 'Corporate Memory',          desc: 'Corporate memory is captured, preserved, and made operationally accessible at scale.' },
+  { step: '02', label: 'Organizational Memory',          desc: 'Organizational memory is captured, preserved, and made operationally accessible at scale.' },
   { step: '03', label: 'Continuity Visibility',      desc: 'Leadership gains a longitudinal view of organizational context and resilience status.' },
   { step: '04', label: 'Explainable Intelligence',   desc: 'Every continuity insight is traceable, human-readable, and governance-safe.' },
   { step: '05', label: 'Governance Continuity',      desc: 'Governance structures are preserved and modernized without losing institutional coherence.' },
@@ -115,7 +115,7 @@ export default async function InstitutionalContinuityPage({
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
             >
-              Request an Institutional Briefing
+              Request an Executive Briefing
             </Link>
             <Link
               href={`/${locale}/governance`}
@@ -414,7 +414,7 @@ export default async function InstitutionalContinuityPage({
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
-              Request an Institutional Briefing
+              Request an Executive Briefing
             </Link>
             <Link
               href={`/${locale}/platform/organizational-memory`}

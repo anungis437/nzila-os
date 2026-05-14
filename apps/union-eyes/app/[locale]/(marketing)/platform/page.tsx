@@ -38,7 +38,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   return {
     title: 'The Operating Architecture | Eight Canonical Institutional Surfaces | UnionEyes',
     description:
-      'UnionEyes is organized as eight canonical institutional surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Corporate Memory, and Trust — composed into one continuous institutional operating record.',
+      'UnionEyes is organized as eight canonical institutional surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Organizational Memory, and Trust — composed into one continuous institutional operating record.',
     alternates: buildLocaleAlternates(locale, '/platform'),
   };
 }
@@ -106,7 +106,7 @@ const pillars = [
   {
     id: 'institutional-memory',
     icon: Library,
-    name: 'Corporate Memory',
+    name: 'Organizational Memory',
     posture: 'Continuity substrate',
     body:
       'Doctrine, precedents, prior decisions, and the continuity archive. Survives leadership transitions because it is held by the institution, not by individuals.',
