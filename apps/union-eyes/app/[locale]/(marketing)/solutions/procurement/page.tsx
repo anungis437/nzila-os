@@ -93,11 +93,11 @@ export default async function ProcurementPage({ params }: { params: Promise<{ lo
         heading={<>Procurement clarity for<br />institutional deployment.</>}
         description="UnionEyes gives procurement teams a coexistence-oriented, sovereignty-conscious deployment path: clear scope, governance-safe deployment controls, federation-aware operations, and evidence provenance for leadership confidence."
         cta={
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               Request an Executive Briefing
             </Link>
-            <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
+            <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               Review Trust Center
             </Link>
           </div>
@@ -169,7 +169,7 @@ export default async function ProcurementPage({ params }: { params: Promise<{ lo
             {institutionalRolloutPathway.map((stage, index) => (
               <article key={stage} className="p-3 rounded-lg bg-gray-50 border border-gray-100 text-center">
                 <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-2">Phase {index + 1}</p>
-                <p className="font-semibold text-navy">{stage}</p>
+                  <p className="font-semibold text-navy text-center">{stage}</p>
               </article>
             ))}
           </div>
@@ -185,7 +185,7 @@ export default async function ProcurementPage({ params }: { params: Promise<{ lo
                 {governanceModernizationJourney.map((stage) => (
                   <article key={stage.stage} className="p-4 rounded-lg bg-white border border-gray-100">
                     <h4 className="text-sm font-semibold text-navy mb-1">{stage.stage}</h4>
-                    <p className="text-xs text-gray-600">{stage.detail}</p>
+                      <p className="text-xs text-gray-600 text-center">{stage.detail}</p>
                   </article>
                 ))}
               </div>
@@ -195,7 +195,7 @@ export default async function ProcurementPage({ params }: { params: Promise<{ lo
               <div className="space-y-3 mb-5">
                 {operationalMaturityPathway.map((stage, index) => (
                   <div key={stage} className="p-3 rounded-lg bg-white border border-gray-100 text-sm text-gray-700">
-                    {index + 1}. <span className="font-semibold text-navy">{stage}</span>
+                      {index + 1}. <span className="font-semibold text-navy text-center">{stage}</span>
                   </div>
                 ))}
               </div>

@@ -16,10 +16,11 @@
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Cpu, ShieldCheck, Lock, Eye, CheckCircle, ArrowRight } from 'lucide-react';
+import { Cpu, ShieldCheck, Lock, Eye, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
+import { getCarouselNav } from '@/lib/solutions-carousel';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
@@ -47,7 +48,9 @@ const technicalPrinciples = [
   { label: 'Modular deployment',                 sub: 'No forced big-bang adoption' },
 ];
 
-export default function TechnologyLeadershipPage() {
+export default async function TechnologyLeadershipPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const carousel = getCarouselNav('technology-leadership', locale);
   return (
     <div className="bg-white min-h-screen">
       <MarketingHeroSection
@@ -60,11 +63,11 @@ export default function TechnologyLeadershipPage() {
         heading={<>Enterprise-safe AI that your<br />institution can trust.</>}
         description="Labour organizations need AI that is explainable, governed, labour-safe, and institutionally trustworthy — not experimental. UnionEyes is built to meet that standard at every architectural layer."
         cta={
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               Request an Executive Briefing
             </Link>
-            <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
+            <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               View Trust Center
             </Link>
           </div>
@@ -107,14 +110,16 @@ export default function TechnologyLeadershipPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-base font-bold text-navy mb-6">Explore related solutions</h3>
           <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              { label: 'Procurement Stakeholders', href: './procurement' },
-              { label: 'Governance Leadership',    href: './governance-leadership' },
-            ].map((l) => (
-              <Link key={l.href} href={l.href} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 text-sm font-medium text-navy hover:text-electric transition-colors">
-                {l.label} <ArrowRight className="h-4 w-4" />
+            {carousel.previous ? (
+              <Link href={carousel.previous.href} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 text-sm font-medium text-navy hover:text-electric transition-colors">
+                <ArrowLeft className="h-4 w-4" /> {carousel.previous.label}
               </Link>
-            ))}
+            ) : null}
+            {carousel.next ? (
+              <Link href={carousel.next.href} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 text-sm font-medium text-navy hover:text-electric transition-colors">
+                {carousel.next.label} <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : null}
           </div>
         </div>
       </section>

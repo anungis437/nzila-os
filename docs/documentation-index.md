@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-05-14T09:27:43.460Z
+Generated: 2026-05-15T13:06:08.285Z
 
 Total documents indexed: 1001
 Stale documents (>90 days since repo validation): 0
@@ -871,7 +871,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/commercial/pricing-framework.md](docs/categories/stakeholders/commercial/pricing-framework.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/public-narrative-audit.md](docs/categories/stakeholders/commercial/public-narrative-audit.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/public-narrative-copydeck.md](docs/categories/stakeholders/commercial/public-narrative-copydeck.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md](docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md) | categories | 2026-05-11 | current |
+| [docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md](docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md) | categories | 2026-05-14 | current |
 | [docs/categories/stakeholders/commercial/sales-kit/02-45-minute-demo-script.md](docs/categories/stakeholders/commercial/sales-kit/02-45-minute-demo-script.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/sales-kit/03-discovery-call-checklist.md](docs/categories/stakeholders/commercial/sales-kit/03-discovery-call-checklist.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/sales-kit/04-objection-handling-sheet.md](docs/categories/stakeholders/commercial/sales-kit/04-objection-handling-sheet.md) | categories | 2026-05-11 | current |
@@ -1009,10 +1009,10 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-14 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-15 | current |
 | [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-14 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
-| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-12 | current |
+| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-14 | current |
 | [docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md](docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md) | platform | 2026-05-11 | current |
 | [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md) | proof-center | 2026-05-11 | current |
 | [docs/public/restore-readiness-summary.md](docs/public/restore-readiness-summary.md) | public | 2026-05-11 | current |

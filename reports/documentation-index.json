@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-14T09:27:43.460Z",
+  "generatedAt": "2026-05-15T13:06:08.285Z",
   "totalDocuments": 1001,
   "staleDocuments": 0,
   "categories": [
@@ -5129,7 +5129,7 @@
     {
       "path": "docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md",
       "category": "categories",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-14",
       "stale": false
     },
     {
@@ -5957,7 +5957,7 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-05-14",
+      "lastValidated": "2026-05-15",
       "stale": false
     },
     {
@@ -5975,7 +5975,7 @@
     {
       "path": "docs/platform/portfolio-matrix.md",
       "category": "platform",
-      "lastValidated": "2026-05-12",
+      "lastValidated": "2026-05-14",
       "stale": false
     },
     {

@@ -110,7 +110,7 @@ export default async function TrustPage({
         contextKicker={`${contextProfile.label} context`}
         contextNote={contextProfile.heroFraming}
         cta={
-          <div className="flex flex-col items-start gap-4 sm:flex-row">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href={withInstitutionalContext(`/${locale}/proof`, contextMode)}
               className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/20 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/30"

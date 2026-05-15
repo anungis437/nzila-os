@@ -14,7 +14,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Linkedin, Twitter, Github, Mail } from 'lucide-react';
+import { ArrowRight, Linkedin, Twitter, Instagram, Mail } from 'lucide-react';
 
 const NZILA_URL = process.env.NEXT_PUBLIC_NZILA_URL ?? 'https://nzilaventures.com';
 
@@ -61,9 +61,9 @@ const footerLinks = {
 };
 
 const socials = [
-  { name: 'LinkedIn', href: 'https://linkedin.com/company/union-eyes', icon: Linkedin },
+  { name: 'LinkedIn', href: 'https://linkedin.com/company/unioneyes-nzilaventures/', icon: Linkedin },
+  { name: 'Instagram', href: 'https://www.instagram.com/unioneyes.nzila?igsh=MTlldGdhMWs0dzJnYQ%3D%3D', icon: Instagram },
   { name: 'X (Twitter)', href: 'https://x.com/unioneyes', icon: Twitter },
-  { name: 'GitHub', href: 'https://github.com/nzila-ventures', icon: Github },
   { name: 'Email', href: 'mailto:hello@unioneyes.app', icon: Mail },
 ];
 
