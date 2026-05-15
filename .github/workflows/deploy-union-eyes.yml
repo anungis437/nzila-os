@@ -504,13 +504,10 @@ jobs:
             -o tsv)
 
           if [ "${HAS_ACR_PULL:-0}" = "0" ]; then
-            echo "Granting AcrPull to $TARGET_APP system identity on $ACR_SERVER..."
-            az role assignment create \
-              --assignee-object-id "$PRINCIPAL_ID" \
-              --assignee-principal-type ServicePrincipal \
-              --role AcrPull \
-              --scope "$ACR_ID" \
-              --output none
+            echo "::warning::AcrPull not found for $TARGET_APP (identity $PRINCIPAL_ID) on $ACR_SERVER."
+            echo "::warning::Grant it manually: az role assignment create --assignee $PRINCIPAL_ID --role AcrPull --scope $ACR_ID"
+          else
+            echo "✓ AcrPull confirmed for $TARGET_APP system identity on $ACR_SERVER."
           fi
 
           az containerapp registry set \
