@@ -458,8 +458,67 @@ jobs:
 
       - name: Update Container App (frontend + backend sidecar)
         run: |
+          set -euo pipefail
+
           TARGET_APP="${{ needs.plan.outputs.app_name }}"
           TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          ACR_NAME="${{ needs.plan.outputs.acr_name }}"
+          ACR_SERVER="${ACR_NAME}.azurecr.io"
+
+          # Ensure system-assigned identity exists and has AcrPull on ACR.
+          PRINCIPAL_ID=$(az containerapp show \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "identity.principalId" \
+            -o tsv)
+
+          if [ -z "$PRINCIPAL_ID" ] || [ "$PRINCIPAL_ID" = "null" ]; then
+            echo "Assigning system identity to $TARGET_APP..."
+            az containerapp identity assign \
+              --name "$TARGET_APP" \
+              --resource-group "$TARGET_RG" \
+              --system-assigned \
+              --output none
+            PRINCIPAL_ID=$(az containerapp show \
+              --name "$TARGET_APP" \
+              --resource-group "$TARGET_RG" \
+              --query "identity.principalId" \
+              -o tsv)
+          fi
+
+          if [ -z "$PRINCIPAL_ID" ] || [ "$PRINCIPAL_ID" = "null" ]; then
+            echo "::error::Unable to resolve system identity principal ID for $TARGET_APP."
+            exit 1
+          fi
+
+          ACR_ID=$(az acr show --name "$ACR_NAME" --query id -o tsv)
+          if [ -z "$ACR_ID" ] || [ "$ACR_ID" = "null" ]; then
+            echo "::error::Unable to resolve ACR resource ID for $ACR_NAME."
+            exit 1
+          fi
+
+          HAS_ACR_PULL=$(az role assignment list \
+            --assignee-object-id "$PRINCIPAL_ID" \
+            --scope "$ACR_ID" \
+            --query "[?roleDefinitionName=='AcrPull'] | length(@)" \
+            -o tsv)
+
+          if [ "${HAS_ACR_PULL:-0}" = "0" ]; then
+            echo "Granting AcrPull to $TARGET_APP system identity on $ACR_SERVER..."
+            az role assignment create \
+              --assignee-object-id "$PRINCIPAL_ID" \
+              --assignee-principal-type ServicePrincipal \
+              --role AcrPull \
+              --scope "$ACR_ID" \
+              --output none
+          fi
+
+          az containerapp registry set \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --server "$ACR_SERVER" \
+            --identity system \
+            --output none
 
           SHOW_ERR=$(az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>&1) || {
             echo "::error::Container App $TARGET_APP cannot be updated in $TARGET_RG."
@@ -468,37 +527,54 @@ jobs:
             exit 1
           }
 
-          az containerapp update \
-            --name "$TARGET_APP" \
-            --resource-group "$TARGET_RG" \
-            --set-env-vars \
-              "NODE_ENV=production" \
-              "PORT=3000" \
-              "NEXT_PUBLIC_APP_ENV=${{ needs.plan.outputs.environment }}" \
-              "UE_ENVIRONMENT=${{ needs.plan.outputs.environment }}" \
-              "UE_DEPLOYMENT_TYPE=${{ needs.plan.outputs.deployment_type }}" \
-              "UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }}" \
-              "NZILA_MODE=${{ needs.plan.outputs.nzila_mode }}" \
-              "GITHUB_SHA=${{ github.sha }}" \
-              "RELEASE_ID=${{ needs.plan.outputs.release_id }}" \
-              "BUILD_TIME=${{ needs.plan.outputs.build_time }}" \
-              "BUILD_TIMESTAMP=${{ needs.plan.outputs.build_time }}" \
-              "ARTIFACT_ID=${{ github.sha }}" \
-              "UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }}" \
-              "UE_APP_URL=${{ needs.plan.outputs.app_url }}" \
-              "NEXT_PUBLIC_SITE_URL=${{ needs.plan.outputs.marketing_url }}" \
-              "NEXT_PUBLIC_APP_URL=${{ needs.plan.outputs.app_url }}" \
-              "NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app" \
-              "NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app" \
-              "AUTH_URL=${{ needs.plan.outputs.app_url }}" \
-              "AUTH_TRUST_HOST=true" \
-              "DJANGO_API_URL=http://localhost:8000" \
-              "PLATFORM_ADMIN_USER_IDS=${{ secrets.PLATFORM_ADMIN_USER_IDS }}" \
-              "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}" \
-              "UPSTASH_REDIS_REST_URL=${{ secrets.UPSTASH_REDIS_REST_URL }}" \
-              "UPSTASH_REDIS_REST_TOKEN=${{ secrets.UPSTASH_REDIS_REST_TOKEN }}" \
-            --container-name "$TARGET_APP" \
-            --image ${{ env.IMAGE }}:${{ github.sha }}
+          # Retry frontend image rollout to tolerate eventual RBAC propagation for AcrPull.
+          ATTEMPT=1
+          MAX_ATTEMPTS=5
+          while true; do
+            if az containerapp update \
+              --name "$TARGET_APP" \
+              --resource-group "$TARGET_RG" \
+              --set-env-vars \
+                "NODE_ENV=production" \
+                "PORT=3000" \
+                "NEXT_PUBLIC_APP_ENV=${{ needs.plan.outputs.environment }}" \
+                "UE_ENVIRONMENT=${{ needs.plan.outputs.environment }}" \
+                "UE_DEPLOYMENT_TYPE=${{ needs.plan.outputs.deployment_type }}" \
+                "UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }}" \
+                "NZILA_MODE=${{ needs.plan.outputs.nzila_mode }}" \
+                "GITHUB_SHA=${{ github.sha }}" \
+                "RELEASE_ID=${{ needs.plan.outputs.release_id }}" \
+                "BUILD_TIME=${{ needs.plan.outputs.build_time }}" \
+                "BUILD_TIMESTAMP=${{ needs.plan.outputs.build_time }}" \
+                "ARTIFACT_ID=${{ github.sha }}" \
+                "UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }}" \
+                "UE_APP_URL=${{ needs.plan.outputs.app_url }}" \
+                "NEXT_PUBLIC_SITE_URL=${{ needs.plan.outputs.marketing_url }}" \
+                "NEXT_PUBLIC_APP_URL=${{ needs.plan.outputs.app_url }}" \
+                "NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app" \
+                "NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app" \
+                "AUTH_URL=${{ needs.plan.outputs.app_url }}" \
+                "AUTH_TRUST_HOST=true" \
+                "DJANGO_API_URL=http://localhost:8000" \
+                "PLATFORM_ADMIN_USER_IDS=${{ secrets.PLATFORM_ADMIN_USER_IDS }}" \
+                "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}" \
+                "UPSTASH_REDIS_REST_URL=${{ secrets.UPSTASH_REDIS_REST_URL }}" \
+                "UPSTASH_REDIS_REST_TOKEN=${{ secrets.UPSTASH_REDIS_REST_TOKEN }}" \
+              --container-name "$TARGET_APP" \
+              --image ${{ env.IMAGE }}:${{ github.sha }}; then
+              break
+            fi
+
+            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+              echo "::error::Frontend rollout failed after $MAX_ATTEMPTS attempts."
+              exit 1
+            fi
+
+            echo "Frontend rollout attempt $ATTEMPT failed; retrying in 20s to allow AcrPull propagation..."
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep 20
+          done
+
           # Backend runs migrations automatically on startup (Dockerfile CMD)
           az containerapp update \
             --name "$TARGET_APP" \
