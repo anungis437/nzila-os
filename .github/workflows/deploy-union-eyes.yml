@@ -584,6 +584,123 @@ jobs:
               "CORS_ALLOWED_ORIGINS=${{ needs.plan.outputs.marketing_url }},${{ needs.plan.outputs.app_url }}" \
             --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
+      - name: Sync DNS records (Cloudflare)
+        if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
+        shell: bash
+        env:
+          DNS_API_TOKEN: ${{ secrets.DNS_API_TOKEN }}
+          DNS_ZONE_ID: ${{ vars.DNS_ZONE_ID }}
+          DNS_ZONE_NAME: ${{ needs.plan.outputs.dns_zone_name }}
+          PROD_DNS_TARGET: ${{ needs.plan.outputs.prod_dns_target }}
+          STAGING_DNS_TARGET: ${{ needs.plan.outputs.staging_dns_target }}
+        run: |
+          set -euo pipefail
+
+          norm() { echo "$1" | tr -d '[:space:]' | sed 's/\.$//' | tr '[:upper:]' '[:lower:]'; }
+
+          upsert_cname() {
+            local name="$1"
+            local target="$2"
+
+            RESULT=$(curl -sS \
+              -H "Authorization: Bearer $DNS_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              "https://api.cloudflare.com/client/v4/zones/${DNS_ZONE_ID}/dns_records?type=CNAME&name=${name}")
+            RECORD_ID=$(echo "$RESULT" | jq -r '.result[0].id // ""')
+            CURRENT=$(echo "$RESULT" | jq -r '.result[0].content // ""')
+
+            if [ "$(norm "$CURRENT")" = "$(norm "$target")" ]; then
+              echo "✓ CNAME ${name} already correct (${target})"
+              return
+            fi
+
+            if [ -n "$RECORD_ID" ]; then
+              RESP=$(curl -sS -X PUT \
+                -H "Authorization: Bearer $DNS_API_TOKEN" \
+                -H "Content-Type: application/json" \
+                "https://api.cloudflare.com/client/v4/zones/${DNS_ZONE_ID}/dns_records/${RECORD_ID}" \
+                -d "{\"type\":\"CNAME\",\"name\":\"${name}\",\"content\":\"${target}\",\"ttl\":300,\"proxied\":false}")
+            else
+              RESP=$(curl -sS -X POST \
+                -H "Authorization: Bearer $DNS_API_TOKEN" \
+                -H "Content-Type: application/json" \
+                "https://api.cloudflare.com/client/v4/zones/${DNS_ZONE_ID}/dns_records" \
+                -d "{\"type\":\"CNAME\",\"name\":\"${name}\",\"content\":\"${target}\",\"ttl\":300,\"proxied\":false}")
+            fi
+
+            SUCCESS=$(echo "$RESP" | jq -r '.success')
+            if [ "$SUCCESS" = "true" ]; then
+              echo "✅ CNAME ${name} -> ${target}"
+            else
+              echo "::error::Failed to upsert CNAME ${name}: $(echo "$RESP" | jq -c '.errors')"
+              exit 1
+            fi
+          }
+
+          upsert_cname "app.${DNS_ZONE_NAME}" "$PROD_DNS_TARGET"
+          upsert_cname "staging-app.${DNS_ZONE_NAME}" "$STAGING_DNS_TARGET"
+          echo "DNS sync complete for ${DNS_ZONE_NAME}"
+
+      - name: Bind custom domains to container app
+        if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
+        shell: bash
+        env:
+          DEPLOY_ENV: ${{ needs.plan.outputs.environment }}
+          DNS_ZONE_NAME: ${{ needs.plan.outputs.dns_zone_name }}
+        run: |
+          set -euo pipefail
+
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          ZONE="$DNS_ZONE_NAME"
+
+          bind_and_wait() {
+            local hostname="$1"
+            local max_wait=600
+            local interval=20
+
+            EXISTING=$(az containerapp show \
+              --name "$TARGET_APP" \
+              --resource-group "$TARGET_RG" \
+              --query "properties.configuration.ingress.customDomains[?name=='${hostname}'].bindingType" \
+              -o tsv 2>/dev/null || echo "")
+
+            if [ "${EXISTING:-}" = "SniEnabled" ]; then
+              echo "✓ Custom domain ${hostname} already bound (SniEnabled)"
+              return
+            fi
+
+            echo "Binding custom domain ${hostname} to ${TARGET_APP}..."
+            az containerapp hostname add \
+              --name "$TARGET_APP" \
+              --resource-group "$TARGET_RG" \
+              --hostname "$hostname" \
+              --output none 2>&1 || echo "::warning::hostname add returned non-zero; cert may already be provisioning."
+
+            echo "Waiting for TLS cert on ${hostname} (up to ${max_wait}s)..."
+            elapsed=0
+            while [ "$elapsed" -lt "$max_wait" ]; do
+              STATE=$(az containerapp show \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --query "properties.configuration.ingress.customDomains[?name=='${hostname}'].bindingType" \
+                -o tsv 2>/dev/null || echo "")
+              if [ "${STATE:-}" = "SniEnabled" ]; then
+                echo "✅ TLS cert ready for ${hostname}"
+                return
+              fi
+              sleep "$interval"
+              elapsed=$((elapsed + interval))
+            done
+            echo "::warning::TLS cert not yet provisioned for ${hostname} after ${max_wait}s; HTTPS smoke checks may fail."
+          }
+
+          if [ "$DEPLOY_ENV" = "production" ]; then
+            bind_and_wait "app.${ZONE}"
+          elif [ "$DEPLOY_ENV" = "staging" ] || [ "$DEPLOY_ENV" = "develop" ]; then
+            bind_and_wait "staging-app.${ZONE}"
+          fi
+
       - name: Custom domain smoke checks
         shell: bash
         run: |
