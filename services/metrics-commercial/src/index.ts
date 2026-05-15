@@ -83,6 +83,10 @@ export class MetricsCommercialService {
     const normalized = events.map((event) => ({
       id: event.id ?? randomUUID(),
       ts: event.ts ?? new Date().toISOString(),
+      ...event,
+    }))
+
+    await this.store.append(normalized)
     return normalized.length
   }
 
