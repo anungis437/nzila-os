@@ -632,14 +632,27 @@ jobs:
             if [ "$SUCCESS" = "true" ]; then
               echo "✅ CNAME ${name} -> ${target}"
             else
-              echo "::error::Failed to upsert CNAME ${name}: $(echo "$RESP" | jq -c '.errors')"
+              ERROR_CODE=$(echo "$RESP" | jq -r '.errors[0].code // "unknown"')
+              if [ "$ERROR_CODE" = "10000" ]; then
+                echo "::warning::Cloudflare DNS sync: authentication error (code 10000) — DNS records NOT updated."
+                echo "::warning::Action required: update GitHub secret DNS_API_TOKEN with a valid Cloudflare API token (Zone:DNS:Edit)."
+                echo "DNS_SYNC_BLOCKED=true" >> "$GITHUB_ENV"
+                return
+              fi
+              echo "::error::Failed to upsert CNAME ${name}: $(echo \"$RESP\" | jq -c '.errors')"
               exit 1
             fi
           }
 
           upsert_cname "app.${DNS_ZONE_NAME}" "$PROD_DNS_TARGET"
-          upsert_cname "staging-app.${DNS_ZONE_NAME}" "$STAGING_DNS_TARGET"
-          echo "DNS sync complete for ${DNS_ZONE_NAME}"
+          if [ "${DNS_SYNC_BLOCKED:-}" != "true" ]; then
+            upsert_cname "staging-app.${DNS_ZONE_NAME}" "$STAGING_DNS_TARGET"
+          fi
+          if [ "${DNS_SYNC_BLOCKED:-}" = "true" ]; then
+            echo "DNS sync blocked; records unchanged."
+          else
+            echo "DNS sync complete for ${DNS_ZONE_NAME}"
+          fi
 
       - name: Bind custom domains to container app
         if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
@@ -649,6 +662,11 @@ jobs:
           DNS_ZONE_NAME: ${{ needs.plan.outputs.dns_zone_name }}
         run: |
           set -euo pipefail
+
+          if [ "${DNS_SYNC_BLOCKED:-}" = "true" ]; then
+            echo "::warning::Custom domain bind skipped — DNS sync was blocked (invalid Cloudflare token)."
+            exit 0
+          fi
 
           TARGET_APP="${{ needs.plan.outputs.app_name }}"
           TARGET_RG="${{ needs.plan.outputs.resource_group }}"
@@ -750,6 +768,12 @@ jobs:
           STAGING_DNS_TARGET: ${{ needs.plan.outputs.staging_dns_target }}
         run: |
           set -euo pipefail
+
+          if [ "${DNS_SYNC_BLOCKED:-}" = "true" ]; then
+            echo "::warning::DNS record verification skipped — DNS sync was blocked due to invalid Cloudflare API token."
+            echo "::warning::Action required: update GitHub secret DNS_API_TOKEN with a valid Cloudflare API token (Zone:DNS:Edit for zone $DNS_ZONE_NAME) and re-run."
+            exit 0
+          fi
 
           if [ "$DNS_PROVIDER" != "cloudflare" ]; then
             echo "DNS verification not implemented for provider: $DNS_PROVIDER"
