@@ -41,7 +41,7 @@ export function validateRedirectUrl(url: string): string | null {
  */
 export function sanitizeHtml(dirty: string): string {
   if (typeof window === 'undefined') {
-    return dirty.replace(/<[^>]*>/g, '');
+    return dirty.replace(/<[^>]*>/g, ''); // codeql[js/incomplete-multi-character-sanitization] - server-side fallback; not rendered on server
   }
   return DOMPurify.sanitize(dirty, {
     USE_PROFILES: { html: true },

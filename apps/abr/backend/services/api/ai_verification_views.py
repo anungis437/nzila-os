@@ -83,7 +83,7 @@ class AIVerificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'interaction_logs failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'interaction_logs',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -119,7 +119,7 @@ class AIVerificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'usage_stats failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'usage_stats',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -152,7 +152,7 @@ class AIVerificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'log_interaction failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'log_interaction',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -185,7 +185,7 @@ class AIVerificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'mark_reviewed failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'mark_reviewed',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -206,7 +206,7 @@ class AIVerificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'validate_response failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'validate_response',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -227,7 +227,7 @@ class AIVerificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'verify_citations failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'verify_citations',
             }, status=status.HTTP_400_BAD_REQUEST)
 

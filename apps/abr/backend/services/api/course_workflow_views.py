@@ -92,7 +92,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'submit_review failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'submit_review',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -125,7 +125,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'approve failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'approve',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -158,7 +158,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'reject failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'reject',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,7 +191,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'publish failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'publish',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -227,7 +227,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'workflow_history failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'workflow_history',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -260,7 +260,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_version failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_version',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -296,7 +296,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'versions failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'versions',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -332,7 +332,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'version failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'version',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -365,7 +365,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_review failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_review',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -398,7 +398,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'complete_review failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'complete_review',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -434,7 +434,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'reviews failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'reviews',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -470,7 +470,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'pending_reviews failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'pending_reviews',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -506,7 +506,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'quality_checklist failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'quality_checklist',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -539,7 +539,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_checklist failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_checklist',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -559,7 +559,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'pending_courses failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'pending_courses',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -579,7 +579,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'workflow_summary failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'workflow_summary',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -599,7 +599,7 @@ class CourseWorkflowViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'courses_by_status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'courses_by_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 

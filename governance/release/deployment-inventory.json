@@ -132,6 +132,7 @@
       },
       "routing": {
         "staging": "blocked",
+        "stagingFallback": "https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "https://www.nzilaventures.com",
         "healthPath": "/api/health",
         "ingress": "external",

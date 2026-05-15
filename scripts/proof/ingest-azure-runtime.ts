@@ -545,7 +545,7 @@ async function assessEnvironment(
       ? (() => {
           try {
             const host = new URL(route).hostname
-            return host.includes('azurecontainerapps.io') ? null : host
+            return (host === 'azurecontainerapps.io' || host.endsWith('.azurecontainerapps.io')) ? null : host
           } catch {
             return null
           }

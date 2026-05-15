@@ -78,7 +78,7 @@ class OutcomePredictionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'predict failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'predict',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -114,7 +114,7 @@ class OutcomePredictionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_prediction failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_prediction',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -147,7 +147,7 @@ class OutcomePredictionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'evaluate_model failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'evaluate_model',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -183,7 +183,7 @@ class OutcomePredictionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'case_outcomes failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'case_outcomes',
             }, status=status.HTTP_400_BAD_REQUEST)
 

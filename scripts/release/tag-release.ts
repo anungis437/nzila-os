@@ -246,13 +246,13 @@ function main(): void {
     const canSign = signingKey.length > 0
 
     if (canSign) {
-      exec(`git tag -s "${tag}" -m "${tagBody.replace(/"/g, '\\"')}"`)
+      child_process.execFileSync('git', ['tag', '-s', tag, '-m', tagBody], { stdio: 'inherit' })
       const signMethod = signFormat === 'ssh' ? 'SSH' : 'GPG'
       console.log(`✓ Created signed tag (${signMethod}): ${tag}`)
     } else if (hasFlag('--allow-unsigned')) {
       console.log('⚠  No signing key — creating unsigned tag (--allow-unsigned override)')
       console.log('   WARNING: This tag will be BLOCKED from production promotion.')
-      exec(`git tag -a "${tag}" -m "${tagBody.replace(/"/g, '\\"')}"`)
+      child_process.execFileSync('git', ['tag', '-a', tag, '-m', tagBody], { stdio: 'inherit' })
       console.log(`✓ Created annotated tag (unsigned): ${tag}`)
     } else {
       console.error('✗ BLOCKED: No signing key configured.')
@@ -266,7 +266,6 @@ function main(): void {
 
     // Push tag first so release automation can continue even if branch pushes are disallowed.
     exec(`git push origin "${tag}"`)
-    console.log(`✓ Pushed tag to origin`)
 
     if (!skipBranchPush) {
       exec(`git push origin HEAD`)

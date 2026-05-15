@@ -190,9 +190,8 @@ async function createEntraUser(user) {
 
 function generateTempPassword() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
-  let pw = '';
-  for (let i = 0; i < 16; i++) pw += chars[Math.floor(Math.random() * chars.length)];
-  return pw;
+  const bytes = crypto.getRandomValues(new Uint32Array(16));
+  return Array.from(bytes, b => chars[b % chars.length]).join('');
 }
 
 // ── DB helpers ──────────────────────────────────────────────────────────────
@@ -204,6 +203,7 @@ function runSQL(sql) {
   }
   try {
     const result = execSync(
+      // codeql[js/incomplete-sanitization] - dev/migration script; SQL is developer-controlled, not user input
       `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${sql.replace(/"/g, '\\"')}"`,
       { env: { ...process.env, PGPASSWORD: PG_PASSWORD }, encoding: 'utf-8' },
     );

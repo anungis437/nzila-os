@@ -621,7 +621,7 @@ def auth_webhook(request):
 
     except Exception as e:
         logger.exception(f"Auth webhook error: {e}")
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": "Internal server error"}, status=500)
 
 
 # Backward compat alias

@@ -83,7 +83,7 @@ class LessonNotesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'notes failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'notes',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -116,7 +116,7 @@ class LessonNotesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_note failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_note',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -149,7 +149,7 @@ class LessonNotesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_note failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_note',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -182,7 +182,7 @@ class LessonNotesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'delete_note failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delete_note',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -218,7 +218,7 @@ class LessonNotesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'note_count failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'note_count',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -238,7 +238,7 @@ class LessonNotesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'export_text failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'export_text',
             }, status=status.HTTP_400_BAD_REQUEST)
 

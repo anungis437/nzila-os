@@ -83,7 +83,7 @@ class ComplianceReportsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -119,7 +119,7 @@ class ComplianceReportsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_report failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_report',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -155,7 +155,7 @@ class ComplianceReportsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'list_reports failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'list_reports',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -188,7 +188,7 @@ class ComplianceReportsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'schedule failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'schedule',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -208,7 +208,7 @@ class ComplianceReportsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'export_csv failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'export_csv',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -228,7 +228,7 @@ class ComplianceReportsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'export_pdf failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'export_pdf',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -248,7 +248,7 @@ class ComplianceReportsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'export_xlsx failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'export_xlsx',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -281,7 +281,7 @@ class ComplianceReportsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'approve_export failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'approve_export',
             }, status=status.HTTP_400_BAD_REQUEST)
 

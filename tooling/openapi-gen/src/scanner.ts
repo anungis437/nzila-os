@@ -65,7 +65,7 @@ function extractNextjsPath(filePath: string, appDir: string): string {
   // Remove route.ts suffix
   const pathPart = rel.replace(/\/route\.ts$/, '');
   // Remove route groups: (dashboard)/ → /
-  const cleaned = pathPart.replace(/\([^)]+\)\//g, '');
+  const cleaned = pathPart.replace(/\([^)]+\)\//g, '') // codeql[js/polynomial-redos] - input is a file path from the workspace, not attacker-controlled
   return '/' + cleaned;
 }
 

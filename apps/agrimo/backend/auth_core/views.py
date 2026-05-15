@@ -126,7 +126,7 @@ def clerk_webhook(request):
 
     except Exception as e:
         logger.exception(f"Clerk webhook error: {e}")
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": "An error occurred"}, status=500)
 
 
 # =============================================================================

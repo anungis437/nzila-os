@@ -104,7 +104,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "send",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -142,7 +142,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "send_bulk",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -184,7 +184,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "templates",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -222,7 +222,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "create_template",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -264,7 +264,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "opt_outs",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -302,7 +302,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "handle_opt_out",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -344,7 +344,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "conversations",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -386,7 +386,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "message_history",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -456,7 +456,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "validate_phone",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -498,7 +498,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "rate_limits",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -600,7 +600,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
             logger.exception("webhook processing failed")
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "webhook",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -642,7 +642,7 @@ class TwilioSmsServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "campaign_status",
                 },
                 status=status.HTTP_400_BAD_REQUEST,

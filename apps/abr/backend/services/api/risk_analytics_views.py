@@ -82,7 +82,7 @@ class RiskAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'org_summary failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'org_summary',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -118,7 +118,7 @@ class RiskAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'department_scores failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'department_scores',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -154,7 +154,7 @@ class RiskAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'department_details failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'department_details',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -190,7 +190,7 @@ class RiskAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'trends failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'trends',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -223,7 +223,7 @@ class RiskAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'capture_snapshot failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'capture_snapshot',
             }, status=status.HTTP_400_BAD_REQUEST)
 

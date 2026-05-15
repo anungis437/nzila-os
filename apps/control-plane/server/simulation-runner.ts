@@ -31,6 +31,7 @@ export interface SyntheticSimulationResult {
 const domains: DomainName[] = ['labour', 'legal', 'commerce', 'media-rights']
 const features = ['dashboard', 'policy-center', 'automation', 'alerts', 'insights', 'exports']
 
+// codeql[js/insecure-randomness] - used only for simulation/demo data, not security-sensitive
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }

@@ -63,7 +63,7 @@ class RiskReportExportViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'executive_summary failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'executive_summary',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,7 +83,7 @@ class RiskReportExportViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'department_csv failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'department_csv',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -103,7 +103,7 @@ class RiskReportExportViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'department_html failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'department_html',
             }, status=status.HTTP_400_BAD_REQUEST)
 

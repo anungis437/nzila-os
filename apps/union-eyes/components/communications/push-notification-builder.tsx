@@ -77,6 +77,8 @@ export function PushNotificationBuilder({
   const [body, setBody] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [iconUrl, setIconUrl] = useState('');
+
+  const isSafeUrl = (url: string) => /^https?:\/\//i.test(url)
   const [clickAction, setClickAction] = useState('');
   const [priority, setPriority] = useState<'high' | 'normal' | 'low'>('normal');
   const [sound, setSound] = useState('default');
@@ -377,7 +379,7 @@ export function PushNotificationBuilder({
                 <Label className="text-xs text-muted-foreground mb-2 block">iOS</Label>
                 <div className="bg-gray-100 rounded-lg p-4 space-y-2">
                   <div className="flex items-start gap-3">
-                    {iconUrl && (
+                    {iconUrl && isSafeUrl(iconUrl) && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={iconUrl} alt="" className="w-8 h-8 rounded-lg" />
                     )}
@@ -388,7 +390,7 @@ export function PushNotificationBuilder({
                       </div>
                     </div>
                   </div>
-                  {imageUrl && (
+                  {imageUrl && isSafeUrl(imageUrl) && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={imageUrl} alt="" className="w-full rounded-lg" />
                   )}
@@ -408,7 +410,7 @@ export function PushNotificationBuilder({
                       <div className="text-sm text-gray-700">
                         {body || 'Notification body text will appear here...'}
                       </div>
-                      {imageUrl && (
+                      {imageUrl && isSafeUrl(imageUrl) && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imageUrl} alt="" className="w-full rounded mt-2" />
                       )}

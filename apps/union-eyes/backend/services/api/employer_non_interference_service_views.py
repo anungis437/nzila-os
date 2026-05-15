@@ -84,7 +84,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'check_access',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -120,7 +120,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'access_rules',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -152,7 +152,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_rule',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -188,7 +188,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'violations',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -220,7 +220,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'report_violation',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -256,7 +256,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'justification_requests',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -288,7 +288,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'submit_justification',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -324,7 +324,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'compliance_audit',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -360,7 +360,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'union_data_tags',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -392,7 +392,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'tag_data',
             }, status=status.HTTP_400_BAD_REQUEST)
 

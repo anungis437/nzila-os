@@ -77,7 +77,7 @@ class DataExportViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -113,7 +113,7 @@ class DataExportViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -149,7 +149,7 @@ class DataExportViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'download failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'download',
             }, status=status.HTTP_400_BAD_REQUEST)
 

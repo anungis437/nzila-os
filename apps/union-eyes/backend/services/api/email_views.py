@@ -79,7 +79,7 @@ class EmailServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'send',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -111,7 +111,7 @@ class EmailServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'send_bulk',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -147,7 +147,7 @@ class EmailServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'templates',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -179,7 +179,7 @@ class EmailServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_template',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -215,7 +215,7 @@ class EmailServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'history',
             }, status=status.HTTP_400_BAD_REQUEST)
 

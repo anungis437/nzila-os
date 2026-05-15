@@ -71,7 +71,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'start_session failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'start_session',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,7 +92,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_session failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_session',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -113,7 +113,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'end_session failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'end_session',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -133,7 +133,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'last_position failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'last_position',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,7 +153,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'lesson_history failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'lesson_history',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -173,7 +173,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'recent_history failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'recent_history',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -193,7 +193,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'total_time failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'total_time',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -213,7 +213,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'time_range failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'time_range',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -233,7 +233,7 @@ class WatchHistoryViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'statistics failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'statistics',
             }, status=status.HTTP_400_BAD_REQUEST)
 

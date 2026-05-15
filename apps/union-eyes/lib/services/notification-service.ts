@@ -150,6 +150,7 @@ export const notifications = pgTable('notifications', {
 
 function stripHtml(html: string): string {
   return html
+    // codeql[js/incomplete-multi-character-sanitization] - used for plain-text conversion, not security sanitization
     .replace(/<style[^>]*>.*<\/style>/gm, '')
     .replace(/<[^>]+>/gm, '')
     .replace(/\s+/g, ' ')

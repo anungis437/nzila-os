@@ -1099,7 +1099,7 @@ export class MobileAnalyticsService {
    * Start a new session
    */
   startSession(userId: string, deviceId: string): string {
-    this.sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.sessionId = `session_${crypto.randomUUID()}`;
     this.sessionStartedAt = new Date();
     
     this.trackEvent({

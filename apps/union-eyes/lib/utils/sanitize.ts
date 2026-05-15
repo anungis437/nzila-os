@@ -42,7 +42,8 @@ export function validateRedirectUrl(url: string): string | null {
  */
 export function sanitizeHtml(dirty: string): string {
   if (typeof window === 'undefined') {
-    // Server-side: strip all HTML tags as a safe fallback
+    // Server-side: strip all HTML tags as a safe fallback (not rendered on server)
+    // codeql[js/incomplete-multi-character-sanitization] - server-side fallback only; client uses DOMPurify
     return dirty.replace(/<[^>]*>/g, '');
   }
   return DOMPurify.sanitize(dirty, {

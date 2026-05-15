@@ -85,7 +85,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'activate',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -117,7 +117,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'deactivate',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,7 +153,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'audit_log',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -189,7 +189,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'key_holders',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -221,7 +221,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'register_key_holder',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -257,7 +257,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'emergency_declarations',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -289,7 +289,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'declare_emergency',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -325,7 +325,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'dr_drills',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -357,7 +357,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'schedule_drill',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -393,7 +393,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'recovery_objectives',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -429,7 +429,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'cold_storage_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 

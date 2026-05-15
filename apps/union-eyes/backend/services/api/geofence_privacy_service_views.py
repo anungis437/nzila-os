@@ -89,7 +89,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'zones',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -121,7 +121,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_zone',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,7 +153,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_zone',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -185,7 +185,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delete_zone',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -217,7 +217,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'check_location',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -253,7 +253,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'events',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -289,7 +289,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'tracking_config',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -321,7 +321,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_tracking_config',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -357,7 +357,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'audit_trail',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -393,7 +393,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'deletion_log',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -425,7 +425,7 @@ class GeofencePrivacyServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'request_deletion',
             }, status=status.HTTP_400_BAD_REQUEST)
 

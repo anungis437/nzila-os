@@ -72,7 +72,7 @@ def clerk_webhook(request):
 
     except Exception as e:
         logger.exception(f"Auth webhook error: {e}")
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": "Internal server error"}, status=500)
 
 
 def _verify_webhook(request) -> bool:

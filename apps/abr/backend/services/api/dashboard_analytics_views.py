@@ -65,7 +65,7 @@ class DashboardAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'stats failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'stats',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -85,7 +85,7 @@ class DashboardAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'recent_activity failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'recent_activity',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -121,7 +121,7 @@ class DashboardAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'learning_streak failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'learning_streak',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -141,7 +141,7 @@ class DashboardAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'ce_credits failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'ce_credits',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -161,7 +161,7 @@ class DashboardAnalyticsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'skill_progress failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'skill_progress',
             }, status=status.HTTP_400_BAD_REQUEST)
 

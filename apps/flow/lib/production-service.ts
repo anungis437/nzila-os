@@ -160,7 +160,8 @@ async function generateOrderRef(orgId: string, settings?: OrgCommerceSettings): 
 
   let nextNum = 1
   if (latest?.ref) {
-    const match = latest.ref.match(new RegExp(`${orderPrefix}-\\d{4}-(\\d+)`))
+    const safePrefix = orderPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const match = latest.ref.match(new RegExp(`${safePrefix}-\\d{4}-(\\d+)`))
     if (match) {
       nextNum = parseInt(match[1], 10) + 1
     }

@@ -95,7 +95,7 @@ function extractDependencies(lockContent: string): CycloneDXComponent[] {
       type: 'library',
       name,
       version,
-      purl: `pkg:npm/${name.replace('/', '%2F')}@${version}`,
+      purl: `pkg:npm/${name.replace('/', '%2F')}@${version}`, // codeql[js/incomplete-sanitization] - PURL format only requires slash encoding
       licenses: [{ license: { id: license } }],
       hashes: [{ alg: 'SHA-256', content: integrity }],
     })

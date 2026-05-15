@@ -82,7 +82,7 @@ export class HtmlBulletinAdapter extends BaseAdapter {
         lowerText.includes("négociation") ||
         lowerText.includes("convention collective");
 
-      if (!isCbaRelated || !href || href.startsWith("#") || href.startsWith("javascript:")) {
+      if (!isCbaRelated || !href || href.startsWith("#") || (href.includes(':') && !/^https?:/i.test(href))) {
         continue;
       }
 

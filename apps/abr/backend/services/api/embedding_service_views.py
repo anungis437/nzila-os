@@ -72,7 +72,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate_embedding failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate_embedding',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -93,7 +93,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate_batch failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate_batch',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -126,7 +126,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate_case failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate_case',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -159,7 +159,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate_course failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate_course',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -192,7 +192,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate_all_cases failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate_all_cases',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -225,7 +225,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate_all_courses failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate_all_courses',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -258,7 +258,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'search_cases failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'search_cases',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -291,7 +291,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'search_courses failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'search_courses',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -327,7 +327,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'job_status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'job_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -363,7 +363,7 @@ class EmbeddingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'all_jobs failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'all_jobs',
             }, status=status.HTTP_400_BAD_REQUEST)
 

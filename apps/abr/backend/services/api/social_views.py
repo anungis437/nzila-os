@@ -99,7 +99,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'profile failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'profile',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -132,7 +132,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'upsert_profile failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'upsert_profile',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -168,7 +168,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'search_users failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'search_users',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -201,7 +201,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'follow failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'follow',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -234,7 +234,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'unfollow failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'unfollow',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -270,7 +270,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'followers failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'followers',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -306,7 +306,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'following failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'following',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -342,7 +342,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'is_following failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'is_following',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -378,7 +378,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'study_buddy_matches failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'study_buddy_matches',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -411,7 +411,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'send_buddy_request failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'send_buddy_request',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -444,7 +444,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'accept_buddy failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'accept_buddy',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -477,7 +477,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'decline_buddy failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'decline_buddy',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -513,7 +513,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'buddies failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'buddies',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -549,7 +549,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'pending_buddy_requests failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'pending_buddy_requests',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -582,7 +582,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_post failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_post',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -618,7 +618,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'activity_feed failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'activity_feed',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -654,7 +654,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_activity failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_activity',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -687,7 +687,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'add_reaction failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'add_reaction',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -720,7 +720,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'remove_reaction failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'remove_reaction',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -741,7 +741,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'add_comment failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'add_comment',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -761,7 +761,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'comments failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'comments',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -781,7 +781,7 @@ class SocialViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'social_summary failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'social_summary',
             }, status=status.HTTP_400_BAD_REQUEST)
 

@@ -65,7 +65,7 @@ class EntitlementsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_entitlements failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_entitlements',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -85,7 +85,7 @@ class EntitlementsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'org_entitlements failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'org_entitlements',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -106,7 +106,7 @@ class EntitlementsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'check_feature failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'check_feature',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -127,7 +127,7 @@ class EntitlementsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'can_perform failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'can_perform',
             }, status=status.HTTP_400_BAD_REQUEST)
 

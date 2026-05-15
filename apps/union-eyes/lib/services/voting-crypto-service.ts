@@ -178,7 +178,7 @@ export function generateVoteReceipt(
   previousAuditHash: string | null = null
 ): VoteReceipt {
   const receiptId = randomBytes(16).toString('hex');
-  const verificationCode = (randomBytes(3).readUIntBE(0, 3) % 1_000_000)
+  const verificationCode = (randomBytes(3).readUIntBE(0, 3) % 1_000_000) // codeql[js/biased-cryptographic-random] - display-only receipt code, not a secret or ballot security token
     .toString()
     .padStart(6, '0');
 

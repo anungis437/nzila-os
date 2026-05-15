@@ -82,7 +82,7 @@ export class FpslrebAdapter extends BaseAdapter {
         /\d{4}/.test(linkText);
 
       if (!isDecision) continue;
-      if (!href || href.startsWith("#") || href.startsWith("javascript:")) continue;
+      if (!href || href.startsWith("#") || (href.includes(':') && !/^https?:/i.test(href))) continue;
       if (linkText.length < 3) continue;
 
       let resolvedUrl: string;

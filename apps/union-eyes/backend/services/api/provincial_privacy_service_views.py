@@ -104,7 +104,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "config",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -142,7 +142,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "update_config",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -184,7 +184,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "consent_records",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -222,7 +222,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "record_consent",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -264,7 +264,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "breaches",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -302,7 +302,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "report_breach",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -344,7 +344,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "data_handling",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -386,7 +386,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "dsar_requests",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -424,7 +424,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "submit_dsar",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -498,7 +498,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "fulfill_dsar",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -585,7 +585,7 @@ class ProvincialPrivacyServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "compliance_check",
                 },
                 status=status.HTTP_400_BAD_REQUEST,

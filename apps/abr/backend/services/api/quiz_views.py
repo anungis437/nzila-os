@@ -91,7 +91,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'list_quizzes failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'list_quizzes',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -127,7 +127,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_quiz failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_quiz',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -160,7 +160,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_quiz failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_quiz',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -193,7 +193,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_quiz failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_quiz',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -226,7 +226,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'delete_quiz failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delete_quiz',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -259,7 +259,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'add_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'add_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -292,7 +292,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'remove_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'remove_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -328,7 +328,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'quiz_for_attempt failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'quiz_for_attempt',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -361,7 +361,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'start_attempt failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'start_attempt',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -394,7 +394,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'submit_response failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'submit_response',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -427,7 +427,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'submit_attempt failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'submit_attempt',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -463,7 +463,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_attempt failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_attempt',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -499,7 +499,7 @@ class QuizViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_attempts failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_attempts',
             }, status=status.HTTP_400_BAD_REQUEST)
 

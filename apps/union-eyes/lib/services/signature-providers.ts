@@ -81,13 +81,15 @@ export class DocuSignProvider implements SignatureProvider {
   }
 
   private static resolveOAuthBaseUrl(rawBaseUrl: string): string {
-    const lower = rawBaseUrl.toLowerCase();
-
-    if (lower.includes('demo.docusign.net') || lower.includes('account-d.docusign.com')) {
-      return 'https://account-d.docusign.com';
+    try {
+      const { hostname } = new URL(rawBaseUrl)
+      if (hostname === 'demo.docusign.net' || hostname === 'account-d.docusign.com') {
+        return 'https://account-d.docusign.com'
+      }
+    } catch {
+      // Invalid URL — fall through to production OAuth base
     }
-
-    return 'https://account.docusign.com';
+    return 'https://account.docusign.com'
   }
 
   private static normalizeBaseUrls(rawBaseUrl: string): { apiBaseUrl: string; oauthBaseUrl: string } {
@@ -146,6 +148,7 @@ export class DocuSignProvider implements SignatureProvider {
     const signingInput = `${encodedHeader}.${encodedPayload}`;
 
     const normalizedKey = this.privateKey.replace(/\\n/g, '\n');
+    // codeql[js/insufficient-password-hash] - RSA-SHA256 is used for JWT digital signing, not password hashing
     const signer = createSign('RSA-SHA256');
     signer.update(signingInput);
     signer.end();

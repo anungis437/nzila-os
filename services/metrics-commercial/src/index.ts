@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -69,7 +69,7 @@ export class MetricsCommercialService {
 
   async record(event: Omit<CommercialEvent, 'id' | 'ts'> & Partial<Pick<CommercialEvent, 'id' | 'ts'>>): Promise<CommercialEvent> {
     const normalized: CommercialEvent = {
-      id: event.id ?? createHash('sha1').update(`${event.userId}:${event.app}:${Date.now()}:${Math.random()}`).digest('hex'),
+      id: event.id ?? randomUUID(),
       ts: event.ts ?? new Date().toISOString(),
       ...event,
     }
@@ -81,12 +81,8 @@ export class MetricsCommercialService {
     events: Array<Omit<CommercialEvent, 'id' | 'ts'> & Partial<Pick<CommercialEvent, 'id' | 'ts'>>>,
   ): Promise<number> {
     const normalized = events.map((event) => ({
-      id: event.id ?? createHash('sha1').update(`${event.userId}:${event.app}:${Date.now()}:${Math.random()}`).digest('hex'),
+      id: event.id ?? randomUUID(),
       ts: event.ts ?? new Date().toISOString(),
-      ...event,
-    }))
-
-    await this.store.append(normalized)
     return normalized.length
   }
 

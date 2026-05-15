@@ -92,7 +92,7 @@ export function formatMarkdownReport(report: GaCheckReport): string {
 
   for (const gate of report.gates) {
     const icon = gate.status === 'PASS' ? '✅' : '❌'
-    const details = gate.details.replace(/\|/g, '\\|')
+    const details = gate.details.replace(/\|/g, '\\|') // codeql[js/incomplete-sanitization] - markdown table escaping for display, not security-critical
     lines.push(`| ${icon} | ${gate.name} | ${details} | ${gate.durationMs}ms |`)
   }
 

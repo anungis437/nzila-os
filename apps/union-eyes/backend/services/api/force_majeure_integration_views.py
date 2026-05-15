@@ -90,7 +90,7 @@ class ForceMajeureIntegrationViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "declare",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -159,7 +159,7 @@ class ForceMajeureIntegrationViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "lift",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -201,7 +201,7 @@ class ForceMajeureIntegrationViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "active",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -243,7 +243,7 @@ class ForceMajeureIntegrationViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "history",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -313,7 +313,7 @@ class ForceMajeureIntegrationViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "affected_agreements",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -402,7 +402,7 @@ class ForceMajeureIntegrationViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "impact_assessment",
                 },
                 status=status.HTTP_400_BAD_REQUEST,

@@ -90,7 +90,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_certificate failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_certificate',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,7 +123,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_from_quiz failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_from_quiz',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -159,7 +159,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_certificate failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_certificate',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -195,7 +195,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_by_number failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_by_number',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -231,7 +231,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_certificates failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_certificates',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -267,7 +267,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_stats failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_stats',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -303,7 +303,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'course_certificates failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'course_certificates',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -339,7 +339,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'verify failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'verify',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -372,7 +372,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'revoke failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'revoke',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -405,7 +405,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_pdf failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_pdf',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -441,7 +441,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'templates failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'templates',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -477,7 +477,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'default_template failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'default_template',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -510,7 +510,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_badge failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_badge',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -546,7 +546,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_badges failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_badges',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -582,7 +582,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'badge_by_assertion failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'badge_by_assertion',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -618,7 +618,7 @@ class CertificatesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'certificate_badges failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'certificate_badges',
             }, status=status.HTTP_400_BAD_REQUEST)
 

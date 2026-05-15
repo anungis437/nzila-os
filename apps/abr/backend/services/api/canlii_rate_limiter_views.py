@@ -245,7 +245,7 @@ class CanLIIRateLimiterViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'release failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -293,7 +293,7 @@ class CanLIIRateLimiterViewSet(viewsets.ViewSet):
 
         except Exception as e:
             logger.error(f'reset_daily failed: {e}', exc_info=True)
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def daily_quotas(self, request):
@@ -331,7 +331,7 @@ class CanLIIRateLimiterViewSet(viewsets.ViewSet):
 
         except Exception as e:
             logger.error(f'daily_quotas failed: {e}', exc_info=True)
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def request_log(self, request):
@@ -362,4 +362,4 @@ class CanLIIRateLimiterViewSet(viewsets.ViewSet):
 
         except Exception as e:
             logger.error(f'request_log failed: {e}', exc_info=True)
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

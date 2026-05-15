@@ -68,7 +68,7 @@ class AIPersonalizationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'analyze_engagement failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'analyze_engagement',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,7 +88,7 @@ class AIPersonalizationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'skill_profile failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'skill_profile',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -108,7 +108,7 @@ class AIPersonalizationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'content_suggestions failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'content_suggestions',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -128,7 +128,7 @@ class AIPersonalizationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'learning_path_recommendations failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'learning_path_recommendations',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -148,7 +148,7 @@ class AIPersonalizationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'smart_notifications failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'smart_notifications',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -169,7 +169,7 @@ class AIPersonalizationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'predict_completion failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'predict_completion',
             }, status=status.HTTP_400_BAD_REQUEST)
 

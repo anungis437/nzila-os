@@ -587,6 +587,7 @@ describe('runDocConsistency', () => {
   // ── Protocol-relative links skipped ───────────────────────────────────
 
   it('skips protocol-relative links (//)', () => {
+    // codeql[js/incomplete-url-substring-sanitization] - test data for doc-consistency checker, not user input
     writeFile(tmpDir, 'README.md', '# Links\n\n[CDN](//cdn.example.com/lib.js)\n')
     const report = runDocConsistency(tmpDir)
     const findings = report.findings.filter(f =>

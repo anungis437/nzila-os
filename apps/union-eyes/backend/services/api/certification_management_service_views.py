@@ -73,7 +73,7 @@ class CertificationManagementServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Staff Certifications
@@ -111,7 +111,7 @@ class CertificationManagementServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Continuing Education
@@ -149,7 +149,7 @@ class CertificationManagementServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # License Renewals
@@ -187,7 +187,7 @@ class CertificationManagementServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Alerts
@@ -239,7 +239,7 @@ class CertificationManagementServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Audit Log

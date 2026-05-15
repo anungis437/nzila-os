@@ -199,7 +199,7 @@ export class MobileAnalytics {
     category: EventCategory,
     properties?: Record<string, unknown>
   ): void {
-    if (!this.config.enabled || Math.random() > this.config.sampleRate) {
+    if (!this.config.enabled || Math.random() > this.config.sampleRate) { // codeql[js/insecure-randomness] - sampling rate check, not security-sensitive
       return;
     }
 
@@ -323,14 +323,14 @@ export class MobileAnalytics {
    * Generate session ID
    */
   private generateSessionId(): string {
-    return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `session-${crypto.randomUUID()}`;
   }
 
   /**
    * Generate event ID
    */
   private generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return crypto.randomUUID();
   }
 }
 

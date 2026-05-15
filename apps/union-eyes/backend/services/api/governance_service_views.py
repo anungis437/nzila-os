@@ -76,7 +76,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
                 
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'])
@@ -130,7 +130,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
             
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=False, methods=['post'])
@@ -172,7 +172,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
                 
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'])
@@ -207,7 +207,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
             
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=False, methods=['post'])
@@ -243,7 +243,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'])
@@ -293,7 +293,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'])
@@ -387,7 +387,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
                 
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'])
@@ -426,7 +426,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'])
@@ -465,7 +465,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'])
@@ -498,7 +498,7 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
             
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=False, methods=['post'])
@@ -544,6 +544,6 @@ class GovernanceServiceViewSet(viewsets.ViewSet):
                 
         except Exception as e:
             return Response({
-                'error': str(e)
+                'error': 'An error occurred'
             }, status=status.HTTP_400_BAD_REQUEST)
 

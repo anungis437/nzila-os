@@ -145,7 +145,7 @@ class CarbonAccountingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.exception("record_emission failed")
             return Response(
-                {"error": str(e), "action": "record_emission"},
+                {"error": "An error occurred", "action": "record_emission"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -196,7 +196,7 @@ class CarbonAccountingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.exception("emission_report failed")
             return Response(
-                {"error": str(e), "action": "emission_report"},
+                {"error": "An error occurred", "action": "emission_report"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -264,7 +264,7 @@ class CarbonAccountingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.exception("carbon_summary failed")
             return Response(
-                {"error": str(e), "action": "carbon_summary"},
+                {"error": "An error occurred", "action": "carbon_summary"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -328,7 +328,7 @@ class CarbonAccountingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.exception("set_target failed")
             return Response(
-                {"error": str(e), "action": "set_target"},
+                {"error": "An error occurred", "action": "set_target"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -392,7 +392,7 @@ class CarbonAccountingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.exception("offset_purchase failed")
             return Response(
-                {"error": str(e), "action": "offset_purchase"},
+                {"error": "An error occurred", "action": "offset_purchase"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -453,6 +453,6 @@ class CarbonAccountingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.exception("compliance_check failed")
             return Response(
-                {"error": str(e), "action": "compliance_check"},
+                {"error": "An error occurred", "action": "compliance_check"},
                 status=status.HTTP_400_BAD_REQUEST,
             )

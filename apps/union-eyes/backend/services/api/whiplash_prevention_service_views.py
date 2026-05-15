@@ -180,7 +180,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "monitor",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -222,7 +222,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "violations",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -260,7 +260,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "flag_violation",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -342,7 +342,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "resolve_violation",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -384,7 +384,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "payment_policy",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -422,7 +422,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "update_payment_policy",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -464,7 +464,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "routing_rules",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -506,7 +506,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "separated_transactions",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -548,7 +548,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "reconciliation",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -590,7 +590,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "strike_fund_audit",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -632,7 +632,7 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "prevention_audit",
                 },
                 status=status.HTTP_400_BAD_REQUEST,

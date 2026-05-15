@@ -86,7 +86,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'register_token',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -118,7 +118,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'deregister_token',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -150,7 +150,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'send_to_device',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -182,7 +182,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'send_to_user',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -214,7 +214,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'send_to_topic',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -246,7 +246,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'subscribe_topic',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -278,7 +278,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'unsubscribe_topic',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -314,7 +314,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delivery_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -346,7 +346,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'cleanup_invalid',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -378,7 +378,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'retry_failed',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -414,7 +414,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'templates',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -446,7 +446,7 @@ class FcmServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_template',
             }, status=status.HTTP_400_BAD_REQUEST)
 

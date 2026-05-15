@@ -76,7 +76,7 @@ class PDFGeneratorViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate_evidence failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate_evidence',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -112,7 +112,7 @@ class PDFGeneratorViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'status',
             }, status=status.HTTP_400_BAD_REQUEST)
 

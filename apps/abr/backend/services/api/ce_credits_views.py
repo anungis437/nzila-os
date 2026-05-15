@@ -68,7 +68,7 @@ class CECreditsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'active_credits failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'active_credits',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,7 +88,7 @@ class CECreditsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'credit_history failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'credit_history',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -108,7 +108,7 @@ class CECreditsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'summary_by_body failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'summary_by_body',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -128,7 +128,7 @@ class CECreditsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'renewal_alerts failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'renewal_alerts',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -148,7 +148,7 @@ class CECreditsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'expiring_certs failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'expiring_certs',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -168,7 +168,7 @@ class CECreditsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_dashboard failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_dashboard',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -188,7 +188,7 @@ class CECreditsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'regulatory_bodies failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'regulatory_bodies',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -208,7 +208,7 @@ class CECreditsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'requirements failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'requirements',
             }, status=status.HTTP_400_BAD_REQUEST)
 

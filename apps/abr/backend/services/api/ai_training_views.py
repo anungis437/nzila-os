@@ -81,7 +81,7 @@ class AITrainingViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'start_job failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'start_job',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -117,7 +117,7 @@ class AITrainingViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'job_status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'job_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,7 +153,7 @@ class AITrainingViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'jobs failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'jobs',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -189,7 +189,7 @@ class AITrainingViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'config failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'config',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -222,7 +222,7 @@ class AITrainingViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_config failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_config',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -255,7 +255,7 @@ class AITrainingViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'submit_feedback failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'submit_feedback',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -291,7 +291,7 @@ class AITrainingViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'feedback failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'feedback',
             }, status=status.HTTP_400_BAD_REQUEST)
 

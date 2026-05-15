@@ -69,7 +69,7 @@ class LiveSessionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'submit_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'submit_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -90,7 +90,7 @@ class LiveSessionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'answer_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'answer_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -111,7 +111,7 @@ class LiveSessionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'upvote_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'upvote_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -132,7 +132,7 @@ class LiveSessionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'send_chat failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'send_chat',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,7 +153,7 @@ class LiveSessionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_breakout_rooms failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_breakout_rooms',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -174,7 +174,7 @@ class LiveSessionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'assign_breakout failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'assign_breakout',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -195,7 +195,7 @@ class LiveSessionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'close_breakout failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'close_breakout',
             }, status=status.HTTP_400_BAD_REQUEST)
 

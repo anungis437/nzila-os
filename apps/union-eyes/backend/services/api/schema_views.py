@@ -80,7 +80,7 @@ class SchemaViewSet(viewsets.ViewSet):
             model_class = apps.get_model(app_label, model_name)
         except LookupError:
             return Response(
-                {"error": f"Model {app_label}.{model_name} not found."},
+                {"error": "An error occurred"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         fields = []

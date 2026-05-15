@@ -89,7 +89,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'list_questions failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'list_questions',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -125,7 +125,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -158,7 +158,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,7 +191,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -224,7 +224,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'delete_question failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delete_question',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -257,7 +257,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'add_option failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'add_option',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -290,7 +290,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_option failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_option',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -323,7 +323,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'delete_option failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delete_option',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -359,7 +359,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'question_stats failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'question_stats',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -392,7 +392,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_pool failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_pool',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -425,7 +425,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'add_to_pool failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'add_to_pool',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -461,7 +461,7 @@ class QuizQuestionsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'random_from_pool failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'random_from_pool',
             }, status=status.HTTP_400_BAD_REQUEST)
 

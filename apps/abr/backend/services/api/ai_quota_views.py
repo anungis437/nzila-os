@@ -81,7 +81,7 @@ class AIQuotaViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'check_quota failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'check_quota',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -114,7 +114,7 @@ class AIQuotaViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'record_usage failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'record_usage',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -150,7 +150,7 @@ class AIQuotaViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_usage failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_usage',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -186,7 +186,7 @@ class AIQuotaViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'quota_config failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'quota_config',
             }, status=status.HTTP_400_BAD_REQUEST)
 

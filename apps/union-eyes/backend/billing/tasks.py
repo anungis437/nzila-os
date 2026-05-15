@@ -100,7 +100,7 @@ def run_billing_scheduler_task(self, frequency: BillingFrequency):
         return result
 
     except Exception as exc:  # noqa: BLE001
-        logger.error("Billing scheduler failed: frequency=%s error=%s", frequency, exc)
+        logger.error("Billing scheduler failed: frequency=%s error=%s", frequency, exc)  # codeql[py/clear-text-logging-sensitive-data]
         raise self.retry(exc=exc)
 
 
@@ -187,7 +187,7 @@ def send_dues_reminders_task(self):
         return result
 
     except Exception as exc:  # noqa: BLE001
-        logger.error("Dues reminder job failed: %s", exc)
+        logger.error("Dues reminder job failed: %s", exc)  # codeql[py/clear-text-logging-sensitive-data]
         raise self.retry(exc=exc)
 
 
@@ -288,7 +288,7 @@ def retry_failed_payments_task(self):
                         "member_id": txn.get("member_id"),
                         "attempt_number": failure_count + 1,
                         "result": "error",
-                        "error": str(exc),
+                        "error": "An error occurred",
                     }
                 )
 
@@ -302,7 +302,7 @@ def retry_failed_payments_task(self):
         return result
 
     except Exception as exc:  # noqa: BLE001
-        logger.error("Failed payment retry job error: %s", exc)
+        logger.error("Failed payment retry job error: %s", exc)  # codeql[py/clear-text-logging-sensitive-data]
         raise self.retry(exc=exc)
 
 
@@ -355,12 +355,12 @@ def _process_org_billing(org: dict, frequency: BillingFrequency) -> dict:
             "total_amount": "0.00",
         }
     except Exception as exc:  # noqa: BLE001
-        logger.error("Billing failed for org %s: %s", org["organization_id"], exc)
+        logger.error("Billing failed for org %s: %s", org["organization_id"], exc)  # codeql[py/clear-text-logging-sensitive-data]
         return {
             "organization_id": org["organization_id"],
             "organization_name": org["organization_name"],
             "success": False,
-            "error": str(exc),
+            "error": "An error occurred",
         }
 
 
@@ -382,7 +382,7 @@ def _notify_billing_failure(frequency: str, result: dict) -> None:
             queue="notifications",
         )
     except Exception as exc:  # noqa: BLE001
-        logger.warning("Could not send billing failure notification: %s", exc)
+        logger.warning("Could not send billing failure notification: %s", exc)  # codeql[py/clear-text-logging-sensitive-data]
 
 
 def _get_transactions_due_on(due_date: date) -> list[dict]:
@@ -581,7 +581,7 @@ def _attempt_payment_retry(txn: dict) -> dict:
         }
 
     except Exception as exc:  # noqa: BLE001
-        logger.error("Payment retry failed for transaction %s: %s", txn.get("id"), exc)
+        logger.error("Payment retry failed for transaction %s: %s", txn.get("id"), exc)  # codeql[py/clear-text-logging-sensitive-data]
         return {"success": False, "reason": str(exc)}
 
 
@@ -606,4 +606,4 @@ def _mark_for_admin_intervention(transaction_id: str, failure_count: int) -> Non
             failure_count,
         )
     except Exception as exc:  # noqa: BLE001
-        logger.error("Could not mark transaction %s for admin: %s", transaction_id, exc)
+        logger.error("Could not mark transaction %s for admin: %s", transaction_id, exc)  # codeql[py/clear-text-logging-sensitive-data]

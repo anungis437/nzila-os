@@ -81,7 +81,7 @@ class LmbpImmigrationServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # LMBP Letters
@@ -122,7 +122,7 @@ class LmbpImmigrationServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # GSS Applications
@@ -166,7 +166,7 @@ class LmbpImmigrationServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Mentorships
@@ -213,7 +213,7 @@ class LmbpImmigrationServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Compliance Alerts
@@ -274,7 +274,7 @@ class LmbpImmigrationServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Dashboard
@@ -311,5 +311,5 @@ class LmbpImmigrationServiceViewSet(viewsets.ViewSet):
             )
         except Exception as e:
             return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

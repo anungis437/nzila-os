@@ -785,18 +785,11 @@ export function generatePKCE(): { verifier: string; challenge: string } {
 }
 
 /**
- * Generate random string for PKCE
+ * Generate random string for PKCE (RFC 7636)
  */
 function generateRandomString(length: number): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-  let result = '';
-  const randomValues = randomBytes(length);
-
-  for (let i = 0; i < length; i++) {
-    result += chars[randomValues[i] % chars.length];
-  }
-
-  return result;
+  // Use base64url encoding of random bytes — unbiased and PKCE-compliant
+  return randomBytes(Math.ceil(length * 3 / 4)).toString('base64url').slice(0, length);
 }
 
 /**

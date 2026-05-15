@@ -62,6 +62,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
+    // codeql[js/sensitive-get-query] - standard filter params on authenticated employer data endpoint
     const { employerId, status, _batchNumber } = req.query;
 
     const conditions = [eq(schema.employerRemittances.tenantId, organizationId)];

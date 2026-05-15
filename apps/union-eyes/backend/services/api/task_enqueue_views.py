@@ -114,7 +114,7 @@ class TaskEnqueueView(APIView):
         task_path = JOB_TYPE_MAP.get(job_type)
         if not task_path:
             return Response(
-                {"error": f"Unknown job_type '{job_type}'. Valid types: {sorted(JOB_TYPE_MAP)}"},
+                {"error": "An error occurred"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -155,7 +155,7 @@ class TaskEnqueueView(APIView):
         except Exception as exc:  # noqa: BLE001
             logger.error("Failed to enqueue task %s: %s", job_type, exc)
             return Response(
-                {"error": f"Failed to enqueue task: {exc}"},
+                {"error": "An error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -266,7 +266,7 @@ class FailedTasksView(APIView):
 
         if queue_name not in QUEUE_NAMES:
             return Response(
-                {"error": f"Unknown queue '{queue_name}'. Valid queues: {sorted(QUEUE_NAMES)}"},
+                {"error": "An error occurred"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -346,11 +346,11 @@ class RetryTaskView(APIView):
 
             record = TaskResult.objects.filter(task_id=task_id).first()
             if not record:
-                return Response({"error": f"Task {task_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "An error occurred"}, status=status.HTTP_404_NOT_FOUND)
 
             if record.status != "FAILURE":
                 return Response(
-                    {"error": f"Task {task_id} has status '{record.status}', only FAILURE tasks can be retried"},
+                    {"error": "An error occurred"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -380,7 +380,7 @@ class RetryTaskView(APIView):
 
         except Exception as exc:  # noqa: BLE001
             logger.error("Failed to retry task %s: %s", task_id, exc)
-            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ---------------------------------------------------------------------------
@@ -412,7 +412,7 @@ class TaskStatusView(APIView):
                 "date_done":  result.date_done.isoformat() if getattr(result, "date_done", None) else None,
             })
         except Exception as exc:  # noqa: BLE001
-            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ---------------------------------------------------------------------------
@@ -429,7 +429,7 @@ class QueuePauseView(APIView):
         if not _require_admin(request):
             return Response({"error": "Admin role required"}, status=status.HTTP_403_FORBIDDEN)
         if queue_name not in QUEUE_NAMES:
-            return Response({"error": f"Unknown queue: {queue_name}"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             app = _get_celery_app()
@@ -437,7 +437,7 @@ class QueuePauseView(APIView):
             app.control.cancel_consumer(queue_name, reply=False)
             return Response({"queue": queue_name, "status": "paused"})
         except Exception as exc:  # noqa: BLE001
-            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class QueueResumeView(APIView):
@@ -449,11 +449,11 @@ class QueueResumeView(APIView):
         if not _require_admin(request):
             return Response({"error": "Admin role required"}, status=status.HTTP_403_FORBIDDEN)
         if queue_name not in QUEUE_NAMES:
-            return Response({"error": f"Unknown queue: {queue_name}"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             app = _get_celery_app()
             app.control.add_consumer(queue_name, reply=False)
             return Response({"queue": queue_name, "status": "resumed"})
         except Exception as exc:  # noqa: BLE001
-            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

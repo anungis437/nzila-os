@@ -89,7 +89,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'subscription failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'subscription',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -122,7 +122,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_subscription failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_subscription',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -155,7 +155,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_subscription failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_subscription',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,7 +191,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'by_stripe_id failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'by_stripe_id',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -211,7 +211,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'can_add_users failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'can_add_users',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -232,7 +232,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'enforce_seats failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'enforce_seats',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -268,7 +268,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'allocations failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'allocations',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -301,7 +301,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'allocate failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'allocate',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -334,7 +334,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'revoke failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'revoke',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -370,7 +370,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -406,7 +406,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'invoices failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'invoices',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -439,7 +439,7 @@ class SeatManagementViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'record_invoice failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'record_invoice',
             }, status=status.HTTP_400_BAD_REQUEST)
 

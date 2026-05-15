@@ -83,6 +83,10 @@ export class EventbriteClient {
 
   private async request<T>(path: string, params?: Record<string, string>): Promise<T> {
     const url = new URL(`${EVENTBRITE_API_BASE}${path}`)
+    const apiHost = new URL(EVENTBRITE_API_BASE).hostname
+    if (url.hostname !== apiHost) {
+      throw new Error('Invalid Eventbrite API path')
+    }
     if (params) {
       for (const [key, val] of Object.entries(params)) {
         url.searchParams.set(key, val)

@@ -98,7 +98,7 @@ class EvidencePackViewSet(viewsets.ReadOnlyModelViewSet):
                 {"error": "Pack not found"}, status=status.HTTP_404_NOT_FOUND
             )
         except ValueError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ----- verify seal -----
 

@@ -79,7 +79,7 @@ class CanLIIIngestionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'start failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'start',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -115,7 +115,7 @@ class CanLIIIngestionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'stats failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'stats',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -151,7 +151,7 @@ class CanLIIIngestionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'daily_quota failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'daily_quota',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -187,7 +187,7 @@ class CanLIIIngestionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'jobs failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'jobs',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -223,7 +223,7 @@ class CanLIIIngestionViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'errors failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'errors',
             }, status=status.HTTP_400_BAD_REQUEST)
 

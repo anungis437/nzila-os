@@ -95,7 +95,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'profile failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'profile',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -128,7 +128,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_profile failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_profile',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -161,7 +161,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_profile failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_profile',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -194,7 +194,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'approve failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'approve',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -230,7 +230,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'active_instructors failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'active_instructors',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -266,7 +266,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'featured_instructors failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'featured_instructors',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -299,7 +299,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'assign_course failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'assign_course',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -332,7 +332,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'remove_course failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'remove_course',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -368,7 +368,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'course_instructors failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'course_instructors',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -404,7 +404,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'instructor_courses failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'instructor_courses',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -424,7 +424,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'dashboard failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'dashboard',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -460,7 +460,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'analytics failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'analytics',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -496,7 +496,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'analytics_timeseries failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'analytics_timeseries',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -516,7 +516,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'effectiveness failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'effectiveness',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -549,7 +549,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'send_message failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'send_message',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -585,7 +585,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'messages failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'messages',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -621,7 +621,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'earnings_summary failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'earnings_summary',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -657,7 +657,7 @@ class InstructorsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'earnings_by_course failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'earnings_by_course',
             }, status=status.HTTP_400_BAD_REQUEST)
 

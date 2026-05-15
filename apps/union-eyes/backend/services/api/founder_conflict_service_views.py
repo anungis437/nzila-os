@@ -91,7 +91,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'disclosures',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,7 +123,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'submit_disclosure',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -155,7 +155,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'resolve_disclosure',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,7 +191,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'blind_trusts',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -223,7 +223,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'register_trust',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -255,7 +255,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'arms_length_verify',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -291,7 +291,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'recusals',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -323,7 +323,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'record_recusal',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -359,7 +359,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'review_committee',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -395,7 +395,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'training_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -431,7 +431,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'audit_log',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -467,7 +467,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'policy',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -499,7 +499,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_policy',
             }, status=status.HTTP_400_BAD_REQUEST)
 

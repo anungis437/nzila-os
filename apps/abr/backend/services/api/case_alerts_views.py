@@ -89,7 +89,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'alerts failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'alerts',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -122,7 +122,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'mark_read failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'mark_read',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -155,7 +155,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'mark_all_read failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'mark_all_read',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,7 +191,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'saved_searches failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'saved_searches',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -224,7 +224,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_search failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_search',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -257,7 +257,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_search failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_search',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -290,7 +290,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'delete_search failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delete_search',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -326,7 +326,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'execute_search failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'execute_search',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -362,7 +362,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'digest failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'digest',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -398,7 +398,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'preferences failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'preferences',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -431,7 +431,7 @@ class CaseAlertsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_preferences failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_preferences',
             }, status=status.HTTP_400_BAD_REQUEST)
 

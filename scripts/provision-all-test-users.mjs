@@ -169,6 +169,7 @@ async function createOrg(name, slug) {
 function runSQL(sql) {
   try {
     const result = execSync(
+      // codeql[js/incomplete-sanitization] - dev/test-only script; SQL is developer-controlled, not user input
       `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${sql.replace(/"/g, '\\"')}"`,
       { env: { ...process.env, PGPASSWORD: PG_PASSWORD }, encoding: 'utf-8' },
     );

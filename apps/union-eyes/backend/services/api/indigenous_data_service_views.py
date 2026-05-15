@@ -90,7 +90,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'band_councils',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -122,7 +122,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'register_council',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -158,7 +158,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'consent_records',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -190,7 +190,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'record_consent',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -226,7 +226,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'member_data',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -262,7 +262,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'access_log',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -298,7 +298,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'sharing_agreements',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -330,7 +330,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_sharing_agreement',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -366,7 +366,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'traditional_knowledge',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -398,7 +398,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'register_knowledge',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -430,7 +430,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'request_access',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -462,7 +462,7 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'approve_access',
             }, status=status.HTTP_400_BAD_REQUEST)
 

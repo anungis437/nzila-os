@@ -158,6 +158,7 @@ function main(): void {
   console.log(`  Tag:             ${hotfixTag}`)
   console.log(`  SHA:             ${gitSha.slice(0, 8)}`)
   console.log(`  Branch:          ${gitBranch}`)
+  // codeql[js/clear-text-logging] - initiatedBy is a non-secret username (GITHUB_ACTOR or local USER)
   console.log(`  Initiated by:    ${initiatedBy}`)
   console.log(`  Normalize by:    ${new Date(deadline).toLocaleString()}`)
 
@@ -202,7 +203,7 @@ function main(): void {
     `Normalize by: ${deadline}`,
   ].join('\n')
 
-  exec(`git tag -a "${hotfixTag}" -m "${tagBody.replace(/"/g, '\\"')}"`)
+  child_process.execFileSync('git', ['tag', '-a', hotfixTag, '-m', tagBody], { stdio: 'inherit' })
   console.log(`✓ Created tag: ${hotfixTag}`)
 
   // 5. Push

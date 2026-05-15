@@ -63,7 +63,7 @@ class CodespringViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'verify_key failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'verify_key',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,7 +83,7 @@ class CodespringViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'status',
             }, status=status.HTTP_400_BAD_REQUEST)
 

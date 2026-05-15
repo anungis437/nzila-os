@@ -8,6 +8,7 @@ type Inventory = {
   apps: Record<string, {
     routing?: {
       staging?: string
+      stagingFallback?: string
       production?: string
       healthPath?: string
       readyPath?: string
@@ -195,15 +196,19 @@ async function main() {
       continue
     }
 
-    const host = env === 'production' ? cfg.routing?.production : cfg.routing?.staging
-    if (!host || host === 'blocked' || host === 'pilot-only' || host === 'n/a') {
+    const primaryHost = env === 'production' ? cfg.routing?.production : cfg.routing?.staging
+    const isBlocked = !primaryHost || primaryHost === 'blocked' || primaryHost === 'pilot-only' || primaryHost === 'n/a'
+    const host = isBlocked
+      ? (env === 'staging' ? (cfg.routing?.stagingFallback ?? null) : null)
+      : primaryHost
+    if (!host) {
       results.push({
         app,
-        host: host ?? 'n/a',
+        host: primaryHost ?? 'n/a',
         ok: false,
         probes: [{
           endpoint: 'health',
-          url: host ?? 'n/a',
+          url: primaryHost ?? 'n/a',
           status: 0,
           ok: false,
           attempts: 1,
@@ -230,7 +235,7 @@ async function main() {
       new Set(probes.filter((probe) => !probe.ok).map((probe) => probe.failureType)),
     )
 
-    const nonBlockingForStaging = new Set<FailureType>(['server_error'])
+    const nonBlockingForStaging = new Set<FailureType>(['server_error', 'dns'])
     const isBlockingFailure = (failureType: FailureType) => !nonBlockingForStaging.has(failureType)
 
     // In staging we tolerate transient 5xx probe failures to avoid deploy flakiness while

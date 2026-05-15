@@ -226,7 +226,7 @@ def parse_database_url(url: str) -> Dict[str, str]:
 
 def connect_db(params: Dict[str, str], label: str = "db") -> psycopg2.extensions.connection:
     """Create a PostgreSQL connection."""
-    logger.info(f"Connecting to {label}: {params['host']}:{params['port']}/{params['dbname']}")
+    logger.info(f"Connecting to {label}: {params['host']}:{params['port']}/{params['dbname']}")  # noqa: S320 codeql[py/clear-text-logging-sensitive-data] - dev/migration tool; only logs host/port/dbname, not credentials
     conn = psycopg2.connect(
         host=params["host"],
         port=params["port"],

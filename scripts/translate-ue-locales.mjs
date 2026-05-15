@@ -83,6 +83,7 @@ function setDeep(obj, dotted, value) {
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     const k = parts[i];
+    if (k === '__proto__' || k === 'constructor' || k === 'prototype') return; // guard against prototype pollution
     if (typeof cur[k] !== 'object' || cur[k] === null || Array.isArray(cur[k])) {
       cur[k] = {};
     }

@@ -73,7 +73,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'check_permission failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'check_permission',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -93,7 +93,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_permissions failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_permissions',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -113,7 +113,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'effective_permissions failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'effective_permissions',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -149,7 +149,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_roles failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_roles',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -182,7 +182,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'assign_permission failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'assign_permission',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -215,7 +215,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'revoke_permission failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'revoke_permission',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -248,7 +248,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_override failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_override',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -281,7 +281,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'approve_override failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'approve_override',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -314,7 +314,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'clear_cache failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'clear_cache',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -347,7 +347,7 @@ class RBACViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'clear_all_caches failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'clear_all_caches',
             }, status=status.HTTP_400_BAD_REQUEST)
 

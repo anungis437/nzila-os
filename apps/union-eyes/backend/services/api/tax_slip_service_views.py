@@ -74,7 +74,7 @@ class TaxSlipServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # RL-1 Tax Slips
@@ -115,7 +115,7 @@ class TaxSlipServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Tax Year-End Processing
@@ -153,7 +153,7 @@ class TaxSlipServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Weekly Threshold Tracking

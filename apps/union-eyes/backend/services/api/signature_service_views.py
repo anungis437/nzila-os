@@ -86,7 +86,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Hash Document Reference
@@ -119,7 +119,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 {"error": "Document not found"}, status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Sign Document
@@ -162,7 +162,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Sign Document With Key
@@ -205,7 +205,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Get Document Signatures
@@ -237,7 +237,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Reject Signature
@@ -276,7 +276,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Create Signature Request (workflow)
@@ -327,7 +327,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Get User Signature Requests
@@ -347,7 +347,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
             serializer = SignatureWorkflowsSerializer(workflows, many=True)
             return Response({"data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Complete Signature Request Step
@@ -385,7 +385,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Cancel Signature Request
@@ -425,7 +425,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Expire Overdue Signature Requests
@@ -469,4 +469,4 @@ class SignatureServiceViewSet(viewsets.ViewSet):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)

@@ -95,7 +95,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'achievement_categories failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'achievement_categories',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -131,7 +131,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'achievements failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'achievements',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -167,7 +167,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_achievements failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_achievements',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -203,7 +203,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'achievement_progress failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'achievement_progress',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -224,7 +224,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'check_achievements failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'check_achievements',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -257,7 +257,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'feature_achievement failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'feature_achievement',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -293,7 +293,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_points failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_points',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -326,7 +326,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'award_points failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'award_points',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -362,7 +362,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'points_transactions failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'points_transactions',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -398,7 +398,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'streaks failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'streaks',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -431,7 +431,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_streak failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_streak',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -467,7 +467,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'best_streak failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'best_streak',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -503,7 +503,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'leaderboards failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'leaderboards',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -539,7 +539,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'leaderboard_entries failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'leaderboard_entries',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -575,7 +575,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_rank failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_rank',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -608,7 +608,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'calculate_leaderboard failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'calculate_leaderboard',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -628,7 +628,7 @@ class CourseGamificationViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'summary failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'summary',
             }, status=status.HTTP_400_BAD_REQUEST)
 

@@ -624,7 +624,7 @@ export class RemittanceExportService {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const nodeCrypto = require('crypto');
     const buf = nodeCrypto.randomBytes(4);
-    return (buf.readUInt32BE(0) % 1000000000).toString().padStart(9, '0');
+    return (buf.readUInt32BE(0) % 1000000000).toString().padStart(9, '0'); // codeql[js/biased-cryptographic-random] - non-secret 9-digit payment reference ID
   }
 
   /**

@@ -259,7 +259,7 @@ export const resolvers = {
       return results.map(claim => ({
         id: claim.id,
         claimNumber: claim.claimNumber,
-        provider: claim.externalProvider.toUpperCase().replace(/_/g, '_'),
+        provider: claim.externalProvider.toUpperCase(),
         memberName: claim.employeeName || 'Unknown',
         claimDate: claim.submissionDate,
         claimType: claim.claimType || 'general',
@@ -294,7 +294,7 @@ export const resolvers = {
 
       return results.map(policy => ({
         id: policy.id,
-        provider: policy.externalProvider.toUpperCase().replace(/_/g, '_'),
+        provider: policy.externalProvider.toUpperCase(),
         policyNumber: policy.policyNumber,
         policyType: policy.policyType || 'general',
         policyHolder: policy.employeeId || 'Unknown',
@@ -326,8 +326,8 @@ export const resolvers = {
         .from(externalInsurancePolicies)
         .groupBy(externalInsurancePolicies.externalProvider);
 
-      const claimMap = new Map(claimCounts.map(c => [c.provider?.toUpperCase().replace(/_/g, '_'), c.count]));
-      const policyMap = new Map(policyCounts.map(p => [p.provider?.toUpperCase().replace(/_/g, '_'), p.count]));
+      const claimMap = new Map(claimCounts.map(c => [c.provider?.toUpperCase(), c.count]));
+      const policyMap = new Map(policyCounts.map(p => [p.provider?.toUpperCase(), p.count]));
 
       return providers.map(provider => {
         const providerKey = provider.toLowerCase();
@@ -648,4 +648,5 @@ export const resolvers = {
     },
   },
 };
+
 

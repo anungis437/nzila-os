@@ -396,7 +396,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
     // Log error for debugging — this catch prevents silent 500s
     logger.error('[middleware] Unhandled error:', { error: middlewareError });
     return new NextResponse(
-      JSON.stringify({ error: 'Middleware error', message: String(middlewareError) }),
+      JSON.stringify({ error: 'Middleware error' }),
       { status: 500, headers: { 'content-type': 'application/json' } }
     );
   }
@@ -410,7 +410,7 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
     const eLogger = createClientLogger('middleware');
     eLogger.error('[middleware] Outer error:', { error: outerError });
     return new NextResponse(
-      JSON.stringify({ error: 'Middleware error', message: String(outerError) }),
+      JSON.stringify({ error: 'Middleware error' }),
       { status: 500, headers: { 'content-type': 'application/json' } }
     );
   }

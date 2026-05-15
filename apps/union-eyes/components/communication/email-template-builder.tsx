@@ -232,6 +232,7 @@ export function EmailTemplateBuilder({
         case "divider":
           return <hr className="my-6 border-gray-300" />;
         case "html":
+          {/* codeql[js/xss-through-dom] - content sanitized by DOMPurify via sanitizeHtml() */}
           return <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }} className="mb-4" />;
         default:
           return null;

@@ -77,7 +77,7 @@ class AuditLoggerViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'log_event failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'log_event',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -113,7 +113,7 @@ class AuditLoggerViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'search failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'search',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -133,7 +133,7 @@ class AuditLoggerViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'export failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'export',
             }, status=status.HTTP_400_BAD_REQUEST)
 

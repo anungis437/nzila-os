@@ -87,7 +87,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_bundle failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_bundle',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,7 +123,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_bundle failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_bundle',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -159,7 +159,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'list_bundles failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'list_bundles',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -192,7 +192,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'add_component failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'add_component',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -225,7 +225,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'add_timeline_event failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'add_timeline_event',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -261,7 +261,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'build_timeline failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'build_timeline',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -297,7 +297,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'policy_mappings failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'policy_mappings',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -330,7 +330,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_policy_mapping failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_policy_mapping',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -351,7 +351,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'generate_mappings failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'generate_mappings',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -384,7 +384,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -404,7 +404,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'export_bundle failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'export_bundle',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -437,7 +437,7 @@ class EvidenceBundlesViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'upload_bundle failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'upload_bundle',
             }, status=status.HTTP_400_BAD_REQUEST)
 

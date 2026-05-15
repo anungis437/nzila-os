@@ -111,7 +111,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "fmv_policy",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -149,7 +149,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "update_fmv_policy",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -296,7 +296,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "calculate_fmv",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -338,7 +338,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "procurement_requests",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -376,7 +376,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "create_procurement",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -418,7 +418,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "bids",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -456,7 +456,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "submit_bid",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -498,7 +498,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "appraisals",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -536,7 +536,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "request_appraisal",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -578,7 +578,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "cpi_data",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -620,7 +620,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "cpi_adjusted_pricing",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -662,7 +662,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "benchmarks",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -704,7 +704,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "violations",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -746,7 +746,7 @@ class JointTrustFmvServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "audit_log",
                 },
                 status=status.HTTP_400_BAD_REQUEST,

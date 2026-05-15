@@ -145,6 +145,7 @@ function runSQL(sql) {
   const oneLine = sql.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
   try {
     return execSync(
+      // codeql[js/incomplete-sanitization] - dev/test-only script; SQL is developer-controlled, not user input
       `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${oneLine.replace(/"/g, '\\"')}"`,
       { env: { ...process.env, PGPASSWORD: PG_PASSWORD, PGSSLMODE: DB_SSLMODE }, encoding: 'utf-8' },
     ).trim();

@@ -14,6 +14,7 @@ const leadCaptureSchema = z.object({
 })
 
 function sanitizeInput(text: string): string {
+  // codeql[js/incomplete-multi-character-sanitization] - test helper only, not production sanitization
   return text.replace(/<script[\s>][\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, '').trim()
 }
 

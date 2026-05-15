@@ -78,7 +78,7 @@ class CarbonAccountingIntegrationViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'sync_provider',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -114,7 +114,7 @@ class CarbonAccountingIntegrationViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'provider_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -146,7 +146,7 @@ class CarbonAccountingIntegrationViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'configure_provider',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -182,7 +182,7 @@ class CarbonAccountingIntegrationViewSet(viewsets.ViewSet):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'sync_history',
             }, status=status.HTTP_400_BAD_REQUEST)
 

@@ -79,7 +79,7 @@ class AIQuotasViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'check failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'check',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -115,7 +115,7 @@ class AIQuotasViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'org_usage failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'org_usage',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -151,7 +151,7 @@ class AIQuotasViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_usage failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_usage',
             }, status=status.HTTP_400_BAD_REQUEST)
 

@@ -230,7 +230,7 @@ export const GET = withApiAuth(async (request: NextRequest) => {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${sanitizedFileName.replace(/"/g, '\\"')}"`,
+        "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(sanitizedFileName)}`,
         "Content-Length": stat.size.toString(),
       },
     });

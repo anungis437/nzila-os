@@ -88,7 +88,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'list_skills failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'list_skills',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -124,7 +124,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_skill failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_skill',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -160,7 +160,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'categories failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'categories',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -196,7 +196,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_skills failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_skills',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -216,7 +216,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'user_dashboard failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'user_dashboard',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -252,7 +252,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'skill_progress failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'skill_progress',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -288,7 +288,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'active_validated failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'active_validated',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -324,7 +324,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'expiring failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'expiring',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -360,7 +360,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'validation_history failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'validation_history',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -393,7 +393,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'validate_from_quiz failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'validate_from_quiz',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -413,7 +413,7 @@ class SkillsViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'recommended_courses failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'recommended_courses',
             }, status=status.HTTP_400_BAD_REQUEST)
 

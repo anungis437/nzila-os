@@ -398,8 +398,9 @@ export function createRouteMatcher(patterns: string[]) {
     let regex = pattern.replace(/:[a-zA-Z_]+/g, '[^/]+')
     // Escape forward slashes and dots for regex
     regex = regex.replace(/\//g, '\\/').replace(/\./g, '\\.')
-    // Convert (.*) to regex
-    regex = regex.replace(/\\\.\*/g, '.*').replace(/\(/, '(').replace(/\)/, ')')
+    // Convert escaped `.*` back to regex wildcard; parentheses in patterns (e.g. `(.*)`) are preserved as groups
+    // codeql[js/incomplete-sanitization] - patterns are developer-defined route strings, not user input
+    regex = regex.replace(/\\\.\*/g, '.*')
     return new RegExp(`^${regex}$`)
   })
 

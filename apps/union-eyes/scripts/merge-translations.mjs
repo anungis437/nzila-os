@@ -653,6 +653,7 @@ const en = JSON.parse(readFileSync(enPath, 'utf8'));
 // Deep merge function
 function deepMerge(target, source) {
   for (const key of Object.keys(source)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue; // guard against prototype pollution
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
       if (!target[key] || typeof target[key] !== 'object') {
         target[key] = {};

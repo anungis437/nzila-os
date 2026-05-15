@@ -103,7 +103,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'modules failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'modules',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -136,7 +136,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_module failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_module',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -169,7 +169,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_module failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_module',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -202,7 +202,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'delete_module failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delete_module',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -235,7 +235,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'reorder_modules failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'reorder_modules',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -268,7 +268,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'enroll failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'enroll',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -304,7 +304,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'enrollment failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'enrollment',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -340,7 +340,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'enrollments failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'enrollments',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -373,7 +373,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_enrollment failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_enrollment',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -406,7 +406,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_progress failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_progress',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -442,7 +442,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'lesson_progress failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'lesson_progress',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -475,7 +475,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'track_lesson failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'track_lesson',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -508,7 +508,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'complete_lesson failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'complete_lesson',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -528,7 +528,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'calculate_completion failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'calculate_completion',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -564,7 +564,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'discussions failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'discussions',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -597,7 +597,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_discussion failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_discussion',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -633,7 +633,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'discussion_replies failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'discussion_replies',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -666,7 +666,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'reply_discussion failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'reply_discussion',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -699,7 +699,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'mark_answered failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'mark_answered',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -735,7 +735,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'quiz_attempts failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'quiz_attempts',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -768,7 +768,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'submit_quiz failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'submit_quiz',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -788,7 +788,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'learning_paths failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'learning_paths',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -808,7 +808,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'learning_path failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'learning_path',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -829,7 +829,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'enroll_path failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'enroll_path',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -849,7 +849,7 @@ class CoursesEnhancedViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'path_progress failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'path_progress',
             }, status=status.HTTP_400_BAD_REQUEST)
 

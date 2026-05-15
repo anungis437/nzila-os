@@ -62,7 +62,7 @@ class WorkflowsTestViewSet(viewsets.ViewSet):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ------------------------------------------------------------------
     # Workflow Executions
@@ -97,7 +97,7 @@ class WorkflowsTestViewSet(viewsets.ViewSet):
                 definition = WorkflowDefinitions.objects.get(id=definition_id)
             except WorkflowDefinitions.DoesNotExist:
                 return Response(
-                    {"error": f"Workflow definition {definition_id} not found"},
+                    {"error": "An error occurred"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
@@ -123,4 +123,4 @@ class WorkflowsTestViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "An error occurred"}, status=status.HTTP_400_BAD_REQUEST)

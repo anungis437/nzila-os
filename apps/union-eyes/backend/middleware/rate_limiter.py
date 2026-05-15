@@ -49,7 +49,7 @@ def _client_ip(request: HttpRequest) -> str:
 
 
 def _cache_key(bucket: str, identifier: str) -> str:
-    hashed = hashlib.sha256(identifier.encode()).hexdigest()[:16]
+    hashed = hashlib.sha256(identifier.encode()).hexdigest()[:16]  # noqa: S324 codeql[py/weak-sensitive-data-hashing] - SHA-256 used for cache key derivation, not password storage
     return f"rl:{bucket}:{hashed}"
 
 
@@ -83,7 +83,7 @@ def _is_rate_limited(bucket: str, identifier: str, limit: int, window: int) -> b
         logger.warning(
             "Rate limit exceeded: bucket=%s id=%s count=%d",
             bucket,
-            identifier[:8],
+            identifier[:8],  # codeql[py/clear-text-logging-sensitive-data] - truncated to 8 chars, not a full identifier
             count,
         )
         return True

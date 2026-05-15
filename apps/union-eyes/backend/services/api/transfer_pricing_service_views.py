@@ -101,7 +101,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "documentation",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -139,7 +139,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "create_document",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -181,7 +181,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "t106_filings",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -219,7 +219,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "create_t106",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -261,7 +261,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "cross_border",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -299,7 +299,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "record_cross_border",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -377,7 +377,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
             if not rate_entry:
                 return Response(
                     {
-                        "error": f"No exchange rate found for {original_currency} → {target_currency}"
+                        "error": "An error occurred"
                     },
                     status=status.HTTP_404_NOT_FOUND,
                 )
@@ -419,7 +419,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "calculate",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -489,7 +489,7 @@ class TransferPricingServiceViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "compliance_report",
                 },
                 status=status.HTTP_400_BAD_REQUEST,

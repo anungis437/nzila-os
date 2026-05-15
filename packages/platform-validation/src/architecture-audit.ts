@@ -179,10 +179,10 @@ function checkCorrelationIds(filePath: string, lines: string[], repoRoot: string
   const rel = relative(repoRoot, filePath).replace(/\\/g, '/')
 
   // Only API routes
-  if (!rel.match(/\/api\/.*route\.ts$/)) return findings
+  if (!rel.match(/\/api\/.*route\.ts$/)) return findings // codeql[js/polynomial-redos] - rel is a workspace-relative path, bounded in length
 
   // Skip health/status endpoints — they don't need correlation IDs
-  if (/\/(health|status|ping|ready|live|favicon|robots)/.test(rel)) return findings
+  if (/\/(health|status|ping|ready|live|favicon|robots)/.test(rel)) return findings // codeql[js/polynomial-redos] - rel is a workspace-relative path, bounded in length
 
   const content = lines.join('\n')
   const hasCorrelation = /requestId|traceId|correlationId|x-request-id|getCorrelation|withRequestId/i.test(content)

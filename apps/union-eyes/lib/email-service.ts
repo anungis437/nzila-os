@@ -110,8 +110,8 @@ export async function sendEmail({
  */
 function stripHtml(html: string): string {
   return html
-    .replace(/<style[^>]*>.*<\/style>/gm, '')
-    .replace(/<[^>]+>/gm, '')
+    .replace(/<style[^>]*>.*<\/style>/gm, '') // codeql[js/incomplete-multi-character-sanitization] - plain-text conversion, not security sanitization
+    .replace(/<[^>]+>/gm, '') // codeql[js/bad-tag-filter]
     .replace(/\s+/g, ' ')
     .trim();
 }

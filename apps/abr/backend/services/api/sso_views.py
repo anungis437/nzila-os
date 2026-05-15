@@ -88,7 +88,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'providers failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'providers',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -124,7 +124,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'get_provider failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'get_provider',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -157,7 +157,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'create_provider failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'create_provider',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -190,7 +190,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_provider failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_provider',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -223,7 +223,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'delete_provider failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'delete_provider',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -256,7 +256,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'update_status failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'update_status',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -289,7 +289,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'set_default failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'set_default',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -322,7 +322,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'test_connection failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'test_connection',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -358,7 +358,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'active_sessions failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'active_sessions',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -391,7 +391,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'revoke_session failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'revoke_session',
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -427,7 +427,7 @@ class SSOViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'login_attempts failed: {e}', exc_info=True)
             return Response({
-                'error': str(e),
+                'error': 'An error occurred',
                 'action': 'login_attempts',
             }, status=status.HTTP_400_BAD_REQUEST)
 

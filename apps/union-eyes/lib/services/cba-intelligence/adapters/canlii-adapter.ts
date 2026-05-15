@@ -121,7 +121,7 @@ export class CanliiAdapter extends BaseAdapter {
 
       // Only consider links that point to CanLII case documents
       if (!href.includes("/doc/") && !href.includes("/case/")) continue;
-      if (!href || href.startsWith("#") || href.startsWith("javascript:")) continue;
+      if (!href || href.startsWith("#") || (href.includes(':') && !/^https?:/i.test(href))) continue;
       if (linkText.length < 5) continue;
 
       const resolvedUrl = this.resolveUrl(href, pageUrl);

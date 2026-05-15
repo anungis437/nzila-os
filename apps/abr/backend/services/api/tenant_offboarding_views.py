@@ -95,7 +95,7 @@ class OrgOffboardingViewSet(viewsets.ViewSet):
             logger.error(f"initiate failed: {e}", exc_info=True)
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "initiate",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -134,7 +134,7 @@ class OrgOffboardingViewSet(viewsets.ViewSet):
             logger.error(f"cancel failed: {e}", exc_info=True)
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "cancel",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -161,7 +161,7 @@ class OrgOffboardingViewSet(viewsets.ViewSet):
             logger.error(f"hard_delete failed: {e}", exc_info=True)
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "hard_delete",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -203,7 +203,7 @@ class OrgOffboardingViewSet(viewsets.ViewSet):
             logger.error(f"pending_deletions failed: {e}", exc_info=True)
             return Response(
                 {
-                    "error": str(e),
+                    "error": "An error occurred",
                     "action": "pending_deletions",
                 },
                 status=status.HTTP_400_BAD_REQUEST,

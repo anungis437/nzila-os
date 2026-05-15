@@ -91,7 +91,7 @@ export class EsdcFederalAdapter extends BaseAdapter {
       const linkText = this.stripHtml(match[2]).trim();
 
       if (!this.isCbaRelated(linkText, href)) continue;
-      if (!href || href.startsWith("#") || href.startsWith("javascript:")) continue;
+      if (!href || href.startsWith("#") || (href.includes(':') && !/^https?:/i.test(href))) continue;
 
       const resolvedUrl = this.resolveUrl(href, baseUrl);
       if (!resolvedUrl) continue;

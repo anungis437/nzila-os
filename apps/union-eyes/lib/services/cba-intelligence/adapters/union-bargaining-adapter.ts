@@ -151,7 +151,7 @@ export class UnionBargainingAdapter extends BaseAdapter {
       const linkText = this.stripHtml(match[2]).trim();
 
       if (!this.isRelevantLink(linkText)) continue;
-      if (!href || href.startsWith("#") || href.startsWith("javascript:")) continue;
+      if (!href || href.startsWith("#") || (href.includes(':') && !/^https?:/i.test(href))) continue;
       if (linkText.length < 5) continue;
 
       const resolvedUrl = this.resolveUrl(href, baseUrl);
