@@ -73,7 +73,7 @@ jobs:
             SMOKE_URLS='https://unioneyes.app https://app.unioneyes.app'
             RESOURCE_GROUP="${{ vars.AZURE_RESOURCE_GROUP_PRODUCTION }}"
             CONTAINERAPP_ENVIRONMENT="${{ vars.AZURE_CONTAINERAPPS_ENVIRONMENT_PRODUCTION }}"
-            NZILA_MODE_VAL="prod"
+            NZILA_MODE_VAL="production"
             DEPLOYMENT_TYPE="prod"
             FEATURE_PROFILE="executive"
           elif [ "$DEPLOY_ENV" = "demo" ]; then
