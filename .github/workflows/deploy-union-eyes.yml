@@ -557,6 +557,14 @@ jobs:
                 "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}" \
                 "UPSTASH_REDIS_REST_URL=${{ secrets.UPSTASH_REDIS_REST_URL }}" \
                 "UPSTASH_REDIS_REST_TOKEN=${{ secrets.UPSTASH_REDIS_REST_TOKEN }}" \
+                "DATABASE_URL=secretref:database-url" \
+                "AUTH_SECRET=secretref:enc-key" \
+                "VOTING_SECRET=secretref:voting-secret" \
+                "FALLBACK_ENCRYPTION_KEY=secretref:enc-key" \
+                "EVIDENCE_SEAL_KEY=secretref:pii-key" \
+                "AZURE_AD_CLIENT_SECRET=secretref:azure-ad-client-secret" \
+                "AUTH_WEBHOOK_SECRET=secretref:auth-webhook-secret" \
+                "DJANGO_SECRET_KEY=secretref:django-secret" \
               --container-name "$TARGET_APP" \
               --image ${{ env.IMAGE }}:${{ github.sha }}; then
               break
@@ -582,7 +590,48 @@ jobs:
               "AUTH_WEBHOOK_SECRET=secretref:auth-webhook-secret" \
               "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" \
               "CORS_ALLOWED_ORIGINS=${{ needs.plan.outputs.marketing_url }},${{ needs.plan.outputs.app_url }}" \
+              "DJANGO_SECRET_KEY=secretref:django-secret" \
             --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+      - name: Wait for revision to be healthy
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+
+          REVISION=$(az containerapp show \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "properties.latestRevisionName" -o tsv)
+
+          echo "Waiting for revision $REVISION to reach Running state..."
+          MAX_WAIT=300
+          INTERVAL=15
+          elapsed=0
+          while [ "$elapsed" -lt "$MAX_WAIT" ]; do
+            STATE=$(az containerapp revision show \
+              --name "$TARGET_APP" \
+              --resource-group "$TARGET_RG" \
+              --revision "$REVISION" \
+              --query "properties.runningState" -o tsv 2>/dev/null || echo "Unknown")
+            if [ "$STATE" = "Running" ]; then
+              echo "\u2705 Revision $REVISION is Running"
+              exit 0
+            elif [ "$STATE" = "Failed" ] || [ "$STATE" = "Stopped" ]; then
+              echo "::error::Revision $REVISION entered state $STATE — rolling update failed."
+              az containerapp logs show \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --revision "$REVISION" \
+                --type console --tail 30 2>&1 || true
+              exit 1
+            fi
+            echo "  state=$STATE elapsed=${elapsed}s; retrying in ${INTERVAL}s..."
+            sleep "$INTERVAL"
+            elapsed=$((elapsed + INTERVAL))
+          done
+          echo "::warning::Revision $REVISION did not reach Running within ${MAX_WAIT}s; proceeding."
 
       - name: Sync DNS records (Cloudflare)
         if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
