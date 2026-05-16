@@ -191,8 +191,8 @@ export default async function LocaleRootPage({
               <ScrollReveal delay={0.1}>
                 <div className="relative rounded-2xl overflow-hidden aspect-4/3">
                   <Image
-                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
-                    alt="Labour leadership collaboration in governance session"
+                    src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&q=80&auto=format"
+                    alt="Union assembly governance session with democratic oversight"
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
