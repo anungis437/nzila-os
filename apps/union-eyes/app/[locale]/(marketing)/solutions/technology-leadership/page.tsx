@@ -21,12 +21,14 @@ import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSectio
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { getCarouselNav } from '@/lib/solutions-carousel';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.solutions.technology' });
   return {
-    title: 'Technology Leadership | Solutions | UnionEyes',
-    description: 'Governance-safe AI with full explainability, enterprise security, and Canadian data residency. UnionEyes for technology leaders in labour organizations.',
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     alternates: buildLocaleAlternates(locale, '/solutions/technology-leadership'),
   };
 }

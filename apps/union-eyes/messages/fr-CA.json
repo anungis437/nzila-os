@@ -7953,6 +7953,36 @@
         "ctaHeadline": "Prêt à rester informé?",
         "ctaSubtitle": "Découvrez comment UnionEyes garde les membres informés et connectés."
       }
+    },
+    "solutions": {
+      "index": {
+        "metaTitle": "Solutions | UnionEyes",
+        "metaDescription": "Solutions de continuité institutionnelle et d’intelligence de gouvernance pour chaque partie prenante : dirigeants syndicaux, responsables de gouvernance, opérations, technologie, politiques et approvisionnement."
+      },
+      "executive": {
+        "metaTitle": "Direction exécutive syndicale | Solutions | UnionEyes",
+        "metaDescription": "Préservez la continuité stratégique, dirigez à travers les transitions de leadership et maintenez la cohérence institutionnelle. UnionEyes pour les dirigeants syndicaux."
+      },
+      "governance": {
+        "metaTitle": "Direction de la gouvernance | Solutions | UnionEyes",
+        "metaDescription": "Modernisez les opérations de gouvernance avec une intelligence explicable, des pistes d’audit complètes et des contrôles de surveillance démocratique. UnionEyes pour les responsables de gouvernance."
+      },
+      "operations": {
+        "metaTitle": "Direction des opérations | Solutions | UnionEyes",
+        "metaDescription": "Maintenez la cohérence opérationnelle à travers les équipes distribuées et les transitions de leadership. UnionEyes pour les responsables des opérations."
+      },
+      "labour": {
+        "metaTitle": "Direction des politiques et du travail | Solutions | UnionEyes",
+        "metaDescription": "Faites progresser la modernisation respectueuse du travail avec une surveillance humaine, des protections contre la surveillance et des contrôles de gouvernance démocratique."
+      },
+      "technology": {
+        "metaTitle": "Direction technologique | Solutions | UnionEyes",
+        "metaDescription": "IA gouvernée en toute sécurité avec explicabilité complète, sécurité d’entreprise et résidence des données au Canada. UnionEyes pour les responsables technologiques des organisations syndicales."
+      },
+      "procurement": {
+        "metaTitle": "Parties prenantes à l’approvisionnement | Solutions | UnionEyes",
+        "metaDescription": "Gouvernance prête pour l’approvisionnement, périmètre d’implémentation clair et valeur mesurable pour les déploiements institutionnels."
+      }
     }
   },
   "communications": {

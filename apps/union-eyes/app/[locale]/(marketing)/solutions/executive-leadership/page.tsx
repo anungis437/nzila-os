@@ -21,12 +21,14 @@ import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSectio
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { getCarouselNav } from '@/lib/solutions-carousel';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.solutions.executive' });
   return {
-    title: 'Union Executive Leadership | Solutions | UnionEyes',
-    description: 'Preserve strategic continuity, lead through leadership transitions, and maintain institutional coherence. UnionEyes for union executive leaders.',
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     alternates: buildLocaleAlternates(locale, '/solutions/executive-leadership'),
   };
 }

@@ -21,12 +21,14 @@ import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSectio
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { getCarouselNav } from '@/lib/solutions-carousel';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.solutions.operations' });
   return {
-    title: 'Operations Leadership | Solutions | UnionEyes',
-    description: 'Maintain operational coherence across distributed teams and leadership transitions. UnionEyes for operations leaders.',
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     alternates: buildLocaleAlternates(locale, '/solutions/operations-leadership'),
   };
 }

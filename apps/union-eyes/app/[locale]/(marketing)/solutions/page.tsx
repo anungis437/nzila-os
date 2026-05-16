@@ -34,13 +34,14 @@ import {
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.solutions.index' });
   return {
-    title: 'Solutions | UnionEyes',
-    description:
-      'Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement.',
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     alternates: buildLocaleAlternates(locale, '/solutions'),
   };
 }

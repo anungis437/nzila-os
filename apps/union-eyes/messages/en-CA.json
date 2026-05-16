@@ -7953,6 +7953,36 @@
         "ctaHeadline": "Ready to stay in the loop?",
         "ctaSubtitle": "See how UnionEyes keeps members informed and connected."
       }
+    },
+    "solutions": {
+      "index": {
+        "metaTitle": "Solutions | UnionEyes",
+        "metaDescription": "Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement."
+      },
+      "executive": {
+        "metaTitle": "Union Executive Leadership | Solutions | UnionEyes",
+        "metaDescription": "Preserve strategic continuity, lead through leadership transitions, and maintain institutional coherence. UnionEyes for union executive leaders."
+      },
+      "governance": {
+        "metaTitle": "Governance Leadership | Solutions | UnionEyes",
+        "metaDescription": "Modernize governance operations with explainable intelligence, full audit trails, and democratic oversight controls. UnionEyes for governance leaders."
+      },
+      "operations": {
+        "metaTitle": "Operations Leadership | Solutions | UnionEyes",
+        "metaDescription": "Maintain operational coherence across distributed teams and leadership transitions. UnionEyes for operations leaders."
+      },
+      "labour": {
+        "metaTitle": "Policy & Labour Leadership | Solutions | UnionEyes",
+        "metaDescription": "Advance labour-safe modernization with human oversight, anti-surveillance safeguards, and democratic governance controls."
+      },
+      "technology": {
+        "metaTitle": "Technology Leadership | Solutions | UnionEyes",
+        "metaDescription": "Governance-safe AI with full explainability, enterprise security, and Canadian data residency. UnionEyes for technology leaders in labour organizations."
+      },
+      "procurement": {
+        "metaTitle": "Procurement Stakeholders | Solutions | UnionEyes",
+        "metaDescription": "Procurement-ready governance, clear implementation scope, and measurable value for institutional deployments."
+      }
     }
   },
   "communications": {

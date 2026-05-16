@@ -21,13 +21,14 @@ import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSectio
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { getCarouselNav } from '@/lib/solutions-carousel';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.solutions.labour' });
   return {
-    title: 'Policy & Labour Leadership | Solutions | UnionEyes',
-    description:
-      'Advance labour-safe modernization with human oversight, anti-surveillance safeguards, and democratic governance controls.',
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     alternates: buildLocaleAlternates(locale, '/solutions/labour-leadership'),
   };
 }

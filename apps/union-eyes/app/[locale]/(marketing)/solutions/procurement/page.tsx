@@ -32,13 +32,14 @@ import {
   procurementEvidenceBinder,
 } from '@/lib/institutional-legitimacy';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.solutions.procurement' });
   return {
-    title: 'Procurement Stakeholders | Solutions | UnionEyes',
-    description:
-      'Procurement-ready governance, clear implementation scope, and measurable value for institutional deployments.',
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     alternates: buildLocaleAlternates(locale, '/solutions/procurement'),
   };
 }
