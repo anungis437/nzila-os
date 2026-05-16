@@ -325,7 +325,14 @@ jobs:
 
       - name: Enforce committed inventory lock
         run: |
-          git diff --exit-code -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md
+          DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
+          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on')
+          if [ -n "$SUBSTANTIVE" ]; then
+            echo "Substantive inventory drift detected:"
+            echo "$DIFF"
+            exit 1
+          fi
+          echo "Inventory check passed (date-stamp differences ignored)"
 
       - name: Control manifest validation
         run: pnpm validate:control:manifests
