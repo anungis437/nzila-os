@@ -83,6 +83,11 @@ export default function StewardshipAppendixPage() {
             customer&rsquo;s institutional governance ecosystem &mdash; not to corporate
             stewardship mechanics.
           </p>
+          <p className="text-sm text-gray-300 mt-3 max-w-2xl">
+            Any assistive intelligence described in procurement responses remains under
+            human oversight, with explainability, reviewability, and procedural
+            transparency.
+          </p>
         </div>
       </header>
 
