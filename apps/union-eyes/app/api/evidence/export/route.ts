@@ -27,9 +27,13 @@ export async function GET(request: Request) {
       const auth = await authenticateUser()
       if (!auth.ok) return auth.response
 
+      const { searchParams } = new URL(request.url)
+      const orgId = searchParams.get('orgId') ?? 'unscoped'
+
       recordEvidenceExport()
 
       return NextResponse.json({
+        org_id: orgId,
         app: APP,
         version: VERSION,
         git_commit: COMMIT,
@@ -59,6 +63,7 @@ export async function GET(request: Request) {
           'escalated', 'arbitration', 'settled', 'resolved', 'closed',
         ],
         org_isolation: {
+          enforced: true,
           enforced_at: ['db_layer', 'route_layer', 'audit_layer'],
           cross_org_read_attempts_blocked: true,
         },
