@@ -46,6 +46,7 @@ paths = [
   '''.*AUTH_.*\.md$''',                # Auth implementation docs
   '''.*DJANGO_.*\.md$''',              # Django settings guides
   '''content/internal/cupe3906-bylaws-raw\.html$''',  # Scraped HTML with third-party New Relic tracking keys
+  '''lib/api-docs/openapi-config\.ts$''',             # API docs with placeholder curl Authorization examples
 ]
 
 commits = [
@@ -71,6 +72,7 @@ regexes = [
   '''user:password@host''',           # Example connection strings
   '''\.replace\(.*whsec_''',          # Code that strips whsec_ prefix (not a secret)
   '''\.startswith\(.*whsec_''',       # Code that checks whsec_ prefix (not a secret)
+  '''YOUR_API_KEY''',                 # Placeholder API key in documentation examples
 ]
 
 # ──────────────────────────────────────
