@@ -1,68 +1,110 @@
-// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
-import { getBuildMetadata, healthStatusFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
+import {
+  buildRuntimeHealthResponse,
+  type RuntimeHealthCheck,
+} from '@nzila/os-core/health'
 
 const APP = 'union-eyes'
 
-function parseBoolEnv(value: string | undefined, defaultValue: boolean): boolean {
-  if (!value) return defaultValue
-  return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase())
-}
-
-async function checkDb(): Promise<boolean> {
+async function checkDb(): Promise<RuntimeHealthCheck> {
+  const start = Date.now()
   try {
     const { db } = await import('@nzila/db')
     const { sql } = await import('drizzle-orm')
     // Cast needed: packages/db pins drizzle-orm ^0.39 while app uses ^0.45
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await db.execute(sql`SELECT 1` as any)
-    return true
-  } catch {
-    return false
+    return { status: 'ok', critical: true, ms: Date.now() - start }
+  } catch (err) {
+    return {
+      status: 'fail',
+      critical: true,
+      ms: Date.now() - start,
+      error: err instanceof Error ? err.message : 'unknown',
+    }
   }
 }
 
-async function checkQueue(): Promise<'ok' | 'degraded' | 'unreachable'> {
-  const djangoUrl = process.env.DJANGO_API_URL || process.env.NEXT_PUBLIC_DJANGO_API_URL || ''
-  if (!djangoUrl) return 'ok' // No Django backend configured
+async function checkAuth(): Promise<RuntimeHealthCheck> {
+  // Clerk auth: validate config presence (full connectivity check is too expensive for a probe)
+  const hasClerkKey =
+    Boolean(process.env.CLERK_SECRET_KEY) ||
+    Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+  return hasClerkKey
+    ? { status: 'ok', critical: true }
+    : { status: 'degraded', critical: true, note: 'Clerk credentials not configured' }
+}
+
+async function checkRedis(): Promise<RuntimeHealthCheck> {
+  const hasRedis =
+    Boolean(process.env.UPSTASH_REDIS_REST_URL) ||
+    Boolean(process.env.KV_REST_API_URL) ||
+    Boolean(process.env.REDIS_URL)
+  if (!hasRedis) return { status: 'ok', note: 'Redis not configured — optional for this deployment' }
 
   try {
-    // Hit the unauthenticated Django health endpoint (auth-exempt in middleware)
+    const start = Date.now()
+    const url = (
+      process.env.UPSTASH_REDIS_REST_URL ??
+      process.env.KV_REST_API_URL ??
+      ''
+    ).replace(/\/$/, '')
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN ?? ''
+    if (!url || !token) return { status: 'degraded', note: 'Redis URL or token missing' }
+
+    const res = await fetch(`${url}/ping`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(2000),
+    })
+    return res.ok
+      ? { status: 'ok', ms: Date.now() - start }
+      : { status: 'degraded', note: `ping returned ${res.status}`, ms: Date.now() - start }
+  } catch (err) {
+    return {
+      status: 'degraded',
+      note: err instanceof Error ? err.message : 'unreachable',
+    }
+  }
+}
+
+async function checkBackend(): Promise<RuntimeHealthCheck> {
+  const djangoUrl = process.env.DJANGO_API_URL ?? process.env.NEXT_PUBLIC_DJANGO_API_URL ?? ''
+  if (!djangoUrl) return { status: 'ok', note: 'Django backend not configured — optional' }
+
+  try {
+    const start = Date.now()
     const base = djangoUrl.replace(/\/$/, '')
     const res = await fetch(`${base}/api/auth_core/health/`, {
       cache: 'no-store',
       signal: AbortSignal.timeout(3000),
     })
-    return res.ok ? 'ok' : 'degraded'
+    return res.ok
+      ? { status: 'ok', ms: Date.now() - start }
+      : { status: 'degraded', ms: Date.now() - start, note: `returned ${res.status}` }
   } catch {
-    return 'unreachable'
+    return { status: 'degraded', note: 'unreachable' }
   }
 }
 
 export async function GET() {
-  const [dbResult, queueResult] = await Promise.allSettled([checkDb(), checkQueue()])
-  const requireQueue = parseBoolEnv(process.env.HEALTH_REQUIRE_QUEUE, false)
+  const [dbResult, authResult, redisResult, backendResult] = await Promise.allSettled([
+    checkDb(),
+    checkAuth(),
+    checkRedis(),
+    checkBackend(),
+  ])
 
-  const checksInput: Record<string, boolean> = {
-    process: true,
-    database: dbResult.status === 'fulfilled' ? dbResult.value : false,
+  const checks: Record<string, RuntimeHealthCheck> = {
+    process: { status: 'ok' },
+    database: dbResult.status === 'fulfilled' ? dbResult.value : { status: 'fail', critical: true },
+    auth: authResult.status === 'fulfilled' ? authResult.value : { status: 'degraded', critical: true },
+    redis: redisResult.status === 'fulfilled' ? redisResult.value : { status: 'degraded' },
+    backend: backendResult.status === 'fulfilled' ? backendResult.value : { status: 'degraded' },
   }
 
-  if (requireQueue) {
-    checksInput.queue = queueResult.status === 'fulfilled' ? queueResult.value === 'ok' : false
-  }
+  const payload = buildRuntimeHealthResponse({ app: APP, checks })
 
-  const checks = normalizeHealthChecks(checksInput)
-
-  const status = healthStatusFromChecks(checks)
-
-  return NextResponse.json(
-    {
-      status,
-      ...getBuildMetadata(APP),
-      checks,
-    },
-    { status: status === 'ok' ? 200 : 503 },
-  )
+  return NextResponse.json(payload, { status: payload.ok ? 200 : 503 })
 }
 
