@@ -36,7 +36,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 const outcomes = [
   { icon: ShieldCheck, title: 'Governance modernization you can defend',  desc: 'Every governance change is explainable, evidence-traceable, and auditable — governance that earns democratic legitimacy.' },
   { icon: Eye,         title: 'Continuity oversight across transitions',   desc: 'Track governance structure health across leadership transitions with full historical context intact.' },
-  { icon: FileCheck,   title: 'Audit-ready governance intelligence',       desc: 'Complete audit trails for all governance decisions, intelligence actions, and human review outcomes.' },
+  { icon: FileCheck,   title: 'Audit-ready governance-of-record intelligence',       desc: 'Complete audit trails for all governance decisions, intelligence actions, and human review outcomes.' },
   { icon: GitBranch,   title: 'Governance evolution made visible',         desc: 'Surface how bylaws, policies, and governance structures have evolved — with the institutional context that explains why.' },
   { icon: Vote,        title: 'Democratic structures preserved',           desc: 'Intelligence recommends. Democratic structures decide. Human oversight is structurally enforced at every layer.' },
 ];
@@ -61,14 +61,14 @@ export default async function GovernanceLeadershipPage({ params }: { params: Pro
           </span>
         }
         heading={<>Governance modernization that<br />earns democratic trust.</>}
-        description="UnionEyes Governance Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic legitimacy."
+        description="UnionEyes Governance-of-Record Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic legitimacy."
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               Request an Executive Briefing
             </Link>
             <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
-              Governance Intelligence Platform
+              Governance-of-Record Intelligence Substrate
             </Link>
           </div>
         }
@@ -147,7 +147,7 @@ export default async function GovernanceLeadershipPage({ params }: { params: Pro
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Modernize governance with confidence</h2>
-          <p className="text-white/70 mb-8">See Governance Intelligence in a live pilot demonstration.</p>
+          <p className="text-white/70 mb-8">See Governance-of-Record Intelligence in a live pilot demonstration.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             Request an Executive Briefing
           </Link>

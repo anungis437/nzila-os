@@ -65,7 +65,7 @@ const solutions = [
     href: 'solutions/governance-leadership',
     challenge: 'Governance modernization requires explainability, oversight controls, and continuity — not opaque AI.',
     outcomes: [
-      'Explainable governance intelligence with human oversight',
+      'Explainable governance-of-record intelligence with human oversight',
       'Governance modernization with full audit trails',
       'Continuity oversight across governance transitions',
     ],

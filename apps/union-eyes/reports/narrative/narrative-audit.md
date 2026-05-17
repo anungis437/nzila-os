@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-14T07:43:36.077Z
+Generated: 2026-05-17T09:10:59.712Z
 
 ## Summary
 
-- Files scanned: **96**
+- Files scanned: **97**
 - Hard-fail violations: **0**
-- Warning violations: **227**
+- Warning violations: **46**
 - Rule failures: **0**
 - Average Institutional Maturity: **88/100**
 
@@ -18,7 +18,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 86/100
 
 **Scores:**
-
 - narrative-balance: 44/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -31,7 +30,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 94/100
 
 **Scores:**
-
 - narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -44,7 +42,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 94/100
 
 **Scores:**
-
 - narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -57,7 +54,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -70,7 +66,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -83,7 +78,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -96,7 +90,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -109,7 +102,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -122,7 +114,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -135,7 +126,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -148,7 +138,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -161,7 +150,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 88/100
 
 **Scores:**
-
 - narrative-balance: 52/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -174,7 +162,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -187,7 +174,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -200,7 +186,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -213,7 +198,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 89/100
 
 **Scores:**
-
 - narrative-balance: 57/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -226,7 +210,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -239,7 +222,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 97/100
 
 **Scores:**
-
 - narrative-balance: 88/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -252,7 +234,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -265,20 +246,11 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 86/100
 
 **Scores:**
-
 - narrative-balance: 44/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L19 [warning/warning] `platform` — redirect('/en-CA/platform/explainable-intelligence');
-
-**Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 
 ### marketing/platform/governance-intelligence
 
@@ -286,20 +258,11 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 88/100
 
 **Scores:**
-
 - narrative-balance: 52/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L19 [warning/warning] `platform` — redirect('/en-CA/platform/governance-intelligence');
-
-**Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 
 ### marketing/platform/operational-coherence
 
@@ -307,20 +270,11 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 86/100
 
 **Scores:**
-
 - narrative-balance: 44/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L19 [warning/warning] `platform` — redirect('/en-CA/platform/operational-coherence');
-
-**Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 
 ### marketing/platform/organizational-memory
 
@@ -328,20 +282,11 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L19 [warning/warning] `platform` — redirect('/en-CA/platform/organizational-memory');
-
-**Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 
 ### marketing/pricing
 
@@ -349,7 +294,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -362,7 +306,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -375,7 +318,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 88/100
 
 **Scores:**
-
 - narrative-balance: 52/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -388,7 +330,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -401,7 +342,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -414,7 +354,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -427,7 +366,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -440,7 +378,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -453,7 +390,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -466,7 +402,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -479,7 +414,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 97/100
 
 **Scores:**
-
 - narrative-balance: 87/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -492,7 +426,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -505,7 +438,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 89/100
 
 **Scores:**
-
 - narrative-balance: 57/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -513,15 +445,12 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
 - L111 [warning/warning] `platform` — Platform · Conventions & Federated Governance
 
 **Flags:**
-
 - (narrative-balance) Governance saturation detected: 51.7% of pillar terms (target 30%, threshold 40%).
 
 **Recommendations:**
-
 - Remove or rephrase "platform" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 
@@ -531,7 +460,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 91/100
 
 **Scores:**
-
 - narrative-balance: 64/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -539,13 +467,9 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
-- L58 [warning/warning] `governance intelligence` — title: 'Governance Intelligence Briefings',
 - L91 [warning/warning] `platform` — Platform · Executive Intelligence
 
 **Recommendations:**
-
-- Remove or rephrase "governance intelligence" (warning).
 - Remove or rephrase "platform" (warning).
 
 ### marketing/features/ai-workbench
@@ -554,7 +478,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -567,7 +490,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 86/100
 
 **Scores:**
-
 - narrative-balance: 44/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -580,7 +502,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 82/100
 
 **Scores:**
-
 - narrative-balance: 28/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -588,11 +509,9 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 100/100 (pass)
 
 **Flags:**
-
 - (narrative-balance) Continuity language under-represented: 11.9% (target 30%).
 
 **Recommendations:**
-
 - Add institutional-continuity framing.
 
 ### marketing/features/inbox
@@ -601,7 +520,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 82/100
 
 **Scores:**
-
 - narrative-balance: 28/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -614,7 +532,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 82/100
 
 **Scores:**
-
 - narrative-balance: 27/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -627,7 +544,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 89/100
 
 **Scores:**
-
 - narrative-balance: 54/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -640,7 +556,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 96/100
 
 **Scores:**
-
 - narrative-balance: 84/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -653,7 +568,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 94/100
 
 **Scores:**
-
 - narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -666,7 +580,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 94/100
 
 **Scores:**
-
 - narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -679,7 +592,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 94/100
 
 **Scores:**
-
 - narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -692,7 +604,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 94/100
 
 **Scores:**
-
 - narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -702,24 +613,20 @@ Generated: 2026-05-14T07:43:36.077Z
 ### marketing/governance
 
 - **Path:** `app/[locale]/(marketing)/governance/page.tsx`
-- **Institutional Maturity:** 91/100
+- **Institutional Maturity:** 88/100
 
 **Scores:**
-
-- narrative-balance: 63/100 (pass)
+- narrative-balance: 52/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-
-- L28 [warning/warning] `platform` — 'How UnionEyes is governed today and the labour-side controls being put in place to keep the platform worker-first.',
-- L67 [warning/warning] `platform` — description="How UnionEyes is governed today, and the labour-side controls being put in place to keep the platform worker-first."
+**Flags:**
+- (narrative-balance) Governance saturation detected: 53.9% of pillar terms (target 30%, threshold 40%).
 
 **Recommendations:**
-
-- Remove or rephrase "platform" (warning).
+- Rebalance toward continuity, coordination, and trust language.
 
 ### marketing/insights/[slug]
 
@@ -727,7 +634,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 92/100
 
 **Scores:**
-
 - narrative-balance: 66/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -740,7 +646,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 88/100
 
 **Scores:**
-
 - narrative-balance: 52/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -753,7 +658,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 89/100
 
 **Scores:**
-
 - narrative-balance: 57/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -766,7 +670,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 88/100
 
 **Scores:**
-
 - narrative-balance: 52/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -779,7 +682,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 88/100
 
 **Scores:**
-
 - narrative-balance: 52/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -792,20 +694,11 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 94/100
 
 **Scores:**
-
 - narrative-balance: 77/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L143 [warning/warning] `governance intelligence` — heading={<>Institutional continuity and governance intelligence</>}
-
-**Recommendations:**
-
-- Remove or rephrase "governance intelligence" (warning).
 
 ### marketing/insights/resonance
 
@@ -813,7 +706,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 88/100
 
 **Scores:**
-
 - narrative-balance: 52/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -826,7 +718,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 94/100
 
 **Scores:**
-
 - narrative-balance: 75/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -834,16 +725,9 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
-- L18 [warning/warning] `platform` — * Institutional Continuity — Core platform capability page
-- L20 [warning/warning] `platform` — * Positions UE as the institutional continuity intelligence platform.
-- L45 [warning/warning] `platform` — 'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity platform.',
 - L107 [warning/warning] `platform` — Platform · Institutional Continuity
-- L212 [warning/warning] `platform` — unified institutional continuity platform.
-- L417 [warning/warning] `platform` — href={`/${locale}/platform/organizational-memory`}
 
 **Recommendations:**
-
 - Remove or rephrase "platform" (warning).
 
 ### locale/(marketing)
@@ -852,7 +736,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -865,7 +748,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 61/100
 
 **Scores:**
-
 - narrative-balance: 0/100 (pass)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
@@ -873,11 +755,9 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 70/100 (pass)
 
 **Flags:**
-
 - (coexistence-positioning) No coexistence / overlay framing detected.
 
 **Recommendations:**
-
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 
 ### marketing/pilot-request
@@ -886,20 +766,11 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 91/100
 
 **Scores:**
-
 - narrative-balance: 63/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L78 [warning/warning] `centralized` — { value: 'No centralized governance oversight', key: 'noGovernanceOversight' },
-
-**Recommendations:**
-
-- Remove or rephrase "centralized" (warning).
 
 ### marketing/platform/explainable-intelligence
 
@@ -907,7 +778,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 83/100
 
 **Scores:**
-
 - narrative-balance: 30/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -915,16 +785,10 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
-- L18 [warning/warning] `platform` — * /platform/explainable-intelligence — Wave 6 ontology collapse.
-- L19 [warning/warning] `platform` — * Canonical: /platform#trust (audit/explainability pillar).
 - L30 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
 - L31 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
-- L36 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform/explainable-intelligence'),
-- L46 [warning/warning] `platform` — redirect(`/${locale}/platform#trust`);
 
 **Recommendations:**
-
 - Remove or rephrase "platform" (warning).
 
 ### marketing/platform/governance-intelligence
@@ -933,7 +797,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 93/100
 
 **Scores:**
-
 - narrative-balance: 70/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -941,16 +804,10 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
-- L18 [warning/warning] `platform` — * /platform/governance-intelligence — Wave 6 ontology collapse.
-- L19 [warning/warning] `platform` — * Canonical: /platform#governance (eight-pillar overview).
 - L30 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
 - L31 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
-- L36 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform/governance-intelligence'),
-- L46 [warning/warning] `platform` — redirect(`/${locale}/platform#governance`);
 
 **Recommendations:**
-
 - Remove or rephrase "platform" (warning).
 
 ### marketing/platform/operational-coherence
@@ -959,7 +816,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 84/100
 
 **Scores:**
-
 - narrative-balance: 37/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -967,16 +823,10 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
-- L18 [warning/warning] `platform` — * /platform/operational-coherence — Wave 6 ontology collapse.
-- L19 [warning/warning] `platform` — * Canonical: /platform#priorities (operational cadence pillar).
 - L30 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
 - L31 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
-- L36 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform/operational-coherence'),
-- L46 [warning/warning] `platform` — redirect(`/${locale}/platform#priorities`);
 
 **Recommendations:**
-
 - Remove or rephrase "platform" (warning).
 
 ### marketing/platform/organizational-memory
@@ -985,7 +835,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -993,16 +842,10 @@ Generated: 2026-05-14T07:43:36.077Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
-- L18 [warning/warning] `platform` — * /platform/organizational-memory — Wave 6 ontology collapse.
-- L19 [warning/warning] `platform` — * Canonical: /platform#institutional-memory (eight-pillar overview).
 - L30 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
 - L31 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
-- L36 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform/organizational-memory'),
-- L46 [warning/warning] `platform` — redirect(`/${locale}/platform#institutional-memory`);
 
 **Recommendations:**
-
 - Remove or rephrase "platform" (warning).
 
 ### marketing/platform
@@ -1011,21 +854,11 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 92/100
 
 **Scores:**
-
 - narrative-balance: 69/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L42 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform'),
-- L140 [warning/warning] `platform` — imageUrl={heroImagery.platform}
-
-**Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 
 ### marketing/pricing
 
@@ -1033,7 +866,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 93/100
 
 **Scores:**
-
 - narrative-balance: 70/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -1046,7 +878,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 97/100
 
 **Scores:**
-
 - narrative-balance: 88/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -1056,23 +887,14 @@ Generated: 2026-05-14T07:43:36.077Z
 ### marketing/solutions/executive-leadership
 
 - **Path:** `app/[locale]/(marketing)/solutions/executive-leadership/page.tsx`
-- **Institutional Maturity:** 94/100
+- **Institutional Maturity:** 93/100
 
 **Scores:**
-
-- narrative-balance: 76/100 (pass)
+- narrative-balance: 71/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L59 [warning/warning] `governance intelligence` — description="UnionEyes gives executive leaders the institutional continuity visibility, strategic clarity, and governance intelligence to lead confidently through any transition — without wading throu
-
-**Recommendations:**
-
-- Remove or rephrase "governance intelligence" (warning).
 
 ### marketing/solutions/governance-leadership
 
@@ -1080,102 +902,61 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 84/100
 
 **Scores:**
-
-- narrative-balance: 35/100 (warn)
+- narrative-balance: 37/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-
-- L36 [warning/warning] `governance intelligence` — { icon: FileCheck,   title: 'Audit-ready governance intelligence',       desc: 'Complete audit trails for all governance decisions, intelligence actions, and human review outcomes.' },
-- L59 [warning/warning] `governance intelligence` — description="UnionEyes Governance Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic l
-- L65 [warning/warning] `platform` — <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25
-- L66 [warning/warning] `platform` — Governance Intelligence Platform
-- L66 [warning/warning] `governance intelligence` — Governance Intelligence Platform
-- L143 [warning/warning] `governance intelligence` — <p className="text-white/70 mb-8">See Governance Intelligence in a live pilot demonstration.</p>
-
 **Flags:**
-
-- (narrative-balance) Governance saturation detected: 44.0% of pillar terms (target 30%, threshold 40%).
-- (narrative-balance) Continuity language under-represented: 9.3% (target 30%).
+- (narrative-balance) Governance saturation detected: 45.1% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 9.9% (target 30%).
 
 **Recommendations:**
-
-- Remove or rephrase "governance intelligence" (warning).
-- Remove or rephrase "platform" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 - Add institutional-continuity framing.
 
 ### marketing/solutions/labour-leadership
 
 - **Path:** `app/[locale]/(marketing)/solutions/labour-leadership/page.tsx`
-- **Institutional Maturity:** 89/100
+- **Institutional Maturity:** 88/100
 
 **Scores:**
-
-- narrative-balance: 54/100 (warn)
+- narrative-balance: 50/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-
-- L80 [warning/warning] `platform` — description="UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform."
-
 **Flags:**
-
-- (narrative-balance) Continuity language under-represented: 11.4% (target 30%).
+- (narrative-balance) Continuity language under-represented: 12.5% (target 30%).
 
 **Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
 
 ### marketing/solutions/operations-leadership
 
 - **Path:** `app/[locale]/(marketing)/solutions/operations-leadership/page.tsx`
-- **Institutional Maturity:** 84/100
+- **Institutional Maturity:** 85/100
 
 **Scores:**
-
-- narrative-balance: 37/100 (pass)
+- narrative-balance: 39/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L65 [warning/warning] `platform` — <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 t
-
-**Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 
 ### marketing/solutions
 
 - **Path:** `app/[locale]/(marketing)/solutions/page.tsx`
-- **Institutional Maturity:** 90/100
+- **Institutional Maturity:** 89/100
 
 **Scores:**
-
-- narrative-balance: 61/100 (pass)
+- narrative-balance: 57/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-
-- L43 [warning/warning] `governance intelligence` — 'Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement.',
-- L67 [warning/warning] `governance intelligence` — 'Explainable governance intelligence with human oversight',
-
-**Recommendations:**
-
-- Remove or rephrase "governance intelligence" (warning).
 
 ### marketing/solutions/procurement
 
@@ -1183,8 +964,7 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 91/100
 
 **Scores:**
-
-- narrative-balance: 64/100 (pass)
+- narrative-balance: 65/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1193,22 +973,19 @@ Generated: 2026-05-14T07:43:36.077Z
 ### marketing/solutions/technology-leadership
 
 - **Path:** `app/[locale]/(marketing)/solutions/technology-leadership/page.tsx`
-- **Institutional Maturity:** 82/100
+- **Institutional Maturity:** 81/100
 
 **Scores:**
-
-- narrative-balance: 29/100 (warn)
+- narrative-balance: 24/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
 **Flags:**
-
-- (narrative-balance) Continuity language under-represented: 10.6% (target 30%).
+- (narrative-balance) Continuity language under-represented: 11.6% (target 30%).
 
 **Recommendations:**
-
 - Add institutional-continuity framing.
 
 ### marketing/status
@@ -1217,7 +994,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 86/100
 
 **Scores:**
-
 - narrative-balance: 42/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -1230,7 +1006,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -1243,28 +1018,37 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 89/100
 
 **Scores:**
-
 - narrative-balance: 57/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-
-- L21 [warning/warning] `platform` — * Demonstrates governance-first platform design: audit trails,
-- L182 [warning/warning] `platform` — enforced at every layer of the platform.
-- L191 [warning/warning] `platform` — { label: 'Anti-monitoring by design',           desc: 'No capability path in the platform can be re-purposed for individual monitoring.' },
-- L443 [warning/warning] `platform` — Real-time operational status of UnionEyes platform services.
-
 **Flags:**
-
 - (narrative-balance) Continuity language under-represented: 12.6% (target 30%).
 
 **Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
+
+### marketing/trust/stewardship-appendix
+
+- **Path:** `app/[locale]/(marketing)/trust/stewardship-appendix/page.tsx`
+- **Institutional Maturity:** 74/100
+
+**Scores:**
+- narrative-balance: 63/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 
 ### app/[locale]/layout.tsx
 
@@ -1272,7 +1056,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 47/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
@@ -1282,118 +1065,58 @@ Generated: 2026-05-14T07:43:36.077Z
 ### app/[locale]/page.tsx
 
 - **Path:** `app/[locale]/page.tsx`
-- **Institutional Maturity:** 88/100
+- **Institutional Maturity:** 71/100
 
 **Scores:**
-
-- narrative-balance: 51/100 (pass)
-- coexistence-positioning: 100/100 (pass)
+- narrative-balance: 42/100 (pass)
+- coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
-- canadian-positioning: 100/100 (pass)
+- canadian-positioning: 73/100 (pass)
 
-**Vocabulary violations:**
-
-- L23 [warning/warning] `platform` — import { auth } from '@nzila/platform-auth/entra/server';
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
 
 **Recommendations:**
-
-- Remove or rephrase "platform" (warning).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 
 ### messages/en-CA.json
 
 - **Path:** `messages/en-CA.json`
-- **Institutional Maturity:** 91/100
+- **Institutional Maturity:** 92/100
 
 **Scores:**
-
-- narrative-balance: 62/100 (warn)
+- narrative-balance: 69/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
-- L1587 [warning/warning] `platform` — "description": "Member relationship management and organizing platform integrations."
-- L2180 [warning/warning] `platform` — "title": "Platform Analytics",
-- L2249 [warning/warning] `platform` — "title": "Platform Summary",
-- L2680 [warning/warning] `platform` — "metaDescription": "Sign in to UnionEyes - the intelligent labour relations platform for unions, locals, and federations.",
-- L2714 [warning/warning] `platform` — "metaDescription": "Monitor platform migration runs and operational migration health"
-- L2958 [warning/warning] `platform` — "platform": "Platform",
-- L3015 [warning/warning] `platform` — "platform": "Platform",
-- L3024 [warning/warning] `platform` — "platform": "SaaS platform provider (Nzila Ventures)",
-- L3107 [warning/warning] `platform` — "platform": "Platform",
-- L3116 [warning/warning] `platform` — "platform": "SaaS platform provider (Nzila Ventures)",
-- L3199 [warning/warning] `platform` — "metaDescription": "Create your UnionEyes account - join the intelligent labour relations platform.",
-- L3245 [warning/warning] `platform` — "metaDescription": "Manage platform and organization configuration settings"
-- L3590 [warning/warning] `platform` — "setupBillingDescription": "Create a billing account to enable platform invoicing and cost allocation. All billing is processed in Canadian Dollars (CAD).",
-- L3824 [warning/warning] `AI credits` — "aiCredits": "1,000 AI credits per billing cycle",
-- L3824 [warning/warning] `credits per billing cycle` — "aiCredits": "1,000 AI credits per billing cycle",
-- L4506 [warning/warning] `platform` — "activityTrackingDescription": "Help improve the platform with usage data",
-- L4608 [warning/warning] `platform` — "platformLabel": "Platform & Goals (Optional)",
-- L4979 [warning/warning] `platform` — "noCasesFiledBody": "No cases have been filed across the platform yet.",
-- L5849 [warning/warning] `platform` — "platformSlasLink": "Platform SLAs",
-- L6010 [warning/warning] `platform` — "description": "Our platform helps you manage union claims, track grievances, and collaborate with your team more effectively.",
-- L7050 [warning/warning] `platform` — "nzilaPlatform": "Platform",
-- L7110 [warning/warning] `platform` — "platformAdminView": "Platform Admin View",
-- L7111 [warning/warning] `platform` — "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
-- L7172 [warning/warning] `platform` — "platform": "Platform",
-- L7294 [warning/warning] `operating system` — "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
-- L7456 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
-- L7478 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
-- L7480 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
-- L7484 [warning/warning] `platform` — "platform": "Capabilities",
-- L7492 [warning/warning] `governance intelligence` — "governanceIntelligence": "Governance Intelligence",
-- L7536 [warning/warning] `platform` — "badge": "Platform Module",
-- L7570 [warning/warning] `platform` — "badge": "Platform Module",
-- L7605 [warning/warning] `platform` — "badge": "Platform Module",
-- L7635 [warning/warning] `platform` — "badge": "Platform Module",
-- L7645 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
-- L7695 [warning/warning] `platform` — "collectDesc": "UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe
-- L7709 [warning/warning] `platform` — "pageDescription": "Terms and conditions governing the use of UnionEyes union management platform.",
-- L7712 [warning/warning] `platform` — "acceptanceDesc": "By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law.
-- L7714 [warning/warning] `platform` — "useDesc": "You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th
-- L7718 [warning/warning] `platform` — "liabilityDesc": "UnionEyes is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to
-- L7730 [warning/warning] `platform` — "standardsDesc": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility
-- L7773 [warning/warning] `platform` — "ctaDescription": "Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.",
-- L7775 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7785 [warning/warning] `platform` — "auditDesc": "Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.",
-- L7791 [warning/warning] `platform` — "reconDesc": "Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.",
-- L7795 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.",
-- L7801 [warning/warning] `disruption` — "disruptionTitle": "Operational disruption modeling",
-- L7939 [warning/warning] `centralized` — "ba3After": "Centralized campaign tracking with real-time progress",
-- L8684 [warning/warning] `AI credits` — "benefit1": "1,000 AI credits per billing cycle",
-- L8684 [warning/warning] `credits per billing cycle` — "benefit1": "1,000 AI credits per billing cycle",
-- L8837 [warning/warning] `platform` — "platform": {
-- L8841 [warning/warning] `platform` — "operationsOverview": "Nzila Platform Operations — here's your overview.",
-- L8857 [warning/warning] `platform` — "platformHealthIncidents": "Platform health & incidents",
-- L8862 [warning/warning] `platform` — "platformAnalytics": "Platform Analytics",
-- L8869 [warning/warning] `platform` — "platformSecurityPosture": "Platform security posture",
-- L8872 [warning/warning] `platform` — "platformHealth": "Platform Health",
-- L8879 [warning/warning] `platform` — "recentPlatformEvents": "Recent Platform Events",
-- L8886 [warning/warning] `platform` — "platformActivityAppears": "Platform activity will appear here",
-- L9188 [warning/warning] `platform` — "subtitle": "Continuity-aware health, continuity events, and operational chronology of the institutional platform.",
-- L9200 [warning/warning] `platform` — "platformUptimeTitle": "Platform Uptime",
-- L9261 [warning/warning] `platform` — "platformAdoptionTitle": "Platform Adoption",
-- L9262 [warning/warning] `platform` — "moduleUsageDescription": "Module usage across the platform",
-- L9298 [warning/warning] `platform` — "featureAdoptionDescription": "Usage across the platform by feature",
-- L10618 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
+- L7191 [warning/warning] `platform` — "platform": "Platform",
+- L7241 [warning/warning] `platform` — "proofSectionLabel": "Built-in platform guarantees",
+- L7459 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
+- L7461 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
+- L7520 [warning/warning] `platform` — "badge": "Platform Module",
+- L7554 [warning/warning] `platform` — "badge": "Platform Module",
+- L7589 [warning/warning] `platform` — "badge": "Platform Module",
+- L7619 [warning/warning] `platform` — "badge": "Platform Module",
+- L7629 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
+- L7679 [warning/warning] `platform` — "collectDesc": "UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe
+- L7696 [warning/warning] `platform` — "acceptanceDesc": "By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law.
+- L7698 [warning/warning] `platform` — "useDesc": "You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th
+- L7714 [warning/warning] `platform` — "standardsDesc": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility
+- L7757 [warning/warning] `platform` — "ctaDescription": "Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.",
+- L7759 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
+- L7769 [warning/warning] `platform` — "auditDesc": "Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.",
+- L7775 [warning/warning] `platform` — "reconDesc": "Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.",
+- L7779 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.",
 
 **Flags:**
-
-- (narrative-balance) Continuity language under-represented: 10.8% (target 30%).
+- (narrative-balance) Continuity language under-represented: 14.6% (target 30%).
 
 **Recommendations:**
-
 - Remove or rephrase "platform" (warning).
-- Remove or rephrase "AI credits" (warning).
-- Remove or rephrase "credits per billing cycle" (warning).
-- Remove or rephrase "operating system" (warning).
-- Remove or rephrase "centralized" (warning).
-- Remove or rephrase "governance intelligence" (warning).
-- Remove or rephrase "disruption" (warning).
-- Remove or rephrase "AI-powered" (warning).
 - Add institutional-continuity framing.
 
 ### messages/en.json
@@ -1402,160 +1125,72 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 91/100
 
 **Scores:**
-
-- narrative-balance: 62/100 (warn)
+- narrative-balance: 65/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-
-- L1593 [warning/warning] `platform` — "description": "Member relationship management and organizing platform integrations."
-- L2186 [warning/warning] `platform` — "title": "Platform Analytics",
-- L2255 [warning/warning] `platform` — "title": "Platform Summary",
-- L2686 [warning/warning] `platform` — "metaDescription": "Sign in to UnionEyes - the intelligent labour relations platform for unions, locals, and federations.",
-- L2720 [warning/warning] `platform` — "metaDescription": "Monitor platform migration runs and operational migration health"
-- L3021 [warning/warning] `platform` — "platform": "Platform",
-- L3078 [warning/warning] `platform` — "platform": "Platform",
-- L3087 [warning/warning] `platform` — "platform": "SaaS platform provider (Nzila Ventures)",
-- L3170 [warning/warning] `platform` — "platform": "Platform",
-- L3179 [warning/warning] `platform` — "platform": "SaaS platform provider (Nzila Ventures)",
-- L3262 [warning/warning] `platform` — "metaDescription": "Create your UnionEyes account - join the intelligent labour relations platform.",
-- L3308 [warning/warning] `platform` — "metaDescription": "Manage platform and organization configuration settings"
-- L3653 [warning/warning] `platform` — "setupBillingDescription": "Create a billing account to enable platform invoicing and cost allocation. All billing is processed in Canadian Dollars (CAD).",
-- L3887 [warning/warning] `AI credits` — "aiCredits": "1,000 AI credits per billing cycle",
-- L3887 [warning/warning] `credits per billing cycle` — "aiCredits": "1,000 AI credits per billing cycle",
-- L4569 [warning/warning] `platform` — "activityTrackingDescription": "Help improve the platform with usage data",
-- L4671 [warning/warning] `platform` — "platformLabel": "Platform & Goals (Optional)",
-- L5042 [warning/warning] `platform` — "noCasesFiledBody": "No cases have been filed across the platform yet.",
-- L5912 [warning/warning] `platform` — "platformSlasLink": "Platform SLAs",
-- L6073 [warning/warning] `platform` — "description": "Our platform helps you manage union claims, track grievances, and collaborate with your team more effectively.",
-- L7113 [warning/warning] `platform` — "nzilaPlatform": "Platform",
-- L7173 [warning/warning] `platform` — "platformAdminView": "Platform Admin View",
-- L7174 [warning/warning] `platform` — "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
 - L7235 [warning/warning] `platform` — "platform": "Platform",
-- L7357 [warning/warning] `operating system` — "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
-- L7519 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
 - L7541 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
 - L7543 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
-- L7653 [warning/warning] `centralized` — "ba3After": "Centralized campaign tracking with real-time progress",
-- L7689 [warning/warning] `platform` — "platform": "Capabilities",
-- L7697 [warning/warning] `governance intelligence` — "governanceIntelligence": "Governance Intelligence",
 - L7741 [warning/warning] `platform` — "badge": "Platform Module",
 - L7775 [warning/warning] `platform` — "badge": "Platform Module",
 - L7810 [warning/warning] `platform` — "badge": "Platform Module",
 - L7840 [warning/warning] `platform` — "badge": "Platform Module",
 - L7850 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
 - L7900 [warning/warning] `platform` — "collectDesc": "UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe
-- L7914 [warning/warning] `platform` — "pageDescription": "Terms and conditions governing the use of UnionEyes union management platform.",
 - L7917 [warning/warning] `platform` — "acceptanceDesc": "By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law.
 - L7919 [warning/warning] `platform` — "useDesc": "You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th
-- L7923 [warning/warning] `platform` — "liabilityDesc": "UnionEyes is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to
 - L7935 [warning/warning] `platform` — "standardsDesc": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility
 - L7978 [warning/warning] `platform` — "ctaDescription": "Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.",
 - L7980 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
 - L7990 [warning/warning] `platform` — "auditDesc": "Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.",
 - L7996 [warning/warning] `platform` — "reconDesc": "Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.",
 - L8000 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.",
-- L8006 [warning/warning] `disruption` — "disruptionTitle": "Operational disruption modeling",
-- L8963 [warning/warning] `AI credits` — "benefit1": "1,000 AI credits per billing cycle",
-- L8963 [warning/warning] `credits per billing cycle` — "benefit1": "1,000 AI credits per billing cycle",
-- L9116 [warning/warning] `platform` — "platform": {
-- L9120 [warning/warning] `platform` — "operationsOverview": "Nzila Platform Operations — here's your overview.",
-- L9136 [warning/warning] `platform` — "platformHealthIncidents": "Platform health & incidents",
-- L9141 [warning/warning] `platform` — "platformAnalytics": "Platform Analytics",
-- L9148 [warning/warning] `platform` — "platformSecurityPosture": "Platform security posture",
-- L9151 [warning/warning] `platform` — "platformHealth": "Platform Health",
-- L9158 [warning/warning] `platform` — "recentPlatformEvents": "Recent Platform Events",
-- L9165 [warning/warning] `platform` — "platformActivityAppears": "Platform activity will appear here",
-- L10270 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
-- L10945 [warning/warning] `platform` — "subtitle": "Continuity-aware health, continuity events, and operational chronology of the institutional platform.",
-- L10957 [warning/warning] `platform` — "platformUptimeTitle": "Platform Uptime",
-- L11018 [warning/warning] `platform` — "platformAdoptionTitle": "Platform Adoption",
-- L11019 [warning/warning] `platform` — "moduleUsageDescription": "Module usage across the platform",
-- L11055 [warning/warning] `platform` — "featureAdoptionDescription": "Usage across the platform by feature",
 
 **Flags:**
-
-- (narrative-balance) Continuity language under-represented: 10.8% (target 30%).
+- (narrative-balance) Continuity language under-represented: 12.5% (target 30%).
 
 **Recommendations:**
-
 - Remove or rephrase "platform" (warning).
-- Remove or rephrase "AI credits" (warning).
-- Remove or rephrase "credits per billing cycle" (warning).
-- Remove or rephrase "operating system" (warning).
-- Remove or rephrase "centralized" (warning).
-- Remove or rephrase "governance intelligence" (warning).
-- Remove or rephrase "disruption" (warning).
-- Remove or rephrase "AI-powered" (warning).
 - Add institutional-continuity framing.
 
 ### messages/fr-CA.json
 
 - **Path:** `messages/fr-CA.json`
-- **Institutional Maturity:** 72/100
+- **Institutional Maturity:** 73/100
 
 **Scores:**
-
-- narrative-balance: 41/100 (warn)
+- narrative-balance: 46/100 (warn)
 - coexistence-positioning: 70/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 76/100 (pass)
 - canadian-positioning: 85/100 (pass)
 
-**Vocabulary violations:**
-
-- L2958 [warning/warning] `platform` — "platform": "Plateforme",
-- L3015 [warning/warning] `platform` — "platform": "Plateforme",
-- L3024 [warning/warning] `platform` — "platform": "Fournisseur de plateforme SaaS (Nzila Ventures)",
-- L3107 [warning/warning] `platform` — "platform": "Plateforme",
-- L3116 [warning/warning] `platform` — "platform": "Fournisseur de plateforme SaaS (Nzila Ventures)",
-- L7172 [warning/warning] `platform` — "platform": "Plateforme",
-- L7484 [warning/warning] `platform` — "platform": "Capacités",
-- L8837 [warning/warning] `platform` — "platform": {
-
 **Flags:**
-
-- (narrative-balance) Continuity language under-represented: 3.3% (target 30%).
+- (narrative-balance) Continuity language under-represented: 4.7% (target 30%).
 
 **Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
 
 ### messages/fr.json
 
 - **Path:** `messages/fr.json`
-- **Institutional Maturity:** 72/100
+- **Institutional Maturity:** 73/100
 
 **Scores:**
-
-- narrative-balance: 41/100 (warn)
+- narrative-balance: 44/100 (warn)
 - coexistence-positioning: 70/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 76/100 (pass)
 - canadian-positioning: 85/100 (pass)
 
-**Vocabulary violations:**
-
-- L2958 [warning/warning] `platform` — "platform": "Plateforme",
-- L3015 [warning/warning] `platform` — "platform": "Plateforme",
-- L3024 [warning/warning] `platform` — "platform": "Fournisseur de plateforme SaaS (Nzila Ventures)",
-- L3107 [warning/warning] `platform` — "platform": "Plateforme",
-- L3116 [warning/warning] `platform` — "platform": "Fournisseur de plateforme SaaS (Nzila Ventures)",
-- L7172 [warning/warning] `platform` — "platform": "Plateforme",
-- L7484 [warning/warning] `platform` — "platform": "Plateforme",
-- L8837 [warning/warning] `platform` — "platform": {
-
 **Flags:**
-
-- (narrative-balance) Continuity language under-represented: 3.3% (target 30%).
+- (narrative-balance) Continuity language under-represented: 3.2% (target 30%).
 
 **Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
 
 ### messages/it.json
@@ -1564,32 +1199,17 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 86/100
 
 **Scores:**
-
 - narrative-balance: 44/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-
-- L2958 [warning/warning] `platform` — "platform": "Piattaforma",
-- L3015 [warning/warning] `platform` — "platform": "Piattaforma",
-- L3024 [warning/warning] `platform` — "platform": "Fornitore di piattaforma SaaS (Nzila Ventures)",
-- L3107 [warning/warning] `platform` — "platform": "Piattaforma",
-- L3116 [warning/warning] `platform` — "platform": "Fornitore di piattaforma SaaS (Nzila Ventures)",
-- L7172 [warning/warning] `platform` — "platform": "Piattaforma",
-- L7484 [warning/warning] `platform` — "platform": "Moduli",
-- L8837 [warning/warning] `platform` — "platform": {
-
 **Flags:**
-
 - (narrative-balance) Governance saturation detected: 42.2% of pillar terms (target 30%, threshold 40%).
 - (narrative-balance) Continuity language under-represented: 10.0% (target 30%).
 
 **Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 - Add institutional-continuity framing.
 
@@ -1599,31 +1219,16 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 87/100
 
 **Scores:**
-
 - narrative-balance: 46/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-
-- L2958 [warning/warning] `platform` — "platform": "Plataforma",
-- L3015 [warning/warning] `platform` — "platform": "Plataforma",
-- L3024 [warning/warning] `platform` — "platform": "Provedor de plataforma SaaS (Nzila Ventures)",
-- L3107 [warning/warning] `platform` — "platform": "Plataforma",
-- L3116 [warning/warning] `platform` — "platform": "Provedor de plataforma SaaS (Nzila Ventures)",
-- L7172 [warning/warning] `platform` — "platform": "Plataforma",
-- L7484 [warning/warning] `platform` — "platform": "Modulos",
-- L8837 [warning/warning] `platform` — "platform": {
-
 **Flags:**
-
 - (narrative-balance) Continuity language under-represented: 11.0% (target 30%).
 
 **Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
 
 ### internal/app/[locale]/(dashboard)/analytics/page.tsx
@@ -1632,14 +1237,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 0/100
 
 **Scores:**
-
-**Vocabulary violations:**
-
-- L13 [warning/warning] `platform` — import { auth } from '@nzila/platform-auth/entra/server';
-
-**Recommendations:**
-
-- Remove or rephrase "platform" (warning).
 
 ### internal/app/[locale]/dashboard/continuity-intelligence/page.tsx
 
@@ -1661,14 +1258,6 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 0/100
 
 **Scores:**
-
-**Vocabulary violations:**
-
-- L11 [warning/warning] `disruption` — 'Reviewer-led workspace to explore institutional continuity fragility, simulate disruption scenarios, and compare continuity safeguard strategies.',
-
-**Recommendations:**
-
-- Remove or rephrase "disruption" (warning).
 
 ### internal/app/[locale]/dashboard/executive-operating-intelligence/page.tsx
 
@@ -1718,16 +1307,3 @@ Generated: 2026-05-14T07:43:36.077Z
 - **Institutional Maturity:** 0/100
 
 **Scores:**
-
-**Vocabulary violations:**
-
-- L9 [warning/warning] `platform` — *   import { requireEntitlement, withEntitlement } from '@/services/platform-economics/entitlement-guard';
-- L17 [warning/warning] `platform` — * @domain platform-economics
-- L122 [warning/warning] `platform` — 'Treasurers reconcile platform billing against internal ledgers and surface variance ahead of audit cadence.',
-- L147 [warning/warning] `platform` — 'Transparent recording and reconciliation of platform transaction fees against contracted terms.',
-- L149 [warning/warning] `platform` — 'Maintains a transparent ledger of platform transaction fees so that contracted terms can be verified at any point in the institution’s audit cycle.',
-- L277 [warning/warning] `platform` — narrativeTagline: `Platform module ${humanised} — institutional capability registered for this organisation.`,
-
-**Recommendations:**
-
-- Remove or rephrase "platform" (warning).

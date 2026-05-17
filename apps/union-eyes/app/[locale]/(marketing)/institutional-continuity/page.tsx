@@ -15,9 +15,9 @@
  * institutional trust for democratic infrastructure.
  */
 /**
- * Institutional Continuity — Core platform capability page
+ * Institutional Continuity — Core substrate capability page
  *
- * Positions UE as the institutional continuity intelligence platform.
+ * Positions UE as the institutional continuity intelligence substrate.
  * Hides internal engine complexity. Exposes operational outcomes.
  */
 import type { Metadata } from 'next';
@@ -42,7 +42,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   return {
     title: 'Institutional Continuity | UnionEyes',
     description:
-      'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity platform.',
+      'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity substrate.',
     alternates: buildLocaleAlternates(locale, '/institutional-continuity'),
   };
 }
@@ -212,7 +212,7 @@ export default async function InstitutionalContinuityPage({
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Each capability is modular and deployable independently — or together as a
-              unified institutional continuity platform.
+              unified institutional continuity substrate.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
