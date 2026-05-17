@@ -79,7 +79,7 @@
     "healthSafety": "Saúde e Segurança",
     "bargaining": "Negociações e Acordos",
     "financialManagement": "Gestão Financeira",
-    "clcDashboard": "Painel Executivo CLC",
+    "clcDashboard": "Coordenação de continuidade CLC",
     "clcStaff": "Operações de Pessoal CLC",
     "clcAffiliates": "Gestão de Afiliados",
     "clcCompliance": "Monitoramento de Conformidade CLC",
@@ -801,7 +801,7 @@
     "claims": "Análise de Reivindicações",
     "financial": "Análise Financeira",
     "members": "Análise de Membros",
-    "operational": "Análise Operacional",
+    "operational": "Visibilidade operacional",
     "trends": "Tendências",
     "breakdown": "Detalhamento",
     "performance": "Desempenho",
@@ -6211,7 +6211,7 @@
   "clc": {
     "title": "Congresso Canadense do Trabalho",
     "executive": {
-      "title": "Painel Executivo do CLC",
+      "title": "Coordenação de continuidade do CLC",
       "overview": "Visão Geral Nacional",
       "statistics": "Estatísticas Nacionais",
       "affiliates": "Organizações Afiliadas",
@@ -6228,7 +6228,7 @@
       "dashboard": {
         "title": "Painel da Equipe do CLC",
         "description": "Operações nacionais, sincronização de afiliados e processamento de remessas",
-        "executiveDashboard": "Painel Executivo"
+        "executiveDashboard": "Coordenação de continuidade"
       },
       "metrics": {
         "pendingSyncs": "Sincronizações Pendentes",
@@ -6407,7 +6407,7 @@
       "audits": "Status da Auditoria"
     },
     "dashboard": {
-      "title": "Painel Executivo do CLC",
+      "title": "Coordenação de continuidade do CLC",
       "description": "Supervisão nacional do Congresso do Trabalho Canadense, coordenação de afiliados e gestão de remessas per capita",
       "compliance": "Conformidade",
       "manageAffiliates": "Gerenciar Afiliados"
@@ -8852,8 +8852,8 @@
     "underNegotiation": "{count} em negociação",
     "totalValue": "${value} valor total",
     "affiliatedOrganizations": "organizações afiliadas",
-    "commandCenter": "Centro de Comando",
-    "operationsCenter": "Centro de Operações",
+    "commandCenter": "Espaço de coordenação",
+    "operationsCenter": "Espaço de continuidade operacional",
     "platformHealthIncidents": "Saúde da plataforma & incidentes",
     "supportQueue": "Fila de Suporte",
     "openTicketsEscalations": "Tickets abertos e escalonamentos",
@@ -11076,12 +11076,12 @@
   },
   "homePage": {
     "meta": {
-      "title": "UnionEyes | Institutional Continuity & Governance Infrastructure",
+      "title": "UnionEyes | Constitutional Continuity Infrastructure",
       "description": "UnionEyes is the continuity layer for federated institutions — preserving institutional memory, strengthening governance coordination, and modernizing operational trust through non-disruptive implementation alongside existing systems. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "jsonLd": {
       "name": "UnionEyes",
-      "description": "Institutional continuity layer and governance infrastructure for federated organizations. Canadian-hosted, bilingual-first, sovereignty-conscious."
+      "description": "Constitutional continuity infrastructure for federated organizations. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "hero": {
       "eyebrow": "Institutional Governance & Continuity Infrastructure",
