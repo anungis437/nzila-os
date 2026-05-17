@@ -9,7 +9,7 @@ import { NextResponse as _NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { grievances } from "@/db/schema/domains/claims/grievances";
+import { grievances, GrievanceStatus } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
@@ -20,7 +20,7 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
@@ -297,27 +297,28 @@ export const GET = withOrganizationAuth(async (request, context) => {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
 
-    const query = db
+    const ACTIVE_STATUSES = ['filed', 'acknowledged', 'investigating', 'response_due', 'response_received', 'escalated', 'mediation', 'arbitration'] as const;
+    const INTAKE_STATUSES = ['draft'] as const;
+
+    // Push status filter to DB layer to avoid loading unbounded result sets into memory.
+    // Safety limit of 500: steward workbenches don't need more; paginate at API level if needed.
+    let scopedFilter;
+    if (status === 'active') {
+      scopedFilter = and(eq(grievances.organizationId, organizationId), inArray(grievances.status, ACTIVE_STATUSES));
+    } else if (status === 'intakes') {
+      scopedFilter = and(eq(grievances.organizationId, organizationId), inArray(grievances.status, INTAKE_STATUSES));
+    } else if (status) {
+      scopedFilter = and(eq(grievances.organizationId, organizationId), eq(grievances.status, status as GrievanceStatus));
+    } else {
+      scopedFilter = eq(grievances.organizationId, organizationId);
+    }
+
+    const filtered = await db
       .select()
       .from(grievances)
-      .where(eq(grievances.organizationId, organizationId))
+      .where(scopedFilter)
       .orderBy(desc(grievances.createdAt))
-      .$dynamic();
-
-    const ACTIVE_STATUSES = ['filed', 'step_1', 'step_2', 'step_3', 'arbitration', 'mediation'];
-    const INTAKE_STATUSES = ['draft'];
-
-    const rows = await query;
-
-    // If status filter is requested, apply in-memory
-    let filtered = rows;
-    if (status === 'intakes') {
-      filtered = rows.filter((r) => INTAKE_STATUSES.includes(r.status));
-    } else if (status === 'active') {
-      filtered = rows.filter((r) => ACTIVE_STATUSES.includes(r.status));
-    } else if (status) {
-      filtered = rows.filter((r) => r.status === status);
-    }
+      .limit(500);
 
     return standardSuccessResponse(filtered);
   } catch (_error) {

@@ -28,8 +28,8 @@ const RESOLVED_STATUSES = new Set(["settled", "withdrawn", "denied", "closed", "
 const ESCALATED_STATUSES = new Set(["escalated", "arbitration"]);
 const ACTIVE_MEMBER_EXCLUDE = new Set(["inactive", "archived", "deleted", "disabled"]);
 
-const LEADERSHIP_CACHE_TTL_SECONDS = 120;
-const EXECUTIVE_CACHE_TTL_SECONDS = 120;
+const LEADERSHIP_CACHE_TTL_SECONDS = 600;
+const EXECUTIVE_CACHE_TTL_SECONDS = 600;
 const CACHE_NAMESPACE = "dashboard-kpis";
 const CACHE_VERSION = "v2";
 
@@ -159,8 +159,8 @@ export async function getLeadershipDashboardMetrics(args: {
   }
 
   const [grievanceRows, alertRows] = await Promise.all([
-    db.select().from(grievances).where(eq(grievances.organizationId, organizationId)),
-    db.select().from(complianceAlerts).where(eq(complianceAlerts.orgId, organizationId)),
+    db.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(5000),
+    db.select().from(complianceAlerts).where(eq(complianceAlerts.orgId, organizationId)).limit(1000),
   ]);
 
   const payload = buildLeadershipDashboard(grievanceRows, alertRows, timeframe, now);
@@ -206,9 +206,9 @@ export async function getExecutiveMetrics(args: {
   const nextMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
 
   const [grievanceRows, memberRows, goalRows, remittanceRows] = await Promise.all([
-    db.select().from(grievances).where(eq(grievances.organizationId, organizationId)),
-    db.select().from(organizationMembers).where(eq(organizationMembers.organizationId, organizationId)),
-    db.select().from(strategicGoals).where(eq(strategicGoals.organizationId, organizationId)),
+    db.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(5000),
+    db.select().from(organizationMembers).where(eq(organizationMembers.organizationId, organizationId)).limit(10000),
+    db.select().from(strategicGoals).where(eq(strategicGoals.organizationId, organizationId)).limit(500),
     db
       .select()
       .from(employerRemittances)

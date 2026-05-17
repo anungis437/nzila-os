@@ -68,10 +68,12 @@ export default function LeadershipPage() {
   const t = useTranslations('leadershipPage');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [timeframe, setTimeframe] = useState<'weekly' | 'monthly' | 'quarterly'>('monthly');
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`/api/dashboard/leadership?timeframe=${timeframe}`);
       if (response.ok) {
@@ -79,9 +81,11 @@ export default function LeadershipPage() {
         setData(result.data ?? result);
       } else {
         logger.warn('Leadership dashboard fetch failed', { status: response.status });
+        setError('Dashboard data unavailable — please try again or contact support.');
       }
-    } catch (error) {
-      logger.error('Failed to load leadership dashboard', error);
+    } catch (err) {
+      logger.error('Failed to load leadership dashboard', err);
+      setError('Could not connect to the dashboard service. Check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -143,11 +147,24 @@ export default function LeadershipPage() {
   if (!data) {
     return (
       <div className="container mx-auto py-6">
-        <EmptyState
-          icon={Shield}
-          title={t('empty.title')}
-          description={t('empty.description')}
-        />
+        {error ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+            <p className="font-medium text-red-800">Dashboard unavailable</p>
+            <p className="mt-1 text-sm text-red-700">{error}</p>
+            <button
+              onClick={() => fetchDashboard()}
+              className="mt-4 text-sm font-medium text-red-800 underline hover:text-red-900"
+            >
+              Try again
+            </button>
+          </div>
+        ) : (
+          <EmptyState
+            icon={Shield}
+            title={t('empty.title')}
+            description={t('empty.description')}
+          />
+        )}
       </div>
     );
   }
