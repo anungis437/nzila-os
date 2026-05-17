@@ -71,7 +71,7 @@ export const POST = withApi(
 
       if (!email) { skipped++; continue; }
 
-      // Look up the Clerk user by email; fall back to a provisional UUID if not found
+      // Look up the auth user by email; fall back to a provisional UUID if not found
       let resolvedUserId: string = crypto.randomUUID();
       try {
         const found = await authClient.users.getUserList({ emailAddress: [email] });
@@ -103,3 +103,4 @@ export const POST = withApi(
     return { job: { id: jobId }, processed, skipped };
   },
 );
+

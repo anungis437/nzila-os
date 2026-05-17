@@ -217,10 +217,10 @@ All events flow through `emitCapeAuditEvent()` with structured metadata (userId,
 
 | Layer | Implementation |
 |-------|---------------|
-| Identity Provider | Clerk (JWT, RS256, JWKS with 1-hour TTL cache) |
-| Session Management | Clerk sessions via edge middleware |
-| Django JWT | `PyJWKClient` — supports Clerk V1 + V2 JWT formats |
-| API Key Auth | `ClerkAPIKeyAuthentication` in DRF |
+| Identity Provider | `@nzila/platform-auth` (PG sessions primary, Entra SSO secondary) |
+| Session Management | Platform auth sessions via edge middleware |
+| Django JWT | `PyJWKClient` — supports platform JWT formats |
+| API Key Auth | `PlatformAPIKeyAuthentication` in DRF |
 | Webhook Auth | `x-cron-secret` header validation |
 
 ### 6.2 Authorization — 30+ Level Role Hierarchy
@@ -237,7 +237,7 @@ Members:       member (10)
 
 ### 6.3 Multi-Org Isolation (3 Layers)
 
-1. **Edge Middleware** — Resolves Clerk org → local UUID; 403 if org not found
+1. **Edge Middleware** — Resolves org identity → local UUID; 403 if org not found
 2. **Django ORM** — `OrgScopedMixin` auto-filters querysets by `X-Organization-Id`
 3. **PostgreSQL RLS** — `SET LOCAL` for `app.current_user_id` + `app.current_org_id`
 
@@ -294,7 +294,7 @@ Members:       member (10)
 | Redis (Upstash) | Cache/Queue | Rate limiting, Celery broker |
 | Azure Blob Storage | Object store | Evidence packs, documents |
 | Sentry | SaaS | Error tracking, performance |
-| Clerk | SaaS | Authentication, user management |
+| `@nzila/platform-auth` | SaaS/Self-hosted | Authentication, user management (PG sessions + Entra SSO) |
 
 ### 8.2 Architecture Quality
 

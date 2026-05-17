@@ -65,18 +65,17 @@
 | Property | Value |
 |---|---|
 | Provider | Azure Key Vault | Planned |
-| Secrets stored | DB connection string, Clerk secret, Blob SAS key, Sentry DSN | Planned |
+| Secrets stored | DB connection string, auth secret, Blob SAS key, Sentry DSN | Planned |
 | Access | Container Apps managed identity → Key Vault RBAC | Planned |
 
 ## Authentication
 
 | Component | Value |
 |---|---|
-| Provider | Clerk | ✅ Implemented (staging) |
-| Production app | `unioneyes-production` (Clerk dashboard — to be created) | Planned |
-| Auth strategy | Clerk JWT → Next.js middleware validation | ✅ Implemented |
-| Org-based access | Clerk Organizations — maps 1:1 to UE org_id | ✅ Implemented |
-| MFA | Clerk default (OTP + optional TOTP) | Planned |
+| Provider | `@nzila/platform-auth` — custom PG-backed password/session (primary), Entra External ID / NextAuth (secondary) | ✅ Implemented (staging) |
+| Auth strategy | PG session cookie (`nzila_session`) → Entra / NextAuth JWT fallback | ✅ Implemented |
+| Org-based access | Organization membership stored in DB — maps 1:1 to UE org_id | ✅ Implemented |
+| MFA | Entra SSO path: Entra policy; Password path: optional TOTP (planned) | Planned |
 | Allowed domains | `app.unioneyes.ca` + `unioneyes.nzila.app` | Planned |
 
 ## Error Tracking
@@ -108,8 +107,8 @@ The following variables must exist in Key Vault and be injected by Container App
 | Variable | Source | Required |
 |---|---|---|
 | `DATABASE_URL` | Key Vault | ✅ Critical |
-| `CLERK_SECRET_KEY` | Key Vault (Clerk prod app) | ✅ Critical |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Build-time env | ✅ Critical |
+| `AUTH_SECRET` | Key Vault (NextAuth session secret) | ✅ Critical |
+| `NZILA_AUTH_ENABLE_PG_FALLBACK` | Container App env | Optional (default: true) |
 | `NEXT_PUBLIC_APP_URL` | `https://app.unioneyes.ca` | ✅ Critical |
 | `STORAGE_ACCOUNT_NAME` | Key Vault | ✅ Critical |
 | `STORAGE_ACCOUNT_KEY` | Key Vault | ✅ Critical |
@@ -140,7 +139,7 @@ The following variables must exist in Key Vault and be injected by Container App
 |---|---|---|
 | PostgreSQL | Azure automated PITR (7 days) | 5 min |
 | Blob storage | Azure soft delete (7 days) | 0 (soft delete) |
-| Clerk data | Clerk-managed — not in our DB | N/A |
+| Auth identity | N/A — identity is DB-managed; no external auth vendor | N/A |
 
 Restore procedure:
 1. Trigger PITR from Azure Portal → restore to new server
@@ -173,7 +172,7 @@ Before marking production topology as LIVE (see `PRODUCTION_CUTOVER_CHECKLIST.md
 
 - [ ] All required env vars defined in Key Vault
 - [ ] Health probe returns `200 { status: "ok" }` from prod URL
-- [ ] Clerk production app created and domain allowlisted
+- [ ] Auth production app configured and domain allowlisted
 - [ ] Rollback tested (deploy → revert → health check)
 - [ ] Evidence pipeline verified end-to-end
 - [ ] Staging release candidate validated for 48h

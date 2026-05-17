@@ -50,7 +50,7 @@ function getTokenKey(sessionId: string): string {
 /**
  * Generate and store CSRF token for a session
  * 
- * @param sessionId - User session ID (from Clerk or custom auth)
+ * @param sessionId - User session ID (from auth provider or custom auth)
  * @returns CSRF token string
  */
 export async function generateCSRFToken(sessionId: string): Promise<string> {
@@ -164,7 +164,7 @@ export function withCSRFProtection(
       return handler(req, ...args);
     }
 
-    // Extract session ID (from Clerk session or custom auth)
+    // Extract session ID (from auth session or custom auth)
     const sessionId = req.headers.get('x-session-id') || 
                      req.cookies.get('__clerk_db_jwt')?.value ||
                      'anonymous';
@@ -368,4 +368,5 @@ export async function csrfMiddleware(request: NextRequest): Promise<NextResponse
   // Token valid - continue to route handler
   return null;
 }
+
 

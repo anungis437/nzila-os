@@ -36,7 +36,7 @@ export function useUserRole() {
       }
 
       try {
-        // Try to get role from Clerk metadata first (faster)
+        // Try to get role from auth provider metadata first (faster)
         const roleMap: Record<string, UserRole> = {
           // Current roles
           app_owner: UserRole.APP_OWNER,
@@ -74,7 +74,7 @@ export function useUserRole() {
           return;
         }
 
-        // Try Clerk organization membership role (e.g. "org:steward" → "steward")
+        // Try organization membership role (e.g. "org:steward" → "steward")
         const orgMembership = user.organizationMemberships?.[0];
         if (orgMembership?.role) {
           const orgRole = orgMembership.role.replace(/^org:/, '').toLowerCase();
@@ -208,4 +208,6 @@ export function useHasCrossOrgAccess(): boolean {
   const { role } = useUserRole();
   return role === UserRole.ADMIN || role === UserRole.CONGRESS_STAFF || role === UserRole.FEDERATION_STAFF;
 }
+
+
 

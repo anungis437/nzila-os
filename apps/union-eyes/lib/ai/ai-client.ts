@@ -61,7 +61,7 @@ export function getAiClient(): AiClient {
     _client = createAiClient({
       baseUrl: resolveAiBaseUrl(),
       getToken: async () => {
-        // Prefer service key for cross-app auth (different Clerk instances)
+        // Prefer service key for cross-app auth (different auth instances)
         if (serviceKey) return serviceKey
         const session = await auth()
         const token = await session.getToken()
@@ -124,3 +124,4 @@ export async function runAICompletionDetailed(input: Parameters<AiClient['genera
   const result = await getAiClient().generate(input)
   return { content: result.content, execution: toExecutionTelemetry(result) }
 }
+

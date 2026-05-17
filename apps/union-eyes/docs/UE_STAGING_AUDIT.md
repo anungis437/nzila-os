@@ -10,7 +10,7 @@
 | Integration | Status | Notes |
 |---|---|---|
 | Postgres (Drizzle) | ✅ Active | `DATABASE_URL` required at boot; fail-closed when absent. |
-| Clerk auth (`@nzila/platform-auth/entra/server`) | ✅ Active | `AUTH_SECRET` required at boot; fail-closed when absent. |
+| Application auth (`@nzila/platform-auth`) — PG sessions (primary), Entra SSO (secondary) | ✅ Active | `AUTH_SECRET` required at boot; fail-closed when absent. |
 | Upstash Redis (rate limiting) | ✅ Active when configured | `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`. Rate limiter fails-closed if Redis unreachable in production. |
 | OpenTelemetry (`@nzila/os-core/telemetry`) | ✅ Active | Initialised first in `instrumentation.ts`. |
 | Sentry | ✅ Active | `sentry.server.config.ts` + `sentry.edge.config.ts` loaded conditionally. |

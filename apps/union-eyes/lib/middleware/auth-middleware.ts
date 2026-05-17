@@ -22,7 +22,7 @@
 import { NextResponse } from 'next/server';
 import type { Session } from '@nzila/platform-auth/entra/server';
 
-// Dynamically import auth to handle different Clerk versions
+// Dynamically import auth to handle auth module loading
 let getAuthSession: (() => Promise<Session | null>) | null = null;
 
 try {
@@ -133,7 +133,7 @@ export const ROLE_PERMISSIONS: Record<SupportedRole, string[]> = {
  */
 export class AuthenticationService {
   /**
-   * Get current authenticated user from Clerk
+   * Get current authenticated user from auth provider
    */
   static async getCurrentUser(): Promise<AuthenticatedUser | null> {
     try {
@@ -156,7 +156,7 @@ return null;
       // Get user details from session
       const sessionData = session as unknown as Record<string, unknown>;
       
-      // Extract user roles from Clerk metadata
+      // Extract user roles from auth provider metadata
       const publicMetadata = sessionData?.publicMetadata as Record<string, unknown> | undefined;
       const roles = (publicMetadata?.roles as string[]) || ['member'];
       const organizationId = (publicMetadata?.organizationId as string) || '';
@@ -492,4 +492,6 @@ export function isValidBearerToken(token: string): boolean {
   // Basic validation - token should be non-empty and contain valid characters
   return /^[A-Za-z0-9._-]+$/.test(token) && token.length >= 20;
 }
+
+
 

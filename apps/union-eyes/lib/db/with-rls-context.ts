@@ -18,7 +18,7 @@
  * - Automatic user context setting (app.current_user_id)
  * - Transaction-scoped isolation (SET LOCAL)
  * - Connection pool safety (no context leakage)
- * - Clerk authentication integration
+ * - platform authentication integration
  * - Error handling with security event logging
  */
 
@@ -32,7 +32,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
  * Execute database operation with automatic RLS context
  * 
  * This wrapper:
- * 1. Gets authenticated user ID from Clerk
+ * 1. Gets authenticated user ID from auth provider
  * 2. Sets app.current_user_id in PostgreSQL session
  * 3. Executes your database operation
  * 4. Automatically cleans up (transaction-scoped with SET LOCAL)
@@ -77,15 +77,15 @@ export async function withRLSContext<T>(
     typeof contextOrOperation === 'function' ? contextOrOperation : maybeOperation!
   ) as (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>;
 
-  // Get authenticated user from Clerk
+  // Get authenticated user from auth provider
   const { userId, orgId: clerkOrgId } = await auth();
   
   if (!userId) {
-    throw new Error('Unauthorized: No authenticated user found. User must be logged in via Clerk.');
+    throw new Error('Unauthorized: No authenticated user found. User must be logged in via platform auth.');
   }
 
   // Resolve orgId using the same fallback chain as getCurrentUser():
-  // Clerk JWT orgId → publicMetadata.organizationId → privateMetadata.organizationId → tenantId
+  // platform JWT orgId → publicMetadata.organizationId → privateMetadata.organizationId → tenantId
   let orgId = clerkOrgId;
   if (!orgId) {
     try {
@@ -97,7 +97,7 @@ export async function withRLSContext<T>(
           || (pub.tenantId as string) || (priv.tenantId as string) || null;
       }
     } catch {
-      // Clerk currentUser() can fail in edge cases — proceed without org
+      // currentUser() can fail in edge cases — proceed without org
     }
   }
 
@@ -105,7 +105,7 @@ export async function withRLSContext<T>(
   if (!orgId) {
     logger.warn(
       '[withRLSContext] Organization context required but orgId is null — ' +
-      'proceeding without org isolation. User must have an active Org selected in Clerk for RLS.'
+      'proceeding without org isolation. User must have an active Org selected for RLS.'
     );
   }
 
@@ -137,7 +137,7 @@ export async function withRLSContext<T>(
  * Use this when you need to set context for a different user than the authenticated one.
  * Common use case: Admin operations, system jobs, or impersonation.
  * 
- * @param userId - User ID to set in context (must be varchar compatible with Clerk IDs)
+ * @param userId - User ID to set in context (must be varchar compatible with auth provider user IDs)
  * @param operation - Async function containing database queries
  * @returns Promise with operation result
  * 
@@ -183,7 +183,7 @@ export async function withExplicitUserContext<T>(
  * 
  * WARNING: Only use for system-level operations that should bypass RLS.
  * Common use cases:
- * - Clerk webhooks creating/updating users
+ * - auth provider webhooks creating/updating users
  * - System maintenance scripts
  * - Background jobs that operate on all data
  * 
@@ -191,7 +191,7 @@ export async function withExplicitUserContext<T>(
  * @returns Promise with operation result
  * 
  * @example
- * // Clerk webhook creating a new user
+ * // auth provider webhook creating a new user
  * export async function POST(req: Request) {
  *   const event = await verifyClerkWebhook(req);
  *   
@@ -387,4 +387,6 @@ export function withRLS<TArgs extends unknown[], TReturn>(
     return withRLSContext(() => handler(...args));
   };
 }
+
+
 

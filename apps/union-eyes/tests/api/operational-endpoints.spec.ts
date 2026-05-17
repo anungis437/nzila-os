@@ -91,7 +91,7 @@ const EVIDENCE_EXPORT_RESPONSE = {
     version: '1.0.0',
     platform: 'nzila-os',
     db_schema: 'drizzle-managed',
-    auth: 'clerk',
+    auth: 'platform-auth',
     storage: 'azure-blob',
     policy_engine: 'nzila-policy-runtime',
   },
@@ -206,7 +206,7 @@ describe('UE Ops - /api/health source implementation contract', () => {
   })
 
   it('probes auth configuration (HEALTH-AUTH-PROBE)', () => {
-    expect(healthSrc).toContain('CLERK_SECRET_KEY')
+    expect(healthSrc).toContain('AUTH_SECRET')
   })
 })
 

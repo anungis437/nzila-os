@@ -4,7 +4,7 @@
  * GET /api/dashboard/export-csv?report=cases|kpis|aging|categories|worksites|assignees|trends
  *
  * PR-051: Returns CSV file download for dashboard data.
- * Authentication: Required via Clerk auth middleware.
+ * Authentication: Required via platform auth middleware.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -124,3 +124,4 @@ export const GET = withApiAuth(async (request: NextRequest) => {
     );
   }
 });
+

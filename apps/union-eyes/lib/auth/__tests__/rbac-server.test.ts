@@ -5,7 +5,7 @@
  *   - getUserRole() 6-point fallback chain
  *   - PLATFORM_ADMIN_USER_IDS override
  *   - SUPER_ADMIN_EMAILS override
- *   - Clerk metadata fallback
+ *   - auth metadata fallback
  *   - getCurrentUserRole() delegation
  *   - requireAuth() / requirePermission() enforcement
  *
@@ -142,7 +142,7 @@ describe('getUserRole', () => {
     expect(role).toBe(UserRole.ADMIN);
   });
 
-  it('falls back to Clerk publicMetadata.role (step 3a)', async () => {
+  it('falls back to publicMetadata.role (step 3a)', async () => {
     // Step 0b: no super admin email
     // Step 1: organization_users empty
     // Step 3: metadata.role = steward
@@ -190,8 +190,8 @@ describe('getUserRole', () => {
   });
 
   it('throws on fatal error (fail closed)', async () => {
-    // currentUser throws (Clerk outage)
-    mockCurrentUser.mockRejectedValue(new Error('Clerk unavailable'));
+    // currentUser throws (auth provider outage)
+    mockCurrentUser.mockRejectedValue(new Error('auth provider unavailable'));
 
     // DB also throws
     mockDbSelect.mockImplementation(() => {
@@ -254,7 +254,7 @@ describe('requirePermission', () => {
   it('throws when user lacks the required permission', async () => {
     mockAuth.mockResolvedValue({ userId: 'user_member' } as unknown as Awaited<ReturnType<typeof mockAuthRaw>>);
 
-    // Resolve as MEMBER via PLATFORM_ADMIN_USER_IDS miss + Clerk metadata
+    // Resolve as MEMBER via PLATFORM_ADMIN_USER_IDS miss + auth metadata
     process.env.PLATFORM_ADMIN_USER_IDS = '';
     mockCurrentUser.mockResolvedValue({
       emailAddresses: [{ emailAddress: 'u@example.com' }],
@@ -268,3 +268,4 @@ describe('requirePermission', () => {
     ).rejects.toThrow('Forbidden');
   });
 });
+

@@ -27,7 +27,7 @@ const ENV_VARS: EnvVar[] = [
     validate: (val) => val.startsWith('postgresql://') || val.startsWith('postgres://'),
   },
 
-  // Authentication (Entra External ID / NextAuth)
+  // Authentication (password auth primary, Entra SSO secondary)
   {
     name: 'AUTH_SECRET',
     required: true,
@@ -58,20 +58,6 @@ const ENV_VARS: EnvVar[] = [
     description: 'Application base URL',
     example: 'https://unioneyes.app',
   },
-  {
-    name: 'NEXT_PUBLIC_CLERK_SIGN_IN_URL',
-    required: false,
-    description: 'Clerk sign-in URL path',
-    example: '/sign-in',
-  },
-  {
-    name: 'NEXT_PUBLIC_CLERK_SIGN_UP_URL',
-    required: false,
-    description: 'Clerk sign-up URL path',
-    example: '/sign-up',
-  },
-
-  // Optional: Azure Services
   {
     name: 'AZURE_KEY_VAULT_URL',
     required: false,

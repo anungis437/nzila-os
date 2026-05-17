@@ -2,7 +2,7 @@
  * Unified API Route Wrapper — `withApi()`
  *
  * A single composable entry-point that wires together:
- *   - Authentication (Clerk + RBAC via api-auth-guard)
+ *   - Authentication (platform auth + RBAC via api-auth-guard)
  *   - Input validation (Zod)
  *   - Rate limiting (Redis / Upstash)
  *   - Standardised response envelope
@@ -263,7 +263,7 @@ export function withApi<
         try {
           user = await getCurrentUser();
         } catch {
-          // getCurrentUser throws on Clerk service errors
+          // getCurrentUser throws on auth service errors
         }
 
         if (requireAuth && !user) {
@@ -286,7 +286,7 @@ export function withApi<
         let userRole = normalizeRole(user.role ?? 'member');
         let userLevel = ROLE_HIERARCHY[userRole] ?? 0;
 
-        // If Clerk metadata role is insufficient, resolve from DB via getUserRole
+        // If auth provider metadata role is insufficient, resolve from DB via getUserRole
         if (userLevel < minRoleLevel) {
           try {
             const { getUserRole } = await import('@/lib/auth/rbac-server');
@@ -505,3 +505,5 @@ export function withApi<
     }
   };
 }
+
+

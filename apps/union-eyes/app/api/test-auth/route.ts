@@ -1,9 +1,9 @@
 /**
  * End-to-end auth-gate test
  *
- * 1. Verifies Clerk session is present
+ * 1. Verifies auth session is present
  * 2. Calls Django GET /api/auth_core/health/  (public)
- * 3. Calls Django GET /api/auth_core/me/      (requires Clerk JWT)
+ * 3. Calls Django GET /api/auth_core/me/      (requires auth JWT)
  *
  * Returns a single JSON object so the full round-trip can be confirmed in one
  * request. `passed: true` means the Django auth gate is closed end-to-end.
@@ -16,12 +16,12 @@ export const dynamic = 'force-dynamic';
 const DJANGO = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 export async function GET(_req: NextRequest) {
-  // ── Step 1: Clerk ──────────────────────────────────────────────────────────
+  // ── Step 1: Auth session ──────────────────────────────────────────────────────────
   const { userId, orgId, getToken } = await auth();
 
   if (!userId) {
     return NextResponse.json(
-      { passed: false, message: 'No Clerk session — sign in first' },
+      { passed: false, message: 'No auth session — sign in first' },
       { status: 401 }
     );
   }
@@ -55,7 +55,7 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({
     passed: meStatus === 200,
-    clerk: {
+    session: {
       userId,
       orgId: orgId ?? null,
       hasToken: !!token,
@@ -66,4 +66,5 @@ export async function GET(_req: NextRequest) {
     },
   });
 }
+
 

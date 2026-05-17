@@ -70,8 +70,8 @@ Deploy UnionEyes as CAPE's grievance case management platform for a **4-week con
 
 ### 4.1 Prerequisites
 
-- [ ] CAPE organization created in Clerk (SSO provider)
-- [ ] Pilot users provisioned with Clerk accounts
+- [ ] CAPE organization created in platform auth (SSO or PG accounts)
+- [ ] Pilot users provisioned with platform accounts
 - [ ] UnionEyes deployment accessible (production or staging URL)
 - [ ] PostgreSQL database provisioned and migrated
 - [ ] Redis instance available (rate limiting, caching)
@@ -141,7 +141,7 @@ Before going live with real data, purge demo data:
 
 | Day | Activity | Owner |
 |-----|----------|-------|
-| Mon | Provision Clerk accounts for all pilot users | IT Contact |
+| Mon | Provision platform accounts for all pilot users | IT Contact |
 | Mon | Configure LRO-led representation protocol | IT Contact |
 | Tue | Seed demo data; walk through onboarding checklist | Pilot Lead |
 | Tue | Role assignment: LROs, Senior LRO, Director, Officers | IT Contact |
@@ -323,7 +323,7 @@ The 7-item pilot checklist (tracked at `/dashboard/pilot/onboarding`):
 | # | Item | Description |
 |---|------|-------------|
 | 1 | Organization seeded | CAPE org configured in system |
-| 2 | Users invited | All pilot users have Clerk accounts |
+| 2 | Users invited | All pilot users have platform accounts |
 | 3 | Roles assigned | LRO, Senior LRO, Director, Officer roles set |
 | 4 | Contracts uploaded | Relevant CBA(s) uploaded to system |
 | 5 | Employers imported | Treasury Board, CRA, PSPC, StatCan contacts added |

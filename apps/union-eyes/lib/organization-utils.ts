@@ -26,7 +26,7 @@ export const DEFAULT_ORGANIZATION_ID = "458a56cb-251a-4c91-a0b5-81bb8ac39087"; /
  * 3. User's first available organization
  * 4. Default organization (fallback)
  * 
- * @param userId - The Clerk user ID (from auth())
+ * @param userId - The auth provider user ID (from auth())
  * @returns The organization ID UUID string
  * @throws Error if no organization found
  */
@@ -307,7 +307,7 @@ export async function getOrganizationInfo(organizationId: string) {
 /**
  * Check if a user has access to a specific organization.
  * 
- * @param userId - The Clerk user ID
+ * @param userId - The auth provider user ID
  * @param organizationId - The organization ID to check
  * @returns True if the user has access, false otherwise
  */
@@ -337,7 +337,7 @@ export async function userHasOrganizationAccess(
 /**
  * Get user's role in an organization from organizationMembers table
  * 
- * @param userId - The Clerk user ID
+ * @param userId - The auth provider user ID
  * @param organizationId - The organization ID
  * @returns The user's role or null if not found
  */

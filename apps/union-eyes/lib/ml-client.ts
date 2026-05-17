@@ -46,7 +46,7 @@ export function getMlClient(): MlClient {
 
 /**
  * Creates an ML client bound to the current session token.
- * Used by React hooks (e.g. useUEMlSignals) that need Clerk-scoped auth.
+ * Used by React hooks (e.g. useUEMlSignals) that need user-scoped auth.
  */
 export function makeMlClient(getToken: () => Promise<string | null>) {
   return createMlClient({
@@ -101,3 +101,4 @@ export async function runPredictionDetailed(opts: {
     },
   }
 }
+

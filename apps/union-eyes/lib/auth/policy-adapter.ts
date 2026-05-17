@@ -3,7 +3,7 @@
  *
  * CONSTRAINT (INV-04): All API routes MUST call `authorize()` from
  * `@nzila/os-core/policy`.  This adapter maps the existing UE role
- * system (Clerk metadata + DB) to the os-core UERole enum, then
+ * system (auth provider metadata + DB) to the os-core UERole enum, then
  * delegates to the centralised `authorize()` function.
  *
  * Existing code can continue to use `requireAuth()` / `requirePermission()`
@@ -134,3 +134,4 @@ export { authorizeOrgAccess, AuthorizationError }
 // Re-export for convenience
 export { UERole } from '@nzila/os-core/policy'
 export type { AuthContext, AuthorizeOptions }
+

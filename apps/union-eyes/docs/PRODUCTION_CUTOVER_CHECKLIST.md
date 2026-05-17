@@ -14,12 +14,12 @@
 - [ ] Row-level security policies applied (run `db:apply-rls`)
 - [ ] Spot-check: `GET /api/health` shows `db: { status: "ok" }` from prod URL
 
-### Authentication (Clerk)
-- [ ] Clerk production application created (`unioneyes-production`)
+### Authentication (Platform Auth)
+- [ ] Auth production app configured (Entra tenant registered OR password-auth domain allow-listed)
 - [ ] Production domain allowlisted (`app.unioneyes.ca`)
-- [ ] `CLERK_SECRET_KEY` stored in Key Vault
-- [ ] `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` set in Container App env
-- [ ] Test login end-to-end with real Clerk production keys
+- [ ] `AUTH_SECRET` stored in Key Vault
+- [ ] `NZILA_AUTH_ENABLE_PG_FALLBACK` set in Container App env (default: true)
+- [ ] Test login end-to-end with production auth config
 
 ### Blob Storage
 - [ ] Azure Blob Storage account created (`unioneyesprodstorage` or similar)
@@ -56,7 +56,7 @@
 - [ ] `GET /api/governance/telemetry` → `200` with valid governance data
 
 ### Org Isolation Smoke Test
-- [ ] Create org A and org B via Clerk admin
+- [ ] Create org A and org B via platform admin
 - [ ] Create a case in org A
 - [ ] Verify org B user cannot see org A case (expect 403/404)
 - [ ] Verify evidence export is org-scoped

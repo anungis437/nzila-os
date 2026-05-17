@@ -239,7 +239,7 @@ UnionEyes is a comprehensive union management platform providing:
 - Mobile app support
 
 ## Authentication
-Most endpoints require authentication via Clerk. Include the session token in the Authorization header:
+Most endpoints require authentication via platform auth. Include the session token in the Authorization header:
 
 \`Authorization: Bearer <your_token>\`
 
@@ -598,3 +598,4 @@ export function initAPIDocumentation() {
 
 // Initialize on import
 initAPIDocumentation();
+

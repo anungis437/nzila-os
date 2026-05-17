@@ -30,11 +30,11 @@ async function checkDb(): Promise<{ state: HealthCheckState; ms: number; error?:
 }
 
 async function checkAuth(): Promise<HealthCheckState> {
-  // Clerk auth: validate config presence (full connectivity check is too expensive for a probe)
-  const hasClerkKey =
-    Boolean(process.env.CLERK_SECRET_KEY) ||
-    Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
-  return hasClerkKey ? 'ok' : 'degraded'
+  // Auth/session: validate AUTH_SECRET present (full connectivity check too expensive for a probe)
+  // Primary: PG-backed password/session auth (nzila_session cookie)
+  // Secondary: Entra External ID / NextAuth (SSO fallback)
+  const hasAuthSecret = Boolean(process.env.AUTH_SECRET)
+  return hasAuthSecret ? 'ok' : 'degraded'
 }
 
 async function checkRedis(): Promise<{ state: HealthCheckState; ms?: number; note?: string }> {

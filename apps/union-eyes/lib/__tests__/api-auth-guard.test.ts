@@ -298,7 +298,7 @@ describe('ApiAuthGuard', () => {
       expect(await getCurrentUser()).toBeNull();
     });
 
-    it('returns null when Clerk user is null', async () => {
+    it('returns null when auth user is null', async () => {
       mocks.mockClerkCurrentUser.mockResolvedValue(null);
       expect(await getCurrentUser()).toBeNull();
     });
@@ -359,7 +359,7 @@ describe('ApiAuthGuard', () => {
       expect(ctx!.roles).toContain('app_owner');
     });
 
-    it('falls back to Clerk metadata role when no membership and not admin', async () => {
+    it('falls back to publicMetadata role when no membership and not admin', async () => {
       mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
       mocks.mockClerkCurrentUser.mockResolvedValue({
         publicMetadata: { role: 'officer' },
@@ -648,7 +648,7 @@ describe('ApiAuthGuard', () => {
     });
 
     it('returns 401 on auth error', async () => {
-      mocks.mockAuth.mockRejectedValue(new Error('clerk down'));
+      mocks.mockAuth.mockRejectedValue(new Error('auth provider down'));
       const handler = vi.fn();
       const wrapped = withApiAuth(handler);
       const res = await wrapped(mockRequest, {} as never);

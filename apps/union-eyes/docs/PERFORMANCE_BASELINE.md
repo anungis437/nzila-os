@@ -44,7 +44,7 @@ The script:
 
 ### Degraded-but-acceptable scenarios
 - Redis unavailable: metrics endpoint falls back to direct DB query (~+500ms)
-- Clerk external latency: auth middleware adds 50–200ms per request
+- Auth middleware latency: auth middleware adds ~5–30ms per request (PG session lookup or NextAuth JWT verify)
 
 ## Seed Load Profiles
 

@@ -21,7 +21,7 @@ import { GovernanceService } from '@/services/governance-service';
 /**
  * Check if user has admin role
  * 
- * @param userId - Clerk user ID
+ * @param userId - auth user ID
  * @param organizationId - Organization ID (optional - checks across all orgs if not provided)
  * @returns True if user has admin or super-admin role
  */
@@ -214,3 +214,4 @@ export default {
   withAdminAuth,
   hasGoldenSharePrivileges,
 };
+

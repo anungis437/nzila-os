@@ -31,7 +31,7 @@ export const GET = withApiAuth(async (request: NextRequest, _context) => {
     // Resolve the user's organization so the role lookup is org-scoped
     const organizationId = await getOrganizationIdForUser(targetUserId);
 
-    // Fetch role from database/Clerk
+    // Fetch role from database
     const role = await getUserRole(targetUserId, organizationId);
 
     return NextResponse.json({ role });
@@ -44,3 +44,4 @@ return standardErrorResponse(
     );
   }
 });
+

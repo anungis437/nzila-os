@@ -41,7 +41,7 @@
         "region": "Canada Central",
         "db": "Azure PostgreSQL Flexible Server",
         "redis": "Upstash Redis",
-        "auth": "Clerk (production app — to be created)",
+        "auth": "platform-auth (PG sessions primary, Entra SSO secondary)",
         "storage": "Azure Blob Storage",
         "secrets": "Azure Key Vault",
         "monitoring": "Azure Application Insights + OTEL",
@@ -49,7 +49,7 @@
         "validated": false,
         "note": "Topology defined and documented. Not yet deployed. Do not mark validated=true until all gates in PRODUCTION_CUTOVER_CHECKLIST.md are closed."
       },
-      "integrations": ["clerk", "drizzle", "upstash-redis", "azure-monitor", "sentry"]
+      "integrations": ["platform-auth", "drizzle", "upstash-redis", "azure-monitor", "sentry"]
     },
     {
       "name": "flow",

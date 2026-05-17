@@ -11,7 +11,7 @@ const logger = createLogger('vocabulary');
  * Returns the complete CUPE vocabulary (case types, priorities, severities, roles, statuses).
  * Org-scoped: Only returns vocabulary; no org-specific customization in v0.1.
  * 
- * Authentication: Required (via Clerk auth middleware)
+ * Authentication: Required (via platform auth middleware)
  * RLS: Not applicable (vocabulary is system-wide, not org-scoped)
  * 
  * Response: CUPEVocabulary
@@ -33,3 +33,4 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
     );
   }
 });
+

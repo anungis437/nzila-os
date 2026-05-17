@@ -67,7 +67,7 @@
 ### Technical Implementation
 - ✅ Client Components with "use client"
 - ✅ Organization-level scoping
-- ✅ Clerk authentication integration
+- ✅ Platform auth integration
 - ✅ next-intl internationalization
 - ✅ TypeScript throughout
 - ✅ Shadcn/ui components
@@ -183,7 +183,7 @@ http://localhost:3000/{locale}/dashboard/health-safety/hazards
 
 ### Current State
 - ✅ Organization-level access control
-- ✅ User authentication via Clerk
+- ✅ User authentication via platform auth
 - ✅ Graceful fallbacks for no organization
 
 ### To Implement

@@ -10,6 +10,7 @@ import type { UserRole, Permission } from './roles';
  */
 export interface UserContext {
   userId: string;
+  /** @deprecated Legacy field from previous auth provider era. Use userId (Entra subject / NextAuth sub) instead. */
   clerkId?: string;
   email?: string;
   firstName?: string;
@@ -77,7 +78,7 @@ export enum AuthErrorType {
   SESSION_EXPIRED = 'SESSION_EXPIRED',
   INSUFFICIENT_PERMISSIONS = 'INSUFFICIENT_PERMISSIONS',
   ORGANIZATION_REQUIRED = 'ORGANIZATION_REQUIRED',
-  CLERK_UNAVAILABLE = 'CLERK_UNAVAILABLE',
+  AUTH_PROVIDER_UNAVAILABLE = 'AUTH_PROVIDER_UNAVAILABLE',
 }
 
 /**

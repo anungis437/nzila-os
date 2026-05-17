@@ -31,7 +31,7 @@ export const GET = withApi(
 
     // Scope to the calling user's own pension enrollment.
     // pensionMembers.userId stores the organization_members.id (UUID PK),
-    // not the Clerk string ID — resolve via subquery.
+    // not the auth provider string ID — resolve via subquery.
     if (userId) {
       conditions.push(
         sql`${pensionMembers.userId} = (
@@ -66,4 +66,5 @@ export const POST = withApi(
     return member;
   },
 );
+
 

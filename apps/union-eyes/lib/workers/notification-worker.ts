@@ -373,7 +373,7 @@ async function getUserEmail(userId: string): Promise<string | null> {
     logger.warn('No email found for user', { userId });
     return null;
   } catch (error) {
-    logger.error('Error fetching user email from Clerk', error instanceof Error ? error : new Error(String(error)), { userId });
+    logger.error('Error fetching user email', error instanceof Error ? error : new Error(String(error)), { userId });
     return null;
   }
 }

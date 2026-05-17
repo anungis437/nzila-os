@@ -37,7 +37,7 @@ type RouteHandler = (
  *
  * Automatically extracts:
  * - x-request-id / traceparent from headers
- * - userId / orgId from Clerk auth
+ * - userId / orgId from auth provider auth
  *
  * Sets response headers:
  * - x-request-id (echo back for client correlation)
@@ -105,3 +105,4 @@ export function withObservability(
  * Useful for embedding in audit entries.
  */
 export { getRequestContext } from '@nzila/os-core';
+

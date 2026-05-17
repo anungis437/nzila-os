@@ -23,7 +23,7 @@ interface AuthStat {
 }
 
 interface AuthPageLayoutProps {
-  /** The Clerk <SignIn> or <SignUp> component */
+  /** The auth <SignIn> or <SignUp> component */
   children: ReactNode;
   /** App display name */
   appName: string;

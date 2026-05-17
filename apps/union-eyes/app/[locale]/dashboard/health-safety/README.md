@@ -183,7 +183,7 @@ All pages follow consistent UnionEyes patterns:
 ### Required Props
 All pages expect:
 - `organizationId` from `useOrganizationId()` hook
-- `user` object from Clerk's `useUser()`
+- `user` object from `useUser()` hook
 
 ### API Endpoints (To Be Implemented)
 
@@ -211,7 +211,7 @@ GET /api/health-safety/export?type={incidents|inspections|hazards}
 
 ### Current Implementation
 - Organization-level checks via `useOrganizationId()`
-- User authentication via Clerk
+- User authentication via platform auth
 - Graceful fallback when no organization selected
 
 ### Recommended Permissions

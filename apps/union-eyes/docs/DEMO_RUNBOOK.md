@@ -27,7 +27,7 @@ Confirm:
 | Var | Purpose |
 |---|---|
 | `DATABASE_URL` | Postgres. Boot fails if missing. |
-| `AUTH_SECRET` | Clerk-derived. Boot fails if missing. |
+| `AUTH_SECRET` | Application auth/session secret (NextAuth). Boot fails if missing. |
 | `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | Rate limiting. Fails-closed under production. |
 | `NZILA_RELEASE_ID` | Surfaces in governance envelopes. |
 | `NZILA_ENVIRONMENT_CLASS` | Surfaces in governance envelopes. |
@@ -71,7 +71,7 @@ Confirm:
 |---|---|
 | Demo data missing | `pnpm -C apps/union-eyes staging:seed` |
 | Health 503 | `curl /api/health` to see which dep failed; restart that dep |
-| 401 on every page | Re-issue Clerk session; check `AUTH_SECRET` matches deployment |
+| 401 on every page | Re-issue auth session; check `AUTH_SECRET` matches deployment |
 | Metrics endpoint slow | Likely DB cold-start; warm with one query to `/api/grievances` |
 | Evidence export empty | Run `pnpm -C apps/union-eyes evidence:all` first |
 

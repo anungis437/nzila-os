@@ -357,7 +357,7 @@ export function fromError(error: unknown): NextResponse<StandardizedError> {
       );
     }
     
-    // Auth errors (from Clerk or our auth system)
+    // Auth errors (from auth provider or our auth system)
     if (error.message.toLowerCase().includes('unauthorized') || 
         error.message.toLowerCase().includes('authentication')) {
       return standardErrorResponse(
@@ -467,3 +467,4 @@ export function toStandardizedError(error: unknown): NextResponse<StandardizedEr
   
   return fromError(error);
 }
+

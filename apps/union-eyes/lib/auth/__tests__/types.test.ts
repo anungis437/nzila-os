@@ -10,7 +10,7 @@ describe('AuthErrorType enum', () => {
     expect(AuthErrorType.SESSION_EXPIRED).toBe('SESSION_EXPIRED');
     expect(AuthErrorType.INSUFFICIENT_PERMISSIONS).toBe('INSUFFICIENT_PERMISSIONS');
     expect(AuthErrorType.ORGANIZATION_REQUIRED).toBe('ORGANIZATION_REQUIRED');
-    expect(AuthErrorType.CLERK_UNAVAILABLE).toBe('CLERK_UNAVAILABLE');
+    expect(AuthErrorType.AUTH_PROVIDER_UNAVAILABLE).toBe('AUTH_PROVIDER_UNAVAILABLE');
   });
 });
 

@@ -42,7 +42,7 @@ interface OrgProviderProps {
  * Organization Provider Component
  *
  * Wraps the application to provide organization context.
- * Automatically loads org information based on Clerk organization.
+ * Automatically loads org information based on current auth session.
  */
 export function OrgProvider({ children }: OrgProviderProps) {
   const { userId, isLoaded: authLoaded } = useAuth();

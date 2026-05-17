@@ -35,7 +35,7 @@ function resolveUserRole(raw: string | null | undefined): UserRole | null {
     // Common shortcuts
     'owner': UserRole.APP_OWNER,
     'admin_owner': UserRole.APP_OWNER,
-    // Nzila platform role stored in Clerk publicMetadata.role
+    // Nzila platform role stored in publicMetadata.role
     'platform_admin': UserRole.APP_OWNER,
     // system_admin is already in UserRole, but keep alias in case stored differently
     'sysadmin': UserRole.SYSTEM_ADMIN,
@@ -111,7 +111,7 @@ function resolvePlatformOrgRole(raw: string | null | undefined): UserRole | null
  * Resolution order (PRIORITIZES SELECTED ORGANIZATION):
  *   1. Platform auth `user_management.organization_users` (selected org only)
  *   2. Local `organization_members` (org-scoped, fallback if no auth record)
- *   3. Clerk `publicMetadata.role` / `publicMetadata.nzilaRole`
+ *   3. `publicMetadata.role` / `publicMetadata.nzilaRole`
  *   4. Default to MEMBER
  *
  * IMPORTANT: When organizationId is provided, we prioritize platform auth
@@ -137,7 +137,7 @@ export async function getUserRole(
 
     // 0. PLATFORM_ADMIN_USER_IDS — explicit override, highest priority.
     //    Set PLATFORM_ADMIN_USER_IDS=user_abc,user_xyz in .env.local to
-    //    grant app_owner rights regardless of DB or Clerk metadata state.
+    //    grant app_owner rights regardless of DB or metadata state.
     const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
       .split(',')
       .map((s) => s.trim())
@@ -213,7 +213,7 @@ export async function getUserRole(
       }
     }
 
-    // 2. Fallback to Clerk publicMetadata
+    // 2. Fallback to publicMetadata
     const user = await currentUser();
 
     // 3a. publicMetadata.role (union-eyes native key)
@@ -362,4 +362,5 @@ export async function requireUnionRepOrHigher(): Promise<{ userId: string; role:
   
   return authData;
 }
+
 

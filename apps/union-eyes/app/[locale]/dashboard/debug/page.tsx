@@ -1,6 +1,6 @@
 /**
  * Debug page to view current user information
- * This helps link Clerk users to database records
+ * This helps link auth users to database records
  * 
  * GATED: Only accessible in development. Returns 404 in production.
  */

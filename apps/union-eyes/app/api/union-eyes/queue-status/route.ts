@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
   try {
-    // Accept either Clerk JWT (browser) or service key (control-plane s2s)
+    // Accept either platform JWT (browser) or service key (control-plane s2s)
     const svcKey = process.env.AI_SERVICE_KEY
     const isServiceRequest = !!svcKey && req.headers.get('x-service-key') === svcKey
     if (!isServiceRequest) {
@@ -65,3 +65,4 @@ export async function GET(req: Request) {
     )
   }
 }
+

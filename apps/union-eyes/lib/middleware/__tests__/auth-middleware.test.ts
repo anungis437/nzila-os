@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock Clerk auth
+// Mock platform auth
 vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: vi.fn().mockResolvedValue(null),
 }));
@@ -175,3 +175,4 @@ describe('requireRole', () => {
     if (!result.success) expect(result.error.status).toBe(401);
   });
 });
+

@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger';
 
 /**
  * API endpoint to create a Whop checkout session with properly structured metadata
- * This ensures the Clerk userId is included in the membership metadata and will
+ * This ensures the auth userId is included in the membership metadata and will
  * be present in webhook events
  */
 export async function POST(req: Request) {
@@ -158,3 +158,4 @@ export async function POST(req: Request) {
     );
   }
 } 
+
