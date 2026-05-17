@@ -20,7 +20,7 @@ UnionEyes is **CONTROLLED PILOT READY** for controlled procurement reviews and e
 | E2E negative-path coverage | ✅ Implemented | `tests/e2e/negative-workflow-transitions.spec.ts`, `org-isolation-negative.spec.ts`, `auth-failure-handling.spec.ts`, `evidence-misuse.spec.ts` |
 | Cross-tenant fuzz testing | ✅ Automated | `security/redteam/ue-org-scope-fuzz.test.ts`, `tooling/contract-tests/ue-org-column-audit.test.ts` |
 | Load / perf benchmarking | ✅ Documented | `docs/PERFORMANCE_BASELINE.md`, `scripts/perf-baseline.ts` (awaiting live run) |
-| Production topology | ⚠️ Planned (not deployed) | `docs/PRODUCTION_TOPOLOGY.md`, `docs/PRODUCTION_CUTOVER_CHECKLIST.md`, `platform/registry/apps.json` |
+| Production topology | ⚠️ Live infra exists, runtime validation in progress | `docs/PRODUCTION_TOPOLOGY.md`, `docs/PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`, `docs/PRODUCTION_INFRA_INVENTORY.md` |
 
 ## What is genuinely production-ready
 
@@ -49,7 +49,22 @@ UnionEyes is **CONTROLLED PILOT READY** for controlled procurement reviews and e
 
 ## What remains amber
 
-- Production deployment topology (planned, documented, not yet deployed — see `PRODUCTION_TOPOLOGY.md`)
+- Production deployment topology — live Azure infrastructure exists in
+  `nzila-canada-prod-rg` (Container App `nzila-os-union-eyes-prod` on
+  revision `--0000041`, Postgres flex v16 with ZR-HA + geo backups,
+  Key Vault `nzila-canada-prod-kv`, Log Analytics `nzila-canada-prod-law`),
+  but Phase B operational validation is in progress.
+  See `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`.
+- Live-captured gaps blocking PRODUCTION READY:
+  - `/api/metrics/operational` currently returns HTTP 500 in prod.
+  - Django backend dependency reports `degraded: unreachable` from
+    prod (honest amber via health contract).
+  - No dedicated prod blob/storage account; no Azure-managed Redis
+    (Upstash via env vars, not yet KV-backed).
+  - Custom domain / WAF / HSTS not bound to UE prod.
+  - Rollback, restore, and formal incident drills documented but not
+    yet executed.
+  - Runtime observation window (Phase B6) not started.
 
 ## Trust posture
 
@@ -70,4 +85,7 @@ UE is NOT yet stamped for:
 - Public launch
 - Unmonitored customer-facing deployment
 
-The only gate remaining before PRODUCTION CANDIDATE is a live, validated production deployment meeting all items in `PRODUCTION_CUTOVER_CHECKLIST.md`.
+The only gate remaining before PRODUCTION CANDIDATE is completion of
+Phase B operational validation. UE Phase B status:
+**PRODUCTION CANDIDATE — INFRA VALIDATION IN PROGRESS**
+(see `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`).

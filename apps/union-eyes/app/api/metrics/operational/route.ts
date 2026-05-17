@@ -21,13 +21,21 @@ export async function GET(req: Request) {
   const now = new Date()
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
-  try {
-    // Accept either platform JWT (browser) or service key (control-plane s2s)
-    const svcKey = process.env.AI_SERVICE_KEY
-    const isServiceRequest = !!svcKey && req.headers.get('x-service-key') === svcKey
-    if (!isServiceRequest) {
+  // Auth check must be outside the data-query try-catch so auth errors are
+  // returned as 401/403, not swallowed as a generic 500.
+  const svcKey = process.env.AI_SERVICE_KEY
+  const isServiceRequest = !!svcKey && req.headers.get('x-service-key') === svcKey
+  if (!isServiceRequest) {
+    try {
       await requireApiAuth()
+    } catch (authErr) {
+      const msg = authErr instanceof Error ? authErr.message : String(authErr)
+      const status = msg.toLowerCase().includes('forbidden') ? 403 : 401
+      return NextResponse.json({ error: msg }, { status })
     }
+  }
+
+  try {
     const [
       totalClaimsResult,
       recentTransitionsResult,
