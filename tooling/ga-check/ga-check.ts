@@ -153,7 +153,14 @@ const checkOrgIsolation = runGate('ORG-ISOLATION', 'Org boundary: No raw DB impo
 
     for (const file of tsFiles) {
       const content = readFileSync(file, 'utf-8')
-      const rel = relative(ROOT, file)
+      const rel = normalizePath(relative(ROOT, file))
+
+      // Exempt the per-app db boundary re-export layer (e.g. apps/*/lib/db/index.ts).
+      // This is the ONLY file in each app allowed to import from @nzila/db/client directly.
+      // All other app code must import from @/lib/db (which re-exports through this layer).
+      if (/apps\/[^/]+\/lib\/db\//.test(rel) || /apps\/[^/]+\/db\/[^/]*index\.ts$/.test(rel)) {
+        continue
+      }
 
       if (
         content.includes("from '@nzila/db/raw'") ||
