@@ -121,7 +121,7 @@ const PROOF_COPY = {
     stepWord: 'Step',
     maturityLabel: 'Maturity Snapshots',
     maturityTitle: 'Directional maturity without ranking',
-    timelineLabel: 'Deployment Timeline Systems',
+    timelineLabel: 'Coexistence-Evolution Phases',
     timelineTitle: 'Phased pacing for procurement and leadership confidence',
     rolloutSimulationTitle: 'Institutional rollout simulation flow',
     briefingFlowsLabel: 'Executive Continuity Briefing Flows',
@@ -135,7 +135,7 @@ const PROOF_COPY = {
       'Onboarding stability improves when continuity transfer routines are documented before expansion phases begin.',
     reviewLayersTitle: 'Governance review simulation layers',
     binderIntro: 'Binder content is structured for due diligence review, not sales framing.',
-    dashboardTitle: 'Executive Continuity Dashboard Signals',
+    dashboardTitle: 'Executive Continuity-Preservation Signals',
     proofPackLabel: 'Proof Pack Orientation',
     proofPackTitle: 'Evidence is meant to help reviewers make a real decision',
     proofPackDesc:

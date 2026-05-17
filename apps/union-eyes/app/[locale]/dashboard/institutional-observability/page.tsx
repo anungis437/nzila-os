@@ -6,9 +6,9 @@ import { getInstitutionalObservabilityView } from '@/lib/institutional-observabi
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Institutional Observability',
+  title: 'Institutional Visibility',
   description:
-    'Read-only chronology, lineage, continuity pathways, evidence-linked timeline, and provenance coverage for inspectable institutional states.',
+    'Read-only chronology, lineage, continuity pathways, evidence-linked timeline, and provenance coverage for inspectable institutional states. Governance visibility surface — not monitoring, not scoring.',
 };
 
 const SECTION_HEADER =
@@ -37,7 +37,7 @@ export default async function InstitutionalObservabilityPage() {
     <main className="mx-auto max-w-6xl px-6 py-10 text-slate-800">
       <header className="mb-8">
         <p className="text-xs uppercase tracking-widest text-slate-500">
-          Institutional Observability
+          Institutional Visibility
         </p>
         <h1 className="mt-1 text-2xl font-semibold text-slate-900">
           Inspectable institutional states

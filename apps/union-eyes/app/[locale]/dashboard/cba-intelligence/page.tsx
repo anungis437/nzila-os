@@ -9,6 +9,7 @@ import { requireUser } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { CbaIntelligenceClient } from "./cba-intelligence-client";
+import { RuntimeHydrationFooter } from "@/components/runtime-hydration";
 
 export const dynamic = "force-dynamic";
 
@@ -44,5 +45,23 @@ export default async function CbaIntelligencePage() {
     redirect("/dashboard");
   }
 
-  return <CbaIntelligenceClient />;
+  return (
+    <>
+      <CbaIntelligenceClient />
+      <RuntimeHydrationFooter
+        surface="Labour Continuity Intelligence"
+        provenance={{
+          sourceAdapter: 'cba-intelligence/freshness + institutional-governance-graph chronology',
+          contractVersion: 'cba.intelligence.v1',
+        }}
+        chronology={{}}
+        continuity={{}}
+        explainability={{
+          visibilityRationale:
+            'CBA freshness, agreement, and benchmark refs are projected read-only and joined to the institutional chronology. Reviewer-led — no automated bargaining recommendations.',
+          reviewPosture: 'assistive · human-reviewed · review-required',
+        }}
+      />
+    </>
+  );
 }

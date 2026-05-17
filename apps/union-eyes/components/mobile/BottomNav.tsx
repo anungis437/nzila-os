@@ -69,6 +69,7 @@ const ICON_BY_LABEL: Record<string, LucideIcon> = {
   'Governance Overview': ShieldCheck,
   'Trust & Explainability': ShieldCheck,
   'Operational Review': Briefcase,
+  'Continuity Review': Briefcase,
   'Policy Alignment': ShieldCheck,
   'Continuity Signals': Activity,
   'Audit & Evidence': ShieldCheck,

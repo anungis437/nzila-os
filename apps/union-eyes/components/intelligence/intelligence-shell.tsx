@@ -4,10 +4,11 @@
  * IntelligenceShell — tabbed research / analysis surface.
  *
  * Tabs:
- *   Local        → AnalyticsOverviewConsole (local union analytics)
- *   Federation   → AI forecasts & insights (officer+)
- *   Executive    → Executive dashboard + strategic planning (secretary_treasurer+)
+ *   Local        → Organization Trends (local union analytics)
+ *   Federation   → Movement Trends (federation-wide forecasts — officer+)
+ *   Executive    → Strategic Context (executive briefing surface — secretary_treasurer+)
  *
+ * All outputs are assistive and human-reviewed; no autonomous governance.
  * Tab visibility is driven by userRole so lower-tier users only see tabs
  * they can access.  The ?scope= query param pre-selects a tab.
  */
@@ -77,12 +78,12 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
 
       <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList>
-          <TabsTrigger value="local">{t("sidebar.insights")}</TabsTrigger>
+          <TabsTrigger value="local">Organization Trends</TabsTrigger>
           {canSeeAI && (
-            <TabsTrigger value="federation">{t("sidebar.federation")}</TabsTrigger>
+            <TabsTrigger value="federation">Movement Trends</TabsTrigger>
           )}
           {canSeeExec && (
-            <TabsTrigger value="executive">Executive</TabsTrigger>
+            <TabsTrigger value="executive">Strategic Context</TabsTrigger>
           )}
         </TabsList>
 
@@ -114,12 +115,13 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
                 <CardContent className="py-5 px-5">
                   <div className="flex items-center gap-2 mb-2">
                     <Briefcase size={18} className="text-blue-600" />
-                    <h2 className="text-lg font-bold text-gray-900">Executive Briefing</h2>
+                    <h2 className="text-lg font-bold text-gray-900">Strategic Briefing</h2>
                   </div>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    This is your leadership summary. Active casework, grievance
-                    trends, and upcoming deadlines are consolidated below. Strategic
-                    decisions should be guided by the priorities and metrics on this page.
+                    This is your leadership summary, assembled as assistive context for
+                    human review. Active casework, grievance trends, and upcoming deadlines
+                    are consolidated below. Strategic decisions remain with leadership and
+                    should be guided by the priorities and metrics on this page.
                   </p>
                   <div className="grid gap-3 sm:grid-cols-3 mt-4">
                     <div className="flex items-start gap-2 p-3 rounded-md bg-gray-50">

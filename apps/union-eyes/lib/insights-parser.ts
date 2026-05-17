@@ -61,6 +61,9 @@ const categoryDescriptions: Record<string, string> = {
     'How labour organizations build organizational memory, navigate leadership transitions, and strengthen continuity resilience.',
   'Governance Modernization':
     'Transforming governance operations with explainable intelligence and modern oversight controls.',
+  'Explainable Governance Reasoning':
+    'Why explainability is non-negotiable in labour environments and how to operationalize it.',
+  // Legacy alias — retained so older article frontmatter continues to parse during transition.
   'Explainable Organizational Intelligence':
     'Why explainability is non-negotiable in labour environments and how to operationalize it.',
   'Labour-Safe AI':
@@ -76,6 +79,8 @@ const categoryDescriptions: Record<string, string> = {
 const categorySlugByName: Record<string, string> = {
   'Institutional Continuity': 'institutional-continuity',
   'Governance Modernization': 'governance-modernization',
+  'Explainable Governance Reasoning': 'explainable-intelligence',
+  // Legacy alias — keep slug stable for procurement deep links.
   'Explainable Organizational Intelligence': 'explainable-intelligence',
   'Labour-Safe AI': 'labour-safe-ai',
   'Organizational Memory': 'organizational-memory',

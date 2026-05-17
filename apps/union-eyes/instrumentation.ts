@@ -8,12 +8,15 @@ export async function register() {
       const { initOtel } = await import('@nzila/os-core/telemetry');
       await initOtel({ appName: 'union-eyes' });
     } catch (error) {
-      // Log error but don't fail startup - tracing is non-critical
+      // Log error but don't fail startup - tracing is non-critical.
+      // Use console.* here instead of dynamic-importing ./lib/logger:
+      // Turbopack's instrumentation loader cannot instantiate relative
+      // module factories from inside the register() catch path, which
+      // surfaces as "module factory is not available" and crashes dev.
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
-      const { logger: log } = await import('./lib/logger');
-      log.error('Failed to initialize OpenTelemetry tracing', errorMessage);
-      if (errorStack) log.error('Stack:', errorStack);
+      console.error('[instrumentation] Failed to initialize OpenTelemetry tracing:', errorMessage);
+      if (errorStack) console.error(errorStack);
     }
 
     // Initialise os-core metrics (SLO counters for union-eyes)

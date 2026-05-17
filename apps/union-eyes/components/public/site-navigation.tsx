@@ -36,12 +36,12 @@ const solutionsLinks = [
 
 const modulesLinks = [
   {
-    name: 'Continuity Command Center',
+    name: 'Institutional Continuity',
     href: '/institutional-continuity',
     desc: 'Leadership transition resilience',
   },
   {
-    name: 'Governance Intelligence Hub',
+    name: 'Governance Transparency Hub',
     href: '/platform/governance-intelligence',
     desc: 'Decision traceability and oversight',
   },

@@ -77,6 +77,21 @@ export const TOPOLOGY_UX_REQUIRED: RewardTerm[] = [
   { term: "preserved institutional records", weight: 3 },
 ];
 
+// Workstream H: Source adapter completion and governance topology hydration.
+// Reward terms that reinforce read-only, provenance-linked topology assembly.
+export const TOPOLOGY_HYDRATION_REQUIRED: RewardTerm[] = [
+  { term: "topology hydration", weight: 3 },
+  { term: "source adapter", weight: 2 },
+  { term: "normalized governance relationships", weight: 3 },
+  { term: "chronology enrichment", weight: 3 },
+  { term: "lineage hydration", weight: 3 },
+  { term: "continuity projection", weight: 3 },
+  { term: "provenance-linked", weight: 3 },
+  { term: "read-only projection", weight: 3 },
+  { term: "inspectable lineage", weight: 3 },
+  { term: "institutional topology infrastructure", weight: 3 },
+];
+
 // Workstream L: Governance Chronology UX.
 // Reward terms that signal governance-safe, continuity-aware, inspectable
 // chronology posture across procedural timelines, institutional evolution,

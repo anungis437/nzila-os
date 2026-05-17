@@ -168,12 +168,12 @@ export function ReportSharingHub({
 
   const generateShareLink = (data: ShareReportData) => {
     // This would generate actual share link in production
-    const link = `https://app.unioneyes.com/reports/shared/${data.reportId}?access=${data.accessType}`;
+    const link = `https://app.unioneyes.app/reports/shared/${data.reportId}?access=${data.accessType}`;
     setShareLink(link);
   };
 
   const generateEmbedCode = (data: ShareReportData) => {
-    const code = `<iframe src="https://app.unioneyes.com/reports/embed/${data.reportId}" width="100%" height="600" frameborder="0"></iframe>`;
+    const code = `<iframe src="https://app.unioneyes.app/reports/embed/${data.reportId}" width="100%" height="600" frameborder="0"></iframe>`;
     setEmbedCode(code);
   };
 

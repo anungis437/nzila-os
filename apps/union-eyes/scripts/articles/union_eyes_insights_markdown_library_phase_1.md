@@ -959,7 +959,7 @@ Continuity resilience begins long before disruption occurs.
 ---
 title: An Explainable Intelligence Procurement Standard for Labour Organizations
 slug: explainable-intelligence-procurement-standard
-category: Explainable Organizational Intelligence
+category: Explainable Governance Reasoning
 author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 9 min
@@ -1398,7 +1398,7 @@ Organizations that operationalize continuity effectively become:
 ---
 title: How to Operationalize Explainable Intelligence in Policy Workflows
 slug: explainable-intelligence-policy-workflows
-category: Explainable Organizational Intelligence
+category: Explainable Governance Reasoning
 author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
@@ -1810,7 +1810,7 @@ Organizations that actively reduce continuity fragmentation become:
 ---
 title: Explainability Is Not a Feature. It Is a Governance Requirement.
 slug: explainability-as-governance
-category: Explainable Organizational Intelligence
+category: Explainable Governance Reasoning
 author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 7 min
@@ -2285,7 +2285,7 @@ Organizations that quantify and reduce fragmentation costs improve resilience, s
 ---
 title: What Institutional Intelligence Means - And What It Does Not
 slug: institutional-intelligence-defined
-category: Explainable Organizational Intelligence
+category: Explainable Governance Reasoning
 author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
@@ -2709,7 +2709,7 @@ Institutional continuity is foundational infrastructure for long-term organizati
 ---
 title: Questions Labour Organizations Should Ask Before Buying Operational Intelligence Platforms
 slug: evaluating-ai-vendors
-category: Explainable Organizational Intelligence
+category: Explainable Governance Reasoning
 author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 9 min

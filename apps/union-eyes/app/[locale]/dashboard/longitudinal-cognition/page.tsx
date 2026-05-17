@@ -14,13 +14,15 @@ import { headers } from 'next/headers';
 import { requireUser } from '@/lib/api-auth-guard';
 import { composeInstitutionalStorybook } from '@/lib/institutional-storytelling';
 import { runFullInstitutionalCognition } from '@/lib/institutional-operating-intelligence';
+import { RuntimeHydrationFooter } from '@/components/runtime-hydration';
+import { CONTINUITY_COGNITION_VERSION } from '@nzila/institutional-governance-graph';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Longitudinal Institutional Cognition · UnionEyes',
+  title: 'Longitudinal Institutional Context · UnionEyes',
   description:
-    'Calm, domain-grouped institutional storytelling: governance evolution, continuity maturity, resilience progression, organizational adaptation.',
+    'Calm, domain-grouped institutional storytelling: governance evolution, continuity maturity, resilience progression, organizational adaptation. Human-reviewed, review-required assistive reasoning — institutional context support for governance leaders.',
 };
 
 function ConfidenceChip({ confidence }: { confidence: string }) {
@@ -54,7 +56,7 @@ export default async function LongitudinalCognitionPage() {
       <div className="mx-auto max-w-6xl space-y-10">
         <header className="space-y-2">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-            Institutional Operating Intelligence · Longitudinal Surface
+            Institutional Context Support · Longitudinal Surface · Human-reviewed
           </p>
           <h1 className="text-3xl font-semibold text-slate-900">
             Institutional Chronology Storybook
@@ -62,8 +64,10 @@ export default async function LongitudinalCognitionPage() {
           <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
             A calm, organizationally scoped projection of how the institution&apos;s governance,
             continuity, resilience, and memory have evolved. Each chapter is anchored to the
-            canonical institutional taxonomy and derived from a fully attributed cognition
-            envelope. No individual is profiled. No workforce inference is produced.
+            canonical institutional taxonomy and derived from a fully attributed reasoning
+            envelope. Assistive only — governance authority remains with humans; all signals
+            below are review-required. No individual is profiled. No workforce inference is
+            produced.
           </p>
           <p className="text-xs text-slate-500">
             Composed at {new Date(storybook.composedAt).toLocaleString()} ·{' '}
@@ -167,6 +171,22 @@ export default async function LongitudinalCognitionPage() {
           envelopes composed · {cognition.failures.length} engine failure
           {cognition.failures.length === 1 ? '' : 's'} isolated
         </footer>
+        <RuntimeHydrationFooter
+          surface="Longitudinal Institutional Context"
+          provenance={{
+            sourceAdapter: 'institutional-operating-intelligence/runFullInstitutionalCognition',
+            substrateVersion: CONTINUITY_COGNITION_VERSION,
+            contractVersion: storybook.storyVersion,
+          }}
+          chronology={{}}
+          continuity={{}}
+          cognition={{}}
+          explainability={{
+            visibilityRationale:
+              'Storybook chapters are deterministic projections of the institutional cognition envelopes. The Wave 3 continuity cognition overlay shows that the continuity substrate is hydrated but does not surface any engine output or governance recommendation here — it is institutional context support, not monitoring.',
+            reviewPosture: 'assistive · human-reviewed · review-required',
+          }}
+        />
       </div>
     </div>
   );

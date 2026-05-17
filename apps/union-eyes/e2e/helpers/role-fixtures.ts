@@ -137,7 +137,7 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
   governance: [
     'Governance Overview',
     'Trust & Explainability',
-    'Operational Review',
+    'Continuity Review',
     'Policy Alignment',
     'Continuity Signals',
     'Audit & Evidence',

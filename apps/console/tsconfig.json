@@ -20,7 +20,8 @@
       "@nzila/platform-policy-engine": ["../../packages/platform-policy-engine/src/index.ts"],
       "@nzila/platform-procurement-proof": ["../../packages/platform-procurement-proof/src/index.ts"],
       "@nzila/platform-marketplace": ["../../packages/platform-marketplace/src/index.ts"],
-      "@nzila/platform-assurance": ["../../packages/platform-assurance/src/index.ts"]
+      "@nzila/platform-assurance": ["../../packages/platform-assurance/src/index.ts"],
+      "@nzila/healthcare-surveys": ["../../packages/healthcare-surveys/src/index.ts"]
     }
   },
   "include": [

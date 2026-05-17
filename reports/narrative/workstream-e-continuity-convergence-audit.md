@@ -1,7 +1,7 @@
 # Workstream E — Evidence, Trust, Chronology & Continuity Semantic Convergence Audit
 
 **App:** apps/union-eyes  
-**Branch:** chore/post-delta-7-orchestrator-image-fix-2026-05-12  
+**Branch:** main  
 **Strategic principle:** Institutional states are explainable, traceable, and continuity-aware.  
 **Layer:** Display / copy / governance-config (additive). No runtime, schema, route, or behavioural change.
 
@@ -107,7 +107,7 @@ These are additive and do not duplicate Workstream A–D entries.
 
 ## Acceptance gates (to be re-validated)
 
-- `pnpm narrative:audit` — maturity ≥ 85, hard-fail = 0 (last green: 88 / 0 / 219 / 85).
-- `pnpm narrative:check --ci` — CI gate green.
-- Root `pnpm typecheck` — 224 / 224.
+- `pnpm validate:docs` — documentation consistency gate (errors must remain 0).
+- `pnpm governance:audit` — aggregate governance gate for docs/ownership/release/repo audits.
+- Root `pnpm typecheck` — workspace typecheck must pass.
 - No route, schema, runtime, or behavioural change. Display layer only.

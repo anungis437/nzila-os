@@ -21,6 +21,8 @@ import {
   scoreStewardWorkloads,
   stewardSubject,
 } from '@/lib/cognition/ue-adapter';
+import { RuntimeHydrationFooter } from '@/components/runtime-hydration';
+import { CONTINUITY_COGNITION_VERSION } from '@nzila/institutional-governance-graph';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,6 +133,11 @@ export default async function CognitionPage({ params }: PageProps) {
         <h1 className="text-2xl font-semibold">{t('header.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {t('header.description')}
+        </p>
+        <p className="mt-2 text-xs text-amber-700">
+          Assistive reasoning · Human-reviewed · Review-required — governance
+          support tooling. Outputs on this surface inform human decision-making
+          and never act autonomously.
         </p>
       </header>
 
@@ -267,6 +274,21 @@ export default async function CognitionPage({ params }: PageProps) {
           generatedAt: new Date().toISOString(),
         })}
       </footer>
+      <RuntimeHydrationFooter
+        surface="Cognition Dashboard"
+        provenance={{
+          sourceAdapter: '@nzila/ue-cognition + institutional-governance-graph',
+          substrateVersion: CONTINUITY_COGNITION_VERSION,
+          contractVersion: kpis.modelVersion,
+        }}
+        continuity={{}}
+        cognition={{}}
+        explainability={{
+          visibilityRationale:
+            'Substrate-presence footer for the Wave 3 continuity cognition layer. The engine tiles above are KPI projections; the panels below disclose the underlying continuity, chronology, and topology substrate references so reviewers can audit the source of every number without invoking any predictive surface.',
+          reviewPosture: 'assistive · human-reviewed · review-required',
+        }}
+      />
     </div>
   );
 }

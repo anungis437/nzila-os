@@ -398,12 +398,12 @@ alert('Failed to log activity');
           </CardContent>
         </Card>
 
-        {/* Volunteer Leaderboard */}
+        {/* Volunteer Recognition */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
-              Volunteer Leaderboard
+              Volunteer Recognition
             </CardTitle>
             <CardDescription>Top volunteers by contacts made</CardDescription>
           </CardHeader>

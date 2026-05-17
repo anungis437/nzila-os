@@ -15,6 +15,7 @@ export * from './ontology/kinds'
 export * from './ontology/canonicalization'
 export * from './lifecycle/normalize'
 export * from './adapters/source-adapter'
+export * from './adapters/topology-source-adapter'
 export * from './projection/organizations'
 export * from './projection/affiliations'
 export * from './projection/voting'
@@ -37,8 +38,17 @@ export * from './governance/evidence'
 // Phase 4 — institutional continuity (read-only succession & tenure layer).
 export * from './governance/continuity'
 
+// Wave 2 — continuity intelligence foundations (Workstream M scaffolding).
+export * from './governance/continuity-intelligence-foundations'
+
+// Wave 3 — continuity cognition (read-only summary derivations over Wave 2).
+export * from './governance/continuity-cognition'
+
 // Phase 4 — trust & explainability (read-only provenance convergence layer).
 export * from './governance/trust'
+
+// Workstream H — source adapter completion and topology hydration.
+export * from './governance/topology-hydration'
 
 // Phase 4 — read-only institutional observability (counts-only, gated).
 export * from './observability/snapshot'

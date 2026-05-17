@@ -98,7 +98,7 @@ export function InsightArticleView({
       'Alignment',
       'Continuity',
     ],
-    'Explainable Organizational Intelligence': [
+    'Explainable Governance Reasoning': [
       'Explainability Layer',
       'Human Oversight Layer',
       'Governance Review Layer',

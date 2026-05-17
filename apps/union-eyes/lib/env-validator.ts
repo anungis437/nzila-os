@@ -56,7 +56,7 @@ const ENV_VARS: EnvVar[] = [
     name: 'NEXT_PUBLIC_APP_URL',
     required: false,
     description: 'Application base URL',
-    example: 'https://unioneyes.com',
+    example: 'https://unioneyes.app',
   },
   {
     name: 'NEXT_PUBLIC_CLERK_SIGN_IN_URL',

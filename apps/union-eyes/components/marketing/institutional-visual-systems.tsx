@@ -87,7 +87,7 @@ export function MethodologyVisualizationSystem() {
         <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:95ms]">
           <ScrollReveal delay={0.06} duration={0.9} distance={16}>
             <VisualPanel
-              title="Institutional Continuity Intelligence Framework"
+              title="Institutional Continuity Reasoning Framework"
               subtitle="Canonical Continuity Map"
             >
               <PillarDiagram
@@ -95,7 +95,7 @@ export function MethodologyVisualizationSystem() {
                   'Institutional Memory',
                   'Governance Continuity',
                   'Operational Coherence',
-                  'Explainable Intelligence',
+                  'Explainable Governance Review',
                   'Organizational Resilience',
                 ]}
               />
@@ -277,7 +277,7 @@ export function ContinuityMappingLanguage() {
     {
       title: 'Organizational Memory Map',
       detail:
-        'Shows where governance context lives, how it is retained, and how institutional intelligence stays coordinated.',
+        'Shows where governance context lives, how it is retained, and how institutional context stays coordinated.',
     },
     {
       title: 'Governance Coherence Map',

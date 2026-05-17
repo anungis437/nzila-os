@@ -16,7 +16,9 @@ import {
   INSTITUTIONAL_CONCEPTS,
   INSTITUTIONAL_ONTOLOGY_VERSION,
 } from '@nzila/institutional-cognition-core';
+import { CONTINUITY_COGNITION_VERSION } from '@nzila/institutional-governance-graph';
 import { requireUser } from '@/lib/api-auth-guard';
+import { RuntimeHydrationFooter } from '@/components/runtime-hydration';
 
 export const dynamic = 'force-dynamic';
 
@@ -176,6 +178,21 @@ export default async function GovernanceCenterPage() {
           <span className="font-mono">@nzila/institutional-cognition-core</span> · all surfaces
           remain organizationally scoped, explainable, and labor-safe.
         </footer>
+        <RuntimeHydrationFooter
+          surface="Governance Center"
+          provenance={{
+            sourceAdapter: 'institutional-cognition-core/registry + institutional-governance-graph',
+            substrateVersion: CONTINUITY_COGNITION_VERSION,
+            contractVersion: COGNITION_CONTRACT_VERSION,
+          }}
+          continuity={{}}
+          cognition={{}}
+          explainability={{
+            visibilityRationale:
+              'Projection of the canonical institutional cognition registry and ontology. The Wave 3 continuity cognition layer is rendered as substrate-presence only — no engine outputs, no scoring, no recommendations. Protected governance semantics (Class B, reserved matter, vetoes, holds, overrides) are stripped by the IGG protected-semantics fence before any panel is rendered.',
+            reviewPosture: 'inspectable · read-only · provenance-stamped',
+          }}
+        />
       </div>
     </div>
   );

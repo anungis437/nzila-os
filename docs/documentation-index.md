@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-15T13:06:08.285Z
+Generated: 2026-05-17T09:18:01.753Z
 
-Total documents indexed: 1001
+Total documents indexed: 1002
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -18,6 +18,7 @@ Stale documents (>90 days since repo validation): 0
 | documentation-index.md | 1 | 0 |
 | governance | 1 | 0 |
 | hardening | 1 | 0 |
+| healthcare | 1 | 0 |
 | migration | 2 | 0 |
 | nzila-residual-closure | 13 | 0 |
 | nzila-runtime-integrity | 11 | 0 |
@@ -959,10 +960,11 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/tutorials/first-app.md](docs/categories/stakeholders/tutorials/first-app.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md](docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/tutorials/README.md](docs/categories/stakeholders/tutorials/README.md) | categories | 2026-05-11 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-14 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-17 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
+| [docs/healthcare/discovery-surveys.md](docs/healthcare/discovery-surveys.md) | healthcare | 2026-05-16 | current |
 | [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-05-10 | current |
 | [docs/migration/trade/canonical-domain-map.md](docs/migration/trade/canonical-domain-map.md) | migration | 2026-05-11 | current |
 | [docs/migration/trade/cars-vertical-scope.md](docs/migration/trade/cars-vertical-scope.md) | migration | 2026-05-11 | current |
@@ -1009,8 +1011,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-15 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-14 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-17 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-17 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
 | [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-14 | current |
 | [docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md](docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md) | platform | 2026-05-11 | current |

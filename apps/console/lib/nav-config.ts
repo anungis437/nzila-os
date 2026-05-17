@@ -95,6 +95,25 @@ export const navGroups: NavGroupConfig[] = [
       { name: 'Signatures', href: '/business/signatures', icon: 'FingerPrintIcon', description: 'Digital signature collection and document signing workflow.' },
     ],
   },
+  {
+    label: 'Healthcare Discovery',
+    items: [
+      {
+        name: 'Surveys',
+        href: '/healthcare/discovery/surveys',
+        icon: 'ClipboardDocumentCheckIcon',
+        description:
+          'Run short privacy-conscious unit surveys before selecting one tiny healthcare workflow wedge.',
+      },
+      {
+        name: 'Pilot Readiness',
+        href: '/healthcare/discovery/pilot-readiness',
+        icon: 'ChartBarSquareIcon',
+        description:
+          'Discovery-to-pilot framing for selecting one governed first workflow.',
+      },
+    ],
+  },
   // ── Zone 5: RISK — Business · Platform · Financial Threats ────────────────
   {
     label: 'Risk',

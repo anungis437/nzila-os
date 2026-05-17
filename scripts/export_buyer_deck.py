@@ -351,7 +351,7 @@ def _build_content_slide(prs: Presentation, slide_data: Slide, slide_num: int) -
         7.12,
         9.5,
         0.3,
-        "Union Eyes  ·  Confidential  ·  unioneyes.ca",
+        "Union Eyes  ·  Confidential  ·  unioneyes.app",
         8,
         color=GREY,
     )
