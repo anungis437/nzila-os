@@ -389,7 +389,7 @@ export const QA_ROUTE_INVENTORY: RouteQaMetadata[] = [
     requiredRolePermissionScope: 'evidence:export:read',
     intelligencePipelineApplies: false,
     auditExportApplies: true,
-    readinessCategory: 'audit',
+    readinessCategory: 'pilot_critical',
   },
 ]
 
