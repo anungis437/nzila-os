@@ -335,6 +335,62 @@ export const QA_ROUTE_INVENTORY: RouteQaMetadata[] = [
     auditExportApplies: false,
     readinessCategory: 'pilot_critical',
   },
+
+  // ── Operational endpoints (health / governance / evidence) ───────────────
+  {
+    routeFile: 'app/api/health/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'deny',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'ops:health:read',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'audit',
+  },
+  {
+    routeFile: 'app/api/governance/telemetry/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'deny',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'governance:telemetry:read',
+    intelligencePipelineApplies: false,
+    auditExportApplies: true,
+    readinessCategory: 'audit',
+  },
+  {
+    routeFile: 'app/api/evidence/export/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'deny',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'evidence:export:read',
+    intelligencePipelineApplies: false,
+    auditExportApplies: true,
+    readinessCategory: 'audit',
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────
