@@ -313,6 +313,42 @@
       "evidence_export": false,
       "demo_seed": false,
       "docs_complete": false
+    },
+    {
+      "name": "maestria",
+      "path": "apps/maestria",
+      "tier": "EXPERIMENTAL",
+      "owner": "platform",
+      "domain": "education",
+      "health_endpoint": false,
+      "metrics_endpoint": false,
+      "evidence_export": false,
+      "demo_seed": false,
+      "docs_complete": false
+    },
+    {
+      "name": "trustcore",
+      "path": "apps/trustcore",
+      "tier": "EXPERIMENTAL",
+      "owner": "platform",
+      "domain": "trust",
+      "health_endpoint": false,
+      "metrics_endpoint": false,
+      "evidence_export": false,
+      "demo_seed": false,
+      "docs_complete": false
+    },
+    {
+      "name": "trustcore-trustops",
+      "path": "apps/trustcore-trustops",
+      "tier": "EXPERIMENTAL",
+      "owner": "platform",
+      "domain": "trust",
+      "health_endpoint": false,
+      "metrics_endpoint": false,
+      "evidence_export": false,
+      "demo_seed": false,
+      "docs_complete": false
     }
   ]
 }
