@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-UnionEyes is **PRODUCTION CANDIDATE** — live production infrastructure validated, operational drills executed, B8 suite green. It is **NOT YET** stamped for unsupervised public multi-tenant use. Remaining gates: custom domain/WAF, Key Vault RBAC for Redis token, governance authenticated drill, 1-week observation window.
+UnionEyes is **PRODUCTION CANDIDATE** — live production infrastructure validated, operational drills executed, B8 suite green, all 3 secrets migrated to Key Vault. It is **NOT YET** stamped for unsupervised public multi-tenant use. Remaining gates: Cloudflare DNS routing through AFD/WAF, governance authenticated drill, 1-week observation window.
 
 | Dimension | Status | Evidence |
 |---|---|---|
@@ -64,25 +64,26 @@ UnionEyes is **PRODUCTION CANDIDATE** — live production infrastructure validat
 | Key Vault RBAC grant blocked | ✅ `Key Vault Secrets Officer` granted to ACA MI `264f8347` `2026-05-17T20:45:00Z` — KV migration path unblocked |
 | No HTTP autoscaling | ✅ KEDA HTTP rule (concurrency 10) added, active on `--0000062` |
 | IaC parity | ✅ `union-eyes-env.bicep` updated (evidence store, autoscaling, secrets); `waf-afd/waf-afd.bicep` created |
+| Upstash token + evidence key not in KV | ✅ **Migrated `2026-05-18`** — all 3 secrets (`upstash-redis-url`, `upstash-redis-token`, `evidence-storage-key`) now KV-backed ACA secretRefs (versioned URI). `SECRET_TOPOLOGY=aca-kv-integrated` on `--0000064`. |
+| AFD/WAF diagnostic logs not in LAW | ✅ **Enabled `2026-05-18`** — `ue-afd-diag` diagnostic settings on AFD profile: `FrontDoorAccessLog` + `FrontDoorWebApplicationFirewallLog` + `FrontDoorHealthProbeLog` → `nzila-canada-prod-law`. |
 
 ## What remains amber
 
 - Production deployment topology — live Azure infrastructure validated in
   `nzila-canada-prod-rg` (Container App `nzila-os-union-eyes-prod` on
-  revision `--0000062`, Postgres flex v16 with ZR-HA + geo backups,
-  Redis Upstash live, Key Vault `nzila-canada-prod-kv`, Log Analytics
-  `nzila-canada-prod-law`, evidence blob store `nzilacanadaprodev`,
-  AFD + WAF configured). Phase B operational validation substantially
-  complete. See `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`.
+  revision `--0000064`, Postgres flex v16 with ZR-HA + geo backups,
+  Redis Upstash live (KV-backed), Key Vault `nzila-canada-prod-kv`,
+  Log Analytics `nzila-canada-prod-law`, evidence blob store `nzilacanadaprodev`
+  (KV-backed), AFD + WAF configured + diag logs to LAW). Phase B operational
+  validation substantially complete. See `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`.
 - Remaining gaps before PRODUCTION READY stamp:
   - Django backend dependency reports `degraded: unreachable` from
     prod (honest amber via health contract — non-critical by design).
-  - Upstash Redis token + evidence storage key stored as ACA secrets.
-    KV migration path **unblocked** (`Key Vault Secrets Officer` granted
-    to ACA MI `264f8347` `2026-05-17T20:45:00Z`). Execute before PRODUCTION READY.
-  - AFD DNS routing: `app.unioneyes.app` CNAME currently points to ACA
-    directly. DNS update → AFD endpoint hostname requires registrar access.
-    Until updated, WAF is provisioned but not in traffic path.
+  - **AFD DNS routing**: `app.unioneyes.app` CNAME must be updated to
+    `ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net` in Cloudflare. AFD custom
+    domain added (`Succeeded`). Validation TXT `_dnsauth.app.unioneyes.app
+    = _q1en0zg4c8s9sockra3ayi3esqr7jw1` must be added + CNAME updated.
+    Until done, WAF is provisioned but not in live traffic path.
   - Row-level DB integrity drill deferred (private endpoint / jump-host required for direct psql access).
   - Governance runtime proof (B3B) and evidence integrity under failure (B4B) pending authenticated drills.
   - Alert fire drill deferred (alerts wired; confirmed via ARM REST; fire not yet observed).
@@ -104,7 +105,9 @@ Operational evidence backing this label:
 - ✅ Deploy rehearsal with health-gated promotion (`--0000043` → `--0000045` → `--0000049`)
 - ✅ Rollback drill: 23s end-to-end, smoke passed
 - ✅ PITR restore drill: 4 min to Ready, prod unaffected
-- ✅ All 3 critical health deps green: `database:ok`, `auth:ok`, `redis:ok`
+- ✅ All 3 critical health deps green: `database:ok`, `auth:ok`, `redis:ok` (Redis KV-backed)
+- ✅ All secrets (Upstash URL/token, evidence key) migrated to Key Vault (`SECRET_TOPOLOGY=aca-kv-integrated`)
+- ✅ AFD + WAF diagnostic logs to LAW enabled (`ue-afd-diag`, 3 log categories)
 - ✅ Observability: 3 KQL alert rules + action group wired to `ops@nzila.ca`
 - ✅ Incident drill (failed deploy): ACA fast-fail, 0 prod impact
 - ✅ B8 validation: 7075 UE tests + 8962 contract tests + governance 54/54
@@ -122,9 +125,9 @@ UE is NOT yet stamped for:
 - Unmonitored customer-facing deployment
 
 Remaining gates before PRODUCTION READY:
-1. Key Vault migration for Upstash token (RBAC grant required)
-2. Custom domain + WAF + HSTS
-3. Governance runtime proof (authenticated drill)
-4. Alert fire drill confirmation
-5. 1-week minimum pilot observation window (opened `2026-05-17T18:34:00Z`)
-6. Dedicated prod blob/storage account for evidence persistence
+1. ~~Key Vault migration for Upstash token~~ ✅ DONE — all 3 secrets KV-backed on `--0000064`
+2. ~~Custom domain + WAF + HSTS~~ ✅ Domain + HSTS validated; WAF provisioned + diag logs to LAW; DNS routing through AFD pending Cloudflare update
+3. Cloudflare DNS: update `app.unioneyes.app` CNAME → `ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net` (grey cloud / DNS-only) + add TXT `_dnsauth.app.unioneyes.app = _q1en0zg4c8s9sockra3ayi3esqr7jw1`
+4. Governance runtime proof (authenticated drill)
+5. Alert fire drill confirmation
+6. 1-week minimum pilot observation window (opened `2026-05-17T18:34:00Z`)
