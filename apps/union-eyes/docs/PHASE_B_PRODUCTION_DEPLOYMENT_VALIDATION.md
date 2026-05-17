@@ -48,7 +48,7 @@ removed (see audit for history).
 | B5B | Restore rehearsal | **validated** (PITR mechanism proven; row-level integrity deferred) | drill `2026-05-17T18:52:09Z`, 4-min restore to Ready, smoke passed, drill server deleted; [`BACKUP_RESTORE_VALIDATION.md`](./BACKUP_RESTORE_VALIDATION.md) |
 | B6A | Runtime observation window | **open** `2026-05-17T18:34:00Z` | [`PILOT_RUNTIME_REVIEW.md`](./PILOT_RUNTIME_REVIEW.md) |
 | B6B | Operational review cadence | **started** — week 1 baseline captured | same |
-| B7  | Procurement / trust finalization | **validated** | B7A: `FINAL_READINESS_STATUS.md` → PRODUCTION CANDIDATE; B7B: `ue-procurement-pack-cupe.md` updated with Phase B operational evidence; Clerk refs removed from all buyer-facing docs — commit `b335ae2e8` |
+| B7  | Procurement / trust finalization | **validated** | B7A: `FINAL_READINESS_STATUS.md` → PRODUCTION CANDIDATE; B7B: `ue-procurement-pack-cupe.md` updated with Phase B operational evidence; legacy auth vendor refs removed from all buyer-facing docs — commit `b335ae2e8` |
 | B8  | Final validation | **validated** | typecheck ✅, lint 0 errors ✅, 7075 UE tests ✅, 8962 contract tests ✅, governance 54/54 ✅, platform contract 0 errors ✅, app lifecycle 0 errors ✅ — `2026-05-17T19:24Z` |
 
 Status legend:
