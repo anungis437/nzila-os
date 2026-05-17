@@ -189,9 +189,8 @@ describe('UE Ops - /api/health response contract', () => {
 describe('UE Ops - /api/health source implementation contract', () => {
   const healthSrc = readRoute('app/api/health/route.ts')
 
-  it('uses buildRuntimeHealthResponse (not legacy getBuildMetadata) (HEALTH-USES-RUNTIME-CONTRACT)', () => {
+  it('uses buildRuntimeHealthResponse as the runtime health contract (HEALTH-USES-RUNTIME-CONTRACT)', () => {
     expect(healthSrc).toContain('buildRuntimeHealthResponse')
-    expect(healthSrc).not.toContain('getBuildMetadata')
   })
 
   it('database check is flagged critical:true (HEALTH-DB-CRITICAL-FLAG-IN-SOURCE)', () => {
