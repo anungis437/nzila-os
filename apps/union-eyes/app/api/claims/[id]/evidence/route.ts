@@ -12,7 +12,7 @@ import { requireApiAuth } from '@/lib/api-auth-guard'
 import { db } from '@/db/db'
 import { claims, claimUpdates } from '@/db/schema'
 import { defensibilityPacks } from '@/db/schema/defensibility-packs-schema'
-import { eq, desc } from 'drizzle-orm'
+import { eq, and, desc } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
@@ -22,18 +22,22 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { userId: _userId } = await requireApiAuth({
+    const { userId: _userId, organizationId } = await requireApiAuth({
       orgScoped: true,
       roles: ['steward', 'admin'],
     })
 
     const { id: claimId } = await params
 
-    // Fetch claim
+    // Fetch claim — always org_id scoped to prevent cross-org evidence access
+    const claimFilter = organizationId
+      ? and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId))
+      : eq(claims.claimId, claimId)
+
     const [claim] = await db
       .select()
       .from(claims)
-      .where(eq(claims.claimId, claimId))
+      .where(claimFilter)
       .limit(1)
 
     if (!claim) {

@@ -69,6 +69,11 @@ export interface CrudOptions {
   resourceName?: string;
   /** Platform module key for entitlement check (from PLATFORM_MODULES) */
   entitlement?: string;
+  /**
+   * Fields that cannot be mutated via PATCH (in addition to pk and organizationId).
+   * Use for FSM-governed fields like `status` that must only change via explicit workflow APIs.
+   */
+  blockedPatchFields?: string[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,6 +122,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     readRole = 'member',
     writeRole = 'steward',
     defaultLimit = 50,
+    blockedPatchFields = [],
   } = opts;
 
   const resourceName = opts.resourceName ?? getTableName(table);
@@ -291,6 +297,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         // Never allow PK or orgId to be overwritten via PATCH
         delete updates[pk];
         if (orgScoped) delete updates.organizationId;
+
+        // Strip FSM-governed and other explicitly blocked fields
+        for (const f of blockedPatchFields) {
+          delete updates[f];
+        }
 
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {

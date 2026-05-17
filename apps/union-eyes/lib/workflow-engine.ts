@@ -590,6 +590,23 @@ export async function assignClaim(
       return { success: false, error: "Claim not found" };
     }
 
+    // Validate via FSM before mutating status — prevents invalid "assigned" transitions
+    const fsmResult = validateClaimTransition({
+      claimId,
+      currentStatus: claim.status as ClaimStatus,
+      targetStatus: "assigned" as ClaimStatus,
+      userId: assignedBy,
+      userRole: "steward",
+      priority: (claim.priority ?? "medium") as ClaimPriority,
+      statusChangedAt: claim.updatedAt ?? new Date(),
+    });
+    if (fsmResult && !fsmResult.allowed) {
+      return {
+        success: false,
+        error: `FSM rejection: cannot transition '${claim.status}' → 'assigned': ${fsmResult.reason ?? 'invalid transition'}`,
+      };
+    }
+
     // Update claim assignment
     await db
       .update(claims)

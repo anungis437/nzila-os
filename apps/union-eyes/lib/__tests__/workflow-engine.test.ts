@@ -230,10 +230,19 @@ describe('workflow-engine', () => {
   describe('assignClaim', () => {
     it('assigns claim to steward', async () => {
       mocks.mockSelect.mockReturnValueOnce(chain([{ claimId: 'c1', status: 'submitted' }]));
+      mocks.mockValidateTransition.mockReturnValueOnce({ allowed: true });
       mocks.mockUpdate.mockReturnValueOnce(chain(undefined));
       mocks.mockInsert.mockReturnValueOnce(chain(undefined));
       const result = await assignClaim('c1', 'steward1', 'admin1');
       expect(result).toEqual({ success: true });
+    });
+
+    it('rejects assignment when FSM blocks the transition', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([{ claimId: 'c1', status: 'closed' }]));
+      mocks.mockValidateTransition.mockReturnValueOnce({ allowed: false, reason: 'closed claims cannot be reassigned' });
+      const result = await assignClaim('c1', 'steward1', 'admin1');
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/FSM rejection/);
     });
 
     it('returns error when claim not found', async () => {

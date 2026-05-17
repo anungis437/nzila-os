@@ -91,7 +91,7 @@ const GET = withApi(
   },
 );
 
-// PATCH and DELETE from CRUD factory
+// PATCH and DELETE from CRUD factory — status is FSM-governed, block direct mutation
 const { PATCH, DELETE } = crudRoutes({
   table: claims,
   pk: 'claimNumber',
@@ -100,6 +100,7 @@ const { PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
+  blockedPatchFields: ['status'],
 }) as unknown as { PATCH: typeof GET; DELETE: typeof GET };
 
 export { GET, PATCH, DELETE };
