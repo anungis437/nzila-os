@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T09:10:59.712Z",
+  "generatedAt": "2026-05-17T09:16:27.549Z",
   "files": [
     {
       "ctx": {
@@ -3116,18 +3116,7 @@
         "isPublicSurface": true,
         "label": "marketing/conventions"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 111,
-          "excerpt": "Platform · Conventions & Federated Governance"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -3224,18 +3213,7 @@
         "isPublicSurface": true,
         "label": "marketing/executive-intelligence"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 91,
-          "excerpt": "Platform · Executive Intelligence"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -5021,18 +4999,7 @@
         "isPublicSurface": true,
         "label": "marketing/institutional-continuity"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 107,
-          "excerpt": "Platform · Institutional Continuity"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -5368,28 +5335,7 @@
         "isPublicSurface": true,
         "label": "marketing/platform/explainable-intelligence"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 30,
-          "excerpt": "title: 'Redirecting | UnionEyes Platform',"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 31,
-          "excerpt": "description: 'This route redirects to the canonical platform section.',"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -5478,28 +5424,7 @@
         "isPublicSurface": true,
         "label": "marketing/platform/governance-intelligence"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 30,
-          "excerpt": "title: 'Redirecting | UnionEyes Platform',"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 31,
-          "excerpt": "description: 'This route redirects to the canonical platform section.',"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -5588,28 +5513,7 @@
         "isPublicSurface": true,
         "label": "marketing/platform/operational-coherence"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 30,
-          "excerpt": "title: 'Redirecting | UnionEyes Platform',"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 31,
-          "excerpt": "description: 'This route redirects to the canonical platform section.',"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -5698,28 +5602,7 @@
         "isPublicSurface": true,
         "label": "marketing/platform/organizational-memory"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 30,
-          "excerpt": "title: 'Redirecting | UnionEyes Platform',"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 31,
-          "excerpt": "description: 'This route redirects to the canonical platform section.',"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -7235,188 +7118,7 @@
         "label": "messages/en-CA.json",
         "locale": "en-CA"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7191,
-          "excerpt": "\"platform\": \"Platform\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7241,
-          "excerpt": "\"proofSectionLabel\": \"Built-in platform guarantees\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7459,
-          "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7461,
-          "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7520,
-          "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7554,
-          "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7589,
-          "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7619,
-          "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7629,
-          "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7679,
-          "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7696,
-          "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7698,
-          "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7714,
-          "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7757,
-          "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7759,
-          "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7769,
-          "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7775,
-          "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7779,
-          "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\","
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -7519,178 +7221,7 @@
         "label": "messages/en.json",
         "locale": "en"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7235,
-          "excerpt": "\"platform\": \"Platform\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7541,
-          "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7543,
-          "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7741,
-          "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7775,
-          "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7810,
-          "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7840,
-          "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7850,
-          "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7900,
-          "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7917,
-          "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7919,
-          "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7935,
-          "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7978,
-          "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7980,
-          "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7990,
-          "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 7996,
-          "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 8000,
-          "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\","
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -8276,7 +7807,7 @@
     "totalFiles": 97,
     "publicFiles": 86,
     "hardFails": 0,
-    "warnings": 46,
+    "warnings": 0,
     "ruleFailures": 0,
     "averageMaturity": 88
   }

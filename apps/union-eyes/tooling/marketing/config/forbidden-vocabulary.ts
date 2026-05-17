@@ -163,7 +163,49 @@ const warningLevel: ForbiddenTerm[] = [
   { term: "decentralized", severity: "warning", category: "warning", publicOnly: true },
   { term: "revolutionary", severity: "warning", category: "warning", publicOnly: true },
   { term: "disruption", severity: "warning", category: "warning", publicOnly: true },
-  { term: "platform", severity: "warning", category: "warning", publicOnly: true },
+  {
+    // Wave 18.1 — "platform" is fenced against drift in marketing prose, but
+    // permitted in a narrow allowlist of structural product-noun contexts where
+    // the term is a faithful noun, not a startup-SaaS positioning move. Each
+    // exception is a case-insensitive substring; if any matches the line, the
+    // hit is suppressed. To extend the allowlist, the new context must be a
+    // structural surface (label, breadcrumb, legal noun, redirect metadata,
+    // proper-name compound) — not new marketing copy.
+    term: "platform",
+    severity: "warning",
+    category: "warning",
+    publicOnly: true,
+    suggestion: "substrate | continuity layer | operating environment",
+    exceptions: [
+      // Product-name compound (titles, redirect metadata, sign-in surfaces).
+      "unioneyes platform",
+      // Feature-module badge label.
+      "platform module",
+      // Pricing CTA secondary action label.
+      "platform overview",
+      // Breadcrumb hierarchy label `Platform · X`.
+      "platform · ",
+      // Legacy /platform/* redirect description.
+      "canonical platform",
+      // Legal / Terms / Privacy / Trust noun-language ("the platform is",
+      // "every action on the platform", "misuse the platform", "the platform
+      // provides", "validate the platform"). Codifies legal noun usage.
+      "the platform",
+      // Accessibility Statement ("Our platform is regularly audited").
+      "our platform",
+      // Status page convention ("UnionEyes platform services").
+      "platform services",
+      // Financial reconciliation noun ("Match platform billing", "Platform
+      // billing reconciles").
+      "platform billing",
+      // Home proof section structural label ("Built-in platform guarantees").
+      "platform guarantees",
+      // Terms of Service definitional clause ("is a platform designed for…").
+      "platform designed",
+      // JSON nav/section structural label (key + identical value).
+      '"platform": "platform"',
+    ],
+  },
   { term: "ecosystem", severity: "warning", category: "warning", publicOnly: true },
   // Phase 4: Buyer-tone warnings (counted toward maturity drift; not hard-fails)
   { term: "operating system", severity: "warning", category: "warning", publicOnly: true },

@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-17T09:10:59.712Z
+Generated: 2026-05-17T09:16:27.549Z
 
 ## Summary
 
 - Files scanned: **97**
 - Hard-fail violations: **0**
-- Warning violations: **46**
+- Warning violations: **0**
 - Rule failures: **0**
 - Average Institutional Maturity: **88/100**
 
@@ -444,14 +444,10 @@ Generated: 2026-05-17T09:10:59.712Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-- L111 [warning/warning] `platform` — Platform · Conventions & Federated Governance
-
 **Flags:**
 - (narrative-balance) Governance saturation detected: 51.7% of pillar terms (target 30%, threshold 40%).
 
 **Recommendations:**
-- Remove or rephrase "platform" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 
 ### marketing/executive-intelligence
@@ -465,12 +461,6 @@ Generated: 2026-05-17T09:10:59.712Z
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-- L91 [warning/warning] `platform` — Platform · Executive Intelligence
-
-**Recommendations:**
-- Remove or rephrase "platform" (warning).
 
 ### marketing/features/ai-workbench
 
@@ -724,12 +714,6 @@ Generated: 2026-05-17T09:10:59.712Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-- L107 [warning/warning] `platform` — Platform · Institutional Continuity
-
-**Recommendations:**
-- Remove or rephrase "platform" (warning).
-
 ### locale/(marketing)
 
 - **Path:** `app/[locale]/(marketing)/layout.tsx`
@@ -784,13 +768,6 @@ Generated: 2026-05-17T09:10:59.712Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-- L30 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
-- L31 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
-
-**Recommendations:**
-- Remove or rephrase "platform" (warning).
-
 ### marketing/platform/governance-intelligence
 
 - **Path:** `app/[locale]/(marketing)/platform/governance-intelligence/page.tsx`
@@ -802,13 +779,6 @@ Generated: 2026-05-17T09:10:59.712Z
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-- L30 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
-- L31 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
-
-**Recommendations:**
-- Remove or rephrase "platform" (warning).
 
 ### marketing/platform/operational-coherence
 
@@ -822,13 +792,6 @@ Generated: 2026-05-17T09:10:59.712Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-- L30 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
-- L31 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
-
-**Recommendations:**
-- Remove or rephrase "platform" (warning).
-
 ### marketing/platform/organizational-memory
 
 - **Path:** `app/[locale]/(marketing)/platform/organizational-memory/page.tsx`
@@ -840,13 +803,6 @@ Generated: 2026-05-17T09:10:59.712Z
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-- L30 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
-- L31 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
-
-**Recommendations:**
-- Remove or rephrase "platform" (warning).
 
 ### marketing/platform
 
@@ -1092,31 +1048,10 @@ Generated: 2026-05-17T09:10:59.712Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-- L7191 [warning/warning] `platform` — "platform": "Platform",
-- L7241 [warning/warning] `platform` — "proofSectionLabel": "Built-in platform guarantees",
-- L7459 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
-- L7461 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
-- L7520 [warning/warning] `platform` — "badge": "Platform Module",
-- L7554 [warning/warning] `platform` — "badge": "Platform Module",
-- L7589 [warning/warning] `platform` — "badge": "Platform Module",
-- L7619 [warning/warning] `platform` — "badge": "Platform Module",
-- L7629 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
-- L7679 [warning/warning] `platform` — "collectDesc": "UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe
-- L7696 [warning/warning] `platform` — "acceptanceDesc": "By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law.
-- L7698 [warning/warning] `platform` — "useDesc": "You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th
-- L7714 [warning/warning] `platform` — "standardsDesc": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility
-- L7757 [warning/warning] `platform` — "ctaDescription": "Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.",
-- L7759 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7769 [warning/warning] `platform` — "auditDesc": "Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.",
-- L7775 [warning/warning] `platform` — "reconDesc": "Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.",
-- L7779 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.",
-
 **Flags:**
 - (narrative-balance) Continuity language under-represented: 14.6% (target 30%).
 
 **Recommendations:**
-- Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
 
 ### messages/en.json
@@ -1131,30 +1066,10 @@ Generated: 2026-05-17T09:10:59.712Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-- L7235 [warning/warning] `platform` — "platform": "Platform",
-- L7541 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
-- L7543 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
-- L7741 [warning/warning] `platform` — "badge": "Platform Module",
-- L7775 [warning/warning] `platform` — "badge": "Platform Module",
-- L7810 [warning/warning] `platform` — "badge": "Platform Module",
-- L7840 [warning/warning] `platform` — "badge": "Platform Module",
-- L7850 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
-- L7900 [warning/warning] `platform` — "collectDesc": "UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe
-- L7917 [warning/warning] `platform` — "acceptanceDesc": "By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law.
-- L7919 [warning/warning] `platform` — "useDesc": "You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th
-- L7935 [warning/warning] `platform` — "standardsDesc": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility
-- L7978 [warning/warning] `platform` — "ctaDescription": "Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.",
-- L7980 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7990 [warning/warning] `platform` — "auditDesc": "Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.",
-- L7996 [warning/warning] `platform` — "reconDesc": "Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.",
-- L8000 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.",
-
 **Flags:**
 - (narrative-balance) Continuity language under-represented: 12.5% (target 30%).
 
 **Recommendations:**
-- Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
 
 ### messages/fr-CA.json
