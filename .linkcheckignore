@@ -145,6 +145,7 @@ reports/compliance/
 reports/investor/
 reports/operational/
 reports/product-reports/
+reports/runtime/
 
 # Migration scripts docs
 scripts/migrations/
