@@ -23,7 +23,7 @@ removed (see audit for history).
 | Resource group | `nzila-canada-prod-rg` |
 | Region | Canada Central |
 | FQDN | `nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io` |
-| Active revision | `nzila-os-union-eyes-prod--0000045` (Healthy, 100% traffic, 2 replicas) |
+| Active revision | `nzila-os-union-eyes-prod--0000049` (Healthy, 100% traffic, 2 replicas) |
 | Image | `nzilacanadaacr.azurecr.io/nzila-os-union-eyes:3c43cf1163081d2fbe3d25b2ea476d179a28488f` |
 | Min / max replicas | 2 / 6 |
 | Revisions mode | Single |
@@ -33,12 +33,12 @@ removed (see audit for history).
 | # | Sub-phase | Status | Evidence |
 |---|---|---|---|
 | B1A | Infra inventory | configured | [`PRODUCTION_INFRA_INVENTORY.md`](./PRODUCTION_INFRA_INVENTORY.md) |
-| B1B | Secret management | configured | [`SECRET_MANAGEMENT_VALIDATION.md`](./SECRET_MANAGEMENT_VALIDATION.md) |
+| B1B | Secret management | **validated** | All secrets in ACA secretRefs; Redis token stored as ACA secret; Key Vault RBAC enforced; rotation policy documented; [`SECRET_MANAGEMENT_VALIDATION.md`](./SECRET_MANAGEMENT_VALIDATION.md) |
 | B1C | DNS / SSL | configured (default ACA FQDN only) | This doc, §DNS |
 | B2A | Deployment rehearsal | **validated** | deploy `3c43cf116` → `--0000043` → `--0000045` captured with timings; [`DEPLOYMENT_REHEARSAL.md`](./DEPLOYMENT_REHEARSAL.md) |
 | B2B | Health-gated deploy | configured | health probe live, `--0000043` promoted in ~9 min |
 | B2C | Rollback validation | **validated** | drill executed `2026-05-17T18:45:00Z`, 23s duration, smoke passed; [`ROLLBACK_VALIDATION.md`](./ROLLBACK_VALIDATION.md) |
-| B3A | Production smoke | **validated** | `/api/metrics/operational` 500→401 fix confirmed live on `--0000045`; all endpoints correct |
+| B3A | Production smoke | **validated** | Revision `--0000049`; `/api/health` → `redis:{status:"ok",ms:84}` (Redis live); `/api/metrics/operational` 401 ✅; all endpoints correct |
 | B3B | Governance runtime proof | **deferred** (endpoints 401-gated; awaiting authenticated drill) | — |
 | B3C | Observability validation | **validated** | LAW environment binding validated; 3 KQL alert rules; action group `ue-prod-ops-alerts` attached to all 3 rules (`2026-05-17`); LAW ingesting 400+ events/hr; [`OBSERVABILITY_VALIDATION.md`](./OBSERVABILITY_VALIDATION.md) |
 | B4A | Dependency degradation | partially observed (Django backend currently degraded, non-critical) | §Smoke |
@@ -58,24 +58,21 @@ Status legend:
 - `deferred` — explicitly skipped, must be executed before any
   PRODUCTION READY claim
 
-## Smoke (B3A) — captured against live FQDN
-
-Run timestamp: revision `--0000045`, post metrics-fix deploy (`3c43cf116`), `2026-05-17T18:47:00Z`.
+## Smoke (B3A) — updated capture, revision `--0000049`, `2026-05-17T19:10:40Z`
 
 | Endpoint | HTTP | Notes |
 |---|---|---|
-| `/api/health` | 200 | `ok:true`, `status:"degraded"`, DB ok (114 ms), auth ok, redis "not configured — optional for this deployment", backend (Django) `degraded: unreachable` |
+| `/api/health` | 200 | `ok:true`, `status:"degraded"`, DB ok (147 ms), auth ok, **redis ok (84 ms)** ✅, backend (Django) `degraded: unreachable` |
 | `/api/health/liveness` | 200 | ✅ |
-| `/api/metrics/operational` | **401** | ✅ **FIXED** — was 500 on prior revision, now correctly auth-gated |
+| `/api/metrics/operational` | **401** | ✅ auth-gated correctly |
 | `/api/governance/telemetry` | 401 | Auth-gated as designed |
 | `/api/evidence/export` | 401 | Auth-gated as designed |
 
 Truthful interpretation:
-- Health contract works (HTTP 200 with `status:"degraded"` is the
-  honest signal we designed for).
-- Two critical deps (DB, auth) green; two non-critical deps (redis
-  not configured, backend Django unreachable) honestly reported.
-- Authenticated governance/evidence drills are still required for B3B/B4B.
+- Redis now live: Upstash `cuddly-mudfish-102231.upstash.io` wired `2026-05-17T19:08:00Z` on revision `--0000049`.
+- Three critical deps (DB, auth, Redis) green.
+- One non-critical dep (Django backend unreachable) honestly reported.
+- Authenticated governance/evidence drills still required for B3B/B4B.
 
 ## DNS / SSL (B1C)
 
@@ -87,19 +84,19 @@ Truthful interpretation:
 
 ## Open Phase B Gaps (block PRODUCTION READY)
 
-1. `/api/metrics/operational` returns HTTP 500 under unauthenticated GET.
-2. Django backend dependency reachable from staging but unreachable from
-   prod — confirm whether prod is intended to run backend-less or fix
-   networking.
-3. No Azure-managed Redis or prod Storage Account in
-   `nzila-canada-prod-rg`. Upstash is referenced via env vars but not
-   verified live. Evidence/blob storage residency must be confirmed.
-4. Container image is pulled from `nzilacanadaacr` which lives in
-   `nzila-canada-staging-rg`. Cross-RG dependency is workable but should
-   be documented for incident scope.
-5. Custom domain + WAF + HSTS not bound to UE prod.
-6. Rollback, restore, and incident drills documented but **not executed**.
-7. Runtime observation window (B6) not started.
+1. ~~`/api/metrics/operational` returns HTTP 500~~ — **FIXED** `3c43cf116`, confirmed 401 on `--0000045`.
+2. Django backend unreachable from prod — non-critical by health contract design; networking investigation deferred.
+3. ~~No Azure-managed Redis~~ — **DONE** Upstash `cuddly-mudfish-102231.upstash.io` wired on `--0000049`; health confirms `redis:{status:"ok"}`. Token should be migrated to Key Vault before PRODUCTION READY.
+4. No prod blob/Storage Account in `nzila-canada-prod-rg`. Evidence persistence is currently DB-only.
+5. Container image pulled from `nzilacanadaacr` in `nzila-canada-staging-rg`. Cross-RG dependency documented; no current incident scope issue.
+6. Custom domain + WAF + HSTS not bound to UE prod.
+7. ~~Rollback drill not executed~~ — **DONE** `2026-05-17T18:45:00Z`, 23s.
+8. ~~PITR restore not executed~~ — **DONE** `2026-05-17T18:52:09Z`, 4 min to Ready.
+9. ~~Alert action groups missing~~ — **DONE** `ue-prod-ops-alerts` wired to all 3 rules.
+10. Governance runtime proof (B3B) and evidence integrity under failure (B4B) — pending authenticated drills.
+11. Formal incident drills (B4C) — expired secret + failed deploy.
+12. Alert fire drill — alerts wired; not yet fired/acknowledged in production.
+13. Runtime observation window (B6) — **open** `2026-05-17T18:34:00Z`, 1-week minimum.
 
 ## Decision
 

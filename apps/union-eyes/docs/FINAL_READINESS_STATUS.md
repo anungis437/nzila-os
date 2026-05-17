@@ -50,20 +50,21 @@ UnionEyes is **CONTROLLED PILOT READY** for controlled procurement reviews and e
 | Rollback drill not executed | ✅ Drill `2026-05-17T18:45:00Z` — 23s end-to-end, smoke passed; see `ROLLBACK_VALIDATION.md` |
 | PITR restore rehearsal not executed | ✅ Drill `2026-05-17T18:52:09Z` — restored to Ready in 4 min, prod unaffected; see `BACKUP_RESTORE_VALIDATION.md` |
 | Alert action groups not configured | ✅ `ue-prod-ops-alerts` (→ `ops@nzila.ca`) attached to all 3 KQL rules `2026-05-17T18:55:00Z` |
+| Redis not configured (empty env vars) | ✅ Upstash `cuddly-mudfish-102231.upstash.io` provisioned; wired via ACA secretRef on `--0000049`; health confirms `redis:{status:"ok",ms:84}` `2026-05-17T19:10:40Z` |
 
 ## What remains amber
 
 - Production deployment topology — live Azure infrastructure exists in
   `nzila-canada-prod-rg` (Container App `nzila-os-union-eyes-prod` on
-  revision `--0000045`, Postgres flex v16 with ZR-HA + geo backups,
-  Key Vault `nzila-canada-prod-kv`, Log Analytics `nzila-canada-prod-law`),
-  Phase B operational validation in progress.
+  revision `--0000049`, Postgres flex v16 with ZR-HA + geo backups,
+  Redis Upstash live, Key Vault `nzila-canada-prod-kv`, Log Analytics
+  `nzila-canada-prod-law`), Phase B operational validation in progress.
   See `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`.
 - Live-captured gaps blocking PRODUCTION READY:
   - Django backend dependency reports `degraded: unreachable` from
     prod (honest amber via health contract — non-critical by design).
-  - No dedicated prod blob/storage account; no Azure-managed Redis
-    (Upstash env vars empty — Redis not yet configured for prod).
+  - No dedicated prod blob/storage account.
+  - Upstash Redis token stored as ACA secret (not yet migrated to Key Vault).
   - Custom domain / WAF / HSTS not bound to UE prod.
   - Row-level DB integrity drill deferred (private endpoint / jump-host
     not configured for direct psql access to drill server).

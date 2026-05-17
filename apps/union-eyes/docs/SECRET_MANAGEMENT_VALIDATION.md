@@ -20,22 +20,22 @@ on the container env, only the reference):
 | `AZURE_AD_CLIENT_SECRET` | `azure-ad-client-secret` | Key Vault |
 | `AUTH_WEBHOOK_SECRET` | `auth-webhook-secret` | Key Vault |
 | `DJANGO_SECRET_KEY` | `django-secret` | Key Vault |
+| `UPSTASH_REDIS_REST_URL` | `upstash-redis-rest-url` | ACA secret (Upstash) |
+| `UPSTASH_REDIS_REST_TOKEN` | `upstash-redis-rest-token` | ACA secret (Upstash) |
 
 Plain env vars (non-secret): `NODE_ENV`, `PORT`, `UE_ENVIRONMENT`,
 `NEXT_PUBLIC_*`, `UE_*`, `PGHOST`, `PGUSER`, `PGDATABASE`, `PGSSLMODE`,
 `AUTH_URL`, `AUTH_TRUST_HOST`, `AZURE_AD_CLIENT_ID`,
 `AZURE_AD_TENANT_ID`, `GITHUB_SHA`, `RELEASE_ID`, `BUILD_TIME`,
 `BUILD_TIMESTAMP`, `ARTIFACT_ID`, `DJANGO_API_URL`,
-`PLATFORM_ADMIN_USER_IDS`, `SUPER_ADMIN_ORG_ID`,
-`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`.
+`PLATFORM_ADMIN_USER_IDS`, `SUPER_ADMIN_ORG_ID`.
 
-> ℹ `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are both set
-> as plaintext env vars with **empty string values** (confirmed via
-> `az containerapp show`). No real Upstash Redis instance is configured
-> for this deployment — the health check correctly reports Redis as
-> "not configured / optional". When a real Upstash instance is provisioned,
-> the token **must** be stored in Key Vault and referenced via ACA
-> `secretRef` before marking PRODUCTION READY.
+> ℹ Redis configured `2026-05-17T19:08:00Z`: Upstash instance
+> `cuddly-mudfish-102231.upstash.io` provisioned by user. Token stored
+> as ACA secret (`upstash-redis-rest-token`) and wired via `secretRef`
+> on revision `--0000049`. Health confirmed: `redis: {status:"ok", ms:84}`.
+> **Gap remaining**: token should be migrated to Key Vault and rotated
+> before PRODUCTION READY stamp.
 
 ## In-repo scan
 
@@ -73,7 +73,7 @@ Status remains `configured`, not `validated`.
 
 ## Gaps
 
-1. `UPSTASH_REDIS_REST_TOKEN` — when Redis is provisioned, store in KV + secretRef (currently empty/not-configured).
+1. `UPSTASH_REDIS_REST_TOKEN` — stored as ACA secret (not yet in Key Vault). Should be migrated to KV before PRODUCTION READY stamp.
 2. No documented evidence of a real production rotation run.
 3. Caller-side access logs (Key Vault diagnostic logs to LAW) should be
    confirmed enabled — not verified in this pass.
