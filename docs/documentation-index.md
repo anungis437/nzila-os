@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-05-17T14:29:41.250Z
+Generated: 2026-05-17T15:50:17.032Z
 
 Total documents indexed: 1002
 Stale documents (>90 days since repo validation): 0

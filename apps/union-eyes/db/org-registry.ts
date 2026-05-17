@@ -67,7 +67,6 @@ export const UE_NON_ORG_SCOPED_TABLES = [
   { table: 'user_profiles', reason: 'User profile data — scoped by user_id' },
   { table: 'push_subscriptions', reason: 'User device tokens — scoped by user_id' },
   { table: 'feature_flags', reason: 'Global feature flag definitions' },
-  { table: 'ab_tests', reason: 'Global A/B test definitions' },
   { table: 'system_settings', reason: 'Global system configuration' },
   { table: 'audit_logs', reason: 'Immutable audit trail — cross-org for compliance' },
   { table: 'hash_chain_entries', reason: 'Immutable hash chain — cross-org for compliance' },

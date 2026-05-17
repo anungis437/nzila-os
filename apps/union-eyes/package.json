@@ -14,6 +14,7 @@
     "test:e2e:ue:auth": "playwright test e2e/authenticated-role-navigation.spec.ts --config playwright.config.ts",
     "test:e2e:ue:pilot": "playwright test e2e/pilot-mode-gating.spec.ts --config playwright.config.ts",
     "test:e2e:ue:stakeholders": "playwright test e2e/stakeholder-demo-journeys.spec.ts --config playwright.config.ts",
+    "test:e2e:ue:negative": "playwright test tests/e2e/negative-workflow-transitions.spec.ts tests/e2e/org-isolation-negative.spec.ts tests/e2e/auth-failure-handling.spec.ts tests/e2e/evidence-misuse.spec.ts --config playwright.config.ts",
     "test:coverage": "vitest run --coverage",
     "test:services": "vitest run services/",
     "e2e": "playwright test",
@@ -33,7 +34,8 @@
     "evidence:all": "pnpm evidence:collect && pnpm evidence:seal && pnpm evidence:verify",
     "narrative:audit": "tsx tooling/marketing/narrative-audit.ts",
     "narrative:check": "tsx tooling/marketing/narrative-audit.ts --ci",
-    "staging:seed": "tsx scripts/staging-seed.ts"
+    "staging:seed": "tsx scripts/staging-seed.ts",
+    "perf:baseline": "tsx scripts/perf-baseline.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.985.0",
