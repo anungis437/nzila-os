@@ -1032,6 +1032,83 @@ const wave17ConstitutionalCategoryFormation: ForbiddenTerm[] = [
   { term: "governance toolkit", severity: "hard-fail", category: "startup-saas", suggestion: "constitutional continuity substrate | continuity-native constitutional infrastructure" },
 ];
 
+// Top-level i18n bundle keys that surface on PUBLIC marketing routes. Used by
+// both the narrative-audit CLI and the marketing-vocabulary contract test to
+// scope `publicOnly` enforcement to customer-facing namespaces. Admin /
+// dashboard / ops namespaces (sidebar, *AdminPage, dashboard*Page, etc.) are
+// internal operator surfaces where literal-noun usage is accurate and should
+// not generate marketing-tone violations. Keep this list in sync with the
+// `PUBLIC_MARKETING_ROUTES` array in the contract test and any new public
+// marketing routes added under `app/[locale]/(marketing)/`.
+export const PUBLIC_MESSAGES_NAMESPACES: ReadonlySet<string> = new Set<string>([
+  // Primary marketing namespace cluster
+  "marketing",
+  "home",
+  "homePage",
+  "footer",
+  "navigation",
+  "navMain",
+  "alerts",
+  "buttons",
+  "challenges",
+  "continuityNotes",
+  "goals",
+  "phase6",
+  "pillarItems",
+  "sectors",
+  "solutionsItems",
+  "step1",
+  "step2",
+  "step3",
+  "step4",
+  "step5",
+  "step6",
+  "stepLabels",
+  // Marketing route page namespaces (mirror PUBLIC_MARKETING_ROUTES)
+  "trustPage",
+  "trust",
+  "storyPage",
+  "story",
+  "governancePage",
+  "governance",
+  "contactPage",
+  "contact",
+  "pilotRequestPage",
+  "pilotRequest",
+  "pricingPage",
+  "pricing",
+  "solutionsPage",
+  "solutions",
+  "statusPage",
+  "status",
+  "platformPage",
+  "featuresPage",
+  "features",
+  "executiveIntelligencePage",
+  "executiveIntelligence",
+  "insightsPage",
+  "insights",
+  "institutionalContinuityPage",
+  "institutionalContinuity",
+  "conventionsPage",
+  "conventions",
+  "proofPage",
+  "proof",
+  "caseStudiesPage",
+  "forClcPage",
+  "forFederationsPage",
+  "forLeadershipPage",
+  "forMembersPage",
+  "forRepresentativesPage",
+  // Continuity simulation marketing page
+  "continuitySimulationPage",
+  "continuitySimulation",
+  // NOTE: `platform` and `signInPage*` deliberately EXCLUDED — those namespaces
+  // contain admin section labels and auth metadata descriptions where literal
+  // noun usage is accurate. The route-level `(marketing)/platform/*` pages
+  // pull copy from `marketing.*` keys, which remain fenced.
+]);
+
 export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...startupSaas,
   ...ripAndReplace,

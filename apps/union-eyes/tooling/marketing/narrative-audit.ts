@@ -17,7 +17,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import fg from "fast-glob";
 
-import { findViolations, type ForbiddenTerm } from "./config/forbidden-vocabulary";
+import { findViolations, PUBLIC_MESSAGES_NAMESPACES, type ForbiddenTerm } from "./config/forbidden-vocabulary";
 import { narrativeBalanceRule } from "./rules/narrative-balance";
 import { coexistencePositioningRule } from "./rules/coexistence-positioning";
 import { proceduralNeutralityRule } from "./rules/procedural-neutrality";
@@ -77,81 +77,10 @@ const MARKETING_GLOBS = [
 const MESSAGES_GLOB = "messages/*.json";
 
 // Wave 18 — Namespace-aware messages scoping.
-// Top-level i18n bundle keys that surface on PUBLIC marketing routes. Warning-
-// tier terms (e.g., "platform", "ecosystem", "AI-powered") are enforced ONLY
-// on lines that fall under one of these namespaces. Admin / dashboard / ops
-// namespaces (sidebar, *AdminPage, dashboard*Page, etc.) are internal operator
-// surfaces where literal-noun usage (e.g., "Platform Analytics" as a section
-// label) is accurate and should not generate marketing-tone warnings.
-const PUBLIC_MESSAGES_NAMESPACES: ReadonlySet<string> = new Set<string>([
-  // Primary marketing namespace cluster
-  "marketing",
-  "home",
-  "homePage",
-  "footer",
-  "navigation",
-  "navMain",
-  "alerts",
-  "buttons",
-  "challenges",
-  "continuityNotes",
-  "goals",
-  "phase6",
-  "pillarItems",
-  "sectors",
-  "solutionsItems",
-  "step1",
-  "step2",
-  "step3",
-  "step4",
-  "step5",
-  "step6",
-  "stepLabels",
-  // Marketing route page namespaces (mirror PUBLIC_MARKETING_ROUTES)
-  "trustPage",
-  "trust",
-  "storyPage",
-  "story",
-  "governancePage",
-  "governance",
-  "contactPage",
-  "contact",
-  "pilotRequestPage",
-  "pilotRequest",
-  "pricingPage",
-  "pricing",
-  "solutionsPage",
-  "solutions",
-  "statusPage",
-  "status",
-  "platformPage",
-  "featuresPage",
-  "features",
-  "executiveIntelligencePage",
-  "executiveIntelligence",
-  "insightsPage",
-  "insights",
-  "institutionalContinuityPage",
-  "institutionalContinuity",
-  "conventionsPage",
-  "conventions",
-  "proofPage",
-  "proof",
-  "caseStudiesPage",
-  "forClcPage",
-  "forFederationsPage",
-  "forLeadershipPage",
-  "forMembersPage",
-  "forRepresentativesPage",
-  // Continuity simulation marketing page
-  "continuitySimulationPage",
-  "continuitySimulation",
-  // NOTE: `platform` and `signInPage` deliberately EXCLUDED — those namespaces
-  // contain admin section labels ("Platform Analytics", "Platform health") and
-  // auth metadata descriptions where "platform" is accurate noun use, not
-  // marketing tone. The route-level `(marketing)/platform/*` pages pull copy
-  // from `marketing.*` keys, which remain fenced.
-]);
+// `PUBLIC_MESSAGES_NAMESPACES` is now exported from
+// `./config/forbidden-vocabulary` so the marketing-vocabulary contract test
+// can share the exact same allowlist. Update that file when adding new public
+// marketing namespaces.
 
 // Workstream B4 — internal runtime-narrative surfaces. Vocabulary-only sweep
 // (no public-marketing rule modules). Keeps the institutional posture

@@ -8,7 +8,7 @@ import path from "node:path";
 import fg from "fast-glob";
 import { describe, expect, it } from "vitest";
 
-import { findViolations } from "../marketing/config/forbidden-vocabulary";
+import { findViolations, PUBLIC_MESSAGES_NAMESPACES } from "../marketing/config/forbidden-vocabulary";
 
 const APP_ROOT = path.resolve(__dirname, "..", "..");
 
@@ -77,9 +77,13 @@ describe("marketing vocabulary (public surfaces)", () => {
     const failures: string[] = [];
     for (const abs of files) {
       const text = await fs.readFile(abs, "utf8");
-      const hits = findViolations(text, { isPublicSurface: true }).filter(
-        (h) => h.term.severity === "hard-fail",
-      );
+      const isMessages = abs.replace(/\\/g, "/").includes("/messages/");
+      const hits = findViolations(text, {
+        isPublicSurface: true,
+        ...(isMessages
+          ? { publicMessagesNamespaces: PUBLIC_MESSAGES_NAMESPACES }
+          : {}),
+      }).filter((h) => h.term.severity === "hard-fail");
       for (const h of hits) {
         const rel = path.relative(APP_ROOT, abs).replace(/\\/g, "/");
         failures.push(
