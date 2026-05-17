@@ -20,9 +20,9 @@ on the container env, only the reference):
 | `AZURE_AD_CLIENT_SECRET` | `azure-ad-client-secret` | Key Vault |
 | `AUTH_WEBHOOK_SECRET` | `auth-webhook-secret` | Key Vault |
 | `DJANGO_SECRET_KEY` | `django-secret` | Key Vault |
-| `UPSTASH_REDIS_REST_URL` | `upstash-redis-url` | ACA secret (Upstash) |
-| `UPSTASH_REDIS_REST_TOKEN` | `upstash-redis-token` | ACA secret (Upstash) |
-| `AZURE_EVIDENCE_STORAGE_KEY` | `evidence-storage-key` | ACA secret (blob store) |
+| `UPSTASH_REDIS_REST_URL` | `upstash-redis-url` | **Key Vault** (`nzila-canada-prod-kv`, versioned URI) |
+| `UPSTASH_REDIS_REST_TOKEN` | `upstash-redis-token` | **Key Vault** (`nzila-canada-prod-kv`, versioned URI) |
+| `AZURE_EVIDENCE_STORAGE_KEY` | `evidence-storage-key` | **Key Vault** (`nzila-canada-prod-kv`, versioned URI) |
 
 Plain env vars (non-secret): `NODE_ENV`, `PORT`, `UE_ENVIRONMENT`,
 `NEXT_PUBLIC_*`, `UE_*`, `PGHOST`, `PGUSER`, `PGDATABASE`, `PGSSLMODE`,
@@ -36,19 +36,20 @@ Plain env vars (non-secret): `NODE_ENV`, `PORT`, `UE_ENVIRONMENT`,
 > as ACA secrets (`upstash-redis-url`, `upstash-redis-token`) and wired
 > via `secretRef` on revision `--0000049`. Health confirmed live:
 > `redis: {status:"ok", ms:37}`.
-> **Gap remaining**: token should be migrated to Key Vault and rotated
-> before PRODUCTION READY stamp.
+> **Migrated to Key Vault `2026-05-18`**: `upstash-redis-url` and
+> `upstash-redis-token` now reference `nzila-canada-prod-kv` via
+> versioned KV URI (`keyVaultUrl` confirmed in ACA secret list).
+> Redis env vars remapped to new KV-backed secret names on revision
+> `--0000063`. Health confirmed: `redis: {status:"ok", ms:60}`.
 >
 > ℹ Evidence blob store added `2026-05-17T20:30:00Z`: storage account
 > `nzilacanadaprodev` (Standard_GRS, canadacentral, HTTPS-only,
 > deny-all + AzureServices bypass). Container `union-eyes-evidence`
 > (private). Storage key stored as ACA secret `evidence-storage-key`.
-> Env vars `AZURE_EVIDENCE_STORAGE_ACCOUNT`, `AZURE_EVIDENCE_STORAGE_CONTAINER`,
-> `AZURE_EVIDENCE_STORAGE_KEY` wired on revision `--0000062`.
-> **Gap remaining**: storage key should be migrated to Key Vault before
-> PRODUCTION READY stamp. ACA managed identity granted `Key Vault Secrets
-> Officer` on `nzila-canada-prod-kv` (principal `264f8347-4c8c-4732-983f-3bb06b563a0a`)
-> `2026-05-17T20:45:00Z` — KV-backed migration path is now unblocked.
+> **Migrated to Key Vault `2026-05-18`**: `evidence-storage-key` now
+> references `nzila-canada-prod-kv` via versioned KV URI.
+> All 3 secrets (`upstash-redis-url`, `upstash-redis-token`,
+> `evidence-storage-key`) confirmed `keyVaultUrl`-backed in ACA.
 
 ## In-repo scan
 
@@ -86,8 +87,8 @@ Status remains `configured`, not `validated`.
 
 ## Gaps
 
-1. `UPSTASH_REDIS_REST_TOKEN` — stored as ACA secret (not yet in Key Vault). KV migration path unblocked (`Key Vault Secrets Officer` granted to ACA managed identity `2026-05-17T20:45:00Z`). Execute before PRODUCTION READY stamp.
-2. `AZURE_EVIDENCE_STORAGE_KEY` — stored as ACA secret (not yet in Key Vault). Same migration path as above. Execute before PRODUCTION READY stamp.
+1. ~~`UPSTASH_REDIS_REST_TOKEN` — stored as ACA secret (not yet in Key Vault).~~ ✅ **MIGRATED `2026-05-18`** — `upstash-redis-url` and `upstash-redis-token` now KV-backed (versioned URI, `keyVaultUrl` confirmed). Redis env vars remapped on revision `--0000063`.
+2. ~~`AZURE_EVIDENCE_STORAGE_KEY` — stored as ACA secret (not yet in Key Vault).~~ ✅ **MIGRATED `2026-05-18`** — `evidence-storage-key` now KV-backed (versioned URI, `keyVaultUrl` confirmed).
 3. No documented evidence of a real production rotation run.
 4. Caller-side access logs (Key Vault diagnostic logs to LAW) should be
    confirmed enabled — not verified in this pass.

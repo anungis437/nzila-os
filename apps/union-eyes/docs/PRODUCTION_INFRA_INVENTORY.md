@@ -12,7 +12,7 @@ resources below. Anything not enumerated by Azure is recorded as
 
 | Component | Provider | Resource | Region | Status | Owner | Notes |
 |---|---|---|---|---|---|---|
-| Container App | Azure Container Apps | `nzila-os-union-eyes-prod` | canadacentral | **validated** | Platform | 2/6 replicas, HTTP autoscaling (10 req/replica), active revision `--0000062` healthy |
+| Container App | Azure Container Apps | `nzila-os-union-eyes-prod` | canadacentral | **validated** | Platform | 2/6 replicas, HTTP autoscaling (10 req/replica), active revision `--0000064` healthy |
 | Managed env | Azure Container Apps | `nzila-canada-prod-env` | canadacentral | **validated** | Platform | Hosts UE prod app |
 | Managed env (system) | ACA internal | `mc-nzila-canada-p-app-unioneyes-ap-1545` | canadacentral | configured | Azure | Auto-created managed component |
 
@@ -43,7 +43,7 @@ resources below. Anything not enumerated by Azure is recorded as
 |---|---|---|---|
 | ACA platform FQDN | Azure Container Apps | **validated** | `nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io` — TLS via ACA |
 | Custom domain | Azure Container Apps | **validated** | `app.unioneyes.app` bound with `SniEnabled` + Azure managed certificate. HSTS `max-age=63072000; includeSubDomains; preload` (2-year) active. Full security header suite live (CSP, X-Frame-Options, COEP, COOP, CORP, Referrer-Policy, Permissions-Policy). Confirmed `2026-05-17T20:00:00Z`. |
-| Azure Front Door | Azure CDN / AFD | **configured** | Profile `nzila-ue-afd-prod` (Standard_AzureFrontDoor). Endpoint `ue-prod` → `ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net`. Origin: ACA FQDN. Route: HTTP→HTTPS redirect, HTTPS-only forwarding, `/*`. WAF security policy linked (`Succeeded`). AFD propagation: `deploymentStatus: NotStarted` (propagating to PoPs at capture time). DNS change to route `app.unioneyes.app` → AFD endpoint not yet made — requires registrar access. |
+| Azure Front Door | Azure CDN / AFD | **configured** | Profile `nzila-ue-afd-prod` (Standard_AzureFrontDoor). Endpoint `ue-prod` → `ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net`. Origin: ACA FQDN. Route: HTTP→HTTPS redirect, HTTPS-only forwarding, `/*`. WAF security policy linked (`Succeeded`). Custom domain `app.unioneyes.app` added to AFD (`provisioningState: Succeeded`); validation token `_q1en0zg4c8s9sockra3ayi3esqr7jw1` for `_dnsauth.app.unioneyes.app` TXT record pending Cloudflare DNS action. AFD diagnostic logs (`FrontDoorAccessLog`, `FrontDoorWebApplicationFirewallLog`, `FrontDoorHealthProbeLog`) enabled to LAW via `ue-afd-diag` diagnostic settings `2026-05-18`. DNS CNAME routing `app.unioneyes.app` → AFD endpoint requires Cloudflare credentials (not yet updated). |
 | WAF | Azure Front Door WAF | **configured** | Policy `nzilauewafdprod` (Standard, Prevention mode). 2 custom rules: `RateLimitPerIP` (300 req/min → Block) + `BlockScanners` (path pattern → Block). Security policy `ue-prod-waf` linked to AFD endpoint (`Succeeded`). OWASP managed rule sets require Premium_AzureFrontDoor upgrade (deferred). |
 | HSTS / canonical redirects | Application headers | **validated** | `max-age=63072000; includeSubDomains; preload` — 2-year HSTS with preload via Next.js `next.config.ts` headers. Confirmed live on `app.unioneyes.app`. |
 
@@ -57,14 +57,14 @@ resources below. Anything not enumerated by Azure is recorded as
 
 | Component | Provider | Resource | Status | Notes |
 |---|---|---|---|---|
-| Blob storage | Azure Storage | `nzilacanadaprodev` | **configured** | Created `2026-05-17T20:30:00Z`. Standard_GRS, canadacentral, HTTPS-only, TLS 1.2+, public access off, deny-all network ACL + AzureServices bypass. Container `union-eyes-evidence` (private). Storage key stored as ACA secret `evidence-storage-key`. Wired via env vars on revision `--0000062`. **Gap**: key not yet in Key Vault (migration unblocked). |
+| Blob storage | Azure Storage | `nzilacanadaprodev` | **configured** | Created `2026-05-17T20:30:00Z`. Standard_GRS, canadacentral, HTTPS-only, TLS 1.2+, public access off, deny-all network ACL + AzureServices bypass. Container `union-eyes-evidence` (private). Storage key migrated to Key Vault `nzila-canada-prod-kv` as `evidence-storage-key` (KV-backed ACA secret, versioned URI) `2026-05-18`. Env vars `AZURE_EVIDENCE_STORAGE_ACCOUNT`, `AZURE_EVIDENCE_STORAGE_CONTAINER`, `AZURE_EVIDENCE_STORAGE_KEY` wired on revision `--0000062`+. |
 
 ## Cache / Rate Limiting
 
 | Component | Provider | Resource | Status | Notes |
 |---|---|---|---|---|
 | Azure Cache for Redis | Azure | — | **deferred** | None in subscription. UE prod uses Upstash external Redis. |
-| Upstash Redis | Upstash SaaS | `cuddly-mudfish-102231.upstash.io` | **validated** | Configured `2026-05-17T19:08:00Z`. URL + token stored as ACA secrets (`upstash-redis-url`, `upstash-redis-token`), wired via `secretRef` on revision `--0000049`. Health confirmed: `redis: {status:"ok", ms:37}`. **Gap**: token should be migrated to Key Vault before PRODUCTION READY stamp. |
+| Upstash Redis | Upstash SaaS | `cuddly-mudfish-102231.upstash.io` | **validated** | Configured `2026-05-17T19:08:00Z`. URL + token migrated to Key Vault `nzila-canada-prod-kv` as `upstash-redis-url` and `upstash-redis-token` (KV-backed ACA secrets, versioned URI) `2026-05-18`. Redis env vars remapped to new KV-backed secret names on revision `--0000063`. Health confirmed: `redis: {status:"ok", ms:60}`. |
 
 ## DR / Backup
 
@@ -80,7 +80,7 @@ resources below. Anything not enumerated by Azure is recorded as
 |---|---|---|
 | Postgres password / session auth | configured | `AUTH_SECRET` sourced via ACA secret `enc-key` |
 | Entra External ID | configured | `AZURE_AD_CLIENT_ID`, `AZURE_AD_TENANT_ID` plaintext env; `AZURE_AD_CLIENT_SECRET` via KV-backed ACA secret |
-| ACA system-assigned managed identity | **validated** | Principal `264f8347-4c8c-4732-983f-3bb06b563a0a`. Granted `Key Vault Secrets Officer` on `nzila-canada-prod-kv` `2026-05-17T20:45:00Z`. KV migration path for ACA secrets now unblocked. |
+| ACA system-assigned managed identity | **validated** | Principal `264f8347-4c8c-4732-983f-3bb06b563a0a`. Granted `Key Vault Secrets Officer` on `nzila-canada-prod-kv` `2026-05-17T20:45:00Z`. All 3 secrets (`upstash-redis-url`, `upstash-redis-token`, `evidence-storage-key`) successfully migrated to KV-backed ACA secretRefs `2026-05-18`. `SECRET_TOPOLOGY=aca-kv-integrated` on revision `--0000064`. |
 | MFA / SSO buyer claims | **planned** | Only claim what is enforced in production; do not pre-claim |
 
 ## Summary
@@ -90,7 +90,11 @@ real Key Vault, and real Log Analytics. Dedicated evidence blob store
 `nzilacanadaprodev` is configured with GRS + deny-all network policy.
 Custom domain `app.unioneyes.app` with 2-year HSTS + full security headers
 is validated. Azure Front Door + WAF policy (Prevention mode, 2 custom rules)
-are configured and security policy linked — DNS routing through AFD pending
-registrar update. ACA managed identity has `Key Vault Secrets Officer` role
-enabling secret migration from ACA secrets to KV. Cross-RG ACR dependency
-is acceptable and recorded.
+are configured, security policy linked, AFD custom domain `app.unioneyes.app`
+added (`provisioningState: Succeeded`), and AFD diagnostic logs to LAW enabled.
+DNS CNAME routing through AFD requires Cloudflare update (validation TXT
+`_dnsauth.app.unioneyes.app = _q1en0zg4c8s9sockra3ayi3esqr7jw1` pending).
+All 3 non-database secrets (Upstash URL, Upstash token, evidence storage key)
+are now KV-backed ACA secretRefs — `SECRET_TOPOLOGY=aca-kv-integrated` on
+revision `--0000064`. ACA managed identity has `Key Vault Secrets Officer` role.
+Cross-RG ACR dependency is acceptable and recorded.

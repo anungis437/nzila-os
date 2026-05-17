@@ -3,6 +3,16 @@
 // Provisions ONE isolated Union Eyes environment (staging | demo | pilot | prod).
 // Deploy four times (once per env) into per-env resource groups:
 //
+//   # Production (KV-integrated — recommended):
+//   az deployment group create \
+//     --resource-group nzila-canada-<env>-rg \
+//     --template-file apps/union-eyes/infra/environments/union-eyes-env.bicep \
+//     --parameters environment=prod postgresAdminPassword=<pwd> \
+//                  upstashRedisUrlKvUri=<versioned-kv-uri> \
+//                  upstashRedisTokenKvUri=<versioned-kv-uri> \
+//                  evidenceStorageKeyKvUri=<versioned-kv-uri>
+//
+//   # Non-prod / initial provisioning (inline secrets fallback):
 //   az deployment group create \
 //     --resource-group nzila-canada-<env>-rg \
 //     --template-file apps/union-eyes/infra/environments/union-eyes-env.bicep \
@@ -45,17 +55,28 @@ param containerImage string = 'nzilacanadaacr.azurecr.io/nzila-os-union-eyes:pro
 @description('ACR resource (managed identity must have AcrPull on this registry)')
 param acrLoginServer string = 'nzilacanadaacr.azurecr.io'
 
-@description('Upstash Redis REST URL (wired as ACA secret)')
+@description('Upstash Redis REST URL — versioned Key Vault URI (e.g. https://nzila-canada-prod-kv.vault.azure.net/secrets/upstash-redis-url/<version>). Leave empty to use inline value.')
+param upstashRedisUrlKvUri string = ''
+
+@description('Upstash Redis REST token — versioned Key Vault URI. Leave empty to use inline value.')
+param upstashRedisTokenKvUri string = ''
+
+@description('Evidence blob storage account key — versioned Key Vault URI. Leave empty to use inline value.')
+param evidenceStorageKeyKvUri string = ''
+
+@description('Upstash Redis REST URL fallback inline value (used only when KV URI is empty; prefer KV URI for prod)')
 @secure()
 param upstashRedisUrl string = ''
 
-@description('Upstash Redis REST token (wired as ACA secret)')
+@description('Upstash Redis REST token fallback inline value (used only when KV URI is empty; prefer KV URI for prod)')
 @secure()
 param upstashRedisToken string = ''
 
-@description('Evidence blob storage account key (wired as ACA secret; prod only)')
+@description('Evidence blob storage account key fallback inline value (used only when KV URI is empty; prefer KV URI for prod)')
 @secure()
 param evidenceStorageKey string = ''
+
+var useKvSecrets = isProd && upstashRedisUrlKvUri != ''
 
 var isProd = environment == 'prod'
 var dbName = 'nzila_os_${environment}'
@@ -197,11 +218,17 @@ resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
           identity: 'system'
         }
       ]
-      secrets: isProd ? [
+      secrets: isProd ? (useKvSecrets ? [
+        // KV-integrated secrets (prod standard — versioned URI + system identity)
+        { name: 'upstash-redis-url', keyVaultUrl: upstashRedisUrlKvUri, identity: 'system' }
+        { name: 'upstash-redis-token', keyVaultUrl: upstashRedisTokenKvUri, identity: 'system' }
+        { name: 'evidence-storage-key', keyVaultUrl: evidenceStorageKeyKvUri, identity: 'system' }
+      ] : [
+        // Fallback inline values (used for non-KV environments or initial provisioning)
         { name: 'upstash-redis-url', value: upstashRedisUrl }
         { name: 'upstash-redis-token', value: upstashRedisToken }
         { name: 'evidence-storage-key', value: evidenceStorageKey }
-      ] : []
+      ]) : []
     }
     template: {
       containers: [
@@ -225,8 +252,8 @@ resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'PGDATABASE', value: dbName }
             { name: 'PGSSLMODE', value: 'require' }
             // Lineage / runtime-fail-closed metadata vars
-            { name: 'SECRET_TOPOLOGY', value: environment == 'prod' ? 'aca-secrets-kv-migration-pending' : 'local' }
-            { name: 'SECRET_AUTHORITY', value: environment == 'prod' ? 'nzila-canada-prod-kv' : 'local' }
+            { name: 'SECRET_TOPOLOGY', value: environment == 'prod' ? (useKvSecrets ? 'aca-kv-integrated' : 'aca-secrets-inline') : 'local' }
+            { name: 'SECRET_AUTHORITY', value: environment == 'prod' ? 'azure-key-vault' : 'local' }
             { name: 'ENVIRONMENT_ISOLATION', value: environment == 'prod' || environment == 'pilot' ? 'full' : 'partial' }
           ], isProd ? [
             { name: 'UPSTASH_REDIS_REST_URL', secretRef: 'upstash-redis-url' }
