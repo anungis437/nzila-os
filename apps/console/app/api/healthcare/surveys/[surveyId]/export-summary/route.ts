@@ -1,8 +1,9 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
 import { eq } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { requireRole } from '@/lib/rbac'
-import { db } from '@nzila/db/client'
+import { db } from '@/lib/db'
 import { healthcareSurveys, healthcareSurveyResponses } from '@nzila/db/schema'
 import { HEALTHCARE_AUDIT_ACTIONS } from '@nzila/healthcare-surveys'
 import { buildSurveyResultArtifacts, recordHealthcareAuditEvent } from '@/lib/healthcare-discovery'

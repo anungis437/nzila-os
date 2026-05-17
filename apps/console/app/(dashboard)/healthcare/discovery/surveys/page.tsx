@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { desc, sql } from 'drizzle-orm'
 import { Card, Button } from '@nzila/ui'
 import { requireRole } from '@/lib/rbac'
-import { db } from '@nzila/db/client'
+import { db } from '@/lib/db'
 import { healthcareSurveys, healthcareSurveyResponses } from '@nzila/db/schema'
 
 export const dynamic = 'force-dynamic'

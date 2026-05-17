@@ -1,4 +1,4 @@
-import { db } from '@nzila/db/client'
+import { db } from '@/lib/db'
 import {
   auditLog,
   healthcareSurveys,

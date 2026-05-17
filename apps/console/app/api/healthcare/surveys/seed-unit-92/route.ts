@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
 import { requireRole } from '@/lib/rbac'
 import { seedUnit92CampaignIfMissing, recordHealthcareAuditEvent } from '@/lib/healthcare-discovery'

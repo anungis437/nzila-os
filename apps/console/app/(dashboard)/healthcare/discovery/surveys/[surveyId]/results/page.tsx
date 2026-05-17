@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { Card } from '@nzila/ui'
 import { requireRole } from '@/lib/rbac'
-import { db } from '@nzila/db/client'
+import { db } from '@/lib/db'
 import { healthcareSurveys, healthcareSurveyResponses } from '@nzila/db/schema'
 import {
   HEALTHCARE_AUDIT_ACTIONS,
@@ -199,3 +199,4 @@ export default async function SurveyResultsPage({
     </div>
   )
 }
+

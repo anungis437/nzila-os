@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { eq } from 'drizzle-orm'
-import { db } from '@nzila/db/client'
+import { db } from '@/lib/db'
 import { healthcareSurveys } from '@nzila/db/schema'
 import { RespondForm } from './respond-form'
 
@@ -44,3 +44,4 @@ export default async function PublicRespondPage({
     />
   )
 }
+

@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { requireRole } from '@/lib/rbac'
-import { db } from '@nzila/db/client'
+import { db } from '@/lib/db'
 import { healthcareSurveys } from '@nzila/db/schema'
 import { SurveyControls } from './survey-controls'
 
@@ -78,3 +78,4 @@ export default async function SurveyDetailPage({
     </div>
   )
 }
+

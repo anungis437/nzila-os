@@ -1,7 +1,8 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { requireRole } from '@/lib/rbac'
-import { db } from '@nzila/db/client'
+import { db } from '@/lib/db'
 import { healthcareSurveys } from '@nzila/db/schema'
 import {
   HEALTHCARE_AUDIT_ACTIONS,
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     campaignName?: string
     internalNotes?: string
     distributionMessage?: string
-    orgId?: string | null
+    targetOrgId?: string | null
   }
 
   if (!body.title || !body.localName || !body.unitName || !body.championLabel) {
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
   const inserted = await db
     .insert(healthcareSurveys)
     .values({
-      orgId: body.orgId ?? undefined,
+      orgId: body.targetOrgId ?? undefined,
       campaignName: body.campaignName ?? null,
       unitName: body.unitName,
       siteName: body.siteName ?? null,
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
   await recordHealthcareAuditEvent({
     action: HEALTHCARE_AUDIT_ACTIONS.HEALTHCARE_SURVEY_CREATED,
     actorId: userId,
-    orgId: body.orgId,
+    orgId: body.targetOrgId,
     surveyId,
     localName: body.localName,
     unitName: body.unitName,

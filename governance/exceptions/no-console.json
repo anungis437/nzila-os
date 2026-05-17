@@ -132,6 +132,12 @@
       "path": "apps/nzila-hq/server/db/audit.ts",
       "owner": "platform-core",
       "justification": "Server-side audit logger in incubating app \u2014 console.error used as fallback when DB insert fails. Will adopt os-core structured logger before PILOT promotion.",
-      "expiresOn": "2026-10-01"    }
+      "expiresOn": "2026-10-01"    },
+    {
+      "path": "apps/union-eyes/instrumentation.ts",
+      "owner": "platform-team",
+      "justification": "Turbopack instrumentation loader cannot instantiate relative module factories from inside register() catch path — console.error is the only safe fallback here.",
+      "expiresOn": "2026-09-01"
+    }
   ]
 }

@@ -1,7 +1,9 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
 import { eq } from 'drizzle-orm'
+import { z } from 'zod'
 import { checkRateLimit } from '@nzila/os-core/rateLimit'
-import { db } from '@nzila/db/client'
+import { db } from '@/lib/db'
 import { healthcareSurveys, healthcareSurveyResponses } from '@nzila/db/schema'
 import {
   computeWorkflowScores,
@@ -18,10 +20,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const body = (await request.json()) as {
-    token: string
-    answers: Record<string, unknown>
-  }
+  const body = await (async () => {
+    const BodySchema = z.object({
+      token: z.string(),
+      answers: z.record(z.unknown()),
+    })
+    return BodySchema.parse(await request.json())
+  })()
 
   if (!body.token || !isValidShareToken(body.token)) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 400 })

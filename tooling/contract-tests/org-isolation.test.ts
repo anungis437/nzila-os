@@ -78,6 +78,7 @@ function isPublicRoute(routeFile: string): boolean {
     || normalized.includes('/webhook')  // webhook routes use signature verification (Stripe, PayPal, Shopify, Zoho, etc.)
     || normalized.includes('/api/whop/')  // Whop payment routes (intentionally unauthenticated checkout)
     || normalized.includes('/api/quote/')  // Quote response via share token (no auth, token-validated)
+    || normalized.includes('/api/healthcare/surveys/responses')  // Anonymous survey response via share token (no user auth, token-validated)
     || normalized.includes('/api/contact/')  // Public contact/demo-request form (marketing)
     || normalized.includes('/api/trial/')  // Public Flow trial signup form
     || normalized.includes('/api/metrics/')  // Telemetry scrape endpoint (token-gated via METRICS_BEARER_TOKEN)
