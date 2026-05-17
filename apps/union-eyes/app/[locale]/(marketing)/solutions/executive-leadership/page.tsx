@@ -61,7 +61,7 @@ export default async function ExecutiveLeadershipPage({ params }: { params: Prom
           </span>
         }
         heading={<>Lead with the full weight of<br />institutional history behind you.</>}
-        description="UnionEyes gives executive leaders the institutional continuity visibility, strategic clarity, and governance intelligence to lead confidently through any transition — without wading through operational complexity."
+        description="UnionEyes gives executive leaders the institutional continuity visibility, strategic clarity, and governance-of-record intelligence to lead confidently through any transition — without wading through operational complexity."
         cta={<Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
             Request an Institutional Briefing
           </Link>}

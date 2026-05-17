@@ -2,7 +2,7 @@
  * Governance & Continuity (customer-institutional).
  *
  * Per realignment directive, "governance" on UnionEyes public surfaces refers
- * to the CUSTOMER's institutional governance ecosystem: constitutional
+ * to the CUSTOMER's institutional governance constellation: constitutional
  * operations, resolutions, committees, delegate coordination, and continuity
  * of mandate across leadership transitions.
  *
@@ -167,11 +167,11 @@ export default async function GovernancePage({
                     },
                     {
                       q: 'What happens when leadership changes?',
-                      a: 'Incoming officers inherit complete deliberation history, active mandates, pending motions, and committee state. Procedural neutrality is enforced by the platform, not by trust in the outgoing officer.',
+                      a: 'Incoming officers inherit complete deliberation history, active mandates, pending motions, and committee state. Procedural neutrality is enforced by the substrate, not by trust in the outgoing officer.',
                     },
                     {
                       q: 'How is UnionEyes itself governed?',
-                      a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep platform neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find structural details in the stewardship appendix.',
+                      a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep substrate neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find structural details in the stewardship appendix.',
                     },
                   ].map(({ q, a }) => (
                     <div key={q} className="pt-6 first:pt-0">
@@ -320,7 +320,7 @@ export default async function GovernancePage({
             <section className="py-20 bg-gray-50 rounded-2xl">
               <div className="max-w-3xl mx-auto px-6 text-center">
                 <h2 className="text-3xl font-bold text-navy mb-4">
-                  Ready to make your governance infrastructure durable?
+                  Ready to make your constitutional continuity infrastructure durable?
                 </h2>
                 <p className="text-gray-600 text-lg mb-10">
                   Book a governance briefing to see how UnionEyes handles constitutional operations,

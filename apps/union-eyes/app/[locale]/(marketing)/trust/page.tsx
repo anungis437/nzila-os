@@ -18,7 +18,7 @@
  * Trust & Compliance page.
  * Accessible at /{locale}/trust — fully translated.
  *
- * Demonstrates governance-first platform design: audit trails,
+ * Demonstrates governance-first substrate design: audit trails,
  * RBAC, Canadian data sovereignty, financial reconciliation,
  * entitlement controls, and defensibility.
  */
@@ -179,7 +179,7 @@ export default async function TrustPage({
           <p className="mb-6 max-w-2xl leading-relaxed text-slate-600">
             UnionEyes is designed from the ground up for deployment in labour environments.
             Our labour-safe posture is not a policy addendum — it is an architectural commitment
-            enforced at every layer of the platform.
+            enforced at every layer of the substrate.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             {[
@@ -188,7 +188,7 @@ export default async function TrustPage({
               { label: 'Human oversight required',           desc: 'All intelligence recommendations require human review before any action.' },
               { label: 'Democratic governance controls',     desc: 'AI systems operate within democratic governance structures, never replacing them.' },
               { label: 'Transparent data use',               desc: 'What data is used, how it is used, and why — documented and available for review.' },
-              { label: 'Anti-monitoring by design',           desc: 'No capability path in the platform can be re-purposed for individual monitoring.' },
+              { label: 'Anti-monitoring by design',           desc: 'No capability path in the substrate can be re-purposed for individual monitoring.' },
             ].map((item) => (
               <div key={item.label} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
                 <div className="mb-1 text-sm font-bold text-slate-900">{item.label}</div>
@@ -440,7 +440,7 @@ export default async function TrustPage({
         <section id="system-status" className="mb-20 scroll-mt-24">
           <h2 className="mb-6 text-2xl font-bold text-slate-900">System Status</h2>
           <p className="mb-8 text-slate-600">
-            Real-time operational status of UnionEyes platform services.
+            Real-time operational status of UnionEyes substrate services.
           </p>
           <StatusPage />
         </section>

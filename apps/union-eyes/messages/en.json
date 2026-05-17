@@ -85,7 +85,7 @@
     "healthSafety": "Health & Safety",
     "bargaining": "Bargaining & Negotiations",
     "financialManagement": "Financial Management",
-    "clcDashboard": "CLC Executive Dashboard",
+    "clcDashboard": "CLC Continuity Coordination",
     "clcStaff": "CLC Staff Operations",
     "clcAffiliates": "Affiliates Management",
     "clcCompliance": "CLC Compliance Tracking",
@@ -807,7 +807,7 @@
     "claims": "Claims Analytics",
     "financial": "Financial Analytics",
     "members": "Member Analytics",
-    "operational": "Operational Analytics",
+    "operational": "Operational Visibility",
     "trends": "Trends",
     "breakdown": "Breakdown",
     "performance": "Performance",
@@ -1471,7 +1471,7 @@
   },
   "healthSafetyPage": {
     "metaTitle": "Health & Safety | UnionEyes",
-    "metaDescription": "Workplace health and safety monitoring and incident management"
+    "metaDescription": "Workplace health and safety monitoring and continuity-preserved restoration"
   },
   "structurePage": {
     "metaTitle": "Union Structure Management",
@@ -1730,8 +1730,8 @@
     }
   },
   "sectorAnalyticsPage": {
-    "title": "Sector Analytics",
-    "subtitle": "Industry-wide trends, wage data, and strategic intelligence across all sectors",
+    "title": "Sector Overview",
+    "subtitle": "Industry-wide trends, wage data, and sector context across the federation",
     "tabs": {
       "overview": "Overview",
       "sectors": "Sector Breakdown",
@@ -2500,8 +2500,8 @@
     "metaDescription": "Manage SMS outreach, campaigns, and conversation flows"
   },
   "crossUnionAnalyticsPage": {
-    "metaTitle": "Cross-Union Analytics | UnionEyes",
-    "metaDescription": "Compare trends and performance across unions and locals"
+    "metaTitle": "Federation Trends | UnionEyes",
+    "metaDescription": "Compare institutional patterns and trends across unions and locals"
   },
   "employerExecutionPage": {
     "metaTitle": "Employer Execution | UnionEyes",
@@ -3760,7 +3760,7 @@
     }
   },
   "movementInsightsPage": {
-    "title": "Movement Insights",
+    "title": "Movement Trends",
     "subtitle": "Privacy-preserving cross-union trends for advocacy and learning",
     "enableDataSharingButton": "Enable Data Sharing",
     "privacyFirstTitle": "Privacy-First Design",
@@ -5439,7 +5439,7 @@
     "noOrgMessage": "Please select an organization to view incident data.",
     "noOrgSelected": "No Organization Selected",
     "pageSubtitle": "Track and manage workplace safety incidents",
-    "pageTitle": "Incident Management",
+    "pageTitle": "Incident Continuity Restoration",
     "reportIncidentButton": "Report Incident",
     "reported": "Reported",
     "resolved": "Resolved",
@@ -6274,7 +6274,7 @@
   "clc": {
     "title": "Canadian Labour Congress",
     "executive": {
-      "title": "CLC Executive Dashboard",
+      "title": "CLC Continuity Coordination",
       "overview": "National Overview",
       "statistics": "National Statistics",
       "affiliates": "Affiliated Organizations",
@@ -6291,7 +6291,7 @@
       "dashboard": {
         "title": "CLC Staff Dashboard",
         "description": "National operations, affiliate synchronization, and remittance processing",
-        "executiveDashboard": "Executive Dashboard"
+        "executiveDashboard": "Continuity Coordination"
       },
       "metrics": {
         "pendingSyncs": "Pending Syncs",
@@ -6470,8 +6470,8 @@
       "audits": "Audit Status"
     },
     "dashboard": {
-      "title": "CLC Executive Dashboard",
-      "description": "Canadian Labour Congress national oversight, affiliate coordination, and per-capita remittance management",
+      "title": "CLC Continuity Coordination",
+      "description": "Canadian Labour Congress national continuity coordination, affiliate coordination, and per-capita remittance stewardship",
       "compliance": "Compliance",
       "manageAffiliates": "Manage Affiliates"
     },
@@ -7232,7 +7232,7 @@
         }
       },
       "story": "Our Story",
-      "platform": "Platform",
+      "platform": "Capabilities",
       "platformItems": {
         "inbox": {
           "name": "Intake & Coordination",
@@ -7276,7 +7276,7 @@
       "signIn": "Sign In"
     },
     "home": {
-      "badge": "Institutional Governance Infrastructure for Unions",
+      "badge": "Constitutional Continuity Infrastructure for Unions",
       "heroHeading": "Command every dimension of your union.",
       "heroDescription": "Grievances. Finances. Membership. Compliance. One governed continuity layer — total transparency, total accountability, zero guesswork.",
       "ctaPrimary": "Start a Controlled Pilot",
@@ -7292,7 +7292,7 @@
       "problemDescription": "Grievances tracked in notebooks. Finances reconciled in spreadsheets. Member records scattered across drives. Employers have million-dollar HR systems — unions have manual processes that lose cases, delay reports, and erode trust.",
       "solutionBadge": "The Solution",
       "solutionHeading": "Institutional Governance Built for How Unions Actually Operate",
-      "solutionDescription": "UnionEyes is institutional governance infrastructure — not generic workplace software. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged for audit. Billing flows from the parent organization down. Data stays in Canadian jurisdiction.",
+      "solutionDescription": "UnionEyes is constitutional continuity infrastructure — not generic workplace software. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged for audit. Billing flows from the parent organization down. Data stays in Canadian jurisdiction.",
       "pillar1": "Contract-Governed Deployment",
       "pillar2": "Financial Accountability",
       "pillar3": "Operational Transparency",
@@ -7311,7 +7311,7 @@
       "step5Desc": "Ongoing audit trails, financial reconciliation, and compliance reporting",
       "governanceBadge": "Governance & Trust",
       "governanceHeading": "Built for the People Who Sign Off",
-      "governanceDescription": "Union executives, finance officers, and legal teams need a governance system they can defend — to their members, their boards, and their auditors.",
+      "governanceDescription": "Union executives, finance officers, and legal teams need a constitutional continuity substrate they can defend — to their members, their boards, and their auditors.",
       "gov1Title": "Immutable Audit Trails",
       "gov1Desc": "Every action — case updates, financial entries, role changes — is logged with tamper-evident records.",
       "gov2Title": "Role-Based Access",
@@ -7354,7 +7354,7 @@
     "story": {
       "badge": "Our Story",
       "heroHeading": "Two brothers. Two careers. One shared conviction.",
-      "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
+      "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the continuity substrate that unions have never had.",
       "readMore": "Read more",
       "backToHome": "Back to home",
       "pageTitle": "Our Story | UnionEyes",
@@ -7516,7 +7516,7 @@
         "complianceReporting": "Difficult compliance reporting",
         "memberTransparency": "Limited member transparency",
         "fragmentedDocs": "Fragmented document management",
-        "noGovernanceOversight": "No centralized governance oversight"
+        "noGovernanceOversight": "No consolidated governance oversight"
       },
       "goals": {
         "auditableFinance": "Auditable financial controls",
@@ -7650,7 +7650,7 @@
         "ba2Before": "No visibility into sector-wide employer patterns",
         "ba2After": "Cross-union trend analysis reveals systemic issues",
         "ba3Before": "Campaign coordination through emails and spreadsheets",
-        "ba3After": "Centralized campaign tracking with real-time progress",
+        "ba3After": "Consolidated campaign tracking with real-time progress",
         "ba4Before": "Policy advocacy backed by limited data",
         "ba4After": "Evidence-based reporting with movement-wide statistics",
         "ctaHeadline": "Ready to see the full picture?",
@@ -7694,7 +7694,7 @@
       "company": "Company",
       "legal": "Legal",
       "institutionalContinuity": "Institutional Continuity",
-      "governanceIntelligence": "Governance Intelligence",
+      "governanceIntelligence": "Governance-of-Record Intelligence",
       "organizationalMemory": "Organizational Memory",
       "corporateMemory": "Organizational Memory",
       "executiveIntelligence": "Executive Intelligence",
@@ -7973,7 +7973,7 @@
       "included5": "Full audit trail on all operations",
       "included6": "Dedicated onboarding and migration support",
       "included7": "Scheduled exports and reporting",
-      "included8": "SLA-backed uptime guarantee",
+      "included8": "SLA-backed continuity survivability",
       "ctaHeading": "Ready to scope a deployment?",
       "ctaDescription": "Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.",
       "ctaPrimary": "Start a Controlled Pilot",
@@ -8003,7 +8003,7 @@
         "leadershipTitle": "Leadership transition continuity scenarios",
         "leadershipDesc": "These scenarios model familiar institutional transition moments and show calm continuity responses that preserve governance coherence.",
         "frictionTitle": "Governance friction simulation flows",
-        "disruptionTitle": "Operational disruption modeling",
+        "disruptionTitle": "Operational strain modeling",
         "stabilizationTitle": "Organizational stabilization simulation",
         "committeeTitle": "Committee coordination simulations",
         "stabilizationMoveLabel": "Stabilization move:",
@@ -9117,7 +9117,7 @@
     "goodMorning": "Good morning",
     "goodAfternoon": "Good afternoon",
     "goodEvening": "Good evening",
-    "operationsOverview": "Nzila Platform Operations — here's your overview.",
+    "operationsOverview": "Nzila Institutional Continuity — here's your overview.",
     "operator": "Operator",
     "organizations": "Organizations",
     "totalMembers": "Total Members",
@@ -9131,8 +9131,8 @@
     "underNegotiation": "{count} under negotiation",
     "totalValue": "${value} total value",
     "affiliatedOrganizations": "affiliated organizations",
-    "commandCenter": "Command Center",
-    "operationsCenter": "Operations Center",
+    "commandCenter": "Coordination Workspace",
+    "operationsCenter": "Operational Continuity Workspace",
     "platformHealthIncidents": "Platform health & incidents",
     "supportQueue": "Support Queue",
     "openTicketsEscalations": "Open tickets & escalations",
@@ -11132,12 +11132,12 @@
   },
   "homePage": {
     "meta": {
-      "title": "UnionEyes | Institutional Continuity & Governance Infrastructure",
+      "title": "UnionEyes | Constitutional Continuity Infrastructure",
       "description": "UnionEyes is the continuity layer for federated institutions — preserving institutional memory, strengthening governance coordination, and modernizing operational trust through non-disruptive implementation alongside existing systems. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "jsonLd": {
       "name": "UnionEyes",
-      "description": "Institutional continuity layer and governance infrastructure for federated organizations. Canadian-hosted, bilingual-first, sovereignty-conscious."
+      "description": "Constitutional continuity infrastructure for federated organizations. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "hero": {
       "eyebrow": "Institutional Governance & Continuity Infrastructure",

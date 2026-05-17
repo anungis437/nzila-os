@@ -801,7 +801,7 @@
     "claims": "Analisi delle Richieste",
     "financial": "Analisi Finanziaria",
     "members": "Analisi dei Membri",
-    "operational": "Analisi Operativa",
+    "operational": "Visibilità operativa",
     "trends": "Tendenze",
     "breakdown": "Dettaglio",
     "performance": "Prestazioni",
@@ -8852,8 +8852,8 @@
     "underNegotiation": "{count} in negoziazione",
     "totalValue": "${value} valore totale",
     "affiliatedOrganizations": "organizzazioni affiliate",
-    "commandCenter": "Centro di Comando",
-    "operationsCenter": "Centro Operativo",
+    "commandCenter": "Spazio di coordinamento",
+    "operationsCenter": "Spazio di continuità operativa",
     "platformHealthIncidents": "Salute della piattaforma e incidenti",
     "supportQueue": "Coda di supporto",
     "openTicketsEscalations": "Ticket aperti e escalation",
@@ -11076,12 +11076,12 @@
   },
   "homePage": {
     "meta": {
-      "title": "UnionEyes | Institutional Continuity & Governance Infrastructure",
+      "title": "UnionEyes | Constitutional Continuity Infrastructure",
       "description": "UnionEyes is the continuity layer for federated institutions — preserving institutional memory, strengthening governance coordination, and modernizing operational trust through non-disruptive implementation alongside existing systems. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "jsonLd": {
       "name": "UnionEyes",
-      "description": "Institutional continuity layer and governance infrastructure for federated organizations. Canadian-hosted, bilingual-first, sovereignty-conscious."
+      "description": "Constitutional continuity infrastructure for federated organizations. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "hero": {
       "eyebrow": "Institutional Governance & Continuity Infrastructure",

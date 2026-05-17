@@ -79,7 +79,7 @@
     "healthSafety": "Santé et sécurité",
     "bargaining": "Négociations collectives",
     "financialManagement": "Gestion financière",
-    "clcDashboard": "Tableau de bord exécutif CTC",
+    "clcDashboard": "Coordination de continuité CTC",
     "clcStaff": "Opérations du personnel CTC",
     "clcAffiliates": "Gestion des affiliés",
     "clcCompliance": "Suivi de la conformité CTC",
@@ -801,7 +801,7 @@
     "claims": "Analytique des Réclamations",
     "financial": "Analytique Financière",
     "members": "Analytique des Membres",
-    "operational": "Analytique Opérationnelle",
+    "operational": "Visibilité opérationnelle",
     "trends": "Tendances",
     "breakdown": "Répartition",
     "performance": "Performance",
@@ -6211,7 +6211,7 @@
   "clc": {
     "title": "Congrès du travail du Canada",
     "executive": {
-      "title": "Tableau de bord exécutif du CTC",
+      "title": "Coordination de continuité du CTC",
       "overview": "Aperçu national",
       "statistics": "Statistiques nationales",
       "affiliates": "Organisations affiliées",
@@ -6228,7 +6228,7 @@
       "dashboard": {
         "title": "Tableau de bord du personnel CTC",
         "description": "Opérations nationales, synchronisation des affiliés et traitement des cotisations",
-        "executiveDashboard": "Tableau de bord exécutif"
+        "executiveDashboard": "Coordination de continuité"
       },
       "metrics": {
         "pendingSyncs": "Synchronisations en attente",
@@ -6407,7 +6407,7 @@
       "audits": "État des audits"
     },
     "dashboard": {
-      "title": "Tableau de bord exécutif du CTC",
+      "title": "Coordination de continuité du CTC",
       "description": "Supervision nationale du CTC, coordination des affiliés et gestion des remises par tête",
       "compliance": "Conformité",
       "manageAffiliates": "Gérer les affiliés"
@@ -8852,8 +8852,8 @@
     "underNegotiation": "{count} en négociation",
     "totalValue": "{value} valeur totale",
     "affiliatedOrganizations": "organisations affiliées",
-    "commandCenter": "Centre de commande",
-    "operationsCenter": "Centre des opérations",
+    "commandCenter": "Espace de coordination",
+    "operationsCenter": "Espace de continuité opérationnelle",
     "platformHealthIncidents": "Santé de la plateforme & incidents",
     "supportQueue": "File d'attente du support",
     "openTicketsEscalations": "Tickets ouverts & escalades",
@@ -11132,12 +11132,12 @@
   },
   "homePage": {
     "meta": {
-      "title": "UnionEyes | Continuité institutionnelle et infrastructure de gouvernance",
+      "title": "UnionEyes | Infrastructure constitutionnelle de continuité",
       "description": "UnionEyes est la couche de continuité pour les institutions fédérées — préservant la mémoire institutionnelle, renforçant la coordination de gouvernance et modernisant la confiance opérationnelle par une mise en œuvre non perturbatrice aux côtés des systèmes existants. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
     },
     "jsonLd": {
       "name": "UnionEyes",
-      "description": "Couche de continuité institutionnelle et infrastructure de gouvernance pour les organisations fédérées. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
+      "description": "Infrastructure constitutionnelle de continuité pour les organisations fédérées. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
     },
     "hero": {
       "eyebrow": "Gouvernance institutionnelle et infrastructure de continuité",

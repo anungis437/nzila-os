@@ -140,7 +140,7 @@ export default async function InsightsPage({
         imageUrl={heroImagery.insights}
         tone="dark"
         revealTempo="conference"
-        heading={<>Institutional continuity and governance intelligence</>}
+        heading={<>Institutional continuity and governance-of-record intelligence</>}
         description="A doctrine publication movement for executive teams preserving institutional memory, reducing fragmentation risk, and operationalizing explainable modernization with continuity confidence."
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

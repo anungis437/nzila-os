@@ -80,7 +80,7 @@ export default function StewardshipAppendixPage() {
           </p>
           <p className="text-sm text-gray-300 mt-4 max-w-2xl">
             The word &ldquo;governance&rdquo; on UnionEyes public surfaces refers to the
-            customer&rsquo;s institutional governance ecosystem &mdash; not to corporate
+            customer&rsquo;s institutional governance constellation &mdash; not to corporate
             stewardship mechanics.
           </p>
           <p className="text-sm text-gray-300 mt-3 max-w-2xl">

@@ -55,7 +55,7 @@ const surfaces = [
   },
   {
     icon: BarChart3,
-    title: 'Governance Intelligence Briefings',
+    title: 'Governance-of-Record Intelligence Briefings',
     desc: 'Governance modernization progress, explainability audit status, and continuity oversight summaries — built for board-level review.',
   },
   {

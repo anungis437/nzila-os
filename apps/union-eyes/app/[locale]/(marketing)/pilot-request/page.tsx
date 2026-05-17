@@ -75,7 +75,7 @@ const CHALLENGES = [
   { value: 'Difficult compliance reporting', key: 'complianceReporting' },
   { value: 'Limited member transparency', key: 'memberTransparency' },
   { value: 'Fragmented document management', key: 'fragmentedDocs' },
-  { value: 'No centralized governance oversight', key: 'noGovernanceOversight' },
+    { value: 'No consolidated governance oversight', key: 'noGovernanceOversight' },
 ] as const;
 
 const GOALS = [

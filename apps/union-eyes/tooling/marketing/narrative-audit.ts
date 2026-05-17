@@ -17,7 +17,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import fg from "fast-glob";
 
-import { findViolations, type ForbiddenTerm } from "./config/forbidden-vocabulary";
+import { findViolations, PUBLIC_MESSAGES_NAMESPACES, type ForbiddenTerm } from "./config/forbidden-vocabulary";
 import { narrativeBalanceRule } from "./rules/narrative-balance";
 import { coexistencePositioningRule } from "./rules/coexistence-positioning";
 import { proceduralNeutralityRule } from "./rules/procedural-neutrality";
@@ -75,6 +75,12 @@ const MARKETING_GLOBS = [
   "app/[(]marketing[)]/**/layout.tsx",
 ];
 const MESSAGES_GLOB = "messages/*.json";
+
+// Wave 18 — Namespace-aware messages scoping.
+// `PUBLIC_MESSAGES_NAMESPACES` is now exported from
+// `./config/forbidden-vocabulary` so the marketing-vocabulary contract test
+// can share the exact same allowlist. Update that file when adding new public
+// marketing namespaces.
 
 // Workstream B4 — internal runtime-narrative surfaces. Vocabulary-only sweep
 // (no public-marketing rule modules). Keeps the institutional posture
@@ -205,7 +211,12 @@ export async function runAudit(): Promise<AuditReport> {
     };
 
     const content = await readSurface(abs);
-    const violations = findViolations(content, { isPublicSurface: true });
+    const violations = findViolations(content, {
+      isPublicSurface: true,
+      ...(isMessages
+        ? { publicMessagesNamespaces: PUBLIC_MESSAGES_NAMESPACES }
+        : {}),
+    });
     const ruleResults = RULES.map((r) => r.evaluate(content, ctx));
     out.push({
       ctx,
