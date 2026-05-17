@@ -20,8 +20,8 @@ on the container env, only the reference):
 | `AZURE_AD_CLIENT_SECRET` | `azure-ad-client-secret` | Key Vault |
 | `AUTH_WEBHOOK_SECRET` | `auth-webhook-secret` | Key Vault |
 | `DJANGO_SECRET_KEY` | `django-secret` | Key Vault |
-| `UPSTASH_REDIS_REST_URL` | `upstash-redis-rest-url` | ACA secret (Upstash) |
-| `UPSTASH_REDIS_REST_TOKEN` | `upstash-redis-rest-token` | ACA secret (Upstash) |
+| `UPSTASH_REDIS_REST_URL` | `upstash-redis-url` | ACA secret (Upstash) |
+| `UPSTASH_REDIS_REST_TOKEN` | `upstash-redis-token` | ACA secret (Upstash) |
 
 Plain env vars (non-secret): `NODE_ENV`, `PORT`, `UE_ENVIRONMENT`,
 `NEXT_PUBLIC_*`, `UE_*`, `PGHOST`, `PGUSER`, `PGDATABASE`, `PGSSLMODE`,
@@ -30,10 +30,11 @@ Plain env vars (non-secret): `NODE_ENV`, `PORT`, `UE_ENVIRONMENT`,
 `BUILD_TIMESTAMP`, `ARTIFACT_ID`, `DJANGO_API_URL`,
 `PLATFORM_ADMIN_USER_IDS`, `SUPER_ADMIN_ORG_ID`.
 
-> ℹ Redis configured `2026-05-17T19:08:00Z`: Upstash instance
+> ℹ Redis validated `2026-05-17T19:10:00Z`: Upstash instance
 > `cuddly-mudfish-102231.upstash.io` provisioned by user. Token stored
-> as ACA secret (`upstash-redis-rest-token`) and wired via `secretRef`
-> on revision `--0000049`. Health confirmed: `redis: {status:"ok", ms:84}`.
+> as ACA secrets (`upstash-redis-url`, `upstash-redis-token`) and wired
+> via `secretRef` on revision `--0000049`. Health confirmed live:
+> `redis: {status:"ok", ms:37}`.
 > **Gap remaining**: token should be migrated to Key Vault and rotated
 > before PRODUCTION READY stamp.
 

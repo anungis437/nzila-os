@@ -62,7 +62,8 @@ resources below. Anything not enumerated by Azure is recorded as
 
 | Component | Provider | Resource | Status | Notes |
 |---|---|---|---|---|
-| Azure Cache for Redis | Azure | — | **deferred** | None in subscription. UE prod is configured for Upstash via `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` env vars. Live Upstash connectivity not verified by this pass. Health check correctly reports `Redis not configured — optional for this deployment`, so this is honest amber, not green. |
+| Azure Cache for Redis | Azure | — | **deferred** | None in subscription. UE prod uses Upstash external Redis. |
+| Upstash Redis | Upstash SaaS | `cuddly-mudfish-102231.upstash.io` | **validated** | Configured `2026-05-17T19:08:00Z`. URL + token stored as ACA secrets (`upstash-redis-url`, `upstash-redis-token`), wired via `secretRef` on revision `--0000049`. Health confirmed: `redis: {status:"ok", ms:37}`. **Gap**: token should be migrated to Key Vault before PRODUCTION READY stamp. |
 
 ## DR / Backup
 

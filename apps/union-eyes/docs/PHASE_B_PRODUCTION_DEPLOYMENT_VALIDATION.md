@@ -32,13 +32,13 @@ removed (see audit for history).
 
 | # | Sub-phase | Status | Evidence |
 |---|---|---|---|
-| B1A | Infra inventory | configured | [`PRODUCTION_INFRA_INVENTORY.md`](./PRODUCTION_INFRA_INVENTORY.md) |
-| B1B | Secret management | **validated** | All secrets in ACA secretRefs; Redis token stored as ACA secret; Key Vault RBAC enforced; rotation policy documented; [`SECRET_MANAGEMENT_VALIDATION.md`](./SECRET_MANAGEMENT_VALIDATION.md) |
+| B1A | Infra inventory | **validated** | Redis (Upstash), DB (PG16 ZR-HA), KV, LAW all live in canadacentral; [`PRODUCTION_INFRA_INVENTORY.md`](./PRODUCTION_INFRA_INVENTORY.md) |
+| B1B | Secret management | **validated** | All secrets in ACA secretRefs; Redis token stored as ACA secret (`upstash-redis-url/token`); Key Vault RBAC enforced; rotation policy documented; [`SECRET_MANAGEMENT_VALIDATION.md`](./SECRET_MANAGEMENT_VALIDATION.md) |
 | B1C | DNS / SSL | configured (default ACA FQDN only) | This doc, §DNS |
 | B2A | Deployment rehearsal | **validated** | deploy `3c43cf116` → `--0000043` → `--0000045` captured with timings; [`DEPLOYMENT_REHEARSAL.md`](./DEPLOYMENT_REHEARSAL.md) |
 | B2B | Health-gated deploy | configured | health probe live, `--0000043` promoted in ~9 min |
 | B2C | Rollback validation | **validated** | drill executed `2026-05-17T18:45:00Z`, 23s duration, smoke passed; [`ROLLBACK_VALIDATION.md`](./ROLLBACK_VALIDATION.md) |
-| B3A | Production smoke | **validated** | Revision `--0000049`; `/api/health` → `redis:{status:"ok",ms:84}` (Redis live); `/api/metrics/operational` 401 ✅; all endpoints correct |
+| B3A | Production smoke | **validated** | Revision `--0000049`; `/api/health` → `redis:{status:"ok",ms:37}` (Redis live ✅); `database:{status:"ok",ms:87}`; `auth:{status:"ok"}`; `/api/metrics/operational` 401 ✅ |
 | B3B | Governance runtime proof | **deferred** (endpoints 401-gated; awaiting authenticated drill) | — |
 | B3C | Observability validation | **validated** | LAW environment binding validated; 3 KQL alert rules; action group `ue-prod-ops-alerts` attached to all 3 rules (`2026-05-17`); LAW ingesting 400+ events/hr; [`OBSERVABILITY_VALIDATION.md`](./OBSERVABILITY_VALIDATION.md) |
 | B4A | Dependency degradation | partially observed (Django backend currently degraded, non-critical) | §Smoke |
@@ -58,11 +58,11 @@ Status legend:
 - `deferred` — explicitly skipped, must be executed before any
   PRODUCTION READY claim
 
-## Smoke (B3A) — updated capture, revision `--0000049`, `2026-05-17T19:10:40Z`
+## Smoke (B3A) — updated capture, revision `--0000049`, `2026-05-17T19:12:05Z`
 
 | Endpoint | HTTP | Notes |
 |---|---|---|
-| `/api/health` | 200 | `ok:true`, `status:"degraded"`, DB ok (147 ms), auth ok, **redis ok (84 ms)** ✅, backend (Django) `degraded: unreachable` |
+| `/api/health` | 200 | `ok:true`, `status:"degraded"`, DB ok (87 ms), auth ok, **redis ok (37 ms)** ✅, backend (Django) `degraded: unreachable` |
 | `/api/health/liveness` | 200 | ✅ |
 | `/api/metrics/operational` | **401** | ✅ auth-gated correctly |
 | `/api/governance/telemetry` | 401 | Auth-gated as designed |
@@ -70,8 +70,7 @@ Status legend:
 
 Truthful interpretation:
 - Redis now live: Upstash `cuddly-mudfish-102231.upstash.io` wired `2026-05-17T19:08:00Z` on revision `--0000049`.
-- Three critical deps (DB, auth, Redis) green.
-- One non-critical dep (Django backend unreachable) honestly reported.
+- Three critical deps (DB, auth, Redis) green; overall health `status:"degraded"` remains the honest signal because Django backend is unreachable (non-critical).
 - Authenticated governance/evidence drills still required for B3B/B4B.
 
 ## DNS / SSL (B1C)
