@@ -23,7 +23,7 @@ removed (see audit for history).
 | Resource group | `nzila-canada-prod-rg` |
 | Region | Canada Central |
 | FQDN | `nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io` |
-| Active revision | `nzila-os-union-eyes-prod--0000049` (Healthy, 100% traffic, 2 replicas) |
+| Active revision | `nzila-os-union-eyes-prod--0000057` (Healthy, 100% traffic, 2 replicas) |
 | Image | `nzilacanadaacr.azurecr.io/nzila-os-union-eyes:3c43cf1163081d2fbe3d25b2ea476d179a28488f` |
 | Min / max replicas | 2 / 6 |
 | Revisions mode | Single |
@@ -48,7 +48,7 @@ removed (see audit for history).
 | B5B | Restore rehearsal | **validated** (PITR mechanism proven; row-level integrity deferred) | drill `2026-05-17T18:52:09Z`, 4-min restore to Ready, smoke passed, drill server deleted; [`BACKUP_RESTORE_VALIDATION.md`](./BACKUP_RESTORE_VALIDATION.md) |
 | B6A | Runtime observation window | **open** `2026-05-17T18:34:00Z` | [`PILOT_RUNTIME_REVIEW.md`](./PILOT_RUNTIME_REVIEW.md) |
 | B6B | Operational review cadence | **started** — week 1 baseline captured | same |
-| B7  | Procurement / trust finalization | **in progress** | B7A status update in progress; B7B evidence-backed docs pending |
+| B7  | Procurement / trust finalization | **validated** | B7A: `FINAL_READINESS_STATUS.md` → PRODUCTION CANDIDATE; B7B: `ue-procurement-pack-cupe.md` updated with Phase B operational evidence; Clerk refs removed from all buyer-facing docs — commit `b335ae2e8` |
 | B8  | Final validation | **validated** | typecheck ✅, lint 0 errors ✅, 7075 UE tests ✅, 8962 contract tests ✅, governance 54/54 ✅, platform contract 0 errors ✅, app lifecycle 0 errors ✅ — `2026-05-17T19:24Z` |
 
 Status legend:
@@ -58,19 +58,21 @@ Status legend:
 - `deferred` — explicitly skipped, must be executed before any
   PRODUCTION READY claim
 
-## Smoke (B3A) — updated capture, revision `--0000049`, `2026-05-17T19:12:05Z`
+## Smoke (B3A) — updated capture, revision `--0000057`, `2026-05-17T19:37:39Z`
 
 | Endpoint | HTTP | Notes |
 |---|---|---|
-| `/api/health` | 200 | `ok:true`, `status:"degraded"`, DB ok (87 ms), auth ok, **redis ok (37 ms)** ✅, backend (Django) `degraded: unreachable` |
+| `/api/health` | 200 | `ok:true`, `status:"degraded"`, `environment:"production"` ✅, DB ok (126 ms), auth ok, **redis ok (54 ms)** ✅, backend (Django) `degraded: unreachable` |
 | `/api/health/liveness` | 200 | ✅ |
 | `/api/metrics/operational` | **401** | ✅ auth-gated correctly |
 | `/api/governance/telemetry` | 401 | Auth-gated as designed |
 | `/api/evidence/export` | 401 | Auth-gated as designed |
 
 Truthful interpretation:
-- Redis now live: Upstash `cuddly-mudfish-102231.upstash.io` wired `2026-05-17T19:08:00Z` on revision `--0000049`.
-- Three critical deps (DB, auth, Redis) green; overall health `status:"degraded"` remains the honest signal because Django backend is unreachable (non-critical).
+- `environment:"production"` now correct — `NZILA_MODE=prod→production` fix deployed on `--0000056/0000057`.
+- Redis live: Upstash `cuddly-mudfish-102231.upstash.io` wired `2026-05-17T19:08:00Z`.
+- Lineage vars (`SECRET_TOPOLOGY`, `SECRET_AUTHORITY`, `ENVIRONMENT_ISOLATION`) set and validated.
+- Three critical deps (DB, auth, Redis) green; overall `status:"degraded"` remains honest signal — Django backend unreachable (non-critical).
 - Authenticated governance/evidence drills still required for B3B/B4B.
 
 ## DNS / SSL (B1C)

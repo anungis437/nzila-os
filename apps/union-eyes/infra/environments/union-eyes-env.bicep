@@ -166,13 +166,17 @@ resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'PORT', value: '3000' }
             { name: 'UE_ENVIRONMENT', value: environment == 'prod' ? 'production' : environment }
             { name: 'NEXT_PUBLIC_APP_ENV', value: environment == 'prod' ? 'production' : environment }
-            { name: 'NZILA_MODE', value: environment == 'prod' ? 'prod' : environment }
+            { name: 'NZILA_MODE', value: environment == 'prod' ? 'production' : environment }
             { name: 'UE_DEPLOYMENT_TYPE', value: environment == 'demo' ? 'clc-demo' : environment }
             { name: 'UE_FEATURE_PROFILE', value: environment == 'demo' ? 'clc' : (environment == 'prod' || environment == 'pilot' ? 'executive' : 'internal') }
             { name: 'PGHOST', value: pg.properties.fullyQualifiedDomainName }
             { name: 'PGUSER', value: 'nzilaadmin' }
             { name: 'PGDATABASE', value: dbName }
             { name: 'PGSSLMODE', value: 'require' }
+            // Lineage / runtime-fail-closed metadata vars
+            { name: 'SECRET_TOPOLOGY', value: environment == 'prod' ? 'aca-secrets-kv-migration-pending' : 'local' }
+            { name: 'SECRET_AUTHORITY', value: environment == 'prod' ? 'nzila-canada-prod-kv' : 'local' }
+            { name: 'ENVIRONMENT_ISOLATION', value: environment == 'prod' || environment == 'pilot' ? 'full' : 'partial' }
           ]
         }
       ]

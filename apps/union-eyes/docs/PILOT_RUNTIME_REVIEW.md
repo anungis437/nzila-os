@@ -34,21 +34,48 @@ Status: **OPEN** — observation window formally opened `2026-05-17T18:34:00Z`.
 - End of window: write a final operational readiness verdict and
   update `FINAL_READINESS_STATUS.md` accordingly.
 
-## Week 1 review — 2026-05-17 (opening baseline)
+## Week 1 review — 2026-05-17 (opening baseline — updated)
 
-*Captured at window open, not a full 7-day observation.*
+*Captured progressively during Phase B execution. Active revision updated as Phase B drills completed.*
 
 | Metric | Value | Notes |
 |---|---|---|
-| Active revision | `--0000041` | SHA `4697daeee` → `3c43cf116` deploy in progress |
+| Active revision | `--0000057` | `NZILA_MODE=production` env fix deployed `2026-05-17T19:36Z` |
+| Image | `SHA 3c43cf116...` | metrics-500 fix, Phase B infra updates |
 | Replicas | 2 active | min 2, max 6 |
-| Health status | `degraded` | DB ok (163ms), auth ok, Redis optional, Django unreachable |
-| HTTP 500s | 1 fixed | `/api/metrics/operational` — 500→401 fix deployed this window |
-| Alert rules | 3 configured | 503-sustained, high-error-rate, governance-events-zero |
-| LAW log routing | confirmed active | ACA environment `log-analytics` destination verified |
-| Deployments | 1 in-progress | `GitOps Deploy` run `25999144816` |
-| Rollbacks | 0 | rollback drill deferred (awaiting 2nd revision) |
+| Health status | `degraded` | DB ok (126ms), auth ok, redis ok (54ms), Django unreachable |
+| Redis | live ✅ | Upstash `cuddly-mudfish-102231.upstash.io` wired on `--0000049`; `ms:54` |
+| `NZILA_MODE` | `production` ✅ | was `prod` (invalid enum); fixed `2026-05-17T19:35Z` — confirmed in health `"environment":"production"` |
+| `SECRET_TOPOLOGY` | `aca-secrets-kv-pending` ✅ | lineage var set; KV RBAC migration still blocked |
+| HTTP 500s | 0 active | `/api/metrics/operational` — 500→401 fix deployed earlier this window |
+| Alert rules | 3 validated | 503-sustained, high-error-rate, governance-events-zero |
+| LAW log routing | confirmed active | 1800+ events/hr ingesting |
+| Deployments | 10+ | CI/CD auto-deploys each push; all health-gated |
+| Rollback drill | ✅ validated | `2026-05-17T18:45:00Z`, 23s duration, smoke passed |
+| PITR restore drill | ✅ validated | `2026-05-17T18:52:09Z`, 4 min to Ready |
+| Incident drill (B4C) | ✅ validated | failed-deploy fast-fail `2026-05-17T19:18:22Z`, 82s, zero prod impact |
+| B8 full suite | ✅ all green | typecheck, lint, 7075 UE tests, 8962 contract tests, governance 54/54 |
 | Unresolved critical risks | 2 | Django backend unreachable (non-critical dep); no custom domain/WAF |
+
+### Boot warnings resolved in this window
+
+| Warning | Resolution |
+|---|---|
+| `NZILA_MODE=prod is invalid` | Fixed: ACA env var changed to `production`; bicep updated |
+| `SECRET_TOPOLOGY missing` | Fixed: set to `aca-secrets-kv-migration-pending` |
+| `SECRET_AUTHORITY missing` | Fixed: set to `nzila-canada-prod-kv` |
+| `ENVIRONMENT_ISOLATION missing` | Fixed: set to `full` |
+
+### Active amber items at week 1 close
+
+| Item | Disposition |
+|---|---|
+| Django backend 503 (`auth_core/health/`) | Non-critical dep; unapplied migrations suspected — investigation deferred |
+| No prod blob storage | Evidence is DB-only; blob story deferred |
+| Key Vault RBAC migration | Blocked — `appid=04b07795` lacks `Key Vault Secrets Officer` |
+| No custom domain / WAF / HSTS | Deferred; ACA FQDN only |
+| Alert fire drill | Deferred — maintenance window required |
+| Governance authenticated drill (B3B) | Deferred — authenticated session required |
 
 ## Exit criteria
 

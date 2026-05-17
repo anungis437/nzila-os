@@ -6,7 +6,7 @@
  *
  * Variables (set by deploy-union-eyes.yml `plan` step):
  *   UE_ENVIRONMENT       — 'local'|'dev'|'staging'|'demo'|'pilot'|'production'
- *   NZILA_MODE           — 'demo'|'pilot'|'staging'|'prod'
+ *   NZILA_MODE           — 'demo'|'pilot'|'staging'|'production'
  *   UE_DEPLOYMENT_TYPE   — 'clc-demo'|'pilot'|'staging'|'prod'
  *   UE_FEATURE_PROFILE   — 'clc'|'executive'|'internal'
  *   NEXT_PUBLIC_APP_ENV  — public mirror of UE_ENVIRONMENT (rendered to client)
@@ -21,7 +21,7 @@ export type UeEnvironment =
   | 'pilot'
   | 'production'
 
-export type NzilaMode = 'demo' | 'pilot' | 'staging' | 'prod'
+export type NzilaMode = 'demo' | 'pilot' | 'staging' | 'production'
 export type UeDeploymentType = 'clc-demo' | 'pilot' | 'staging' | 'prod'
 export type UeFeatureProfile = 'clc' | 'executive' | 'internal'
 
@@ -56,7 +56,7 @@ export function getUeEnvironment(): UeEnvironment {
 
 export function getNzilaMode(): NzilaMode | undefined {
   const m = readEnvVar('NZILA_MODE')
-  if (m === 'demo' || m === 'pilot' || m === 'staging' || m === 'prod') return m
+  if (m === 'demo' || m === 'pilot' || m === 'staging' || m === 'production') return m
   return undefined
 }
 
