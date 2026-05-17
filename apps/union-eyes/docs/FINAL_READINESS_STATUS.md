@@ -48,6 +48,8 @@ UnionEyes is **CONTROLLED PILOT READY** for controlled procurement reviews and e
 | Auth reality / stale vendor refs | ✅ Phase A complete — all active provider refs removed; PG sessions (primary) + Entra SSO (secondary) documented |
 | `/api/metrics/operational` 500 in prod | ✅ Fixed commit `3c43cf116` — confirmed 401 on `--0000045` `2026-05-17T18:47:00Z` |
 | Rollback drill not executed | ✅ Drill `2026-05-17T18:45:00Z` — 23s end-to-end, smoke passed; see `ROLLBACK_VALIDATION.md` |
+| PITR restore rehearsal not executed | ✅ Drill `2026-05-17T18:52:09Z` — restored to Ready in 4 min, prod unaffected; see `BACKUP_RESTORE_VALIDATION.md` |
+| Alert action groups not configured | ✅ `ue-prod-ops-alerts` (→ `ops@nzila.ca`) attached to all 3 KQL rules `2026-05-17T18:55:00Z` |
 
 ## What remains amber
 
@@ -58,17 +60,16 @@ UnionEyes is **CONTROLLED PILOT READY** for controlled procurement reviews and e
   Phase B operational validation in progress.
   See `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`.
 - Live-captured gaps blocking PRODUCTION READY:
-  - ~~`/api/metrics/operational` returns HTTP 500 in prod.~~ **FIXED** ✅ — commit `3c43cf116`, confirmed 401 on `--0000045`.
-  - ~~Rollback drill not yet executed.~~ **DONE** ✅ — drill `2026-05-17T18:45:00Z`, 23s duration, smoke passed.
   - Django backend dependency reports `degraded: unreachable` from
     prod (honest amber via health contract — non-critical by design).
   - No dedicated prod blob/storage account; no Azure-managed Redis
     (Upstash env vars empty — Redis not yet configured for prod).
   - Custom domain / WAF / HSTS not bound to UE prod.
-  - PITR restore rehearsal documented but not executed.
-  - Alert action groups not configured (alerts fire but notify nobody).
+  - Row-level DB integrity drill deferred (private endpoint / jump-host
+    not configured for direct psql access to drill server).
   - Governance runtime proof (B3B) and evidence integrity under failure (B4B) pending authenticated drills.
   - Formal incident drills (expired secret, failed deploy) pending.
+  - Alert fire drill not yet executed (alerts wired, not yet fired/acknowledged).
   - Pilot runtime observation window opened `2026-05-17T18:34:00Z`;
     1-week minimum observation period running.
 - B8 validation suite (local): all checks green —

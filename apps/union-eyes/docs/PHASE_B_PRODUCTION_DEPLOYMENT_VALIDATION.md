@@ -40,12 +40,12 @@ removed (see audit for history).
 | B2C | Rollback validation | **validated** | drill executed `2026-05-17T18:45:00Z`, 23s duration, smoke passed; [`ROLLBACK_VALIDATION.md`](./ROLLBACK_VALIDATION.md) |
 | B3A | Production smoke | **validated** | `/api/metrics/operational` 500→401 fix confirmed live on `--0000045`; all endpoints correct |
 | B3B | Governance runtime proof | **deferred** (endpoints 401-gated; awaiting authenticated drill) | — |
-| B3C | Observability validation | **configured** | LAW environment binding validated; 3 KQL alert rules created; [`OBSERVABILITY_VALIDATION.md`](./OBSERVABILITY_VALIDATION.md) |
+| B3C | Observability validation | **validated** | LAW environment binding validated; 3 KQL alert rules; action group `ue-prod-ops-alerts` attached to all 3 rules (`2026-05-17`); LAW ingesting 400+ events/hr; [`OBSERVABILITY_VALIDATION.md`](./OBSERVABILITY_VALIDATION.md) |
 | B4A | Dependency degradation | partially observed (Django backend currently degraded, non-critical) | §Smoke |
 | B4B | Evidence integrity under failure | **deferred** | — |
 | B4C | Incident drill | **deferred** (Django-down observation captured as informal drill) | [`INCIDENT_DRILL_REPORT.md`](./INCIDENT_DRILL_REPORT.md) |
-| B5A | Backup verification | configured | [`BACKUP_RESTORE_VALIDATION.md`](./BACKUP_RESTORE_VALIDATION.md) |
-| B5B | Restore rehearsal | **deferred** (PITR procedure documented, not executed) | same |
+| B5A | Backup verification | **validated** | 30-day PITR, geo-redundant, earliest restore `2026-05-11`, confirmed live `2026-05-17`; [`BACKUP_RESTORE_VALIDATION.md`](./BACKUP_RESTORE_VALIDATION.md) |
+| B5B | Restore rehearsal | **validated** (PITR mechanism proven; row-level integrity deferred) | drill `2026-05-17T18:52:09Z`, 4-min restore to Ready, smoke passed, drill server deleted; [`BACKUP_RESTORE_VALIDATION.md`](./BACKUP_RESTORE_VALIDATION.md) |
 | B6A | Runtime observation window | **open** `2026-05-17T18:34:00Z` | [`PILOT_RUNTIME_REVIEW.md`](./PILOT_RUNTIME_REVIEW.md) |
 | B6B | Operational review cadence | **started** — week 1 baseline captured | same |
 | B7  | Procurement / trust finalization | not started | — |
