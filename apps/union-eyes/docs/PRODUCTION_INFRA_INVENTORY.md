@@ -12,8 +12,8 @@ resources below. Anything not enumerated by Azure is recorded as
 
 | Component | Provider | Resource | Region | Status | Owner | Notes |
 |---|---|---|---|---|---|---|
-| Container App | Azure Container Apps | `nzila-os-union-eyes-prod` | canadacentral | configured | Platform | Single revision mode, 2/6 replicas, latest `--0000041` healthy |
-| Managed env | Azure Container Apps | `nzila-canada-prod-env` | canadacentral | configured | Platform | Hosts UE prod app |
+| Container App | Azure Container Apps | `nzila-os-union-eyes-prod` | canadacentral | **validated** | Platform | 2/6 replicas, HTTP autoscaling (10 req/replica), active revision `--0000062` healthy |
+| Managed env | Azure Container Apps | `nzila-canada-prod-env` | canadacentral | **validated** | Platform | Hosts UE prod app |
 | Managed env (system) | ACA internal | `mc-nzila-canada-p-app-unioneyes-ap-1545` | canadacentral | configured | Azure | Auto-created managed component |
 
 ## Data
@@ -41,10 +41,11 @@ resources below. Anything not enumerated by Azure is recorded as
 
 | Component | Provider | Status | Notes |
 |---|---|---|---|
-| ACA platform FQDN | Azure Container Apps | configured | `nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io` — TLS via ACA |
-| Custom domain | — | **planned** | Not bound |
-| WAF / Front Door / Application Gateway | — | **planned** | Not bound to UE prod yet |
-| HSTS / canonical redirects | — | **planned** | Pending custom domain |
+| ACA platform FQDN | Azure Container Apps | **validated** | `nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io` — TLS via ACA |
+| Custom domain | Azure Container Apps | **validated** | `app.unioneyes.app` bound with `SniEnabled` + Azure managed certificate. HSTS `max-age=63072000; includeSubDomains; preload` (2-year) active. Full security header suite live (CSP, X-Frame-Options, COEP, COOP, CORP, Referrer-Policy, Permissions-Policy). Confirmed `2026-05-17T20:00:00Z`. |
+| Azure Front Door | Azure CDN / AFD | **configured** | Profile `nzila-ue-afd-prod` (Standard_AzureFrontDoor). Endpoint `ue-prod` → `ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net`. Origin: ACA FQDN. Route: HTTP→HTTPS redirect, HTTPS-only forwarding, `/*`. WAF security policy linked (`Succeeded`). AFD propagation: `deploymentStatus: NotStarted` (propagating to PoPs at capture time). DNS change to route `app.unioneyes.app` → AFD endpoint not yet made — requires registrar access. |
+| WAF | Azure Front Door WAF | **configured** | Policy `nzilauewafdprod` (Standard, Prevention mode). 2 custom rules: `RateLimitPerIP` (300 req/min → Block) + `BlockScanners` (path pattern → Block). Security policy `ue-prod-waf` linked to AFD endpoint (`Succeeded`). OWASP managed rule sets require Premium_AzureFrontDoor upgrade (deferred). |
+| HSTS / canonical redirects | Application headers | **validated** | `max-age=63072000; includeSubDomains; preload` — 2-year HSTS with preload via Next.js `next.config.ts` headers. Confirmed live on `app.unioneyes.app`. |
 
 ## Image Registry
 
@@ -56,7 +57,7 @@ resources below. Anything not enumerated by Azure is recorded as
 
 | Component | Provider | Resource | Status | Notes |
 |---|---|---|---|---|
-| Blob storage | Azure Storage | — | **deferred** | No storage account in `nzila-canada-prod-rg`. Subscription contains `nzilacanadastore` (in canada staging RG, canadacentral) and `nzilastagingstore` (eastus — not for prod). Production evidence/blob path must be explicitly chosen before PRODUCTION READY. |
+| Blob storage | Azure Storage | `nzilacanadaprodev` | **configured** | Created `2026-05-17T20:30:00Z`. Standard_GRS, canadacentral, HTTPS-only, TLS 1.2+, public access off, deny-all network ACL + AzureServices bypass. Container `union-eyes-evidence` (private). Storage key stored as ACA secret `evidence-storage-key`. Wired via env vars on revision `--0000062`. **Gap**: key not yet in Key Vault (migration unblocked). |
 
 ## Cache / Rate Limiting
 
@@ -79,12 +80,17 @@ resources below. Anything not enumerated by Azure is recorded as
 |---|---|---|
 | Postgres password / session auth | configured | `AUTH_SECRET` sourced via ACA secret `enc-key` |
 | Entra External ID | configured | `AZURE_AD_CLIENT_ID`, `AZURE_AD_TENANT_ID` plaintext env; `AZURE_AD_CLIENT_SECRET` via KV-backed ACA secret |
+| ACA system-assigned managed identity | **validated** | Principal `264f8347-4c8c-4732-983f-3bb06b563a0a`. Granted `Key Vault Secrets Officer` on `nzila-canada-prod-kv` `2026-05-17T20:45:00Z`. KV migration path for ACA secrets now unblocked. |
 | MFA / SSO buyer claims | **planned** | Only claim what is enforced in production; do not pre-claim |
 
 ## Summary
 
 UE prod has real compute, real Postgres (HA + geo-redundant backup),
-real Key Vault, and real Log Analytics. Missing in prod RG and explicitly
-not green: dedicated prod storage account, prod-region Redis (Upstash
-external is the design), custom domain + WAF, App Insights component.
-Cross-RG ACR dependency is acceptable but recorded.
+real Key Vault, and real Log Analytics. Dedicated evidence blob store
+`nzilacanadaprodev` is configured with GRS + deny-all network policy.
+Custom domain `app.unioneyes.app` with 2-year HSTS + full security headers
+is validated. Azure Front Door + WAF policy (Prevention mode, 2 custom rules)
+are configured and security policy linked — DNS routing through AFD pending
+registrar update. ACA managed identity has `Key Vault Secrets Officer` role
+enabling secret migration from ACA secrets to KV. Cross-RG ACR dependency
+is acceptable and recorded.

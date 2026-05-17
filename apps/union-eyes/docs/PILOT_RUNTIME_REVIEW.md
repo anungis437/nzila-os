@@ -40,22 +40,26 @@ Status: **OPEN** — observation window formally opened `2026-05-17T18:34:00Z`.
 
 | Metric | Value | Notes |
 |---|---|---|
-| Active revision | `--0000057` | `NZILA_MODE=production` env fix deployed `2026-05-17T19:36Z` |
+| Active revision | `--0000062` | Evidence blob store, HTTP autoscaling (KEDA concurrency 10), Upstash + storage secrets wired |
 | Image | `SHA 3c43cf116...` | metrics-500 fix, Phase B infra updates |
 | Replicas | 2 active | min 2, max 6 |
-| Health status | `degraded` | DB ok (126ms), auth ok, redis ok (54ms), Django unreachable |
-| Redis | live ✅ | Upstash `cuddly-mudfish-102231.upstash.io` wired on `--0000049`; `ms:54` |
+| Health status | `degraded` | DB ok (133ms), auth ok, redis ok (70ms), Django unreachable |
+| Redis | live ✅ | Upstash `cuddly-mudfish-102231.upstash.io` wired on `--0000049`; `ms:70` on `--0000062` |
 | `NZILA_MODE` | `production` ✅ | was `prod` (invalid enum); fixed `2026-05-17T19:35Z` — confirmed in health `"environment":"production"` |
-| `SECRET_TOPOLOGY` | `aca-secrets-kv-pending` ✅ | lineage var set; KV RBAC migration still blocked |
+| `SECRET_TOPOLOGY` | `aca-secrets-kv-pending` ✅ | lineage var set; KV RBAC unblocked `2026-05-17T20:45Z` — migration pending |
+| Evidence blob store | `nzilacanadaprodev` ✅ | GRS, deny-all network, `union-eyes-evidence` container; wired on `--0000062` |
+| HTTP autoscaling | KEDA HTTP concurrency=10 ✅ | active on `--0000062`, min 2 / max 6 |
+| Custom domain + HSTS | `app.unioneyes.app` ✅ | validated (managed cert, SniEnabled, 2-year HSTS+preload) |
+| AFD + WAF | `nzila-ue-afd-prod` + `nzilauewafdprod` ✅ | provisioned + security policy linked; DNS routing through AFD pending registrar action |
 | HTTP 500s | 0 active | `/api/metrics/operational` — 500→401 fix deployed earlier this window |
 | Alert rules | 3 validated | 503-sustained, high-error-rate, governance-events-zero |
 | LAW log routing | confirmed active | 1800+ events/hr ingesting |
-| Deployments | 10+ | CI/CD auto-deploys each push; all health-gated |
+| Deployments | ~62 revisions | CI/CD auto-deploys each push; all health-gated |
 | Rollback drill | ✅ validated | `2026-05-17T18:45:00Z`, 23s duration, smoke passed |
 | PITR restore drill | ✅ validated | `2026-05-17T18:52:09Z`, 4 min to Ready |
 | Incident drill (B4C) | ✅ validated | failed-deploy fast-fail `2026-05-17T19:18:22Z`, 82s, zero prod impact |
 | B8 full suite | ✅ all green | typecheck, lint, 7075 UE tests, 8962 contract tests, governance 54/54 |
-| Unresolved critical risks | 2 | Django backend unreachable (non-critical dep); no custom domain/WAF |
+| Unresolved critical risks | 1 | Django backend unreachable (non-critical dep); custom domain/WAF provisioned (DNS routing pending registrar action) |
 
 ### Boot warnings resolved in this window
 

@@ -1,4 +1,4 @@
-// Union Eyes — Phase A Environment Provisioning
+// Union Eyes — Phase B Environment Provisioning
 //
 // Provisions ONE isolated Union Eyes environment (staging | demo | pilot | prod).
 // Deploy four times (once per env) into per-env resource groups:
@@ -6,7 +6,8 @@
 //   az deployment group create \
 //     --resource-group nzila-canada-<env>-rg \
 //     --template-file apps/union-eyes/infra/environments/union-eyes-env.bicep \
-//     --parameters environment=<env> postgresAdminPassword=<pwd>
+//     --parameters environment=<env> postgresAdminPassword=<pwd> \
+//                  upstashRedisUrl=<url> upstashRedisToken=<token>
 //
 // Each deployment provisions:
 //   * Container Apps Environment   nzila-canada-<env>-env
@@ -15,9 +16,15 @@
 //   * PostgreSQL database          nzila_os_<env>
 //   * Key Vault                    nzila-canada-<env>-kv
 //   * Log Analytics workspace      nzila-canada-<env>-law
+//   * Storage account (prod)       nzilacanadaprod<env>
+//   * Blob container (prod)        union-eyes-evidence
 //
-// Production receives PremiumV3 sizing and 30-day backup retention. All
-// non-production environments receive Burstable sizing and 7-day retention.
+// Production receives PremiumV3 sizing, 30-day backup retention, HTTP autoscaling
+// (10 concurrent req/replica, min 2 / max 6), and a dedicated evidence blob store.
+// All non-production environments receive Burstable sizing and 7-day retention.
+//
+// Azure Front Door + WAF are provisioned separately:
+//   apps/union-eyes/infra/waf-afd/waf-afd.bicep
 
 targetScope = 'resourceGroup'
 
@@ -38,6 +45,18 @@ param containerImage string = 'nzilacanadaacr.azurecr.io/nzila-os-union-eyes:pro
 @description('ACR resource (managed identity must have AcrPull on this registry)')
 param acrLoginServer string = 'nzilacanadaacr.azurecr.io'
 
+@description('Upstash Redis REST URL (wired as ACA secret)')
+@secure()
+param upstashRedisUrl string = ''
+
+@description('Upstash Redis REST token (wired as ACA secret)')
+@secure()
+param upstashRedisToken string = ''
+
+@description('Evidence blob storage account key (wired as ACA secret; prod only)')
+@secure()
+param evidenceStorageKey string = ''
+
 var isProd = environment == 'prod'
 var dbName = 'nzila_os_${environment}'
 var appName = 'nzila-os-union-eyes-${environment}'
@@ -45,6 +64,8 @@ var pgServerName = 'nzila-os-union-eyes-${environment}-db'
 var kvName = 'nzila-canada-${environment}-kv'
 var lawName = 'nzila-canada-${environment}-law'
 var caEnvName = 'nzila-canada-${environment}-env'
+var evidenceStorageAccountName = 'nzilacanadaprod${environment}'
+var evidenceContainerName = 'union-eyes-evidence'
 
 resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: lawName
@@ -132,6 +153,31 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
   }
 }
 
+// Evidence blob store (prod only). Non-prod uses DB-only evidence storage.
+resource evidenceStorage 'Microsoft.Storage/storageAccounts@2023-01-01' = if (isProd) {
+  name: evidenceStorageAccountName
+  location: location
+  sku: { name: 'Standard_GRS' }
+  kind: 'StorageV2'
+  properties: {
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+    allowBlobPublicAccess: false
+    networkAcls: {
+      defaultAction: 'Deny'
+      bypass: 'AzureServices'
+    }
+  }
+}
+
+resource evidenceContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = if (isProd) {
+  name: '${evidenceStorageAccountName}/default/${evidenceContainerName}'
+  properties: {
+    publicAccess: 'None'
+  }
+  dependsOn: [ evidenceStorage ]
+}
+
 resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
@@ -151,6 +197,11 @@ resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
           identity: 'system'
         }
       ]
+      secrets: isProd ? [
+        { name: 'upstash-redis-url', value: upstashRedisUrl }
+        { name: 'upstash-redis-token', value: upstashRedisToken }
+        { name: 'evidence-storage-key', value: evidenceStorageKey }
+      ] : []
     }
     template: {
       containers: [
@@ -161,7 +212,7 @@ resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: isProd ? json('1.0') : json('0.5')
             memory: isProd ? '2Gi' : '1Gi'
           }
-          env: [
+          env: concat([
             { name: 'NODE_ENV', value: 'production' }
             { name: 'PORT', value: '3000' }
             { name: 'UE_ENVIRONMENT', value: environment == 'prod' ? 'production' : environment }
@@ -177,12 +228,28 @@ resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'SECRET_TOPOLOGY', value: environment == 'prod' ? 'aca-secrets-kv-migration-pending' : 'local' }
             { name: 'SECRET_AUTHORITY', value: environment == 'prod' ? 'nzila-canada-prod-kv' : 'local' }
             { name: 'ENVIRONMENT_ISOLATION', value: environment == 'prod' || environment == 'pilot' ? 'full' : 'partial' }
-          ]
+          ], isProd ? [
+            { name: 'UPSTASH_REDIS_REST_URL', secretRef: 'upstash-redis-url' }
+            { name: 'UPSTASH_REDIS_REST_TOKEN', secretRef: 'upstash-redis-token' }
+            { name: 'AZURE_EVIDENCE_STORAGE_ACCOUNT', value: evidenceStorageAccountName }
+            { name: 'AZURE_EVIDENCE_STORAGE_CONTAINER', value: evidenceContainerName }
+            { name: 'AZURE_EVIDENCE_STORAGE_KEY', secretRef: 'evidence-storage-key' }
+          ] : [])
         }
       ]
       scale: {
         minReplicas: isProd ? 2 : 1
         maxReplicas: isProd ? 6 : 3
+        rules: isProd ? [
+          {
+            name: 'http-scaler'
+            http: {
+              metadata: {
+                concurrentRequests: '10'
+              }
+            }
+          }
+        ] : []
       }
     }
   }
@@ -198,3 +265,4 @@ output postgresDatabaseName string = dbName
 output keyVaultName string = kv.name
 output keyVaultUri string = kv.properties.vaultUri
 output containerAppPrincipalId string = ueApp.identity.principalId
+output evidenceStorageAccountName string = isProd ? evidenceStorageAccountName : ''

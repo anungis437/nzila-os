@@ -23,7 +23,7 @@ removed (see audit for history).
 | Resource group | `nzila-canada-prod-rg` |
 | Region | Canada Central |
 | FQDN | `nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io` |
-| Active revision | `nzila-os-union-eyes-prod--0000057` (Healthy, 100% traffic, 2 replicas) |
+| Active revision | `nzila-os-union-eyes-prod--0000062` (Healthy, 100% traffic, 2 replicas) |
 | Image | `nzilacanadaacr.azurecr.io/nzila-os-union-eyes:3c43cf1163081d2fbe3d25b2ea476d179a28488f` |
 | Min / max replicas | 2 / 6 |
 | Revisions mode | Single |
@@ -34,7 +34,7 @@ removed (see audit for history).
 |---|---|---|---|
 | B1A | Infra inventory | **validated** | Redis (Upstash), DB (PG16 ZR-HA), KV, LAW all live in canadacentral; [`PRODUCTION_INFRA_INVENTORY.md`](./PRODUCTION_INFRA_INVENTORY.md) |
 | B1B | Secret management | **validated** | All secrets in ACA secretRefs; Redis token stored as ACA secret (`upstash-redis-url/token`); Key Vault RBAC enforced; rotation policy documented; [`SECRET_MANAGEMENT_VALIDATION.md`](./SECRET_MANAGEMENT_VALIDATION.md) |
-| B1C | DNS / SSL | configured (default ACA FQDN only) | This doc, §DNS |
+| B1C | DNS / SSL | **validated** (custom domain + HSTS) + **configured** (AFD + WAF) | `app.unioneyes.app` bound to ACA with managed cert (SniEnabled); 2-year HSTS with preload + full security header suite live `2026-05-17T20:00:00Z`. AFD Standard `nzila-ue-afd-prod` + WAF `nzilauewafdprod` (Prevention mode, 2 custom rules) provisioned; security policy linked (`Succeeded`). DNS CNAME for `app.unioneyes.app` → AFD hostname pending registrar update (requires human action). |
 | B2A | Deployment rehearsal | **validated** | deploy `3c43cf116` → `--0000043` → `--0000045` captured with timings; [`DEPLOYMENT_REHEARSAL.md`](./DEPLOYMENT_REHEARSAL.md) |
 | B2B | Health-gated deploy | configured | health probe live, `--0000043` promoted in ~9 min |
 | B2C | Rollback validation | **validated** | drill executed `2026-05-17T18:45:00Z`, 23s duration, smoke passed; [`ROLLBACK_VALIDATION.md`](./ROLLBACK_VALIDATION.md) |
@@ -58,11 +58,11 @@ Status legend:
 - `deferred` — explicitly skipped, must be executed before any
   PRODUCTION READY claim
 
-## Smoke (B3A) — updated capture, revision `--0000057`, `2026-05-17T19:37:39Z`
+## Smoke (B3A) — updated capture, revision `--0000062`, `2026-05-17T20:55:00Z`
 
 | Endpoint | HTTP | Notes |
 |---|---|---|
-| `/api/health` | 200 | `ok:true`, `status:"degraded"`, `environment:"production"` ✅, DB ok (126 ms), auth ok, **redis ok (54 ms)** ✅, backend (Django) `degraded: unreachable` |
+| `/api/health` | 200 | `ok:true`, `status:"degraded"`, `environment:"production"` ✅, DB ok (133 ms), auth ok, **redis ok (70 ms)** ✅, backend (Django) `degraded: unreachable` |
 | `/api/health/liveness` | 200 | ✅ |
 | `/api/metrics/operational` | **401** | ✅ auth-gated correctly |
 | `/api/governance/telemetry` | 401 | Auth-gated as designed |
@@ -77,20 +77,33 @@ Truthful interpretation:
 
 ## DNS / SSL (B1C)
 
-- Only the platform-issued ACA FQDN
-  (`*.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io`) is live.
-- Azure Container Apps provides TLS termination on this FQDN by default.
-- **Gap:** no custom domain / managed certificate / HSTS / WAF policy
-  bound to UE prod yet. Status: `configured (default)`, not `validated`.
+- **Custom domain** `app.unioneyes.app` bound to ACA with `SniEnabled` + Azure managed certificate.
+- HSTS `max-age=63072000; includeSubDomains; preload` (2-year) active via Next.js application headers.
+- Full security header suite live: CSP, X-Frame-Options: DENY, X-Content-Type-Options: nosniff,
+  Referrer-Policy, Permissions-Policy, COEP: credentialless, COOP: same-origin, CORP: same-origin.
+- **Azure Front Door** `nzila-ue-afd-prod` (Standard_AzureFrontDoor, canadacentral):
+  - Endpoint `ue-prod` → `ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net`
+  - Route: HTTP→HTTPS redirect, HTTPS-only forwarding, `/*`
+  - Origin: ACA FQDN, health probe: `/api/health/liveness`
+- **WAF** `nzilauewafdprod` (Standard, Prevention mode, 2 custom rules):
+  - `RateLimitPerIP`: 300 req/min → Block
+  - `BlockScanners`: `.env`, `wp-admin`, `phpinfo`, `/etc/passwd`, `xmlrpc` patterns → Block
+  - Security policy `ue-prod-waf` linked to AFD endpoint (`Succeeded`)
+- **Gap:** DNS CNAME for `app.unioneyes.app` currently points to ACA directly.
+  Must update to `ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net` at registrar to route through WAF.
+  **Requires human action (registrar access).**
+- **Note:** OWASP managed rule sets require Premium_AzureFrontDoor (currently Standard) — deferred.
+
+Status: `validated` (custom domain + HSTS), `configured` (AFD + WAF), DNS routing **pending**.
 
 ## Open Phase B Gaps (block PRODUCTION READY)
 
 1. ~~`/api/metrics/operational` returns HTTP 500~~ — **FIXED** `3c43cf116`, confirmed 401 on `--0000045`.
 2. Django backend unreachable from prod — non-critical by health contract design; networking investigation deferred.
-3. ~~No Azure-managed Redis~~ — **DONE** Upstash `cuddly-mudfish-102231.upstash.io` wired on `--0000049`; health confirms `redis:{status:"ok"}`. **Remaining gap**: migrate token from ACA secret to Key Vault (blocked on RBAC — `appid=04b07795` lacks `Key Vault Secrets Officer`; requires manual KV access grant).
-4. No prod blob/Storage Account in `nzila-canada-prod-rg`. Evidence persistence is currently DB-only.
+3. ~~No Azure-managed Redis~~ — **DONE** Upstash `cuddly-mudfish-102231.upstash.io` wired on `--0000049`; health confirms `redis:{status:"ok"}`. ~~Remaining gap: migrate token from ACA secret to Key Vault (blocked on RBAC)~~ → **UNBLOCKED** `Key Vault Secrets Officer` granted to ACA MI `264f8347` `2026-05-17T20:45:00Z`. Migrate before PRODUCTION READY.
+4. ~~No prod blob/Storage Account in `nzila-canada-prod-rg`~~ — **DONE** `nzilacanadaprodev` (GRS, deny-all) created `2026-05-17T20:30:00Z`; `union-eyes-evidence` container configured; wired on `--0000062`. Remaining gap: migrate storage key from ACA secret to Key Vault (same KV RBAC path as above).
 5. Container image pulled from `nzilacanadaacr` in `nzila-canada-staging-rg`. Cross-RG dependency documented; no current incident scope issue.
-6. Custom domain + WAF + HSTS not bound to UE prod.
+6. ~~Custom domain + WAF + HSTS not bound to UE prod~~ — **DONE** `app.unioneyes.app` validated (custom domain + managed cert + 2-year HSTS). WAF provisioned + linked. DNS routing through AFD pending registrar CNAME update (human action required).
 7. ~~Rollback drill not executed~~ — **DONE** `2026-05-17T18:45:00Z`, 23s.
 8. ~~PITR restore not executed~~ — **DONE** `2026-05-17T18:52:09Z`, 4 min to Ready.
 9. ~~Alert action groups missing~~ — **DONE** `ue-prod-ops-alerts` wired to all 3 rules.

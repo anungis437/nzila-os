@@ -22,6 +22,7 @@ on the container env, only the reference):
 | `DJANGO_SECRET_KEY` | `django-secret` | Key Vault |
 | `UPSTASH_REDIS_REST_URL` | `upstash-redis-url` | ACA secret (Upstash) |
 | `UPSTASH_REDIS_REST_TOKEN` | `upstash-redis-token` | ACA secret (Upstash) |
+| `AZURE_EVIDENCE_STORAGE_KEY` | `evidence-storage-key` | ACA secret (blob store) |
 
 Plain env vars (non-secret): `NODE_ENV`, `PORT`, `UE_ENVIRONMENT`,
 `NEXT_PUBLIC_*`, `UE_*`, `PGHOST`, `PGUSER`, `PGDATABASE`, `PGSSLMODE`,
@@ -37,6 +38,17 @@ Plain env vars (non-secret): `NODE_ENV`, `PORT`, `UE_ENVIRONMENT`,
 > `redis: {status:"ok", ms:37}`.
 > **Gap remaining**: token should be migrated to Key Vault and rotated
 > before PRODUCTION READY stamp.
+>
+> ℹ Evidence blob store added `2026-05-17T20:30:00Z`: storage account
+> `nzilacanadaprodev` (Standard_GRS, canadacentral, HTTPS-only,
+> deny-all + AzureServices bypass). Container `union-eyes-evidence`
+> (private). Storage key stored as ACA secret `evidence-storage-key`.
+> Env vars `AZURE_EVIDENCE_STORAGE_ACCOUNT`, `AZURE_EVIDENCE_STORAGE_CONTAINER`,
+> `AZURE_EVIDENCE_STORAGE_KEY` wired on revision `--0000062`.
+> **Gap remaining**: storage key should be migrated to Key Vault before
+> PRODUCTION READY stamp. ACA managed identity granted `Key Vault Secrets
+> Officer` on `nzila-canada-prod-kv` (principal `264f8347-4c8c-4732-983f-3bb06b563a0a`)
+> `2026-05-17T20:45:00Z` — KV-backed migration path is now unblocked.
 
 ## In-repo scan
 
@@ -74,7 +86,8 @@ Status remains `configured`, not `validated`.
 
 ## Gaps
 
-1. `UPSTASH_REDIS_REST_TOKEN` — stored as ACA secret (not yet in Key Vault). Should be migrated to KV before PRODUCTION READY stamp.
-2. No documented evidence of a real production rotation run.
-3. Caller-side access logs (Key Vault diagnostic logs to LAW) should be
+1. `UPSTASH_REDIS_REST_TOKEN` — stored as ACA secret (not yet in Key Vault). KV migration path unblocked (`Key Vault Secrets Officer` granted to ACA managed identity `2026-05-17T20:45:00Z`). Execute before PRODUCTION READY stamp.
+2. `AZURE_EVIDENCE_STORAGE_KEY` — stored as ACA secret (not yet in Key Vault). Same migration path as above. Execute before PRODUCTION READY stamp.
+3. No documented evidence of a real production rotation run.
+4. Caller-side access logs (Key Vault diagnostic logs to LAW) should be
    confirmed enabled — not verified in this pass.
