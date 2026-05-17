@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-05-17T09:18:01.753Z
+Generated: 2026-05-17T14:29:41.250Z
 
 Total documents indexed: 1002
 Stale documents (>90 days since repo validation): 0
@@ -964,7 +964,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
-| [docs/healthcare/discovery-surveys.md](docs/healthcare/discovery-surveys.md) | healthcare | 2026-05-16 | current |
+| [docs/healthcare/discovery-surveys.md](docs/healthcare/discovery-surveys.md) | healthcare | 2026-05-17 | current |
 | [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-05-10 | current |
 | [docs/migration/trade/canonical-domain-map.md](docs/migration/trade/canonical-domain-map.md) | migration | 2026-05-11 | current |
 | [docs/migration/trade/cars-vertical-scope.md](docs/migration/trade/cars-vertical-scope.md) | migration | 2026-05-11 | current |

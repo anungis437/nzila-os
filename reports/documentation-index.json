@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T09:18:01.753Z",
+  "generatedAt": "2026-05-17T14:29:41.250Z",
   "totalDocuments": 1002,
   "staleDocuments": 0,
   "categories": [
@@ -5686,7 +5686,7 @@
     {
       "path": "docs/healthcare/discovery-surveys.md",
       "category": "healthcare",
-      "lastValidated": "2026-05-16",
+      "lastValidated": "2026-05-17",
       "stale": false
     },
     {

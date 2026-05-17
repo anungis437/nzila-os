@@ -11,7 +11,29 @@
       "metrics_endpoint": true,
       "evidence_export": true,
       "demo_seed": true,
-      "docs_complete": true
+      "docs_complete": true,
+      "governance_telemetry": true,
+      "port": 3002,
+      "endpoints": {
+        "health": "/api/health",
+        "metrics_operational": "/api/metrics/operational",
+        "governance_telemetry": "/api/governance/telemetry",
+        "evidence_export": "/api/evidence/export"
+      },
+      "runbook": "docs/DEMO_RUNBOOK.md",
+      "audits": {
+        "staging": "docs/UE_STAGING_AUDIT.md",
+        "org_scope": "docs/ORG_SCOPE_AUDIT.md",
+        "readiness": "docs/FINAL_READINESS_STATUS.md",
+        "ops_checklist": "docs/OPS_VALIDATION_CHECKLIST.md",
+        "governance_model": "docs/GOVERNANCE_RUNTIME_MODEL.md"
+      },
+      "staging_seed_script": "pnpm -C apps/union-eyes staging:seed",
+      "environments": {
+        "staging": "staging.unioneyes.app",
+        "production": null
+      },
+      "integrations": ["clerk", "drizzle", "upstash-redis", "azure-monitor", "sentry"]
     },
     {
       "name": "flow",

@@ -32,7 +32,8 @@
     "evidence:verify": "tsx scripts/evidence/verify.mjs",
     "evidence:all": "pnpm evidence:collect && pnpm evidence:seal && pnpm evidence:verify",
     "narrative:audit": "tsx tooling/marketing/narrative-audit.ts",
-    "narrative:check": "tsx tooling/marketing/narrative-audit.ts --ci"
+    "narrative:check": "tsx tooling/marketing/narrative-audit.ts --ci",
+    "staging:seed": "tsx scripts/staging-seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.985.0",
