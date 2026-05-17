@@ -27,7 +27,7 @@ The UnionEyes API provides programmatic access to union management features incl
 All API requests require authentication using an API key:
 
 \`\`\`bash
-curl -H "Authorization: Bearer YOUR_API_KEY" https://api.unioneyes.com/v1/claims
+curl -H "Authorization: Bearer YOUR_API_KEY" https://api.unioneyes.app/v1/claims
 \`\`\`
 
 Get your API key from the [Admin Dashboard](/admin/api-keys).
@@ -40,27 +40,27 @@ Get your API key from the [Admin Dashboard](/admin/api-keys).
 
 ## Support
 
-- Documentation: https://docs.unioneyes.com
-- Email: api@unioneyes.com
-- Status Page: https://status.unioneyes.com
+- Documentation: https://docs.unioneyes.app
+- Email: api@unioneyes.app
+- Status Page: https://status.unioneyes.app
     `.trim(),
     contact: {
       name: 'UnionEyes API Support',
-      email: 'api@unioneyes.com',
-      url: 'https://unioneyes.com/support',
+      email: 'api@unioneyes.app',
+      url: 'https://unioneyes.app/support',
     },
     license: {
       name: 'Proprietary',
-      url: 'https://unioneyes.com/terms',
+      url: 'https://unioneyes.app/terms',
     },
   },
   servers: [
     {
-      url: 'https://api.unioneyes.com/v1',
+      url: 'https://api.unioneyes.app/v1',
       description: 'Production',
     },
     {
-      url: 'https://staging-api.unioneyes.com/v1',
+      url: 'https://staging-api.unioneyes.app/v1',
       description: 'Staging',
     },
     {

@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-05-15T13:06:05.945Z",
-  "filesScanned": 1650,
-  "totalFindings": 2382,
+  "generatedAt": "2026-05-17T09:18:08.266Z",
+  "filesScanned": 1651,
+  "totalFindings": 2387,
   "findingsByRule": {
     "stale-reference": 1045,
     "stale-package-ref": 53,
-    "naming-inconsistency": 1177,
+    "naming-inconsistency": 1181,
     "missing-required-doc": 3,
-    "missing-package-readme": 104
+    "missing-package-readme": 105
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1205,
-    "info": 1177
+    "warning": 1206,
+    "info": 1181
   },
   "findings": [
     {
@@ -14775,8 +14775,36 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 949,
+      "line": 950,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/healthcare/discovery-surveys.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/healthcare/discovery-surveys.md",
+      "line": 14,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/healthcare/discovery-surveys.md",
+      "line": 18,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/healthcare/discovery-surveys.md",
+      "line": 73,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
@@ -16317,6 +16345,12 @@
       "severity": "warning",
       "file": "packages/health-ui",
       "message": "Package health-ui missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/healthcare-surveys",
+      "message": "Package healthcare-surveys missing README.md"
     },
     {
       "rule": "missing-package-readme",

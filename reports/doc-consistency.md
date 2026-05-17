@@ -1,24 +1,24 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-15T13:06:05.945Z
+> Generated: 2026-05-17T09:18:08.266Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1650 |
-| Total Findings | 2382 |
+| Files Scanned | 1651 |
+| Total Findings | 2387 |
 | Errors | 0 |
-| Warnings | 1205 |
-| Info | 1177 |
+| Warnings | 1206 |
+| Info | 1181 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1177 |
+| naming-inconsistency | 1181 |
 | stale-reference | 1045 |
-| missing-package-readme | 104 |
+| missing-package-readme | 105 |
 | stale-package-ref | 53 |
 | missing-required-doc | 3 |
 
@@ -1126,7 +1126,7 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 
-## naming-inconsistency (1177)
+## naming-inconsistency (1181)
 
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2138,7 +2138,11 @@
 - ℹ️ `docs/categories/stakeholders/tutorials/first-app.md:122` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md:54` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md:62` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/documentation-index.md:949` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:950` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/healthcare/discovery-surveys.md:73` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/INDEX.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/INDEX.md:99` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/INDEX.md:65` — "Buyer Pack" should be "procurement pack" (procurement artifact)
@@ -2312,7 +2316,7 @@
 - 🟡 `docs/disaster-recovery.md` — Required document missing: Disaster recovery plan
 - 🟡 `docs/incident-response.md` — Required document missing: Incident response plan
 
-## missing-package-readme (104)
+## missing-package-readme (105)
 
 - 🟡 `packages/agri-adapters` — Package agri-adapters missing README.md
 - 🟡 `packages/agri-core` — Package agri-core missing README.md
@@ -2374,6 +2378,7 @@
 - 🟡 `packages/health-connectors` — Package health-connectors missing README.md
 - 🟡 `packages/health-governance` — Package health-governance missing README.md
 - 🟡 `packages/health-ui` — Package health-ui missing README.md
+- 🟡 `packages/healthcare-surveys` — Package healthcare-surveys missing README.md
 - 🟡 `packages/ingestion-core` — Package ingestion-core missing README.md
 - 🟡 `packages/intelligence` — Package intelligence missing README.md
 - 🟡 `packages/itsm-core` — Package itsm-core missing README.md

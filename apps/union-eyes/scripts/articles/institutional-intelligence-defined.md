@@ -1,7 +1,7 @@
 ---
 title: What Institutional Intelligence Means - And What It Does Not
 slug: institutional-intelligence-defined
-category: Explainable Organizational Intelligence
+category: Explainable Governance Reasoning
 author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min

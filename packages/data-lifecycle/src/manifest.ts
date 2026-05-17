@@ -181,6 +181,7 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
       { name: 'Executive Operating System Data', description: 'Executive operating cadence data in founder_time_logs, weekly_focus_targets, treasury_snapshots, runway_assumptions, execution_initiatives, executive_decisions, decision_scorebacks, founder_priorities, product_health_snapshots, customer_onboarding_milestones, budget_lines, cs_accounts, security_findings, security_waivers, erp_invoices, job_postings, job_applications, grants, grant_reports, revenue_events, renewal_tasks, command_alerts, ops_clients, and ITSM tables (itsm_tickets, itsm_ticket_events, itsm_assets, itsm_problems, itsm_changes, itsm_approvals, itsm_kb_articles)', containsPii: false, containsFinancial: true, storageEngine: 'PostgreSQL' },
       { name: 'Proof Packs', description: 'Generated governance proof packs', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
       { name: 'Audit Logs', description: 'Console operation audit trail including audit_records export and verification telemetry', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'Healthcare Discovery Surveys', description: 'Workforce discovery survey data in healthcare_surveys, healthcare_survey_responses, healthcare_survey_insights, and healthcare_survey_templates — anonymous survey responses for clinical workflow discovery', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
     ],
     retentionSchedules: [
       { category: 'Platform Metrics', retentionClass: '1_YEAR', retentionPeriod: '1 year', legalBasis: 'Operational monitoring — rolling window' },
@@ -188,6 +189,7 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
       { category: 'Executive Operating System Data', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Executive decisioning, treasury traceability, and operating accountability' },
       { category: 'Proof Packs', retentionClass: 'PERMANENT', retentionPeriod: 'Permanent', legalBasis: 'Immutable governance attestation' },
       { category: 'Audit Logs', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Audit trail integrity' },
+      { category: 'Healthcare Discovery Surveys', retentionClass: '3_YEARS', retentionPeriod: '3 years', legalBasis: 'Workflow discovery evidence and operational audit trail' },
     ],
     deletionPolicies: [
       { category: 'Platform Metrics', method: 'retention_expiry', verification: 'automated_scan', authorizedRoles: [], reversible: false },
@@ -195,6 +197,7 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
       { category: 'Executive Operating System Data', method: 'retention_expiry', verification: 'automated_scan', authorizedRoles: [], reversible: false },
       { category: 'Proof Packs', method: 'retention_expiry', verification: 'deletion_certificate', authorizedRoles: [], reversible: false },
       { category: 'Audit Logs', method: 'retention_expiry', verification: 'automated_scan', authorizedRoles: [], reversible: false },
+      { category: 'Healthcare Discovery Surveys', method: 'hard_delete', verification: 'audit_log', authorizedRoles: ['platform_admin'], reversible: false },
     ],
     residency: { type: 'managed', regions: ['southafricanorth'], orgSelectable: false, description: 'Platform infrastructure — not org-selectable' },
     backup: { frequency: 'daily', provider: 'Azure Backup', location: 'Same region', encryptedAtRest: true, backupRetention: '30 days', rtoHours: 4, rpoHours: 1 },

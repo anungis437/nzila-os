@@ -338,6 +338,9 @@ export const ORG_SCOPED_TABLES = [
   'trustopsCreditors',
   'trustopsProofsOfClaim',
   'trustopsMandateStageHistory',
+
+  // ── healthcare-surveys.ts ─────────────────────────────────────
+  'healthcareSurveys',
 ] as const
 
 /**
@@ -397,6 +400,10 @@ export const NON_ORG_SCOPED_TABLES = [
   { table: 'decisionPipelineCheckpoints', reason: 'Global pipeline cursor/state table (one row per pipeline)' },
   { table: 'decisionPipelineRuns', reason: 'Global run log table with optional organization_id for org-specific replays' },
   { table: 'pipelineAlerts', reason: 'Global operational alert table emitted by pipeline infrastructure' },
+  // ── healthcare-surveys.ts — FK-scoped via survey_id → healthcareSurveys ─
+  { table: 'healthcareSurveyResponses', reason: 'Scoped via survey_id FK → healthcareSurveys (Org-scoped); anonymous responses — no direct org_id' },
+  { table: 'healthcareSurveyInsights', reason: 'Scoped via survey_id FK → healthcareSurveys (Org-scoped)' },
+  { table: 'healthcareSurveyTemplates', reason: 'Global template library — not org-specific' },
   // ── zonga.ts (no org_id) ────────────────────────────────
   { table: 'zongaReleaseTracks', reason: 'Scoped via release_id FK → zongaReleases (Org-scoped)' },
   { table: 'zongaPlaylistItems', reason: 'Scoped via playlist_id FK → zongaPlaylists (Org-scoped)' },

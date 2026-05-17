@@ -1,0 +1,17 @@
+
+> @nzila/union-eyes@1.0.0 narrative:check C:\APPS\nzila-automation\apps\union-eyes
+> tsx tooling/marketing/narrative-audit.ts --ci "--ci"
+
+
+UnionEyes ΓÇö Narrative CI Audit
+============================================================
+Files scanned        : 97
+Hard-fail violations : 0
+Warning violations   : 231
+Rule failures        : 1
+Institutional Maturity (avg) : 87/100
+
+Narrative CI failed: 0 hard-fail violations, 1 rule failures.
+C:\APPS\nzila-automation\apps\union-eyes:
+ΓÇëERR_PNPM_RECURSIVE_RUN_FIRST_FAILΓÇë @nzila/union-eyes@1.0.0 narrative:check: `tsx tooling/marketing/narrative-audit.ts --ci "--ci"`
+Exit status 1

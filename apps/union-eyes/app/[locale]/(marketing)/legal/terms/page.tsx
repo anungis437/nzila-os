@@ -97,8 +97,8 @@ export default async function TermsOfServicePage({
             <h2 className="text-2xl font-semibold text-gray-900">{t('contactTitle')}</h2>
             <p className="text-gray-700">
               {t('contactDesc')}{' '}
-              <a href="mailto:legal@unioneyes.com" className="text-violet-600 hover:text-violet-700">
-                legal@unioneyes.com
+              <a href="mailto:legal@unioneyes.app" className="text-violet-600 hover:text-violet-700">
+                legal@unioneyes.app
               </a>.
             </p>
           </section>

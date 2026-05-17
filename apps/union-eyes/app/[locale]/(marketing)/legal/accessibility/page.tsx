@@ -95,8 +95,8 @@ export default async function AccessibilityPage({
             </div>
             <p className="text-gray-700">
               {t('feedbackDesc')}{' '}
-              <a href="mailto:accessibility@unioneyes.com" className="text-violet-600 hover:text-violet-700">
-                accessibility@unioneyes.com
+              <a href="mailto:accessibility@unioneyes.app" className="text-violet-600 hover:text-violet-700">
+                accessibility@unioneyes.app
               </a>.
             </p>
           </section>

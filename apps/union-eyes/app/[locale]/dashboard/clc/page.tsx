@@ -27,8 +27,8 @@ import { sql, and, eq, lt } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 export const metadata: Metadata = {
-  title: 'CLC Executive Dashboard | UnionEyes',
-  description: 'Canadian Labour Congress executive dashboard and national analytics',
+  title: 'CLC Continuity Coordination | UnionEyes',
+  description: 'Canadian Labour Congress continuity coordination and federation-safe institutional visibility',
 };
 
 async function checkCLCAccess(userId: string, orgId: string): Promise<boolean> {
@@ -167,7 +167,7 @@ export default async function CLCDashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Building2 className="h-8 w-8 text-red-600" />
-            {t('dashboard.title', { defaultValue: 'CLC Executive Dashboard' })}
+            {t('dashboard.title', { defaultValue: 'CLC Continuity Coordination' })}
           </h1>
           <p className="text-muted-foreground mt-2">
             {t('dashboard.description', { 

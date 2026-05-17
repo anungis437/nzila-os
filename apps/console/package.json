@@ -35,6 +35,7 @@
     "@nzila/governance-review": "workspace:*",
     "@nzila/operational-convergence": "workspace:*",
     "@nzila/governed-workflow": "workspace:*",
+    "@nzila/healthcare-surveys": "workspace:*",
     "@nzila/itsm-core": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",

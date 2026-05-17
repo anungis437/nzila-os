@@ -40,6 +40,7 @@ import {
   redactProtected,
 } from './../governance/protected'
 import { buildInstitutionalTimeline } from './../governance/timeline'
+import { hydrateGovernanceTopologyInfrastructure } from './../governance/topology-hydration'
 import {
   buildExplainabilityRecords,
   summarizeProvenanceCoverage,
@@ -81,6 +82,12 @@ export interface InstitutionalObservabilitySnapshot {
   }
   readonly continuity: {
     readonly entries: number
+  }
+  readonly topology: {
+    readonly normalizedRelationships: number
+    readonly lineageChains: number
+    readonly continuityProjections: number
+    readonly protectedRedactions: number
   }
   readonly provenance: {
     readonly totalDecisions: number
@@ -138,6 +145,10 @@ export function collectInstitutionalObservability(
   })
   const evidence = buildEvidenceConvergence(safe)
   const continuity = buildContinuityTimeline(safe)
+  const topology = hydrateGovernanceTopologyInfrastructure({
+    edges: safe.edges,
+    decisions: safe.decisions,
+  })
   const explain = buildExplainabilityRecords(safe)
   const provenance = summarizeProvenanceCoverage(explain)
 
@@ -151,6 +162,12 @@ export function collectInstitutionalObservability(
     timeline: { entries: timeline.length },
     evidence: { entries: evidence.length },
     continuity: { entries: continuity.length },
+    topology: {
+      normalizedRelationships: topology.stats.normalizedRelationshipCount,
+      lineageChains: topology.stats.lineageChainCount,
+      continuityProjections: topology.stats.continuityProjectionCount,
+      protectedRedactions: topology.stats.redactedProtectedRelationships,
+    },
     provenance: {
       totalDecisions: provenance.totalDecisions,
       decisionsWithEvidence: provenance.decisionsWithEvidence,

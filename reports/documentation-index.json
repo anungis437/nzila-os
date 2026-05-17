@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-15T13:06:08.285Z",
-  "totalDocuments": 1001,
+  "generatedAt": "2026-05-17T09:18:01.753Z",
+  "totalDocuments": 1002,
   "staleDocuments": 0,
   "categories": [
     {
@@ -45,6 +45,11 @@
     },
     {
       "category": "hardening",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "healthcare",
       "count": 1,
       "staleCount": 0
     },
@@ -5657,7 +5662,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-05-14",
+      "lastValidated": "2026-05-17",
       "stale": false
     },
     {
@@ -5676,6 +5681,12 @@
       "path": "docs/hardening/secrets.md",
       "category": "hardening",
       "lastValidated": "2026-05-11",
+      "stale": false
+    },
+    {
+      "path": "docs/healthcare/discovery-surveys.md",
+      "category": "healthcare",
+      "lastValidated": "2026-05-16",
       "stale": false
     },
     {
@@ -5957,13 +5968,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-05-15",
+      "lastValidated": "2026-05-17",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-05-14",
+      "lastValidated": "2026-05-17",
       "stale": false
     },
     {

@@ -121,7 +121,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
     return [
       { label: 'Governance Overview', href: '/dashboard/governance' },
       { label: 'Trust & Explainability', href: '/dashboard/trust' },
-      { label: 'Operational Review', href: '/dashboard/workbench' },
+      { label: 'Continuity Review', href: '/dashboard/workbench' },
       { label: 'Policy Alignment', href: '/dashboard/governance' },
       { label: 'Continuity Signals', href: '/dashboard/continuity-intelligence' },
       { label: 'Audit & Evidence', href: '/dashboard/audits' },

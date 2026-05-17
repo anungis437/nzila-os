@@ -87,8 +87,8 @@ export default async function PrivacyPolicyPage({
             </div>
             <p className="text-gray-700">
               {t('rightsDesc')}{' '}
-              <a href="mailto:privacy@unioneyes.com" className="text-violet-600 hover:text-violet-700">
-                privacy@unioneyes.com
+              <a href="mailto:privacy@unioneyes.app" className="text-violet-600 hover:text-violet-700">
+                privacy@unioneyes.app
               </a>.
             </p>
           </section>
@@ -105,8 +105,8 @@ export default async function PrivacyPolicyPage({
             <h2 className="text-2xl font-semibold text-gray-900">{t('contactTitle')}</h2>
             <p className="text-gray-700">
               {t('contactDesc')}{' '}
-              <a href="mailto:privacy@unioneyes.com" className="text-violet-600 hover:text-violet-700">
-                privacy@unioneyes.com
+              <a href="mailto:privacy@unioneyes.app" className="text-violet-600 hover:text-violet-700">
+                privacy@unioneyes.app
               </a>.
             </p>
           </section>
