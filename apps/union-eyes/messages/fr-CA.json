@@ -7187,6 +7187,13 @@
           "desc": "Audit et souveraineté"
         }
       },
+      "pillars": "Piliers",
+      "pillarItems": {
+        "governance": { "name": "Gouvernance & continuité", "desc": "Opérations constitutionnelles pour organisations fédérées" },
+        "conventions": { "name": "Congrès & gouvernance fédérée", "desc": "Coordination des délégués et décision fédérée" },
+        "continuity": { "name": "Mémoire institutionnelle", "desc": "Doctrine, précédents et archive de continuité" },
+        "trust": { "name": "Confiance & intendance", "desc": "Audit, souveraineté et engagements d'intendance" }
+      },
       "story": "Notre histoire",
       "platform": "Plateforme",
       "platformItems": {

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import LocaleSiteNavigation from './(marketing)/locale-site-navigation';
@@ -26,6 +25,39 @@ export async function generateMetadata({
   };
 }
 
+const outcomes = [
+  {
+    title: 'Institutional continuity',
+    desc: 'Leadership transitions retain strategic memory, governance context, and operational direction.',
+  },
+  {
+    title: 'Governance-safe cognition',
+    desc: 'Every interpretation is bounded, evidence-anchored, and reviewer-of-record resolved.',
+  },
+  {
+    title: 'Operational coherence',
+    desc: 'Distributed teams work from one shared operating view instead of fragmented systems.',
+  },
+  {
+    title: 'Anti-surveillance posture',
+    desc: 'Continuity-safe modernization, anti-surveillance design, and human oversight enforced structurally at every layer.',
+  },
+];
+
+const proofPoints = [
+  { metric: '100%', label: 'Explainable decisions', sub: 'Every recommendation auditable' },
+  { metric: '0', label: 'Worker surveillance paths', sub: 'Anti-surveillance by design' },
+  { metric: 'Canada', label: 'Data residency', sub: 'Sovereign hosting, no cross-border egress' },
+  { metric: '24/7', label: 'Institutional memory', sub: 'Continuity across leadership transitions' },
+];
+
+const principles = [
+  'Human oversight is required, not optional.',
+  'No black-box outputs: every result is explainable.',
+  'No worker surveillance capability path.',
+  'Complete audit trails for governance trust.',
+];
+
 export default async function LocaleRootPage({
   params,
 }: {
@@ -33,28 +65,6 @@ export default async function LocaleRootPage({
 }) {
   const { locale } = await params;
   const { userId } = await auth();
-  const t = await getTranslations({ locale, namespace: 'marketing.home' });
-
-  const outcomes = [
-    { title: t('outcome1Title'), desc: t('outcome1Desc') },
-    { title: t('outcome2Title'), desc: t('outcome2Desc') },
-    { title: t('outcome3Title'), desc: t('outcome3Desc') },
-    { title: t('outcome4Title'), desc: t('outcome4Desc') },
-  ];
-
-  const proofPoints = [
-    { metric: '100%', label: t('pp1Label'), sub: t('pp1Sub') },
-    { metric: '0', label: t('pp2Label'), sub: t('pp2Sub') },
-    { metric: 'Canada', label: t('pp3Label'), sub: t('pp3Sub') },
-    { metric: '24/7', label: t('pp4Label'), sub: t('pp4Sub') },
-  ];
-
-  const principles = [
-    t('principle1'),
-    t('principle2'),
-    t('principle3'),
-    t('principle4'),
-  ];
 
   if (userId) {
     redirect(`/${locale}/dashboard/priorities`);
@@ -80,20 +90,20 @@ export default async function LocaleRootPage({
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28">
             <ScrollReveal>
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white mb-6">
-                {t('badge')}
+                Institutional Governance & Continuity Infrastructure
               </span>
             </ScrollReveal>
 
             <ScrollReveal delay={0.08}>
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-                {t('heroHeadingLine1')}<br />
-                <span className="gradient-text">{t('heroHeadingLine2')}</span>
+                Confidence that<br />
+                <span className="gradient-text">institutional memory will outlive any individual.</span>
               </h1>
             </ScrollReveal>
 
             <ScrollReveal delay={0.16}>
               <p className="text-xl md:text-2xl text-white mb-10 max-w-3xl">
-                {t('heroDescription')}
+                Union Eyes is the operational infrastructure layer for institutional labour continuity — governance-safe cognition, institutional memory, stewardship continuity, and anti-surveillance posture, embodied as one operating environment.
               </p>
             </ScrollReveal>
 
@@ -103,13 +113,13 @@ export default async function LocaleRootPage({
                   href={`/${locale}/pilot-request`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
-                  {t('ctaPrimary')}
+                  Request a Demo
                 </Link>
                 <Link
                   href={`/${locale}/solutions`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-white/15 backdrop-blur text-white font-bold rounded-xl border border-white/30 hover:bg-white/25 transition-all text-lg btn-press"
                 >
-                  {t('ctaSecondary')}
+                  Explore Solutions
                 </Link>
               </div>
             </ScrollReveal>
@@ -119,7 +129,7 @@ export default async function LocaleRootPage({
         <section className="py-10 bg-white border-y border-gray-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-center text-xs font-semibold tracking-widest uppercase text-gray-400 mb-6">
-              {t('proofSectionLabel')}
+              Built-in platform guarantees
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               {proofPoints.map((item) => (
@@ -137,10 +147,10 @@ export default async function LocaleRootPage({
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <ScrollReveal>
               <div className="text-center mb-12">                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
-                  {t('outcomesHeading')}
+                  Enterprise-grade operations, institution-first design
                 </h2>
                 <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-                  {t('outcomesDescription')}
+                  Union Eyes is designed for leadership continuity, governance modernization, and democratic trust at scale.
                 </p>
               </div>
             </ScrollReveal>
@@ -162,10 +172,11 @@ export default async function LocaleRootPage({
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <ScrollReveal>                <h2 className="text-3xl md:text-4xl font-bold text-navy mb-5">
-                  {t('govHeading')}
+                  Explainable intelligence with democratic safeguards
                 </h2>
                 <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                  {t('govDescription')}
+                  Intelligence recommends. People decide. Governance controls, labour-safe standards,
+                  and auditable evidence are built into every workflow.
                 </p>
                 <ul className="space-y-3">
                   {principles.map((item) => (
@@ -180,8 +191,8 @@ export default async function LocaleRootPage({
               <ScrollReveal delay={0.1}>
                 <div className="relative rounded-2xl overflow-hidden aspect-4/3">
                   <Image
-                    src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&q=80&auto=format"
-                    alt={t('govImageAlt')}
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
+                    alt="Labour leadership collaboration in governance session"
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
@@ -198,23 +209,23 @@ export default async function LocaleRootPage({
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <ScrollReveal>
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-5">
-                {t('finalCtaHeading')}
+                Ready for institutional continuity at executive scale?
               </h2>
               <p className="text-xl text-gray-100 mb-9">
-                {t('finalCtaDescription')}
+                Start with a guided pilot built around your governance and operations priorities.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href={`/${locale}/pilot-request`}
                   className="inline-flex items-center justify-center px-10 py-5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
-                  {t('finalCtaPrimary')}
+                  Request a Demo
                 </Link>
                 <Link
                   href={`/${locale}/trust`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-white/15 backdrop-blur text-white font-bold rounded-xl border border-white/30 hover:bg-white/25 transition-all text-lg btn-press"
                 >
-                  {t('finalCtaSecondary')}
+                  View Governance & Trust
                 </Link>
               </div>
             </ScrollReveal>

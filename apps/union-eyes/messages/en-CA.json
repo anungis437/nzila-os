@@ -7187,6 +7187,13 @@
           "desc": "Audit, sovereignty, stewardship"
         }
       },
+      "pillars": "Pillars",
+      "pillarItems": {
+        "governance": { "name": "Governance & Continuity", "desc": "Constitutional operations for federated organizations" },
+        "conventions": { "name": "Conventions & Federated Democratic Governance", "desc": "Delegate coordination and federated decision-making" },
+        "continuity": { "name": "Institutional Memory", "desc": "Doctrine, precedents, and continuity archive" },
+        "trust": { "name": "Trust & Stewardship", "desc": "Audit, sovereignty, and stewardship commitments" }
+      },
       "story": "Our Story",
       "platform": "Capabilities",
       "platformItems": {
