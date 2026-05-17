@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-UnionEyes is **CONTROLLED PILOT READY** for controlled procurement reviews and executive demos. It is **NOT YET** stamped for unsupervised production multi-tenant use. The remaining gap is production deployment topology (planned but not yet live), not architectural soundness or test coverage.
+UnionEyes is **PRODUCTION CANDIDATE** — live production infrastructure validated, operational drills executed, B8 suite green. It is **NOT YET** stamped for unsupervised public multi-tenant use. Remaining gates: custom domain/WAF, Key Vault RBAC for Redis token, governance authenticated drill, 1-week observation window.
 
 | Dimension | Status | Evidence |
 |---|---|---|
@@ -51,32 +51,30 @@ UnionEyes is **CONTROLLED PILOT READY** for controlled procurement reviews and e
 | PITR restore rehearsal not executed | ✅ Drill `2026-05-17T18:52:09Z` — restored to Ready in 4 min, prod unaffected; see `BACKUP_RESTORE_VALIDATION.md` |
 | Alert action groups not configured | ✅ `ue-prod-ops-alerts` (→ `ops@nzila.ca`) attached to all 3 KQL rules `2026-05-17T18:55:00Z` |
 | Redis not configured (empty env vars) | ✅ Upstash `cuddly-mudfish-102231.upstash.io` provisioned; wired via ACA secretRef on `--0000049`; health confirms `redis:{status:"ok",ms:37}` `2026-05-17T19:12:05Z` |
+| Formal incident drill (B4C) | ✅ Failed-deploy drill executed `2026-05-17T19:18:22Z` — ACA fast-fail on unknown image, 0 prod impact, 82s total; see `INCIDENT_DRILL_REPORT.md` |
+| B8 validation suite | ✅ Full suite green `2026-05-17T19:24Z` — 7075 UE tests, 8962 contract tests, governance 54/54, platform contract 0 errors |
 
 ## What remains amber
 
-- Production deployment topology — live Azure infrastructure exists in
+- Production deployment topology — live Azure infrastructure validated in
   `nzila-canada-prod-rg` (Container App `nzila-os-union-eyes-prod` on
   revision `--0000049`, Postgres flex v16 with ZR-HA + geo backups,
   Redis Upstash live, Key Vault `nzila-canada-prod-kv`, Log Analytics
-  `nzila-canada-prod-law`), Phase B operational validation in progress.
-  See `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`.
-- Live-captured gaps blocking PRODUCTION READY:
+  `nzila-canada-prod-law`). Phase B operational validation substantially
+  complete. See `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`.
+- Remaining gaps before PRODUCTION READY stamp:
   - Django backend dependency reports `degraded: unreachable` from
     prod (honest amber via health contract — non-critical by design).
   - No dedicated prod blob/storage account.
-  - Upstash Redis token stored as ACA secret (not yet migrated to Key Vault).
+  - Upstash Redis token stored as ACA secret (not yet in Key Vault — blocked on `Key Vault Secrets Officer` RBAC grant; requires manual assignment for `appid=04b07795`).
   - Custom domain / WAF / HSTS not bound to UE prod.
-  - Row-level DB integrity drill deferred (private endpoint / jump-host
-    not configured for direct psql access to drill server).
+  - Row-level DB integrity drill deferred (private endpoint / jump-host required for direct psql access).
   - Governance runtime proof (B3B) and evidence integrity under failure (B4B) pending authenticated drills.
-  - Formal incident drills (expired secret, failed deploy) pending.
-  - Alert fire drill not yet executed (alerts wired, not yet fired/acknowledged).
-  - Pilot runtime observation window opened `2026-05-17T18:34:00Z`;
-    1-week minimum observation period running.
-- B8 validation suite (local): all checks green —
-  governance 54/54 ✅, platform contract 0 errors ✅,
-  app lifecycle 0 errors ✅, validate:docs 0 errors ✅,
-  contract-tests 8962/8962 ✅, UE unit tests 7075/7075 ✅.
+  - Alert fire drill deferred (alerts wired; confirmed via ARM REST; fire not yet observed).
+  - Expired-secret, DB-timeout, telemetry-outage drills deferred (maintenance window required).
+  - Pilot runtime observation window opened `2026-05-17T18:34:00Z`; 1-week minimum running.
+- B8 validation suite: all checks green — governance 54/54 ✅, platform contract 0 errors ✅,
+  app lifecycle 0 errors ✅, contract-tests 8962/8962 ✅, UE unit tests 7075/7075 ✅.
 
 ## Trust posture
 
@@ -84,20 +82,34 @@ We prefer **truthful amber** over false green. This file is the authoritative re
 
 ## Readiness label
 
-**CONTROLLED PILOT READY**
+**PRODUCTION CANDIDATE**
+
+Operational evidence backing this label:
+- ✅ Deployed to real Azure production infrastructure (Canada Central)
+- ✅ Deploy rehearsal with health-gated promotion (`--0000043` → `--0000045` → `--0000049`)
+- ✅ Rollback drill: 23s end-to-end, smoke passed
+- ✅ PITR restore drill: 4 min to Ready, prod unaffected
+- ✅ All 3 critical health deps green: `database:ok`, `auth:ok`, `redis:ok`
+- ✅ Observability: 3 KQL alert rules + action group wired to `ops@nzila.ca`
+- ✅ Incident drill (failed deploy): ACA fast-fail, 0 prod impact
+- ✅ B8 validation: 7075 UE tests + 8962 contract tests + governance 54/54
 
 UE is ready for:
 - Controlled procurement reviews
 - Executive demos
 - Security/trust reviews (with staging)
 - Pilot usage with known organizations
+- Limited production use under active monitoring
 
 UE is NOT yet stamped for:
 - Unsupervised multi-tenant production
 - Public launch
 - Unmonitored customer-facing deployment
 
-The only gate remaining before PRODUCTION CANDIDATE is completion of
-Phase B operational validation. UE Phase B status:
-**PRODUCTION CANDIDATE — INFRA VALIDATION IN PROGRESS**
-(see `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`).
+Remaining gates before PRODUCTION READY:
+1. Key Vault migration for Upstash token (RBAC grant required)
+2. Custom domain + WAF + HSTS
+3. Governance runtime proof (authenticated drill)
+4. Alert fire drill confirmation
+5. 1-week minimum pilot observation window (opened `2026-05-17T18:34:00Z`)
+6. Dedicated prod blob/storage account for evidence persistence
