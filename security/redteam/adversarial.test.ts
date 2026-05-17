@@ -78,7 +78,12 @@ describe('RED-TEAM-001 — Cross-org data access must be structurally impossible
     const appFiles = walkSync(appsDir)
     const violations: string[] = []
 
+    // apps/*/lib/db/index.ts is the single authorised boundary re-export —
+    // it is the ONLY place allowed to import directly from @nzila/db/client.
+    const DB_BOUNDARY_RE = /[\\/]lib[\\/]db[\\/]index\.ts$/
+
     for (const file of appFiles) {
+      if (DB_BOUNDARY_RE.test(file)) continue
       const content = readFileSync(file, 'utf-8')
       if (
         content.includes("from '@nzila/db/raw'") ||
