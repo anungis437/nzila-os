@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-05-07T22:40:24.243Z",
+  "capturedAt": "2026-05-17T13:01:49.664Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -130,9 +130,13 @@
       "hash": "997099f91df00ecce6775d1b3df40ba8f573090145b4c9ce240525c0fb8bd4fe",
       "size": 1850
     },
+    "packages/db/src/schema/healthcare-surveys.ts": {
+      "hash": "e75a765c8421a2500949f2e35d1e0689070c6f847a470f8985cfbe18436f0104",
+      "size": 5342
+    },
     "packages/db/src/schema/index.ts": {
-      "hash": "522171db292ef87c7dc5d1107be16ddbc0bd851965a20f964dd2ae53c45718ee",
-      "size": 1761
+      "hash": "e939c16f66f8b9764c67e9b6afd46a0d1909654e3bb1985720d4afc2b9326108",
+      "size": 1798
     },
     "packages/db/src/schema/integrations.ts": {
       "hash": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65",
@@ -203,5 +207,5 @@
       "size": 38020
     }
   },
-  "compositeHash": "fdeadcdcf0fbbb1327fd39d0315171529ce82430265b39a955a7dfa8ed389f81"
+  "compositeHash": "5f600e78f686ad4a64f6cc8a733a9da4669617c25318d985a3a5bb5e051509b2"
 }
