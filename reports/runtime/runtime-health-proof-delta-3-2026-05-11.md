@@ -3,8 +3,8 @@
 - **As-of date:** 2026-05-11
 - **Branch:** `chore/runtime-health-proof-delta-3`
 - **Authority level:** current-runtime-remediation
-- **Predecessor:** [reports/runtime/runtime-health-contract-delta-2026-05-11.md](runtime-health-contract-delta-2026-05-11.md) (Delta-2)
-- **Source-of-truth artifact:** [reports/runtime/runtime-health-status-latest.json](runtime-health-status-latest.json) (regenerated deterministically by CI)
+- **Predecessor:** [reports/runtime/runtime-health-contract-delta-2026-05-11.md](reports/runtime/runtime-health-contract-delta-2026-05-11.md) (Delta-2)
+- **Source-of-truth artifact:** [reports/runtime/runtime-health-status-latest.json](reports/runtime/runtime-health-status-latest.json) (regenerated deterministically by CI)
 
 ## 1. Mandate
 
@@ -21,11 +21,11 @@ This delta does NOT change the os-core health contract, the orchestrator-api sou
 
 | Decision | Status | Evidence |
 | --- | --- | --- |
-| Generator is the single writer of `runtime-health-status-latest.json` | GO | [tooling/scripts/generate-runtime-health-status.mjs](../../tooling/scripts/generate-runtime-health-status.mjs) |
-| Validator forbids `orchestrator-api = healthy` while failure matrix is latest observation | GO | [tooling/scripts/validate-runtime-health-status.mjs](../../tooling/scripts/validate-runtime-health-status.mjs) |
-| CI runs generator + validator on every push (no secrets, no `|| true`) | GO | [.github/workflows/runtime-governance-attestation.yml](../../.github/workflows/runtime-governance-attestation.yml) |
+| Generator is the single writer of `runtime-health-status-latest.json` | GO | [tooling/scripts/generate-runtime-health-status.mjs](tooling/scripts/generate-runtime-health-status.mjs) |
+| Validator forbids `orchestrator-api = healthy` while failure matrix is latest observation | GO | [tooling/scripts/validate-runtime-health-status.mjs](tooling/scripts/validate-runtime-health-status.mjs) |
+| CI runs generator + validator on every push (no secrets, no `|| true`) | GO | [.github/workflows/runtime-governance-attestation.yml](.github/workflows/runtime-governance-attestation.yml) |
 | Latest JSON uploaded as workflow artifact | GO | upload-artifact path extended to include `reports/runtime/runtime-health-status-latest.json` |
-| Post-redeploy proof plan exists and is referenced by JSON notes | GO | [reports/runtime/post-delta-2-redeploy-proof-plan-2026-05-11.md](post-delta-2-redeploy-proof-plan-2026-05-11.md) |
+| Post-redeploy proof plan exists and is referenced by JSON notes | GO | [reports/runtime/post-delta-2-redeploy-proof-plan-2026-05-11.md](reports/runtime/post-delta-2-redeploy-proof-plan-2026-05-11.md) |
 | `orchestrator-api` reclassified to `healthy` in this delta | NO-GO | Reclassification gated on the proof plan above; no live evidence exists yet |
 | Veridian-{admin,care,site} reclassified | NO-GO | DNS/infra remediation is a separate track; `requiresDnsOrInfra=true` |
 | `agrimo` failing classification reclassified | NO-GO | Incubating; does not block Union Eyes pilot |
@@ -48,13 +48,13 @@ This delta does NOT change the os-core health contract, the orchestrator-api sou
 
 ## 4. Files changed in this delta
 
-- Added: [tooling/scripts/generate-runtime-health-status.mjs](../../tooling/scripts/generate-runtime-health-status.mjs)
-- Added: [tooling/scripts/validate-runtime-health-status.mjs](../../tooling/scripts/validate-runtime-health-status.mjs)
-- Added: [reports/runtime/runtime-health-status-latest.json](runtime-health-status-latest.json) (generator output; tracked so CI compares against committed truth)
-- Added: [reports/runtime/post-delta-2-redeploy-proof-plan-2026-05-11.md](post-delta-2-redeploy-proof-plan-2026-05-11.md)
-- Added: [reports/runtime/runtime-health-proof-delta-3-2026-05-11.md](runtime-health-proof-delta-3-2026-05-11.md) (this report)
-- Modified: [package.json](../../package.json) — added `runtime:health:generate` and `runtime:health:validate` scripts
-- Modified: [.github/workflows/runtime-governance-attestation.yml](../../.github/workflows/runtime-governance-attestation.yml) — added Generate + Validate steps after install; extended artifact upload path
+- Added: [tooling/scripts/generate-runtime-health-status.mjs](tooling/scripts/generate-runtime-health-status.mjs)
+- Added: [tooling/scripts/validate-runtime-health-status.mjs](tooling/scripts/validate-runtime-health-status.mjs)
+- Added: [reports/runtime/runtime-health-status-latest.json](reports/runtime/runtime-health-status-latest.json) (generator output; tracked so CI compares against committed truth)
+- Added: [reports/runtime/post-delta-2-redeploy-proof-plan-2026-05-11.md](reports/runtime/post-delta-2-redeploy-proof-plan-2026-05-11.md)
+- Added: [reports/runtime/runtime-health-proof-delta-3-2026-05-11.md](reports/runtime/runtime-health-proof-delta-3-2026-05-11.md) (this report)
+- Modified: [package.json](package.json) — added `runtime:health:generate` and `runtime:health:validate` scripts
+- Modified: [.github/workflows/runtime-governance-attestation.yml](.github/workflows/runtime-governance-attestation.yml) — added Generate + Validate steps after install; extended artifact upload path
 
 No runtime application code changed. No package contract changed. No `tenant` language introduced.
 
@@ -62,13 +62,13 @@ No runtime application code changed. No package contract changed. No `tenant` la
 
 Inputs (read-only):
 
-- [governance/release/deployment-inventory.json](../../governance/release/deployment-inventory.json) (28 entries; 6 `outOfScope`; `faircase` alias of `abr`).
-- [reports/runtime/live-health-failure-matrix.json](live-health-failure-matrix.json) (live ACA observations).
-- [reports/runtime/runtime-health-status-2026-05-11.json](runtime-health-status-2026-05-11.json) (Delta-2 sidecar; carries non-live curatorial notes).
+- [governance/release/deployment-inventory.json](governance/release/deployment-inventory.json) (28 entries; 6 `outOfScope`; `faircase` alias of `abr`).
+- [reports/runtime/live-health-failure-matrix.json](reports/runtime/live-health-failure-matrix.json) (live ACA observations).
+- [reports/runtime/runtime-health-status-2026-05-11.json](reports/runtime/runtime-health-status-2026-05-11.json) (Delta-2 sidecar; carries non-live curatorial notes).
 
 Output:
 
-- [reports/runtime/runtime-health-status-latest.json](runtime-health-status-latest.json) — sorted, stable JSON.
+- [reports/runtime/runtime-health-status-latest.json](reports/runtime/runtime-health-status-latest.json) — sorted, stable JSON.
 
 Rules (executed in order, smallest-safe-fix):
 
@@ -108,7 +108,7 @@ No secrets. No live network. No `|| true`. `contents: read, actions: read` permi
 
 ## 8. Outstanding (tracked, NOT remediated in this delta)
 
-- `orchestrator-api` redeploy + post-redeploy proof capture (per [post-delta-2-redeploy-proof-plan-2026-05-11.md](post-delta-2-redeploy-proof-plan-2026-05-11.md)). Reclassification target: 5 → 4 failing, 6 → 7 healthy, 1 → 0 requiresRedeploy.
+- `orchestrator-api` redeploy + post-redeploy proof capture (per [post-delta-2-redeploy-proof-plan-2026-05-11.md](reports/runtime/post-delta-2-redeploy-proof-plan-2026-05-11.md)). Reclassification target: 5 → 4 failing, 6 → 7 healthy, 1 → 0 requiresRedeploy.
 - `veridian-{admin,care,site}` DNS/infra remediation (separate track).
 - `agrimo` adoption of `@nzila/os-core/health` helper (incubating; non-blocking).
 
