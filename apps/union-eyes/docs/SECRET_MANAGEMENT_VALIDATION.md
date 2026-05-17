@@ -29,9 +29,13 @@ Plain env vars (non-secret): `NODE_ENV`, `PORT`, `UE_ENVIRONMENT`,
 `PLATFORM_ADMIN_USER_IDS`, `SUPER_ADMIN_ORG_ID`,
 `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`.
 
-> ⚠ `UPSTASH_REDIS_REST_TOKEN` is currently sourced as a plaintext env
-> var rather than via `secretRef`. Move it under ACA secret + Key Vault
-> before PRODUCTION READY.
+> ℹ `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are both set
+> as plaintext env vars with **empty string values** (confirmed via
+> `az containerapp show`). No real Upstash Redis instance is configured
+> for this deployment — the health check correctly reports Redis as
+> "not configured / optional". When a real Upstash instance is provisioned,
+> the token **must** be stored in Key Vault and referenced via ACA
+> `secretRef` before marking PRODUCTION READY.
 
 ## In-repo scan
 
@@ -69,7 +73,7 @@ Status remains `configured`, not `validated`.
 
 ## Gaps
 
-1. `UPSTASH_REDIS_REST_TOKEN` is a plaintext env var, not a KV secret.
+1. `UPSTASH_REDIS_REST_TOKEN` — when Redis is provisioned, store in KV + secretRef (currently empty/not-configured).
 2. No documented evidence of a real production rotation run.
 3. Caller-side access logs (Key Vault diagnostic logs to LAW) should be
    confirmed enabled — not verified in this pass.

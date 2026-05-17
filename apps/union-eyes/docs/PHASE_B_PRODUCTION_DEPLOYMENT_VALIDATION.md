@@ -23,8 +23,8 @@ removed (see audit for history).
 | Resource group | `nzila-canada-prod-rg` |
 | Region | Canada Central |
 | FQDN | `nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io` |
-| Active revision | `nzila-os-union-eyes-prod--0000041` (Healthy, 100% traffic, 2 replicas) |
-| Image | `nzilacanadaacr.azurecr.io/nzila-os-union-eyes:4697daeee1d9a3e4393350159207429a5eb9044b` |
+| Active revision | `nzila-os-union-eyes-prod--0000045` (Healthy, 100% traffic, 2 replicas) |
+| Image | `nzilacanadaacr.azurecr.io/nzila-os-union-eyes:3c43cf1163081d2fbe3d25b2ea476d179a28488f` |
 | Min / max replicas | 2 / 6 |
 | Revisions mode | Single |
 
@@ -35,21 +35,21 @@ removed (see audit for history).
 | B1A | Infra inventory | configured | [`PRODUCTION_INFRA_INVENTORY.md`](./PRODUCTION_INFRA_INVENTORY.md) |
 | B1B | Secret management | configured | [`SECRET_MANAGEMENT_VALIDATION.md`](./SECRET_MANAGEMENT_VALIDATION.md) |
 | B1C | DNS / SSL | configured (default ACA FQDN only) | This doc, §DNS |
-| B2A | Deployment rehearsal | observed (current revision only) | [`DEPLOYMENT_REHEARSAL.md`](./DEPLOYMENT_REHEARSAL.md) |
-| B2B | Health-gated deploy | configured | health probe live |
-| B2C | Rollback validation | **deferred** (procedure documented, not executed) | [`ROLLBACK_VALIDATION.md`](./ROLLBACK_VALIDATION.md) |
-| B3A | Production smoke | partial — 1 failing endpoint | This doc, §Smoke |
+| B2A | Deployment rehearsal | **validated** | deploy `3c43cf116` → `--0000043` → `--0000045` captured with timings; [`DEPLOYMENT_REHEARSAL.md`](./DEPLOYMENT_REHEARSAL.md) |
+| B2B | Health-gated deploy | configured | health probe live, `--0000043` promoted in ~9 min |
+| B2C | Rollback validation | **validated** | drill executed `2026-05-17T18:45:00Z`, 23s duration, smoke passed; [`ROLLBACK_VALIDATION.md`](./ROLLBACK_VALIDATION.md) |
+| B3A | Production smoke | **validated** | `/api/metrics/operational` 500→401 fix confirmed live on `--0000045`; all endpoints correct |
 | B3B | Governance runtime proof | **deferred** (endpoints 401-gated; awaiting authenticated drill) | — |
-| B3C | Observability validation | configured | [`OBSERVABILITY_VALIDATION.md`](./OBSERVABILITY_VALIDATION.md) |
-| B4A | Dependency degradation | partially observed (Django backend currently degraded) | §Smoke |
+| B3C | Observability validation | **configured** | LAW environment binding validated; 3 KQL alert rules created; [`OBSERVABILITY_VALIDATION.md`](./OBSERVABILITY_VALIDATION.md) |
+| B4A | Dependency degradation | partially observed (Django backend currently degraded, non-critical) | §Smoke |
 | B4B | Evidence integrity under failure | **deferred** | — |
 | B4C | Incident drill | **deferred** (Django-down observation captured as informal drill) | [`INCIDENT_DRILL_REPORT.md`](./INCIDENT_DRILL_REPORT.md) |
 | B5A | Backup verification | configured | [`BACKUP_RESTORE_VALIDATION.md`](./BACKUP_RESTORE_VALIDATION.md) |
 | B5B | Restore rehearsal | **deferred** (PITR procedure documented, not executed) | same |
-| B6A | Runtime observation window | not started | [`PILOT_RUNTIME_REVIEW.md`](./PILOT_RUNTIME_REVIEW.md) |
-| B6B | Operational review cadence | not started | same |
+| B6A | Runtime observation window | **open** `2026-05-17T18:34:00Z` | [`PILOT_RUNTIME_REVIEW.md`](./PILOT_RUNTIME_REVIEW.md) |
+| B6B | Operational review cadence | **started** — week 1 baseline captured | same |
 | B7  | Procurement / trust finalization | not started | — |
-| B8  | Final validation | partial (CI suite green; live infra checks captured) | this doc |
+| B8  | Final validation | partial (CI suite green; live infra checks captured; rollback validated; alerts configured) | this doc |
 
 Status legend:
 - `planned` — committed in IaC/docs, no live resource yet
@@ -60,12 +60,13 @@ Status legend:
 
 ## Smoke (B3A) — captured against live FQDN
 
-Run timestamp: revision `--0000041`, post Phase A completion.
+Run timestamp: revision `--0000045`, post metrics-fix deploy (`3c43cf116`), `2026-05-17T18:47:00Z`.
 
 | Endpoint | HTTP | Notes |
 |---|---|---|
-| `/api/health` | 200 | `ok:true`, `status:"degraded"`, DB ok (163 ms), auth ok, redis "not configured — optional for this deployment", backend (Django) `degraded: unreachable` |
-| `/api/metrics/operational` | **500** | **Real production defect** — captured during this validation pass. Tracked as a Phase B follow-up; do not gate Phase A on it but block PRODUCTION READY label until fixed. |
+| `/api/health` | 200 | `ok:true`, `status:"degraded"`, DB ok (114 ms), auth ok, redis "not configured — optional for this deployment", backend (Django) `degraded: unreachable` |
+| `/api/health/liveness` | 200 | ✅ |
+| `/api/metrics/operational` | **401** | ✅ **FIXED** — was 500 on prior revision, now correctly auth-gated |
 | `/api/governance/telemetry` | 401 | Auth-gated as designed |
 | `/api/evidence/export` | 401 | Auth-gated as designed |
 

@@ -46,25 +46,35 @@ UnionEyes is **CONTROLLED PILOT READY** for controlled procurement reviews and e
 | Cross-tenant fuzz testing | ✅ `ue-org-scope-fuzz.test.ts` (10 parameterized red-team probes) + `ue-org-column-audit.test.ts` (INV-34 schema audit) |
 | Load / perf benchmarking | ✅ `PERFORMANCE_BASELINE.md` defines thresholds; `perf-baseline.ts` script records live p50/p95/p99 |
 | Auth reality / stale vendor refs | ✅ Phase A complete — all active provider refs removed; PG sessions (primary) + Entra SSO (secondary) documented |
+| `/api/metrics/operational` 500 in prod | ✅ Fixed commit `3c43cf116` — confirmed 401 on `--0000045` `2026-05-17T18:47:00Z` |
+| Rollback drill not executed | ✅ Drill `2026-05-17T18:45:00Z` — 23s end-to-end, smoke passed; see `ROLLBACK_VALIDATION.md` |
 
 ## What remains amber
 
 - Production deployment topology — live Azure infrastructure exists in
   `nzila-canada-prod-rg` (Container App `nzila-os-union-eyes-prod` on
-  revision `--0000041`, Postgres flex v16 with ZR-HA + geo backups,
+  revision `--0000045`, Postgres flex v16 with ZR-HA + geo backups,
   Key Vault `nzila-canada-prod-kv`, Log Analytics `nzila-canada-prod-law`),
-  but Phase B operational validation is in progress.
+  Phase B operational validation in progress.
   See `PHASE_B_PRODUCTION_DEPLOYMENT_VALIDATION.md`.
 - Live-captured gaps blocking PRODUCTION READY:
-  - `/api/metrics/operational` currently returns HTTP 500 in prod.
+  - ~~`/api/metrics/operational` returns HTTP 500 in prod.~~ **FIXED** ✅ — commit `3c43cf116`, confirmed 401 on `--0000045`.
+  - ~~Rollback drill not yet executed.~~ **DONE** ✅ — drill `2026-05-17T18:45:00Z`, 23s duration, smoke passed.
   - Django backend dependency reports `degraded: unreachable` from
-    prod (honest amber via health contract).
+    prod (honest amber via health contract — non-critical by design).
   - No dedicated prod blob/storage account; no Azure-managed Redis
-    (Upstash via env vars, not yet KV-backed).
+    (Upstash env vars empty — Redis not yet configured for prod).
   - Custom domain / WAF / HSTS not bound to UE prod.
-  - Rollback, restore, and formal incident drills documented but not
-    yet executed.
-  - Runtime observation window (Phase B6) not started.
+  - PITR restore rehearsal documented but not executed.
+  - Alert action groups not configured (alerts fire but notify nobody).
+  - Governance runtime proof (B3B) and evidence integrity under failure (B4B) pending authenticated drills.
+  - Formal incident drills (expired secret, failed deploy) pending.
+  - Pilot runtime observation window opened `2026-05-17T18:34:00Z`;
+    1-week minimum observation period running.
+- B8 validation suite (local): all checks green —
+  governance 54/54 ✅, platform contract 0 errors ✅,
+  app lifecycle 0 errors ✅, validate:docs 0 errors ✅,
+  contract-tests 8962/8962 ✅, UE unit tests 7075/7075 ✅.
 
 ## Trust posture
 
