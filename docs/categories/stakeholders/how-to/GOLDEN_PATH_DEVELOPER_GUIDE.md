@@ -53,7 +53,7 @@ import { createEnforcedHandler, createContext, traceLayer, authLayer, governance
 // 1. Configure your auth provider
 authLayer({
   extractActor: async (headers) => {
-    // Verify JWT from Clerk/NextAuth/etc.
+    // Verify JWT from platform-auth / Entra External ID / etc.
     const token = headers.authorization?.replace('Bearer ', '')
     if (!token) return null
     const decoded = await verifyToken(token)

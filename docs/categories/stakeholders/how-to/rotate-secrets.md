@@ -9,10 +9,11 @@ in Azure Key Vault and should be rotated on a schedule.
 
 | Secret Type | Interval | Auto-Rotate |
 |-------------|----------|-------------|
-| API Keys (Clerk, Stripe) | 90 days | No (manual) |
+| API Keys (third-party integrations) | 90 days | No (manual) |
 | Database Passwords | 90 days | Yes |
-| OAuth Client Secrets | 180 days | No |
+| OAuth Client Secrets (Entra External ID) | 180 days | No |
 | TLS Certificates | 365 days | Yes (via Azure) |
+| Application Auth/Session Secret (`AUTH_SECRET`) | 90 days | No (manual) |
 
 ## Step 1: Check Rotation Status
 
@@ -22,10 +23,10 @@ import { SecretRotationManager } from '@nzila/secrets/rotation';
 const manager = new SecretRotationManager();
 
 manager.registerPolicy({
-  secretName: 'clerk-secret-key',
+  secretName: 'auth-secret',
   rotationIntervalDays: 90,
   lastRotated: new Date('2025-01-01'),
-  rotationType: 'api_key',
+  rotationType: 'app_secret',
 });
 
 const status = manager.getRotationStatus();
@@ -38,8 +39,8 @@ console.log('Upcoming:', status.upcoming.map(p => p.secretName));
 ```bash
 # Using Azure CLI
 az keyvault secret set \
-  --vault-name nzila-prod \
-  --name clerk-secret-key \
+  --vault-name nzila-canada-prod-kv \
+  --name auth-secret \
   --value "NEW_SECRET_VALUE"
 ```
 
@@ -47,8 +48,8 @@ az keyvault secret set \
 
 ```typescript
 manager.recordRotation({
-  secretName: 'clerk-secret-key',
-  rotationType: 'api_key',
+  secretName: 'auth-secret',
+  rotationType: 'app_secret',
   newVersion: 'v2025-04',
   rotatedAt: new Date(),
   rotatedBy: 'manual',
@@ -63,7 +64,7 @@ If using `KeyVaultClient` with caching, invalidate the rotated secret:
 import { KeyVaultClient } from '@nzila/secrets/keyvault';
 
 const client = new KeyVaultClient({ vaultUrl: process.env.AZURE_KEY_VAULT_URL! });
-client.invalidate('clerk-secret-key');
+client.invalidate('auth-secret');
 ```
 
 ## Emergency Rotation
