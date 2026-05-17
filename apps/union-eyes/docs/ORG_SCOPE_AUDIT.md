@@ -27,6 +27,8 @@ UE itself does NOT have such an exemption. Every UE route MUST go through `getAu
 |---|---|---|
 | `/api/grievances/**` | ✅ Enforced | Uses `crudRoutes({ orgScoped: true })` or explicit `organizationId` filters. |
 | `/api/cases/**` | ✅ Enforced | Same pattern as grievances. |
+| `/api/claims/[id]/evidence` | ✅ Fixed (commit `0fff5f3`) | **Was**: queried claim by `claimId` only — cross-org evidence read possible. **Fix**: added `organizationId` join via `and(eq(claims.claimId, id), eq(claims.organizationId, orgId))`. |
+| `/api/claims/[id]` PATCH | ✅ Fixed (commit `0fff5f3`) | **Was**: generic PATCH accepted `{ status: "closed" }`, bypassing the workflow FSM. **Fix**: `blockedPatchFields: ['status']` strips status from PATCH — mutations must go through `workflow-engine.ts`. |
 | `/api/executive/dashboard` | ✅ Enforced | `organizationId` extracted from auth context, filtered via `eq(grievances.organizationId, orgId)`. |
 | `/api/metrics/operational` | ⚠️ Aggregate | Returns ORG-AGNOSTIC platform totals (deliberate; operator-facing). Add `?org=` filter before exposing externally. |
 | `/api/governance/telemetry` | ⚠️ Aggregate | Same as above; platform-wide counters. |
