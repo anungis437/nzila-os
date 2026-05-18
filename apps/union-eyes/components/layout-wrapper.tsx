@@ -15,5 +15,5 @@ interface LayoutWrapperProps {
 }
 
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
-  return <main>{children}</main>;
+  return <>{children}</>;
 }

@@ -27,7 +27,7 @@ export function ShellLayout({ children, moduleSidebar, hideNav }: ShellLayoutPro
           {moduleSidebar}
         </aside>
       )}
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main role="main" className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 }
