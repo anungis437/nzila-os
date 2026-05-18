@@ -14,8 +14,8 @@
 | **Pilot user (CUPE)** | [CUPE Pilot User Guide](../../docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md) |
 | **Pilot admin** | [CUPE Pilot Admin Runbook](../../docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) |
 | **Steward / rep** | [Steward Quick Start](#steward-quick-start) |
-| **Developer** | [Architecture](./ARCHITECTURE_SHAPE.md) |
-| **Platform ops** | [Demo Flow](./CAPE-DEMO-FLOW.md) |
+| **Developer** | [Architecture](./architecture/ARCHITECTURE_SHAPE.md) |
+| **Platform ops** | [Operations](./operations/) |
 
 ## Documentation Map
 
@@ -41,14 +41,49 @@
 
 | Document | Purpose |
 |----------|---------|
-| [Architecture](./ARCHITECTURE_SHAPE.md) | System architecture and component map |
-| [Domain Model](./DOMAIN_MODEL.md) | Entities, relationships, state machines |
-| [Terminology Alignment](./TERMINOLOGY_ALIGNMENT.md) | Vocabulary contract across product, docs, and APIs |
-| [Enterprise Hardening](./enterprise-hardening-architecture.md) | Security, observability, deployment |
-| [Labor Continuity Intelligence API](./cba-intelligence-openapi.yaml) | Governance-safe labor continuity operations API spec |
-| [Labor Continuity Intelligence Authority](../../../docs/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md) | Canonical institutional labor continuity philosophy and controls |
-| [Pilot Playbook](./CAPE-PILOT-PLAYBOOK.md) | Adoption and rollout strategy |
-| [Pilot Audit Report](./CAPE-PILOT-AUDIT-REPORT.md) | Historical audit reference |
+| [Architecture](./architecture/ARCHITECTURE_SHAPE.md) | System architecture and component map |
+| [Domain Model](./architecture/DOMAIN_MODEL.md) | Entities, relationships, state machines |
+| [Governance Runtime Model](./architecture/GOVERNANCE_RUNTIME_MODEL.md) | Route policy and enforcement architecture |
+| [Enterprise Hardening](./architecture/enterprise-hardening-architecture.md) | Security, observability, deployment |
+| [FSM Authority](./architecture/FSM_AUTHORITY.md) | Finite state machine governance |
+| [Labor Continuity Intelligence API](./architecture/cba-intelligence-openapi.yaml) | Governance-safe labor continuity operations API spec |
+| [Terminology Alignment](./governance/TERMINOLOGY_ALIGNMENT.md) | Vocabulary contract across product, docs, and APIs |
+
+### Security & Incident Response
+
+| Document | Purpose |
+|----------|---------|
+| [Auth Reality Audit](./security/AUTH_REALITY_AUDIT.md) | Auth layer audit findings |
+| [Secret Management Validation](./security/SECRET_MANAGEMENT_VALIDATION.md) | Secrets posture evidence |
+| [Incident Drill Report](./security/INCIDENT_DRILL_REPORT.md) | Incident response rehearsal results |
+| [Backup / Restore Validation](./security/BACKUP_RESTORE_VALIDATION.md) | DR validation evidence |
+
+### Operations
+
+| Document | Purpose |
+|----------|---------|
+| [Production Topology](./operations/PRODUCTION_TOPOLOGY.md) | Infrastructure topology |
+| [Production Cutover Checklist](./operations/PRODUCTION_CUTOVER_CHECKLIST.md) | Go-live runbook |
+| [Rollback Validation](./operations/ROLLBACK_VALIDATION.md) | Rollback procedure evidence |
+| [Observability Validation](./operations/OBSERVABILITY_VALIDATION.md) | Monitoring and alerting evidence |
+| [Demo Runbook](./operations/DEMO_RUNBOOK.md) | Operator pre-flight and demo setup |
+
+### Procurement & Pilot Evidence
+
+| Document | Purpose |
+|----------|---------|
+| [Product Readiness Report](./procurement/PRODUCT_READINESS_REPORT.md) | Production readiness memo (buyer evidence) |
+| [Final Readiness Status](./procurement/FINAL_READINESS_STATUS.md) | Gate sign-off record |
+| [Pilot Scope](./procurement/PILOT_SCOPE.md) | Pilot program scope and constraints |
+| [Pilot Validation](./procurement/PILOT_VALIDATION.md) | Pilot validation results |
+| [CAPE Pilot Playbook](./procurement/CAPE-PILOT-PLAYBOOK.md) | CAPE pilot adoption strategy |
+| [CAPE Pilot Audit Report](./procurement/CAPE-PILOT-AUDIT-REPORT.md) | CAPE pilot audit evidence |
+
+### Roadmap
+
+| Document | Purpose |
+|----------|---------|
+| [Governed Public Experience Layer](./roadmap/governed-public-experience-layer.md) | Vision and plan for public-facing union surfaces |
 
 ### Archive
 
