@@ -23,6 +23,6 @@
   "devDependencies": {
     "@nzila/config": "workspace:*",
     "typescript": "^6",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.6"
   }
 }
