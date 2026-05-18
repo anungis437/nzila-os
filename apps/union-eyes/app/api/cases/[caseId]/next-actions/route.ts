@@ -10,7 +10,8 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { eq } from 'drizzle-orm';
-import { getAllowedTransitions } from '@/lib/case-fsm-enforcement';
+import { getAllowedTransitions, type ActorRole } from '@/lib/workflow/case-lifecycle';
+import { toLifecycleState, toLegacyClaimStatus } from '@/lib/workflow/state-bridge';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims } from '@/db/schema/claims-schema';
 import { logger } from '@/lib/logger';
@@ -52,19 +53,22 @@ export async function GET(
       );
     }
 
-    // Map DB status to CUPE vocabulary
-    const cupeStatus = mapDbStatusToCupe(claim.status);
+    // Map DB status to canonical LifecycleState, then get allowed transitions
+    const lifecycleState = toLifecycleState('claim', claim.status) ?? 'submitted';
 
     // Resolve actor role from org membership
     const resolvedRole = await getUserRoleInOrganization(userId, orgId);
-    const actorRole = resolvedRole ?? 'member';
+    const actorRole = normalizeActorRole(resolvedRole);
 
-    const transitions = getAllowedTransitions(cupeStatus, actorRole);
+    const allowedLifecycle = getAllowedTransitions(lifecycleState, actorRole);
+    // Convert back to legacy ClaimStatus values for backward-compat consumers
+    const allowedTransitions = [...new Set(allowedLifecycle.map(toLegacyClaimStatus))];
 
     return NextResponse.json({
       caseId,
-      currentStatus: cupeStatus,
-      allowedTransitions: transitions,
+      currentStatus: claim.status,
+      currentLifecycleState: lifecycleState,
+      allowedTransitions,
     }, {
       headers: { 'Cache-Control': 'no-store' },
     });
@@ -77,16 +81,18 @@ export async function GET(
   }
 }
 
-function mapDbStatusToCupe(dbStatus: string): string {
-  const mapping: Record<string, string> = {
-    submitted: 'filed',
-    under_review: 'acknowledged',
-    assigned: 'acknowledged',
-    investigation: 'investigating',
-    pending_documentation: 'response_due',
-    resolved: 'settled',
-    rejected: 'denied',
-    closed: 'closed',
+function normalizeActorRole(role: string | null | undefined): ActorRole {
+  const map: Record<string, ActorRole> = {
+    platform_admin: 'system_admin',
+    system_admin: 'system_admin',
+    admin: 'admin',
+    union_admin: 'admin',
+    officer: 'officer',
+    chief_steward: 'chief_steward',
+    business_agent: 'chief_steward',
+    steward: 'steward',
+    union_staff: 'steward',
+    member: 'member',
   };
-  return mapping[dbStatus] ?? dbStatus;
+  return map[role ?? ''] ?? 'member';
 }

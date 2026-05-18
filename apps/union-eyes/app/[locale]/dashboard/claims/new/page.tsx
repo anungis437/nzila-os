@@ -165,7 +165,7 @@ export default function NewClaimPage() {
           setRecordingTime(prev => prev + 1);
         }, 1000);
       } catch (_error) {
-alert('Unable to access microphone. Please ensure you have granted permission.');
+        toast({ variant: "destructive", title: t('errors.microphoneAccessDenied', { defaultValue: 'Unable to access microphone. Please ensure you have granted permission.' }) });
       }
     }
   };

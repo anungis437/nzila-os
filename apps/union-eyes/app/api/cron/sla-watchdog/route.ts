@@ -14,31 +14,21 @@ import { eventBus } from '@/lib/events/event-bus'
 import { logger } from '@/lib/logger'
 import { withApi } from '@/lib/api/framework'
 import { trackPilotEvent } from '@/lib/services/pilot-tracking'
-import {
-  CLAIM_SLA_STANDARDS,
-  type ClaimStatus,
-  type ClaimPriority,
-} from '@/lib/services/claim-workflow-fsm'
+import { getSLADeadlineHours, type CasePriority } from '@/lib/workflow/case-lifecycle'
+import { toLifecycleState } from '@/lib/workflow/state-bridge'
 import { recordUnionEyesSlaCompliance, recordUnionEyesSlaWatchdog } from '@/lib/pilot-metrics'
 
 export const dynamic = 'force-dynamic'
 
-const PRIORITY_MULTIPLIERS: Record<string, number> = {
-  critical: 0.5,
-  high: 0.75,
-  medium: 1.0,
-  low: 1.5,
-}
-
 function slaDeadline(
-  status: ClaimStatus,
-  priority: ClaimPriority,
+  status: string,
+  priority: string,
   statusChangedAt: Date,
 ): Date {
-  const baseHours = CLAIM_SLA_STANDARDS[status] ?? 0
-  const multiplier = PRIORITY_MULTIPLIERS[priority] ?? 1
+  const lifecycleState = toLifecycleState('claim', status) ?? 'submitted'
+  const hours = getSLADeadlineHours(lifecycleState, (priority as CasePriority) || 'medium')
   const d = new Date(statusChangedAt)
-  d.setHours(d.getHours() + baseHours * multiplier)
+  d.setHours(d.getHours() + hours)
   return d
 }
 
@@ -68,14 +58,14 @@ export const POST = withApi(
     let breachedCount = 0
 
     for (const c of activeClaims) {
-      const status = c.status as ClaimStatus
-      const priority = (c.priority as ClaimPriority) || 'medium'
+      const status = c.status
+      const priority = (c.priority as CasePriority) || 'medium'
       const changedAt = c.updatedAt ?? c.createdAt ?? now
 
       const deadline = slaDeadline(status, priority, changedAt)
       const msRemaining = deadline.getTime() - now.getTime()
       const hoursRemaining = msRemaining / (1000 * 60 * 60)
-      const totalHours = (CLAIM_SLA_STANDARDS[status] ?? 1) * (PRIORITY_MULTIPLIERS[priority] ?? 1)
+      const totalHours = getSLADeadlineHours(toLifecycleState('claim', status) ?? 'submitted', priority)
 
       // At-risk: less than 20% of SLA time remaining
       const atRisk = hoursRemaining > 0 && hoursRemaining < totalHours * 0.2
@@ -184,12 +174,12 @@ export const POST = withApi(
     for (const c of activeClaims) {
       if (!c.organizationId) continue
       const current = orgCounts.get(c.organizationId) ?? { breached: 0, atRisk: 0, compliant: 0, scanned: 0 }
-      const status = c.status as ClaimStatus
-      const priority = (c.priority as ClaimPriority) || 'medium'
+      const status = c.status
+      const priority = (c.priority as CasePriority) || 'medium'
       const changedAt = c.updatedAt ?? c.createdAt ?? now
       const deadline = slaDeadline(status, priority, changedAt)
       const hoursRemaining = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60)
-      const totalHours = (CLAIM_SLA_STANDARDS[status] ?? 1) * (PRIORITY_MULTIPLIERS[priority] ?? 1)
+      const totalHours = getSLADeadlineHours(toLifecycleState('claim', status) ?? 'submitted', priority)
       current.scanned += 1
       if (hoursRemaining <= 0) current.breached += 1
       else {

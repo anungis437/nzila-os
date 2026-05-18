@@ -39,6 +39,7 @@ import { InstitutionalContinuityNote } from '@/components/marketing/institutiona
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { getInstitutionalModeProfile, parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { logger } from '@/lib/logger';
+import { toast } from 'sonner';
 import {
   executiveDecisionPathwaySystems,
   buildContinuityReadinessProfile,
@@ -175,11 +176,11 @@ export default function LocalePilotRequestPage() {
       if (response.ok) {
         setStep(6);
       } else {
-        alert(t('alerts.submitFailed'));
+        toast.error(t('alerts.submitFailed'));
       }
     } catch (error) {
       logger.error('Submission error:', error);
-      alert(t('alerts.submitFailed'));
+      toast.error(t('alerts.submitFailed'));
     } finally {
       setSubmitting(false);
     }

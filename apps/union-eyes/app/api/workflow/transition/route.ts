@@ -10,10 +10,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth-guard'
 import { updateClaimStatus } from '@/lib/workflow-engine'
-import {
-  getAllowedClaimTransitions,
-  type ClaimStatus,
-} from '@/lib/services/claim-workflow-fsm'
+import { getAllowedTransitions, type ActorRole } from '@/lib/workflow/case-lifecycle'
+import { toLifecycleState, toLegacyClaimStatus } from '@/lib/workflow/state-bridge'
+
+// Local alias for DB claim status values — decoupled from deprecated FSM module
+type ClaimStatus =
+  | 'submitted' | 'under_review' | 'assigned' | 'investigation'
+  | 'pending_documentation' | 'resolved' | 'rejected' | 'closed'
 import { claims, claimUpdates } from '@/db/schema'
 import { eq, and, count } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
@@ -96,9 +99,11 @@ export async function POST(request: NextRequest) {
 
       const currentStatus = claim.status as ClaimStatus
 
-      // Pre-flight FSM guard — show allowed transitions
-      const allowed = getAllowedClaimTransitions(currentStatus, 'steward')
-      if (!allowed.includes(targetStatus)) {
+      // Pre-flight FSM guard via canonical lifecycle bridge
+      const currentLifecycle = toLifecycleState('claim', currentStatus) ?? 'submitted'
+      const allowedLifecycle = getAllowedTransitions(currentLifecycle, 'steward')
+      const allowed = [...new Set(allowedLifecycle.map(toLegacyClaimStatus))]
+      if (!allowed.includes(targetStatus as ClaimStatus)) {
         recordUnionEyesWorkflowTransitionFailure(
           organizationId || claim.organizationId,
           claim.claimId,
