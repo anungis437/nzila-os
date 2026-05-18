@@ -5,7 +5,7 @@
   "workspacePackageCount": 247,
   "workflowCount": 48,
   "contractTestCount": 251,
-  "tsTestFileCount": 1419,
+  "tsTestFileCount": 1442,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -666,7 +666,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3574
+      "codeFileCount": 3654
     },
     {
       "name": "veridian-admin",
