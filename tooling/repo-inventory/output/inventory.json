@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-17T00:00:00.000Z",
+  "generatedAt": "2026-05-18T00:00:00.000Z",
   "appCount": 26,
   "packageCount": 215,
   "workspacePackageCount": 247,
   "workflowCount": 48,
-  "contractTestCount": 249,
-  "tsTestFileCount": 1408,
+  "contractTestCount": 251,
+  "tsTestFileCount": 1419,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -173,7 +173,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 364
+      "codeFileCount": 384
     },
     {
       "name": "control-plane",
@@ -666,7 +666,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3549
+      "codeFileCount": 3574
     },
     {
       "name": "veridian-admin",

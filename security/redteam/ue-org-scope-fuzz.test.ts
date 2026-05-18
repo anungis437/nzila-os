@@ -53,6 +53,8 @@ const ORG_ENFORCEMENT_PATTERNS = [
   /requireOrg/,
   /assertOrgAccess/,
   /withApi\b/,            // UE canonical API wrapper — enforces auth.required + minRole; handlers rely on ScopedDb for org isolation
+  /withApiAuth\b/,        // UE auth guard wrapper (api-auth-guard)
+  /withRoleAuth\b/,       // UE role-based auth guard wrapper
   /withOrganizationAuth/, // legacy wrapper
   /sourceOrganizationId/, // explicit cross-org reference (e.g. clause library search)
 ]
@@ -245,7 +247,7 @@ describe('RED-TEAM-ORG — UE Org-Scope Route Fuzz (static analysis)', () => {
       const content = readFileSync(route, 'utf-8')
       const rel = route.replace(ROOT, '').replace(/^[/\\]/, '')
 
-      const hasAuth = /auth\(\)|withRLSContext|requireAdmin|assertOrgAccess|orgId/.test(content)
+      const hasAuth = /auth\(\)|withRLSContext|requireAdmin|assertOrgAccess|orgId|withApi\b|withApiAuth\b|withRoleAuth\b/.test(content)
       expect(
         hasAuth,
         `Export/evidence route ${rel} must have auth + org enforcement`,
