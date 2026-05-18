@@ -3,7 +3,7 @@
 - **As-of date:** 2026-05-11
 - **Scope:** Single ACA workload — `orchestrator-api` (Canada Central, env `jollydune-88c1e97f`)
 - **Authority level:** current-runtime-remediation
-- **Status:** `failing` (per [reports/runtime/runtime-health-status-latest.json](reports/runtime/runtime-health-status-latest.json)) until evidence below is captured.
+- **Status:** `failing` (per [reports/runtime/runtime-health-status-latest.json](runtime-health-status-latest.json)) until evidence below is captured.
 
 This plan is the only path by which `orchestrator-api` may be reclassified from `failing` to `healthy`. It is referenced by the Delta-3 generator (`tooling/scripts/generate-runtime-health-status.mjs`) and enforced by the Delta-3 validator (`tooling/scripts/validate-runtime-health-status.mjs`), which both forbid a `healthy` classification for `orchestrator-api` while live failure-matrix evidence remains the most recent observation.
 
@@ -11,10 +11,10 @@ This plan is the only path by which `orchestrator-api` may be reclassified from 
 
 ## 1. Context and source of truth
 
-- Live failure: three ACA fallback observations — `/`, `/health`, `/ready` — recorded in [reports/runtime/live-health-failure-matrix.json](reports/runtime/live-health-failure-matrix.json).
-- Source fix: commit `4ad83815f` — [apps/orchestrator-api/src/routes/health.ts](apps/orchestrator-api/src/routes/health.ts) — adopts `@nzila/os-core/health` with critical / non-critical split (only `failing` returns 503; `degraded` keeps 200).
-- Shared contract: [packages/os-core/src/health.ts](packages/os-core/src/health.ts) — `RuntimeHealthCheck`, `HealthCheckState`, `RuntimeHealthStatus` ('healthy'|'degraded'|'failing'|'not_instrumented'); `ok = status !== 'failing'`.
-- Contract test suite: [packages/os-core/src/__tests__/runtime-health.test.ts](packages/os-core/src/__tests__/runtime-health.test.ts) — 12/12 passing on commit `4ad83815f`.
+- Live failure: three ACA fallback observations — `/`, `/health`, `/ready` — recorded in [reports/runtime/live-health-failure-matrix.json](live-health-failure-matrix.json).
+- Source fix: commit `4ad83815f` — [apps/orchestrator-api/src/routes/health.ts](../../apps/orchestrator-api/src/routes/health.ts) — adopts `@nzila/os-core/health` with critical / non-critical split (only `failing` returns 503; `degraded` keeps 200).
+- Shared contract: [packages/os-core/src/health.ts](../../packages/os-core/src/health.ts) — `RuntimeHealthCheck`, `HealthCheckState`, `RuntimeHealthStatus` ('healthy'|'degraded'|'failing'|'not_instrumented'); `ok = status !== 'failing'`.
+- Contract test suite: [packages/os-core/src/__tests__/runtime-health.test.ts](../../packages/os-core/src/__tests__/runtime-health.test.ts) — 12/12 passing on commit `4ad83815f`.
 
 Until the redeploy evidence in §4 is captured, the latest legitimate observation remains the live failure matrix, and the classification stays `failing`.
 

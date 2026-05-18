@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-18T18:56:56.648Z",
-  "totalDocuments": 1002,
+  "generatedAt": "2026-05-12T12:33:26.882Z",
+  "totalDocuments": 1001,
   "staleDocuments": 0,
   "categories": [
     {
@@ -45,11 +45,6 @@
     },
     {
       "category": "hardening",
-      "count": 1,
-      "staleCount": 0
-    },
-    {
-      "category": "healthcare",
       "count": 1,
       "staleCount": 0
     },
@@ -4876,7 +4871,7 @@
     {
       "path": "docs/categories/stakeholders/builders/CONTRIBUTING.md",
       "category": "categories",
-      "lastValidated": "2026-05-14",
+      "lastValidated": "2026-05-11",
       "stale": false
     },
     {
@@ -5134,7 +5129,7 @@
     {
       "path": "docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md",
       "category": "categories",
-      "lastValidated": "2026-05-14",
+      "lastValidated": "2026-05-11",
       "stale": false
     },
     {
@@ -5392,7 +5387,7 @@
     {
       "path": "docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md",
       "category": "categories",
-      "lastValidated": "2026-05-17",
+      "lastValidated": "2026-05-11",
       "stale": false
     },
     {
@@ -5524,7 +5519,7 @@
     {
       "path": "docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md",
       "category": "categories",
-      "lastValidated": "2026-05-17",
+      "lastValidated": "2026-05-11",
       "stale": false
     },
     {
@@ -5536,7 +5531,7 @@
     {
       "path": "docs/categories/stakeholders/how-to/rotate-secrets.md",
       "category": "categories",
-      "lastValidated": "2026-05-17",
+      "lastValidated": "2026-05-11",
       "stale": false
     },
     {
@@ -5662,7 +5657,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-05-18",
+      "lastValidated": "2026-05-11",
       "stale": false
     },
     {
@@ -5681,12 +5676,6 @@
       "path": "docs/hardening/secrets.md",
       "category": "hardening",
       "lastValidated": "2026-05-11",
-      "stale": false
-    },
-    {
-      "path": "docs/healthcare/discovery-surveys.md",
-      "category": "healthcare",
-      "lastValidated": "2026-05-17",
       "stale": false
     },
     {
@@ -5968,13 +5957,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-05-18",
+      "lastValidated": "2026-05-11",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-05-18",
+      "lastValidated": "2026-05-11",
       "stale": false
     },
     {
@@ -5986,7 +5975,7 @@
     {
       "path": "docs/platform/portfolio-matrix.md",
       "category": "platform",
-      "lastValidated": "2026-05-14",
+      "lastValidated": "2026-05-12",
       "stale": false
     },
     {

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-18T00:00:00.000Z",
+  "generatedAt": "2026-05-12T00:00:00.000Z",
   "appCount": 26,
-  "packageCount": 215,
-  "workspacePackageCount": 247,
+  "packageCount": 213,
+  "workspacePackageCount": 245,
   "workflowCount": 48,
-  "contractTestCount": 251,
-  "tsTestFileCount": 1442,
+  "contractTestCount": 248,
+  "tsTestFileCount": 1382,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -141,7 +141,6 @@
         "governance-operations",
         "governance-review",
         "governed-workflow",
-        "healthcare-surveys",
         "itsm-core",
         "ml-sdk",
         "operational-convergence",
@@ -173,7 +172,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 384
+      "codeFileCount": 364
     },
     {
       "name": "control-plane",
@@ -454,7 +453,7 @@
         "policies"
       ],
       "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
-      "codeFileCount": 32
+      "codeFileCount": 30
     },
     {
       "name": "partners",
@@ -649,7 +648,6 @@
         "governance-otel",
         "governance-review",
         "institutional-cognition-core",
-        "institutional-governance-graph",
         "ml-sdk",
         "nar",
         "operational-convergence",
@@ -666,7 +664,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3654
+      "codeFileCount": 3526
     },
     {
       "name": "veridian-admin",

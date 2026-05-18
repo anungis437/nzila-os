@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-18T18:56:56.648Z
+Generated: 2026-05-12T12:33:26.882Z
 
-Total documents indexed: 1002
+Total documents indexed: 1001
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -18,7 +18,6 @@ Stale documents (>90 days since repo validation): 0
 | documentation-index.md | 1 | 0 |
 | governance | 1 | 0 |
 | hardening | 1 | 0 |
-| healthcare | 1 | 0 |
 | migration | 2 | 0 |
 | nzila-residual-closure | 13 | 0 |
 | nzila-runtime-integrity | 11 | 0 |
@@ -829,7 +828,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/README.md](docs/categories/README.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/builders/ARCHITECTURE_MAP.md](docs/categories/stakeholders/builders/ARCHITECTURE_MAP.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/builders/COMMANDS.md](docs/categories/stakeholders/builders/COMMANDS.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/builders/CONTRIBUTING.md](docs/categories/stakeholders/builders/CONTRIBUTING.md) | categories | 2026-05-14 | current |
+| [docs/categories/stakeholders/builders/CONTRIBUTING.md](docs/categories/stakeholders/builders/CONTRIBUTING.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/builders/QUICKSTART.md](docs/categories/stakeholders/builders/QUICKSTART.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/buyers/buyer-faq.md](docs/categories/stakeholders/buyers/buyer-faq.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/buyers/deployment-models.md](docs/categories/stakeholders/buyers/deployment-models.md) | categories | 2026-05-11 | current |
@@ -872,7 +871,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/commercial/pricing-framework.md](docs/categories/stakeholders/commercial/pricing-framework.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/public-narrative-audit.md](docs/categories/stakeholders/commercial/public-narrative-audit.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/public-narrative-copydeck.md](docs/categories/stakeholders/commercial/public-narrative-copydeck.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md](docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md) | categories | 2026-05-14 | current |
+| [docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md](docs/categories/stakeholders/commercial/sales-kit/01-union-eyes-one-page-copy.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/sales-kit/02-45-minute-demo-script.md](docs/categories/stakeholders/commercial/sales-kit/02-45-minute-demo-script.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/sales-kit/03-discovery-call-checklist.md](docs/categories/stakeholders/commercial/sales-kit/03-discovery-call-checklist.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/sales-kit/04-objection-handling-sheet.md](docs/categories/stakeholders/commercial/sales-kit/04-objection-handling-sheet.md) | categories | 2026-05-11 | current |
@@ -915,7 +914,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/commercial/vendor-risk-pack/subprocessor-list.md](docs/categories/stakeholders/commercial/vendor-risk-pack/subprocessor-list.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/vendor-risk-pack/support-sla.md](docs/categories/stakeholders/commercial/vendor-risk-pack/support-sla.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/why-union-eyes.md](docs/categories/stakeholders/commercial/why-union-eyes.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md) | categories | 2026-05-17 | current |
+| [docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/gtm/BUYER_OBJECTION_BATTLECARDS.md](docs/categories/stakeholders/gtm/BUYER_OBJECTION_BATTLECARDS.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/gtm/CASE_STUDY_FACTORY.md](docs/categories/stakeholders/gtm/CASE_STUDY_FACTORY.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/gtm/case-study-capture.md](docs/categories/stakeholders/gtm/case-study-capture.md) | categories | 2026-05-11 | current |
@@ -937,9 +936,9 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/gtm/ue-pricing-model.md](docs/categories/stakeholders/gtm/ue-pricing-model.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/gtm/ue-prospect-list.md](docs/categories/stakeholders/gtm/ue-prospect-list.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/how-to/create-model-card.md](docs/categories/stakeholders/how-to/create-model-card.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) | categories | 2026-05-17 | current |
+| [docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/how-to/README.md](docs/categories/stakeholders/how-to/README.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/how-to/rotate-secrets.md](docs/categories/stakeholders/how-to/rotate-secrets.md) | categories | 2026-05-17 | current |
+| [docs/categories/stakeholders/how-to/rotate-secrets.md](docs/categories/stakeholders/how-to/rotate-secrets.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/investor/defensible-moat-analysis.md](docs/categories/stakeholders/investor/defensible-moat-analysis.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/investor/final-investor-onepager.md](docs/categories/stakeholders/investor/final-investor-onepager.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/investor/product-expansion-strategy.md](docs/categories/stakeholders/investor/product-expansion-strategy.md) | categories | 2026-05-11 | current |
@@ -960,11 +959,10 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/tutorials/first-app.md](docs/categories/stakeholders/tutorials/first-app.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md](docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/tutorials/README.md](docs/categories/stakeholders/tutorials/README.md) | categories | 2026-05-11 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-18 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-11 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
-| [docs/healthcare/discovery-surveys.md](docs/healthcare/discovery-surveys.md) | healthcare | 2026-05-17 | current |
 | [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-05-10 | current |
 | [docs/migration/trade/canonical-domain-map.md](docs/migration/trade/canonical-domain-map.md) | migration | 2026-05-11 | current |
 | [docs/migration/trade/cars-vertical-scope.md](docs/migration/trade/cars-vertical-scope.md) | migration | 2026-05-11 | current |
@@ -1011,10 +1009,10 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-18 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-18 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-11 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-11 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
-| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-14 | current |
+| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-12 | current |
 | [docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md](docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md) | platform | 2026-05-11 | current |
 | [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md) | proof-center | 2026-05-11 | current |
 | [docs/public/restore-readiness-summary.md](docs/public/restore-readiness-summary.md) | public | 2026-05-11 | current |
