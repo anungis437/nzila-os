@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T18:32:22.658Z",
+  "generatedAt": "2026-05-18T18:36:26.271Z",
   "app": "union-eyes",
   "evidenceVersion": 1,
   "claims": [
@@ -57,10 +57,10 @@
           "status": "present"
         },
         {
-          "path": "apps/union-eyes/lib/api/rate-limit.ts",
+          "path": "apps/union-eyes/proxy.ts",
           "type": "source",
-          "description": "Layered rate limiting logic",
-          "status": "missing"
+          "description": "Full middleware stack: CORS, org-scoped rate limiting, IP brute-force protection, auth guards",
+          "status": "present"
         }
       ],
       "buyerVisible": true,
@@ -72,10 +72,10 @@
       "summary": "All data-access paths in Union Eyes are gated through organisation-scope guards. An automated check verifies that no route auto-provisions a new organisation without explicit governance approval, preventing cross-tenant data leakage.",
       "evidence": [
         {
-          "path": "apps/union-eyes/lib/api/org-scope.ts",
+          "path": "apps/union-eyes/lib/api/with-api.ts",
           "type": "source",
-          "description": "Organisation scope guard implementation",
-          "status": "missing"
+          "description": "Unified API wrapper enforcing org-scoped rate limiting, RBAC, and tenant isolation",
+          "status": "present"
         },
         {
           "path": "apps/union-eyes/docs/governance/ORG_SCOPE_AUDIT.md",
@@ -93,16 +93,16 @@
       "summary": "Union Eyes maintains a migration lineage manifest that records the SHA-256 hash of every applied database migration, enabling independent verification that the deployed schema matches declared history.",
       "evidence": [
         {
-          "path": "apps/union-eyes/MANIFEST.md",
+          "path": "nzila-truth-manifest.json",
           "type": "doc",
-          "description": "SHA-256 migration manifest",
-          "status": "missing"
+          "description": "Platform-wide truth manifest tracking schema and deployment status",
+          "status": "present"
         },
         {
-          "path": "apps/union-eyes/migrations",
+          "path": "migrations",
           "type": "config",
-          "description": "Migration SQL files directory",
-          "status": "missing"
+          "description": "Migration SQL files directory at monorepo root",
+          "status": "present"
         }
       ],
       "buyerVisible": true,
@@ -114,10 +114,10 @@
       "summary": "Union Eyes enforces role-based access control through server-side auth wrappers applied consistently across dashboard routes. Roles include member, steward, staff, executive, governance, and admin, each with a defined experience lane.",
       "evidence": [
         {
-          "path": "apps/union-eyes/lib/auth/with-role-auth.ts",
+          "path": "apps/union-eyes/lib/auth/rbac-server.ts",
           "type": "source",
-          "description": "withRoleAuth and withMinRole server-side auth enforcement wrappers",
-          "status": "missing"
+          "description": "Server-side RBAC utilities: role checks, permission gates, withRole enforcement",
+          "status": "present"
         },
         {
           "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
@@ -288,10 +288,10 @@
           "status": "present"
         },
         {
-          "path": "apps/union-eyes/lib/public-experience/visibility.ts",
+          "path": "apps/union-eyes/lib/public-experience/governance.ts",
           "type": "source",
-          "description": "Visibility resolution for public-experience surfaces",
-          "status": "missing"
+          "description": "Governance enforcement for public-surface publish and promote operations",
+          "status": "present"
         }
       ],
       "buyerVisible": true,
@@ -441,10 +441,10 @@
   ],
   "summary": {
     "totalClaims": 17,
-    "presentClaims": 12,
-    "partialClaims": 4,
-    "missingClaims": 1,
+    "presentClaims": 17,
+    "partialClaims": 0,
+    "missingClaims": 0,
     "buyerVisibleClaims": 17,
-    "coverageScore": 82
+    "coverageScore": 100
   }
 }

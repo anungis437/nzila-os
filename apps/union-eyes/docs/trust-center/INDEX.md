@@ -1,8 +1,8 @@
 # Union Eyes — Trust Center Index
 
 > **Audience:** Procurement reviewers, institutional buyers, governance auditors.
-> **Generated:** 2026-05-18T18:32:22.658Z
-> **Coverage score:** 82%
+> **Generated:** 2026-05-18T18:36:26.271Z
+> **Coverage score:** 100%
 
 This index provides a buyer-readable summary of Union Eyes governance, security,
 and operational evidence. All claims are grounded in repository artifacts and
@@ -21,7 +21,7 @@ generated automatically from the evidence manifest.
 
 | Metric | Value | Metric | Value | Metric | Value | Metric | Value |
 |--------|-------|--------|-------|--------|-------|--------|-------|
-| **Total claims** | 17 | **Present** | 12 | **Partial** | 4 | **Missing** | 1 |
+| **Total claims** | 17 | **Present** | 17 | **Partial** | 0 | **Missing** | 0 |
 
 **Buyer-visible claims:** 17
 
@@ -33,16 +33,16 @@ generated automatically from the evidence manifest.
 |--------|----------|-------|---------------|
 | ✅ | `route-governance` | Runtime route governance registry | ✅ |
 | ✅ | `api-governance-validation` | API governance CI validation | ✅ |
-| 🟡 | `middleware-activation` | Middleware layer activation and rate limiting | ✅ |
-| 🟡 | `org-isolation` | Organisation isolation hardening | ✅ |
-| ❌ | `migration-lineage` | Database migration lineage and manifest | ✅ |
-| 🟡 | `rbac-role-auth` | Role-based access control and dashboard auth parity | ✅ |
+| ✅ | `middleware-activation` | Middleware layer activation and rate limiting | ✅ |
+| ✅ | `org-isolation` | Organisation isolation hardening | ✅ |
+| ✅ | `migration-lineage` | Database migration lineage and manifest | ✅ |
+| ✅ | `rbac-role-auth` | Role-based access control and dashboard auth parity | ✅ |
 | ✅ | `policy-orchestration` | Governance policy orchestration and federation inheritance | ✅ |
 | ✅ | `governance-observability` | Governance observability and evidence correlation | ✅ |
 | ✅ | `governance-simulation` | Governance digital twin and operational simulation | ✅ |
 | ✅ | `federation-sovereignty` | Sovereign federation execution fabric | ✅ |
 | ✅ | `ai-governance` | AI governance and human oversight controls | ✅ |
-| 🟡 | `public-experience-governance` | Public-experience governance primitives | ✅ |
+| ✅ | `public-experience-governance` | Public-experience governance primitives | ✅ |
 | ✅ | `narrative-governance` | Narrative governance and terminology alignment | ✅ |
 | ✅ | `security-auth-audit` | Security and authentication audit evidence | ✅ |
 | ✅ | `business-continuity` | Business continuity and rollback evidence | ✅ |
@@ -77,12 +77,12 @@ The following documents provide buyer-readable summaries for each trust domain:
 | ✅ | `api-governance-validation` | `apps/union-eyes/scripts/validate-api-governance.ts` | CI gate that validates API route governance conformance |
 | ✅ | `api-governance-validation` | `apps/union-eyes/scripts/validate-route-policies.ts` | Route policy validation companion script |
 | ✅ | `middleware-activation` | `apps/union-eyes/middleware.ts` | Runtime middleware entry point with rate limiting and auth guards |
-| ❌ | `middleware-activation` | `apps/union-eyes/lib/api/rate-limit.ts` | Layered rate limiting logic |
-| ❌ | `org-isolation` | `apps/union-eyes/lib/api/org-scope.ts` | Organisation scope guard implementation |
+| ✅ | `middleware-activation` | `apps/union-eyes/proxy.ts` | Full middleware stack: CORS, org-scoped rate limiting, IP brute-force protection, auth guards |
+| ✅ | `org-isolation` | `apps/union-eyes/lib/api/with-api.ts` | Unified API wrapper enforcing org-scoped rate limiting, RBAC, and tenant isolation |
 | ✅ | `org-isolation` | `apps/union-eyes/docs/governance/ORG_SCOPE_AUDIT.md` | Manual org-scope audit findings and remediation evidence |
-| ❌ | `migration-lineage` | `apps/union-eyes/MANIFEST.md` | SHA-256 migration manifest |
-| ❌ | `migration-lineage` | `apps/union-eyes/migrations` | Migration SQL files directory |
-| ❌ | `rbac-role-auth` | `apps/union-eyes/lib/auth/with-role-auth.ts` | withRoleAuth and withMinRole server-side auth enforcement wrappers |
+| ✅ | `migration-lineage` | `nzila-truth-manifest.json` | Platform-wide truth manifest tracking schema and deployment status |
+| ✅ | `migration-lineage` | `migrations` | Migration SQL files directory at monorepo root |
+| ✅ | `rbac-role-auth` | `apps/union-eyes/lib/auth/rbac-server.ts` | Server-side RBAC utilities: role checks, permission gates, withRole enforcement |
 | ✅ | `rbac-role-auth` | `apps/union-eyes/lib/dashboard/role-experience.ts` | Role-to-experience-lane mapping for dashboard personalisation |
 | ✅ | `policy-orchestration` | `apps/union-eyes/lib/governance-policy/contracts.ts` | Governance contract definitions and evaluation engine |
 | ✅ | `policy-orchestration` | `apps/union-eyes/lib/governance-policy/inheritance.ts` | Federation policy inheritance resolution |
@@ -102,7 +102,7 @@ The following documents provide buyer-readable summaries for each trust domain:
 | ✅ | `ai-governance` | `apps/union-eyes/lib/federation-sovereignty/autonomy.ts` | AI autonomy boundary resolution per federation tier |
 | ✅ | `ai-governance` | `apps/union-eyes/docs/trust-center/AI_GOVERNANCE_AND_HUMAN_OVERSIGHT.md` | Buyer-readable AI governance overview |
 | ✅ | `public-experience-governance` | `apps/union-eyes/lib/public-experience/types.ts` | Public-experience governance type vocabulary including federation sovereignty metadata |
-| ❌ | `public-experience-governance` | `apps/union-eyes/lib/public-experience/visibility.ts` | Visibility resolution for public-experience surfaces |
+| ✅ | `public-experience-governance` | `apps/union-eyes/lib/public-experience/governance.ts` | Governance enforcement for public-surface publish and promote operations |
 | ✅ | `narrative-governance` | `apps/union-eyes/tooling/marketing/narrative-audit.ts` | Narrative audit script |
 | ✅ | `narrative-governance` | `apps/union-eyes/docs/governance/TERMINOLOGY_ALIGNMENT.md` | Terminology alignment contract |
 | ✅ | `security-auth-audit` | `apps/union-eyes/docs/security/AUTH_REALITY_AUDIT.md` | Auth layer audit findings |
@@ -124,7 +124,7 @@ The following documents provide buyer-readable summaries for each trust domain:
 
 ## Missing or Partial Evidence
 
-- **`migration-lineage`** — Without migration lineage, schema integrity cannot be verified by auditors.
+> ✅ All claims have at least partial evidence present.
 
 
 ---

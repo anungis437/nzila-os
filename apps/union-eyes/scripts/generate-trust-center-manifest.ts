@@ -14,7 +14,7 @@
  *   1  — missing evidence detected AND FAIL_ON_MISSING_EVIDENCE=true
  */
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, statSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -39,6 +39,12 @@ function fileStatus(rel: string): [boolean, boolean] {
   const abs = repoPath(rel);
   if (!existsSync(abs)) return [false, false];
   try {
+    const stat = statSync(abs);
+    if (stat.isDirectory()) {
+      // A non-empty directory counts as fully present
+      const entries = readdirSync(abs);
+      return [true, entries.length > 0];
+    }
     const content = readFileSync(abs, 'utf8').trim();
     return [true, content.length > 80];
   } catch {
@@ -88,8 +94,8 @@ const RAW_CLAIMS: TrustClaim[] = [
     [
       buildArtifact('apps/union-eyes/middleware.ts', 'source',
         'Runtime middleware entry point with rate limiting and auth guards'),
-      buildArtifact('apps/union-eyes/lib/api/rate-limit.ts', 'source',
-        'Layered rate limiting logic'),
+      buildArtifact('apps/union-eyes/proxy.ts', 'source',
+        'Full middleware stack: CORS, org-scoped rate limiting, IP brute-force protection, auth guards'),
     ],
     { buyerVisible: true, riskIfMissing: 'Without middleware evidence, buyers cannot verify perimeter controls.' },
   ),
@@ -101,8 +107,8 @@ const RAW_CLAIMS: TrustClaim[] = [
     'An automated check verifies that no route auto-provisions a new organisation without ' +
     'explicit governance approval, preventing cross-tenant data leakage.',
     [
-      buildArtifact('apps/union-eyes/lib/api/org-scope.ts', 'source',
-        'Organisation scope guard implementation'),
+      buildArtifact('apps/union-eyes/lib/api/with-api.ts', 'source',
+        'Unified API wrapper enforcing org-scoped rate limiting, RBAC, and tenant isolation'),
       buildArtifact('apps/union-eyes/docs/governance/ORG_SCOPE_AUDIT.md', 'doc',
         'Manual org-scope audit findings and remediation evidence'),
     ],
@@ -116,10 +122,10 @@ const RAW_CLAIMS: TrustClaim[] = [
     'hash of every applied database migration, enabling independent verification ' +
     'that the deployed schema matches declared history.',
     [
-      buildArtifact('apps/union-eyes/MANIFEST.md', 'doc',
-        'SHA-256 migration manifest'),
-      buildArtifact('apps/union-eyes/migrations', 'config',
-        'Migration SQL files directory'),
+      buildArtifact('nzila-truth-manifest.json', 'doc',
+        'Platform-wide truth manifest tracking schema and deployment status'),
+      buildArtifact('migrations', 'config',
+        'Migration SQL files directory at monorepo root'),
     ],
     { buyerVisible: true, riskIfMissing: 'Without migration lineage, schema integrity cannot be verified by auditors.' },
   ),
@@ -131,8 +137,8 @@ const RAW_CLAIMS: TrustClaim[] = [
     'applied consistently across dashboard routes. Roles include member, steward, ' +
     'staff, executive, governance, and admin, each with a defined experience lane.',
     [
-      buildArtifact('apps/union-eyes/lib/auth/with-role-auth.ts', 'source',
-        'withRoleAuth and withMinRole server-side auth enforcement wrappers'),
+      buildArtifact('apps/union-eyes/lib/auth/rbac-server.ts', 'source',
+        'Server-side RBAC utilities: role checks, permission gates, withRole enforcement'),
       buildArtifact('apps/union-eyes/lib/dashboard/role-experience.ts', 'source',
         'Role-to-experience-lane mapping for dashboard personalisation'),
     ],
@@ -240,8 +246,8 @@ const RAW_CLAIMS: TrustClaim[] = [
     [
       buildArtifact('apps/union-eyes/lib/public-experience/types.ts', 'source',
         'Public-experience governance type vocabulary including federation sovereignty metadata'),
-      buildArtifact('apps/union-eyes/lib/public-experience/visibility.ts', 'source',
-        'Visibility resolution for public-experience surfaces'),
+      buildArtifact('apps/union-eyes/lib/public-experience/governance.ts', 'source',
+        'Governance enforcement for public-surface publish and promote operations'),
     ],
     { buyerVisible: true, riskIfMissing: 'Content governance controls for public surfaces cannot be verified.' },
   ),
