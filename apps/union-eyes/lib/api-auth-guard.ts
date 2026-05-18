@@ -58,6 +58,7 @@ import {
   type MemberRoleWithDetails,
 } from '@/db/queries/enhanced-rbac-queries';
 import { logger } from '@/lib/logger';
+import { AuditEventType, AuditSeverity, auditLog } from '@/lib/audit-logger';
 import { ROLE_PERMISSIONS } from '@/lib/auth/roles';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
@@ -1171,6 +1172,14 @@ export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuth
   requiredRole: string,
   handler: ApiRouteHandler<TContext>
 ): ApiRouteHandler<TContext> {
+  // Policy classification at wrapper-call time (module load) — zero per-request overhead.
+  // Admin/officer routes receive automatic audit evidence; member routes do not.
+  const _isAdminRole = requiredRole === 'admin' || requiredRole === 'system_admin' || requiredRole === 'app_owner';
+  const _isOfficerRole = requiredRole === 'officer' || requiredRole === 'chief_steward' || requiredRole === 'secretary_treasurer';
+  const _deprecatedAutoAudit = _isAdminRole || _isOfficerRole;
+  const _deprecatedAuditEventType = _isAdminRole ? AuditEventType.ADMIN_CONFIG_CHANGED : AuditEventType.DATA_ACCESS;
+  const _deprecatedAuditSeverity = _isAdminRole ? AuditSeverity.HIGH : _isOfficerRole ? AuditSeverity.MEDIUM : AuditSeverity.LOW;
+
   return withApiAuth(async (request: NextRequest, context: TContext) => {
     let user: AuthUser | null = null;
     try {
@@ -1209,7 +1218,27 @@ export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuth
       );
     }
 
-    return handler(request, context);
+    const response = await handler(request, context);
+
+    // Fire-and-forget governance audit for admin/officer-tier deprecated routes.
+    // Failures are logged but never propagate to the caller.
+    if (_deprecatedAutoAudit) {
+      const _traceId = Math.random().toString(36).slice(2, 10);
+      void auditLog({
+        eventType: _deprecatedAuditEventType,
+        severity: _deprecatedAuditSeverity,
+        userId: (context as unknown as BaseAuthContext).userId ?? 'unknown',
+        organizationId: (context as unknown as BaseAuthContext).organizationId ?? undefined,
+        resource: new URL(request.url).pathname,
+        action: request.method.toLowerCase(),
+        outcome: 'success',
+        details: { traceId: _traceId, automated: true, source: 'deprecated-wrapper' },
+      }).catch((err: unknown) => {
+        logger.error('[deprecated-wrapper] Audit emission failed', { error: (err as Error).message });
+      });
+    }
+
+    return response;
   });
 }
 
@@ -1225,6 +1254,13 @@ export function withMinRole<TContext extends Record<string, unknown> = BaseAuthC
   minRole: string,
   handler: ApiRouteHandler<TContext>
 ): ApiRouteHandler<TContext> {
+  // Policy classification at wrapper-call time (module load) — zero per-request overhead.
+  const _isAdminMinRole = minRole === 'admin' || minRole === 'system_admin' || minRole === 'app_owner';
+  const _isOfficerMinRole = minRole === 'officer' || minRole === 'chief_steward' || minRole === 'secretary_treasurer';
+  const _deprecatedAutoAudit = _isAdminMinRole || _isOfficerMinRole;
+  const _deprecatedAuditEventType = _isAdminMinRole ? AuditEventType.ADMIN_CONFIG_CHANGED : AuditEventType.DATA_ACCESS;
+  const _deprecatedAuditSeverity = _isAdminMinRole ? AuditSeverity.HIGH : _isOfficerMinRole ? AuditSeverity.MEDIUM : AuditSeverity.LOW;
+
   return withApiAuth(async (request: NextRequest, context: TContext) => {
     const user = await getCurrentUser();
     if (!user) {
@@ -1257,7 +1293,26 @@ export function withMinRole<TContext extends Record<string, unknown> = BaseAuthC
       );
     }
 
-    return handler(request, context);
+    const response = await handler(request, context);
+
+    // Fire-and-forget governance audit for admin/officer-tier deprecated routes.
+    if (_deprecatedAutoAudit) {
+      const _traceId = Math.random().toString(36).slice(2, 10);
+      void auditLog({
+        eventType: _deprecatedAuditEventType,
+        severity: _deprecatedAuditSeverity,
+        userId: authCtx.userId ?? 'unknown',
+        organizationId: authCtx.organizationId ?? undefined,
+        resource: new URL(request.url).pathname,
+        action: request.method.toLowerCase(),
+        outcome: 'success',
+        details: { traceId: _traceId, automated: true, source: 'deprecated-wrapper' },
+      }).catch((err: unknown) => {
+        logger.error('[deprecated-wrapper] Audit emission failed', { error: (err as Error).message });
+      });
+    }
+
+    return response;
   });
 }
 

@@ -35,7 +35,27 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock('@/lib/audit-logger', () => ({ auditDataAccess: mockAuditDataAccess }));
+vi.mock('@/lib/audit-logger', () => ({
+  auditDataAccess: mockAuditDataAccess,
+  auditLog: vi.fn().mockResolvedValue(undefined),
+  AuditEventType: {
+    DATA_ACCESS: 'data.access',
+    DATA_EXPORT: 'data.export',
+    ADMIN_CONFIG_CHANGED: 'admin.config_changed',
+    AUTH_LOGIN: 'auth.login',
+    AUTH_LOGOUT: 'auth.logout',
+    AUTH_FAILED: 'auth.failed',
+    DATA_CREATE: 'data.create',
+    DATA_UPDATE: 'data.update',
+    DATA_DELETE: 'data.delete',
+  },
+  AuditSeverity: {
+    LOW: 'low',
+    MEDIUM: 'medium',
+    HIGH: 'high',
+    CRITICAL: 'critical',
+  },
+}));
 
 // Mock the DB — each test configures select() return values as needed.
 vi.mock('@/db/db', () => ({
