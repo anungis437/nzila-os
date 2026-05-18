@@ -563,3 +563,40 @@ CREATE TABLE IF NOT EXISTS public.org_subscriptions (
   updated_at timestamptz NOT NULL DEFAULT now(),
   created_by varchar(255)
 );
+CREATE TABLE IF NOT EXISTS public.platform_invoices (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  billing_account_id uuid,
+  organization_id uuid NOT NULL,
+  billing_period_id uuid,
+  invoice_number varchar(50) NOT NULL,
+  issue_date timestamptz NOT NULL DEFAULT now(),
+  due_date timestamptz NOT NULL DEFAULT now(),
+  subtotal numeric(14, 2) NOT NULL DEFAULT 0,
+  tax_amount numeric(14, 2) NOT NULL DEFAULT 0,
+  total_amount numeric(14, 2) NOT NULL DEFAULT 0,
+  amount_paid numeric(14, 2) NOT NULL DEFAULT 0,
+  currency varchar(3) NOT NULL DEFAULT 'CAD',
+  status varchar(20) NOT NULL DEFAULT 'draft',
+  notes text,
+  metadata jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  created_by varchar(255),
+  CONSTRAINT platform_invoices_invoice_number_unique UNIQUE (invoice_number)
+);
+
+CREATE TABLE IF NOT EXISTS public.platform_payments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  billing_account_id uuid,
+  organization_id uuid NOT NULL,
+  amount numeric(14, 2) NOT NULL DEFAULT 0,
+  currency varchar(3) NOT NULL DEFAULT 'CAD',
+  status varchar(20) NOT NULL DEFAULT 'pending',
+  method varchar(50) NOT NULL DEFAULT 'unknown',
+  external_reference varchar(255),
+  paid_at timestamptz,
+  failure_reason text,
+  metadata jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  created_by varchar(255)
+);
