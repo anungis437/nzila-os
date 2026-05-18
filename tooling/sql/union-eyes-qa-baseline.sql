@@ -237,7 +237,11 @@ END $$;
 CREATE TABLE IF NOT EXISTS public.organization_members (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id text NOT NULL,
-  organization_id uuid NOT NULL,
+  -- Canonical schema (db/migrations-audit/0000_familiar_silhouette.sql) declares
+  -- organization_id as text. Runtime SQL casts c.organization_id::text to join
+  -- against it (e.g. claims dashboard query). Must be text here too, otherwise
+  -- joins fail with "operator does not exist: uuid = text".
+  organization_id text NOT NULL,
   tenant_id uuid,
   role text NOT NULL,
   status text NOT NULL,
@@ -285,6 +289,23 @@ ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS search_vector t
 -- Canonical schema-organizations.ts columns required by runtime SELECTs.
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS tenant_id uuid;
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS preferred_contact_method text;
+
+-- Converge organization_id to text if a prior baseline created it as uuid.
+-- Runtime joins use `m.organization_id = c.organization_id::text`, which fails
+-- with `operator does not exist: uuid = text` when the column stayed uuid.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'organization_members'
+      AND column_name = 'organization_id'
+      AND data_type = 'uuid'
+  ) THEN
+    EXECUTE 'ALTER TABLE public.organization_members ALTER COLUMN organization_id TYPE text USING organization_id::text';
+  END IF;
+END $$;
 
 -- Profiles table is the canonical user profile substrate consulted by the
 -- dashboard layout (apps/union-eyes/app/[locale]/dashboard/layout.tsx). The
@@ -380,8 +401,42 @@ CREATE TABLE IF NOT EXISTS audit_security.audit_logs (
   user_id varchar(255),
   action varchar(100) NOT NULL,
   resource_type varchar(50) NOT NULL,
+  resource_id uuid,
+  old_values jsonb,
+  new_values jsonb,
+  ip_address varchar(45),
+  user_agent text,
+  session_id uuid,
+  correlation_id uuid,
+  severity varchar(20) DEFAULT 'info',
+  outcome varchar(20) DEFAULT 'success',
+  error_message text,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  archived boolean DEFAULT false NOT NULL,
+  archived_at timestamptz,
+  archived_path text,
   created_at timestamptz DEFAULT now()
 );
+
+-- Idempotent column convergence for environments where audit_logs already
+-- exists with the older minimal shape. Runtime INSERTs in
+-- apps/union-eyes/lib/audit/* write all of these columns; missing columns
+-- cause the INSERT to throw and bubble up as a 500 on dashboard server
+-- components.
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS resource_id uuid;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS old_values jsonb;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS new_values jsonb;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS ip_address varchar(45);
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS user_agent text;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS session_id uuid;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS correlation_id uuid;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS severity varchar(20) DEFAULT 'info';
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS outcome varchar(20) DEFAULT 'success';
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS error_message text;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS archived boolean DEFAULT false NOT NULL;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS archived_at timestamptz;
+ALTER TABLE audit_security.audit_logs ADD COLUMN IF NOT EXISTS archived_path text;
 
 CREATE TABLE IF NOT EXISTS audit_security.security_events (
   event_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
