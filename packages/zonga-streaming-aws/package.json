@@ -20,7 +20,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@aws-sdk/client-ivs": "^3.750.0",
+    "@aws-sdk/client-ivs": "^3.1048.0",
     "@aws-sdk/client-mediaconvert": "^3.750.0",
     "@aws-sdk/client-s3": "^3.750.0",
     "@aws-sdk/client-cloudfront": "^3.750.0",
