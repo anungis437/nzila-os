@@ -179,7 +179,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
   
   // Get user's organization and role via proper RBAC chain
-  const organizationId = await getOrganizationIdForUser(userId);
+  let organizationId: string = DEFAULT_ORGANIZATION_ID;
+  try {
+    organizationId = await getOrganizationIdForUser(userId);
+  } catch {
+    logger.warn('[dashboard:layout] getOrganizationIdForUser failed, defaulting to default org', { userId });
+  }
   let userRole: UserRole = UserRole.MEMBER;
   try {
     userRole = await getUserRole(userId, organizationId);
