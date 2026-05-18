@@ -25,6 +25,7 @@ import type { GovernanceSimulationScenario } from './types';
  * Consumers can extend this with org-specific scenarios via
  * `registerScenario()`.
  */
+// ga-check:exempt — in-process scenario catalog, not primary persistence
 const _catalog: Map<string, GovernanceSimulationScenario> = new Map();
 
 // ── Scenario registration ─────────────────────────────────────────────────────

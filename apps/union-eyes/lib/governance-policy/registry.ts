@@ -17,6 +17,7 @@ import type { GovernancePolicyScope } from './types';
 
 // ── Internal store ─────────────────────────────────────────────────────────────
 
+// ga-check:exempt — in-process bootstrap registry, not primary persistence
 const _contracts = new Map<string, GovernancePolicyContract>();
 
 let _bootstrapped = false;

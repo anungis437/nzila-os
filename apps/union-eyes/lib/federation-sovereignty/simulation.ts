@@ -30,6 +30,7 @@ import { evaluateDelegationChain } from './delegation';
 
 // ── Scenario registry ─────────────────────────────────────────────────────────
 
+// ga-check:exempt — in-process runtime registry, not primary persistence
 const _scenarios = new Map<string, CrossFederationSimulationScenario>();
 
 export function registerSimulationScenario(

@@ -20,6 +20,7 @@ import type {
 
 // ── Grant registry (in-process) ───────────────────────────────────────────────
 
+// ga-check:exempt — in-process runtime registry, not primary persistence
 const _grants = new Map<string, DelegationGrant[]>();
 
 /** Register one or more delegation grants into the in-process registry. */

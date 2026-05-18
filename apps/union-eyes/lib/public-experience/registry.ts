@@ -37,6 +37,7 @@ export interface ExperienceSurface {
 }
 
 /** In-memory surface registry (seeded at startup or from DB in production). */
+// ga-check:exempt — seeded at startup, backed by DB in production, not primary persistence
 const _registry = new Map<string, ExperienceSurface>();
 
 /** Register an experience surface. Idempotent — last write wins. */
