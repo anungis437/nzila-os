@@ -41,7 +41,8 @@
     "validate:route-policies": "tsx scripts/validate-route-policies.ts",
     "governance:contracts": "tsx scripts/validate-governance-contracts.ts",
     "governance:ledger": "tsx scripts/generate-governance-ledger.ts",
-    "governance:summary": "tsx scripts/generate-governance-summary.ts"
+    "governance:summary": "tsx scripts/generate-governance-summary.ts",
+    "governance:observability": "tsx scripts/validate-governance-observability.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.985.0",

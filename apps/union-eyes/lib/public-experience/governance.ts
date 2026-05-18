@@ -16,6 +16,7 @@ import type { GovernanceLevel, PublicContentStatus, ExperienceVisibility } from 
 import { resolveContract } from '../governance-policy/registry';
 import { evaluatePolicy } from '../governance-policy/evaluation';
 import type { PolicyEvaluationContext, PolicyEvaluationResult } from '../governance-policy/evaluation';
+import { recordPublicationEvent } from '../governance-observability/telemetry';
 
 export interface GovernanceActor {
   userId: string;
@@ -146,5 +147,17 @@ export function evaluateSurfaceContract(
     federationApproved: opts.federationApproved ?? false,
   };
 
-  return evaluatePolicy(contract, context);
+  const result = evaluatePolicy(contract, context);
+
+  // Fire-and-forget governed telemetry for publication events (Wave 8)
+  void recordPublicationEvent({
+    surfaceId: surface.id,
+    isPublic: surface.visibility === 'public',
+    isFederation: opts.isFederation ?? false,
+    targetStatus: 'evaluation',
+    actorId: actor.userId,
+    allowed: result.allowed,
+  });
+
+  return result;
 }

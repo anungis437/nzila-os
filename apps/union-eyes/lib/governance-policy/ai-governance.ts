@@ -76,6 +76,27 @@ export interface AIGovernanceResult {
    * Descriptive reason when `permitted` is false or `humanReviewRequired` is true.
    */
   rationale?: string;
+
+  // ── Wave 8 governance telemetry trace fields ───────────────────────────────
+
+  /**
+   * Whether the evaluation result should be propagated to the governance
+   * observability telemetry pipeline. Always `true` for sensitive/restricted.
+   */
+  aiGovernanceTrace: boolean;
+
+  /**
+   * Whether a human review was actually triggered (as opposed to merely required).
+   * Set by the caller after the review workflow is initiated; defaults to same
+   * as `humanReviewRequired` at evaluation time.
+   */
+  humanReviewTriggered: boolean;
+
+  /**
+   * Whether this action caused a sensitive-operation escalation event to be
+   * recorded (e.g. federation restriction, public-output denial, restricted tier).
+   */
+  sensitiveOperationEscalated: boolean;
 }
 
 // ── Risk classification rules ─────────────────────────────────────────────────
@@ -121,6 +142,9 @@ export function evaluateAIAction(
       auditRequired: true,
       permitted: true,
       rationale: 'Restricted AI actions always require human review before use.',
+      aiGovernanceTrace: true,
+      humanReviewTriggered: true,
+      sensitiveOperationEscalated: true,
     };
   }
 
@@ -132,6 +156,9 @@ export function evaluateAIAction(
       auditRequired: true,
       permitted: true,
       rationale: 'Sensitive AI actions require human review due to member data or labour record involvement.',
+      aiGovernanceTrace: true,
+      humanReviewTriggered: true,
+      sensitiveOperationEscalated: false,
     };
   }
 
@@ -143,6 +170,9 @@ export function evaluateAIAction(
       auditRequired: true,
       permitted: true,
       rationale: 'AI output with public visibility requires human review before publication.',
+      aiGovernanceTrace: true,
+      humanReviewTriggered: true,
+      sensitiveOperationEscalated: true,
     };
   }
 
@@ -153,6 +183,9 @@ export function evaluateAIAction(
       humanReviewRequired: false,
       auditRequired: true,
       permitted: true,
+      aiGovernanceTrace: true,
+      humanReviewTriggered: false,
+      sensitiveOperationEscalated: false,
     };
   }
 
@@ -163,6 +196,9 @@ export function evaluateAIAction(
       humanReviewRequired: false,
       auditRequired: true,
       permitted: true,
+      aiGovernanceTrace: true,
+      humanReviewTriggered: false,
+      sensitiveOperationEscalated: false,
     };
   }
 
@@ -172,6 +208,9 @@ export function evaluateAIAction(
     humanReviewRequired: false,
     auditRequired: false,
     permitted: true,
+    aiGovernanceTrace: false,
+    humanReviewTriggered: false,
+    sensitiveOperationEscalated: false,
   };
 }
 

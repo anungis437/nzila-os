@@ -68,6 +68,10 @@ import {
   executePostHandlerPolicies,
   type PolicyDirectives,
 } from './route-policy';
+import {
+  createCorrelationContext,
+  correlationToHeaders,
+} from '@/lib/governance-observability/correlation';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -291,6 +295,13 @@ export function withApi<
     nextContext?: { params?: Promise<Record<string, string>> | Record<string, string> },
   ): Promise<NextResponse> => {
     const traceId = generateTraceId();
+
+    // Governance correlation context — shadow-mode only, non-blocking.
+    // Creates a correlation ID that links all governance events for this request.
+    const governanceCtx = createCorrelationContext({
+      incomingTraceId: request.headers.get('x-trace-id') ?? undefined,
+    });
+    const governanceHeaders = correlationToHeaders(governanceCtx);
 
     try {
       // ── 1. Resolve route params (Next.js 16 async params) ───────────────
@@ -596,6 +607,10 @@ export function withApi<
         if (policy.routeStatusHeader) {
           result.headers.set('X-Route-Status', policy.routeStatusHeader);
         }
+        // Shadow-mode governance correlation headers (non-blocking)
+        for (const [k, v] of Object.entries(governanceHeaders)) {
+          result.headers.set(k, v);
+        }
         return result;
       }
 
@@ -604,6 +619,7 @@ export function withApi<
         const noContentHeaders: Record<string, string> = {
           'X-Trace-ID': traceId,
           'Cache-Control': 'private, no-store',
+          ...governanceHeaders,
         };
         if (policy.routeStatusHeader) {
           noContentHeaders['X-Route-Status'] = policy.routeStatusHeader;
@@ -619,6 +635,7 @@ export function withApi<
       const successHeaders: Record<string, string> = {
         'X-Trace-ID': traceId,
         'Cache-Control': 'private, no-store',
+        ...governanceHeaders,
       };
       if (policy.routeStatusHeader) {
         successHeaders['X-Route-Status'] = policy.routeStatusHeader;
