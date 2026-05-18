@@ -52,6 +52,9 @@ const ORG_ENFORCEMENT_PATTERNS = [
   /clerkMiddleware/,
   /requireOrg/,
   /assertOrgAccess/,
+  /withApi\b/,            // UE canonical API wrapper — enforces auth.required + minRole; handlers rely on ScopedDb for org isolation
+  /withOrganizationAuth/, // legacy wrapper
+  /sourceOrganizationId/, // explicit cross-org reference (e.g. clause library search)
 ]
 
 // Patterns that explicitly bypass org scope (must be in allowlist)
