@@ -247,7 +247,7 @@ describe('RED-TEAM-ORG — UE Org-Scope Route Fuzz (static analysis)', () => {
       const content = readFileSync(route, 'utf-8')
       const rel = route.replace(ROOT, '').replace(/^[/\\]/, '')
 
-      const hasAuth = /auth\(\)|withRLSContext|requireAdmin|assertOrgAccess|orgId|withApi\b|withApiAuth\b|withRoleAuth\b/.test(content)
+      const hasAuth = ORG_ENFORCEMENT_PATTERNS.some((p) => p.test(content))
       expect(
         hasAuth,
         `Export/evidence route ${rel} must have auth + org enforcement`,

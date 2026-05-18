@@ -29,11 +29,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function WorkPage() {
+export default async function WorkPage({ params }: PageProps) {
+  const { locale } = await params;
   const user = await requireUser();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect(`/${locale}/sign-in`);
   const authorized = await hasMinRole("steward");
-  if (!authorized) redirect("/dashboard/inbox");
+  if (!authorized) redirect(`/${locale}/dashboard/inbox`);
 
   return <WorkSurface />;
 }

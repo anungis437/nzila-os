@@ -20,6 +20,7 @@ import { OnboardingProvider } from "@/components/onboarding/onboarding-provider"
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import { getUserRole } from "@/lib/auth/rbac-server";
+import { UserRole } from "@/lib/auth/roles";
 import { db } from "@/db/db";
 import { profiles } from "@/db/schema";
 import { organizationMembers } from "@/db/schema-organizations";
@@ -179,7 +180,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   
   // Get user's organization and role via proper RBAC chain
   const organizationId = await getOrganizationIdForUser(userId);
-  const userRole = await getUserRole(userId, organizationId);
+  let userRole: UserRole = UserRole.MEMBER;
+  try {
+    userRole = await getUserRole(userId, organizationId);
+  } catch {
+    logger.warn('[dashboard:layout] getUserRole failed, defaulting to member role', { userId, organizationId });
+  }
 
   if (!organizationId) {
     logger.error('[dashboard:identity] getOrganizationIdForUser returned no organizationId', {

@@ -69,11 +69,7 @@ function safeJoinUnder(base: string, ...parts: string[]): string | null {
 }
 
 function readUtf8(filePath: string): string {
-  return spawnSync(process.execPath, [
-    '-e',
-    'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));',
-    filePath,
-  ], { encoding: 'utf-8' }).stdout;
+  return readFileSync(filePath, 'utf-8');
 }
 
 function readJson(filePath: string): Record<string, unknown> | null {
