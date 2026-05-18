@@ -7172,27 +7172,20 @@
       "pillarItems": {
         "governance": {
           "name": "Gouvernance & continuité",
-          "desc": "Opérations constitutionnelles"
+          "desc": "Opérations constitutionnelles pour organisations fédérées"
         },
         "conventions": {
-          "name": "Congrès & démocratie",
-          "desc": "Coordination des délégués"
+          "name": "Congrès & gouvernance fédérée",
+          "desc": "Coordination des délégués et décision fédérée"
         },
         "continuity": {
           "name": "Mémoire institutionnelle",
-          "desc": "Précédents et doctrine"
+          "desc": "Doctrine, précédents et archive de continuité"
         },
         "trust": {
           "name": "Confiance & intendance",
-          "desc": "Audit et souveraineté"
+          "desc": "Audit, souveraineté et engagements d'intendance"
         }
-      },
-      "pillars": "Piliers",
-      "pillarItems": {
-        "governance": { "name": "Gouvernance & continuité", "desc": "Opérations constitutionnelles pour organisations fédérées" },
-        "conventions": { "name": "Congrès & gouvernance fédérée", "desc": "Coordination des délégués et décision fédérée" },
-        "continuity": { "name": "Mémoire institutionnelle", "desc": "Doctrine, précédents et archive de continuité" },
-        "trust": { "name": "Confiance & intendance", "desc": "Audit, souveraineté et engagements d'intendance" }
       },
       "story": "Notre histoire",
       "platform": "Plateforme",
@@ -11310,5 +11303,13 @@
         "layerSubtitle": "Renforce les systèmes existants · mise en œuvre non perturbatrice"
       }
     }
+  },
+  "grievancesPage": {
+    "metaTitle": "Griefs | UnionEyes",
+    "metaDescription": "Suivre, enquêter et résoudre les griefs des membres"
+  },
+  "casesPage": {
+    "metaTitle": "Dossiers | UnionEyes",
+    "metaDescription": "Gérer les dossiers de représentation et d'arbitrage"
   }
 }

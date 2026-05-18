@@ -11289,5 +11289,13 @@
         "layerSubtitle": "Renforce les systèmes existants · mise en œuvre non perturbatrice"
       }
     }
+  },
+  "grievancesPage": {
+    "metaTitle": "Griefs | UnionEyes",
+    "metaDescription": "Suivre, enquêter et résoudre les griefs des membres"
+  },
+  "casesPage": {
+    "metaTitle": "Dossiers | UnionEyes",
+    "metaDescription": "Gérer les dossiers de représentation et d'arbitrage"
   }
 }

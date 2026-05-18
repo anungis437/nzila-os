@@ -11233,5 +11233,13 @@
         "layerSubtitle": "Augments existing systems · non-disruptive implementation"
       }
     }
+  },
+  "grievancesPage": {
+    "metaTitle": "Queixas | UnionEyes",
+    "metaDescription": "Rastrear, investigar e resolver queixas dos membros"
+  },
+  "casesPage": {
+    "metaTitle": "Casos | UnionEyes",
+    "metaDescription": "Gerir casos de representação e arbitragem"
   }
 }

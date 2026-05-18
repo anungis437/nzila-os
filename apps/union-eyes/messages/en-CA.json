@@ -7172,27 +7172,20 @@
       "pillarItems": {
         "governance": {
           "name": "Governance & Continuity",
-          "desc": "Constitutional union operations"
+          "desc": "Constitutional operations for federated organizations"
         },
         "conventions": {
-          "name": "Conventions & Democracy",
-          "desc": "Federated delegate coordination"
+          "name": "Conventions & Federated Democratic Governance",
+          "desc": "Delegate coordination and federated decision-making"
         },
         "continuity": {
           "name": "Institutional Memory",
-          "desc": "Precedents and doctrine archive"
+          "desc": "Doctrine, precedents, and continuity archive"
         },
         "trust": {
           "name": "Trust & Stewardship",
-          "desc": "Audit, sovereignty, stewardship"
+          "desc": "Audit, sovereignty, and stewardship commitments"
         }
-      },
-      "pillars": "Pillars",
-      "pillarItems": {
-        "governance": { "name": "Governance & Continuity", "desc": "Constitutional operations for federated organizations" },
-        "conventions": { "name": "Conventions & Federated Democratic Governance", "desc": "Delegate coordination and federated decision-making" },
-        "continuity": { "name": "Institutional Memory", "desc": "Doctrine, precedents, and continuity archive" },
-        "trust": { "name": "Trust & Stewardship", "desc": "Audit, sovereignty, and stewardship commitments" }
       },
       "story": "Our Story",
       "platform": "Capabilities",
@@ -11310,5 +11303,13 @@
         "layerSubtitle": "Augments existing systems · non-disruptive implementation"
       }
     }
+  },
+  "grievancesPage": {
+    "metaTitle": "Grievances | UnionEyes",
+    "metaDescription": "Track, investigate, and resolve member grievances"
+  },
+  "casesPage": {
+    "metaTitle": "Cases | UnionEyes",
+    "metaDescription": "Manage representation cases and arbitration files"
   }
 }
