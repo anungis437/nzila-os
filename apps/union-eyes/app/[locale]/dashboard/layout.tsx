@@ -42,7 +42,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     return redirect("/login");
   }
 
-  let profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0] ?? null;
+  let profile: (typeof profiles.$inferSelect) | null = null;
+  try {
+    profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0] ?? null;
+  } catch (err) {
+    logger.error('[dashboard:profile] profiles query failed — redirecting to /sign-up', { userId, err });
+    return redirect("/sign-up");
+  }
 
   // Auto-create profile if it doesn&apos;t exist (prevents redirect loop)
   if (!profile) {
@@ -276,12 +282,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
           
           {/* Page content */}
-          <div className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
+          <main className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
             <FeatureFlagProvider>
               <RoleExperienceGuard userRole={userRole} />
               {children}
             </FeatureFlagProvider>
-          </div>
+          </main>
 
           {/* First-visit onboarding overlay */}
           <OnboardingProvider userRole={userRole} />
