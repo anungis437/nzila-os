@@ -1,0 +1,450 @@
+{
+  "generatedAt": "2026-05-18T18:25:53.678Z",
+  "app": "union-eyes",
+  "evidenceVersion": 1,
+  "claims": [
+    {
+      "id": "route-governance",
+      "title": "Runtime route governance registry",
+      "summary": "Union Eyes maintains a generated registry of governed API and page routes, providing auditable coverage of role-based access control assignments across the application surface.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/reports/route-registry.json",
+          "type": "report",
+          "description": "Generated registry mapping all routes to their governance policy",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/scripts/generate-route-registry.ts",
+          "type": "script",
+          "description": "Script that produces the route-registry.json report",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Buyers cannot independently verify route-level access control coverage."
+    },
+    {
+      "id": "api-governance-validation",
+      "title": "API governance CI validation",
+      "summary": "An automated validation script checks that Union Eyes API routes conform to governance policy contracts on every change. This provides continuous evidence that API access controls have not drifted from declared policy.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/scripts/validate-api-governance.ts",
+          "type": "script",
+          "description": "CI gate that validates API route governance conformance",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/scripts/validate-route-policies.ts",
+          "type": "script",
+          "description": "Route policy validation companion script",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "API governance drift may go undetected between reviews."
+    },
+    {
+      "id": "middleware-activation",
+      "title": "Middleware layer activation and rate limiting",
+      "summary": "Union Eyes activates a runtime middleware layer that enforces IP-based and role-based rate limiting, ensuring that sensitive operations are protected against abuse at the infrastructure boundary.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/middleware.ts",
+          "type": "source",
+          "description": "Runtime middleware entry point with rate limiting and auth guards",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/api/rate-limit.ts",
+          "type": "source",
+          "description": "Layered rate limiting logic",
+          "status": "missing"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Without middleware evidence, buyers cannot verify perimeter controls."
+    },
+    {
+      "id": "org-isolation",
+      "title": "Organisation isolation hardening",
+      "summary": "All data-access paths in Union Eyes are gated through organisation-scope guards. An automated check verifies that no route auto-provisions a new organisation without explicit governance approval, preventing cross-tenant data leakage.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/lib/api/org-scope.ts",
+          "type": "source",
+          "description": "Organisation scope guard implementation",
+          "status": "missing"
+        },
+        {
+          "path": "apps/union-eyes/docs/governance/ORG_SCOPE_AUDIT.md",
+          "type": "doc",
+          "description": "Manual org-scope audit findings and remediation evidence",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Tenant data isolation cannot be verified, which is a critical procurement blocker."
+    },
+    {
+      "id": "migration-lineage",
+      "title": "Database migration lineage and manifest",
+      "summary": "Union Eyes maintains a migration lineage manifest that records the SHA-256 hash of every applied database migration, enabling independent verification that the deployed schema matches declared history.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/MANIFEST.md",
+          "type": "doc",
+          "description": "SHA-256 migration manifest",
+          "status": "missing"
+        },
+        {
+          "path": "apps/union-eyes/migrations",
+          "type": "config",
+          "description": "Migration SQL files directory",
+          "status": "missing"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Without migration lineage, schema integrity cannot be verified by auditors."
+    },
+    {
+      "id": "rbac-role-auth",
+      "title": "Role-based access control and dashboard auth parity",
+      "summary": "Union Eyes enforces role-based access control through server-side auth wrappers applied consistently across dashboard routes. Roles include member, steward, staff, executive, governance, and admin, each with a defined experience lane.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/lib/auth/with-role-auth.ts",
+          "type": "source",
+          "description": "withRoleAuth and withMinRole server-side auth enforcement wrappers",
+          "status": "missing"
+        },
+        {
+          "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+          "type": "source",
+          "description": "Role-to-experience-lane mapping for dashboard personalisation",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Role-based access cannot be demonstrated to buyers — significant trust gap."
+    },
+    {
+      "id": "policy-orchestration",
+      "title": "Governance policy orchestration and federation inheritance",
+      "summary": "Union Eyes includes a policy orchestration layer that evaluates governance contracts, resolves federation-level policy inheritance, and classifies AI operations against declared risk thresholds before they execute.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/lib/governance-policy/contracts.ts",
+          "type": "source",
+          "description": "Governance contract definitions and evaluation engine",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/governance-policy/inheritance.ts",
+          "type": "source",
+          "description": "Federation policy inheritance resolution",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/governance-policy/ai-governance.ts",
+          "type": "source",
+          "description": "AI operation governance classification",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Policy orchestration maturity cannot be demonstrated to governance-sensitive buyers."
+    },
+    {
+      "id": "governance-observability",
+      "title": "Governance observability and evidence correlation",
+      "summary": "A governed observability layer classifies all governance events by severity, assigns correlation IDs, and maintains a retention-aware evidence ledger. This supports audit trail reconstruction and evidence correlation across operations.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/lib/governance-observability/telemetry.ts",
+          "type": "source",
+          "description": "Governance telemetry classification and event recording",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/governance-observability/correlation.ts",
+          "type": "source",
+          "description": "Correlation ID assignment and cross-event evidence linking",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/governance-observability/ledger.ts",
+          "type": "source",
+          "description": "Observability event ledger with retention governance",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Audit trail evidence cannot be independently verified."
+    },
+    {
+      "id": "governance-simulation",
+      "title": "Governance digital twin and operational simulation",
+      "summary": "Union Eyes provides a shadow-mode governance simulation layer that models federation conflicts, continuity stress, AI escalation scenarios, and policy inheritance outcomes before they affect production operations. Simulations are replayable and ledgered for governance preparedness evidence.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/lib/governance-simulation/simulation.ts",
+          "type": "source",
+          "description": "Governance simulation engine",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/governance-simulation/ledger.ts",
+          "type": "source",
+          "description": "Simulation ledger",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/reports/governance-simulation-summary.json",
+          "type": "report",
+          "description": "Generated governance simulation summary report",
+          "status": "missing"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Institutional preparedness evidence is unavailable for procurement review."
+    },
+    {
+      "id": "federation-sovereignty",
+      "title": "Sovereign federation execution fabric",
+      "summary": "Union Eyes models governance-aware institutional autonomy across federation tiers (national, regional, local, affiliate, coalition). Delegation chains, sovereignty conflicts, continuity sharing, AI governance jurisdiction, and replayable federation simulations are all supported in shadow mode.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/lib/federation-sovereignty/types.ts",
+          "type": "source",
+          "description": "Sovereignty type vocabulary",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/federation-sovereignty/delegation.ts",
+          "type": "source",
+          "description": "Delegated authority chain evaluation",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/federation-sovereignty/simulation.ts",
+          "type": "source",
+          "description": "Cross-federation simulation engine",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/reports/federation-sovereignty-summary.json",
+          "type": "report",
+          "description": "Generated federation sovereignty summary report",
+          "status": "missing"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Federation governance architecture cannot be demonstrated to multi-tier union buyers."
+    },
+    {
+      "id": "ai-governance",
+      "title": "AI governance and human oversight controls",
+      "summary": "All AI operations within Union Eyes are classified by risk level before execution. Sensitive and restricted AI operations require explicit human review. Federation-level AI autonomy boundaries are declared and enforced through shadow-mode governance contracts.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/lib/governance-policy/ai-governance.ts",
+          "type": "source",
+          "description": "AI operation risk classification and governance gate",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/governance-simulation/ai-simulation.ts",
+          "type": "source",
+          "description": "AI governance simulation scenarios",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/federation-sovereignty/autonomy.ts",
+          "type": "source",
+          "description": "AI autonomy boundary resolution per federation tier",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/trust-center/AI_GOVERNANCE_AND_HUMAN_OVERSIGHT.md",
+          "type": "doc",
+          "description": "Buyer-readable AI governance overview",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "AI accountability cannot be demonstrated — significant risk for public-sector and union buyers."
+    },
+    {
+      "id": "public-experience-governance",
+      "title": "Public-experience governance primitives",
+      "summary": "Content published to public-facing surfaces in Union Eyes is classified through a governance lifecycle (draft → review → approved → published → archived). Federation sovereignty metadata is tracked in shadow mode for all public surfaces.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/lib/public-experience/types.ts",
+          "type": "source",
+          "description": "Public-experience governance type vocabulary including federation sovereignty metadata",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/lib/public-experience/visibility.ts",
+          "type": "source",
+          "description": "Visibility resolution for public-experience surfaces",
+          "status": "missing"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Content governance controls for public surfaces cannot be verified."
+    },
+    {
+      "id": "narrative-governance",
+      "title": "Narrative governance and terminology alignment",
+      "summary": "Union Eyes enforces vocabulary alignment through a narrative audit CI check. Marketing language, product claims, and documentation are continuously validated against a terminology contract to prevent claim drift.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/tooling/marketing/narrative-audit.ts",
+          "type": "source",
+          "description": "Narrative audit script",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/governance/TERMINOLOGY_ALIGNMENT.md",
+          "type": "doc",
+          "description": "Terminology alignment contract",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Marketing claim accuracy cannot be independently verified."
+    },
+    {
+      "id": "security-auth-audit",
+      "title": "Security and authentication audit evidence",
+      "summary": "Union Eyes includes documented authentication audit findings, secret management validation evidence, an incident drill report, and backup/restore validation. These provide a foundation for independent security review.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/docs/security/AUTH_REALITY_AUDIT.md",
+          "type": "doc",
+          "description": "Auth layer audit findings",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/security/SECRET_MANAGEMENT_VALIDATION.md",
+          "type": "doc",
+          "description": "Secrets posture evidence",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/security/INCIDENT_DRILL_REPORT.md",
+          "type": "doc",
+          "description": "Incident response rehearsal results",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/security/BACKUP_RESTORE_VALIDATION.md",
+          "type": "doc",
+          "description": "Disaster recovery validation evidence",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Security posture evidence is unavailable — blocks trust-sector procurement."
+    },
+    {
+      "id": "business-continuity",
+      "title": "Business continuity and rollback evidence",
+      "summary": "Union Eyes provides documented rollback procedures, production cutover checklists, and deployment rehearsal evidence. These support institutional buyers' continuity and recovery requirements.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/docs/operations/ROLLBACK_VALIDATION.md",
+          "type": "doc",
+          "description": "Rollback procedure and validation evidence",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/operations/PRODUCTION_CUTOVER_CHECKLIST.md",
+          "type": "doc",
+          "description": "Production go-live checklist",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/operations/DEPLOYMENT_REHEARSAL.md",
+          "type": "doc",
+          "description": "Deployment rehearsal results",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Buyers cannot verify recovery procedures — required for regulated-sector procurement."
+    },
+    {
+      "id": "pilot-evidence",
+      "title": "Pilot readiness and procurement documentation",
+      "summary": "Union Eyes includes a pilot scope document, pilot validation results, a product readiness report, and a final readiness sign-off. These provide a documented procurement evidence trail for controlled pilot deployments.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/docs/procurement/PILOT_SCOPE.md",
+          "type": "doc",
+          "description": "Pilot program scope and constraints",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/procurement/PILOT_VALIDATION.md",
+          "type": "doc",
+          "description": "Pilot validation results",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/procurement/PRODUCT_READINESS_REPORT.md",
+          "type": "doc",
+          "description": "Production readiness memo for buyer evidence",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/procurement/FINAL_READINESS_STATUS.md",
+          "type": "doc",
+          "description": "Gate sign-off record",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Structured procurement evidence trail is missing — increases sales cycle friction."
+    },
+    {
+      "id": "docs-hygiene",
+      "title": "Documentation hygiene and evidence organisation",
+      "summary": "Union Eyes maintains a structured documentation index covering architecture, security, operations, governance, and procurement. Documentation is organised for traceability and is referenced from a central index.",
+      "evidence": [
+        {
+          "path": "apps/union-eyes/docs/INDEX.md",
+          "type": "doc",
+          "description": "Central documentation navigation index",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/architecture/ARCHITECTURE_SHAPE.md",
+          "type": "doc",
+          "description": "System architecture overview",
+          "status": "present"
+        },
+        {
+          "path": "apps/union-eyes/docs/architecture/GOVERNANCE_RUNTIME_MODEL.md",
+          "type": "doc",
+          "description": "Governance runtime model documentation",
+          "status": "present"
+        }
+      ],
+      "buyerVisible": true,
+      "riskIfMissing": "Documentation disorganisation signals operational immaturity to enterprise buyers."
+    }
+  ],
+  "summary": {
+    "totalClaims": 17,
+    "presentClaims": 10,
+    "partialClaims": 6,
+    "missingClaims": 1,
+    "buyerVisibleClaims": 17,
+    "coverageScore": 76
+  }
+}

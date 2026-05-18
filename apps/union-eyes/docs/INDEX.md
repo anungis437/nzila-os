@@ -68,6 +68,24 @@
 | [Observability Validation](./operations/OBSERVABILITY_VALIDATION.md) | Monitoring and alerting evidence |
 | [Demo Runbook](./operations/DEMO_RUNBOOK.md) | Operator pre-flight and demo setup |
 
+### Trust Center
+
+Buyer-facing public-safe trust and procurement evidence summaries.
+
+| Document | Purpose |
+|----------|---------|
+| [Trust Center Index](./trust-center/INDEX.md) | Evidence summary and claim coverage table |
+| [Security and Privacy](./trust-center/SECURITY_AND_PRIVACY_OVERVIEW.md) | Security controls and data privacy posture |
+| [Governance and Auditability](./trust-center/GOVERNANCE_AND_AUDITABILITY_OVERVIEW.md) | Runtime governance controls and audit trail |
+| [Data Residency and Infrastructure](./trust-center/DATA_RESIDENCY_AND_INFRASTRUCTURE_OVERVIEW.md) | Infrastructure topology and data residency |
+| [AI Governance and Human Oversight](./trust-center/AI_GOVERNANCE_AND_HUMAN_OVERSIGHT.md) | AI controls and human review gates |
+| [Federation and Sovereignty](./trust-center/FEDERATION_AND_SOVEREIGNTY_OVERVIEW.md) | Multi-tier federation governance architecture |
+| [Business Continuity and Recovery](./trust-center/BUSINESS_CONTINUITY_AND_RECOVERY_OVERVIEW.md) | Continuity, rollback, and DR posture |
+| [Procurement Evidence Map](./trust-center/PROCUREMENT_EVIDENCE_MAP.md) | Maps procurement questions to evidence artifacts |
+| [Public-Safe Architecture Summary](./trust-center/PUBLIC_SAFE_ARCHITECTURE_SUMMARY.md) | External-facing architecture overview |
+
+> Regenerate the trust center index with: `pnpm --filter @nzila/union-eyes trust:center`
+
 ### Procurement & Pilot Evidence
 
 | Document | Purpose |
