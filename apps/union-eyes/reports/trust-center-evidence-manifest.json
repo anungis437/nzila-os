@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T18:25:53.678Z",
+  "generatedAt": "2026-05-18T18:32:22.658Z",
   "app": "union-eyes",
   "evidenceVersion": 1,
   "claims": [
@@ -204,7 +204,7 @@
           "path": "apps/union-eyes/reports/governance-simulation-summary.json",
           "type": "report",
           "description": "Generated governance simulation summary report",
-          "status": "missing"
+          "status": "present"
         }
       ],
       "buyerVisible": true,
@@ -237,7 +237,7 @@
           "path": "apps/union-eyes/reports/federation-sovereignty-summary.json",
           "type": "report",
           "description": "Generated federation sovereignty summary report",
-          "status": "missing"
+          "status": "present"
         }
       ],
       "buyerVisible": true,
@@ -441,10 +441,10 @@
   ],
   "summary": {
     "totalClaims": 17,
-    "presentClaims": 10,
-    "partialClaims": 6,
+    "presentClaims": 12,
+    "partialClaims": 4,
     "missingClaims": 1,
     "buyerVisibleClaims": 17,
-    "coverageScore": 76
+    "coverageScore": 82
   }
 }

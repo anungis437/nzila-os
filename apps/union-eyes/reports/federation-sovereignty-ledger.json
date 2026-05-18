@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-05-18T18:31:23.954Z",
+  "governanceMode": "shadow",
+  "entries": [
+    {
+      "federationId": "report-run",
+      "eventType": "coordination-event",
+      "tier": "national",
+      "outcome": "accepted",
+      "correlationId": "report:national-policy-tightening",
+      "diagnostics": {
+        "scenario": "national-policy-tightening"
+      },
+      "entryId": "slgr_1779129083949_1",
+      "governanceMode": "shadow",
+      "timestamp": "2026-05-18T18:31:23.949Z"
+    },
+    {
+      "federationId": "report-run",
+      "eventType": "coordination-event",
+      "tier": "national",
+      "outcome": "accepted",
+      "correlationId": "report:steward-turnover-continuity-loss",
+      "diagnostics": {
+        "scenario": "steward-turnover-continuity-loss"
+      },
+      "entryId": "slgr_1779129083950_2",
+      "governanceMode": "shadow",
+      "timestamp": "2026-05-18T18:31:23.950Z"
+    },
+    {
+      "federationId": "report-run",
+      "eventType": "coordination-event",
+      "tier": "national",
+      "outcome": "accepted",
+      "correlationId": "report:ai-governance-federation-conflict",
+      "diagnostics": {
+        "scenario": "ai-governance-federation-conflict"
+      },
+      "entryId": "slgr_1779129083950_3",
+      "governanceMode": "shadow",
+      "timestamp": "2026-05-18T18:31:23.950Z"
+    },
+    {
+      "federationId": "report-run",
+      "eventType": "coordination-event",
+      "tier": "national",
+      "outcome": "accepted",
+      "correlationId": "report:coalition-publication-governance",
+      "diagnostics": {
+        "scenario": "coalition-publication-governance"
+      },
+      "entryId": "slgr_1779129083950_4",
+      "governanceMode": "shadow",
+      "timestamp": "2026-05-18T18:31:23.950Z"
+    },
+    {
+      "federationId": "report-run",
+      "eventType": "coordination-event",
+      "tier": "national",
+      "outcome": "accepted",
+      "correlationId": "report:audit-visibility-escalation-deadlock",
+      "diagnostics": {
+        "scenario": "audit-visibility-escalation-deadlock"
+      },
+      "entryId": "slgr_1779129083950_5",
+      "governanceMode": "shadow",
+      "timestamp": "2026-05-18T18:31:23.950Z"
+    }
+  ],
+  "summary": {
+    "totalEntries": 5,
+    "delegationEvents": 0,
+    "conflictEvents": 0,
+    "escalationEvents": 0,
+    "overrideAttempts": 0,
+    "overrideRejections": 0,
+    "continuityEvents": 0,
+    "coordinationEvents": 5,
+    "outcomeBreakdown": {
+      "accepted": 5,
+      "rejected": 0,
+      "escalated": 0,
+      "pending": 0
+    },
+    "tierBreakdown": {
+      "national": 5
+    },
+    "authorityBreakdown": {},
+    "generatedAt": "2026-05-18T18:31:23.952Z"
+  }
+}

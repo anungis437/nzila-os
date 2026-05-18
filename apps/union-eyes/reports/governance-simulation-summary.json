@@ -1,0 +1,325 @@
+{
+  "generatedAt": "2026-05-18T18:32:14.356Z",
+  "governanceMode": "shadow",
+  "summary": {
+    "totalSimulations": 13,
+    "outcomeMatchRate": 0.9230769230769231,
+    "severityBreakdown": {
+      "informational": 0,
+      "elevated": 3,
+      "critical": 1,
+      "institutional-risk": 9
+    },
+    "escalationsTriggered": 11,
+    "continuityGapsDetected": 4,
+    "federationConflictsDetected": 4,
+    "scenarioIds": [
+      "federation.policy-tightening-cascade",
+      "federation.local-weakening-attempt",
+      "federation.governance-deadlock",
+      "continuity.steward-turnover",
+      "continuity.executive-turnover",
+      "continuity.audit-chain-loss",
+      "continuity.governance-orphan",
+      "publication.unauthorized-attempt",
+      "publication.federation-dispute",
+      "ai.restricted-operation-escalation",
+      "ai.advisory-to-restricted-transition",
+      "ai.federation-restriction",
+      "incident.policy-breach"
+    ],
+    "generatedAt": "2026-05-18T18:32:14.355Z"
+  },
+  "readinessScore": {
+    "overall": 47,
+    "continuity": {
+      "score": 29,
+      "continuityGapsDetected": 4,
+      "leadershipVulnerabilities": 2,
+      "auditChainIntegrity": false
+    },
+    "federation": {
+      "score": 28,
+      "conflictsSimulated": 4,
+      "conflictsResolved": 3,
+      "inheritanceViolations": 4
+    },
+    "publication": {
+      "score": 60,
+      "escalationsRequired": 4,
+      "unauthorizedAttempts": 0,
+      "approvalCoverageComplete": true
+    },
+    "aiAccountability": {
+      "score": 100,
+      "highRiskOperationsSimulated": 2,
+      "humanReviewTriggered": 2,
+      "escalationsResolved": 2
+    },
+    "scoredAt": "2026-05-18T18:32:14.356Z",
+    "simulationCount": 13
+  },
+  "scenarios": [
+    {
+      "id": "federation.policy-tightening-cascade",
+      "severity": "critical",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "inheritance.cascade.triggered",
+        "federation.conflict.recorded",
+        "local.publication.blocked",
+        "federation-review.required",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "local",
+        "regional",
+        "national"
+      ],
+      "continuityGapDetected": false,
+      "federationConflictDetected": true,
+      "correlationId": "gcid_0f861a3faf67418d8e2a885eb2e78196"
+    },
+    {
+      "id": "federation.local-weakening-attempt",
+      "severity": "institutional-risk",
+      "outcomesMatched": false,
+      "actualOutcomes": [
+        "override.rejected",
+        "federation.conflict.recorded",
+        "governance.deadlock.detected",
+        "executive-approval.required",
+        "publication.blocked",
+        "local.publication.blocked",
+        "federation-review.required",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [
+        "audit.emitted"
+      ],
+      "escalationChain": [],
+      "continuityGapDetected": false,
+      "federationConflictDetected": true,
+      "correlationId": "gcid_aa7e1389eea644b5b3665e549ae3107c"
+    },
+    {
+      "id": "federation.governance-deadlock",
+      "severity": "institutional-risk",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "inheritance.cascade.triggered",
+        "federation.conflict.recorded",
+        "governance.deadlock.detected",
+        "executive-approval.required",
+        "publication.blocked",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "regional",
+        "national"
+      ],
+      "continuityGapDetected": false,
+      "federationConflictDetected": true,
+      "correlationId": "gcid_576260ec6694488fa85e6e842de084a7"
+    },
+    {
+      "id": "continuity.steward-turnover",
+      "severity": "institutional-risk",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "continuity.gap.detected",
+        "governance.orphan.identified",
+        "succession.alert.generated",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "governance"
+      ],
+      "continuityGapDetected": true,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_113125978f3441e094e3a5070fdf7ca5"
+    },
+    {
+      "id": "continuity.executive-turnover",
+      "severity": "institutional-risk",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "continuity.gap.detected",
+        "governance.orphan.identified",
+        "succession.alert.generated",
+        "approval.authority.gap",
+        "publication.blocked",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "governance"
+      ],
+      "continuityGapDetected": true,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_c452d7c7f2df4084b465ae6366e46cef"
+    },
+    {
+      "id": "continuity.audit-chain-loss",
+      "severity": "institutional-risk",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "continuity.gap.detected",
+        "audit.gap.detected",
+        "governance.chain.incomplete",
+        "legal-review.required",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "governance"
+      ],
+      "continuityGapDetected": true,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_6a0bf58836a64eb1940f5a943bb9d80c"
+    },
+    {
+      "id": "continuity.governance-orphan",
+      "severity": "institutional-risk",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "continuity.gap.detected",
+        "policy.orphan.detected",
+        "governance.escalation.triggered",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "governance"
+      ],
+      "continuityGapDetected": true,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_b5cdf3db35984c70ae839038e42a5184"
+    },
+    {
+      "id": "publication.unauthorized-attempt",
+      "severity": "elevated",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "publication.blocked",
+        "approval.required",
+        "audit.emitted",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "governance"
+      ],
+      "continuityGapDetected": false,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_d493da7789f54d75a42718078465943f"
+    },
+    {
+      "id": "publication.federation-dispute",
+      "severity": "institutional-risk",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "publication.blocked",
+        "approval.required",
+        "audit.emitted",
+        "federation-review.required",
+        "federation.conflict.recorded",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "local",
+        "regional",
+        "national"
+      ],
+      "continuityGapDetected": false,
+      "federationConflictDetected": true,
+      "correlationId": "gcid_14e6eab2de6b4e87ad00b93f3c04774d"
+    },
+    {
+      "id": "ai.restricted-operation-escalation",
+      "severity": "institutional-risk",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "audit.emitted",
+        "human-review.triggered",
+        "ai-operation.escalated",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "governance"
+      ],
+      "continuityGapDetected": false,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_d41d870f62b3409bb43accb4bac41737"
+    },
+    {
+      "id": "ai.advisory-to-restricted-transition",
+      "severity": "elevated",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "audit.emitted",
+        "human-review.triggered",
+        "ai-operation.escalated",
+        "risk.reclassified",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "governance"
+      ],
+      "continuityGapDetected": false,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_7b930a919906474dbf9e8021523ee97b"
+    },
+    {
+      "id": "ai.federation-restriction",
+      "severity": "elevated",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "audit.emitted",
+        "ai-operation.blocked",
+        "federation.restriction.applied",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [],
+      "continuityGapDetected": false,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_e934a43368eb49e4af8cc865108817d9"
+    },
+    {
+      "id": "incident.policy-breach",
+      "severity": "institutional-risk",
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "audit.emitted",
+        "legal-review.required",
+        "policy.breach.detected",
+        "escalation.triggered",
+        "evidence.generated"
+      ],
+      "unmatchedExpected": [],
+      "escalationChain": [
+        "governance"
+      ],
+      "continuityGapDetected": false,
+      "federationConflictDetected": false,
+      "correlationId": "gcid_e223d35709ad4f80a41717136aaf34f5"
+    }
+  ]
+}

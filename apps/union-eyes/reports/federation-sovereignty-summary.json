@@ -1,0 +1,141 @@
+{
+  "generatedAt": "2026-05-18T18:31:23.952Z",
+  "governanceMode": "shadow",
+  "scenariosRun": 5,
+  "scenarioResults": [
+    {
+      "scenarioId": "national-policy-tightening",
+      "description": "National tightens policy; regional refuses inheritance; local publication request conflicts.",
+      "participatingTiers": [
+        "national",
+        "regional",
+        "local"
+      ],
+      "conflictsDetected": [],
+      "resolutionPaths": [],
+      "escalationChain": [],
+      "outcomesMatched": false,
+      "actualOutcomes": [],
+      "governanceMode": "shadow"
+    },
+    {
+      "scenarioId": "steward-turnover-continuity-loss",
+      "description": "Steward turnover at local level causes continuity authority gap.",
+      "participatingTiers": [
+        "local",
+        "regional"
+      ],
+      "conflictsDetected": [],
+      "resolutionPaths": [],
+      "escalationChain": [],
+      "outcomesMatched": false,
+      "actualOutcomes": [],
+      "governanceMode": "shadow"
+    },
+    {
+      "scenarioId": "ai-governance-federation-conflict",
+      "description": "Regional tightens AI governance; local requests AI publication override.",
+      "participatingTiers": [
+        "regional",
+        "local"
+      ],
+      "conflictsDetected": [],
+      "resolutionPaths": [],
+      "escalationChain": [],
+      "outcomesMatched": false,
+      "actualOutcomes": [],
+      "governanceMode": "shadow"
+    },
+    {
+      "scenarioId": "coalition-publication-governance",
+      "description": "Coalition of locals attempt joint publication across restricted federation.",
+      "participatingTiers": [
+        "local",
+        "coalition"
+      ],
+      "conflictsDetected": [],
+      "resolutionPaths": [],
+      "escalationChain": [],
+      "outcomesMatched": false,
+      "actualOutcomes": [],
+      "governanceMode": "shadow"
+    },
+    {
+      "scenarioId": "audit-visibility-escalation-deadlock",
+      "description": "Two national units dispute audit visibility scope — no parent tier available.",
+      "participatingTiers": [
+        "national",
+        "national"
+      ],
+      "conflictsDetected": [
+        "escalation-deadlock"
+      ],
+      "resolutionPaths": [
+        "arbitration-required"
+      ],
+      "escalationChain": [],
+      "outcomesMatched": true,
+      "actualOutcomes": [
+        "escalation-deadlock-detected",
+        "arbitration-required"
+      ],
+      "governanceMode": "shadow"
+    }
+  ],
+  "readinessAssessment": {
+    "overall": 100,
+    "autonomy": {
+      "score": 100,
+      "unitsAssessed": 3,
+      "fullyAutonomousUnits": 1,
+      "restrictedUnits": 0
+    },
+    "delegation": {
+      "score": 100,
+      "delegationGrantsValid": 11,
+      "conflictsDetected": 0,
+      "subDelegationExposure": 0
+    },
+    "continuity": {
+      "score": 100,
+      "sharingAgreementsActive": 2,
+      "continuityGapsDetected": 0,
+      "jurisdictionIntact": true
+    },
+    "jurisdiction": {
+      "score": 100,
+      "auditVisibilityPoliciesValid": 3,
+      "overrideViolationsDetected": 0,
+      "aiJurisdictionConsistent": true
+    },
+    "simulationCount": 5,
+    "governanceMode": "shadow",
+    "generatedAt": "2026-05-18T18:31:23.952Z"
+  },
+  "ledgerSummary": {
+    "totalEntries": 5,
+    "delegationEvents": 0,
+    "conflictEvents": 0,
+    "escalationEvents": 0,
+    "overrideAttempts": 0,
+    "overrideRejections": 0,
+    "continuityEvents": 0,
+    "coordinationEvents": 5,
+    "outcomeBreakdown": {
+      "accepted": 5,
+      "rejected": 0,
+      "escalated": 0,
+      "pending": 0
+    },
+    "tierBreakdown": {
+      "national": 5
+    },
+    "authorityBreakdown": {},
+    "generatedAt": "2026-05-18T18:31:23.952Z"
+  },
+  "metadata": {
+    "wave": 10,
+    "module": "federation-sovereignty",
+    "productionImpact": "none"
+  }
+}

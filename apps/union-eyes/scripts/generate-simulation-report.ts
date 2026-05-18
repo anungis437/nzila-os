@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const appRoot = join(__dirname, '..');
 
+async function main(): Promise<void> {
 // Dynamic imports ensure modules bootstrap cleanly in script context
 const { getAllScenarios } = await import('../lib/governance-simulation/scenarios.js');
 const { runScenario } = await import('../lib/governance-simulation/simulation.js');
@@ -167,5 +168,11 @@ writeFileSync(mdPath, md, 'utf-8');
 console.log(`  → Markdown report: docs/procurement/GOVERNANCE_SIMULATION_OVERVIEW.md`);
 
 console.log(`\n  Readiness score: ${readiness.overall}/100`);
-console.log(`  Outcome match:   ${outcomeMatchPct}%`);
-console.log(`  Done.\n`);
+  console.log(`  Outcome match:   ${outcomeMatchPct}%`);
+  console.log(`  Done.\n`);
+}
+
+main().catch((err) => {
+  console.error('❌ Report generation failed:', err);
+  process.exit(1);
+});

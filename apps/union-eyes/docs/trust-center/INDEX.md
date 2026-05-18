@@ -1,8 +1,8 @@
 # Union Eyes — Trust Center Index
 
 > **Audience:** Procurement reviewers, institutional buyers, governance auditors.
-> **Generated:** 2026-05-18T18:25:53.678Z
-> **Coverage score:** 76%
+> **Generated:** 2026-05-18T18:32:22.658Z
+> **Coverage score:** 82%
 
 This index provides a buyer-readable summary of Union Eyes governance, security,
 and operational evidence. All claims are grounded in repository artifacts and
@@ -21,7 +21,7 @@ generated automatically from the evidence manifest.
 
 | Metric | Value | Metric | Value | Metric | Value | Metric | Value |
 |--------|-------|--------|-------|--------|-------|--------|-------|
-| **Total claims** | 17 | **Present** | 10 | **Partial** | 6 | **Missing** | 1 |
+| **Total claims** | 17 | **Present** | 12 | **Partial** | 4 | **Missing** | 1 |
 
 **Buyer-visible claims:** 17
 
@@ -39,8 +39,8 @@ generated automatically from the evidence manifest.
 | 🟡 | `rbac-role-auth` | Role-based access control and dashboard auth parity | ✅ |
 | ✅ | `policy-orchestration` | Governance policy orchestration and federation inheritance | ✅ |
 | ✅ | `governance-observability` | Governance observability and evidence correlation | ✅ |
-| 🟡 | `governance-simulation` | Governance digital twin and operational simulation | ✅ |
-| 🟡 | `federation-sovereignty` | Sovereign federation execution fabric | ✅ |
+| ✅ | `governance-simulation` | Governance digital twin and operational simulation | ✅ |
+| ✅ | `federation-sovereignty` | Sovereign federation execution fabric | ✅ |
 | ✅ | `ai-governance` | AI governance and human oversight controls | ✅ |
 | 🟡 | `public-experience-governance` | Public-experience governance primitives | ✅ |
 | ✅ | `narrative-governance` | Narrative governance and terminology alignment | ✅ |
@@ -92,11 +92,11 @@ The following documents provide buyer-readable summaries for each trust domain:
 | ✅ | `governance-observability` | `apps/union-eyes/lib/governance-observability/ledger.ts` | Observability event ledger with retention governance |
 | ✅ | `governance-simulation` | `apps/union-eyes/lib/governance-simulation/simulation.ts` | Governance simulation engine |
 | ✅ | `governance-simulation` | `apps/union-eyes/lib/governance-simulation/ledger.ts` | Simulation ledger |
-| ❌ | `governance-simulation` | `apps/union-eyes/reports/governance-simulation-summary.json` | Generated governance simulation summary report |
+| ✅ | `governance-simulation` | `apps/union-eyes/reports/governance-simulation-summary.json` | Generated governance simulation summary report |
 | ✅ | `federation-sovereignty` | `apps/union-eyes/lib/federation-sovereignty/types.ts` | Sovereignty type vocabulary |
 | ✅ | `federation-sovereignty` | `apps/union-eyes/lib/federation-sovereignty/delegation.ts` | Delegated authority chain evaluation |
 | ✅ | `federation-sovereignty` | `apps/union-eyes/lib/federation-sovereignty/simulation.ts` | Cross-federation simulation engine |
-| ❌ | `federation-sovereignty` | `apps/union-eyes/reports/federation-sovereignty-summary.json` | Generated federation sovereignty summary report |
+| ✅ | `federation-sovereignty` | `apps/union-eyes/reports/federation-sovereignty-summary.json` | Generated federation sovereignty summary report |
 | ✅ | `ai-governance` | `apps/union-eyes/lib/governance-policy/ai-governance.ts` | AI operation risk classification and governance gate |
 | ✅ | `ai-governance` | `apps/union-eyes/lib/governance-simulation/ai-simulation.ts` | AI governance simulation scenarios |
 | ✅ | `ai-governance` | `apps/union-eyes/lib/federation-sovereignty/autonomy.ts` | AI autonomy boundary resolution per federation tier |
