@@ -82,6 +82,8 @@
     "backend/**",
     "infra/**",
     "lib/external-calendar-sync/**",
-    "lib/integrations/**"
+    "lib/integrations/**",
+    "e2e/**",
+    "tests/e2e/**"
   ]
 }

@@ -25,7 +25,7 @@ import {
 import { SignalBadge } from './signal-badge';
 import { SignalDetails } from './signal-details';
 import { useFeatureFlags } from '@/lib/hooks/use-feature-flags';
-import { LRO_FEATURES } from '@/lib/services/feature-flags';
+import { LRO_FEATURES } from '@/lib/services/feature-flags.constants';
 
 export interface CaseListItem extends CaseForSignals {
   assignedOfficerName?: string;

@@ -24,7 +24,7 @@ import {
 } from '@/lib/services/lro-signals';
 import { SignalBadge } from '../cases/signal-badge';
 import { useFeatureFlags } from '@/lib/hooks/use-feature-flags';
-import { LRO_FEATURES } from '@/lib/services/feature-flags';
+import { LRO_FEATURES } from '@/lib/services/feature-flags.constants';
 
 interface DashboardSignalsWidgetProps {
   cases: CaseForSignals[];
