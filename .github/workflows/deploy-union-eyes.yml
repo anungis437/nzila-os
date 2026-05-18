@@ -612,9 +612,26 @@ jobs:
             exit 1
           fi
 
+          # Soft-warn on hosts that may have managed-cert binding in flight.
+          # Uses the same UE_SOFT_SMOKE_HOSTS variable as the smoke-check step;
+          # defaults to app.unioneyes.app until its cert is fully bound.
+          SOFT_DNS_HOSTS="${{ vars.UE_SOFT_SMOKE_HOSTS != '' && vars.UE_SOFT_SMOKE_HOSTS || 'app.unioneyes.app' }}"
+          dns_host_is_soft() {
+            local host="$1"
+            for soft in $SOFT_DNS_HOSTS; do
+              if [ "$host" = "$soft" ]; then return 0; fi
+            done
+            return 1
+          }
+
           for URL in "https://$ZONE" "https://app.$ZONE" "https://staging.$ZONE" "https://staging-app.$ZONE"; do
+            HOST="$(echo "$URL" | awk -F/ '{print $3}')"
             STATUS=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 20 "$URL" || echo "000")
-            if [[ ! "$STATUS" =~ ^(200|301|302|307|308)$ ]]; then
+            if [[ "$STATUS" =~ ^(200|301|302|307|308)$ ]]; then
+              echo "✅ $URL -> HTTP $STATUS"
+            elif dns_host_is_soft "$HOST"; then
+              echo "::warning::Managed-cert binding pending for $URL -> HTTP $STATUS; not failing the deploy."
+            else
               echo "HTTPS check failed for $URL status=$STATUS"
               exit 1
             fi
