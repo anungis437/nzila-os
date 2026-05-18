@@ -11,7 +11,13 @@ import { NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { validateCUPETransition } from '@/lib/case-fsm-enforcement';
+import {
+  validateTransition,
+  getAllowedTransitions,
+  type ActorRole,
+  type CasePriority,
+} from '@/lib/workflow/case-lifecycle';
+import { toLifecycleState } from '@/lib/workflow/state-bridge';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims } from '@/db/schema/claims-schema';
 import { claimUpdates } from '@/db/schema/claims-schema';
@@ -101,31 +107,43 @@ export async function PATCH(
       const resolvedRole = await getUserRoleInOrganization(userId, claim.organizationId);
       const actorRole = resolvedRole ?? 'member';
 
-      // 5. Validate FSM transition
-      // Map the DB status to CUPE vocabulary status
-      const currentStatus = mapDbStatusToCupe(claim.status);
-      const cupeTarget = targetStatus; // Already uses CUPE vocabulary IDs
+      // 5. Validate FSM transition via canonical case-lifecycle.ts
+      const cupeCurrentStatus = mapDbStatusToCupe(claim.status);
+      const currentLifecycleState = toLifecycleState('cupe', cupeCurrentStatus) ?? 'submitted';
+      const targetLifecycleState = toLifecycleState('cupe', targetStatus);
 
-      const validation = validateCUPETransition({
+      if (!targetLifecycleState) {
+        return {
+          found: true as const,
+          allowed: false as const,
+          reason: `Unknown or invalid target status: ${targetStatus}`,
+          nextAllowedStatuses: [] as string[],
+        };
+      }
+
+      const normalizedRole = normalizeActorRole(actorRole);
+      const validation = validateTransition({
         caseId,
-        currentStatus,
-        targetStatus: cupeTarget,
-        actorRole,
-        reason,
+        currentState: currentLifecycleState,
+        targetState: targetLifecycleState,
+        actorRole: normalizedRole,
+        priority: (claim.priority as CasePriority) ?? 'medium',
+        notes: reason,
       });
 
       if (!validation.allowed) {
+        const allowedLifecycleStates = getAllowedTransitions(currentLifecycleState, normalizedRole);
         return {
           found: true as const,
           allowed: false as const,
           reason: validation.reason,
-          nextAllowedStatuses: validation.nextAllowedStatuses,
+          nextAllowedStatuses: allowedLifecycleStates.map(toCupeVocabulary),
         };
       }
 
       // 5. Apply transition
       const fromStatus = claim.status;
-      const toDbStatus = mapCupeToDbStatus(cupeTarget);
+      const toDbStatus = mapCupeToDbStatus(targetStatus);
 
       const now = new Date();
       await tx
@@ -133,8 +151,8 @@ export async function PATCH(
         .set({
           status: toDbStatus,
           updatedAt: now,
-          ...(cupeTarget === 'closed' ? { closedAt: now } : {}),
-          ...(cupeTarget === 'settled' || cupeTarget === 'denied'
+          ...(targetStatus === 'closed' ? { closedAt: now } : {}),
+          ...(targetStatus === 'settled' || targetStatus === 'denied'
             ? { resolvedAt: now }
             : {}),
         })
@@ -153,8 +171,8 @@ export async function PATCH(
         metadata: {
           fromStatus,
           toStatus: toDbStatus,
-          cupeFromStatus: currentStatus,
-          cupeToStatus: cupeTarget,
+          cupeFromStatus: cupeCurrentStatus,
+          cupeToStatus: targetStatus,
           reason: reason ?? null,
         },
       });
@@ -164,8 +182,8 @@ export async function PATCH(
         allowed: true as const,
         fromStatus,
         toStatus: toDbStatus,
-        cupeFromStatus: currentStatus,
-        cupeToStatus: cupeTarget,
+        cupeFromStatus: cupeCurrentStatus,
+        cupeToStatus: targetStatus,
         claimId: caseId,
       };
     });
@@ -234,6 +252,41 @@ export async function PATCH(
       { status: 500 },
     );
   }
+}
+
+// ─── FSM Role Normalization ───────────────────────────────────────────────────
+
+/**
+ * Normalize DB/org role strings to canonical ActorRole for case-lifecycle FSM.
+ * Maps legacy role names to the unified vocabulary.
+ */
+function normalizeActorRole(role: string): ActorRole {
+  const map: Record<string, ActorRole> = {
+    platform_admin: 'system_admin',
+    business_agent: 'chief_steward',
+    union_admin: 'admin',
+    union_staff: 'steward',
+  };
+  return (map[role] ?? role) as ActorRole;
+}
+
+/**
+ * Convert a LifecycleState back to the CUPE vocabulary ID for API responses.
+ */
+function toCupeVocabulary(state: string): string {
+  const map: Record<string, string> = {
+    draft: 'draft',
+    submitted: 'filed',
+    triage: 'acknowledged',
+    investigation: 'investigating',
+    pending_docs: 'response_due',
+    negotiation: 'response_due',
+    mediation: 'mediation',
+    arbitration: 'escalated',
+    resolved: 'settled',
+    closed: 'closed',
+  };
+  return map[state] ?? state;
 }
 
 // ─── Status Mapping ───────────────────────────────────────────────────────────
