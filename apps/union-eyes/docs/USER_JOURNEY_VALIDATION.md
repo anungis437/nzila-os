@@ -261,7 +261,7 @@ This document validates the end-to-end user journeys for each role persona in Un
 | **Step** | Click "Profile & Settings" in sidebar → navigate to `/settings` or `/dashboard/settings` |
 | **Expected route** | `/en-CA/settings` or `/en-CA/dashboard/settings` |
 | **Expected UI** | Profile page shows member's name, email, org. MFA settings link present. No admin sections visible. |
-| **Expected data** | User record for `ue-qa-member-primary` from Clerk + DB. |
+| **Expected data** | User record for `ue-qa-member-primary` from DB (NextAuth session). |
 | **Role permission required** | `VIEW_OWN_PROFILE` |
 | **Validation status** | ⚠️ PARTIAL |
 | **Notes** | No spec explicitly navigates to the member's profile page and asserts content. `no-fsm-overexposure.spec.ts` navigates to `/dashboard/settings` for all roles and confirms no FSM terms are present and no auth redirect occurs. |

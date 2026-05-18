@@ -191,7 +191,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Member-facing pages (any authenticated member) ─────────────────────
   { path: 'agreements/page.tsx',                         minRole: 'member',               description: 'Collective agreements browser' },
-  // claims/page.tsx removed: directory holds only new/ and [id]/ sub-pages on disk
+  { path: 'claims/page.tsx',                             minRole: 'member',               description: 'Claims list (active/historical)' },
   { path: 'claims/new/page.tsx',                         minRole: 'member',               description: 'File new claim' },
   { path: 'claims/[id]/page.tsx',                        minRole: 'member',               description: 'Claim detail view' },
   { path: 'compliance/page.tsx',                         minRole: 'member',               description: 'Compliance dashboard (client-side)' },
@@ -253,7 +253,8 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'communications/page.tsx',                     minRole: 'steward',              description: 'Communications hub' },
   { path: 'communications/sms/page.tsx',                 minRole: 'steward',              description: 'SMS communications' },
   { path: 'cross-union-analytics/page.tsx',              minRole: 'steward',              description: 'Cross-union analytics' },
-  // grievances/page.tsx removed: directory holds only [id]/ sub-page on disk
+  { path: 'cases/page.tsx',                              minRole: 'steward',              description: 'Cases list (steward queue)' },
+  { path: 'grievances/page.tsx',                         minRole: 'steward',              description: 'Grievances list (steward queue)' },
   { path: 'grievances/[id]/page.tsx',                    minRole: 'steward',              description: 'Grievance detail' },
   { path: 'members/page.tsx',                            minRole: 'steward',              description: 'Members directory' },
   { path: 'members/new/page.tsx',                        minRole: 'steward',              description: 'Create new member' },

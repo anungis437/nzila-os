@@ -74,6 +74,8 @@ const ALLOWED_PATTERNS = [
   'apps/union-eyes/app/[locale]/dashboard/correspondence/',
   // role-experience.ts: 'clerk' is the union role string value
   'apps/union-eyes/lib/dashboard/role-experience.ts',
+  // MODULE_PAGE_INVENTORY.md: `clerk` is the union officer role name (recording clerk), not auth vendor
+  'apps/union-eyes/docs/MODULE_PAGE_INVENTORY.md',
 ]
 
 /**
