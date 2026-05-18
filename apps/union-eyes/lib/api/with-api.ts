@@ -131,6 +131,55 @@ export interface WithApiOptions<
     deprecated?: boolean;
   };
 
+  // ── Route Registry ────────────────────────────────────────────────────────
+
+  /**
+   * Governance registry metadata. Optional — new routes should populate this.
+   * Consumed by `scripts/generate-route-registry.ts` to produce the governed
+   * route inventory in `reports/route-registry.json`.
+   *
+   * Providing this field has no runtime effect; it is a compile-time annotation
+   * that enables static governance tooling and CI-enforced route inventories.
+   *
+   * @example
+   * ```ts
+   * registry: {
+   *   audience: 'officer',
+   *   pilotEligible: true,
+   *   productionStatus: 'active',
+   *   evidenceRequired: false,
+   *   orgScoping: 'caller-org',
+   * }
+   * ```
+   */
+  registry?: {
+    /**
+     * Primary audience for this route.
+     * Drives governance classification and pilot visibility decisions.
+     */
+    audience?:
+      | 'member'
+      | 'steward'
+      | 'officer'
+      | 'admin'
+      | 'platform'
+      | 'public'
+      | 'webhook'
+      | 'cron';
+    /** Whether this route is available in pilot mode (default: true). */
+    pilotEligible?: boolean;
+    /** Operational maturity classification for this route. */
+    productionStatus?: 'active' | 'pilot-only' | 'deprecated' | 'experimental';
+    /** Whether access to this route generates a governance audit event. */
+    evidenceRequired?: boolean;
+    /** Org-scoping strategy for governance documentation. */
+    orgScoping?:
+      | 'caller-org'
+      | 'any-org-with-membership'
+      | 'platform-admin-only'
+      | 'public';
+  };
+
   // ── Response ──────────────────────────────────────────────────────────────
 
   /** HTTP status code for successful response (default 200) */
