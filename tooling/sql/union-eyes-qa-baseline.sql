@@ -517,3 +517,49 @@ CREATE TABLE IF NOT EXISTS public.platform_services (
   status varchar(50) NOT NULL DEFAULT 'unknown',
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Billing/subscription tables required by dashboard billing data loader.
+-- Drift fix: canonical schema includes these; QA baseline was missing them,
+-- causing relation "org_subscriptions" does not exist on dashboard server-render.
+CREATE TABLE IF NOT EXISTS public.subscription_plans (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code varchar(50) NOT NULL,
+  name varchar(255) NOT NULL,
+  description text,
+  pricing_model varchar(20) NOT NULL DEFAULT 'flat',
+  base_fee numeric(12, 2) NOT NULL DEFAULT 0,
+  per_local_fee numeric(10, 2) DEFAULT 0,
+  per_seat_fee numeric(10, 2) DEFAULT 0,
+  per_module_fee numeric(10, 2) DEFAULT 0,
+  onboarding_fee numeric(10, 2) DEFAULT 0,
+  support_fee numeric(10, 2) DEFAULT 0,
+  currency varchar(3) NOT NULL DEFAULT 'CAD',
+  billing_interval varchar(20) NOT NULL DEFAULT 'monthly',
+  is_active boolean NOT NULL DEFAULT true,
+  effective_from timestamptz NOT NULL DEFAULT now(),
+  effective_to timestamptz,
+  metadata jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT subscription_plans_code_unique UNIQUE (code)
+);
+
+CREATE TABLE IF NOT EXISTS public.org_subscriptions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  billing_account_id uuid,
+  plan_id uuid NOT NULL,
+  organization_id uuid NOT NULL,
+  status varchar(20) NOT NULL DEFAULT 'active',
+  start_date timestamptz NOT NULL DEFAULT now(),
+  end_date timestamptz,
+  trial_end_date timestamptz,
+  local_count integer DEFAULT 0,
+  seat_count integer DEFAULT 0,
+  module_list jsonb DEFAULT '[]'::jsonb,
+  discount_percent numeric(5, 2) DEFAULT 0,
+  subsidy_amount numeric(12, 2) DEFAULT 0,
+  metadata jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  created_by varchar(255)
+);

@@ -540,9 +540,12 @@ jobs:
 
           # Hosts that are known to be deployed but whose managed-cert binding
           # is still in flight should be treated as soft warnings instead of
-          # hard-failing the deploy gate. Set UE_SOFT_SMOKE_HOSTS to a
-          # space-separated list of hostnames (e.g. "app.unioneyes.app").
-          SOFT_HOSTS="${{ vars.UE_SOFT_SMOKE_HOSTS }}"
+          # hard-failing the deploy gate. Defaults to app.unioneyes.app, which
+          # is gated on a managed cert that may lag behind the deploy. Override
+          # via UE_SOFT_SMOKE_HOSTS (space-separated) once the cert is bound to
+          # promote it back to a hard check, or set UE_SOFT_SMOKE_HOSTS="" to
+          # disable softening entirely.
+          SOFT_HOSTS="${{ vars.UE_SOFT_SMOKE_HOSTS != '' && vars.UE_SOFT_SMOKE_HOSTS || 'app.unioneyes.app' }}"
 
           host_is_soft() {
             local host="$1"
