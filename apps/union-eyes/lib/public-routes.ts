@@ -23,6 +23,8 @@ export const PUBLIC_API_ROUTES = new Set([
   // Justification: Infrastructure monitoring, no sensitive data
   // ========================================================================
   '/api/health',              // Basic health check for uptime monitoring
+  '/api/auth_core/health',    // Auth-core health alias (re-exports /api/health)
+  '/api/auth_core/health/',   // Trailing-slash variant used by E2E helpers
   '/api/health/liveness',      // Kubernetes liveness probe
   '/api/status',               // System status endpoint for ops dashboards
   '/api/docs/openapi.json',    // Public API documentation (describes public endpoints only)

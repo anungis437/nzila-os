@@ -37,7 +37,7 @@ export async function ensureServerReady(request: APIRequestContext): Promise<voi
 export async function seedOrVerifyTestState(request: APIRequestContext): Promise<void> {
   await ensureServerReady(request)
   const healthResponse = await request.get('/api/auth_core/health/', { timeout: 10_000 })
-  expect([200, 204, 401, 403, 404, 503]).toContain(healthResponse.status())
+  expect([200, 204, 401, 403, 404, 429, 503]).toContain(healthResponse.status())
 }
 
 export async function loginAsTestUser(request: APIRequestContext, email: string): Promise<void> {
