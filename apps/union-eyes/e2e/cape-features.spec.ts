@@ -128,13 +128,11 @@ test.describe("Grievance submission flow", () => {
     await page.goto("/en-CA/dashboard/work");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
-    // Should show some content — at minimum a heading or empty state
-    const hasContent = await page
-      .locator("h1, h2, [role='table'], [role='list']")
-      .first()
-      .isVisible({ timeout: 10_000 })
-      .catch(() => false);
-    expect(hasContent).toBe(true);
+    // Should show some content — at minimum a heading or empty state.
+    // Use toBeVisible() so Playwright polls until the element appears (isVisible() returns immediately and ignores the timeout option).
+    await expect(
+      page.locator("h1, h2, [role='table'], [role='list']").first()
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test("intake form validates required fields before submission", async ({
@@ -280,7 +278,16 @@ test.describe("Leadership dashboard", () => {
     await expect(page.getByRole('heading', { name: /Leadership Dashboard/i })).toBeVisible({ timeout: 10_000 });
 
     // Page can render KPI cards when data exists, or empty-state analytics panels when not seeded.
-    const hasKpi = await page.locator('main').getByText(/Active Grievances|Resolved This Month|Avg\. Time to Triage/i).first().isVisible({ timeout: 5_000 }).catch(() => false);
+    // Use toBeVisible() so Playwright polls until the text appears (isVisible() returns immediately).
+    let hasKpi = false;
+    try {
+      await expect(
+        page.locator('main').getByText(/Active Grievances|Resolved This Month|Avg\. Time to Triage/i).first()
+      ).toBeVisible({ timeout: 8_000 });
+      hasKpi = true;
+    } catch {
+      // KPI data not loaded or empty state — acceptable
+    }
     if (hasKpi) {
       const kpiLabels = [
         "Active Grievances",
@@ -295,7 +302,12 @@ test.describe("Leadership dashboard", () => {
         await expect(page.getByText(label)).toBeVisible({ timeout: 10_000 });
       }
     } else {
-      const mainText = ((await page.textContent('main')) ?? '').toLowerCase();
+      // page.textContent('main') throws TimeoutError if <main> is absent; use a safe fallback.
+      const mainText = (
+        (await page.locator('main').textContent({ timeout: 15_000 }).catch(
+          async () => page.locator('body').textContent().catch(() => '')
+        )) ?? ''
+      ).toLowerCase();
       expect(mainText).toMatch(/no employer grievance data|no steward capacity data|leadership dashboard/);
     }
   });
@@ -372,12 +384,10 @@ test.describe("Steward workbench", () => {
     await page.goto("/en-CA/dashboard");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
-    // Should show at minimum a heading or dashboard content
-    const hasContent = await page
-      .locator("h1, h2, h3, [role='main']")
-      .first()
-      .isVisible({ timeout: 10_000 })
-      .catch(() => false);
-    expect(hasContent).toBe(true);
+    // Should show at minimum a heading or dashboard content.
+    // Use toBeVisible() so Playwright polls until the element appears (isVisible() returns immediately and ignores the timeout option).
+    await expect(
+      page.locator("h1, h2, h3").first()
+    ).toBeVisible({ timeout: 15_000 });
   });
 });
