@@ -45,10 +45,10 @@ const SEARCH_PATTERNS = [
  * and this test file itself.
  */
 const ALLOWED_PATTERNS = [
-  // The audit doc that intentionally catalogs Clerk refs
-  'apps/union-eyes/docs/AUTH_REALITY_AUDIT.md',
-  // The Phase A validation doc that documents the remediation (mentions Clerk as context)
-  'apps/union-eyes/docs/PHASE_A_PRODUCTION_INFRA_VALIDATION.md',
+  // The audit doc that intentionally catalogs Clerk refs (moved to docs/security/)
+  'apps/union-eyes/docs/security/AUTH_REALITY_AUDIT.md',
+  // The Phase A validation doc that documents the remediation (moved to docs/operations/)
+  'apps/union-eyes/docs/operations/PHASE_A_PRODUCTION_INFRA_VALIDATION.md',
   // Legacy DB column names (not active Clerk SDK usage)
   'apps/union-eyes/db/schema/',
   'apps/union-eyes/db/migrations/',
@@ -74,8 +74,8 @@ const ALLOWED_PATTERNS = [
   'apps/union-eyes/app/[locale]/dashboard/correspondence/',
   // role-experience.ts: 'clerk' is the union role string value
   'apps/union-eyes/lib/dashboard/role-experience.ts',
-  // MODULE_PAGE_INVENTORY.md: `clerk` is the union officer role name (recording clerk), not auth vendor
-  'apps/union-eyes/docs/MODULE_PAGE_INVENTORY.md',
+  // MODULE_PAGE_INVENTORY.md: `clerk` is the union officer role name (recording clerk), not auth vendor (moved to docs/governance/)
+  'apps/union-eyes/docs/governance/MODULE_PAGE_INVENTORY.md',
 ]
 
 /**
