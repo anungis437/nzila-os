@@ -161,22 +161,36 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     }
 
     if (localMemberships.length === 0) {
-      const userName = user?.fullName ?? user?.firstName ?? userEmail.split('@')[0] ?? 'Member';
-      logger.info(`Auto-provisioning org membership for user ${userId} in default org`);
-      try {
-        await db.insert(organizationMembers).values({
-          userId,
-          organizationId: DEFAULT_ORGANIZATION_ID,
-          name: userName,
-          email: userEmail,
-          role: 'member',
-          status: 'active',
-          isPrimary: true,
-        });
-        logger.info(`Created org membership for ${userId} in ${DEFAULT_ORGANIZATION_ID}`);
-      } catch (insertErr) {
-        // Unique constraint race — another request may have created it
-        logger.warn('Org membership insert failed (may already exist)', insertErr);
+      // Auto-provisioning into the default org is only permitted in non-production
+      // environments or when PILOT_AUTO_PROVISIONING=true is explicitly set.
+      // In production without that flag, users without an organisation membership
+      // must be directed to the access-request flow.
+      const allowAutoProvisioning =
+        process.env.NODE_ENV !== 'production' ||
+        process.env.PILOT_AUTO_PROVISIONING === 'true';
+
+      if (allowAutoProvisioning) {
+        const userName = user?.fullName ?? user?.firstName ?? userEmail.split('@')[0] ?? 'Member';
+        logger.info(`Auto-provisioning org membership for user ${userId} in default org`);
+        try {
+          await db.insert(organizationMembers).values({
+            userId,
+            organizationId: DEFAULT_ORGANIZATION_ID,
+            name: userName,
+            email: userEmail,
+            role: 'member',
+            status: 'active',
+            isPrimary: true,
+          });
+          logger.info(`Created org membership for ${userId} in ${DEFAULT_ORGANIZATION_ID}`);
+        } catch (insertErr) {
+          // Unique constraint race — another request may have created it
+          logger.warn('Org membership insert failed (may already exist)', insertErr);
+        }
+      } else {
+        // Production: no membership → require explicit invitation or admin approval.
+        logger.warn(`[dashboard:layout] User ${userId} has no org membership — redirecting to /pilot-request`);
+        return redirect('/pilot-request');
       }
     }
   } catch (syncError) {

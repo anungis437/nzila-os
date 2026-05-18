@@ -1,28 +1,29 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-17T18:35:33.865Z
+> Generated: 2026-05-18T13:09:15.162Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Files Scanned | 1651 |
-| Total Findings | 2387 |
+| Total Findings | 2388 |
 | Errors | 0 |
-| Warnings | 1206 |
-| Info | 1181 |
+| Warnings | 1200 |
+| Info | 1188 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
 | naming-inconsistency | 1181 |
-| stale-reference | 1045 |
+| stale-reference | 1039 |
 | missing-package-readme | 105 |
 | stale-package-ref | 53 |
+| stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1045)
+## stale-reference (1039)
 
 - 🟡 `ARCHITECTURE.md:92` — Possible broken link: [docs/architecture/STACK_AUTHORITY.md](./docs/architecture/STACK_AUTHORITY.md)
 - 🟡 `ARCHITECTURE.md:99` — Possible broken link: [docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md](./docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md)
@@ -604,14 +605,11 @@
 - 🟡 `docs/categories/products-and-market/union-eyes/README.md:63` — Possible broken link: [Developer Index](../../apps/union-eyes/docs/INDEX.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/README.md:68` — Possible broken link: [Platform Architecture](../../ARCHITECTURE.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/README.md:69` — Possible broken link: [Security Policy](../../SECURITY.md)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:31` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:133` — Possible broken link: [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:143` — Possible broken link: [apps/union-eyes/lib/runtime/production-guard.ts](../../../apps/union-eyes/lib/runtime/production-guard.ts)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:144` — Possible broken link: [apps/union-eyes/lib/runtime/production-guard.mjs](../../../apps/union-eyes/lib/runtime/production-guard.mjs)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:145` — Possible broken link: [apps/union-eyes/lib/runtime/environment.ts](../../../apps/union-eyes/lib/runtime/environment.ts)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:152` — Possible broken link: [apps/union-eyes/infra/environments/union-eyes-env.bicep](../../../apps/union-eyes/infra/environments/union-eyes-env.bicep)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:153` — Possible broken link: [apps/union-eyes/infra/environments/provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:41` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:93` — Possible broken link: [feature-flags/route.ts](../../../apps/union-eyes/app/api/feature-flags/route.ts#L27)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:114` — Possible broken link: [seed-clc-demo-environment.ts](../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:163` — Possible broken link: [feature-flags/route.ts](../../../apps/union-eyes/app/api/feature-flags/route.ts#L27)
@@ -622,15 +620,12 @@
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:166` — Possible broken link: [role-experience-guard.tsx](../../../apps/union-eyes/components/dashboard/role-experience-guard.tsx#L37)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:168` — Possible broken link: [seed-clc-demo-environment.ts](../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:239` — Possible broken link: [role-experience.ts](../../../apps/union-eyes/lib/dashboard/role-experience.ts)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:254` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:292` — Possible broken link: [deployment-inventory.json](../../../governance/release/deployment-inventory.json#L21)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:307` — Possible broken link: [deployment-inventory.json](../../../governance/release/deployment-inventory.json)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:323` — Possible broken link: [README](../../../apps/union-eyes/db/migrations/README.md)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md:70` — Possible broken link: [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md:187` — Possible broken link: [seed-cupe-pilot.mjs](../../../apps/union-eyes/scripts/seed-cupe-pilot.mjs)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md:241` — Possible broken link: [provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:52` — Possible broken link: [`apps/union-eyes/lib/runtime/environment.ts`](../../../apps/union-eyes/lib/runtime/environment.ts)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:83` — Possible broken link: [`apps/union-eyes/.github/workflows/deploy-union-eyes.yml`](../../../.github/workflows/deploy-union-eyes.yml)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:91` — Possible broken link: [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../apps/union-eyes/lib/runtime/production-guard.ts)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/schema-parity-report.md:59` — Possible broken link: [`apps/union-eyes/db/migrations/README.md`](../../../apps/union-eyes/db/migrations/README.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/revenue-profile.md:96` — Possible broken link: [Procurement Pack](../governance/procurement-pack.md)
@@ -697,7 +692,7 @@
 - 🟡 `docs/categories/stakeholders/how-to/README.md:16` — Possible broken link: [Add OPA Policy](add-opa-policy.md)
 - 🟡 `docs/categories/stakeholders/how-to/README.md:24` — Possible broken link: [Configure SLOs](configure-slos.md)
 - 🟡 `docs/categories/stakeholders/how-to/README.md:28` — Possible broken link: [Run Chaos Tests](run-chaos-tests.md)
-- 🟡 `docs/categories/stakeholders/how-to/rotate-secrets.md:76` — Possible broken link: [Secret Compromise Runbook](../runbooks/secret-compromise.md)
+- 🟡 `docs/categories/stakeholders/how-to/rotate-secrets.md:77` — Possible broken link: [Secret Compromise Runbook](../runbooks/secret-compromise.md)
 - 🟡 `docs/categories/stakeholders/personas/01-buyer.md:15` — Possible broken link: [README.business.md](../../README.business.md)
 - 🟡 `docs/categories/stakeholders/personas/01-buyer.md:23` — Possible broken link: [procurement-pack.md](../governance/procurement-pack.md)
 - 🟡 `docs/categories/stakeholders/personas/01-buyer.md:24` — Possible broken link: [evidence-packs.md](../architecture/evidence-packs.md)
@@ -2309,6 +2304,16 @@
 - ℹ️ `governance/security/THREAT_MODEL.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/security/THREAT_MODEL.md:15` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/security/THREAT_MODEL.md:144` — "orgId" should be "org_id" (tenant identifier)
+
+## stale-date (7)
+
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 90 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 90 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 90 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 90 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 90 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 90 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 90 days old — may be stale
 
 ## missing-required-doc (3)
 

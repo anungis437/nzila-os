@@ -150,6 +150,13 @@ export default function StewardshipAppendixPage() {
           </div>
         </div>
 
+        <p className="text-sm text-gray-500 mb-10">
+          Platform tooling that surfaces structural stewardship data operates under
+          human oversight, with full explainability available to any party conducting
+          procurement review. No governance decision is automated; every output is
+          reviewable by counsel, auditors, or labour-elected oversight bodies.
+        </p>
+
         <div className="border-t border-gray-100 pt-10 flex flex-col sm:flex-row items-center gap-4">
           <Link href="../" className="text-sm text-electric font-semibold hover:underline">
             ← Back to Trust &amp; Stewardship

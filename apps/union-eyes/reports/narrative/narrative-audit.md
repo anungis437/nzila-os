@@ -1,14 +1,14 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-17T09:28:19.772Z
+Generated: 2026-05-18T13:09:06.458Z
 
 ## Summary
 
 - Files scanned: **97**
 - Hard-fail violations: **0**
-- Warning violations: **0**
+- Warning violations: **4**
 - Rule failures: **0**
-- Average Institutional Maturity: **88/100**
+- Average Institutional Maturity: **87/100**
 
 ## Per-Surface Detail
 
@@ -603,20 +603,30 @@ Generated: 2026-05-17T09:28:19.772Z
 ### marketing/governance
 
 - **Path:** `app/[locale]/(marketing)/governance/page.tsx`
-- **Institutional Maturity:** 88/100
+- **Institutional Maturity:** 76/100
 
 **Scores:**
-- narrative-balance: 52/100 (warn)
-- coexistence-positioning: 100/100 (pass)
+- narrative-balance: 69/100 (warn)
+- coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
-- canadian-positioning: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L5 [warning/warning] `ecosystem` — * to the CUSTOMER's institutional governance ecosystem: constitutional
+- L125 [warning/warning] `platform` — a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep platform neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find
 
 **Flags:**
-- (narrative-balance) Governance saturation detected: 53.9% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Governance saturation detected: 45.3% of pillar terms (target 30%, threshold 40%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
+- Remove or rephrase "ecosystem" (warning).
+- Replace "platform" → substrate | continuity layer | operating environment
 - Rebalance toward continuity, coordination, and trust language.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 
 ### marketing/insights/[slug]
 
@@ -989,20 +999,26 @@ Generated: 2026-05-17T09:28:19.772Z
 ### marketing/trust/stewardship-appendix
 
 - **Path:** `app/[locale]/(marketing)/trust/stewardship-appendix/page.tsx`
-- **Institutional Maturity:** 74/100
+- **Institutional Maturity:** 73/100
 
 **Scores:**
-- narrative-balance: 63/100 (pass)
+- narrative-balance: 59/100 (pass)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L83 [warning/warning] `ecosystem` — customer&rsquo;s institutional governance ecosystem &mdash; not to corporate
+- L154 [warning/warning] `platform` — Platform tooling that surfaces structural stewardship data operates under
 
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
+- Remove or rephrase "ecosystem" (warning).
+- Replace "platform" → substrate | continuity layer | operating environment
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 
@@ -1021,10 +1037,10 @@ Generated: 2026-05-17T09:28:19.772Z
 ### app/[locale]/page.tsx
 
 - **Path:** `app/[locale]/page.tsx`
-- **Institutional Maturity:** 71/100
+- **Institutional Maturity:** 79/100
 
 **Scores:**
-- narrative-balance: 42/100 (pass)
+- narrative-balance: 71/100 (pass)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1049,7 +1065,7 @@ Generated: 2026-05-17T09:28:19.772Z
 - canadian-positioning: 100/100 (pass)
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 14.6% (target 30%).
+- (narrative-balance) Continuity language under-represented: 14.7% (target 30%).
 
 **Recommendations:**
 - Add institutional-continuity framing.

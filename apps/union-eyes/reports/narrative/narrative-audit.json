@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T09:28:19.772Z",
+  "generatedAt": "2026-05-18T13:09:06.458Z",
   "files": [
     {
       "ctx": {
@@ -4286,48 +4286,82 @@
         "isPublicSurface": true,
         "label": "marketing/governance"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "ecosystem",
+            "severity": "warning",
+            "category": "warning",
+            "publicOnly": true
+          },
+          "line": 5,
+          "excerpt": "* to the CUSTOMER's institutional governance ecosystem: constitutional"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning",
+            "publicOnly": true,
+            "suggestion": "substrate | continuity layer | operating environment",
+            "exceptions": [
+              "unioneyes platform",
+              "platform module",
+              "platform overview",
+              "platform · ",
+              "canonical platform",
+              "the platform",
+              "our platform",
+              "platform services",
+              "platform billing",
+              "platform guarantees",
+              "platform designed",
+              "\"platform\": \"platform\""
+            ]
+          },
+          "line": 125,
+          "excerpt": "a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep platform neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 52,
+          "score": 69,
           "flags": [
             {
-              "message": "Governance saturation detected: 53.9% of pillar terms (target 30%, threshold 40%).",
+              "message": "Governance saturation detected: 45.3% of pillar terms (target 30%, threshold 40%).",
               "suggestion": "Rebalance toward continuity, coordination, and trust language."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 62,
-              "continuity": 24,
-              "coordination": 10,
-              "trust": 19
+              "governance": 24,
+              "continuity": 14,
+              "coordination": 6,
+              "trust": 9
             },
-            "total": 115,
+            "total": 53,
             "shares": {
-              "governance": 0.5391304347826087,
-              "continuity": 0.20869565217391303,
-              "coordination": 0.08695652173913043,
-              "trust": 0.16521739130434782
+              "governance": 0.4528301886792453,
+              "continuity": 0.2641509433962264,
+              "coordination": 0.11320754716981132,
+              "trust": 0.16981132075471697
             }
           }
         },
         {
           "rule": "coexistence-positioning",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
           "detail": {
-            "matched": [
-              "overlay infrastructure",
-              "continuity layer",
-              "coexistence",
-              "non-disruptive implementation",
-              "alongside existing systems",
-              "augments existing"
-            ]
+            "matched": []
           }
         },
         {
@@ -4346,29 +4380,27 @@
             "matchedRequired": [
               "human oversight",
               "explainability",
-              "reviewability",
               "assistive intelligence"
             ]
           }
         },
         {
           "rule": "canadian-positioning",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
           "detail": {
-            "matched": [
-              "Canadian-hosted",
-              "bilingual-first"
-            ],
-            "generalCanadianHits": [
-              "canadian",
-              "bilingual"
-            ]
+            "matched": [],
+            "generalCanadianHits": []
           }
         }
       ],
-      "maturity": 88
+      "maturity": 76
     },
     {
       "ctx": {
@@ -6876,26 +6908,62 @@
         "isPublicSurface": true,
         "label": "marketing/trust/stewardship-appendix"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "ecosystem",
+            "severity": "warning",
+            "category": "warning",
+            "publicOnly": true
+          },
+          "line": 83,
+          "excerpt": "customer&rsquo;s institutional governance ecosystem &mdash; not to corporate"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning",
+            "publicOnly": true,
+            "suggestion": "substrate | continuity layer | operating environment",
+            "exceptions": [
+              "unioneyes platform",
+              "platform module",
+              "platform overview",
+              "platform · ",
+              "canonical platform",
+              "the platform",
+              "our platform",
+              "platform services",
+              "platform billing",
+              "platform guarantees",
+              "platform designed",
+              "\"platform\": \"platform\""
+            ]
+          },
+          "line": 154,
+          "excerpt": "Platform tooling that surfaces structural stewardship data operates under"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 63,
+          "score": 59,
           "flags": [],
           "detail": {
             "counts": {
               "governance": 8,
-              "continuity": 14,
+              "continuity": 15,
               "coordination": 2,
-              "trust": 8
+              "trust": 9
             },
-            "total": 32,
+            "total": 34,
             "shares": {
-              "governance": 0.25,
-              "continuity": 0.4375,
-              "coordination": 0.0625,
-              "trust": 0.25
+              "governance": 0.23529411764705882,
+              "continuity": 0.4411764705882353,
+              "coordination": 0.058823529411764705,
+              "trust": 0.2647058823529412
             }
           }
         },
@@ -6928,9 +6996,7 @@
             "mentionsAi": true,
             "matchedRequired": [
               "human oversight",
-              "explainability",
-              "reviewability",
-              "assistive intelligence"
+              "explainability"
             ]
           }
         },
@@ -6950,7 +7016,7 @@
           }
         }
       ],
-      "maturity": 74
+      "maturity": 73
     },
     {
       "ctx": {
@@ -7052,21 +7118,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 42,
+          "score": 71,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
-              "coordination": 0,
-              "trust": 1
+              "governance": 13,
+              "continuity": 17,
+              "coordination": 4,
+              "trust": 14
             },
-            "total": 9,
+            "total": 48,
             "shares": {
-              "governance": 0.3333333333333333,
-              "continuity": 0.5555555555555556,
-              "coordination": 0,
-              "trust": 0.1111111111111111
+              "governance": 0.2708333333333333,
+              "continuity": 0.3541666666666667,
+              "coordination": 0.08333333333333333,
+              "trust": 0.2916666666666667
             }
           }
         },
@@ -7109,7 +7175,7 @@
           }
         }
       ],
-      "maturity": 71
+      "maturity": 79
     },
     {
       "ctx": {
@@ -7126,23 +7192,23 @@
           "score": 69,
           "flags": [
             {
-              "message": "Continuity language under-represented: 14.6% (target 30%).",
+              "message": "Continuity language under-represented: 14.7% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 278,
-              "continuity": 119,
-              "coordination": 169,
+              "governance": 279,
+              "continuity": 120,
+              "coordination": 170,
               "trust": 250
             },
-            "total": 816,
+            "total": 819,
             "shares": {
-              "governance": 0.34068627450980393,
-              "continuity": 0.14583333333333334,
-              "coordination": 0.20710784313725492,
-              "trust": 0.30637254901960786
+              "governance": 0.34065934065934067,
+              "continuity": 0.14652014652014653,
+              "coordination": 0.20757020757020758,
+              "trust": 0.3052503052503053
             }
           }
         },
@@ -7237,15 +7303,15 @@
             "counts": {
               "governance": 273,
               "continuity": 97,
-              "coordination": 166,
+              "coordination": 167,
               "trust": 242
             },
-            "total": 778,
+            "total": 779,
             "shares": {
-              "governance": 0.3508997429305913,
-              "continuity": 0.12467866323907455,
-              "coordination": 0.2133676092544987,
-              "trust": 0.3110539845758355
+              "governance": 0.3504492939666239,
+              "continuity": 0.1245186136071887,
+              "coordination": 0.21437740693196405,
+              "trust": 0.31065468549422337
             }
           }
         },
@@ -7807,8 +7873,8 @@
     "totalFiles": 97,
     "publicFiles": 86,
     "hardFails": 0,
-    "warnings": 0,
+    "warnings": 4,
     "ruleFailures": 0,
-    "averageMaturity": 88
+    "averageMaturity": 87
   }
 }

@@ -1,18 +1,19 @@
 {
-  "generatedAt": "2026-05-17T18:35:33.865Z",
+  "generatedAt": "2026-05-18T13:09:15.162Z",
   "filesScanned": 1651,
-  "totalFindings": 2387,
+  "totalFindings": 2388,
   "findingsByRule": {
-    "stale-reference": 1045,
+    "stale-reference": 1039,
     "stale-package-ref": 53,
     "naming-inconsistency": 1181,
+    "stale-date": 7,
     "missing-required-doc": 3,
     "missing-package-readme": 105
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1206,
-    "info": 1181
+    "warning": 1200,
+    "info": 1188
   },
   "findings": [
     {
@@ -4450,20 +4451,6 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md",
-      "line": 31,
-      "message": "Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md",
-      "line": 133,
-      "message": "Possible broken link: [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md",
       "line": 143,
       "message": "Possible broken link: [apps/union-eyes/lib/runtime/production-guard.ts](../../../apps/union-eyes/lib/runtime/production-guard.ts)"
     },
@@ -4494,13 +4481,6 @@
       "file": "docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md",
       "line": 153,
       "message": "Possible broken link: [apps/union-eyes/infra/environments/provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md",
-      "line": 41,
-      "message": "Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74)"
     },
     {
       "rule": "stale-reference",
@@ -4576,13 +4556,6 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md",
-      "line": 254,
-      "message": "Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md",
       "line": 292,
       "message": "Possible broken link: [deployment-inventory.json](../../../governance/release/deployment-inventory.json#L21)"
     },
@@ -4604,13 +4577,6 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md",
-      "line": 70,
-      "message": "Possible broken link: [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md",
       "line": 187,
       "message": "Possible broken link: [seed-cupe-pilot.mjs](../../../apps/union-eyes/scripts/seed-cupe-pilot.mjs)"
     },
@@ -4627,13 +4593,6 @@
       "file": "docs/categories/products-and-market/union-eyes/release/release-governance-standard.md",
       "line": 52,
       "message": "Possible broken link: [`apps/union-eyes/lib/runtime/environment.ts`](../../../apps/union-eyes/lib/runtime/environment.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/products-and-market/union-eyes/release/release-governance-standard.md",
-      "line": 83,
-      "message": "Possible broken link: [`apps/union-eyes/.github/workflows/deploy-union-eyes.yml`](../../../.github/workflows/deploy-union-eyes.yml)"
     },
     {
       "rule": "stale-reference",
@@ -5101,7 +5060,7 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/categories/stakeholders/how-to/rotate-secrets.md",
-      "line": 76,
+      "line": 77,
       "message": "Possible broken link: [Secret Compromise Runbook](../runbooks/secret-compromise.md)"
     },
     {
@@ -15967,6 +15926,55 @@
       "file": "governance/security/THREAT_MODEL.md",
       "line": 144,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
+      "line": 662,
+      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
+      "line": 625,
+      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
+      "line": 403,
+      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "governance/ai/README.md",
+      "line": 318,
+      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "governance/business/investor-materials/README.md",
+      "line": 4,
+      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "governance/business/README.md",
+      "line": 4,
+      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
+      "line": 515,
+      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",

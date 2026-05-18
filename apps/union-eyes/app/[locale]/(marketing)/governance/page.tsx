@@ -133,6 +133,13 @@ export default function GovernancePage() {
           </div>
         </div>
 
+        <p className="text-sm text-gray-500 mb-10">
+          Where assistive intelligence surfaces governance patterns or drafts procedural
+          summaries, it operates under human oversight and explainability constraints.
+          Every automated suggestion is reviewable and requires explicit officer action before
+          it affects any record of proceedings.
+        </p>
+
         <div className="border-t border-gray-100 pt-10 flex flex-col sm:flex-row items-center gap-4">
           <Link
             href="../institutional-continuity"

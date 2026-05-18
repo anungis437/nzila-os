@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-05-17T20:56:24.904Z",
+  "timestamp": "2026-05-18T12:29:51.600Z",
   "status": "violation",
   "allowed_regions": [
     "canadacentral",
     "canadaeast"
   ],
   "resource_group_scope": null,
-  "total_resources_seen": 81,
+  "total_resources_seen": 82,
   "violations_count": 18,
   "violations": [
     {

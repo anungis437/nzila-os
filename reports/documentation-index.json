@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T15:50:17.032Z",
+  "generatedAt": "2026-05-18T11:00:07.008Z",
   "totalDocuments": 1002,
   "staleDocuments": 0,
   "categories": [
@@ -5392,7 +5392,7 @@
     {
       "path": "docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md",
       "category": "categories",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-17",
       "stale": false
     },
     {
@@ -5524,7 +5524,7 @@
     {
       "path": "docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md",
       "category": "categories",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-17",
       "stale": false
     },
     {
@@ -5536,7 +5536,7 @@
     {
       "path": "docs/categories/stakeholders/how-to/rotate-secrets.md",
       "category": "categories",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-17",
       "stale": false
     },
     {
@@ -5968,7 +5968,7 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-05-17",
+      "lastValidated": "2026-05-18",
       "stale": false
     },
     {

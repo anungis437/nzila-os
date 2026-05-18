@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-17T20:56:28.521Z",
+  "timestamp": "2026-05-18T12:29:48.638Z",
   "total": 5,
   "passed": 5,
   "failed": 0,
@@ -22,7 +22,7 @@
     {
       "name": "regulatory watchlist is current",
       "status": "pass",
-      "detail": "watchlist has 5 entries; reviewed 31 days ago"
+      "detail": "watchlist has 5 entries; reviewed 32 days ago"
     },
     {
       "name": "succession and cross-training policy is measurable",

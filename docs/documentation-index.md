@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-05-17T15:50:17.032Z
+Generated: 2026-05-18T11:00:07.008Z
 
 Total documents indexed: 1002
 Stale documents (>90 days since repo validation): 0
@@ -915,7 +915,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/commercial/vendor-risk-pack/subprocessor-list.md](docs/categories/stakeholders/commercial/vendor-risk-pack/subprocessor-list.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/vendor-risk-pack/support-sla.md](docs/categories/stakeholders/commercial/vendor-risk-pack/support-sla.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/commercial/why-union-eyes.md](docs/categories/stakeholders/commercial/why-union-eyes.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md) | categories | 2026-05-11 | current |
+| [docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md) | categories | 2026-05-17 | current |
 | [docs/categories/stakeholders/gtm/BUYER_OBJECTION_BATTLECARDS.md](docs/categories/stakeholders/gtm/BUYER_OBJECTION_BATTLECARDS.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/gtm/CASE_STUDY_FACTORY.md](docs/categories/stakeholders/gtm/CASE_STUDY_FACTORY.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/gtm/case-study-capture.md](docs/categories/stakeholders/gtm/case-study-capture.md) | categories | 2026-05-11 | current |
@@ -937,9 +937,9 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/gtm/ue-pricing-model.md](docs/categories/stakeholders/gtm/ue-pricing-model.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/gtm/ue-prospect-list.md](docs/categories/stakeholders/gtm/ue-prospect-list.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/how-to/create-model-card.md](docs/categories/stakeholders/how-to/create-model-card.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) | categories | 2026-05-11 | current |
+| [docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) | categories | 2026-05-17 | current |
 | [docs/categories/stakeholders/how-to/README.md](docs/categories/stakeholders/how-to/README.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/how-to/rotate-secrets.md](docs/categories/stakeholders/how-to/rotate-secrets.md) | categories | 2026-05-11 | current |
+| [docs/categories/stakeholders/how-to/rotate-secrets.md](docs/categories/stakeholders/how-to/rotate-secrets.md) | categories | 2026-05-17 | current |
 | [docs/categories/stakeholders/investor/defensible-moat-analysis.md](docs/categories/stakeholders/investor/defensible-moat-analysis.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/investor/final-investor-onepager.md](docs/categories/stakeholders/investor/final-investor-onepager.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/investor/product-expansion-strategy.md](docs/categories/stakeholders/investor/product-expansion-strategy.md) | categories | 2026-05-11 | current |
@@ -1011,7 +1011,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-17 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-18 | current |
 | [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-17 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
 | [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-14 | current |
