@@ -95,7 +95,7 @@ jobs:
           node tooling/security/npm-bulk-audit.mjs --audit-level=critical
 
       - name: TruffleHog secret scan
-        uses: trufflesecurity/trufflehog@v3.94.2 # pin to release tag, not mutable @main
+        uses: trufflesecurity/trufflehog@v3.95.3 # pin to release tag, not mutable @main
         with:
           path: ./
           base: HEAD~10
