@@ -1,15 +1,15 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-18T13:09:15.162Z
+> Generated: 2026-05-18T15:11:45.686Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Files Scanned | 1651 |
-| Total Findings | 2388 |
+| Total Findings | 2387 |
 | Errors | 0 |
-| Warnings | 1200 |
+| Warnings | 1199 |
 | Info | 1188 |
 
 ## Findings by Rule
@@ -17,13 +17,13 @@
 | Rule | Count |
 |------|-------|
 | naming-inconsistency | 1181 |
-| stale-reference | 1039 |
+| stale-reference | 1038 |
 | missing-package-readme | 105 |
 | stale-package-ref | 53 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1039)
+## stale-reference (1038)
 
 - 🟡 `ARCHITECTURE.md:92` — Possible broken link: [docs/architecture/STACK_AUTHORITY.md](./docs/architecture/STACK_AUTHORITY.md)
 - 🟡 `ARCHITECTURE.md:99` — Possible broken link: [docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md](./docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md)
@@ -124,7 +124,6 @@
 - 🟡 `docs/categories/historical-archive/archive/iterations/nzila-live-audit/monetization-doctrine-alignment-audit.md:6` — Possible broken link: [apps/union-eyes/app/api/billing/](../../apps/union-eyes/app/api/billing/)
 - 🟡 `docs/categories/historical-archive/archive/iterations/nzila-live-audit/README.md:84` — Possible broken link: [tooling/scripts/validate-live-operational-readiness.mjs](../../tooling/scripts/validate-live-operational-readiness.mjs)
 - 🟡 `docs/categories/historical-archive/archive/iterations/nzila-live-audit/test-persona-credentials-audit.md:4` — Possible broken link: [apps/union-eyes/tests/fixtures/test-users.ts](../../apps/union-eyes/tests/fixtures/test-users.ts)
-- 🟡 `docs/categories/historical-archive/archive/iterations/nzila-live-audit/ue-whole-system-review.md:5` — Possible broken link: [apps/union-eyes/](../../apps/union-eyes/)
 - 🟡 `docs/categories/historical-archive/archive/iterations/nzila-operational-convergence/canonical-information-architecture.md:47` — Possible broken link: [`@nzila/operational-convergence`](../../packages/operational-convergence)
 - 🟡 `docs/categories/historical-archive/archive/iterations/nzila-operational-convergence/cross-app-operational-cadence.md:29` — Possible broken link: [`@nzila/operational-convergence`](../../packages/operational-convergence)
 - 🟡 `docs/categories/historical-archive/archive/iterations/nzila-operational-convergence/cross-app-review-workflow-fabric.md:24` — Possible broken link: [`@nzila/governance-review`](../../packages/governance-review)

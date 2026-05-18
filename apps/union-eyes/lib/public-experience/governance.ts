@@ -5,10 +5,17 @@
  * is allowed to transition to a new status under the current actor's
  * governance level. These are enforced at the API layer before any
  * publish or promote operation.
+ *
+ * Governance contracts from `lib/governance-policy` are bound here so that
+ * public-surface governance evaluation flows through the centralized policy
+ * evaluation engine and is captured in the governance decision ledger.
  */
 
 import type { ExperienceSurface } from './registry';
 import type { GovernanceLevel, PublicContentStatus, ExperienceVisibility } from './types';
+import { resolveContract } from '../governance-policy/registry';
+import { evaluatePolicy } from '../governance-policy/evaluation';
+import type { PolicyEvaluationContext, PolicyEvaluationResult } from '../governance-policy/evaluation';
 
 export interface GovernanceActor {
   userId: string;
@@ -96,4 +103,48 @@ export function evaluateStatusTransition(
   }
 
   return { allowed: true };
+}
+
+// ── Governance contract binding ───────────────────────────────────────────────
+
+/**
+ * Resolve and evaluate the governance policy contract for a public-experience
+ * surface. Returns the policy evaluation result for ledger capture.
+ *
+ * - Non-federation surfaces use `CONTRACT_PUBLIC_SURFACE` (`public-experience.surface`).
+ * - Federation surfaces use `CONTRACT_FEDERATION_SURFACE` (`public-experience.federation`).
+ *
+ * If the registry has not been bootstrapped yet (e.g. in test isolation),
+ * this function returns `null` gracefully — never throws.
+ */
+export function evaluateSurfaceContract(
+  surface: ExperienceSurface,
+  actor: GovernanceActor,
+  opts: {
+    isFederation?: boolean;
+    executiveApproved?: boolean;
+    federationApproved?: boolean;
+  } = {},
+): PolicyEvaluationResult | null {
+  const contractId = opts.isFederation
+    ? 'public-experience.federation'
+    : 'public-experience.surface';
+
+  const contract = resolveContract(contractId);
+  if (!contract) return null;
+
+  const context: PolicyEvaluationContext = {
+    operationId: `public-experience.${surface.id}`,
+    actor: {
+      userId: actor.userId,
+      role: actor.role,
+      orgId: '',
+    },
+    isPublic: surface.visibility === 'public',
+    isFederation: opts.isFederation ?? false,
+    executiveApproved: opts.executiveApproved ?? actor.clearance === 'executive-approved',
+    federationApproved: opts.federationApproved ?? false,
+  };
+
+  return evaluatePolicy(contract, context);
 }

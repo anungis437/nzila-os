@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-18T13:09:15.162Z",
+  "generatedAt": "2026-05-18T15:11:45.686Z",
   "filesScanned": 1651,
-  "totalFindings": 2388,
+  "totalFindings": 2387,
   "findingsByRule": {
-    "stale-reference": 1039,
+    "stale-reference": 1038,
     "stale-package-ref": 53,
     "naming-inconsistency": 1181,
     "stale-date": 7,
@@ -12,7 +12,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1200,
+    "warning": 1199,
     "info": 1188
   },
   "findings": [
@@ -715,13 +715,6 @@
       "file": "docs/categories/historical-archive/archive/iterations/nzila-live-audit/test-persona-credentials-audit.md",
       "line": 4,
       "message": "Possible broken link: [apps/union-eyes/tests/fixtures/test-users.ts](../../apps/union-eyes/tests/fixtures/test-users.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/historical-archive/archive/iterations/nzila-live-audit/ue-whole-system-review.md",
-      "line": 5,
-      "message": "Possible broken link: [apps/union-eyes/](../../apps/union-eyes/)"
     },
     {
       "rule": "stale-reference",

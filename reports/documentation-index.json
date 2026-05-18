@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T11:00:07.008Z",
+  "generatedAt": "2026-05-18T15:11:48.621Z",
   "totalDocuments": 1002,
   "staleDocuments": 0,
   "categories": [
@@ -5662,7 +5662,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-05-17",
+      "lastValidated": "2026-05-18",
       "stale": false
     },
     {
@@ -5974,7 +5974,7 @@
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-05-17",
+      "lastValidated": "2026-05-18",
       "stale": false
     },
     {

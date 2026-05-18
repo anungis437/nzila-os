@@ -1,0 +1,8 @@
+{
+  "sealVersion": "1.0",
+  "algorithm": "sha256",
+  "packDigest": "8c90e5eac4f2ddef1d7f9199413d2914bb20aaf3a5298566885722d9c769f836",
+  "artifactsMerkleRoot": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifactCount": 0,
+  "sealedAt": "2026-05-18T15:03:04.659Z"
+}
