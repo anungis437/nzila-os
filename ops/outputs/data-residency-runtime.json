@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-05-17T17:07:26.275Z",
+  "timestamp": "2026-05-17T20:56:24.904Z",
   "status": "violation",
   "allowed_regions": [
     "canadacentral",
     "canadaeast"
   ],
   "resource_group_scope": null,
-  "total_resources_seen": 73,
-  "violations_count": 14,
+  "total_resources_seen": 81,
+  "violations_count": 18,
   "violations": [
     {
       "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2",
@@ -106,6 +106,34 @@
       "type": "Microsoft.Insights/metricalerts",
       "location": "global",
       "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Insights/actiongroups/ue-prod-ops-alerts",
+      "name": "ue-prod-ops-alerts",
+      "type": "Microsoft.Insights/actiongroups",
+      "location": "global",
+      "resourceGroup": "nzila-canada-prod-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Cdn/profiles/nzila-ue-afd-prod",
+      "name": "nzila-ue-afd-prod",
+      "type": "Microsoft.Cdn/profiles",
+      "location": "global",
+      "resourceGroup": "nzila-canada-prod-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Cdn/profiles/nzila-ue-afd-prod/afdendpoints/ue-prod",
+      "name": "nzila-ue-afd-prod/ue-prod",
+      "type": "Microsoft.Cdn/profiles/afdendpoints",
+      "location": "global",
+      "resourceGroup": "nzila-canada-prod-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Network/frontdoorWebApplicationFirewallPolicies/nzilauewafdprod",
+      "name": "nzilauewafdprod",
+      "type": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies",
+      "location": "global",
+      "resourceGroup": "nzila-canada-prod-rg"
     }
   ],
   "error": null
