@@ -63,6 +63,11 @@ import {
 import {
   requireEntitlement,
 } from '@/services/platform-economics/entitlement-guard';
+import {
+  evaluateRoutePolicy,
+  executePostHandlerPolicies,
+  type PolicyDirectives,
+} from './route-policy';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -136,11 +141,10 @@ export interface WithApiOptions<
 
   /**
    * Governance registry metadata. Optional — new routes should populate this.
-   * Consumed by `scripts/generate-route-registry.ts` to produce the governed
-   * route inventory in `reports/route-registry.json`.
-   *
-   * Providing this field has no runtime effect; it is a compile-time annotation
-   * that enables static governance tooling and CI-enforced route inventories.
+   * Consumed by `scripts/generate-route-registry.ts` for the governed route
+   * inventory in `reports/route-registry.json`, and by `withApi()` at runtime
+   * to derive enforcement policies (audit emission, admin-only enforcement,
+   * route-status headers).
    *
    * @example
    * ```ts
@@ -148,7 +152,7 @@ export interface WithApiOptions<
    *   audience: 'officer',
    *   pilotEligible: true,
    *   productionStatus: 'active',
-   *   evidenceRequired: false,
+   *   evidenceRequired: true,   // triggers automatic audit log on success
    *   orgScoping: 'caller-org',
    * }
    * ```
@@ -156,12 +160,13 @@ export interface WithApiOptions<
   registry?: {
     /**
      * Primary audience for this route.
-     * Drives governance classification and pilot visibility decisions.
+     * Drives governance classification, audit severity, and pilot visibility.
      */
     audience?:
       | 'member'
       | 'steward'
       | 'officer'
+      | 'governance'
       | 'admin'
       | 'platform'
       | 'public'
@@ -275,6 +280,10 @@ export function withApi<
     ? (ROLE_HIERARCHY[options.auth.minRole] ?? 0)
     : null;
   const allowedRoles = options.auth?.roles ?? null;
+
+  // Evaluate runtime policy directives from registry metadata once at route
+  // registration time — zero per-request overhead (no I/O, no dynamic lookup).
+  const policy: PolicyDirectives = evaluateRoutePolicy(options.registry);
 
   // Return the actual Next.js handler
   return async (
@@ -408,6 +417,37 @@ export function withApi<
         }
       }
 
+      // ── 4d. Policy: platform-admin-only enforcement ───────────────────
+      // Routes annotated with registry.orgScoping = 'platform-admin-only'
+      // are enforced here even if minRole was not explicitly declared.
+      // Belt-and-suspenders: prevents accidental open access on admin routes.
+      if (policy.enforceAdminOnly && user) {
+        const adminLevel = ROLE_HIERARCHY['admin'] ?? 140;
+        const metaRole = normalizeRole(user.role ?? 'member');
+        let adminUserLevel = ROLE_HIERARCHY[metaRole] ?? 0;
+
+        if (adminUserLevel < adminLevel) {
+          try {
+            const { getUserRole } = await import('@/lib/auth/rbac-server');
+            const { getOrganizationIdForUser } = await import('@/lib/organization-utils');
+            const resolvedOrgId = await getOrganizationIdForUser(user.id);
+            const dbRole = await getUserRole(user.id, resolvedOrgId ?? user.organizationId ?? undefined);
+            adminUserLevel = ROLE_HIERARCHY[normalizeRole(dbRole ?? 'member')] ?? 0;
+          } catch {
+            // DB lookup failed — keep metadata level
+          }
+        }
+
+        if (adminUserLevel < adminLevel) {
+          return standardErrorResponse(
+            ErrorCode.INSUFFICIENT_PERMISSIONS,
+            'Platform administrator access required',
+            undefined,
+            traceId,
+          );
+        }
+      }
+
       // ── 5. Rate limiting ───────────────────────────────────────────────
       if (options.rateLimit && user) {
         const rlResult = await checkRateLimit(user.id, options.rateLimit);
@@ -532,6 +572,19 @@ export function withApi<
 
       const result = await handler(ctx);
 
+      // ── 8b. Post-handler policies (fire-and-forget) ────────────────────
+      // Auto-audit emission for routes with evidenceRequired: true.
+      // Never awaited in the hot path — must not delay or alter the response.
+      if (policy.autoAudit && user) {
+        void executePostHandlerPolicies(policy, {
+          userId: user.id,
+          organizationId: resolvedOrganizationId,
+          routePath: request.nextUrl.pathname,
+          method: request.method,
+          traceId,
+        });
+      }
+
       // ── 9. Build response ──────────────────────────────────────────────
 
       // Escape-hatch: handler already returned a NextResponse
@@ -540,26 +593,43 @@ export function withApi<
         if (!result.headers.has('Cache-Control')) {
           result.headers.set('Cache-Control', 'private, no-store');
         }
+        if (policy.routeStatusHeader) {
+          result.headers.set('X-Route-Status', policy.routeStatusHeader);
+        }
         return result;
       }
 
       // void / null → 204
       if (result === undefined || result === null) {
+        const noContentHeaders: Record<string, string> = {
+          'X-Trace-ID': traceId,
+          'Cache-Control': 'private, no-store',
+        };
+        if (policy.routeStatusHeader) {
+          noContentHeaders['X-Route-Status'] = policy.routeStatusHeader;
+        }
         return new NextResponse(null, {
           status: 204,
-          headers: { 'X-Trace-ID': traceId, 'Cache-Control': 'private, no-store' },
+          headers: noContentHeaders,
         });
       }
 
       // Wrapped success envelope
       const status = options.successStatus ?? 200;
+      const successHeaders: Record<string, string> = {
+        'X-Trace-ID': traceId,
+        'Cache-Control': 'private, no-store',
+      };
+      if (policy.routeStatusHeader) {
+        successHeaders['X-Route-Status'] = policy.routeStatusHeader;
+      }
       const response = NextResponse.json(
         {
           success: true as const,
           data: result,
           timestamp: new Date().toISOString(),
         },
-        { status, headers: { 'X-Trace-ID': traceId, 'Cache-Control': 'private, no-store' } },
+        { status, headers: successHeaders },
       );
       return response;
 

@@ -163,6 +163,26 @@ function extractProductionStatus(content: string): string | null {
   return match ? match[1] : null;
 }
 
+/** Extract evidenceRequired from registry field. */
+function extractEvidenceRequired(content: string): boolean | null {
+  const inRegistry = content.match(/registry\s*:\s*\{[^}]*evidenceRequired\s*:\s*(true|false)/);
+  if (inRegistry) return inRegistry[1] === 'true';
+  return null;
+}
+
+/** Extract orgScoping from registry field. */
+function extractOrgScoping(content: string): string | null {
+  const match = content.match(/orgScoping:\s*['"]([^'"]+)['"]/);
+  return match ? match[1] : null;
+}
+
+/** Extract pilotEligible from registry field. */
+function extractPilotEligible(content: string): boolean | null {
+  const inRegistry = content.match(/registry\s*:\s*\{[^}]*pilotEligible\s*:\s*(true|false)/);
+  if (inRegistry) return inRegistry[1] === 'true';
+  return null;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────
 
 interface RegistryEntry {
@@ -181,6 +201,9 @@ interface RegistryEntry {
   registry: {
     audience: string | null;
     productionStatus: string | null;
+    evidenceRequired: boolean | null;
+    orgScoping: string | null;
+    pilotEligible: boolean | null;
   };
 }
 
@@ -215,6 +238,9 @@ function main(): void {
       registry: {
         audience: extractAudience(content),
         productionStatus: extractProductionStatus(content),
+        evidenceRequired: extractEvidenceRequired(content),
+        orgScoping: extractOrgScoping(content),
+        pilotEligible: extractPilotEligible(content),
       },
     });
   }
@@ -227,6 +253,9 @@ function main(): void {
   const publicCount = entries.filter((e) => e.governance === "public").length;
   const cronCount = entries.filter((e) => e.governance === "cron").length;
   const ungoverned = entries.filter((e) => e.governance === "ungoverned").length;
+  const audienceAnnotated = entries.filter((e) => e.registry.audience !== null).length;
+  const evidenceAnnotated = entries.filter((e) => e.registry.evidenceRequired !== null).length;
+  const pilotAnnotated = entries.filter((e) => e.registry.pilotEligible !== null).length;
 
   const report = {
     generatedAt: new Date().toISOString(),
@@ -241,6 +270,13 @@ function main(): void {
       public: publicCount,
       cron: cronCount,
       ungoverned,
+      coverage: {
+        audienceAnnotated,
+        evidenceAnnotated,
+        pilotAnnotated,
+        audiencePct: entries.length > 0 ? Math.round((audienceAnnotated / entries.length) * 100) : 0,
+        evidencePct: entries.length > 0 ? Math.round((evidenceAnnotated / entries.length) * 100) : 0,
+      },
     },
     routes: entries,
   };
@@ -258,6 +294,10 @@ function main(): void {
   if (ungoverned > 0) {
     console.log(`  ✗ UNGOVERNED: ${ungoverned}`);
   }
+  console.log(`  Registry coverage:`);
+  console.log(`    audience:         ${audienceAnnotated}/${entries.length} (${Math.round((audienceAnnotated / entries.length) * 100)}%)`);
+  console.log(`    evidenceRequired: ${evidenceAnnotated}/${entries.length} (${Math.round((evidenceAnnotated / entries.length) * 100)}%)`);
+  console.log(`    pilotEligible:    ${pilotAnnotated}/${entries.length} (${Math.round((pilotAnnotated / entries.length) * 100)}%)`);
   console.log(`──────────────────────────────────────────────────────────────\n`);
 }
 

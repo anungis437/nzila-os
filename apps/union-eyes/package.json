@@ -37,7 +37,8 @@
     "staging:seed": "tsx scripts/staging-seed.ts",
     "perf:baseline": "tsx scripts/perf-baseline.ts",
     "validate:api-governance": "tsx scripts/validate-api-governance.ts",
-    "registry:generate": "tsx scripts/generate-route-registry.ts"
+    "registry:generate": "tsx scripts/generate-route-registry.ts",
+    "validate:route-policies": "tsx scripts/validate-route-policies.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.985.0",
