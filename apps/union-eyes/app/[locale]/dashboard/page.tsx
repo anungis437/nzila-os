@@ -2,7 +2,8 @@ import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
 import { getUserRole } from '@/lib/auth/rbac-server';
 import { getRoleLandingPath } from '@/lib/dashboard/role-experience';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from '@/lib/organization-utils';
+import { UserRole } from '@/lib/auth/roles';
 import { logger } from '@/lib/logger';
 
 type DashboardRootPageProps = {
@@ -23,29 +24,27 @@ export default async function DashboardRootPage({ params }: DashboardRootPagePro
     redirect('/login');
   }
 
-  let organizationId: string;
+  let organizationId: string = DEFAULT_ORGANIZATION_ID;
   try {
     organizationId = await getOrganizationIdForUser(userId);
   } catch (error) {
-    logger.error('[dashboard:root] getOrganizationIdForUser threw', {
+    logger.warn('[dashboard:root] getOrganizationIdForUser threw — falling back to default org', {
       stage: 'organization',
       userId,
       error: error instanceof Error ? error.message : String(error),
     });
-    throw error;
   }
 
-  let userRole: Awaited<ReturnType<typeof getUserRole>>;
+  let userRole: UserRole = UserRole.MEMBER;
   try {
     userRole = await getUserRole(userId, organizationId);
   } catch (error) {
-    logger.error('[dashboard:root] getUserRole threw', {
+    logger.warn('[dashboard:root] getUserRole threw — falling back to member role', {
       stage: 'role',
       userId,
       organizationId,
       error: error instanceof Error ? error.message : String(error),
     });
-    throw error;
   }
 
   const landingPath = getRoleLandingPath(userRole);
