@@ -88,6 +88,15 @@ export interface RateLimitConfig {
   window: number;
   /** Identifier for the rate limit bucket (e.g., 'ai-query', 'ml-predictions') */
   identifier: string;
+  /**
+   * When `true`, allow the request when the rate-limiting backend (Redis) is
+   * unavailable rather than rejecting it. Use for catch-all / default limits
+   * that should degrade gracefully rather than hard-block traffic on Redis
+   * outages. Explicit per-route limits (AI, financial, etc.) should leave this
+   * `false` (the default) so they remain enforced even under infrastructure
+   * pressure.
+   */
+  failOpen?: boolean;
 }
 
 /**
@@ -148,11 +157,21 @@ export async function checkRateLimit(
   key: string,
   config: RateLimitConfig
 ): Promise<RateLimitResult> {
-  const { limit, window, identifier } = config;
+  const { limit, window, identifier, failOpen: configFailOpen = false } = config;
   const redisKey = `ratelimit:${identifier}:${key}`;
 
-  // If no Redis client configured at all, fail closed to prevent abuse
+  // If no Redis client configured at all, behaviour depends on failOpen flag.
+  // Explicit limits (AI, financial) default to fail-closed to prevent abuse.
+  // Catch-all / default limits set failOpen:true so Redis outages don't hard-
+  // block all authenticated traffic.
   if (!redis) {
+    if (configFailOpen) {
+      logger.warn('Redis not configured for rate limiting - failing open (catch-all limit)', {
+        key,
+        identifier,
+      });
+      return { allowed: true, current: 0, limit, remaining: limit, resetIn: window };
+    }
     logger.error('Redis not configured for rate limiting - rejecting request', {
       key,
       identifier,
@@ -210,8 +229,9 @@ export async function checkRateLimit(
     });
 
   } catch (error) {
-    // In development, fail open when Redis is unreachable so devs are not blocked
-    const failOpen = process.env.NODE_ENV === 'development';
+    // In development, fail open when Redis is unreachable so devs are not blocked.
+    // Routes that declare failOpen:true also fail open (catch-all/default limits).
+    const failOpen = process.env.NODE_ENV === 'development' || configFailOpen;
 
     // Circuit breaker is open - service unavailable
     if (error instanceof CircuitBreakerOpenError) {
@@ -883,6 +903,52 @@ export const RATE_LIMITS = {
     limit: 100,
     window: 3600, // 1 hour
     identifier: 'social-media-api',
+  },
+
+  // ===== CATCH-ALL / DEFAULT LIMITS =====
+
+  /**
+   * Default org-level safety net applied automatically to all `withApi` routes
+   * that do not declare an explicit `rateLimit` option.
+   *
+   * Keyed by organizationId — gives each org a shared bucket across all its
+   * users. This prevents a single compromised or runaway client within an org
+   * from flooding the API while staying well clear of legitimate usage patterns.
+   *
+   * failOpen: true — degrades gracefully when Redis is unavailable rather than
+   * hard-blocking all authenticated traffic. Explicit per-route limits remain
+   * fail-closed regardless of this setting.
+   *
+   * 1 200 requests per 5 minutes per organization (~240 req/min).
+   */
+  DEFAULT_API_ORG: {
+    limit: 1200,
+    window: 300, // 5 minutes
+    identifier: 'default-api-org',
+    failOpen: true,
+  },
+
+  /**
+   * IP-based rate limit for authentication endpoints (/api/auth/**).
+   *
+   * Applied at the edge (proxy.ts) using the client IP as the key.
+   * Protects against brute-force credential attacks even before a session
+   * is established (no org header available at this point).
+   *
+   * 20 requests per 15 minutes per IP address.
+   * This allows legitimate auth flows (sign-in, token refresh, MFA) while
+   * blocking repeated automated attack attempts.
+   *
+   * failOpen: false — brute-force protection must be enforced even on Redis
+   * outages. The proxy falls back gracefully (logs + passes request) when
+   * the check itself throws, but a clean Redis-unavailable response returns
+   * 429 for safety.
+   */
+  AUTH_IP: {
+    limit: 20,
+    window: 900, // 15 minutes
+    identifier: 'auth-ip',
+    failOpen: false,
   },
 } as const;
 

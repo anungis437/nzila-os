@@ -1,42 +1,47 @@
 /**
- * Next.js Edge Middleware
- * 
- * MIDDLEWARE STACK ARCHITECTURE:
+ * Next.js Edge Middleware — implementation module.
+ *
+ * This file contains the full edge-safe middleware stack for Union Eyes.
+ * It is intentionally named `proxy.ts` rather than `middleware.ts` to signal
+ * that this layer acts as an edge proxy (intercepts, inspects, and
+ * forwards/rejects requests) and to allow it to be imported and tested
+ * independently of Next.js framework conventions.
+ *
+ * NEXT.JS ENTRYPOINT:
+ * Next.js requires the middleware entrypoint to be named `middleware.ts` at
+ * the application root and to export a function named `middleware` (or
+ * `default`). That thin entrypoint lives in `middleware.ts` and simply
+ * re-exports from this file:
+ *
+ *   export { proxy as middleware, config } from './proxy';
+ *
+ * MIDDLEWARE STACK (in execution order):
  * ================================
- * 
- * This application uses a multi-layer middleware approach for security and isolation:
- * 
- * Layer 1: Edge Middleware (THIS FILE)
- * - Runs on Vercel Edge/Cloudflare network before request reaches application
- * - Responsibilities:
- *   1. Platform authentication (JWT validation, session management)
- *   2. i18n localization routing
- *   3. Route protection (public vs protected routes)
- *   4. Webhook authentication (cron, Stripe webhooks)
- * - Sets: userId, orgId, sessionClaims in request context
- * 
+ *
+ * 1. Request-ID propagation (x-request-id header for distributed tracing)
+ * 2. Public API route pass-through (CORS headers for allowed origins)
+ * 3. Cron authentication (x-cron-secret header validation)
+ * 4. Idempotency-Key enforcement (auto-inject + warn for mutating requests)
+ * 5. Org-scoped rate limiting (per-org + route-group buckets via os-core)
+ * 6. IP-based rate limiting for /api/auth endpoints (brute-force protection)
+ * 7. Static file pass-through
+ * 8. Payment redirect cleanup (strips checkout/payment_intent params)
+ * 9. Auth path pass-through (skip i18n for /sign-in, /api/auth, etc.)
+ * 10. Marketing path pass-through (/, /story, /pricing, etc.)
+ * 11. Locale alias normalisation (/en → /en-CA, /fr → /fr-CA, 308 redirect)
+ * 12. i18n locale routing (next-intl)
+ *
+ * APPLICATION MIDDLEWARE LAYERS (NOT in this file):
+ * ================================
+ *
  * Layer 2: Database RLS Context (lib/db/with-rls-context.ts)
- * - Runs inside API routes and server actions
- * - Responsibilities:
- *   1. Sets PostgreSQL session variables (app.current_user_id)
- *   2. Enables Row-Level Security enforcement
- *   3. Transaction-scoped isolation (prevents context leakage)
- * - Usage: Wrap all database operations in withRLSContext()
- * 
+ * - Sets PostgreSQL session variables for Row-Level Security enforcement
+ * - Transaction-scoped; runs inside API routes and server actions
+ *
  * Layer 3: Application Authorization (lib/auth.ts)
- * - Runs inside business logic
- * - Responsibilities:
- *   1. Role-based access control (RBAC)
- *   2. Organization membership checks
- *   3. Permission validation
- * - Functions: hasRole(), isSystemAdmin(), hasRoleInOrganization()
- * 
- * COORDINATION:
- * - Edge middleware authenticates user via platform auth
- * - RLS middleware sets database context using authenticated user ID
- * - RLS policies enforce row-level security automatically
- * - Application code can add additional authorization checks as needed
- * 
+ * - RBAC, organization membership checks, permission validation
+ * - Runs inside business logic via withApi() and server-side layouts
+ *
  * See: docs/security/RLS_AUTH_RBAC_ALIGNMENT.md for complete architecture
  */
 
@@ -47,6 +52,7 @@ import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
 import { checkOrgRateLimit, orgRateLimitHeaders } from '@nzila/os-core/orgRateLimit';
+import { checkRateLimit, RATE_LIMITS } from './lib/rate-limiter';
 
 // Edge-safe logger — os-core's createLogger uses Node.js APIs (process.stdout,
 // node:crypto, node:async_hooks) that are unavailable on the Edge Runtime.
@@ -73,6 +79,30 @@ function ensureRequestId(req: Pick<NextRequest, 'headers'>): string {
 function withRequestId(response: NextResponse, requestId: string): NextResponse {
   response.headers.set('x-request-id', requestId);
   return response;
+}
+
+/**
+ * Extract the real client IP from the request, respecting common proxy headers.
+ *
+ * Header priority (most-specific to least-specific):
+ *   cf-connecting-ip  — Cloudflare's verified single-IP header
+ *   x-real-ip         — nginx / generic reverse-proxy single-IP header
+ *   x-forwarded-for   — standard hop-list; take the first (leftmost) value
+ *
+ * Falls back to 'unknown' when no IP header is present (e.g. direct Edge
+ * Runtime invocations in test environments).
+ */
+function getClientIp(req: Pick<NextRequest, 'headers'>): string {
+  const cfIp = req.headers.get('cf-connecting-ip');
+  if (cfIp) return cfIp;
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp) return realIp;
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const first = forwarded.split(',')[0]?.trim();
+    if (first) return first;
+  }
+  return 'unknown';
 }
 
 const _isProtectedRoute = createRouteMatcher([
@@ -293,6 +323,53 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
               headers: orgRateLimitHeaders(orgRl),
             },
           ), requestId);
+        }
+      }
+
+      // ── IP-based rate limiting for auth endpoints (brute-force protection) ──
+      // Auth endpoints never carry an x-org-id header (no session yet), so the
+      // org rate-limit block above does not apply to them. This block provides
+      // per-IP protection against credential stuffing and brute-force attacks.
+      if (req.nextUrl.pathname.startsWith('/api/auth')) {
+        const clientIp = getClientIp(req);
+        try {
+          const ipRl = await checkRateLimit(
+            `ip:${clientIp}`,
+            RATE_LIMITS.AUTH_IP,
+          );
+          if (!ipRl.allowed) {
+            logger.warn('Auth endpoint IP rate limit exceeded', {
+              ip: clientIp,
+              pathname: req.nextUrl.pathname,
+              requestId,
+            });
+            return withRequestId(NextResponse.json(
+              {
+                error: 'Too Many Requests',
+                message: 'Authentication rate limit exceeded. Please try again later.',
+                code: 'AUTH_IP_RATE_LIMIT_EXCEEDED',
+                retryAfter: ipRl.resetIn,
+              },
+              {
+                status: 429,
+                headers: {
+                  'Retry-After': String(ipRl.resetIn),
+                  'X-RateLimit-Limit': String(ipRl.limit),
+                  'X-RateLimit-Remaining': String(ipRl.remaining),
+                  'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + ipRl.resetIn),
+                },
+              },
+            ), requestId);
+          }
+        } catch (rlError) {
+          // Rate limit check failure must not block legitimate auth traffic.
+          // Log for monitoring but allow the request through.
+          logger.error('Auth IP rate limit check failed — allowing request', {
+            ip: clientIp,
+            pathname: req.nextUrl.pathname,
+            error: (rlError as Error).message,
+            requestId,
+          });
         }
       }
     }

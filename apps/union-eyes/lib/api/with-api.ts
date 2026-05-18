@@ -57,6 +57,7 @@ import {
 import {
   checkRateLimit,
   createRateLimitHeaders,
+  RATE_LIMITS,
   type RateLimitConfig,
 } from '@/lib/rate-limiter';
 import {
@@ -419,6 +420,39 @@ export function withApi<
             { resetIn: rlResult.resetIn, limit: rlResult.limit },
             traceId,
           );
+        }
+      }
+
+      // ── 5b. Default org-level safety-net rate limit ────────────────────
+      // Applied to every authenticated, org-scoped request that does NOT
+      // declare an explicit `rateLimit`. Keyed by organizationId so one org
+      // cannot saturate the API on behalf of many users. Uses failOpen:true —
+      // if Redis is unavailable the request is allowed through (fail-open) so
+      // a Redis outage never hard-blocks all authenticated traffic.
+      // Routes that specify `rateLimit` already have a tighter explicit limit;
+      // this block is the catch-all for the remaining ~636 withApi routes.
+      if (!options.rateLimit && user && resolvedOrganizationId) {
+        try {
+          const defaultRl = await checkRateLimit(
+            resolvedOrganizationId,
+            RATE_LIMITS.DEFAULT_API_ORG,
+          );
+          if (!defaultRl.allowed) {
+            return standardErrorResponse(
+              ErrorCode.RATE_LIMIT_EXCEEDED,
+              'Organization API rate limit exceeded',
+              { resetIn: defaultRl.resetIn, limit: defaultRl.limit },
+              traceId,
+            );
+          }
+        } catch {
+          // Treat any unexpected error from the default check as fail-open.
+          // The explicit-limit path above does NOT have this catch — those
+          // limits must remain enforced.
+          logger.warn('[withApi] Default org rate limit check threw — allowing request', {
+            organizationId: resolvedOrganizationId,
+            traceId,
+          });
         }
       }
 
