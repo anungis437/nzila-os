@@ -10,10 +10,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { eq } from 'drizzle-orm';
-import { db } from '@/db';
-import { icraMaturityProfiles } from '@/db/schema/icra-schema';
-import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
+import { getIcraProfile } from '@/actions/icra/get-profile';
 import { ICRAProfile } from '@/components/icra/ICRAProfile';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
@@ -33,28 +30,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-async function fetchProfile(id: string): Promise<InstitutionalContinuityProfile | null> {
-  try {
-    const rows = await db
-      .select({ profilePayload: icraMaturityProfiles.profilePayload })
-      .from(icraMaturityProfiles)
-      .where(eq(icraMaturityProfiles.assessmentId, id))
-      .limit(1);
-
-    const row = rows[0];
-    if (!row) return null;
-    return row.profilePayload as InstitutionalContinuityProfile;
-  } catch {
-    return null;
-  }
-}
-
 export default async function ResultsPage({ params }: PageProps) {
   const { id } = await params;
 
   if (!id || !UUID_RE.test(id)) notFound();
 
-  const profile = await fetchProfile(id);
+  const profile = await getIcraProfile(id);
   if (!profile) notFound();
 
   return (
