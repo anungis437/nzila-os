@@ -78,6 +78,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/billing\/checkout/,    // Public SaaS checkout (Stripe-hosted)
       /\/api\/billing\/webhook/,     // Stripe webhook (signature-verified, no user auth)
       /\/api\/leads(?:\/|$)/,         // Public lead capture (pre-onboarding, no auth required)
+      /\/api\/icra(?:\/|$)/,          // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated)
       /\/_perf\//,                   // Web vitals beacon endpoint (anonymous sendBeacon, size-capped)
     ]
 
