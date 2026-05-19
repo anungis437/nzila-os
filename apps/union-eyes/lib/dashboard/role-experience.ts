@@ -194,6 +194,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   ],
   admin: [
     '/dashboard',
+    '/dashboard/admin',
     '/dashboard/admin/organizations',
     '/dashboard/admin/members',
     '/dashboard/admin/onboarding',

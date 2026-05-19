@@ -114,10 +114,12 @@ test.describe('Empty states', () => {
   test('steward inbox with no cases shows empty state (not blank)', async ({ page }) => {
     await loginAsRole(page, 'steward');
 
-    await page.route('**/api/cases**', async (route) => {
+    // InboxConsole fetches /api/claims and /api/notifications — stub both so
+    // the component sees zero items and renders its empty state.
+    await page.route('**/api/claims**', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() });
     });
-    await page.route('**/api/inbox**', async (route) => {
+    await page.route('**/api/notifications**', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() });
     });
 
