@@ -64,7 +64,10 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.goto(`/${LOCALE}/dashboard/admin`, { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    // Use innerText() — not textContent() — so that <script> tag content
+    // (Next.js build manifests that always reference the "/404" route) is
+    // excluded from the check.
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/\b404\b/);
   });
 

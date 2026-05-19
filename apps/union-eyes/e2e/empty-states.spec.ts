@@ -124,6 +124,10 @@ test.describe('Empty states', () => {
     });
 
     await page.goto('/en-CA/dashboard/inbox', { waitUntil: 'domcontentloaded' });
+    // InboxConsole starts with loading=true (spinner). Wait for the spinner
+    // to detach so that the empty-state text ("No signals yet") is committed
+    // to the DOM before assertEmptyStateVisible reads innerText().
+    await page.locator('.animate-spin').waitFor({ state: 'detached', timeout: 15000 }).catch(() => {});
     await assertEmptyStateVisible(page);
   });
 
