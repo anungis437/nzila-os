@@ -14,6 +14,7 @@ import { db } from '@/db';
 import { icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
 import { rateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest, { params }: Params): Promise<NextRes
     const profile = row.profilePayload as InstitutionalContinuityProfile;
     return NextResponse.json(profile, { status: 200 });
   } catch (err) {
-    console.error('[icra/results] Error:', err);
+    logger.error('icra.results.fetch_failed', { id, error: (err as Error).message });
     return NextResponse.json({ error: 'Failed to fetch results.' }, { status: 500 });
   }
 }
