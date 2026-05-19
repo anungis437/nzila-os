@@ -151,11 +151,11 @@ const verticalData: Record<string, {
     heroAlt: 'Labour union workers raising hands together in solidarity',
     tam: '$50B',
     orgs: '4,773',
-    platforms: ['UnionEyes'],
+    platforms: ['Union Eyes'],
     status: 'Flagship',
     color: 'from-gold to-gold-light',
     overview:
-      'UnionEyes is Nzila\'s flagship platform — the most comprehensive union management system available. Covering 4,773 orgs, it digitises every dimension of union operations from grievance tracking to pension forecasting, with CBA intelligence and arbitration precedent research delivering decisive intelligence to labour leaders.',
+      'Union Eyes is Nzila\'s flagship validation product: institutional continuity infrastructure for labor organizations. It preserves grievance lineage, steward handoffs, CBA context, governance rationale, and evidence-sealed audit trails without becoming a worker surveillance system.',
     capabilities: [
       {
         title: 'Pension Forecasting Engine',
@@ -176,10 +176,10 @@ const verticalData: Record<string, {
           'Contract clause analysis, pattern recognition across past agreements, and negotiation benchmarking to strengthen bargaining positions. Available for local unions, federations, and congress-tier organizations.',
       },
       {
-        title: 'Member Analytics & Engagement',
+        title: 'Member Accountability Evidence',
         icon: '👥',
         description:
-          'Membership demographics, participation trends, dues collection tracking, and communication suite — all in one secure dashboard.',
+          'Member-facing governance evidence, visible records, role-scoped access, and communication context that support accountability without behavioral profiling.',
       },
       {
         title: 'Arbitration Precedents & Research',
@@ -323,7 +323,7 @@ const verticalData: Record<string, {
     status: 'Flagship + In Development',
     color: 'from-gold to-coral',
     overview:
-      'Nzila\'s Commerce vertical is the most complete trade-operations platform for SMEs and enterprise operators. Flow is the flagship — covering the full order-to-cash and procure-to-pay lifecycle with auditable workflows, inventory management, and multi-channel integrations. Trade OS extends the stack with cross-border trade management.',
+      'Nzila\'s Commerce vertical extends the Nzila OS pattern into trade operations. Flow covers order-to-cash and procure-to-pay workflows with auditable state transitions, inventory context, and multi-channel integrations. Trade OS extends the stack with cross-border trade management.',
     capabilities: [
       {
         title: 'Order-to-Cash & Procure-to-Pay (Flow)',
@@ -362,7 +362,7 @@ const verticalData: Record<string, {
       { scenario: 'An importer managing 50+ active purchase orders', outcome: 'Trade OS state-machine-enforced workflows, payment gating, and real-time shipment visibility' },
     ],
     differentiators: [
-      'Flow is the flagship commerce platform — order-to-cash, procure-to-pay, inventory, and multi-channel integrations in one product',
+      'Flow extends continuity principles into commerce operations: state lineage, audit trails, and governed handoffs',
       'Three complementary platforms covering the full trade lifecycle — order creation to delivery',
       'State-machine-enforced workflows prevent illegal transitions and ensure audit compliance',
       'Payment deposit gating blocks production and shipment until financial prerequisites are met',
@@ -382,7 +382,7 @@ const verticalData: Record<string, {
     status: 'Flagship + Production Ready',
     color: 'from-coral to-gold',
     overview:
-      'Nzila\'s Music & Entertainment vertical celebrates and monetises African and diaspora creative talent. Zonga is the flagship — an Africa-first music distribution and streaming platform for artists, with royalty calculation, transparent payouts, event ticketing, and broader content distribution for the African and diaspora creative economy.',
+      'Nzila\'s Music & Entertainment vertical celebrates and monetises African and diaspora creative talent. Zonga is an Africa-first music distribution and streaming platform for artists, with royalty calculation, transparent payouts, event ticketing, and broader content distribution for the African and diaspora creative economy.',
     capabilities: [
       {
         title: 'Artist & Label Dashboard',
@@ -470,7 +470,7 @@ const verticalData: Record<string, {
       'Human dignity at the centre of every product decision',
       'Designed with and for caregivers — not just clinicians',
       'Cognitive health monitoring aligned with B Corp social wellbeing standards',
-      'Undergoing Backbone modernisation to cloud-native architecture',
+      'Undergoing Nzila OS modernisation to cloud-native architecture',
     ],
   },
 
@@ -621,7 +621,7 @@ export default async function VerticalPage({
 
   const strategicStory = {
     now: `${v.platforms.join(', ')} is actively shaping our ${v.name} footprint today through production-grade capabilities and measurable market execution.`,
-    next: `Over the next execution cycle, we are deepening cross-vertical Backbone integrations for ${v.name} to accelerate delivery speed, governance quality, and customer outcomes.`,
+    next: `Over the next execution cycle, we are deepening Nzila OS integrations for ${v.name} to improve delivery speed, governance quality, and customer outcomes.`,
   };
 
   return (

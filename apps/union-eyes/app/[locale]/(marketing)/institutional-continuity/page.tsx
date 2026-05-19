@@ -39,15 +39,17 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const isFr = locale === 'fr-CA';
   return {
-    title: 'Institutional Continuity | UnionEyes',
-    description:
-      'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity substrate.',
+    title: isFr ? 'Continuité institutionnelle | UnionEyes' : 'Institutional Continuity | UnionEyes',
+    description: isFr
+      ? 'Préservez la mémoire organisationnelle, renforcez la résilience institutionnelle et maintenez la continuité à travers les transitions de leadership.'
+      : 'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity substrate.',
     alternates: buildLocaleAlternates(locale, '/institutional-continuity'),
   };
 }
 
-const pillars = [
+const englishPillars = [
   {
     icon: BookOpen,
     title: 'Organizational Memory',
@@ -80,7 +82,7 @@ const pillars = [
   },
 ];
 
-const journeySteps = [
+const englishJourneySteps = [
   { step: '01', label: 'Fragmentation Problem',     desc: 'Knowledge fragmentation and continuity risk become visible across the organization.' },
   { step: '02', label: 'Organizational Memory',          desc: 'Organizational memory is captured, preserved, and made operationally accessible at scale.' },
   { step: '03', label: 'Continuity Visibility',      desc: 'Leadership gains a longitudinal view of organizational context and resilience status.' },
@@ -89,12 +91,105 @@ const journeySteps = [
   { step: '06', label: 'Resilience Outcome',         desc: 'The organization emerges stronger, more resilient, and strategically coherent through change.' },
 ];
 
+const pageCopy = {
+  'en-CA': {
+    badge: 'Platform · Institutional Continuity',
+    heading: <>Preserve what your organization<br />knows. Protect what it can do.</>,
+    description:
+      'Institutional Continuity is the UnionEyes capability that preserves organizational memory, strengthens resilience through transitions, and ensures governance structures survive beyond any individual leader.',
+    primaryCta: 'Request an Executive Briefing',
+    secondaryCta: 'View Governance Structure',
+    tabs: {
+      challenge: 'Challenge',
+      pathways: 'Pathways',
+      proof: 'Proof',
+      action: 'Action',
+    },
+    problemHeading: 'Knowledge that lives in people disappears when they leave',
+    problemBody1:
+      'Labour organizations face a persistent continuity crisis: decades of institutional knowledge — negotiation history, relationship maps, governance decisions, operational precedents — lives in people, not in systems. When leaders leave, retire, or transition, that knowledge walks out with them.',
+    problemBody2:
+      'UnionEyes Institutional Continuity transforms fragmented institutional knowledge into governed, accessible, and explainable continuity-aware structures — so your organization is stronger through every leadership transition.',
+    journeyHeading: 'From fragmentation to institutional resilience',
+    pillarsHeading: 'Six continuity capabilities. One integrated system.',
+    pillarsBody:
+      'Each capability is modular and deployable independently — or together as a unified institutional continuity substrate.',
+    trustSignals: [
+      { label: 'Labour-safe by design', sub: 'Zero individual conduct grading or monitoring' },
+      { label: 'Human oversight required', sub: 'All intelligence is human-reviewed' },
+      { label: 'Explainable intelligence', sub: 'Every insight is evidence-traceable' },
+    ],
+    finalHeading: 'Ready to strengthen institutional continuity?',
+    finalBody:
+      'See how UnionEyes preserves organizational memory and builds resilience through your leadership transitions.',
+    finalSecondary: 'Explore Organizational Memory',
+    journeySteps: englishJourneySteps,
+    pillars: englishPillars,
+  },
+  'fr-CA': {
+    badge: 'Plateforme · Continuité institutionnelle',
+    heading: <>Préserver ce que votre organisation<br />sait. Protéger ce qu’elle peut faire.</>,
+    description:
+      'La continuité institutionnelle est la capacité UnionEyes qui préserve la mémoire organisationnelle, renforce la résilience pendant les transitions et aide les structures de gouvernance à survivre au-delà de toute personne.',
+    primaryCta: 'Demander une présentation exécutive',
+    secondaryCta: 'Voir la structure de gouvernance',
+    tabs: {
+      challenge: 'Défi',
+      pathways: 'Parcours',
+      proof: 'Preuves',
+      action: 'Action',
+    },
+    problemHeading: 'La connaissance détenue par des personnes disparaît lorsqu’elles partent',
+    problemBody1:
+      'Les organisations syndicales font face à un risque de continuité persistant : des décennies de savoir institutionnel — historique de négociation, relations, décisions de gouvernance et précédents opérationnels — vivent chez des personnes plutôt que dans des systèmes.',
+    problemBody2:
+      'UnionEyes transforme ce savoir fragmenté en structures gouvernées, accessibles et explicables, afin que l’organisation se renforce à travers chaque transition de leadership.',
+    journeyHeading: 'De la fragmentation à la résilience institutionnelle',
+    pillarsHeading: 'Six capacités de continuité. Un système intégré.',
+    pillarsBody:
+      'Chaque capacité peut être déployée seule ou avec les autres comme substrat unifié de continuité institutionnelle.',
+    trustSignals: [
+      { label: 'Respectueux du travail par conception', sub: 'Aucune notation ou surveillance de conduite individuelle' },
+      { label: 'Supervision humaine requise', sub: 'Toute intelligence est revue par des humains' },
+      { label: 'Intelligence explicable', sub: 'Chaque signal est traçable à ses preuves' },
+    ],
+    finalHeading: 'Prêt à renforcer la continuité institutionnelle?',
+    finalBody:
+      'Voyez comment UnionEyes préserve la mémoire organisationnelle et renforce la résilience pendant vos transitions de leadership.',
+    finalSecondary: 'Explorer la mémoire organisationnelle',
+    journeySteps: [
+      { step: '01', label: 'Problème de fragmentation', desc: 'Les risques liés à la fragmentation du savoir et à la continuité deviennent visibles dans l’organisation.' },
+      { step: '02', label: 'Mémoire organisationnelle', desc: 'La mémoire organisationnelle est capturée, préservée et rendue accessible à l’échelle opérationnelle.' },
+      { step: '03', label: 'Visibilité de continuité', desc: 'La direction obtient une vue longitudinale du contexte organisationnel et de la résilience.' },
+      { step: '04', label: 'Intelligence explicable', desc: 'Chaque signal de continuité est traçable, lisible et respectueux de la gouvernance.' },
+      { step: '05', label: 'Continuité de gouvernance', desc: 'Les structures de gouvernance sont préservées et modernisées sans perdre la cohérence institutionnelle.' },
+      { step: '06', label: 'Résilience', desc: 'L’organisation traverse le changement avec plus de force, de cohérence et de résilience.' },
+    ],
+    pillars: [
+      { icon: BookOpen, title: 'Mémoire organisationnelle', desc: 'Préserver les décisions, précédents, relations et historiques opérationnels qui doivent survivre aux transitions.' },
+      { icon: RefreshCw, title: 'Continuité pendant les transitions', desc: 'Maintenir la cohérence opérationnelle et stratégique pendant la succession, la réorganisation ou l’expansion.' },
+      { icon: Network, title: 'Visibilité institutionnelle longitudinale', desc: 'Faire ressortir le contexte historique et relationnel qui éclaire les décisions actuelles.' },
+      { icon: Users, title: 'Planification de continuité', desc: 'Repérer les risques de continuité et établir des parcours de résilience avant qu’ils deviennent vulnérables.' },
+      { icon: ShieldCheck, title: 'Respectueux du travail par conception', desc: 'Toute intelligence de continuité fonctionne avec supervision humaine, contrôles de gouvernance et sans surveillance des travailleurs.' },
+      { icon: BarChart3, title: 'Intelligence explicable', desc: 'Chaque aperçu institutionnel est traçable à ses preuves sources — sans boîte noire.' },
+    ],
+  },
+} as const;
+
 export default async function InstitutionalContinuityPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const copy = pageCopy[locale as keyof typeof pageCopy] ?? pageCopy['en-CA'];
+
+  // Select locale-aware arrays for imported content
+  const rolloutPathway = institutionalRolloutPathway[locale as keyof typeof institutionalRolloutPathway] ?? institutionalRolloutPathway['en-CA'];
+  const modernizationJourney = governanceModernizationJourney[locale as keyof typeof governanceModernizationJourney] ?? governanceModernizationJourney['en-CA'];
+  const maturityPathway = operationalMaturityPathway[locale as keyof typeof operationalMaturityPathway] ?? operationalMaturityPathway['en-CA'];
+  const transformationPathway = organizationalTransformationPathway[locale as keyof typeof organizationalTransformationPathway] ?? organizationalTransformationPathway['en-CA'];
+  const evidence = evidenceArchitecture[locale as keyof typeof evidenceArchitecture] ?? evidenceArchitecture['en-CA'];
 
   return (
     <div className="bg-white min-h-screen">
@@ -104,24 +199,24 @@ export default async function InstitutionalContinuityPage({
         imageUrl={heroImagery.institutionalContinuity}
         badge={
           <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white">
-            Platform · Institutional Continuity
+            {copy.badge}
           </span>
         }
-        heading={<>Preserve what your organization<br />knows. Protect what it can do.</>}
-        description="Institutional Continuity is the UnionEyes capability that preserves organizational memory, strengthens resilience through transitions, and ensures governance structures survive beyond any individual leader."
+        heading={copy.heading}
+        description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
             >
-              Request an Executive Briefing
+              {copy.primaryCta}
             </Link>
             <Link
               href={`/${locale}/governance`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all"
             >
-              View Governance Structure
+              {copy.secondaryCta}
             </Link>
           </div>
         }
@@ -132,16 +227,16 @@ export default async function InstitutionalContinuityPage({
           <div className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/95 backdrop-blur-sm">
             <TabsList className="grid h-auto w-full grid-cols-2 md:grid-cols-4 gap-2 bg-transparent p-0 my-3">
               <TabsTrigger value="challenge" className="rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] data-[state=active]:border-electric/70 data-[state=active]:text-electric data-[state=active]:shadow-none">
-                Challenge
+                {copy.tabs.challenge}
               </TabsTrigger>
               <TabsTrigger value="pathways" className="rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] data-[state=active]:border-electric/70 data-[state=active]:text-electric data-[state=active]:shadow-none">
-                Pathways
+                {copy.tabs.pathways}
               </TabsTrigger>
               <TabsTrigger value="proof" className="rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] data-[state=active]:border-electric/70 data-[state=active]:text-electric data-[state=active]:shadow-none">
-                Proof
+                {copy.tabs.proof}
               </TabsTrigger>
               <TabsTrigger value="action" className="rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] data-[state=active]:border-electric/70 data-[state=active]:text-electric data-[state=active]:shadow-none">
-                Action
+                {copy.tabs.action}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -152,18 +247,13 @@ export default async function InstitutionalContinuityPage({
       <section className="py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">            <h2 className="text-3xl font-bold text-navy mb-4">
-              Knowledge that lives in people disappears when they leave
+              {copy.problemHeading}
             </h2>
             <p className="text-gray-700 text-lg leading-relaxed mb-6">
-              Labour organizations face a persistent continuity crisis: decades of institutional
-              knowledge — negotiation history, relationship maps, governance decisions, operational
-              precedents — lives in people, not in systems. When leaders leave, retire, or transition,
-              that knowledge walks out with them.
+              {copy.problemBody1}
             </p>
             <p className="text-gray-700 text-lg leading-relaxed">
-              UnionEyes Institutional Continuity transforms fragmented institutional knowledge
-              into governed, accessible, and explainable continuity-aware structures — so your
-              organization is stronger through every leadership transition.
+              {copy.problemBody2}
             </p>
           </div>
         </div>
@@ -173,12 +263,12 @@ export default async function InstitutionalContinuityPage({
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">            <h2 className="text-3xl font-bold text-navy mb-2">
-              From fragmentation to institutional resilience
+              {copy.journeyHeading}
             </h2>
           </div>
           <div className="space-y-0">
-            {journeySteps.map((step, i) => {
-              const hasNext = i < journeySteps.length - 1;
+            {copy.journeySteps.map((step, i) => {
+              const hasNext = i < copy.journeySteps.length - 1;
               return (
                 <div
                   key={step.step}
@@ -208,15 +298,14 @@ export default async function InstitutionalContinuityPage({
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-navy mb-3">
-              Six continuity capabilities. One integrated system.
+              {copy.pillarsHeading}
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Each capability is modular and deployable independently — or together as a
-              unified institutional continuity substrate.
+              {copy.pillarsBody}
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pillars.map((p) => (
+            {copy.pillars.map((p) => (
               <div key={p.title} className="p-6 rounded-2xl bg-white border border-gray-100">
                 <div className="w-10 h-10 rounded-xl bg-electric/10 flex items-center justify-center mb-4">
                   <p.icon className="h-5 w-5 text-electric" />
@@ -233,11 +322,7 @@ export default async function InstitutionalContinuityPage({
       <section className="py-16 bg-white border-y border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-3 gap-6 text-center">
-            {[
-              { label: 'Labour-safe by design',     sub: 'Zero individual conduct grading or monitoring' },
-              { label: 'Human oversight required',  sub: 'All intelligence is human-reviewed' },
-              { label: 'Explainable intelligence',  sub: 'Every insight is evidence-traceable' },
-            ].map((item) => (
+            {copy.trustSignals.map((item) => (
               <div key={item.label} className="p-6 rounded-xl bg-gray-50 border border-gray-100">
                 <div className="text-sm font-bold text-navy mb-1">{item.label}</div>
                 <div className="text-xs text-gray-500">{item.sub}</div>
@@ -256,7 +341,7 @@ export default async function InstitutionalContinuityPage({
             UnionEyes rollout sequencing is intentionally calm, reviewable, and operationally realistic for institutional modernization environments.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-3">
-            {institutionalRolloutPathway.map((stage, idx) => (
+            {rolloutPathway.map((stage, idx) => (
               <article key={stage} className="p-4 rounded-xl bg-white border border-gray-100 text-center">
                 <p className="text-[11px] tracking-widest uppercase text-gray-400 mb-2">Phase {idx + 1}</p>
                 <p className="text-xs sm:text-sm font-semibold text-navy leading-relaxed">{stage}</p>
@@ -269,7 +354,7 @@ export default async function InstitutionalContinuityPage({
       <section className="py-20 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-3xl font-bold text-navy mb-8">How modernization safely becomes operational</h2>
           <div className="space-y-3">
-            {governanceModernizationJourney.map((item) => (
+            {modernizationJourney.map((item) => (
               <article key={item.stage} className="p-5 rounded-xl bg-gray-50 border border-gray-100">
                 <h3 className="text-sm font-bold text-navy mb-2">{item.stage}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{item.detail}</p>
@@ -287,7 +372,7 @@ export default async function InstitutionalContinuityPage({
                 Organizations can locate current operating maturity and progress safely through governed continuity stages.
               </p>
               <div className="space-y-3">
-                {operationalMaturityPathway.map((stage, idx) => (
+                {maturityPathway.map((stage, idx) => (
                   <div key={stage} className="flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-100">
                     <div className="w-8 h-8 rounded-full bg-electric/10 text-electric text-xs font-bold flex items-center justify-center">
                       {idx + 1}
@@ -303,10 +388,10 @@ export default async function InstitutionalContinuityPage({
                 UnionEyes focuses on coherent progression from fragmentation risk to continuity-centered resilience.
               </p>
               <div className="space-y-3">
-                {organizationalTransformationPathway.map((stage, idx) => (
+                {transformationPathway.map((stage, idx) => (
                   <div key={stage} className="flex items-center justify-between p-3 rounded-lg bg-white border border-gray-100">
                     <p className="text-sm font-semibold text-navy">{stage}</p>
-                    {idx < organizationalTransformationPathway.length - 1 ? <ArrowRight className="h-4 w-4 text-gray-300" /> : <span className="text-xs text-emerald-700 font-semibold">Target</span>}
+                    {idx < transformationPathway.length - 1 ? <ArrowRight className="h-4 w-4 text-gray-300" /> : <span className="text-xs text-emerald-700 font-semibold">Target</span>}
                   </div>
                 ))}
               </div>
@@ -357,7 +442,7 @@ export default async function InstitutionalContinuityPage({
             </Link>
           </div>
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {evidenceArchitecture.map((item) => (
+            {evidence.map((item) => (
               <article key={item.title} className="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">{item.purpose}</p>
                 <h3 className="text-base font-bold text-navy mb-2">{item.title}</h3>
@@ -403,24 +488,23 @@ export default async function InstitutionalContinuityPage({
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Ready to strengthen institutional continuity?
+            {copy.finalHeading}
           </h2>
           <p className="text-white/70 mb-8">
-            See how UnionEyes preserves organizational memory and builds resilience
-            through your leadership transitions.
+            {copy.finalBody}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
-              Request an Executive Briefing
+              {copy.primaryCta}
             </Link>
             <Link
               href={`/${locale}/platform/organizational-memory`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all"
             >
-              Explore Organizational Memory
+              {copy.finalSecondary}
             </Link>
           </div>
         </div>

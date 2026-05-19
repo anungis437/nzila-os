@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import ScrollReveal from './ScrollReveal';
 import TrackedLink from './TrackedLink';
-import { MARKETING_FACTS } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
 interface InvestorCTAProps {
@@ -22,24 +21,24 @@ const investorCtaCopy: Record<Locale, {
   partnersCta: string
 }> = {
   'en-CA': {
-    investorsBadge: 'For Investors',
-    investorsTitle: 'Series A - Join the Future of AI Infrastructure',
-    investorsBody: `${MARKETING_FACTS.totalTamLabel} TAM. ${MARKETING_FACTS.productPlatforms} platforms. ${MARKETING_FACTS.flagshipPlatforms} flagships. One unified Backbone.`,
-    investorsCta: 'View Investment Thesis',
-    partnersBadge: 'For Partners',
-    partnersTitle: 'Build With the APEX of AI',
-    partnersBody: 'Deploy ethical AI solutions across healthcare, finance, agriculture, and beyond.',
-    partnersCta: 'Partner With Us',
+    investorsBadge: 'For Institutions',
+    investorsTitle: 'Assess continuity risk before transition exposes it',
+    investorsBody: 'Use the Institutional Continuity Risk Assessment to identify governance fragility, operational memory loss, trust debt, and sovereignty exposure.',
+    investorsCta: 'Begin Assessment',
+    partnersBadge: 'For Labor Organizations',
+    partnersTitle: 'Union Eyes is the flagship validation path',
+    partnersBody: 'Pilot continuity infrastructure for grievance history, steward handoffs, governance evidence, and anti-surveillance accountability.',
+    partnersCta: 'Explore Union Eyes',
   },
   'fr-CA': {
-    investorsBadge: 'Pour les investisseurs',
-    investorsTitle: "Série A - Rejoignez le futur de l'infrastructure IA",
-    investorsBody: `${MARKETING_FACTS.totalTamLabel} TAM. ${MARKETING_FACTS.productPlatforms} plateformes. ${MARKETING_FACTS.flagshipPlatforms} produits phares. Une seule Backbone unifiee.`,
-    investorsCta: "Voir la thèse d'investissement",
-    partnersBadge: 'Pour les partenaires',
-    partnersTitle: "Construisez avec l'APEX de l'IA",
-    partnersBody: "Déployez des solutions IA éthiques en santé, finance, agriculture et plus encore.",
-    partnersCta: 'Devenir partenaire',
+    investorsBadge: 'Pour les institutions',
+    investorsTitle: 'Évaluez le risque de continuité avant qu une transition ne l expose',
+    investorsBody: 'L évaluation de continuité institutionnelle identifie fragilité de gouvernance, perte de mémoire opérationnelle, dette de confiance et exposition de souveraineté.',
+    investorsCta: 'Commencer l évaluation',
+    partnersBadge: 'Pour les organisations syndicales',
+    partnersTitle: 'Union Eyes est le chemin de validation principal',
+    partnersBody: 'Pilotez une infrastructure de continuité pour les griefs, les transitions de délégués, les preuves de gouvernance et l accountability anti-surveillance.',
+    partnersCta: 'Explorer Union Eyes',
   },
 };
 
@@ -70,8 +69,8 @@ export default function InvestorCTA({ className = '' }: InvestorCTAProps) {
               {copy.investorsBody}
             </p>
             <TrackedLink
-              href="/investors"
-              eventName="cta_investor_thesis"
+              href="/continuity-assessment"
+              eventName="cta_continuity_assessment"
               eventProps={{ source: 'investor_cta' }}
               className="inline-flex items-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-colors text-lg"
             >
@@ -90,8 +89,8 @@ export default function InvestorCTA({ className = '' }: InvestorCTAProps) {
               {copy.partnersBody}
             </p>
             <TrackedLink
-              href="/contact"
-              eventName="cta_partner_contact"
+              href="/union-eyes"
+              eventName="cta_union_eyes"
               eventProps={{ source: 'investor_cta' }}
               className="inline-flex items-center px-8 py-4 bg-white text-navy font-bold rounded-xl hover:bg-gray-100 transition-colors text-lg"
             >
@@ -103,9 +102,6 @@ export default function InvestorCTA({ className = '' }: InvestorCTAProps) {
     </section>
   );
 }
-
-
-
 
 
 

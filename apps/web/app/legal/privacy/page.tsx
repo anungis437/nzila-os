@@ -72,7 +72,7 @@ export default async function PrivacyPolicy() {
           </p>
           <ul className="list-disc pl-6 text-gray-600 space-y-2">
             <li><strong>{isFr ? 'Fournisseurs de services' : 'Service providers'}</strong> {isFr ? 'traitant les données pour notre compte sous ententes strictes de confidentialité' : 'who process data on our behalf (hosting, analytics, authentication) under strict confidentiality agreements'}</li>
-            <li><strong>{isFr ? 'Autorites légales' : 'Legal authorities'}</strong> {isFr ? 'lorsque requis par la loi ou pour protèger les droits et la sécurité des utilisateurs' : 'when required by law, court order, or to protect the rights and safety of Nzila and its users'}</li>
+            <li><strong>{isFr ? 'Autorites légales' : 'Legal authorities'}</strong> {isFr ? 'lorsque requis par la loi ou pour protèger les droits et la sécurité des membres, opérateurs, organisations et parties concernées' : 'when required by law, court order, or to protect the rights and safety of Nzila, members, operators, organizations, and affected parties'}</li>
             <li><strong>{isFr ? 'Transactions d entreprise' : 'Business transfers'}</strong> {isFr ? 'dans le cadre d une fusion, acquisition ou vente d actifs' : 'in connection with a merger, acquisition, or sale of assets, with notice provided to you'}</li>
           </ul>
         </section>

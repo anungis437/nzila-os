@@ -1,38 +1,34 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-18T18:56:53.385Z
+> Generated: 2026-05-19T02:06:15.117Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1651 |
-| Total Findings | 2387 |
+| Files Scanned | 1667 |
+| Total Findings | 2450 |
 | Errors | 0 |
-| Warnings | 1199 |
-| Info | 1188 |
+| Warnings | 1195 |
+| Info | 1255 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1181 |
-| stale-reference | 1038 |
+| naming-inconsistency | 1248 |
+| stale-reference | 1034 |
 | missing-package-readme | 105 |
 | stale-package-ref | 53 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1038)
+## stale-reference (1034)
 
-- 🟡 `ARCHITECTURE.md:92` — Possible broken link: [docs/architecture/STACK_AUTHORITY.md](./docs/architecture/STACK_AUTHORITY.md)
-- 🟡 `ARCHITECTURE.md:99` — Possible broken link: [docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md](./docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md)
-- 🟡 `ARCHITECTURE.md:100` — Possible broken link: [docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md](./docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md)
-- 🟡 `ARCHITECTURE.md:102` — Possible broken link: [docs/platform/PACKAGE_OWNERSHIP_MATRIX.md](./docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
-- 🟡 `ARCHITECTURE.md:107` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
-- 🟡 `ARCHITECTURE.md:111` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
-- 🟡 `ARCHITECTURE.md:115` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
-- 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
+- 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
+- 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
+- 🟡 `ARCHITECTURE.md:122` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
+- 🟡 `ARCHITECTURE.md:128` — Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:12` — Possible broken link: [docs/repo-contract/README.md](docs/repo-contract/README.md)
 - 🟡 `CONTRIBUTING.md:82` — Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
 - 🟡 `CONTRIBUTING.md:83` — Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
@@ -1120,11 +1116,12 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 
-## naming-inconsistency (1181)
+## naming-inconsistency (1248)
 
+- ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `ARCHITECTURE.md:233` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `ARCHITECTURE.md:243` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `AWS_ZONGA_SETUP.md:339` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `CLAUDE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `CONTRIBUTING.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2132,7 +2129,73 @@
 - ℹ️ `docs/categories/stakeholders/tutorials/first-app.md:122` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md:54` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md:62` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/documentation-index.md:950` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md:12` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:21` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:35` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:54` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:64` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:76` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:84` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:94` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:104` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:118` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:183` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:199` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:36` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:44` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:61` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:87` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:93` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:113` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:125` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:136` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:138` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:149` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:161` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:169` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:203` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:219` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:244` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:252` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:275` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:308` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:336` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:549` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:717` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:835` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:993` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1159` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1231` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1252` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1375` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1426` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1495` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_GOVERNANCE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:154` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:155` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:170` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:182` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_TRACEABILITY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/frameworks.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/frameworks.md:122` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/frameworks.md:229` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/narrative-playbooks.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/narrative-playbooks.md:101` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:19` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:145` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:149` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:157` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/principles.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/principles.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/SCORING_MODELS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/vocabulary.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/vocabulary.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:951` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)

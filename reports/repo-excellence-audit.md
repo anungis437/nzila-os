@@ -1,6 +1,6 @@
 # Repo Excellence Audit
 
-Generated: 2026-05-18T18:57:01.101Z
+Generated: 2026-05-19T02:06:20.232Z
 
 Overall score: 7.2 / 10
 
@@ -19,7 +19,11 @@ Overall score: 7.2 / 10
 | dead_assets | 6.8 |
 | ownership | 10 |
 
-## Remaining Blockers
+## Gate Blockers
+
+- none
+
+## Improvement Backlog
 
 - [runtime_proof] MTTR is still missing live incident feed integration.
 - [runtime_proof] Deploy success rate is not yet backfilled from production telemetry.

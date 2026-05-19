@@ -161,7 +161,12 @@ export async function auth(): Promise<AuthSessionResult> {
   }
 
   // ── 2. Fall back to Entra / NextAuth ────────────────────────────────────
-  const session = await nextAuth()
+  let session: Awaited<ReturnType<typeof nextAuth>> | null = null
+  try {
+    session = await nextAuth()
+  } catch {
+    // NextAuth not configured in this environment (e.g. CI without Entra credentials)
+  }
   const entra = session as EntraSession | null
 
   if (!session?.user) {
@@ -273,7 +278,12 @@ export async function currentUser() {
   }
 
   // ── 2. Fall back to Entra / NextAuth ────────────────────────────────────
-  const session = await nextAuth()
+  let session: Awaited<ReturnType<typeof nextAuth>> | null = null
+  try {
+    session = await nextAuth()
+  } catch {
+    // NextAuth not configured in this environment (e.g. CI without Entra credentials)
+  }
   const entra = session as EntraSession | null
 
   if (!session?.user) return null

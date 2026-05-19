@@ -4,15 +4,14 @@ import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import InvestorCTA from '@/components/public/InvestorCTA';
-import { MARKETING_FACTS } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Products',
-  description: `Our portfolio of ${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools across UnionEyes, Zonga, Flow, and Agrimo.`,
+  description: 'Nzila Ventures product architecture: Nzila OS, Union Eyes as the flagship validation product, and continuity-oriented product lines.',
   openGraph: {
     title: 'Nzila Ventures Products',
-    description: `${MARKETING_FACTS.productPlatforms} products. ${MARKETING_FACTS.flagshipPlatforms} flagships. ${MARKETING_FACTS.governedApplications} live tools. One shared platform.`,
+    description: 'Nzila OS, Union Eyes, and governed product lines for continuity-critical institutions.',
     images: [{ url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Digital network visualization representing Nzila Ventures product suite' }],
   },
   alternates: { canonical: '/products' },
@@ -20,14 +19,14 @@ export const metadata: Metadata = {
 
 const flagships = [
   {
-    name: 'UnionEyes',
+    name: 'Union Eyes',
     vertical: 'Uniontech',
     status: 'Production Ready',
     tam: '$50B',
     image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
-    alt: 'UnionEyes — comprehensive union management platform for pension forecasting and labor analytics',
-    description: 'Full-stack union case management platform — pension forecasting, grievance lifecycle, collective bargaining analysis, CBA intelligence, and evidence-sealed audit trails.',
-    features: ['Pension Forecasting', 'Grievance Lifecycle', 'CBA Intelligence', 'Evidence-Sealed Audit Trails'],
+    alt: 'Union Eyes - continuity infrastructure for labor organizations',
+    description: 'Flagship continuity and governance infrastructure for labor organizations: grievance lineage, steward continuity, CBA context, and evidence-sealed audit trails.',
+    features: ['Grievance Lineage', 'Steward Continuity', 'CBA Context', 'Evidence-Sealed Audit Trails'],
   },
   {
     name: 'Zonga',
@@ -91,10 +90,10 @@ const statusFr: Record<string, string> = {
 };
 
 const flagshipFr: Record<string, { vertical: string; description: string; features: string[] }> = {
-  UnionEyes: {
+  'Union Eyes': {
     vertical: 'Uniontech',
-    description: 'Plateforme complété de gestion syndicale - prevision des pensions, cycle de vie des griefs, analyse de conventions collectives et audit scelle par preuve.',
-    features: ['Prevision des pensions', 'Cycle des griefs', 'Intelligence CBA', 'Audit scelle par preuve'],
+    description: 'Infrastructure phare de continuité et gouvernance pour organisations syndicales: lignée des griefs, continuité des délégués, contexte CBA et audit scellé par preuve.',
+    features: ['Lignée des griefs', 'Continuité des délégués', 'Contexte CBA', 'Audit scellé par preuve'],
   },
   Zonga: {
     vertical: 'Musique et économie des createurs',
@@ -144,8 +143,8 @@ export default async function ProductsPage() {
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               {isFr
-                ? `${MARKETING_FACTS.productPlatforms} produits dans ${MARKETING_FACTS.verticalsLabel} industries - livres via ${MARKETING_FACTS.governedApplications} outils en service sur la plateforme partagée Nzila.`
-                : `${MARKETING_FACTS.productPlatforms} products across ${MARKETING_FACTS.verticalsLabel} industries - delivered through ${MARKETING_FACTS.governedApplications} live tools on the Nzila shared platform.`}
+                ? 'Nzila Ventures distingue la société d exploitation, Nzila OS, Union Eyes et les lignes produit qui étendent l infrastructure de continuité.'
+                : 'Nzila Ventures distinguishes the operating company, Nzila OS, Union Eyes, and the product lines that extend continuity infrastructure.'}
             </p>
           </ScrollReveal>
         </div>
@@ -155,9 +154,9 @@ export default async function ProductsPage() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge={isFr ? 'Quatre plateformes coeur' : 'Four Core Platforms'}
-            title={isFr ? 'Notre suite principale' : 'Our Main Product Suite'}
-            subtitle={isFr ? 'Plateformes prêtes pour la production en uniontech, musique, commerce et agriculture' : 'Production-grade platforms across uniontech, music, commerce, and agriculture'}
+            badge={isFr ? 'Architecture produit' : 'Product Architecture'}
+            title={isFr ? 'Union Eyes d abord, portefeuille ensuite' : 'Union Eyes first, portfolio second'}
+            subtitle={isFr ? 'Union Eyes est le produit de validation phare. Les autres lignes étendent les mêmes principes de continuité, gouvernance, preuve et souveraineté.' : 'Union Eyes is the flagship validation product. Other lines extend the same continuity, governance, evidence, and sovereignty principles.'}
           />
 
           <div className="space-y-8">
@@ -208,9 +207,9 @@ export default async function ProductsPage() {
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge={isFr ? 'Portefeuille éténdu' : 'Extended Portfolio'}
-            title={isFr ? 'Écosystème en croissance' : 'Growing Ecosystem'}
-            subtitle={isFr ? '11 produits complementaires - en production, en developpement et solutions specialisees qui éténdent la plateforme partagée Nzila' : '11 complementary products - production-ready, in development, and specialized solutions that extend the Nzila shared platform'}
+            badge={isFr ? 'Lignes produit' : 'Product Lines'}
+            title={isFr ? 'Le portefeuille reste subordonné à la doctrine' : 'The portfolio stays subordinate to the doctrine'}
+            subtitle={isFr ? 'Chaque ligne doit renforcer continuité, gouvernance, explicabilité, confiance, souveraineté, preuve ou fédération.' : 'Every product line must strengthen continuity, governance, explainability, trust, sovereignty, evidence, or federation.'}
             light
           />
 
@@ -240,8 +239,6 @@ export default async function ProductsPage() {
     </main>
   );
 }
-
-
 
 
 

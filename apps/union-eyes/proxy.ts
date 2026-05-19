@@ -331,7 +331,12 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
       // org rate-limit block above does not apply to them. This block provides
       // per-IP protection against credential stuffing and brute-force attacks.
       // NOTE: match '/api/auth/' (with slash) to avoid catching '/api/auth_core/...'
-      if (req.nextUrl.pathname.startsWith('/api/auth/') || req.nextUrl.pathname === '/api/auth') {
+      // NOTE: skip in CI — test suites hit auth routes from a single IP and exhaust
+      //       the 20-req/15-min bucket; brute-force protection is not needed in CI.
+      if (
+        !process.env.CI &&
+        (req.nextUrl.pathname.startsWith('/api/auth/') || req.nextUrl.pathname === '/api/auth')
+      ) {
         const clientIp = getClientIp(req);
         try {
           const ipRl = await checkRateLimit(

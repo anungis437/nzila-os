@@ -1,75 +1,47 @@
 {
-  "generatedAt": "2026-05-18T18:56:53.385Z",
-  "filesScanned": 1651,
-  "totalFindings": 2387,
+  "generatedAt": "2026-05-19T02:06:15.117Z",
+  "filesScanned": 1667,
+  "totalFindings": 2450,
   "findingsByRule": {
-    "stale-reference": 1038,
+    "stale-reference": 1034,
     "stale-package-ref": 53,
-    "naming-inconsistency": 1181,
+    "naming-inconsistency": 1248,
     "stale-date": 7,
     "missing-required-doc": 3,
     "missing-package-readme": 105
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1199,
-    "info": 1188
+    "warning": 1195,
+    "info": 1255
   },
   "findings": [
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "ARCHITECTURE.md",
-      "line": 92,
-      "message": "Possible broken link: [docs/architecture/STACK_AUTHORITY.md](./docs/architecture/STACK_AUTHORITY.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "ARCHITECTURE.md",
-      "line": 99,
-      "message": "Possible broken link: [docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md](./docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "ARCHITECTURE.md",
-      "line": 100,
-      "message": "Possible broken link: [docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md](./docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "ARCHITECTURE.md",
-      "line": 102,
-      "message": "Possible broken link: [docs/platform/PACKAGE_OWNERSHIP_MATRIX.md](./docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "ARCHITECTURE.md",
-      "line": 107,
+      "line": 113,
       "message": "Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "ARCHITECTURE.md",
-      "line": 111,
+      "line": 117,
       "message": "Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "ARCHITECTURE.md",
-      "line": 115,
+      "line": 122,
       "message": "Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "ARCHITECTURE.md",
-      "line": 120,
+      "line": 128,
       "message": "Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)"
     },
     {
@@ -7656,6 +7628,13 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "AGENTS.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "ARCHITECTURE.md",
       "line": 1,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
@@ -7671,7 +7650,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "ARCHITECTURE.md",
-      "line": 233,
+      "line": 243,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -14726,8 +14705,470 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md",
+      "line": 12,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 21,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 35,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 54,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 64,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 76,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 84,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 94,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 104,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 118,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 183,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/constitution.md",
+      "line": 199,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 36,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 44,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 61,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 87,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 93,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 113,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 125,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 136,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 138,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 149,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 161,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 169,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 203,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 219,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 244,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 252,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 275,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 308,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 336,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 549,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 717,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 835,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 993,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 1159,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 1231,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 1252,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 1375,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 1426,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE.md",
+      "line": 1495,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE_GOVERNANCE.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE_STRESS_TEST.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE_STRESS_TEST.md",
+      "line": 154,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE_STRESS_TEST.md",
+      "line": 155,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE_STRESS_TEST.md",
+      "line": 170,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE_STRESS_TEST.md",
+      "line": 182,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/DOCTRINE_TRACEABILITY.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/frameworks.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/frameworks.md",
+      "line": 122,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/frameworks.md",
+      "line": 229,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/narrative-playbooks.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/narrative-playbooks.md",
+      "line": 101,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/positioning.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/positioning.md",
+      "line": 19,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/positioning.md",
+      "line": 145,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/positioning.md",
+      "line": 149,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/positioning.md",
+      "line": 157,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/principles.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/principles.md",
+      "line": 10,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/SCORING_MODELS.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/vocabulary.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/vocabulary.md",
+      "line": 10,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 950,
+      "line": 951,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {

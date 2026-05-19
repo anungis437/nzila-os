@@ -6,16 +6,15 @@ import SectionHeading from '@/components/public/SectionHeading';
 import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
 import TrackedLink from '@/components/public/TrackedLink';
-import { MARKETING_FACTS } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
-  title: 'Platform',
-  description: `The Nzila shared platform - unified infrastructure for ${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools.`,
+  title: 'Nzila OS',
+  description: 'Nzila OS is governed operational infrastructure for trust-sensitive institutions: continuity, governance, evidence, sovereignty, and explainability.',
   openGraph: {
-    title: 'Nzila Ventures Platform',
-    description: `The Nzila shared platform - unified infrastructure for ${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools.`,
-    images: [{ url: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Server room with blue lighting representing Nzila shared platform infrastructure' }],
+    title: 'Nzila OS',
+    description: 'Governed operational infrastructure for continuity-critical institutions.',
+    images: [{ url: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Server room with blue lighting representing Nzila OS infrastructure' }],
   },
   alternates: { canonical: '/platform' },
 };
@@ -23,15 +22,15 @@ export const metadata: Metadata = {
 const capabilities = [
   {
     photo: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600',
-    name: 'Shared Platform Infrastructure',
+    name: 'Governed Operational Infrastructure',
     alt: 'Network cables and fiber optic connections in a modern data center',
-    description: 'Shared authentication, databases, CI/CD, and observability across 15 products and 17 live tools.',
+    description: 'Shared identity, data, policy, release evidence, and observability primitives across governed operational applications.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600',
-    name: 'Multi-Org Architecture',
+    name: 'Multi-Organization Architecture',
     alt: 'Abstract server architecture with layered network topology',
-    description: 'Isolated yet unified — each vertical runs on shared primitives with Org-level separation.',
+    description: 'Organizations remain isolated by default while sharing governed primitives for continuity, policy, and evidence.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600',
@@ -41,9 +40,9 @@ const capabilities = [
   },
   {
     photo: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600',
-    name: 'Analytics Pipeline',
+    name: 'Evidence Pipeline',
     alt: 'Business analytics dashboard with real-time data visualizations and charts',
-    description: 'Automated portfolio analytics, migration tracking, and executive reporting dashboards.',
+    description: 'Operational traceability, governance evidence, continuity indicators, and reviewable executive reports.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600',
@@ -53,51 +52,51 @@ const capabilities = [
   },
   {
     photo: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=600',
-    name: 'Automation Engine',
+    name: 'Explainable Assistance',
     alt: 'Command-line interface running automated deployment scripts',
-    description: 'Python-powered validation, migration orchestration, and business intelligence automation.',
+    description: 'Human-overridable assistance for validation, summaries, migration sequencing, and governance workflows.',
   },
 ];
 
 const layers = [
   { name: 'Frontend', tech: 'Next.js · React 19 · Tailwind 4', color: 'bg-electric' },
   { name: 'API Layer', tech: 'Django 5 · REST · GraphQL', color: 'bg-violet' },
-  { name: 'Intelligence Layer', tech: 'TensorFlow · OpenAI · Companion Engine', color: 'bg-gold' },
+  { name: 'Continuity Layer', tech: 'Operational memory · Evidence lineage · Explainable assistance', color: 'bg-gold' },
   { name: 'Data', tech: 'PostgreSQL · Azure CosmosDB · Redis', color: 'bg-emerald' },
   { name: 'Infrastructure', tech: 'Azure · Docker · Terraform · GitHub Actions', color: 'bg-coral' },
 ];
 
 const capabilityFr: Record<string, { name: string; description: string }> = {
-  'Shared Platform Infrastructure': {
-    name: 'Infrastructure de plateforme partagée',
-    description: 'Authentification, bases de données, CI/CD et observabilite partagées sur 15 produits et 17 outils en service.',
+  'Governed Operational Infrastructure': {
+    name: 'Infrastructure opérationnelle gouvernée',
+    description: 'Identité, données, politiques, preuves de release et observabilité partagées entre applications opérationnelles gouvernées.',
   },
-  'Multi-Org Architecture': {
+  'Multi-Organization Architecture': {
     name: 'Architecture multi-organisation',
-    description: 'Isolee mais unifiee - chaque verticale fonctionne sur des primitives partagées avec separation par organisation.',
+    description: 'Chaque organisation reste isolée par défaut tout en utilisant des primitives partagées de continuité, politique et preuve.',
   },
   'Security & Compliance': {
     name: 'Securite et conformite',
     description: 'Patterns alignes SOC 2, identite basee Entra ID et contrôle d accès par roles sur toutes les applications.',
   },
-  'Analytics Pipeline': {
-    name: 'Pipeline analytique',
-    description: 'Analytique automatisee du portefeuille, suivi de migration et tableaux executifs.',
+  'Evidence Pipeline': {
+    name: 'Pipeline de preuves',
+    description: 'Traçabilité opérationnelle, preuves de gouvernance, indicateurs de continuité et rapports exécutifs vérifiables.',
   },
   'Azure Native': {
     name: 'Natif Azure',
     description: 'Container Apps, PostgreSQL et services Azure pour des charges de production securisees.',
   },
-  'Automation Engine': {
-    name: 'Moteur d automatisation',
-    description: 'Validation Python, orchestration de migration et automatisation de l intelligence d affaires.',
+  'Explainable Assistance': {
+    name: 'Assistance explicable',
+    description: 'Assistance révisable par des humains pour validation, résumés, séquençage de migration et workflows de gouvernance.',
   },
 };
 
 const layerFr: Record<string, string> = {
   Frontend: 'Interface',
   'API Layer': 'Couche API',
-  'Intelligence Layer': 'Couche intelligence',
+  'Continuity Layer': 'Couche continuité',
   Data: 'Données',
   Infrastructure: 'Infrastructure',
 };
@@ -112,7 +111,7 @@ export default async function PlatformPage() {
       <section className="relative min-h-[60vh] flex items-center overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=1920"
-          alt="Server room corridor with rows of blue-lit server racks — Nzila shared platform infrastructure"
+          alt="Server room corridor with rows of blue-lit server racks - Nzila OS infrastructure"
           fill
           priority
           className="object-cover"
@@ -129,24 +128,24 @@ export default async function PlatformPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              {isFr ? 'La ' : 'The Nzila '}<span className="gradient-text">{isFr ? 'plateforme partagée Nzila' : 'Shared Platform'}</span>
+              {isFr ? 'Nzila ' : 'Nzila '}<span className="gradient-text">OS</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
               {isFr
-                ? 'Une couche d infrastructure unifiee qui alimente la technologie à impact social en sante, finance, agriculture, droits du travail et justice.'
-                : 'A unified infrastructure layer that powers social impact technology across healthcare, finance, agriculture, labor rights, and justice.'}
+                ? 'Une infrastructure opérationnelle gouvernée pour les institutions sensibles à la confiance: continuité, gouvernance, preuves, souveraineté et explicabilité.'
+                : 'Governed operational infrastructure for trust-sensitive institutions: continuity, governance, evidence, sovereignty, and explainability.'}
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.3}>
             <TrackedLink
-              href="/portfolio"
-              eventName="cta_portfolio"
+              href="/institutional-continuity"
+              eventName="cta_institutional_continuity"
               eventProps={{ source: 'platform_hero' }}
               className="inline-flex items-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition text-lg"
             >
-              {isFr ? 'Voir le portefeuille complet ->' : 'View Full Portfolio ->'}
+              {isFr ? 'Comprendre la continuité ->' : 'Understand Continuity ->'}
             </TrackedLink>
           </ScrollReveal>
         </div>
@@ -230,10 +229,5 @@ export default async function PlatformPage() {
     </main>
   );
 }
-
-
-
-
-
 
 

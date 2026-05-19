@@ -59,10 +59,27 @@ const CLC_COPY = {
     heading: 'Convention-ready continuity modernization activation.',
     descriptionHero:
       'A calm, strategic field system that turns convention conversations into executive trust, procurement curiosity, and structured pilot exploration.',
+    ctaProof: 'Executive proof path',
+    ctaPilot: 'Pilot exploration path',
     tabNarrative: 'Narrative',
     tabEngagement: 'Engagement',
     tabConversion: 'Conversion',
     tabFollowUp: 'Follow-Up',
+    narrativeRhythm: 'Canonical Booth Narrative Rhythm',
+    narrativeHeading: 'Distinctive continuity narrative for CLC field presence',
+    stageLabel: 'Stage',
+    engagementChoreography: 'Executive Engagement Choreography',
+    engagementHeading: 'Stakeholder-specific entry points without sales theatrics',
+    outcomeLabel: 'Outcome:',
+    talkTrackHeading: 'Stakeholder talk-track system',
+    qrJourneyLabel: 'QR Journey Architecture',
+    qrJourneyHeading: 'Intentional conference journeys with continuity context',
+    objectionHeading: 'Objection-handling framework',
+    pilotPathwayHeading: 'Pilot conversation pathway',
+    briefingPacksHeading: 'Executive Briefing Packs',
+    procurementHeading: 'Procurement follow-up infrastructure',
+    leadClassificationHeading: 'Lead classification system',
+    postConferenceHeading: 'Post-conference continuity campaigns',
   },
   'fr-CA': {
     title: 'Activation terrain CLC | UnionEyes',
@@ -72,10 +89,27 @@ const CLC_COPY = {
     heading: 'Activation de modernisation prete pour la convention.',
     descriptionHero:
       'Un systeme terrain calme et strategique qui transforme les conversations en confiance executive et exploration pilote structuree.',
+    ctaProof: 'Parcours de preuve executive',
+    ctaPilot: 'Parcours d exploration pilote',
     tabNarrative: 'Narratif',
     tabEngagement: 'Engagement',
     tabConversion: 'Conversion',
     tabFollowUp: 'Suivi',
+    narrativeRhythm: 'Rythme narratif canonique du kiosque',
+    narrativeHeading: 'Narratif distinctif de continuite pour la presence terrain CLC',
+    stageLabel: 'Etape',
+    engagementChoreography: 'Choregraphie d engagement executif',
+    engagementHeading: 'Points d entree par partie prenante sans theatrale commerciale',
+    outcomeLabel: 'Resultat :',
+    talkTrackHeading: 'Systeme de points de discussion par partie prenante',
+    qrJourneyLabel: 'Architecture des parcours QR',
+    qrJourneyHeading: 'Parcours de conference intentionnels avec contexte de continuite',
+    objectionHeading: 'Cadre de traitement des objections',
+    pilotPathwayHeading: 'Parcours de conversation pilote',
+    briefingPacksHeading: 'Dossiers de breffage executif',
+    procurementHeading: 'Infrastructure de suivi des achats',
+    leadClassificationHeading: 'Systeme de classification des pistes',
+    postConferenceHeading: 'Campagnes de continuite post-conference',
   },
   it: {
     title: 'Attivazione campo CLC | UnionEyes',
@@ -85,10 +119,27 @@ const CLC_COPY = {
     heading: 'Attivazione modernizzazione pronta per convention.',
     descriptionHero:
       'Un sistema campo calmo e strategico che converte conversazioni in fiducia executive e esplorazione pilota strutturata.',
+    ctaProof: 'Percorso prove executive',
+    ctaPilot: 'Percorso esplorazione pilota',
     tabNarrative: 'Narrativa',
     tabEngagement: 'Engagement',
     tabConversion: 'Conversione',
     tabFollowUp: 'Follow-up',
+    narrativeRhythm: 'Ritmo narrativo stand canonico',
+    narrativeHeading: 'Narrativa di continuita per presenza CLC',
+    stageLabel: 'Fase',
+    engagementChoreography: 'Coreografia engagement executive',
+    engagementHeading: 'Ingressi stakeholder senza teatralita commerciale',
+    outcomeLabel: 'Esito:',
+    talkTrackHeading: 'Sistema talk-track stakeholder',
+    qrJourneyLabel: 'Architettura percorsi QR',
+    qrJourneyHeading: 'Percorsi conference con contesto continuita',
+    objectionHeading: 'Framework gestione obiezioni',
+    pilotPathwayHeading: 'Percorso conversazione pilota',
+    briefingPacksHeading: 'Pacchetti briefing executive',
+    procurementHeading: 'Infrastruttura follow-up procurement',
+    leadClassificationHeading: 'Sistema classificazione lead',
+    postConferenceHeading: 'Campagne continuita post-conference',
   },
   pt: {
     title: 'Ativacao de campo CLC | UnionEyes',
@@ -98,10 +149,27 @@ const CLC_COPY = {
     heading: 'Ativacao de modernizacao pronta para convencao.',
     descriptionHero:
       'Um sistema de campo calmo e estrategico que converte conversas em confianca executiva e exploracao piloto estruturada.',
+    ctaProof: 'Caminho de prova executiva',
+    ctaPilot: 'Caminho de exploracao piloto',
     tabNarrative: 'Narrativa',
     tabEngagement: 'Engajamento',
     tabConversion: 'Conversao',
     tabFollowUp: 'Follow-up',
+    narrativeRhythm: 'Ritmo narrativo canonico de estande',
+    narrativeHeading: 'Narrativa distintiva de continuidade para presenca CLC',
+    stageLabel: 'Etapa',
+    engagementChoreography: 'Coreografia de engajamento executivo',
+    engagementHeading: 'Pontos de entrada por stakeholder sem teatro comercial',
+    outcomeLabel: 'Resultado:',
+    talkTrackHeading: 'Sistema de fala por stakeholder',
+    qrJourneyLabel: 'Arquitetura de jornada QR',
+    qrJourneyHeading: 'Jornadas intencionais de conferencia com contexto de continuidade',
+    objectionHeading: 'Framework de tratamento de objecoes',
+    pilotPathwayHeading: 'Caminho de conversa piloto',
+    briefingPacksHeading: 'Pacotes de briefing executivo',
+    procurementHeading: 'Infraestrutura de follow-up de compras',
+    leadClassificationHeading: 'Sistema de classificacao de leads',
+    postConferenceHeading: 'Campanhas de continuidade pos-conferencia',
   },
 } as const;
 
@@ -141,10 +209,10 @@ export default async function LocaleForCLCPage({
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href={`/${locale}/proof?context=executive`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Executive proof path
+              {copy.ctaProof}
             </Link>
             <Link href={`/${locale}/pilot-request?context=conference`} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
-              Pilot exploration path
+              {copy.ctaPilot}
             </Link>
           </div>
         }
@@ -173,13 +241,13 @@ export default async function LocaleForCLCPage({
             <section>
               <div className="flex items-center gap-2 mb-3 text-electric">
                 <ShieldCheck className="h-4 w-4" />
-                <span className="text-xs uppercase tracking-widest font-semibold">Canonical Booth Narrative Rhythm</span>
+                <span className="text-xs uppercase tracking-widest font-semibold">{copy.narrativeRhythm}</span>
               </div>
-              <h2 className="text-3xl font-bold text-navy mb-4">Distinctive continuity narrative for CLC field presence</h2>
+              <h2 className="text-3xl font-bold text-navy mb-4">{copy.narrativeHeading}</h2>
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {clcBoothNarrativeSystem.map((stage, index) => (
                   <article key={stage} className="p-5 rounded-2xl border border-gray-100 bg-white shadow-sm">
-                    <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">Stage {index + 1}</p>
+                    <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">{copy.stageLabel} {index + 1}</p>
                     <h3 className="text-sm font-bold text-navy">{stage}</h3>
                   </article>
                 ))}
@@ -191,21 +259,21 @@ export default async function LocaleForCLCPage({
             <section>
               <div className="flex items-center gap-2 mb-3 text-electric">
                 <Users className="h-4 w-4" />
-                <span className="text-xs uppercase tracking-widest font-semibold">Executive Engagement Choreography</span>
+                <span className="text-xs uppercase tracking-widest font-semibold">{copy.engagementChoreography}</span>
               </div>
-              <h2 className="text-3xl font-bold text-navy mb-4">Stakeholder-specific entry points without sales theatrics</h2>
+              <h2 className="text-3xl font-bold text-navy mb-4">{copy.engagementHeading}</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {executiveEngagementChoreography.map((item) => (
                   <article key={item.stakeholder} className="p-5 rounded-2xl border border-gray-100 bg-gray-50">
                     <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">{item.emotionalEntry}</p>
                     <h3 className="text-sm font-bold text-navy mb-2">{item.stakeholder}</h3>
                     <p className="text-sm text-gray-600 mb-1">{item.openingMove}</p>
-                    <p className="text-xs text-gray-700"><span className="font-semibold">Outcome:</span> {item.engagementOutcome}</p>
+                    <p className="text-xs text-gray-700"><span className="font-semibold">{copy.outcomeLabel}</span> {item.engagementOutcome}</p>
                   </article>
                 ))}
               </div>
 
-              <h3 className="text-xl font-bold text-navy mt-8 mb-3">Stakeholder talk-track system</h3>
+              <h3 className="text-xl font-bold text-navy mt-8 mb-3">{copy.talkTrackHeading}</h3>
               <div className="grid md:grid-cols-2 gap-4">
                 {stakeholderTalkTrackSystem.map((track) => (
                   <article key={track.stakeholder} className="p-5 rounded-2xl border border-gray-100 bg-white">
@@ -225,9 +293,9 @@ export default async function LocaleForCLCPage({
             <section>
               <div className="flex items-center gap-2 mb-3 text-electric">
                 <QrCode className="h-4 w-4" />
-                <span className="text-xs uppercase tracking-widest font-semibold">QR Journey Architecture</span>
+                <span className="text-xs uppercase tracking-widest font-semibold">{copy.qrJourneyLabel}</span>
               </div>
-              <h2 className="text-3xl font-bold text-navy mb-4">Intentional conference journeys with continuity context</h2>
+              <h2 className="text-3xl font-bold text-navy mb-4">{copy.qrJourneyHeading}</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {qrJourneyArchitecture.map((journey) => (
                   <article key={journey.journey} className="p-5 rounded-2xl border border-gray-100 bg-white">
@@ -240,7 +308,7 @@ export default async function LocaleForCLCPage({
                 ))}
               </div>
 
-              <h3 className="text-xl font-bold text-navy mt-8 mb-3">Objection-handling framework</h3>
+              <h3 className="text-xl font-bold text-navy mt-8 mb-3">{copy.objectionHeading}</h3>
               <div className="space-y-3">
                 {objectionHandlingFramework.map((item) => (
                   <article key={item.concern} className="p-4 rounded-xl border border-gray-100 bg-gray-50">
@@ -251,7 +319,7 @@ export default async function LocaleForCLCPage({
                 ))}
               </div>
 
-              <h3 className="text-xl font-bold text-navy mt-8 mb-3">Pilot conversation pathway</h3>
+              <h3 className="text-xl font-bold text-navy mt-8 mb-3">{copy.pilotPathwayHeading}</h3>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {pilotConversationPathway.map((step, index) => (
                   <div key={step} className="p-3 rounded-lg border border-gray-100 bg-white text-sm text-navy font-semibold">
@@ -267,7 +335,7 @@ export default async function LocaleForCLCPage({
               <article className="p-6 rounded-2xl border border-gray-100 bg-white">
                 <div className="flex items-center gap-2 mb-3 text-electric">
                   <ClipboardList className="h-4 w-4" />
-                  <span className="text-xs uppercase tracking-widest font-semibold">Executive Briefing Packs</span>
+                  <span className="text-xs uppercase tracking-widest font-semibold">{copy.briefingPacksHeading}</span>
                 </div>
                 <div className="space-y-2 text-sm text-gray-700">
                   {executiveBriefingPacks.map((item) => (
@@ -277,7 +345,7 @@ export default async function LocaleForCLCPage({
               </article>
 
               <article className="p-6 rounded-2xl border border-gray-100 bg-gray-50">
-                <h3 className="text-lg font-bold text-navy mb-3">Procurement follow-up infrastructure</h3>
+                <h3 className="text-lg font-bold text-navy mb-3">{copy.procurementHeading}</h3>
                 <div className="space-y-2 text-sm text-gray-700">
                   {procurementFollowUpInfrastructure.map((item) => (
                     <div key={item} className="p-2 rounded bg-white border border-gray-100">{item}</div>
@@ -288,7 +356,7 @@ export default async function LocaleForCLCPage({
 
             <section className="grid lg:grid-cols-2 gap-8">
               <article className="p-6 rounded-2xl border border-gray-100 bg-white">
-                <h3 className="text-lg font-bold text-navy mb-3">Lead classification system</h3>
+                <h3 className="text-lg font-bold text-navy mb-3">{copy.leadClassificationHeading}</h3>
                 <div className="space-y-2">
                   {leadClassificationSystem.map((item) => (
                     <div key={item.segment} className="p-3 rounded-lg bg-gray-50 border border-gray-100">
@@ -300,7 +368,7 @@ export default async function LocaleForCLCPage({
               </article>
 
               <article className="p-6 rounded-2xl border border-gray-100 bg-gray-50">
-                <h3 className="text-lg font-bold text-navy mb-3">Post-conference continuity campaigns</h3>
+                <h3 className="text-lg font-bold text-navy mb-3">{copy.postConferenceHeading}</h3>
                 <div className="space-y-2 text-sm text-gray-700">
                   {postConferenceContinuityCampaigns.map((item) => (
                     <div key={item} className="p-2 rounded bg-white border border-gray-100">{item}</div>

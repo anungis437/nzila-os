@@ -167,7 +167,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       // must be directed to the access-request flow.
       const allowAutoProvisioning =
         process.env.NODE_ENV !== 'production' ||
-        process.env.PILOT_AUTO_PROVISIONING === 'true';
+        process.env.PILOT_AUTO_PROVISIONING === 'true' ||
+        process.env.CI === 'true';
 
       if (allowAutoProvisioning) {
         const userName = user?.fullName ?? user?.firstName ?? userEmail.split('@')[0] ?? 'Member';

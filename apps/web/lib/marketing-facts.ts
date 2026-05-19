@@ -4,15 +4,15 @@ export const MARKETING_FACTS = {
   verticalsLabel: '10+',
   flagshipPlatforms: 4,
   totalTamLabel: '$100B+',
-  backboneName: 'Nzila Backbone',
+  backboneName: 'Nzila OS',
 } as const
 
 export function platformCoverageLabel(): string {
-  return `${MARKETING_FACTS.productPlatforms} product platforms across ${MARKETING_FACTS.verticalsLabel} verticals`
+  return `${MARKETING_FACTS.productPlatforms} continuity product lines across ${MARKETING_FACTS.verticalsLabel} trust-sensitive sectors`
 }
 
 export function governedCoverageLabel(): string {
-  return `delivered through ${MARKETING_FACTS.governedApplications} governed applications`
+  return `supported by ${MARKETING_FACTS.governedApplications} governed operational applications`
 }
 
 export function portfolioHeadlineLabel(): string {

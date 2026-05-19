@@ -7172,19 +7172,19 @@
       "pillarItems": {
         "governance": {
           "name": "Gouvernance & continuité",
-          "desc": "Opérations constitutionnelles pour organisations fédérées"
+          "desc": "Opérations constitutionnelles"
         },
         "conventions": {
           "name": "Congrès & gouvernance fédérée",
-          "desc": "Coordination des délégués et décision fédérée"
+          "desc": "Délégués et décisions"
         },
         "continuity": {
           "name": "Mémoire institutionnelle",
-          "desc": "Doctrine, précédents et archive de continuité"
+          "desc": "Mémoire et précédents"
         },
         "trust": {
           "name": "Confiance & intendance",
-          "desc": "Audit, souveraineté et engagements d'intendance"
+          "desc": "Audit et souveraineté"
         }
       },
       "story": "Notre histoire",
@@ -7778,7 +7778,7 @@
       "defensibilityTitle": "Défensibilité juridique",
       "defensibilityDesc": "Les décisions de griefs, les allocations financières et les changements de droits sont enregistrés avec attribution, horodatage et justification — prêts pour examen.",
       "phase6": {
-        "tabScenario": "Intelligence de scénarios",
+        "tabScenario": "Scénarios",
         "leadershipTitle": "Scénarios de continuité lors des transitions de leadership",
         "leadershipDesc": "Ces scénarios reflètent des transitions institutionnelles réelles et montrent des réponses calmes qui préservent la cohérence de gouvernance.",
         "frictionTitle": "Flux de simulation des frictions de gouvernance",

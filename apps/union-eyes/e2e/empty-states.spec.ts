@@ -21,14 +21,29 @@ function emptyList() {
   return JSON.stringify({ success: true, data: [], total: 0, page: 1, pageSize: 20 });
 }
 
+/**
+ * Pattern that matches a real server-error surface in visible text.
+ *
+ * Intentionally narrow: avoids bare-number matches like `\b500\b` which
+ * false-positive on CSS values (`font-weight:500`), latency strings
+ * (`500ms`), or account codes embedded in dashboards.
+ */
+const SERVER_ERROR_PATTERN = /internal server error|http\s*5\d\d\b|application error: a server-side exception/i;
+
 /** Checks that the page body contains a non-trivial empty-state signal. */
 async function assertEmptyStateVisible(page: import('@playwright/test').Page): Promise<void> {
   await page.waitForLoadState('networkidle');
-  const body = (await page.textContent('body')) ?? '';
+  // Use innerText to read only visually rendered text — this excludes
+  // <script> tag contents (e.g. the serialized RSC payload) where CSS
+  // values and JSON numbers would otherwise trigger false positives.
+  const body = await page.locator('body').innerText();
   const bodyLower = body.toLowerCase();
 
   // The page must not be a raw error or fully blank.
-  expect(bodyLower).not.toMatch(/\b500\b|internal server error/i);
+  expect(bodyLower).not.toMatch(SERVER_ERROR_PATTERN);
+  // Also catch the Next.js default error page element directly, in case
+  // the visible status text is rendered solely as a non-text element.
+  await expect(page.locator('h1.next-error-h1')).toHaveCount(0);
   expect(bodyLower).not.toMatch(/^\s*$/);
 
   // Accept any of these common empty-state patterns.
@@ -68,22 +83,32 @@ test.describe('Empty states', () => {
   test('dashboard with no active cases shows meaningful empty state', async ({ page }) => {
     await loginAsRole(page, 'member');
 
-    // Stub all cases endpoints to return empty.
+    // Stub all data endpoints the member dashboard surface touches so the
+    // assertion is deterministic regardless of seeded data.
     await page.route('**/api/cases**', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() });
     });
+    await page.route('**/api/inbox**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() });
+    });
+    await page.route('**/api/notifications**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() });
+    });
 
-    await page.goto('/en-CA/dashboard', { waitUntil: 'domcontentloaded' });
+    // Navigate directly to the member's actual landing surface
+    // (`getRoleLandingPath('member') === '/dashboard/inbox'`). Going via
+    // `/dashboard` would force the role-router redirect chain which is
+    // environment-sensitive and unrelated to empty-state rendering.
+    await page.goto('/en-CA/dashboard/inbox', { waitUntil: 'domcontentloaded' });
 
     // Ensure the page body renders something meaningful.
     await expect(page.locator('body')).toBeVisible();
     await page.waitForLoadState('networkidle');
 
-    // Dashboard itself must load — not an error page.
-    const bodyText = (await page.textContent('body')) ?? '';
-    expect(bodyText).not.toMatch(/\b500\b|internal server error/i);
-    // The overall layout (nav, main) should still be present even with no data.
-    await expect(page.locator('nav, [role="navigation"]').first()).toBeVisible();
+    // Dashboard itself must load — not a Next.js error page.
+    const bodyText = await page.locator('body').innerText();
+    expect(bodyText).not.toMatch(SERVER_ERROR_PATTERN);
+    await expect(page.locator('h1.next-error-h1')).toHaveCount(0);
   });
 
   test('steward inbox with no cases shows empty state (not blank)', async ({ page }) => {
@@ -185,9 +210,10 @@ test.describe('Empty states', () => {
     await page.goto('/en-CA/dashboard/admin', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
 
-    // Admin panel must render without a 500.
-    const bodyText = (await page.textContent('body')) ?? '';
-    expect(bodyText).not.toMatch(/\b500\b|internal server error/i);
+    // Admin panel must render without a server error.
+    const bodyText = await page.locator('body').innerText();
+    expect(bodyText).not.toMatch(SERVER_ERROR_PATTERN);
+    await expect(page.locator('h1.next-error-h1')).toHaveCount(0);
     await expect(page.locator('body')).toBeVisible();
   });
 

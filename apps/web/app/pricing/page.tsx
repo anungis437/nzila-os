@@ -28,8 +28,8 @@ function loadMatrix(): PricingMatrix {
 const tiers = [
   {
     id: 'enterprise',
-    en: { name: 'Enterprise', desc: 'Multi-tenant, multi-region deployments with full governance, audit, and dedicated success.', price: 'Custom' },
-    fr: { name: 'Entreprise', desc: 'Déploiements multi-tenant, multi-régions avec gouvernance, audit et succès dédié.', price: 'Sur mesure' },
+    en: { name: 'Enterprise', desc: 'Multi-organization, multi-region deployments with full governance, audit, and dedicated success.', price: 'Custom' },
+    fr: { name: 'Entreprise', desc: 'Déploiements multi-organisation, multi-régions avec gouvernance, audit et succès dédié.', price: 'Sur mesure' },
   },
   {
     id: 'growth',

@@ -29,59 +29,137 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const isFr = locale === 'fr-CA';
   return {
-    title: 'Executive Intelligence | UnionEyes',
-    description:
-      'Calm, executive-grade strategic summaries and leadership continuity intelligence for union executives. Operational clarity without technical complexity.',
+    title: isFr ? 'Intelligence exécutive | UnionEyes' : 'Executive Intelligence | UnionEyes',
+    description: isFr
+      ? 'Résumés stratégiques calmes et intelligence de continuité pour les directions syndicales. Clarté opérationnelle sans complexité technique.'
+      : 'Calm, executive-grade strategic summaries and leadership continuity intelligence for union executives. Operational clarity without technical complexity.',
     alternates: buildLocaleAlternates(locale, '/executive-intelligence'),
   };
 }
 
-const surfaces = [
-  {
-    icon: FileText,
-    title: 'Strategic Summaries',
-    desc: 'Executive-grade summaries of organizational status, continuity risks, and strategic priorities — human-readable and action-oriented.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Continuity Visibility',
-    desc: 'See organizational continuity health at a glance: what knowledge is at risk, where transitions are occurring, and what requires leadership attention.',
-  },
-  {
-    icon: Users,
-    title: 'Leadership Continuity Tracking',
-    desc: 'Track succession readiness, knowledge transfer progress, and continuity preparedness across the organization.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Governance-of-Record Intelligence Briefings',
-    desc: 'Governance modernization progress, explainability audit status, and continuity oversight summaries — built for board-level review.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Trust & Compliance Dashboards',
-    desc: 'Operational trust posture, governance compliance status, and institutional audit readiness — all in one executive surface.',
-  },
-  {
-    icon: Layers,
-    title: 'Organizational Memory Snapshots',
-    desc: 'Point-in-time views of organizational knowledge, historical precedents, and institutional context available for executive review.',
-  },
-];
+const surfaces = {
+  'en-CA': [
+    {
+      icon: FileText,
+      title: 'Strategic Summaries',
+      desc: 'Executive-grade summaries of organizational status, continuity risks, and strategic priorities — human-readable and action-oriented.',
+    },
+    {
+      icon: TrendingUp,
+      title: 'Continuity Visibility',
+      desc: 'See organizational continuity health at a glance: what knowledge is at risk, where transitions are occurring, and what requires leadership attention.',
+    },
+    {
+      icon: Users,
+      title: 'Leadership Continuity Tracking',
+      desc: 'Track succession readiness, knowledge transfer progress, and continuity preparedness across the organization.',
+    },
+    {
+      icon: BarChart3,
+      title: 'Governance-of-Record Intelligence Briefings',
+      desc: 'Governance modernization progress, explainability audit status, and continuity oversight summaries — built for board-level review.',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Trust & Compliance Dashboards',
+      desc: 'Operational trust posture, governance compliance status, and institutional audit readiness — all in one executive surface.',
+    },
+    {
+      icon: Layers,
+      title: 'Organizational Memory Snapshots',
+      desc: 'Point-in-time views of organizational knowledge, historical precedents, and institutional context available for executive review.',
+    },
+  ],
+  'fr-CA': [
+    {
+      icon: FileText,
+      title: 'Résumés stratégiques',
+      desc: 'Des résumés de niveau direction sur l’état organisationnel, les risques de continuité et les priorités stratégiques — lisibles et orientés action.',
+    },
+    {
+      icon: TrendingUp,
+      title: 'Visibilité de la continuité',
+      desc: 'Visualisez la santé de la continuité organisationnelle : savoir à risque, transitions en cours, points d’attention pour la direction.',
+    },
+    {
+      icon: Users,
+      title: 'Suivi de la continuité du leadership',
+      desc: 'Suivez la préparation à la succession, le transfert de connaissances et la préparation à la continuité dans toute l’organisation.',
+    },
+    {
+      icon: BarChart3,
+      title: 'Briefings de gouvernance officielle',
+      desc: 'Progrès de la modernisation de la gouvernance, audit d’explicabilité et synthèses de supervision — conçus pour le conseil d’administration.',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Tableaux de confiance et conformité',
+      desc: 'Posture de confiance opérationnelle, conformité de gouvernance et préparation à l’audit institutionnel — tout sur une surface direction.',
+    },
+    {
+      icon: Layers,
+      title: 'Instantanés de mémoire organisationnelle',
+      desc: 'Vues ponctuelles des connaissances, précédents historiques et contexte institutionnel disponibles pour la direction.',
+    },
+  ],
+};
 
-const principles = [
-  { label: 'Calm',              desc: 'No technical complexity exposed at executive surfaces' },
-  { label: 'Strategic',         desc: 'Focused on organizational direction and continuity' },
-  { label: 'Explainable',       desc: 'Every summary traces back to evidence' },
-  { label: 'Governance-safe',   desc: 'Full human oversight at all decision points' },
-  { label: 'Labour-safe',       desc: 'Zero individual monitoring or worker conduct grading' },
-  { label: 'Enterprise-grade',  desc: 'Built for institutional trust, not startup dashboards' },
-];
+const principles = {
+  'en-CA': [
+    { label: 'Calm',              desc: 'No technical complexity exposed at executive surfaces' },
+    { label: 'Strategic',         desc: 'Focused on organizational direction and continuity' },
+    { label: 'Explainable',       desc: 'Every summary traces back to evidence' },
+    { label: 'Governance-safe',   desc: 'Full human oversight at all decision points' },
+    { label: 'Labour-safe',       desc: 'Zero individual monitoring or worker conduct grading' },
+    { label: 'Enterprise-grade',  desc: 'Built for institutional trust, not startup dashboards' },
+  ],
+  'fr-CA': [
+    { label: 'Calme',              desc: 'Aucune complexité technique exposée aux surfaces directionnelles' },
+    { label: 'Stratégique',        desc: 'Axé sur la direction organisationnelle et la continuité' },
+    { label: 'Explicable',         desc: 'Chaque résumé est traçable à ses preuves' },
+    { label: 'Sûr pour la gouvernance', desc: 'Supervision humaine à chaque point de décision' },
+    { label: 'Respectueux du travail',  desc: 'Aucune surveillance individuelle ni notation de conduite' },
+    { label: 'De niveau entreprise',    desc: 'Conçu pour la confiance institutionnelle, pas pour des dashboards de startup' },
+  ],
+};
 
-export default function ExecutiveIntelligencePage() {
+export default async function ExecutiveIntelligencePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const briefingCta = locale === 'fr-CA' ? 'Demander un breffage institutionnel' : 'Request an Institutional Briefing';
+  const surfacesArr = surfaces[locale as keyof typeof surfaces] ?? surfaces['en-CA'];
+  const principlesArr = principles[locale as keyof typeof principles] ?? principles['en-CA'];
+  const stakeholderJourney = {
+    'en-CA': [
+      'See continuity risks before they become crises',
+      'Lead governance modernization with explainable intelligence',
+      'Maintain strategic coherence through succession and change',
+      'Communicate institutional health to boards with confidence',
+    ],
+    'fr-CA': [
+      'Voir les risques de continuité avant qu’ils ne deviennent des crises',
+      'Piloter la modernisation de la gouvernance avec une intelligence explicable',
+      'Maintenir la cohérence stratégique lors des successions et des changements',
+      'Communiquer la santé institutionnelle aux conseils avec confiance',
+    ],
+  };
+  const stakeholderJourneyArr = stakeholderJourney[locale as keyof typeof stakeholderJourney] ?? stakeholderJourney['en-CA'];
+  const faqs = {
+    'en-CA': [
+      { q: 'Does this feel strategically trustworthy?',  a: 'Executive Intelligence is built to earn institutional trust through transparency and explainability.' },
+      { q: 'Does this feel operationally mature?',       a: 'Calm, modular, and enterprise-grade — not startup dashboards or AI admin panels.' },
+      { q: 'Does this feel labour-safe?',                a: 'Zero worker surveillance. Human oversight built into every intelligence output.' },
+    ],
+    'fr-CA': [
+      { q: 'Est-ce stratégiquement digne de confiance ?', a: 'L’intelligence exécutive est conçue pour mériter la confiance institutionnelle par la transparence et l’explicabilité.' },
+      { q: 'Est-ce opérationnellement mature ?', a: 'Calme, modulaire et de niveau entreprise — pas des dashboards de startup ou des panneaux IA.' },
+      { q: 'Est-ce respectueux du travail ?', a: 'Aucune surveillance des travailleurs. Supervision humaine intégrée à chaque sortie d’intelligence.' },
+    ],
+  };
+  const faqsArr = faqs[locale as keyof typeof faqs] ?? faqs['en-CA'];
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen bg-white">
 
       {/* ── Hero ── */}
       <MarketingHeroSection
@@ -95,10 +173,10 @@ export default function ExecutiveIntelligencePage() {
         description="Executive Intelligence surfaces institutional continuity, governance modernization status, and organizational health — in calm, executive-readable formats designed for leadership decision-making."
         cta={
           <Link
-            href="/pilot-request"
+            href={`/${locale}/pilot-request`}
             className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
-            Request an Institutional Briefing
+            {briefingCta}
           </Link>
         }
       />
@@ -110,7 +188,7 @@ export default function ExecutiveIntelligencePage() {
             Executive Intelligence Design Principles
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {principles.map((p) => (
+            {principlesArr.map((p) => (
               <div key={p.label} className="text-center p-4 rounded-xl bg-white border border-gray-100">
                 <div className="text-sm font-bold text-navy mb-1">{p.label}</div>
                 <div className="text-xs text-gray-500 leading-tight">{p.desc}</div>
@@ -132,7 +210,7 @@ export default function ExecutiveIntelligencePage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {surfaces.map((s) => (
+            {surfacesArr.map((s) => (
               <div key={s.title} className="p-6 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
                 <div className="w-10 h-10 rounded-xl bg-electric/10 flex items-center justify-center mb-4">
                   <s.icon className="h-5 w-5 text-electric" />
@@ -159,12 +237,7 @@ export default function ExecutiveIntelligencePage() {
                 technical reports or fragmented operational data.
               </p>
               <ul className="space-y-3">
-                {[
-                  'See continuity risks before they become crises',
-                  'Lead governance modernization with explainable intelligence',
-                  'Maintain strategic coherence through succession and change',
-                  'Communicate institutional health to boards with confidence',
-                ].map((item) => (
+                {stakeholderJourneyArr.map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
                     <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5" />
                     {item}
@@ -173,11 +246,7 @@ export default function ExecutiveIntelligencePage() {
               </ul>
             </div>
             <div className="space-y-4">
-              {[
-                { q: 'Does this feel strategically trustworthy?',  a: 'Executive Intelligence is built to earn institutional trust through transparency and explainability.' },
-                { q: 'Does this feel operationally mature?',       a: 'Calm, modular, and enterprise-grade — not startup dashboards or AI admin panels.' },
-                { q: 'Does this feel labour-safe?',                a: 'Zero worker surveillance. Human oversight built into every intelligence output.' },
-              ].map((item) => (
+                {faqsArr.map((item) => (
                 <div key={item.q} className="p-5 rounded-xl bg-white border border-gray-100">
                   <p className="text-sm font-semibold text-navy mb-2">{item.q}</p>
                   <p className="text-sm text-gray-600">{item.a}</p>
@@ -195,13 +264,15 @@ export default function ExecutiveIntelligencePage() {
             Ready to lead with institutional clarity?
           </h2>
           <p className="text-white/70 mb-8">
-            Request an Executive Briefing to see Executive Intelligence in action for your organization.
+            {locale === 'fr-CA'
+              ? 'Demandez un breffage exécutif pour voir l’intelligence exécutive en action dans votre organisation.'
+              : 'Request an Executive Briefing to see Executive Intelligence in action for your organization.'}
           </p>
           <Link
-            href="/pilot-request"
+            href={`/${locale}/pilot-request`}
             className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
           >
-            Request an Institutional Briefing
+            {briefingCta}
           </Link>
         </div>
       </section>

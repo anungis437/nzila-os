@@ -10,16 +10,16 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Verticals',
-  description: '10+ strategic verticals — Fintech, Healthtech, Agrotech, Legaltech, EdTech, Uniontech, and more. Each powered by purpose-built AI.',
+  description: 'Trust-sensitive sectors where Nzila applies continuity, governance, operational memory, evidence, and sovereignty infrastructure.',
   openGraph: {
     title: 'Nzila Ventures Verticals',
-    description: 'AI-powered platforms across 10+ strategic verticals.',
+    description: 'Continuity infrastructure across trust-sensitive sectors.',
     images: [{ url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Technology conference audience in a large auditorium with stage lighting' }],
   },
   alternates: { canonical: '/verticals' },
 };
 
-// Updated to reflect 4 flagship platforms: UnionEyes, Zonga, Flow, Agrimo
+// Public sector map for continuity-critical product lines.
 const verticals = [
   {
     slug: 'fintech',
@@ -44,8 +44,8 @@ const verticals = [
     name: 'Uniontech',
     photo: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
     alt: 'Labor union workers raising hands together in solidarity',
-    platforms: ['UnionEyes'],
-    description: 'Union management, pension forecasting, grievance tracking, and CBA intelligence.',
+    platforms: ['Union Eyes'],
+    description: 'Institutional continuity, grievance lineage, steward handoffs, governance evidence, and CBA context.',
     tam: '$50B', orgs: '4,773', status: 'Flagship',
   },
   {
@@ -199,8 +199,8 @@ export default async function Verticals() {
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               {isFr
-                ? 'Des secteurs divers unis par une mission commune : construire une technologie IA éthique, alignee B Corp, qui sert de vrais besoins humains en sante, finance, justice et plus.'
-                : 'Diverse sectors united by a common mission: building ethical, B Corp-aligned AI technology that serves real human needs across healthcare, finance, justice, and beyond.'}
+                ? 'Des secteurs où la continuité, la mémoire opérationnelle, les preuves de gouvernance et la confiance institutionnelle deviennent matérielles.'
+                : 'Sectors where continuity, operational memory, governance evidence, and institutional trust become materially important.'}
             </p>
           </ScrollReveal>
         </div>
@@ -298,15 +298,15 @@ export default async function Verticals() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge={isFr ? 'Synergies' : 'Synergies'}
-            title={isFr ? 'Impact inter-verticales' : 'Cross-Vertical Impact'}
-            subtitle={isFr ? 'Notre infrastructure Backbone unifiee active des synergies puissantes dans chaque verticale' : 'Our unified Backbone infrastructure enables powerful synergies across every vertical'}
+            badge={isFr ? 'Infrastructure commune' : 'Shared Infrastructure'}
+            title={isFr ? 'Nzila OS relie les lignes sans effacer leur contexte' : 'Nzila OS connects product lines without erasing their context'}
+            subtitle={isFr ? 'Les primitives partagées servent la continuité, les preuves et la gouvernance tout en respectant les limites organisationnelles.' : 'Shared primitives serve continuity, evidence, and governance while respecting organizational boundaries.'}
           />
 
           <div className="grid md:grid-cols-4 gap-6">
             {[
               { value: 80, suffix: '%+', label: isFr ? 'Reutilisation code' : 'Code Reuse', sub: isFr ? 'Services partages entre verticales' : 'Shared services across verticals' },
-              { value: 56, suffix: '%', label: isFr ? 'Gain de temps' : 'Time Savings', sub: isFr ? 'Grace a la migration Backbone' : 'Through Backbone migration' },
+              { value: 56, suffix: '%', label: isFr ? 'Réduction pilote visée' : 'Pilot Reduction Target', sub: isFr ? 'Grâce à la migration Nzila OS' : 'Through Nzila OS migration' },
               { value: 5.7, prefix: '$', suffix: 'M', label: isFr ? 'Valeur PI' : 'IP Value', sub: isFr ? 'Secrets commerciaux et brevets' : 'Trade secrets & patents' },
               { value: 200, suffix: '+', label: isFr ? 'Prompts IA' : 'AI Prompts', sub: isFr ? 'Bibliotheque Companion Engine' : 'Companion Engine library' },
             ].map((stat, i) => (
@@ -329,8 +329,6 @@ export default async function Verticals() {
     </main>
   );
 }
-
-
 
 
 

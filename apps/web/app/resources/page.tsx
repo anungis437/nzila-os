@@ -5,12 +5,12 @@ import { getAllDocs } from '@/lib/docs';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionDivider from '@/components/public/SectionDivider';
 import TrackedLink from '@/components/public/TrackedLink';
-import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
+import { governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Resources',
-  description: 'Public documentation, guides, and technical resources from Nzila Ventures — the APEX of AI in social impact.',
+  description: 'Public documentation, doctrine explainers, and operational resources from Nzila Ventures.',
   openGraph: {
     title: 'Nzila Ventures Resources',
     description: `Documentation, guides, and technical resources for ${platformCoverageLabel()} and ${governedCoverageLabel()}.`,
@@ -84,21 +84,21 @@ export default async function ResourcesPage() {
       label: isFr ? 'Architecture plateforme' : 'Platform Architecture',
       href: '/platform',
       icon: '🏗️',
-      description: isFr ? 'Notre infrastructure Backbone unifiee' : 'Our unified Backbone infrastructure',
+      description: isFr ? 'Notre infrastructure Nzila OS gouvernée' : 'Our governed Nzila OS infrastructure',
     },
     {
-      label: isFr ? "Thèse d'investissement" : 'Investment Thesis',
-      href: '/investors',
+      label: isFr ? 'Évaluation continuité' : 'Continuity Assessment',
+      href: '/continuity-assessment',
       icon: '📈',
-      description: isFr ? 'Occasion Série A et analyse de marché' : 'Series A opportunity & market analysis',
+      description: isFr ? 'Diagnostic ICRA et risque institutionnel' : 'ICRA diagnostic and institutional risk',
     },
     {
-      label: isFr ? 'Apercu portefeuille' : 'Portfolio Overview',
-      href: '/portfolio',
+      label: isFr ? 'Union Eyes' : 'Union Eyes',
+      href: '/union-eyes',
       icon: '📊',
       description: isFr
-        ? `${MARKETING_FACTS.productPlatforms} plateformes produit, ${MARKETING_FACTS.governedApplications} applications gouvernées`
-        : `${MARKETING_FACTS.productPlatforms} product platforms, ${MARKETING_FACTS.governedApplications} governed applications`,
+        ? 'Produit de validation phare pour organisations syndicales'
+        : 'Flagship validation product for labor organizations',
     },
     {
       label: isFr ? 'Nous contacter' : 'Contact Us',
@@ -158,8 +158,8 @@ export default async function ResourcesPage() {
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-2xl">
               {isFr
-                ? 'Explorez notre documentation publique, nos guides techniques et nos analyses stratégiques de l écosystème Nzila Ventures.'
-                : 'Explore our public documentation, technical guides, and strategic insights into the Nzila Ventures ecosystem.'}
+                ? 'Explorez la doctrine publique, les guides techniques et les analyses opérationnelles de Nzila Ventures.'
+                : 'Explore public doctrine, technical guides, and operational insights from Nzila Ventures.'}
             </p>
           </ScrollReveal>
           {totalDocs > 0 && (
@@ -341,8 +341,6 @@ export default async function ResourcesPage() {
     </main>
   );
 }
-
-
 
 
 

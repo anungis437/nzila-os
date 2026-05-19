@@ -5,14 +5,14 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'ROI calculator',
-  description: 'Estimate the operational savings of moving to a Nzila product — Union Eyes, Flow, FAIRCASE.',
+  description: 'Estimate continuity, governance, and operational savings from Union Eyes, Flow, and FAIRCASE pilots.',
   alternates: { canonical: '/roi' },
 };
 
 const scenarios = [
   {
-    en: { product: 'Union Eyes', driver: 'Reduce grievance handling time by 40%', annualSaving: 'CA$120,000 (per 5 staff)' },
-    fr: { product: 'Union Eyes', driver: 'Réduire le temps de traitement des griefs de 40%', annualSaving: '120 000 $ CA (par 5 employés)' },
+    en: { product: 'Union Eyes', driver: 'Reduce grievance handoff and reconstruction time by 40%', annualSaving: 'CA$120,000 (per 5 staff)' },
+    fr: { product: 'Union Eyes', driver: 'Réduire le temps de transfert et reconstruction des griefs de 40%', annualSaving: '120 000 $ CA (par 5 employés)' },
   },
   {
     en: { product: 'Flow', driver: 'Cut order-to-cash cycle from 14 → 6 days', annualSaving: 'CA$80,000 (working capital)' },

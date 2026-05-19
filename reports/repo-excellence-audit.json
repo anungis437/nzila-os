@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T18:57:01.101Z",
+  "generatedAt": "2026-05-19T02:06:20.232Z",
   "overallScore": 7.2,
   "categories": {
     "runtime_proof": {
@@ -65,7 +65,8 @@
       "findings": []
     }
   },
-  "blockers": [
+  "gateBlockers": [],
+  "improvementBacklog": [
     {
       "category": "runtime_proof",
       "finding": "MTTR is still missing live incident feed integration."
@@ -126,5 +127,6 @@
       "category": "dead_assets",
       "finding": "Legacy app-specific deployment entry points remain present and should stay demoted to emergency/manual use only."
     }
-  ]
+  ],
+  "blockers": []
 }
