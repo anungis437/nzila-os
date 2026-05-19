@@ -6,12 +6,24 @@ import Link from "next/link";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@nzila/platform-auth/entra/client";
-import { Building2, CircleDot } from "lucide-react";
+import {
+  BarChart3,
+  BookOpen,
+  BriefcaseBusiness,
+  Building2,
+  CalendarDays,
+  CircleDot,
+  FolderOpen,
+  LayoutDashboard,
+  Scale,
+  type LucideIcon,
+} from "lucide-react";
 import type { SelectProfile } from "@/db/schema/domains/member";
 import { useOrganization } from "@/contexts/organization-context";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
 import {
   getDashboardExperience,
+  getCupe4373DemoNavigation,
   getNavigationForExperience,
   type NavigationItem,
 } from "@/lib/dashboard/role-experience";
@@ -23,13 +35,32 @@ interface SidebarProps {
   whopYearlyPlanId: string;
   userRole?: string;
   platformOrgId?: string;
+  isCupeDemo?: boolean;
 }
 
 function iconForItem(item: NavigationItem) {
-  return <CircleDot size={14} className="shrink-0" />;
+  const iconsByKey: Record<NonNullable<NavigationItem["icon"]>, LucideIcon> = {
+    dashboard: LayoutDashboard,
+    cases: BriefcaseBusiness,
+    grievances: Scale,
+    agreements: BookOpen,
+    calendar: CalendarDays,
+    documents: FolderOpen,
+    reports: BarChart3,
+  };
+  const iconsByHref: Record<string, LucideIcon> = {
+    "/dashboard": LayoutDashboard,
+    "/dashboard/cases": BriefcaseBusiness,
+    "/dashboard/work": BriefcaseBusiness,
+    "/dashboard/agreements": BookOpen,
+    "/dashboard/calendar": CalendarDays,
+    "/dashboard/reports": BarChart3,
+  };
+  const Icon = item.icon ? iconsByKey[item.icon] : iconsByHref[item.href] ?? CircleDot;
+  return <Icon size={16} className="shrink-0" aria-hidden="true" />;
 }
 
-export default function Sidebar({ profile, userEmail, userRole, platformOrgId }: SidebarProps) {
+export default function Sidebar({ profile, userEmail, userRole, platformOrgId, isCupeDemo = false }: SidebarProps) {
   const locale = useLocale();
   const pathname = usePathname();
   const { organization } = useOrganization();
@@ -45,6 +76,10 @@ export default function Sidebar({ profile, userEmail, userRole, platformOrgId }:
   const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
 
   const items = useMemo(() => {
+    if (isCupeDemo) {
+      return getCupe4373DemoNavigation();
+    }
+
     const nav = getNavigationForExperience(experience);
 
     // In pilot mode, keep only routes in the role-first IA shell.
@@ -54,7 +89,7 @@ export default function Sidebar({ profile, userEmail, userRole, platformOrgId }:
 
     const pilotAllowed = new Set(nav.map((entry) => entry.href));
     return nav.filter((entry) => pilotAllowed.has(entry.href));
-  }, [experience, isPilotMode]);
+  }, [experience, isPilotMode, isCupeDemo]);
 
   const identityLabel = userEmail || profile?.email || "User";
 

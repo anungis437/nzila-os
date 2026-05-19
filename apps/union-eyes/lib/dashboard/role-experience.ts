@@ -3,6 +3,7 @@ export type DashboardExperience = 'member' | 'staff' | 'executive' | 'governance
 export type NavigationItem = {
   label: string;
   href: string;
+  icon?: 'dashboard' | 'cases' | 'grievances' | 'agreements' | 'calendar' | 'reports' | 'documents';
 };
 
 const ADMIN_ROLES = new Set([
@@ -53,6 +54,49 @@ const STAFF_ROLES = new Set([
   'federation_staff',
 ]);
 
+const CUPE4373_DEMO_PROFILE = 'cupe4373';
+
+const CUPE4373_DEMO_NAVIGATION: NavigationItem[] = [
+  { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
+  { label: 'Cases', href: '/dashboard/cases', icon: 'cases' },
+  { label: 'Grievances', href: '/dashboard/grievances', icon: 'grievances' },
+  { label: 'Agreements', href: '/dashboard/agreements', icon: 'agreements' },
+  { label: 'Calendar', href: '/dashboard/calendar', icon: 'calendar' },
+  { label: 'Documents', href: '/dashboard/documents', icon: 'documents' },
+  { label: 'Reports', href: '/dashboard/reports', icon: 'reports' },
+];
+
+export function getCupe4373DemoNavigation(): NavigationItem[] {
+  return CUPE4373_DEMO_NAVIGATION;
+}
+
+const CUPE4373_DEMO_ALLOWED_PREFIXES = [
+  '/dashboard',
+  '/dashboard/work',
+  '/dashboard/cases',
+  '/dashboard/grievances',
+  '/dashboard/agreements',
+  '/dashboard/calendar',
+  '/dashboard/documents',
+  '/dashboard/reports',
+  '/dashboard/profile',
+];
+
+function readRuntimeMarker(name: string): string {
+  return (process.env[name] ?? '').trim().toLowerCase();
+}
+
+export function isCupe4373DemoRuntime(): boolean {
+  const publicDemoProfile = (process.env.NEXT_PUBLIC_UE_DEMO_PROFILE ?? '').trim().toLowerCase();
+  const publicFeatureProfile = (process.env.NEXT_PUBLIC_UE_FEATURE_PROFILE ?? '').trim().toLowerCase();
+  return (
+    publicDemoProfile === CUPE4373_DEMO_PROFILE
+    || publicFeatureProfile === CUPE4373_DEMO_PROFILE
+    || readRuntimeMarker('UE_FEATURE_PROFILE') === CUPE4373_DEMO_PROFILE
+    || readRuntimeMarker('UE_DEPLOYMENT_TYPE') === 'cupe4373-demo'
+  );
+}
+
 export function getDashboardExperience(role?: string | null): DashboardExperience {
   const normalized = (role ?? 'member').toLowerCase();
 
@@ -64,6 +108,8 @@ export function getDashboardExperience(role?: string | null): DashboardExperienc
 }
 
 export function getRoleLandingPath(role?: string | null): string {
+  if (isCupe4373DemoRuntime()) return '/dashboard';
+
   const experience = getDashboardExperience(role);
   if (experience === 'member') return '/dashboard/inbox';
   // staff lands on the Workbench tile, which is the first nav item below
@@ -77,6 +123,10 @@ export function getRoleLandingPath(role?: string | null): string {
 }
 
 export function getNavigationForExperience(experience: DashboardExperience): NavigationItem[] {
+  if (isCupe4373DemoRuntime()) {
+    return CUPE4373_DEMO_NAVIGATION;
+  }
+
   if (experience === 'member') {
     return [
       { label: 'Home', href: '/dashboard/inbox' },
@@ -228,7 +278,9 @@ const PILOT_EXCLUDED_PREFIXES = [
 ] as const;
 
 export function canAccessDashboardPath(pathname: string, experience: DashboardExperience, isPilotMode: boolean): boolean {
-  const allowedPrefixes = ALLOWED_PREFIXES_BY_EXPERIENCE[experience];
+  const allowedPrefixes = isCupe4373DemoRuntime()
+    ? CUPE4373_DEMO_ALLOWED_PREFIXES
+    : ALLOWED_PREFIXES_BY_EXPERIENCE[experience];
   const isAllowed = allowedPrefixes.some((prefix) => {
     if (prefix === '/dashboard') {
       return pathname === '/dashboard';
