@@ -7172,19 +7172,19 @@
       "pillarItems": {
         "governance": {
           "name": "Governance & Continuity",
-          "desc": "Constitutional operations for federated organizations"
+          "desc": "Constitutional operations"
         },
         "conventions": {
-          "name": "Conventions & Federated Democratic Governance",
-          "desc": "Delegate coordination and federated decision-making"
+          "name": "Conventions & Federated Governance",
+          "desc": "Delegates and decisions"
         },
         "continuity": {
           "name": "Institutional Memory",
-          "desc": "Doctrine, precedents, and continuity archive"
+          "desc": "Memory and precedents"
         },
         "trust": {
           "name": "Trust & Stewardship",
-          "desc": "Audit, sovereignty, and stewardship commitments"
+          "desc": "Audit and sovereignty"
         }
       },
       "story": "Our Story",

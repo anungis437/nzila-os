@@ -1,7 +1,8 @@
 /**
  * STACK_AUTHORITY_001 — "Django-authoritative apps must not mutate via Drizzle directly"
  *
- * Enforces the Stack Authority Rules (docs/architecture/STACK_AUTHORITY.md):
+ * Enforces the Stack Authority Rules
+ * (docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md):
  *
  * 1. Django-authoritative apps (union-eyes, abr): TS layer MUST NOT contain
  *    direct Drizzle mutations (db.insert, db.update, db.delete) unless:
@@ -13,7 +14,7 @@
  *    (no `django-proxy.ts`, no Python `manage.py`, no `backend/` directory)
  *
  * 3. No app may introduce a new Django backend without updating
- *    docs/architecture/STACK_AUTHORITY.md
+ *    docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md
  *
  * @invariant STACK_AUTHORITY_001
  */
@@ -145,9 +146,7 @@ function walkTsFiles(dir: string): string[] {
  *
  * Returns array of lines with violations.
  */
-function findDirectMutations(
-  content: string,
-): { line: number; text: string }[] {
+function findDirectMutations(content: string): { line: number; text: string }[] {
   const violations: { line: number; text: string }[] = []
   const lines = content.split('\n')
 
@@ -162,9 +161,7 @@ function findDirectMutations(
     // If the function is inside a withRLSContext callback or uses
     // createAuditedScopedDb, it's safe
     const contextWindow = lines.slice(Math.max(0, i - 50), i + 1).join('\n')
-    const isSafe = SAFE_MUTATION_CONTEXTS.some((ctx) =>
-      contextWindow.includes(ctx),
-    )
+    const isSafe = SAFE_MUTATION_CONTEXTS.some((ctx) => contextWindow.includes(ctx))
     if (isSafe) continue
 
     violations.push({ line: i + 1, text: line.trim().slice(0, 120) })
@@ -175,9 +172,7 @@ function findDirectMutations(
 // ── STACK_AUTHORITY_001 ─────────────────────────────────────────────────────
 
 describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
-  const exceptionFile = loadExceptions(
-    'governance/exceptions/stack-authority.json',
-  )
+  const exceptionFile = loadExceptions('governance/exceptions/stack-authority.json')
 
   it('Django-authoritative apps must not contain direct Drizzle mutations in app-layer TS files', () => {
     const violations: Violation[] = []
@@ -223,8 +218,7 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
             filePath: rel,
             line: mut.line,
             snippet: mut.text,
-            offendingValue:
-              'Direct Drizzle mutation in Django-authoritative app',
+            offendingValue: 'Direct Drizzle mutation in Django-authoritative app',
             remediation:
               'Route mutations through djangoProxy(), withRLSContext(), or createAuditedScopedDb(). ' +
               'If this is a legitimate exception, add to governance/exceptions/stack-authority.json',
@@ -254,7 +248,7 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
             offendingValue: `Django marker file "${marker}" found in TS-authoritative app`,
             remediation:
               'TS-authoritative apps must not have a Django backend. ' +
-              'If this app needs Django, update docs/architecture/STACK_AUTHORITY.md first.',
+              'If this app needs Django, update docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md first.',
           })
         }
       }
@@ -267,11 +261,10 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
           violations.push({
             ruleId: 'STACK_AUTHORITY_001',
             filePath: `apps/${app}/backend/manage.py`,
-            offendingValue:
-              'Django backend/ directory found in TS-authoritative app',
+            offendingValue: 'Django backend/ directory found in TS-authoritative app',
             remediation:
               'TS-authoritative apps must not have a Django backend. ' +
-              'If this app needs Django, update docs/architecture/STACK_AUTHORITY.md first.',
+              'If this app needs Django, update docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md first.',
           })
         }
       }
@@ -282,11 +275,10 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
         violations.push({
           ruleId: 'STACK_AUTHORITY_001',
           filePath: `apps/${app}/lib/django-proxy.ts`,
-          offendingValue:
-            'Django proxy file found in TS-authoritative app',
+          offendingValue: 'Django proxy file found in TS-authoritative app',
           remediation:
             'TS-authoritative apps must not proxy to Django. ' +
-            'If this app needs Django, update docs/architecture/STACK_AUTHORITY.md first.',
+            'If this app needs Django, update docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md first.',
         })
       }
     }
@@ -302,18 +294,17 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
       .filter((d) => d.isDirectory())
       .map((d) => d.name)
 
-    const classified = new Set([
-      ...DJANGO_AUTHORITATIVE_APPS,
-      ...TS_AUTHORITATIVE_APPS,
-    ])
+    const classified = new Set([...DJANGO_AUTHORITATIVE_APPS, ...TS_AUTHORITATIVE_APPS])
 
-    const unclassified = allApps.filter((app) => !classified.has(app) && !SCAFFOLD_TEST_EXCLUSIONS.has(app))
+    const unclassified = allApps.filter(
+      (app) => !classified.has(app) && !SCAFFOLD_TEST_EXCLUSIONS.has(app),
+    )
 
     expect(
       unclassified,
       `Unclassified apps found: ${unclassified.join(', ')}. ` +
         'Add them to DJANGO_AUTHORITATIVE_APPS or TS_AUTHORITATIVE_APPS ' +
-        'in stack-authority.test.ts and update docs/architecture/STACK_AUTHORITY.md',
+        'in stack-authority.test.ts and update docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md',
     ).toHaveLength(0)
   })
 
@@ -349,8 +340,7 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
           filePath: rel,
           line: mut.line,
           snippet: mut.text,
-          offendingValue:
-            'Unaudited Drizzle mutation in union-eyes app layer',
+          offendingValue: 'Unaudited Drizzle mutation in union-eyes app layer',
           remediation:
             'Wrap mutations in withRLSContext() for user-scoped routes or ' +
             'withSystemContext() for system routes (webhooks, seeds). ' +

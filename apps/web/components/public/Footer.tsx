@@ -14,7 +14,7 @@ const ABR_URL = process.env.NEXT_PUBLIC_ABR_URL ?? 'http://localhost:3005';
 const appLinks = [
   { name: 'Console', href: CONSOLE_URL, external: true },
   { name: 'Partner Portal', href: PARTNERS_URL, external: true },
-  { name: 'UnionEyes', href: UNION_EYES_URL, external: true },
+  { name: 'Union Eyes', href: UNION_EYES_URL, external: true },
   { name: 'FAIRCASE', href: ABR_URL, external: true },
 ];
 
@@ -33,21 +33,31 @@ const footerCopy: Record<Locale, {
   'en-CA': {
     columns: [
       {
-        category: 'Company',
+        category: 'Platform',
         links: [
-          { name: 'About Us', href: '/about' },
-          { name: 'Portfolio', href: '/portfolio' },
-          { name: 'Verticals', href: '/verticals' },
+          { name: 'Institutional Continuity', href: '/institutional-continuity' },
+          { name: 'Union Eyes', href: '/union-eyes' },
           { name: 'Platform', href: '/platform' },
+          { name: 'Trust Center', href: '/trust' },
           { name: 'Contact', href: '/contact' },
         ],
       },
       {
-        category: 'Investors',
+        category: 'Doctrine',
         links: [
-          { name: 'Investment Thesis', href: '/investors' },
+          { name: 'Continuity Assessment', href: '/continuity-assessment' },
+          { name: 'Anti-Surveillance', href: '/anti-surveillance' },
+          { name: 'Starter Kit', href: '/starter-kit' },
+          { name: 'Insights', href: '/insights' },
+        ],
+      },
+      {
+        category: 'Company',
+        links: [
+          { name: 'About Us', href: '/about' },
           { name: 'Products', href: '/products' },
-          { name: 'Resources', href: '/resources' },
+          { name: 'Portfolio', href: '/portfolio' },
+          { name: 'Investors', href: '/investors' },
         ],
       },
       {
@@ -59,8 +69,8 @@ const footerCopy: Record<Locale, {
         ],
       },
     ],
-    blurb: 'The APEX of AI — a venture studio building ethical, human-centered technology across {platformCoverage}.',
-    seriesA: 'Series A Ready',
+    blurb: 'Nzila Ventures builds institutional continuity infrastructure across {platformCoverage}.',
+    seriesA: 'Continuity Infrastructure',
     appsLabel: 'Apps',
     copyright: 'All rights reserved.',
     platformsLabel: 'platforms',
@@ -72,21 +82,31 @@ const footerCopy: Record<Locale, {
   'fr-CA': {
     columns: [
       {
-        category: 'Entreprise',
+        category: 'Plateforme',
         links: [
-          { name: 'À propos', href: '/about' },
-          { name: 'Portefeuille', href: '/portfolio' },
-          { name: 'Secteurs', href: '/verticals' },
+          { name: 'Continuité institutionnelle', href: '/institutional-continuity' },
+          { name: 'Union Eyes', href: '/union-eyes' },
           { name: 'Plateforme', href: '/platform' },
+          { name: 'Centre de confiance', href: '/trust' },
           { name: 'Contact', href: '/contact' },
         ],
       },
       {
-        category: 'Investisseurs',
+        category: 'Doctrine',
         links: [
-          { name: "Thèse d'investissement", href: '/investors' },
+          { name: 'Évaluation continuité', href: '/continuity-assessment' },
+          { name: 'Anti-surveillance', href: '/anti-surveillance' },
+          { name: 'Kit de démarrage', href: '/starter-kit' },
+          { name: 'Analyses', href: '/insights' },
+        ],
+      },
+      {
+        category: 'Entreprise',
+        links: [
+          { name: 'À propos', href: '/about' },
           { name: 'Produits', href: '/products' },
-          { name: 'Ressources', href: '/resources' },
+          { name: 'Portefeuille', href: '/portfolio' },
+          { name: 'Investisseurs', href: '/investors' },
         ],
       },
       {
@@ -98,8 +118,8 @@ const footerCopy: Record<Locale, {
         ],
       },
     ],
-    blurb: "L'APEX de l'IA — un studio de capital-risque qui crée des technologies éthiques et centrées sur l'humain dans {platformCoverage}.",
-    seriesA: 'Prêt pour la série A',
+    blurb: "Nzila Ventures construit une infrastructure de continuité institutionnelle dans {platformCoverage}.",
+    seriesA: 'Infrastructure de continuité',
     appsLabel: 'Applications',
     copyright: 'Tous droits réservés.',
     platformsLabel: 'plateformes',
@@ -114,14 +134,14 @@ export default function Footer() {
   const locale = useLocale() as Locale;
   const copy = footerCopy[locale] ?? footerCopy['en-CA'];
   const platformCoverage = locale === 'fr-CA'
-    ? `${MARKETING_FACTS.productPlatforms} plateformes produits dans plus de ${MARKETING_FACTS.verticalsLabel.replace('+', '')} secteurs`
+    ? `plus de ${MARKETING_FACTS.verticalsLabel.replace('+', '')} secteurs sensibles a la confiance`
     : platformCoverageLabel();
   const blurb = copy.blurb.replace('{platformCoverage}', platformCoverage);
 
   return (
     <footer className="bg-navy text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
@@ -138,7 +158,7 @@ export default function Footer() {
                 {copy.seriesA}
               </span>
               <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-emerald/20 text-emerald">
-                $100B+ TAM
+                Union Eyes Flagship
               </span>
             </div>
           </div>
@@ -197,7 +217,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <span className="hidden lg:inline text-gray-600">
-              {MARKETING_FACTS.productPlatforms} {copy.platformsLabel} / {MARKETING_FACTS.governedApplications} {copy.governedAppsLabel}
+              {MARKETING_FACTS.governedApplications} {copy.governedAppsLabel}
             </span>
             <Link href="/legal/privacy" className="hover:text-gray-300 transition-colors">{copy.privacy}</Link>
             <span>·</span>
@@ -210,8 +230,6 @@ export default function Footer() {
     </footer>
   );
 }
-
-
 
 
 

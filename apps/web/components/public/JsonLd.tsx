@@ -7,7 +7,7 @@ export default function JsonLd() {
     url: 'https://nzilaventures.com',
     logo: 'https://nzilaventures.com/file.svg',
     description:
-      'Venture studio building 15 AI-powered platforms across 10+ verticals — healthcare, finance, agriculture, labor rights, and justice.',
+      'Operating company behind Nzila OS, building institutional continuity infrastructure for trust-sensitive organizations.',
     foundingDate: '2024',
     numberOfEmployees: {
       '@type': 'QuantitativeValue',
@@ -19,14 +19,14 @@ export default function JsonLd() {
       url: 'https://nzilaventures.com/contact',
     },
     knowsAbout: [
-      'Artificial Intelligence',
-      'Machine Learning',
-      'Fintech',
-      'Healthtech',
-      'Agrotech',
-      'Legaltech',
-      'EdTech',
-      'Social Impact Technology',
+      'Institutional Continuity',
+      'Operational Memory',
+      'Governance Infrastructure',
+      'Trust Infrastructure',
+      'Union Operations',
+      'Auditability',
+      'Data Sovereignty',
+      'Explainable AI',
     ],
   };
 
@@ -37,7 +37,7 @@ export default function JsonLd() {
     name: 'Nzila Ventures',
     url: 'https://nzilaventures.com',
     description:
-      '15 AI-powered platforms across 10+ verticals. One unified Backbone. Series A ready.',
+      'Institutional continuity infrastructure for organizations where governance, operational memory, and trust must survive transition.',
     inLanguage: 'en-CA',
     publisher: {
       '@id': 'https://nzilaventures.com/#organization',

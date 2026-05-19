@@ -1,0 +1,383 @@
+'use client';
+
+/**
+ * ARTIFACT TYPE: React Component
+ * DOCTRINE_VERSION: 1.0.0
+ *
+ * ICRAAssessmentFlow — full multi-section assessment flow.
+ * Step 0: Consent. Step 1: Org context. Steps 2-8: Seven scored sections.
+ *
+ * Client component. Submits to /api/icra/submit on completion.
+ * No auth required. Redirects to /continuity-assessment/results/[id].
+ */
+
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import type { Answer, ConsentRecord, SectionId } from '@/lib/icra/types';
+import type { MetadataQuestion } from '@/lib/icra/questions';
+import {
+  SECTIONS,
+  QUESTIONS_BY_SECTION,
+  METADATA_QUESTIONS,
+  QUESTION_BANK_VERSION,
+} from '@/lib/icra/questions';
+import { ConsentGate } from './ConsentGate';
+
+const DOCTRINE_VERSION = '1.0.0';
+const SCORED_SECTIONS: SectionId[] = [
+  'operational_dependency',
+  'governance_visibility',
+  'institutional_memory',
+  'transition_readiness',
+  'operational_coordination',
+  'explainability_trust',
+  'sovereignty_governance',
+];
+
+type OrgContextAnswers = Record<string, string>;
+
+const FLOW_COPY = {
+  'en-CA': {
+    generatingTitle: 'Generating your continuity profile…',
+    generatingBody: 'This takes a moment. Please do not close this page.',
+    submissionFailed: 'Submission failed. Please try again.',
+    section: 'Section',
+    of: 'of',
+    complete: 'complete',
+    previous: '← Previous section',
+    next: 'Next section →',
+    submit: 'Submit assessment',
+    remainingPrefix: '',
+    remainingSingular: 'question remaining in this section',
+    remainingPlural: 'questions remaining in this section',
+    orgTitle: 'Organizational Context',
+    orgBody:
+      'This information helps contextualize your results. It is not scored and does not affect your continuity profile.',
+    selectPlaceholder: 'Select…',
+    optionalPlaceholder: 'Optional',
+    begin: 'Begin Assessment →',
+  },
+  'fr-CA': {
+    generatingTitle: 'Génération de votre profil de continuité...',
+    generatingBody: 'Cela prendra un moment. Veuillez ne pas fermer cette page.',
+    submissionFailed: 'La soumission a échoué. Veuillez réessayer.',
+    section: 'Section',
+    of: 'sur',
+    complete: 'complété',
+    previous: '← Section précédente',
+    next: 'Section suivante →',
+    submit: "Soumettre l'évaluation",
+    remainingPrefix: '',
+    remainingSingular: 'question restante dans cette section',
+    remainingPlural: 'questions restantes dans cette section',
+    orgTitle: 'Contexte organisationnel',
+    orgBody:
+      "Ces informations aident à contextualiser vos résultats. Elles ne sont pas notées et n'ont aucun effet sur votre profil de continuité.",
+    selectPlaceholder: 'Sélectionner...',
+    optionalPlaceholder: 'Facultatif',
+    begin: "Commencer l'évaluation →",
+  },
+};
+
+export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
+  const router = useRouter();
+  const copy = FLOW_COPY[locale as keyof typeof FLOW_COPY] ?? FLOW_COPY['en-CA'];
+
+  // Step: 0=consent, 1=org context, 2-8=scored sections, 9=submitting
+  const [step, setStep] = useState(0);
+  const [consent, setConsent] = useState<ConsentRecord | null>(null);
+  const [orgContext, setOrgContext] = useState<OrgContextAnswers>({});
+  const [answers, setAnswers] = useState<Map<string, Answer>>(new Map());
+  const [currentSectionAnswers, setCurrentSectionAnswers] = useState<Map<string, string>>(new Map());
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Step 0 → 1
+  function handleConsent(record: ConsentRecord) {
+    setConsent(record);
+    setStep(1);
+  }
+
+  // Step 1 → 2
+  function handleOrgContext(ctx: OrgContextAnswers) {
+    setOrgContext(ctx);
+    setStep(2);
+  }
+
+  // Steps 2–8: current section index is (step - 2)
+  const currentSectionId = step >= 2 && step <= 8 ? SCORED_SECTIONS[step - 2] : null;
+  const currentSectionDef = currentSectionId
+    ? SECTIONS.find((s) => s.id === currentSectionId)
+    : null;
+  const currentQuestions = currentSectionId
+    ? (QUESTIONS_BY_SECTION[currentSectionId] ?? [])
+    : [];
+
+  function handleOptionSelect(questionId: string, value: string) {
+    setCurrentSectionAnswers((prev) => new Map(prev).set(questionId, value));
+  }
+
+  function handleSectionNext() {
+    if (!currentSectionId) return;
+
+    const questions = QUESTIONS_BY_SECTION[currentSectionId] ?? [];
+    const newAnswers = new Map(answers);
+
+    for (const q of questions) {
+      const rawValue = currentSectionAnswers.get(q.id);
+      if (!rawValue) continue;
+      if (!('options' in q)) continue;
+
+      const selectedOption = q.options.find((o) => o.value === rawValue);
+      if (!selectedOption) continue;
+
+      const answer: Answer = {
+        questionId: q.id,
+        questionVersion: QUESTION_BANK_VERSION,
+        rawValue,
+        normalizedScore: selectedOption.score,
+        weightsSnapshot: { ...q.weights },
+        riskInverted: q.riskInverted ?? false,
+        answeredAt: new Date().toISOString(),
+      };
+      newAnswers.set(q.id, answer);
+    }
+
+    setAnswers(newAnswers);
+    setCurrentSectionAnswers(new Map());
+
+    if (step < 8) {
+      setStep(step + 1);
+    } else {
+      void handleSubmit(newAnswers);
+    }
+  }
+
+  const handleSubmit = useCallback(
+    async (finalAnswers: Map<string, Answer>) => {
+      if (!consent) return;
+      setSubmitting(true);
+      setStep(9);
+      setError(null);
+
+      try {
+        const body = {
+          consent,
+          orgContext,
+          answers: Array.from(finalAnswers.values()),
+          locale,
+        };
+
+        const res = await fetch('/api/icra/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          throw new Error(data.error ?? `Submission failed (${res.status})`);
+        }
+
+        const data = (await res.json()) as { assessmentId: string };
+        router.push(`/${locale}/continuity-assessment/results/${data.assessmentId}`);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : copy.submissionFailed);
+        setSubmitting(false);
+        setStep(8);
+      }
+    },
+    [consent, copy.submissionFailed, locale, orgContext, router],
+  );
+
+  // Progress: 0=0%, 1=10%, 2-8=20-90%, 9=100%
+  const progressPercent = step === 0 ? 0 : step === 1 ? 10 : step === 9 ? 100 : 10 + (step - 1) * 12.85;
+
+  if (step === 0) {
+    return <ConsentGate onConsent={handleConsent} doctrineVersion={DOCTRINE_VERSION} locale={locale} />;
+  }
+
+  if (step === 1) {
+    return <OrgContextForm questions={METADATA_QUESTIONS} onSubmit={handleOrgContext} copy={copy} />;
+  }
+
+  if (step === 9 || submitting) {
+    return (
+      <div className="mx-auto max-w-xl py-24 text-center space-y-4">
+        <div className="text-stone-400 text-4xl">⟳</div>
+        <h2 className="font-serif text-2xl font-semibold text-stone-900">
+          {copy.generatingTitle}
+        </h2>
+        <p className="text-stone-500 text-sm">{copy.generatingBody}</p>
+        {error && (
+          <p className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (!currentSectionDef || currentQuestions.length === 0) return null;
+
+  const sectionIndex = step - 2;
+  const answeredInSection = currentQuestions.filter((q) => currentSectionAnswers.has(q.id)).length;
+  const sectionComplete = answeredInSection === currentQuestions.length;
+
+  return (
+    <div className="mx-auto max-w-3xl py-8 space-y-8">
+      {/* Progress bar */}
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs text-stone-500">
+          <span>
+            {copy.section} {sectionIndex + 1} {copy.of} {SCORED_SECTIONS.length} — {currentSectionDef.title}
+          </span>
+          <span>{Math.round(progressPercent)}% {copy.complete}</span>
+        </div>
+        <div className="h-1.5 w-full rounded-full bg-stone-200">
+          <div
+            className="h-1.5 rounded-full bg-stone-800 transition-all duration-500"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Section header */}
+      <div className="space-y-2 border-b border-stone-200 pb-6">
+        <h2 className="font-serif text-2xl font-bold text-stone-900">{currentSectionDef.title}</h2>
+        {currentSectionDef.intro && (
+          <p className="text-stone-600 text-sm leading-relaxed">{currentSectionDef.intro}</p>
+        )}
+      </div>
+
+      {/* Questions */}
+      <div className="space-y-10">
+        {currentQuestions
+          .sort((a, b) => a.order - b.order)
+          .map((q) => {
+            if (!('options' in q)) return null;
+            const selected = currentSectionAnswers.get(q.id);
+            return (
+              <div key={q.id} className="space-y-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-stone-900 leading-snug">{q.prompt}</p>
+                  {q.helpText && (
+                    <p className="text-xs text-stone-500 leading-relaxed">{q.helpText}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  {q.options.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleOptionSelect(q.id, opt.value)}
+                      className={`w-full rounded-md border px-4 py-3 text-left text-sm transition-colors ${
+                        selected === opt.value
+                          ? 'border-stone-800 bg-stone-900 text-white'
+                          : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+      </div>
+
+      {/* Navigation */}
+      <div className="flex items-center justify-between border-t border-stone-200 pt-6">
+        <button
+          onClick={() => setStep(Math.max(2, step - 1))}
+          disabled={step <= 2}
+          className="text-sm text-stone-500 hover:text-stone-800 disabled:opacity-30"
+        >
+          {copy.previous}
+        </button>
+        <button
+          onClick={handleSectionNext}
+          disabled={!sectionComplete}
+          className="inline-flex items-center justify-center rounded-md bg-stone-900 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {step < 8 ? copy.next : copy.submit}
+        </button>
+      </div>
+
+      {!sectionComplete && (
+        <p className="text-center text-xs text-stone-400">
+          {currentQuestions.length - answeredInSection}{' '}
+          {currentQuestions.length - answeredInSection === 1 ? copy.remainingSingular : copy.remainingPlural}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Org context form
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface OrgContextFormProps {
+  questions: MetadataQuestion[];
+  onSubmit: (ctx: OrgContextAnswers) => void;
+  copy: typeof FLOW_COPY['en-CA'];
+}
+
+function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
+  const [values, setValues] = useState<OrgContextAnswers>({});
+
+  const requiredIds = questions.filter((q) => q.required).map((q) => q.id);
+  const allRequiredAnswered = requiredIds.every((id) => values[id]?.trim());
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-8 py-10">
+      <div className="space-y-2">
+        <h2 className="font-serif text-2xl font-bold text-stone-900">{copy.orgTitle}</h2>
+        <p className="text-sm text-stone-600 leading-relaxed">
+          {copy.orgBody}
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        {questions.sort((a, b) => a.order - b.order).map((q) => (
+          <div key={q.id} className="space-y-1.5">
+            <label className="block text-sm font-medium text-stone-900">
+              {q.prompt}
+              {q.required && <span className="ml-1 text-stone-400">*</span>}
+            </label>
+            {q.helpText && <p className="text-xs text-stone-500">{q.helpText}</p>}
+
+            {q.type === 'select' && q.options ? (
+              <select
+                value={values[q.id] ?? ''}
+                onChange={(e) => setValues((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600"
+              >
+                <option value="">{copy.selectPlaceholder}</option>
+                {q.options.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            ) : (
+              <textarea
+                value={values[q.id] ?? ''}
+                onChange={(e) => setValues((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                rows={3}
+                placeholder={copy.optionalPlaceholder}
+                className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600 resize-none"
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={() => onSubmit(values)}
+        disabled={!allRequiredAnswered}
+        className="inline-flex items-center justify-center rounded-md bg-stone-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {copy.begin}
+      </button>
+    </div>
+  );
+}

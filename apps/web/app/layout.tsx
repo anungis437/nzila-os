@@ -20,11 +20,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL("https://nzilaventures.com"),
   title: {
-    default: "Nzila Ventures | The APEX of AI in Social Impact",
+    default: "Nzila Ventures | Institutional Continuity Infrastructure",
     template: "%s | Nzila Ventures",
   },
-  description: `Venture studio building ${platformCoverageLabel()}, ${governedCoverageLabel()}. ${MARKETING_FACTS.totalTamLabel} Total Addressable Market.`,
-  keywords: ["AI", "venture studio", "social impact", "fintech", "healthtech", "agrotech", "legaltech", "edtech", "ethical AI", "machine learning", "Nzila Ventures"],
+  description: `Nzila Ventures builds ${platformCoverageLabel()}, ${governedCoverageLabel()}, and Nzila OS for organizations where governance, continuity, evidence, and trust matter.`,
+  keywords: ["institutional continuity", "operational memory", "governance infrastructure", "trust infrastructure", "Union Eyes", "Nzila OS", "auditability", "data sovereignty", "explainable AI", "Nzila Ventures"],
   authors: [{ name: "Nzila Ventures" }],
   creator: "Nzila Ventures",
   icons: {
@@ -35,21 +35,21 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Nzila Ventures",
-    title: "Nzila Ventures | The APEX of AI in Social Impact",
-    description: `${MARKETING_FACTS.productPlatforms} product platforms across ${MARKETING_FACTS.verticalsLabel} verticals, delivered through ${MARKETING_FACTS.governedApplications} governed applications. One unified Backbone.`,
+    title: "Nzila Ventures | Institutional Continuity Infrastructure",
+    description: `Continuity infrastructure for trust-sensitive institutions, delivered through Nzila OS, Union Eyes, and ${MARKETING_FACTS.governedApplications} governed operational applications.`,
     images: [
       {
         url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80",
         width: 1200,
         height: 630,
-        alt: "Earth at night showing illuminated cities and global connectivity — representing Nzila Ventures AI infrastructure",
+        alt: "Earth at night showing illuminated cities and global connectivity - representing Nzila Ventures continuity infrastructure",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nzila Ventures | The APEX of AI in Social Impact",
-    description: `${MARKETING_FACTS.productPlatforms} product platforms across ${MARKETING_FACTS.verticalsLabel} verticals, delivered through ${MARKETING_FACTS.governedApplications} governed applications. One unified Backbone.`,
+    title: "Nzila Ventures | Institutional Continuity Infrastructure",
+    description: "Nzila builds governed operational infrastructure that preserves continuity, operational memory, evidence, and institutional trust.",
     images: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80"],
   },
   robots: {

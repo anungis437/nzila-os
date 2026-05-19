@@ -102,6 +102,27 @@ export default function LocalePilotRequestPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const locale = (params.locale as string) ?? 'en-CA';
+  const rolloutPathway =
+    institutionalRolloutPathway[locale as keyof typeof institutionalRolloutPathway] ??
+    institutionalRolloutPathway['en-CA'];
+  const leadershipTransitionArr =
+    leadershipTransitionContinuityScenarios[locale as keyof typeof leadershipTransitionContinuityScenarios] ??
+    leadershipTransitionContinuityScenarios['en-CA'];
+  const governanceFrictionArr =
+    governanceFrictionSimulationFlows[locale as keyof typeof governanceFrictionSimulationFlows] ??
+    governanceFrictionSimulationFlows['en-CA'];
+  const executiveBriefingArr =
+    executiveBriefingFlows[locale as keyof typeof executiveBriefingFlows] ??
+    executiveBriefingFlows['en-CA'];
+  const onboardingContinuityArr =
+    onboardingContinuityIntelligenceScenarios[locale as keyof typeof onboardingContinuityIntelligenceScenarios] ??
+    onboardingContinuityIntelligenceScenarios['en-CA'];
+  const federationScaleArr =
+    federationScaleContinuityScenarios[locale as keyof typeof federationScaleContinuityScenarios] ??
+    federationScaleContinuityScenarios['en-CA'];
+  const executiveDecisionArr =
+    executiveDecisionPathwaySystems[locale as keyof typeof executiveDecisionPathwaySystems] ??
+    executiveDecisionPathwaySystems['en-CA'];
   const t = useTranslations('marketing.pilotRequest');
   const tNote = useTranslations('continuityNotes.pilot');
   const contextMode = parseInstitutionalMode(searchParams.get('context') ?? undefined);
@@ -615,7 +636,7 @@ export default function LocalePilotRequestPage() {
               <section className="p-5 rounded-lg border border-gray-200 bg-white">
                 <h3 className="font-semibold text-gray-900 mb-3">{t('phase6.leadershipTitle')}</h3>
                 <div className="grid gap-3 md:grid-cols-2">
-                  {leadershipTransitionContinuityScenarios.map((item) => (
+                  {leadershipTransitionArr.map((item) => (
                     <article key={item.scenario} className="p-4 rounded-lg bg-gray-50 border border-gray-100">
                       <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">{item.focus}</p>
                       <h4 className="text-sm font-semibold text-gray-900 mb-1">{item.scenario}</h4>
@@ -629,7 +650,7 @@ export default function LocalePilotRequestPage() {
               <section className="p-5 rounded-lg border border-gray-200 bg-gray-50">
                 <h3 className="font-semibold text-gray-900 mb-3">{t('phase6.frictionTitle')}</h3>
                 <div className="space-y-2">
-                  {governanceFrictionSimulationFlows.map((item) => (
+                  {governanceFrictionArr.map((item) => (
                     <article key={item.friction} className="p-3 rounded-md bg-white border border-gray-100">
                       <p className="text-sm font-medium text-gray-900">{item.friction}</p>
                       <p className="text-xs text-gray-600 mt-1">{item.continuityImpact}</p>
@@ -643,7 +664,7 @@ export default function LocalePilotRequestPage() {
                 <article className="p-5 rounded-lg border border-gray-200 bg-white">
                   <h3 className="font-semibold text-gray-900 mb-3">{t('phase6.onboardingTitle')}</h3>
                   <div className="space-y-2">
-                    {onboardingContinuityIntelligenceScenarios.map((item) => (
+                    {onboardingContinuityArr.map((item) => (
                       <div key={item.scenario} className="p-3 rounded-md bg-gray-50 border border-gray-100">
                         <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">{item.focus}</p>
                         <p className="text-sm font-medium text-gray-900">{item.scenario}</p>
@@ -656,7 +677,7 @@ export default function LocalePilotRequestPage() {
                 <article className="p-5 rounded-lg border border-gray-200 bg-white">
                   <h3 className="font-semibold text-gray-900 mb-3">{t('phase6.federationTitle')}</h3>
                   <div className="space-y-2">
-                    {federationScaleContinuityScenarios.map((item) => (
+                    {federationScaleArr.map((item) => (
                       <div key={item.area} className="p-3 rounded-md bg-gray-50 border border-gray-100">
                         <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">{item.focus}</p>
                         <p className="text-sm font-medium text-gray-900">{item.area}</p>
@@ -670,7 +691,7 @@ export default function LocalePilotRequestPage() {
               <section className="p-5 rounded-lg border border-blue-100 bg-blue-50/70">
                 <h3 className="font-semibold text-blue-950 mb-3">{t('phase6.decisionTitle')}</h3>
                 <div className="grid gap-2 md:grid-cols-2">
-                  {executiveDecisionPathwaySystems.map((item) => (
+                  {executiveDecisionArr.map((item) => (
                     <article key={item.decision} className="p-3 rounded-md bg-white border border-blue-100">
                       <p className="text-[11px] uppercase tracking-widest text-blue-400 mb-1">{item.continuityFocus}</p>
                       <p className="text-sm font-medium text-gray-900">{item.decision}</p>
@@ -683,7 +704,7 @@ export default function LocalePilotRequestPage() {
               <section className="p-5 rounded-lg border border-gray-200 bg-white">
                 <h3 className="font-semibold text-gray-900 mb-3">Executive continuity briefing flow</h3>
                 <div className="grid sm:grid-cols-2 gap-2 text-sm text-gray-700">
-                  {executiveBriefingFlows.map((item) => (
+                  {executiveBriefingArr.map((item) => (
                     <div key={item} className="p-3 rounded bg-gray-50 border border-gray-100">{item}</div>
                   ))}
                 </div>
@@ -710,7 +731,7 @@ export default function LocalePilotRequestPage() {
               <section className="p-5 rounded-lg border border-gray-200 bg-white">
                 <h3 className="font-semibold text-gray-900 mb-3">Recommended Institutional Rollout Pathway</h3>
                 <div className="grid sm:grid-cols-2 gap-2">
-                  {institutionalRolloutPathway.map((stage, index) => (
+                  {rolloutPathway.map((stage, index) => (
                     <div key={stage} className="text-sm text-gray-700 p-2 rounded bg-gray-50 border border-gray-100">
                       {index + 1}. {stage}
                     </div>

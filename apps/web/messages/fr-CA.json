@@ -15,21 +15,25 @@
     "verticals": "Secteurs",
     "investors": "Investisseurs",
     "contact": "Contact",
+    "continuity": "Continuité",
+    "unionEyes": "Union Eyes",
+    "trust": "Confiance",
+    "insights": "Analyses",
     "partners": "Partenaires",
     "resources": "Ressources",
     "portfolio": "Portefeuille",
     "legal": "Juridique",
     "signIn": "Connexion",
-    "requestDemo": "Demander une démo",
+    "requestDemo": "Revue gouvernance",
     "apps": "Applications",
     "console": "Console",
     "partnerPortal": "Portail partenaires",
     "language": "Langue"
   },
   "hero": {
-    "title": "L'apogée de l\\'IA dans l\\'impact social",
-    "subtitle": "Studio de capital-risque construisant 15 plateformes alimentées par l\\'IA dans plus de 10 secteurs — santé, finance, agriculture, droits du travail et justice.",
-    "cta": "Explorez notre plateforme"
+    "title": "Une organisation ne devrait pas perdre sa continuité quand des personnes clés partent.",
+    "subtitle": "Nzila construit une infrastructure gouvernée qui préserve la mémoire opérationnelle, les décisions, les preuves et la confiance institutionnelle pendant les transitions.",
+    "cta": "Commencer l'évaluation"
   },
   "legal": {
     "privacy": "Politique de confidentialité",

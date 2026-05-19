@@ -1,91 +1,174 @@
 import type { PilotApplicationInput } from '@/types/marketing';
 
-export const institutionalRolloutPathway = [
-  'Assessment',
-  'Continuity Review',
-  'Governance Mapping',
-  'Pilot Alignment',
-  'Operational Adoption',
-  'Institutional Stabilization',
-  'Long-Term Resilience',
-] as const;
 
-export const governanceModernizationJourney = [
-  {
-    stage: 'Stage 1 - Fragmented Operations',
-    detail:
-      'Governance and operations are active but continuity context is distributed across teams and files.',
-  },
-  {
-    stage: 'Stage 2 - Continuity Visibility',
-    detail:
-      'Institutional memory and continuity risk become visible in one reviewable operating view.',
-  },
-  {
-    stage: 'Stage 3 - Governance Alignment',
-    detail:
-      'Governance reasoning, ownership boundaries, and operating pathways become consistently legible.',
-  },
-  {
-    stage: 'Stage 4 - Explainable Coordination',
-    detail:
-      'Teams coordinate with transparent rationale and clear review pathways for modernization decisions.',
-  },
-  {
-    stage: 'Stage 5 - Institutional Resilience',
-    detail:
-      'The institution sustains continuity through transitions without operational or governance destabilization.',
-  },
-] as const;
+export const institutionalRolloutPathway = {
+  'en-CA': [
+    'Assessment',
+    'Continuity Review',
+    'Governance Mapping',
+    'Pilot Alignment',
+    'Operational Adoption',
+    'Institutional Stabilization',
+    'Long-Term Resilience',
+  ],
+  'fr-CA': [
+    'Évaluation',
+    'Revue de continuité',
+    'Cartographie de la gouvernance',
+    'Alignement du pilote',
+    'Adoption opérationnelle',
+    'Stabilisation institutionnelle',
+    'Résilience à long terme',
+  ],
+} as const;
 
-export const operationalMaturityPathway = [
-  'Reactive',
-  'Coordinated',
-  'Explainable',
-  'Continuity-Aware',
-  'Institutionally Resilient',
-] as const;
+export const governanceModernizationJourney = {
+  'en-CA': [
+    {
+      stage: 'Stage 1 - Fragmented Operations',
+      detail: 'Governance and operations are active but continuity context is distributed across teams and files.',
+    },
+    {
+      stage: 'Stage 2 - Continuity Visibility',
+      detail: 'Institutional memory and continuity risk become visible in one reviewable operating view.',
+    },
+    {
+      stage: 'Stage 3 - Governance Alignment',
+      detail: 'Governance reasoning, ownership boundaries, and operating pathways become consistently legible.',
+    },
+    {
+      stage: 'Stage 4 - Explainable Coordination',
+      detail: 'Teams coordinate with transparent rationale and clear review pathways for modernization decisions.',
+    },
+    {
+      stage: 'Stage 5 - Institutional Resilience',
+      detail: 'The institution sustains continuity through transitions without operational or governance destabilization.',
+    },
+  ],
+  'fr-CA': [
+    {
+      stage: 'Étape 1 - Opérations fragmentées',
+      detail: 'La gouvernance et les opérations sont actives mais le contexte de continuité est dispersé entre équipes et fichiers.',
+    },
+    {
+      stage: 'Étape 2 - Visibilité de la continuité',
+      detail: 'La mémoire institutionnelle et le risque de continuité deviennent visibles dans une vue opérationnelle vérifiable.',
+    },
+    {
+      stage: 'Étape 3 - Alignement de la gouvernance',
+      detail: 'Le raisonnement de gouvernance, les limites de propriété et les parcours opérationnels deviennent lisibles de façon cohérente.',
+    },
+    {
+      stage: 'Étape 4 - Coordination explicable',
+      detail: 'Les équipes se coordonnent avec des justifications transparentes et des parcours de revue clairs pour les décisions de modernisation.',
+    },
+    {
+      stage: 'Étape 5 - Résilience institutionnelle',
+      detail: 'L’institution maintient la continuité à travers les transitions sans déstabilisation opérationnelle ou de gouvernance.',
+    },
+  ],
+} as const;
 
-export const organizationalTransformationPathway = [
-  'Operational Fragmentation',
-  'Continuity Visibility',
-  'Governance Alignment',
-  'Organizational Coherence',
-  'Institutional Resilience',
-] as const;
+export const operationalMaturityPathway = {
+  'en-CA': [
+    'Reactive',
+    'Coordinated',
+    'Explainable',
+    'Continuity-Aware',
+    'Institutionally Resilient',
+  ],
+  'fr-CA': [
+    'Réactif',
+    'Coordonné',
+    'Explicable',
+    'Conscient de la continuité',
+    'Résilient institutionnellement',
+  ],
+} as const;
 
-export const evidenceArchitecture = [
-  {
-    title: 'Rollout pathways',
-    purpose: 'Deployment realism',
-    note: 'Shows how activation moves from assessment into controlled adoption.',
-  },
-  {
-    title: 'Governance review flows',
-    purpose: 'Explainability',
-    note: 'Surfaces the checkpoints where oversight remains visible and documented.',
-  },
-  {
-    title: 'Continuity assessments',
-    purpose: 'Operational insight',
-    note: 'Keeps continuity risk and resilience direction readable to leadership.',
-  },
-  {
-    title: 'Pilot artifacts',
-    purpose: 'Institutional safety',
-    note: 'Frames simulation packs, boundaries, and stabilization notes as reviewable outputs.',
-  },
-  {
-    title: 'Readiness summaries',
-    purpose: 'Executive confidence',
-    note: 'Packages deployment direction in plain language for procurement and leadership.',
-  },
-  {
-    title: 'Trust-center evidence',
-    purpose: 'Procurement reassurance',
-    note: 'Keeps implementation safeguards, controls, and proof materials centrally visible.',
-  },
-] as const;
+export const organizationalTransformationPathway = {
+  'en-CA': [
+    'Operational Fragmentation',
+    'Continuity Visibility',
+    'Governance Alignment',
+    'Organizational Coherence',
+    'Institutional Resilience',
+  ],
+  'fr-CA': [
+    'Fragmentation opérationnelle',
+    'Visibilité de la continuité',
+    'Alignement de la gouvernance',
+    'Cohérence organisationnelle',
+    'Résilience institutionnelle',
+  ],
+} as const;
+
+export const evidenceArchitecture = {
+  'en-CA': [
+    {
+      title: 'Rollout pathways',
+      purpose: 'Deployment realism',
+      note: 'Shows how activation moves from assessment into controlled adoption.',
+    },
+    {
+      title: 'Governance review flows',
+      purpose: 'Explainability',
+      note: 'Surfaces the checkpoints where oversight remains visible and documented.',
+    },
+    {
+      title: 'Continuity assessments',
+      purpose: 'Operational insight',
+      note: 'Keeps continuity risk and resilience direction readable to leadership.',
+    },
+    {
+      title: 'Pilot artifacts',
+      purpose: 'Institutional safety',
+      note: 'Frames simulation packs, boundaries, and stabilization notes as reviewable outputs.',
+    },
+    {
+      title: 'Readiness summaries',
+      purpose: 'Executive confidence',
+      note: 'Packages deployment direction in plain language for procurement and leadership.',
+    },
+    {
+      title: 'Trust-center evidence',
+      purpose: 'Procurement reassurance',
+      note: 'Keeps implementation safeguards, controls, and proof materials centrally visible.',
+    },
+  ],
+  'fr-CA': [
+    {
+      title: 'Parcours de déploiement',
+      purpose: 'Réalité du déploiement',
+      note: 'Montre comment l’activation passe de l’évaluation à l’adoption contrôlée.',
+    },
+    {
+      title: 'Flux de revue de gouvernance',
+      purpose: 'Explicabilité',
+      note: 'Fait ressortir les points de contrôle où la supervision reste visible et documentée.',
+    },
+    {
+      title: 'Évaluations de continuité',
+      purpose: 'Aperçu opérationnel',
+      note: 'Garde le risque de continuité et la direction de la résilience lisibles pour la direction.',
+    },
+    {
+      title: 'Artefacts pilotes',
+      purpose: 'Sécurité institutionnelle',
+      note: 'Présente les packs de simulation, les limites et les notes de stabilisation comme résultats vérifiables.',
+    },
+    {
+      title: 'Synthèses de préparation',
+      purpose: 'Confiance des dirigeants',
+      note: 'Présente la direction du déploiement en langage clair pour l’approvisionnement et la direction.',
+    },
+    {
+      title: 'Preuves du centre de confiance',
+      purpose: 'Rassurance pour l’approvisionnement',
+      note: 'Garde les garanties de mise en œuvre, les contrôles et les preuves centralisées visibles.',
+    },
+  ],
+} as const;
 
 export const deploymentWalkthrough = [
   {
@@ -244,38 +327,24 @@ export const institutionalRolloutSimulationFlow = [
   'Long-Term Continuity',
 ] as const;
 
-export const governanceOperationalWalkthroughs = [
-  {
-    type: 'Leadership transition',
-    focus: 'Continuity preservation',
-    narrative: 'Maintains institutional memory and governance continuity during executive or committee turnover.',
-  },
-  {
-    type: 'Governance review',
-    focus: 'Explainability',
-    narrative: 'Shows how decisions remain traceable through review checkpoints and rationale pathways.',
-  },
-  {
-    type: 'Committee coordination',
-    focus: 'Operational coherence',
-    narrative: 'Aligns committee roles and handoffs so operational decisions remain coordinated.',
-  },
-  {
-    type: 'Onboarding stabilization',
-    focus: 'Institutional memory',
-    narrative: 'Preserves continuity context while new teams inherit active operating responsibilities.',
-  },
-  {
-    type: 'Fragmentation reduction',
-    focus: 'Alignment',
-    narrative: 'Reduces siloed operations through shared governance language and review cadence.',
-  },
-  {
-    type: 'Procurement review',
-    focus: 'Governance trust',
-    narrative: 'Supports due diligence with implementation safeguards, boundaries, and evidence commitments.',
-  },
-] as const;
+export const governanceOperationalWalkthroughs = {
+  'en-CA': [
+    { type: 'Leadership transition', focus: 'Continuity preservation', narrative: 'Maintains institutional memory and governance continuity during executive or committee turnover.' },
+    { type: 'Governance review', focus: 'Explainability', narrative: 'Shows how decisions remain traceable through review checkpoints and rationale pathways.' },
+    { type: 'Committee coordination', focus: 'Operational coherence', narrative: 'Aligns committee roles and handoffs so operational decisions remain coordinated.' },
+    { type: 'Onboarding stabilization', focus: 'Institutional memory', narrative: 'Preserves continuity context while new teams inherit active operating responsibilities.' },
+    { type: 'Fragmentation reduction', focus: 'Alignment', narrative: 'Reduces siloed operations through shared governance language and review cadence.' },
+    { type: 'Procurement review', focus: 'Governance trust', narrative: 'Supports due diligence with implementation safeguards, boundaries, and evidence commitments.' },
+  ],
+  'fr-CA': [
+    { type: 'Transition de leadership', focus: 'Préservation de la continuité', narrative: 'Maintient la mémoire institutionnelle et la continuité de gouvernance pendant le roulement de direction ou de comité.' },
+    { type: 'Revue de gouvernance', focus: 'Explicabilité', narrative: 'Montre comment les décisions restent traçables via des points de contrôle et des parcours de justification.' },
+    { type: 'Coordination des comités', focus: 'Cohérence opérationnelle', narrative: 'Aligne les rôles des comités et les passations pour que les décisions opérationnelles restent coordonnées.' },
+    { type: 'Stabilisation de l\'intégration', focus: 'Mémoire institutionnelle', narrative: 'Préserve le contexte de continuité pendant que de nouvelles équipes héritent de responsabilités actives.' },
+    { type: 'Réduction de la fragmentation', focus: 'Alignement', narrative: 'Réduit les opérations en silos grâce à un langage de gouvernance partagé et une cadence de révision.' },
+    { type: 'Revue d\'approvisionnement', focus: 'Confiance de gouvernance', narrative: 'Soutient la diligence raisonnable avec des garde-fous, des limites et des engagements de preuve.' },
+  ],
+} as const;
 
 export const institutionalBeforeAfterMap = [
   'Fragmented Governance',
@@ -314,24 +383,45 @@ export const organizationalMaturitySnapshots = [
   },
 ] as const;
 
-export const procurementEvidenceBinder = [
-  'Implementation safeguards',
-  'Governance oversight structures',
-  'Explainability philosophy',
-  'Rollout sequencing',
-  'Operational boundaries',
-  'Continuity protection principles',
-  'Pilot governance safeguards',
-  'Reviewability commitments',
-] as const;
+export const procurementEvidenceBinder = {
+  'en-CA': [
+    'Implementation safeguards',
+    'Governance oversight structures',
+    'Explainability philosophy',
+    'Rollout sequencing',
+    'Operational boundaries',
+    'Continuity protection principles',
+    'Pilot governance safeguards',
+    'Reviewability commitments',
+  ],
+  'fr-CA': [
+    'Garde-fous de mise en œuvre',
+    'Structures de supervision de gouvernance',
+    'Philosophie d\'explicabilité',
+    'Séquençage du déploiement',
+    'Limites opérationnelles',
+    'Principes de protection de la continuité',
+    'Garde-fous de gouvernance pilote',
+    'Engagements de révisabilité',
+  ],
+} as const;
 
-export const governanceReviewSimulationLayers = [
-  'Review checkpoints',
-  'Explainability pathways',
-  'Approval layers',
-  'Governance accountability',
-  'Operational validation',
-] as const;
+export const governanceReviewSimulationLayers = {
+  'en-CA': [
+    'Review checkpoints',
+    'Explainability pathways',
+    'Approval layers',
+    'Governance accountability',
+    'Operational validation',
+  ],
+  'fr-CA': [
+    'Points de contrôle de revue',
+    'Parcours d\'explicabilité',
+    'Niveaux d\'approbation',
+    'Responsabilité de gouvernance',
+    'Validation opérationnelle',
+  ],
+} as const;
 
 export const executiveDashboardSignals = [
   {
@@ -356,371 +446,578 @@ export const executiveDashboardSignals = [
   },
 ] as const;
 
-export const executiveBriefingFlows = [
-  'Continuity risk summaries',
-  'Governance resilience observations',
-  'Fragmentation visibility',
-  'Organizational coherence mapping',
-  'Institutional readiness guidance',
-] as const;
+export const executiveBriefingFlows = {
+  'en-CA': [
+    'Continuity risk summaries',
+    'Governance resilience observations',
+    'Fragmentation visibility',
+    'Organizational coherence mapping',
+    'Institutional readiness guidance',
+  ],
+  'fr-CA': [
+    'Synthèses des risques de continuité',
+    'Observations de résilience de gouvernance',
+    'Visibilité de la fragmentation',
+    'Cartographie de cohérence organisationnelle',
+    'Orientation de préparation institutionnelle',
+  ],
+} as const;
 
-export const leadershipTransitionContinuityScenarios = [
-  {
-    scenario: 'Executive departure',
-    focus: 'Institutional memory preservation',
-    livedSignal:
-      'Decision rationale and relationship context are often concentrated in a narrow leadership circle.',
-    stabilizationMove:
-      'Convert active decisions and precedent notes into shared continuity records before role transition.',
-  },
-  {
-    scenario: 'Governance turnover',
-    focus: 'Continuity stabilization',
-    livedSignal:
-      'Committee rhythm can slip when incoming members inherit implicit rather than documented review pathways.',
-    stabilizationMove:
-      'Run a short governance handoff cycle with explicit ownership and checkpoint cadence.',
-  },
-  {
-    scenario: 'Committee restructuring',
-    focus: 'Coordination continuity',
-    livedSignal:
-      'Coordination friction appears when responsibilities shift faster than cross-committee communication patterns.',
-    stabilizationMove:
-      'Re-map decision boundaries and maintain a shared operating language during transition windows.',
-  },
-  {
-    scenario: 'Role concentration',
-    focus: 'Knowledge dependency visibility',
-    livedSignal:
-      'Critical continuity context can depend on a small number of coordinators with limited transfer routines.',
-    stabilizationMove:
-      'Surface concentration points and schedule continuity transfer checkpoints before expansion phases.',
-  },
-  {
-    scenario: 'Interim leadership',
-    focus: 'Operational resilience',
-    livedSignal:
-      'Interim structures can keep operations moving but leave governance rationale fragmented if not recorded.',
-    stabilizationMove:
-      'Preserve interim decisions as explainable records and align them to long-term governance pathways.',
-  },
-] as const;
+export const leadershipTransitionContinuityScenarios = {
+  'en-CA': [
+    {
+      scenario: 'Executive departure',
+      focus: 'Institutional memory preservation',
+      livedSignal: 'Decision rationale and relationship context are often concentrated in a narrow leadership circle.',
+      stabilizationMove: 'Convert active decisions and precedent notes into shared continuity records before role transition.',
+    },
+    {
+      scenario: 'Governance turnover',
+      focus: 'Continuity stabilization',
+      livedSignal: 'Committee rhythm can slip when incoming members inherit implicit rather than documented review pathways.',
+      stabilizationMove: 'Run a short governance handoff cycle with explicit ownership and checkpoint cadence.',
+    },
+    {
+      scenario: 'Committee restructuring',
+      focus: 'Coordination continuity',
+      livedSignal: 'Coordination friction appears when responsibilities shift faster than cross-committee communication patterns.',
+      stabilizationMove: 'Re-map decision boundaries and maintain a shared operating language during transition windows.',
+    },
+    {
+      scenario: 'Role concentration',
+      focus: 'Knowledge dependency visibility',
+      livedSignal: 'Critical continuity context can depend on a small number of coordinators with limited transfer routines.',
+      stabilizationMove: 'Surface concentration points and schedule continuity transfer checkpoints before expansion phases.',
+    },
+    {
+      scenario: 'Interim leadership',
+      focus: 'Operational resilience',
+      livedSignal: 'Interim structures can keep operations moving but leave governance rationale fragmented if not recorded.',
+      stabilizationMove: 'Preserve interim decisions as explainable records and align them to long-term governance pathways.',
+    },
+  ],
+  'fr-CA': [
+    {
+      scenario: 'Départ de direction',
+      focus: 'Préservation de la mémoire institutionnelle',
+      livedSignal: 'La logique des décisions et le contexte relationnel sont souvent concentrés dans un cercle restreint de dirigeants.',
+      stabilizationMove: 'Convertir les décisions actives et les notes de précédents en archives de continuité partagées avant la transition de rôle.',
+    },
+    {
+      scenario: 'Renouvellement de gouvernance',
+      focus: 'Stabilisation de la continuité',
+      livedSignal: 'Le rythme des comités peut flancher lorsque les nouveaux membres héritent de parcours de révision implicites plutôt que documentés.',
+      stabilizationMove: 'Mettre en place un cycle court de passation de gouvernance avec propriété explicite et cadence de points de contrôle.',
+    },
+    {
+      scenario: 'Restructuration de comité',
+      focus: 'Continuité de la coordination',
+      livedSignal: 'Des frictions de coordination apparaissent lorsque les responsabilités évoluent plus vite que les modes de communication inter-comités.',
+      stabilizationMove: 'Redéfinir les frontières décisionnelles et maintenir un langage opérationnel partagé pendant les fenêtres de transition.',
+    },
+    {
+      scenario: 'Concentration des rôles',
+      focus: 'Visibilité de la dépendance aux connaissances',
+      livedSignal: 'Le contexte de continuité critique peut dépendre d\'un petit nombre de coordinateurs aux routines de transfert limitées.',
+      stabilizationMove: 'Identifier les points de concentration et planifier des points de transfert de continuité avant les phases d\'expansion.',
+    },
+    {
+      scenario: 'Leadership intérimaire',
+      focus: 'Résilience opérationnelle',
+      livedSignal: 'Les structures intérimaires peuvent maintenir les opérations en mouvement tout en laissant le raisonnement de gouvernance fragmenté s\'il n\'est pas consigné.',
+      stabilizationMove: 'Préserver les décisions intérimaires comme dossiers explicables et les aligner sur les parcours de gouvernance à long terme.',
+    },
+  ],
+} as const;
 
-export const governanceFrictionSimulationFlows = [
-  {
-    friction: 'Committee misalignment',
-    continuityImpact: 'Decision pacing becomes uneven across governance groups.',
-    managementPath: 'Align review cadence and shared checkpoint definitions.',
-  },
-  {
-    friction: 'Fragmented approvals',
-    continuityImpact: 'Implementation slows because sign-off pathways are not synchronized.',
-    managementPath: 'Consolidate approval windows and preserve explicit owner accountability.',
-  },
-  {
-    friction: 'Duplicated governance pathways',
-    continuityImpact: 'Teams repeat reviews with inconsistent rationale capture.',
-    managementPath: 'Unify pathways around one review record and one evidence trail.',
-  },
-  {
-    friction: 'Operational silo conflicts',
-    continuityImpact: 'Cross-team handoffs lose context and increase stabilization effort.',
-    managementPath: 'Use shared transition logs between operational and governance groups.',
-  },
-  {
-    friction: 'Onboarding inconsistency',
-    continuityImpact: 'New leaders inherit uneven continuity expectations.',
-    managementPath: 'Standardize onboarding checkpoints tied to current continuity priorities.',
-  },
-  {
-    friction: 'Continuity drift across leadership cycles',
-    continuityImpact: 'Institutional priorities become less coherent over successive transitions.',
-    managementPath: 'Anchor each cycle to prior rationale records and active resilience goals.',
-  },
-] as const;
+export const governanceFrictionSimulationFlows = {
+  'en-CA': [
+    { friction: 'Committee misalignment', continuityImpact: 'Decision pacing becomes uneven across governance groups.', managementPath: 'Align review cadence and shared checkpoint definitions.' },
+    { friction: 'Fragmented approvals', continuityImpact: 'Implementation slows because sign-off pathways are not synchronized.', managementPath: 'Consolidate approval windows and preserve explicit owner accountability.' },
+    { friction: 'Duplicated governance pathways', continuityImpact: 'Teams repeat reviews with inconsistent rationale capture.', managementPath: 'Unify pathways around one review record and one evidence trail.' },
+    { friction: 'Operational silo conflicts', continuityImpact: 'Cross-team handoffs lose context and increase stabilization effort.', managementPath: 'Use shared transition logs between operational and governance groups.' },
+    { friction: 'Onboarding inconsistency', continuityImpact: 'New leaders inherit uneven continuity expectations.', managementPath: 'Standardize onboarding checkpoints tied to current continuity priorities.' },
+    { friction: 'Continuity drift across leadership cycles', continuityImpact: 'Institutional priorities become less coherent over successive transitions.', managementPath: 'Anchor each cycle to prior rationale records and active resilience goals.' },
+  ],
+  'fr-CA': [
+    { friction: 'Désalignement de comité', continuityImpact: 'Le rythme décisionnel devient irrégulier entre les groupes de gouvernance.', managementPath: 'Aligner la cadence de révision et les définitions de points de contrôle partagés.' },
+    { friction: 'Approbations fragmentées', continuityImpact: 'La mise en œuvre ralentit car les parcours d\'approbation ne sont pas synchronisés.', managementPath: 'Consolider les fenêtres d\'approbation et préserver la responsabilité explicite des propriétaires.' },
+    { friction: 'Parcours de gouvernance dupliqués', continuityImpact: 'Les équipes répètent les révisions avec une capture de raisonnement incohérente.', managementPath: 'Unifier les parcours autour d\'un seul dossier de révision et d\'une piste de preuve.' },
+    { friction: 'Conflits de silos opérationnels', continuityImpact: 'Les transferts inter-équipes perdent le contexte et augmentent l\'effort de stabilisation.', managementPath: 'Utiliser des journaux de transition partagés entre les groupes opérationnels et de gouvernance.' },
+    { friction: 'Incohérence de l\'intégration', continuityImpact: 'Les nouveaux dirigeants héritent d\'attentes de continuité inégales.', managementPath: 'Standardiser les points de contrôle d\'intégration liés aux priorités de continuité actuelles.' },
+    { friction: 'Dérive de continuité entre cycles de leadership', continuityImpact: 'Les priorités institutionnelles deviennent moins cohérentes au fil des transitions successives.', managementPath: 'Ancrer chaque cycle aux archives de raisonnement antérieures et aux objectifs de résilience actifs.' },
+  ],
+} as const;
 
-export const institutionalContinuityEventWalkthroughs = [
-  {
-    event: 'Leadership change',
-    continuityFocus: 'Institutional memory',
-    livedWalkthrough:
-      'Teams re-open prior decisions to recover context unless rationale archives are carried forward during transition.',
-  },
-  {
-    event: 'Multi-board transition',
-    continuityFocus: 'Governance alignment',
-    livedWalkthrough:
-      'Alignment pressure rises when multiple boards inherit partially different interpretations of the same policy intent.',
-  },
-  {
-    event: 'Staff turnover',
-    continuityFocus: 'Operational stabilization',
-    livedWalkthrough:
-      'Operational continuity weakens when handoffs occur through informal channels rather than recorded pathways.',
-  },
-  {
-    event: 'Committee expansion',
-    continuityFocus: 'Coordination continuity',
-    livedWalkthrough:
-      'Expansion increases coordination load and requires explicit synchronization checkpoints to remain calm.',
-  },
-  {
-    event: 'Federation growth',
-    continuityFocus: 'Organizational coherence',
-    livedWalkthrough:
-      'Regional variation can dilute coherence unless national and regional pathways share review language.',
-  },
-  {
-    event: 'Policy transition',
-    continuityFocus: 'Explainability continuity',
-    livedWalkthrough:
-      'Policy updates remain trusted when historical rationale stays visible during implementation handoffs.',
-  },
-] as const;
+export const institutionalContinuityEventWalkthroughs = {
+  'en-CA': [
+    {
+      event: 'Leadership change',
+      continuityFocus: 'Institutional memory',
+      livedWalkthrough:
+        'Teams re-open prior decisions to recover context unless rationale archives are carried forward during transition.',
+    },
+    {
+      event: 'Multi-board transition',
+      continuityFocus: 'Governance alignment',
+      livedWalkthrough:
+        'Alignment pressure rises when multiple boards inherit partially different interpretations of the same policy intent.',
+    },
+    {
+      event: 'Staff turnover',
+      continuityFocus: 'Operational stabilization',
+      livedWalkthrough:
+        'Operational continuity weakens when handoffs occur through informal channels rather than recorded pathways.',
+    },
+    {
+      event: 'Committee expansion',
+      continuityFocus: 'Coordination continuity',
+      livedWalkthrough:
+        'Expansion increases coordination load and requires explicit synchronization checkpoints to remain calm.',
+    },
+    {
+      event: 'Federation growth',
+      continuityFocus: 'Organizational coherence',
+      livedWalkthrough:
+        'Regional variation can dilute coherence unless national and regional pathways share review language.',
+    },
+    {
+      event: 'Policy transition',
+      continuityFocus: 'Explainability continuity',
+      livedWalkthrough:
+        'Policy updates remain trusted when historical rationale stays visible during implementation handoffs.',
+    },
+  ],
+  'fr-CA': [
+    {
+      event: 'Changement de leadership',
+      continuityFocus: 'Memoire institutionnelle',
+      livedWalkthrough:
+        'Les equipes reouvrent les decisions anterieures pour recuperer le contexte, sauf si les archives de justification sont transmises lors des transitions.',
+    },
+    {
+      event: 'Transition multi-conseil',
+      continuityFocus: 'Alignement de gouvernance',
+      livedWalkthrough:
+        'La pression d alignement augmente quand plusieurs conseils heritent d interpretations partiellement differentes d une meme intention politique.',
+    },
+    {
+      event: 'Rotation du personnel',
+      continuityFocus: 'Stabilisation operationnelle',
+      livedWalkthrough:
+        'La continuite operationnelle s affaiblit quand les passations se font par des canaux informels plutot que par des parcours documentes.',
+    },
+    {
+      event: 'Expansion de comite',
+      continuityFocus: 'Continuite de la coordination',
+      livedWalkthrough:
+        'L expansion accroit la charge de coordination et necessite des points de synchronisation explicites pour rester stable.',
+    },
+    {
+      event: 'Croissance federale',
+      continuityFocus: 'Coherence organisationnelle',
+      livedWalkthrough:
+        'La variation regionale peut diluer la coherence si les parcours nationaux et regionaux ne partagent pas un langage de revision commun.',
+    },
+    {
+      event: 'Transition de politique',
+      continuityFocus: 'Continuite de l explicabilite',
+      livedWalkthrough:
+        'Les mises a jour de politique restent fiables quand le raisonnement historique reste visible lors des passations de mise en oeuvre.',
+    },
+  ],
+} as const;
 
-export const operationalDisruptionModels = [
-  {
-    area: 'Knowledge concentration',
-    focus: 'Dependency risk',
-    signal: 'Critical continuity context is held by a limited set of institutional actors.',
-    mitigation: 'Create transfer routines tied to active governance checkpoints.',
-  },
-  {
-    area: 'Approval fragmentation',
-    focus: 'Governance slowdown',
-    signal: 'Parallel approval paths create pacing uncertainty and delayed execution.',
-    mitigation: 'Converge review layers into explicit sequence maps.',
-  },
-  {
-    area: 'Onboarding inconsistency',
-    focus: 'Institutional drift',
-    signal: 'Incoming leaders receive uneven continuity guidance across committees.',
-    mitigation: 'Use one continuity briefing template and phased onboarding checkpoints.',
-  },
-  {
-    area: 'Informal workflows',
-    focus: 'Visibility loss',
-    signal: 'Key decisions progress through channels that do not preserve rationale.',
-    mitigation: 'Promote lightweight decision logs attached to formal review moments.',
-  },
-  {
-    area: 'Committee silos',
-    focus: 'Coordination breakdown',
-    signal: 'Cross-functional dependencies are recognized late in the decision cycle.',
-    mitigation: 'Introduce shared dependency visibility before approval milestones.',
-  },
-] as const;
+export const operationalDisruptionModels = {
+  'en-CA': [
+    { area: 'Knowledge concentration', focus: 'Dependency risk', signal: 'Critical continuity context is held by a limited set of institutional actors.', mitigation: 'Create transfer routines tied to active governance checkpoints.' },
+    { area: 'Approval fragmentation', focus: 'Governance slowdown', signal: 'Parallel approval paths create pacing uncertainty and delayed execution.', mitigation: 'Converge review layers into explicit sequence maps.' },
+    { area: 'Onboarding inconsistency', focus: 'Institutional drift', signal: 'Incoming leaders receive uneven continuity guidance across committees.', mitigation: 'Use one continuity briefing template and phased onboarding checkpoints.' },
+    { area: 'Informal workflows', focus: 'Visibility loss', signal: 'Key decisions progress through channels that do not preserve rationale.', mitigation: 'Promote lightweight decision logs attached to formal review moments.' },
+    { area: 'Committee silos', focus: 'Coordination breakdown', signal: 'Cross-functional dependencies are recognized late in the decision cycle.', mitigation: 'Introduce shared dependency visibility before approval milestones.' },
+  ],
+  'fr-CA': [
+    { area: 'Concentration des connaissances', focus: 'Risque de dépendance', signal: 'Le contexte de continuité critique est détenu par un nombre limité d\'acteurs institutionnels.', mitigation: 'Créer des routines de transfert liées aux points de contrôle de gouvernance actifs.' },
+    { area: 'Fragmentation des approbations', focus: 'Ralentissement de la gouvernance', signal: 'Des parcours d\'approbation parallèles créent une incertitude de rythme et retardent l\'exécution.', mitigation: 'Fusionner les niveaux de révision en cartes de séquences explicites.' },
+    { area: 'Incohérence de l\'intégration', focus: 'Dérive institutionnelle', signal: 'Les nouveaux dirigeants reçoivent des orientations de continuité inégales entre les comités.', mitigation: 'Utiliser un modèle de breffage de continuité unique et des points de contrôle d\'intégration par phases.' },
+    { area: 'Flux de travail informels', focus: 'Perte de visibilité', signal: 'Les décisions clés progressent via des canaux qui ne préservent pas le raisonnement.', mitigation: 'Promouvoir des journaux décisionnels légers liés aux moments de révision formels.' },
+    { area: 'Silos de comités', focus: 'Rupture de coordination', signal: 'Les dépendances inter-fonctionnelles sont identifiées tardivement dans le cycle décisionnel.', mitigation: 'Introduire une visibilité partagée des dépendances avant les jalons d\'approbation.' },
+  ],
+} as const;
 
-export const organizationalStabilizationSimulationFlow = [
-  'Fragmentation',
-  'Visibility',
-  'Alignment',
-  'Coordination',
-  'Continuity Stabilization',
-  'Institutional Resilience',
-] as const;
+export const organizationalStabilizationSimulationFlow = {
+  'en-CA': ['Fragmentation', 'Visibility', 'Alignment', 'Coordination', 'Continuity Stabilization', 'Institutional Resilience'],
+  'fr-CA': ['Fragmentation', 'Visibilité', 'Alignement', 'Coordination', 'Stabilisation de continuité', 'Résilience institutionnelle'],
+} as const;
 
-export const onboardingContinuityIntelligenceScenarios = [
-  {
-    scenario: 'New executive onboarding',
-    focus: 'Institutional memory',
-    continuityGuide:
-      'Prioritize active decision context, ongoing commitments, and rationale carry-forward in first-cycle briefings.',
-  },
-  {
-    scenario: 'Committee onboarding',
-    focus: 'Governance continuity',
-    continuityGuide:
-      'Orient incoming committee members to current review cadence and unresolved governance dependencies.',
-  },
-  {
-    scenario: 'Regional leadership onboarding',
-    focus: 'Federation alignment',
-    continuityGuide:
-      'Translate national continuity priorities into region-level implementation checkpoints.',
-  },
-  {
-    scenario: 'Policy onboarding',
-    focus: 'Explainability continuity',
-    continuityGuide:
-      'Connect new policy stewards to prior rationale records and change constraints.',
-  },
-  {
-    scenario: 'Operational onboarding',
-    focus: 'Coordination stability',
-    continuityGuide:
-      'Pair new operators with cross-team dependency maps for early-cycle stability.',
-  },
-] as const;
+export const onboardingContinuityIntelligenceScenarios = {
+  'en-CA': [
+    {
+      scenario: 'New executive onboarding',
+      focus: 'Institutional memory',
+      continuityGuide:
+        'Prioritize active decision context, ongoing commitments, and rationale carry-forward in first-cycle briefings.',
+    },
+    {
+      scenario: 'Committee onboarding',
+      focus: 'Governance continuity',
+      continuityGuide:
+        'Orient incoming committee members to current review cadence and unresolved governance dependencies.',
+    },
+    {
+      scenario: 'Regional leadership onboarding',
+      focus: 'Federation alignment',
+      continuityGuide:
+        'Translate national continuity priorities into region-level implementation checkpoints.',
+    },
+    {
+      scenario: 'Policy onboarding',
+      focus: 'Explainability continuity',
+      continuityGuide:
+        'Connect new policy stewards to prior rationale records and change constraints.',
+    },
+    {
+      scenario: 'Operational onboarding',
+      focus: 'Coordination stability',
+      continuityGuide:
+        'Pair new operators with cross-team dependency maps for early-cycle stability.',
+    },
+  ],
+  'fr-CA': [
+    {
+      scenario: 'Integration d un nouveau dirigeant',
+      focus: 'Memoire institutionnelle',
+      continuityGuide:
+        'Prioriser le contexte des decisions actives, les engagements en cours et la transmission du raisonnement dans les breffages du premier cycle.',
+    },
+    {
+      scenario: 'Integration de comite',
+      focus: 'Continuite de la gouvernance',
+      continuityGuide:
+        'Orienter les nouveaux membres du comite vers la cadence de revision actuelle et les dependances de gouvernance non resolues.',
+    },
+    {
+      scenario: 'Integration de leadership regional',
+      focus: 'Alignement federal',
+      continuityGuide:
+        'Traduire les priorites de continuite nationales en points de controle de mise en oeuvre au niveau regional.',
+    },
+    {
+      scenario: 'Integration de politique',
+      focus: 'Continuite de l explicabilite',
+      continuityGuide:
+        'Connecter les nouveaux gestionnaires de politique aux archives de raisonnement anterieures et aux contraintes de changement.',
+    },
+    {
+      scenario: 'Integration operationnelle',
+      focus: 'Stabilite de la coordination',
+      continuityGuide:
+        'Jumeler les nouveaux operateurs avec des cartes de dependances inter-equipes pour la stabilite du premier cycle.',
+    },
+  ],
+} as const;
 
-export const federationScaleContinuityScenarios = [
-  {
-    area: 'National and regional alignment',
-    focus: 'Governance coherence',
-    realism:
-      'Alignment requires preserving local operating realities while maintaining shared review principles.',
-  },
-  {
-    area: 'Multi-committee coordination',
-    focus: 'Operational visibility',
-    realism:
-      'Coordination confidence improves when committee dependencies are visible before decision windows.',
-  },
-  {
-    area: 'Shared continuity frameworks',
-    focus: 'Institutional stability',
-    realism:
-      'Frameworks reduce transition risk when they are practical enough for local adoption.',
-  },
-  {
-    area: 'Distributed governance',
-    focus: 'Explainability',
-    realism:
-      'Distributed structures remain trustworthy when rationale records travel across governance layers.',
-  },
-  {
-    area: 'Organizational scaling',
-    focus: 'Continuity preservation',
-    realism:
-      'Scaling remains calm when expansion stages keep continuity safeguards visible and reviewable.',
-  },
-] as const;
+export const federationScaleContinuityScenarios = {
+  'en-CA': [
+    {
+      area: 'National and regional alignment',
+      focus: 'Governance coherence',
+      realism:
+        'Alignment requires preserving local operating realities while maintaining shared review principles.',
+    },
+    {
+      area: 'Multi-committee coordination',
+      focus: 'Operational visibility',
+      realism:
+        'Coordination confidence improves when committee dependencies are visible before decision windows.',
+    },
+    {
+      area: 'Shared continuity frameworks',
+      focus: 'Institutional stability',
+      realism:
+        'Frameworks reduce transition risk when they are practical enough for local adoption.',
+    },
+    {
+      area: 'Distributed governance',
+      focus: 'Explainability',
+      realism:
+        'Distributed structures remain trustworthy when rationale records travel across governance layers.',
+    },
+    {
+      area: 'Organizational scaling',
+      focus: 'Continuity preservation',
+      realism:
+        'Scaling remains calm when expansion stages keep continuity safeguards visible and reviewable.',
+    },
+  ],
+  'fr-CA': [
+    {
+      area: 'Alignement national et regional',
+      focus: 'Coherence de gouvernance',
+      realism:
+        'L alignement necessite de preserver les realites operationnelles locales tout en maintenant des principes de revision partages.',
+    },
+    {
+      area: 'Coordination multi-comites',
+      focus: 'Visibilite operationnelle',
+      realism:
+        'La confiance dans la coordination s ameliore quand les dependances des comites sont visibles avant les fenetres de decision.',
+    },
+    {
+      area: 'Cadres de continuite partages',
+      focus: 'Stabilite institutionnelle',
+      realism:
+        'Les cadres reduisent le risque de transition quand ils sont suffisamment pratiques pour etre adoptes localement.',
+    },
+    {
+      area: 'Gouvernance distribuee',
+      focus: 'Explicabilite',
+      realism:
+        'Les structures distribuees restent fiables quand les archives de raisonnement circulent entre les niveaux de gouvernance.',
+    },
+    {
+      area: 'Croissance organisationnelle',
+      focus: 'Preservation de la continuite',
+      realism:
+        'La croissance reste calme quand les etapes d expansion maintiennent les garde-fous de continuite visibles et revisables.',
+    },
+  ],
+} as const;
 
-export const committeeCoordinationSimulations = [
-  {
-    simulation: 'Overlapping governance responsibilities',
-    coordinationSignal: 'Ownership ambiguity appears at handoff boundaries.',
-    stabilizationApproach: 'Clarify owner of record per decision stage.',
-  },
-  {
-    simulation: 'Fragmented decision pathways',
-    coordinationSignal: 'Pathways diverge by committee and slow synchronization.',
-    stabilizationApproach: 'Introduce one shared pathway map for active initiatives.',
-  },
-  {
-    simulation: 'Institutional memory fragmentation',
-    coordinationSignal: 'Historic rationale is unevenly distributed among committees.',
-    stabilizationApproach: 'Consolidate precedent references inside review briefings.',
-  },
-  {
-    simulation: 'Cross-functional continuity drift',
-    coordinationSignal: 'Operational and governance language diverge over time.',
-    stabilizationApproach: 'Run periodic cross-functional alignment checkpoints.',
-  },
-  {
-    simulation: 'Approval synchronization',
-    coordinationSignal: 'Approvals arrive in inconsistent sequence under pressure.',
-    stabilizationApproach: 'Sequence dependencies before opening final approval windows.',
-  },
-] as const;
+export const committeeCoordinationSimulations = {
+  'en-CA': [
+    { simulation: 'Overlapping governance responsibilities', coordinationSignal: 'Ownership ambiguity appears at handoff boundaries.', stabilizationApproach: 'Clarify owner of record per decision stage.' },
+    { simulation: 'Fragmented decision pathways', coordinationSignal: 'Pathways diverge by committee and slow synchronization.', stabilizationApproach: 'Introduce one shared pathway map for active initiatives.' },
+    { simulation: 'Institutional memory fragmentation', coordinationSignal: 'Historic rationale is unevenly distributed among committees.', stabilizationApproach: 'Consolidate precedent references inside review briefings.' },
+    { simulation: 'Cross-functional continuity drift', coordinationSignal: 'Operational and governance language diverge over time.', stabilizationApproach: 'Run periodic cross-functional alignment checkpoints.' },
+    { simulation: 'Approval synchronization', coordinationSignal: 'Approvals arrive in inconsistent sequence under pressure.', stabilizationApproach: 'Sequence dependencies before opening final approval windows.' },
+  ],
+  'fr-CA': [
+    { simulation: 'Responsabilités de gouvernance qui se chevauchent', coordinationSignal: 'L\'ambiguïté de propriété apparaît aux frontières de passation.', stabilizationApproach: 'Clarifier le responsable de dossier pour chaque étape décisionnelle.' },
+    { simulation: 'Parcours décisionnels fragmentés', coordinationSignal: 'Les parcours divergent par comité et ralentissent la synchronisation.', stabilizationApproach: 'Introduire une carte de parcours partagée unique pour les initiatives actives.' },
+    { simulation: 'Fragmentation de la mémoire institutionnelle', coordinationSignal: 'Le raisonnement historique est inégalement réparti entre les comités.', stabilizationApproach: 'Consolider les références de précédents dans les breffages de révision.' },
+    { simulation: 'Dérive de continuité inter-fonctionnelle', coordinationSignal: 'Le langage opérationnel et de gouvernance diverge avec le temps.', stabilizationApproach: 'Organiser des points de contrôle d\'alignement inter-fonctionnel périodiques.' },
+    { simulation: 'Synchronisation des approbations', coordinationSignal: 'Les approbations arrivent dans une séquence incohérente sous pression.', stabilizationApproach: 'Séquencer les dépendances avant l\'ouverture des fenêtres d\'approbation finale.' },
+  ],
+} as const;
 
-export const institutionalMemoryDisruptionModels = [
-  {
-    area: 'Knowledge concentration',
-    focus: 'Continuity dependency',
-    awareness:
-      'Continuity risk rises when critical operational history is held by a small set of individuals.',
-  },
-  {
-    area: 'Informal processes',
-    focus: 'Visibility loss',
-    awareness:
-      'Informal workflows reduce explainability during leadership and committee transitions.',
-  },
-  {
-    area: 'Transition gaps',
-    focus: 'Operational fragility',
-    awareness:
-      'Unstructured handoffs create temporary stability gaps in active operations.',
-  },
-  {
-    area: 'Committee memory loss',
-    focus: 'Governance drift',
-    awareness:
-      'Committees can drift from prior institutional commitments when rationale lineage is thin.',
-  },
-  {
-    area: 'Historical continuity erosion',
-    focus: 'Institutional instability',
-    awareness:
-      'Loss of historical context weakens confidence in modernization sequencing over time.',
-  },
-] as const;
+export const institutionalMemoryDisruptionModels = {
+  'en-CA': [
+    {
+      area: 'Knowledge concentration',
+      focus: 'Continuity dependency',
+      awareness:
+        'Continuity risk rises when critical operational history is held by a small set of individuals.',
+    },
+    {
+      area: 'Informal processes',
+      focus: 'Visibility loss',
+      awareness:
+        'Informal workflows reduce explainability during leadership and committee transitions.',
+    },
+    {
+      area: 'Transition gaps',
+      focus: 'Operational fragility',
+      awareness:
+        'Unstructured handoffs create temporary stability gaps in active operations.',
+    },
+    {
+      area: 'Committee memory loss',
+      focus: 'Governance drift',
+      awareness:
+        'Committees can drift from prior institutional commitments when rationale lineage is thin.',
+    },
+    {
+      area: 'Historical continuity erosion',
+      focus: 'Institutional instability',
+      awareness:
+        'Loss of historical context weakens confidence in modernization sequencing over time.',
+    },
+  ],
+  'fr-CA': [
+    {
+      area: 'Concentration des connaissances',
+      focus: 'Dependance de continuite',
+      awareness:
+        'Le risque de continuite augmente quand l historique operationnel critique est detenu par un petit groupe d individus.',
+    },
+    {
+      area: 'Processus informels',
+      focus: 'Perte de visibilite',
+      awareness:
+        'Les flux de travail informels reduisent l explicabilite lors des transitions de leadership et de comites.',
+    },
+    {
+      area: 'Lacunes de transition',
+      focus: 'Fragilite operationnelle',
+      awareness:
+        'Les passations non structurees creent des ecarts de stabilite temporaires dans les operations actives.',
+    },
+    {
+      area: 'Perte de memoire de comite',
+      focus: 'Derive de gouvernance',
+      awareness:
+        'Les comites peuvent deriver des engagements institutionnels passes quand la lignee du raisonnement est mince.',
+    },
+    {
+      area: 'Erosion de la continuite historique',
+      focus: 'Instabilite institutionnelle',
+      awareness:
+        'La perte du contexte historique affaiblit la confiance dans le sequencement de modernisation au fil du temps.',
+    },
+  ],
+} as const;
 
-export const executiveDecisionPathwaySystems = [
-  {
-    decision: 'Pilot adoption',
-    continuityFocus: 'Governance safety',
-    pathway:
-      'Confirm scope boundaries, review accountability, and stabilization commitments before activation.',
-  },
-  {
-    decision: 'Rollout pacing',
-    continuityFocus: 'Organizational stability',
-    pathway:
-      'Expand only after each phase demonstrates continuity clarity and governance reliability.',
-  },
-  {
-    decision: 'Governance review',
-    continuityFocus: 'Explainability',
-    pathway:
-      'Validate rationale lineage and oversight traceability before major implementation decisions.',
-  },
-  {
-    decision: 'Transition support',
-    continuityFocus: 'Institutional continuity',
-    pathway:
-      'Prioritize transfer routines where leadership turnover intersects active modernization work.',
-  },
-  {
-    decision: 'Committee alignment',
-    continuityFocus: 'Operational coherence',
-    pathway:
-      'Synchronize committee dependencies and shared timing before final approvals.',
-  },
-] as const;
+export const executiveDecisionPathwaySystems = {
+  'en-CA': [
+    {
+      decision: 'Pilot adoption',
+      continuityFocus: 'Governance safety',
+      pathway:
+        'Confirm scope boundaries, review accountability, and stabilization commitments before activation.',
+    },
+    {
+      decision: 'Rollout pacing',
+      continuityFocus: 'Organizational stability',
+      pathway:
+        'Expand only after each phase demonstrates continuity clarity and governance reliability.',
+    },
+    {
+      decision: 'Governance review',
+      continuityFocus: 'Explainability',
+      pathway:
+        'Validate rationale lineage and oversight traceability before major implementation decisions.',
+    },
+    {
+      decision: 'Transition support',
+      continuityFocus: 'Institutional continuity',
+      pathway:
+        'Prioritize transfer routines where leadership turnover intersects active modernization work.',
+    },
+    {
+      decision: 'Committee alignment',
+      continuityFocus: 'Operational coherence',
+      pathway:
+        'Synchronize committee dependencies and shared timing before final approvals.',
+    },
+  ],
+  'fr-CA': [
+    {
+      decision: 'Adoption du pilote',
+      continuityFocus: 'Securite de gouvernance',
+      pathway:
+        'Confirmer les limites de portee, la responsabilite de revision et les engagements de stabilisation avant l activation.',
+    },
+    {
+      decision: 'Rythme de deploiement',
+      continuityFocus: 'Stabilite organisationnelle',
+      pathway:
+        'Etendre seulement apres que chaque phase demontre une clarte de continuite et une fiabilite de gouvernance.',
+    },
+    {
+      decision: 'Revue de gouvernance',
+      continuityFocus: 'Explicabilite',
+      pathway:
+        'Valider la lignee du raisonnement et la tracabilite de la supervision avant les decisions majeures de mise en oeuvre.',
+    },
+    {
+      decision: 'Soutien a la transition',
+      continuityFocus: 'Continuite institutionnelle',
+      pathway:
+        'Prioriser les routines de transfert la ou le roulement de leadership croise le travail de modernisation actif.',
+    },
+    {
+      decision: 'Alignement des comites',
+      continuityFocus: 'Coherence operationnelle',
+      pathway:
+        'Synchroniser les dependances des comites et le calendrier partage avant les approbations finales.',
+    },
+  ],
+} as const;
 
-export const multiStakeholderGovernanceNarratives = [
-  {
-    stakeholders: 'Executive leadership, governance chairs, operations leads',
-    narrative:
-      'Continuity confidence improves when strategy, oversight, and implementation use one explainable operating storyline.',
-  },
-  {
-    stakeholders: 'Procurement reviewers, legal teams, governance observers',
-    narrative:
-      'Review readiness strengthens when safeguards and rationale are visible in operational context.',
-  },
-  {
-    stakeholders: 'Regional leaders, committee coordinators, transition stewards',
-    narrative:
-      'Distributed modernization remains stable when local realities are integrated into shared continuity frameworks.',
-  },
-] as const;
+export const multiStakeholderGovernanceNarratives = {
+  'en-CA': [
+    {
+      stakeholders: 'Executive leadership, governance chairs, operations leads',
+      narrative:
+        'Continuity confidence improves when strategy, oversight, and implementation use one explainable operating storyline.',
+    },
+    {
+      stakeholders: 'Procurement reviewers, legal teams, governance observers',
+      narrative:
+        'Review readiness strengthens when safeguards and rationale are visible in operational context.',
+    },
+    {
+      stakeholders: 'Regional leaders, committee coordinators, transition stewards',
+      narrative:
+        'Distributed modernization remains stable when local realities are integrated into shared continuity frameworks.',
+    },
+  ],
+  'fr-CA': [
+    {
+      stakeholders: 'Direction executive, presidents de gouvernance, responsables operationnels',
+      narrative:
+        'La confiance dans la continuite s ameliore quand strategie, supervision et mise en oeuvre utilisent un recit operationnel explicable commun.',
+    },
+    {
+      stakeholders: 'Examinateurs d approvisionnement, equipes juridiques, observateurs de gouvernance',
+      narrative:
+        'La preparation a la revision se renforce quand les garde-fous et le raisonnement sont visibles en contexte operationnel.',
+    },
+    {
+      stakeholders: 'Leaders regionaux, coordinateurs de comites, gestionnaires de transition',
+      narrative:
+        'La modernisation distribuee reste stable quand les realites locales sont integrees dans des cadres de continuite partages.',
+    },
+  ],
+} as const;
 
-export const longitudinalContinuityEvolutionStories = [
-  {
-    stage: 'Cycle 1 - Visibility',
-    storyline:
-      'Organization identifies concentration points and begins continuity-focused evidence capture.',
-  },
-  {
-    stage: 'Cycle 2 - Alignment',
-    storyline:
-      'Governance pathways and operational handoffs are synchronized with explainable checkpoints.',
-  },
-  {
-    stage: 'Cycle 3 - Stabilization',
-    storyline:
-      'Onboarding routines and transition safeguards become repeatable under normal operating pressure.',
-  },
-  {
-    stage: 'Cycle 4 - Resilience',
-    storyline:
-      'Institution handles leadership changes with continuity confidence and preserved rationale lineage.',
-  },
-] as const;
+export const longitudinalContinuityEvolutionStories = {
+  'en-CA': [
+    {
+      stage: 'Cycle 1 - Visibility',
+      storyline:
+        'Organization identifies concentration points and begins continuity-focused evidence capture.',
+    },
+    {
+      stage: 'Cycle 2 - Alignment',
+      storyline:
+        'Governance pathways and operational handoffs are synchronized with explainable checkpoints.',
+    },
+    {
+      stage: 'Cycle 3 - Stabilization',
+      storyline:
+        'Onboarding routines and transition safeguards become repeatable under normal operating pressure.',
+    },
+    {
+      stage: 'Cycle 4 - Resilience',
+      storyline:
+        'Institution handles leadership changes with continuity confidence and preserved rationale lineage.',
+    },
+  ],
+  'fr-CA': [
+    {
+      stage: 'Cycle 1 - Visibilite',
+      storyline:
+        'L organisation identifie les points de concentration et commence la capture de preuves axee sur la continuite.',
+    },
+    {
+      stage: 'Cycle 2 - Alignement',
+      storyline:
+        'Les parcours de gouvernance et les passations operationnelles sont synchronises avec des points de controle explicables.',
+    },
+    {
+      stage: 'Cycle 3 - Stabilisation',
+      storyline:
+        'Les routines d integration et les garde-fous de transition deviennent repetables sous pression operationnelle normale.',
+    },
+    {
+      stage: 'Cycle 4 - Resilience',
+      storyline:
+        'L institution gere les changements de leadership avec confiance dans la continuite et une lignee de raisonnement preservee.',
+    },
+  ],
+} as const;
 
 export const clcBoothNarrativeSystem = [
   'Institutional Fragmentation',

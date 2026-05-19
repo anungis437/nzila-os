@@ -37,10 +37,10 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.pricing' });
   return {
-    title: 'Pricing | UnionEyes',
-    description:
-      'UnionEyes is institutional operational infrastructure. Pricing is organized as operational maturity states — Foundation, Governance Operations, Institutional Continuity, Sovereignty Layer — not seat-based SaaS tiers.',
+    title: t('pageTitle'),
+    description: t('pageDescription'),
     alternates: buildLocaleAlternates(locale, '/pricing'),
   };
 }
@@ -241,6 +241,208 @@ const procurementCommitments = [
   },
 ];
 
+const frOperationalReality = [
+  { title: 'Complexité institutionnelle', body: 'Multiples sections locales, mandats et comités sans image opérationnelle cohérente.' },
+  { title: 'Risque de continuité', body: 'Savoir critique détenu par des personnes — perdu à chaque transition de leadership.' },
+  { title: 'Fragmentation de la gouvernance', body: 'Décisions, motions et engagements dispersés entre courriels, lecteurs et notes de réunion.' },
+  { title: 'Roulement opérationnel', body: 'Nouveaux délégués, dirigeants et membres du personnel héritant de dossiers inachevés sans registre opérationnel.' },
+  { title: 'Surcharge des délégués', body: 'Les représentants de première ligne portent une mémoire organisationnelle que l’institution ne retient pas elle-même.' },
+  { title: 'Perte de mémoire organisationnelle', body: 'Les précédents, doctrines et décisions antérieures se dégradent chaque année lorsqu’ils ne sont pas consignés.' },
+];
+
+const frMaturityTiers = [
+  {
+    key: 'foundation',
+    icon: Layers,
+    name: 'Fondation',
+    posture: 'Stabilisation opérationnelle',
+    fit: 'Sections locales et petits syndicats établissant un registre opérationnel cohérent.',
+    feels: 'Stable. Coordonné. Vérifiable.',
+    focus: [
+      'Réception unifiée des dossiers et messages des membres',
+      'Communication et coordination des délégués respectueuses de la continuité',
+      'Mémoire opérationnelle bornée avec rétention explicite',
+      'Visibilité opérationnelle pour dirigeants et comités',
+    ],
+    surfaces: ['Réception', 'Travail', 'Priorités', 'Gouvernance de base', 'Communications'],
+    range: 'Programme annuel — généralement 12 k$ à 30 k$',
+  },
+  {
+    key: 'governance',
+    icon: Building2,
+    name: 'Opérations de gouvernance',
+    posture: 'Infrastructure de maturité de gouvernance',
+    fit: 'Organisations de taille moyenne modernisant la cadence de gouvernance et les rapports fédératifs.',
+    feels: 'Discipliné. Mesurable. Transparent.',
+    focus: [
+      'Opérations de gouvernance et décisions officielles',
+      'Rapports fédératifs et continuité de conformité',
+      'Visibilité exécutive sur l’institution opérationnelle',
+      'Cadence opérationnelle avec pistes d’audit défendables',
+    ],
+    surfaces: ['Surfaces Fondation', 'Gouvernance', 'Analytique', 'Fédération', 'Conformité', 'Intelligence exécutive'],
+    range: 'Programme annuel — généralement 40 k$ à 120 k$',
+  },
+  {
+    key: 'continuity',
+    icon: Landmark,
+    name: 'Continuité institutionnelle',
+    posture: 'Infrastructure de continuité',
+    fit: 'Syndicats nationaux et fédérations préservant la mémoire institutionnelle à travers les transitions.',
+    feels: 'Durable. Transmissible. Continu.',
+    focus: [
+      'Mémoire organisationnelle préservée à travers les transitions de leadership',
+      'Préservation de continuité et résilience opérationnelle',
+      'Continuité de succession pour dirigeants, délégués et personnel',
+      'Cognition respectueuse de la gouvernance à l’échelle fédérative',
+    ],
+    surfaces: ['Surfaces de gouvernance', 'Mémoire organisationnelle', 'Intelligence de continuité', 'Cognition longitudinale', 'Analytique intersyndicale', 'Simulation de continuité'],
+    range: 'Défini avec la direction exécutive — discutons-en',
+  },
+  {
+    key: 'sovereignty',
+    icon: Globe2,
+    name: 'Couche de souveraineté',
+    posture: 'Souveraineté opérationnelle institutionnelle',
+    fit: 'Infrastructure stratégique à l’échelle fédérative avec topologie opérationnelle souveraine.',
+    feels: 'Souverain. Résilient. À l’échelle fédérative.',
+    focus: [
+      'Topologie opérationnelle souveraine sous votre gouvernance',
+      'Cognition respectueuse de la continuité avec dégradation sécuritaire',
+      'Coordination opérationnelle à l’échelle fédérative',
+      'Outils de résilience institutionnelle et infrastructure de continuité partagée',
+    ],
+    surfaces: ['Surfaces de continuité institutionnelle', 'Cognition', 'Opérations souveraines', 'Coordination fédérative', 'IA respectueuse de la gouvernance', 'Systèmes avancés de continuité'],
+    range: 'Engagement stratégique fédératif — discutons-en',
+  },
+];
+
+const frVisibilityBands = [
+  {
+    band: 'Délégués et représentants de première ligne',
+    foundation: 'Réception unifiée, dossiers et communication respectueuse de la continuité.',
+    governance: 'Dossiers avec contexte de gouvernance et précédents politiques.',
+    continuity: 'Dossiers ancrés dans la mémoire institutionnelle et les décisions antérieures.',
+    sovereignty: 'Tendances fédératives et précédents intersyndicaux.',
+  },
+  {
+    band: 'Dirigeants et comités',
+    foundation: 'Visibilité opérationnelle et décisions officielles.',
+    governance: 'Cadence de gouvernance, motions et continuité de conformité.',
+    continuity: 'Intelligence de continuité à travers mandats et transitions.',
+    sovereignty: 'Intelligence opérationnelle souveraine à l’échelle fédérative.',
+  },
+  {
+    band: 'Direction exécutive',
+    foundation: 'Image opérationnelle de l’institution.',
+    governance: 'Intelligence exécutive avec rapports fédératifs.',
+    continuity: 'Intelligence exécutive longitudinale à travers les cycles de leadership.',
+    sovereignty: 'Coordination exécutive et posture de résilience à l’échelle fédérative.',
+  },
+  {
+    band: 'Membres et institution',
+    foundation: 'Confiance que les demandes et engagements ne se perdent pas.',
+    governance: 'Confiance que la gouvernance suit une cadence défendable.',
+    continuity: 'Confiance que la mémoire institutionnelle survivra à toute personne.',
+    sovereignty: 'Confiance que la souveraineté opérationnelle est préservée par conception.',
+  },
+];
+
+const frProgression = [
+  { from: 'Fondation', to: 'Opérations de gouvernance', trigger: 'La cadence de gouvernance devient la contrainte principale, plutôt que le volume de dossiers.' },
+  { from: 'Opérations de gouvernance', to: 'Continuité institutionnelle', trigger: 'Les transitions de leadership, la succession et les rapports fédératifs deviennent des risques institutionnels.' },
+  { from: 'Continuité institutionnelle', to: 'Couche de souveraineté', trigger: 'La souveraineté opérationnelle, la coordination fédérative et la continuité partagée deviennent stratégiques.' },
+];
+
+const frProcurementCommitments = [
+  { title: 'Honnêteté opérationnelle', body: 'Les capacités, limites et comportements de dégradation sont documentés avant l’approvisionnement.' },
+  { title: 'Cognition respectueuse de la gouvernance', body: 'Les surfaces de raisonnement fonctionnent sous gouvernance institutionnelle, pas selon des hypothèses d’agent autonome.' },
+  { title: 'Dégradation sécuritaire', body: 'Lorsque les systèmes se dégradent, ils le font de manière gouvernable et non opaque.' },
+  { title: 'Posture de souveraineté', body: 'La résidence des données au Canada et l’hébergement souverain sont des engagements structurels.' },
+  { title: 'Opérations respectueuses de la continuité', body: 'Aucun parcours opérationnel ne dépend d’une seule personne, d’un fournisseur ou d’une pratique non documentée.' },
+];
+
+const pricingCopy = {
+  'en-CA': {
+    heading: <>Institutional operational infrastructure,<br />organized by operational maturity.</>,
+    description: 'We meet institutions where they are. Programs are organized as operational maturity states — chosen with you, not handed down as seat counts or feature matrices. Start where it fits, grow when it matters.',
+    realityHeading: 'Operational reality',
+    realityBody: 'Institutions adopt UnionEyes when operational reality outgrows informal coordination. The conditions below consistently determine the right maturity tier.',
+    tierHeading: 'Find the tier that fits you today',
+    tierBody: 'Four operational maturity states. Each one is a coherent place to live for a while — not a feature bundle. You don’t need to start at the top; you need to start where your institution actually is.',
+    fitPrefix: 'Best for: ',
+    focusLabel: 'What you focus on',
+    includedLabel: 'What’s included',
+    investmentLabel: 'Investment',
+    rangeNote: 'A starting range — we shape the final scope with you and your procurement team.',
+    unsureTitle: 'Not sure where you fit?',
+    unsureBody: 'That’s the most common starting point. A short conversation usually makes the right tier obvious — and we’ll tell you honestly if you don’t need the bigger one yet.',
+    unsureCta: 'Talk it through with us',
+    visibilityHeading: 'What everyone gets out of it',
+    visibilityBody: 'Each tier changes what stewards, officers, executives, and members can see and rely on. High-level on purpose — we keep the feature talk for the conversation.',
+    who: 'Who',
+    growHeading: 'Grow when you’re ready',
+    growBody: 'Institutions evolve. The ladder is designed to be lived in — each tier earns the next when something concrete in your operations changes.',
+    when: 'When it happens: ',
+    procurementLabel: 'Procurement-safe by design',
+    commitmentsHeading: 'Institutional commitments, not feature claims',
+    commitmentsBody: 'Every maturity tier inherits the same institutional commitments. These are the positions that distinguish operational infrastructure from generic AI tooling.',
+    trustCenter: 'Trust Center',
+    governanceStructure: 'Governance Structure',
+    institutionalProof: 'Institutional Proof',
+    ctaLabel: 'Let’s find the right fit',
+    ctaHeading: 'Start with a conversation, not a quote',
+    ctaBody: 'Tell us where your institution is today. We’ll help you identify the right tier, walk through what it looks like in practice, and shape the program with you — at the pace that fits your governance.',
+    ctaPrimary: 'Request Executive Briefing',
+    ctaSecondary: 'Discuss Operational Maturity',
+    ctaFinePrint: 'Maturity tiers and ranges are positioning structure for institutional planning. Final program scope is set jointly with executive and procurement leadership.',
+    operationalReality,
+    maturityTiers,
+    visibilityBands,
+    progression,
+    procurementCommitments,
+  },
+  'fr-CA': {
+    heading: <>Infrastructure opérationnelle institutionnelle,<br />organisée par maturité opérationnelle.</>,
+    description: 'Nous rencontrons les institutions là où elles sont. Les programmes sont organisés comme des états de maturité opérationnelle, choisis avec vous plutôt qu’imposés comme des sièges ou des matrices de fonctionnalités.',
+    realityHeading: 'Réalité opérationnelle',
+    realityBody: 'Les institutions adoptent UnionEyes lorsque la réalité opérationnelle dépasse la coordination informelle. Les conditions ci-dessous aident à déterminer le bon niveau de maturité.',
+    tierHeading: 'Trouver le palier qui vous convient aujourd’hui',
+    tierBody: 'Quatre états de maturité opérationnelle. Chacun est un lieu cohérent où vivre pendant un certain temps, pas un ensemble de fonctionnalités.',
+    fitPrefix: 'Convient à : ',
+    focusLabel: 'Ce sur quoi vous vous concentrez',
+    includedLabel: 'Ce qui est inclus',
+    investmentLabel: 'Investissement',
+    rangeNote: 'Une fourchette de départ — nous façonnons la portée finale avec vous et votre équipe d’approvisionnement.',
+    unsureTitle: 'Vous ne savez pas où vous situer?',
+    unsureBody: 'C’est le point de départ le plus courant. Une courte conversation rend généralement le bon palier évident.',
+    unsureCta: 'En discuter avec nous',
+    visibilityHeading: 'Ce que chacun y gagne',
+    visibilityBody: 'Chaque palier change ce que les délégués, dirigeants, exécutifs et membres peuvent voir et utiliser avec confiance.',
+    who: 'Qui',
+    growHeading: 'Grandir lorsque vous êtes prêt',
+    growBody: 'Les institutions évoluent. Cette progression est conçue pour être vécue; chaque palier mérite le suivant lorsqu’un changement concret apparaît dans vos opérations.',
+    when: 'Quand cela se produit : ',
+    procurementLabel: 'Conçu pour l’approvisionnement',
+    commitmentsHeading: 'Engagements institutionnels, pas promesses de fonctionnalités',
+    commitmentsBody: 'Chaque palier hérite des mêmes engagements institutionnels. Ce sont ces positions qui distinguent l’infrastructure opérationnelle des outils d’IA génériques.',
+    trustCenter: 'Centre de confiance',
+    governanceStructure: 'Structure de gouvernance',
+    institutionalProof: 'Preuves institutionnelles',
+    ctaLabel: 'Trouvons le bon ajustement',
+    ctaHeading: 'Commencer par une conversation, pas par un devis',
+    ctaBody: 'Dites-nous où se situe votre institution aujourd’hui. Nous vous aidons à identifier le bon palier et à façonner le programme à un rythme compatible avec votre gouvernance.',
+    ctaPrimary: 'Demander une présentation exécutive',
+    ctaSecondary: 'Discuter de la maturité opérationnelle',
+    ctaFinePrint: 'Les paliers et fourchettes servent à planifier l’engagement institutionnel. La portée finale est définie avec la direction exécutive et l’approvisionnement.',
+    operationalReality: frOperationalReality,
+    maturityTiers: frMaturityTiers,
+    visibilityBands: frVisibilityBands,
+    progression: frProgression,
+    procurementCommitments: frProcurementCommitments,
+  },
+} as const;
+
 export default async function LocalePricingPage({
   params,
 }: {
@@ -248,20 +450,15 @@ export default async function LocalePricingPage({
 }) {
   const { locale } = await params;
   const tNote = await getTranslations({ locale, namespace: 'continuityNotes.procurement' });
+  const copy = pricingCopy[locale as keyof typeof pricingCopy] ?? pricingCopy['en-CA'];
   return (
     <div className="institution-shell min-h-screen">
       <MarketingHeroSection
         imageUrl={heroImagery.pricing}
         tone="dark"
         revealTempo="conference"
-        heading={
-          <>
-            Institutional operational infrastructure,
-            <br />
-            organized by operational maturity.
-          </>
-        }
-        description="We meet institutions where they are. Programs are organized as operational maturity states — chosen with you, not handed down as seat counts or feature matrices. Start where it fits, grow when it matters."
+        heading={copy.heading}
+        description={copy.description}
       />
 
       <InstitutionalContinuityNote
@@ -273,15 +470,15 @@ export default async function LocalePricingPage({
       <section className="py-16 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">Operational reality</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.realityHeading}</h2>
           </ScrollReveal>
           <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              Institutions adopt UnionEyes when operational reality outgrows informal coordination. The conditions below consistently determine the right maturity tier.
+              {copy.realityBody}
             </p>
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">
-            {operationalReality.map((item) => (
+            {copy.operationalReality.map((item) => (
               <article key={item.title} className="institution-panel calm-elevation p-5">
                 <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
@@ -295,16 +492,16 @@ export default async function LocalePricingPage({
       <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">Find the tier that fits you today</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.tierHeading}</h2>
           </ScrollReveal>
           <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              Four operational maturity states. Each one is a coherent place to live for a while — not a feature bundle. You don’t need to start at the top; you need to start where your institution actually is.
+              {copy.tierBody}
             </p>
           </ScrollReveal>
 
           <div className="grid md:grid-cols-2 gap-5 narrative-sequence">
-            {maturityTiers.map((tier) => {
+            {copy.maturityTiers.map((tier) => {
               const Icon = tier.icon;
               return (
                 <article key={tier.key} className="institution-panel calm-elevation p-6 flex flex-col">
@@ -321,11 +518,11 @@ export default async function LocalePricingPage({
                   <p className="text-xs text-slate-500 italic mb-4">{tier.feels}</p>
 
                   <p className="text-sm text-slate-700 leading-relaxed mb-5">
-                    <span className="font-semibold text-navy">Best for: </span>{tier.fit}
+                    <span className="font-semibold text-navy">{copy.fitPrefix}</span>{tier.fit}
                   </p>
 
                   <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
-                    What you focus on
+                    {copy.focusLabel}
                   </div>
                   <ul className="space-y-2 mb-5">
                     {tier.focus.map((item) => (
@@ -337,7 +534,7 @@ export default async function LocalePricingPage({
                   </ul>
 
                   <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
-                    What’s included
+                    {copy.includedLabel}
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-5">
                     {tier.surfaces.map((s) => (
@@ -352,11 +549,11 @@ export default async function LocalePricingPage({
 
                   <div className="mt-auto pt-4 border-t border-slate-200/70">
                     <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">
-                      Investment
+                      {copy.investmentLabel}
                     </div>
                     <p className="text-sm font-semibold text-navy">{tier.range}</p>
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      A starting range — we shape the final scope with you and your procurement team.
+                      {copy.rangeNote}
                     </p>
                   </div>
                 </article>
@@ -367,16 +564,16 @@ export default async function LocalePricingPage({
           {/* Friendly fit-finder */}
           <div className="institution-panel calm-elevation mt-8 p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5">
             <div className="flex-1">
-              <h3 className="text-base font-semibold text-navy mb-1">Not sure where you fit?</h3>
+              <h3 className="text-base font-semibold text-navy mb-1">{copy.unsureTitle}</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                That’s the most common starting point. A short conversation usually makes the right tier obvious — and we’ll tell you honestly if you don’t need the bigger one yet.
+                {copy.unsureBody}
               </p>
             </div>
             <Link
               href="../contact"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-navy text-white text-sm font-semibold rounded-xl hover:bg-[#1f5b84] transition-colors whitespace-nowrap"
             >
-              Talk it through with us <ArrowRight className="h-4 w-4" />
+              {copy.unsureCta} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -386,11 +583,11 @@ export default async function LocalePricingPage({
       <section className="py-16 bg-white border-b border-slate-200/70">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">What everyone gets out of it</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.visibilityHeading}</h2>
           </ScrollReveal>
           <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              Each tier changes what stewards, officers, executives, and members can see and rely on. High-level on purpose — we keep the feature talk for the conversation.
+              {copy.visibilityBody}
             </p>
           </ScrollReveal>
 
@@ -398,7 +595,7 @@ export default async function LocalePricingPage({
             <table className="w-full text-sm">
               <thead className="border-b border-slate-200/70">
                 <tr className="text-navy">
-                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Who</th>
+                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">{copy.who}</th>
                   <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Foundation</th>
                   <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Governance Operations</th>
                   <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Institutional Continuity</th>
@@ -406,7 +603,7 @@ export default async function LocalePricingPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/70">
-                {visibilityBands.map((row) => (
+                {copy.visibilityBands.map((row) => (
                   <tr key={row.band} className="hover:bg-[#f8f6f2]/60 transition-colors">
                     <td className="px-5 py-4 font-semibold text-navy align-top">{row.band}</td>
                     <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.foundation}</td>
@@ -425,16 +622,16 @@ export default async function LocalePricingPage({
       <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">Grow when you’re ready</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.growHeading}</h2>
           </ScrollReveal>
           <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              Institutions evolve. The ladder is designed to be lived in — each tier earns the next when something concrete in your operations changes.
+              {copy.growBody}
             </p>
           </ScrollReveal>
 
           <div className="space-y-4 narrative-sequence">
-            {progression.map((step) => (
+            {copy.progression.map((step) => (
               <article
                 key={`${step.from}-${step.to}`}
                 className="institution-panel calm-elevation p-5 flex flex-col md:flex-row md:items-center gap-4"
@@ -445,7 +642,7 @@ export default async function LocalePricingPage({
                   <span className="text-sm font-semibold text-navy">{step.to}</span>
                 </div>
                 <p className="text-sm text-slate-700 leading-relaxed md:flex-1">
-                  <span className="font-semibold text-navy">When it happens: </span>
+                  <span className="font-semibold text-navy">{copy.when}</span>
                   {step.trigger}
                 </p>
               </article>
@@ -460,18 +657,18 @@ export default async function LocalePricingPage({
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
             <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-slate-100 text-navy text-xs font-semibold tracking-wide uppercase mb-4">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Procurement-safe by design
+              {copy.procurementLabel}
             </div>
-            <h2 className="text-3xl font-semibold text-navy mb-3">Institutional commitments, not feature claims</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.commitmentsHeading}</h2>
           </ScrollReveal>
           <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              Every maturity tier inherits the same institutional commitments. These are the positions that distinguish operational infrastructure from generic AI tooling.
+              {copy.commitmentsBody}
             </p>
           </ScrollReveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">
-            {procurementCommitments.map((item) => (
+            {copy.procurementCommitments.map((item) => (
               <article key={item.title} className="institution-panel calm-elevation p-5">
                 <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
@@ -484,19 +681,19 @@ export default async function LocalePricingPage({
               href="../trust"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
             >
-              Trust Center <ArrowRight className="h-4 w-4" />
+              {copy.trustCenter} <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="../governance"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
             >
-              Governance Structure <ArrowRight className="h-4 w-4" />
+              {copy.governanceStructure} <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="../proof"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
             >
-              Institutional Proof <ArrowRight className="h-4 w-4" />
+              {copy.institutionalProof} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -507,30 +704,30 @@ export default async function LocalePricingPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-white/10 text-xs font-semibold tracking-wide uppercase mb-4">
             <Users className="h-3.5 w-3.5" />
-            Let’s find the right fit
+            {copy.ctaLabel}
           </div>
           <h2 className="text-3xl md:text-4xl font-semibold mb-4">
-            Start with a conversation, not a quote
+            {copy.ctaHeading}
           </h2>
           <p className="text-white/75 text-base max-w-3xl mx-auto mb-8 leading-relaxed">
-            Tell us where your institution is today. We’ll help you identify the right tier, walk through what it looks like in practice, and shape the program with you — at the pace that fits your governance.
+            {copy.ctaBody}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="../pilot-request"
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all"
             >
-              Request Executive Briefing
+              {copy.ctaPrimary}
             </Link>
             <Link
               href="../contact"
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all"
             >
-              Discuss Operational Maturity
+              {copy.ctaSecondary}
             </Link>
           </div>
           <p className="text-xs text-white/55 mt-6 max-w-2xl mx-auto leading-relaxed">
-            Maturity tiers and ranges are positioning structure for institutional planning. Final program scope is set jointly with executive and procurement leadership.
+            {copy.ctaFinePrint}
           </p>
         </div>
       </section>

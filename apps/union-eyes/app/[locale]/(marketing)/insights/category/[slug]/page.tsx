@@ -76,6 +76,19 @@ export default async function InsightCategoryPage({ params, searchParams }: Insi
 
   const categoryArticles = getInsightsByCategory(slug);
   const categoryCounts = getInsightCategoryCounts();
+  const ctaCopy = locale === 'fr-CA'
+    ? {
+        heading: 'Besoin d’un breffage exécutif propre à cette catégorie?',
+        body: 'Nous pouvons adapter un breffage à vos priorités de leadership, de gouvernance et de modernisation.',
+        primary: 'Demander un breffage',
+        secondary: 'Retour aux perspectives',
+      }
+    : {
+        heading: 'Need a category-specific executive briefing?',
+        body: 'We can tailor a briefing around your leadership, governance, and modernization priorities.',
+        primary: 'Request a Briefing',
+        secondary: 'Back to Insights',
+      };
 
   return (
     <div className="bg-white min-h-screen">
@@ -152,23 +165,23 @@ export default async function InsightCategoryPage({ params, searchParams }: Insi
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal delay={0.04} duration={0.88} distance={14} tempo="conference">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">Need a category-specific executive briefing?</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">{ctaCopy.heading}</h2>
           </ScrollReveal>
           <ScrollReveal delay={0.1} duration={0.9} distance={14} tempo="conference">
-            <p className="text-white/70 mb-8">We can tailor a briefing around your leadership, governance, and modernization priorities.</p>
+            <p className="text-white/70 mb-8">{ctaCopy.body}</p>
           </ScrollReveal>
           <div className="flex flex-col sm:flex-row gap-4 justify-center narrative-sequence">
             <Link
-              href="/pilot-request"
+              href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
-              Request a Briefing
+              {ctaCopy.primary}
             </Link>
             <Link
               href={withInstitutionalContext(`/${locale}/insights`, contextMode)}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all"
             >
-              Back to Insights
+              {ctaCopy.secondary}
             </Link>
           </div>
         </div>

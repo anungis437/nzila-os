@@ -140,6 +140,21 @@ const PROOF_COPY = {
     proofPackTitle: 'Evidence is meant to help reviewers make a real decision',
     proofPackDesc:
       'This page is intentionally practical. It does not promise modernization by rhetoric. It shows the evidence surfaces, implementation sequence, and review structures that make deployment credible.',
+    sectionTransitionPressure: 'Lived transition pressure points and calm continuity responses',
+    sectionFrictionFlows: 'Governance friction simulation flows',
+    sectionEventWalkthroughs: 'Institutional continuity event walkthroughs',
+    sectionContinuityStress: 'Continuity stress modeling',
+    sectionOrgStabilization: 'Organizational stabilization simulation',
+    sectionOnboardingIntel: 'Onboarding continuity intelligence',
+    sectionFederationScale: 'Federation-scale continuity scenarios',
+    sectionCommitteeCoord: 'Committee coordination simulations',
+    sectionMemoryStress: 'Institutional memory stress models',
+    sectionDecisionPathways: 'Executive decision pathway systems',
+    sectionMultiStakeholder: 'Multi-stakeholder governance narratives',
+    sectionLongitudinal: 'Longitudinal continuity evolution stories',
+    stabilizationMoveLabel: 'Stabilization move',
+    manageThroughLabel: 'Manage through',
+    stabilizeWithLabel: 'Stabilize with',
   },
   'fr-CA': {
     title: 'Preuves institutionnelles | UnionEyes',
@@ -229,6 +244,21 @@ const PROOF_COPY = {
     proofPackTitle: 'La preuve aide les decideurs a prendre une decision reelle',
     proofPackDesc:
       'Cette page est volontairement pratique. Elle montre les surfaces de preuve, la sequence de mise en oeuvre et les structures de revue qui rendent le deploiement credible.',
+    sectionTransitionPressure: 'Points de pression de transition et reponses calmes de continuite',
+    sectionFrictionFlows: 'Flux de simulation de friction de gouvernance',
+    sectionEventWalkthroughs: 'Parcours d evenements de continuite institutionnelle',
+    sectionContinuityStress: 'Modelisation du stress de continuite',
+    sectionOrgStabilization: 'Simulation de stabilisation organisationnelle',
+    sectionOnboardingIntel: 'Intelligence de continuite pour l integration',
+    sectionFederationScale: 'Scenarios de continuite a l echelle federale',
+    sectionCommitteeCoord: 'Simulations de coordination de comites',
+    sectionMemoryStress: 'Modeles de stress de memoire institutionnelle',
+    sectionDecisionPathways: 'Systemes de parcours de decision executive',
+    sectionMultiStakeholder: 'Recits de gouvernance multi-parties prenantes',
+    sectionLongitudinal: 'Histoires d evolution longitudinale de la continuite',
+    stabilizationMoveLabel: 'Geste de stabilisation',
+    manageThroughLabel: 'Gerer via',
+    stabilizeWithLabel: 'Stabiliser avec',
   },
   it: {
     title: 'Prove istituzionali | UnionEyes',
@@ -318,6 +348,21 @@ const PROOF_COPY = {
     proofPackTitle: 'Le prove servono per prendere decisioni reali',
     proofPackDesc:
       'Questa pagina e intenzionalmente pratica. Mostra superfici di prova, sequenza di implementazione e strutture di review che rendono credibile il deployment.',
+    sectionTransitionPressure: 'Punti di pressione della transizione e risposte di continuita',
+    sectionFrictionFlows: 'Flussi di simulazione di attrito nella governance',
+    sectionEventWalkthroughs: 'Walkthrough eventi di continuita istituzionale',
+    sectionContinuityStress: 'Modellazione dello stress di continuita',
+    sectionOrgStabilization: 'Simulazione di stabilizzazione organizzativa',
+    sectionOnboardingIntel: 'Intelligenza di continuita per l onboarding',
+    sectionFederationScale: 'Scenari di continuita su scala federale',
+    sectionCommitteeCoord: 'Simulazioni di coordinamento dei comitati',
+    sectionMemoryStress: 'Modelli di stress della memoria istituzionale',
+    sectionDecisionPathways: 'Sistemi di percorso decisionale esecutivo',
+    sectionMultiStakeholder: 'Narrazioni di governance multi-stakeholder',
+    sectionLongitudinal: 'Storie di evoluzione longitudinale della continuita',
+    stabilizationMoveLabel: 'Mossa di stabilizzazione',
+    manageThroughLabel: 'Gestire attraverso',
+    stabilizeWithLabel: 'Stabilizzare con',
   },
   pt: {
     title: 'Provas institucionais | UnionEyes',
@@ -407,6 +452,21 @@ const PROOF_COPY = {
     proofPackTitle: 'A evidencia existe para apoiar decisoes reais',
     proofPackDesc:
       'Esta pagina e intencionalmente pratica. Ela mostra superficies de evidencia, sequencia de implementacao e estruturas de revisao que tornam a implantacao credvel.',
+    sectionTransitionPressure: 'Pontos de pressao de transicao e respostas calmas de continuidade',
+    sectionFrictionFlows: 'Fluxos de simulacao de atrito na governanca',
+    sectionEventWalkthroughs: 'Walkthroughs de eventos de continuidade institucional',
+    sectionContinuityStress: 'Modelagem de estresse de continuidade',
+    sectionOrgStabilization: 'Simulacao de estabilizacao organizacional',
+    sectionOnboardingIntel: 'Inteligencia de continuidade para onboarding',
+    sectionFederationScale: 'Cenarios de continuidade em escala federal',
+    sectionCommitteeCoord: 'Simulacoes de coordenacao de comites',
+    sectionMemoryStress: 'Modelos de estresse de memoria institucional',
+    sectionDecisionPathways: 'Sistemas de caminho de decisao executiva',
+    sectionMultiStakeholder: 'Narrativas de governanca multi-partes interessadas',
+    sectionLongitudinal: 'Historias de evolucao longitudinal da continuidade',
+    stabilizationMoveLabel: 'Movimento de estabilizacao',
+    manageThroughLabel: 'Gerenciar por meio de',
+    stabilizeWithLabel: 'Estabilizar com',
   },
 } as const;
 
@@ -760,19 +820,19 @@ export default async function ProofPage({
   const localeKey: keyof typeof PROOF_COPY =
     locale in PROOF_COPY ? (locale as keyof typeof PROOF_COPY) : 'en-CA';
   const copy = PROOF_COPY[localeKey];
+  const evidenceArchitectureArr =
+    evidenceArchitecture[localeKey as keyof typeof evidenceArchitecture] ?? evidenceArchitecture['en-CA'];
 
-  const localizedEvidenceArchitecture = evidenceArchitecture.map((item) => ({
+  const localizedEvidenceArchitecture = evidenceArchitectureArr.map((item) => ({
     ...item,
     title: translateOperationalString(localeKey, item.title),
     purpose: translateOperationalString(localeKey, item.purpose),
     note: translateOperationalString(localeKey, item.note),
   }));
-  const localizedGovernanceOperationalWalkthroughs = governanceOperationalWalkthroughs.map((item) => ({
-    ...item,
-    type: translateOperationalString(localeKey, item.type),
-    focus: translateOperationalString(localeKey, item.focus),
-    narrative: translateOperationalString(localeKey, item.narrative),
-  }));
+  const localizedGovernanceOperationalWalkthroughs = (
+    governanceOperationalWalkthroughs[localeKey as keyof typeof governanceOperationalWalkthroughs] ??
+    governanceOperationalWalkthroughs['en-CA']
+  );
   const localizedDeploymentWalkthrough = deploymentWalkthrough.map((item) => ({
     ...item,
     stage: translateOperationalString(localeKey, item.stage),
@@ -805,73 +865,70 @@ export default async function ProofPage({
   const localizedInstitutionalRolloutSimulationFlow = institutionalRolloutSimulationFlow.map((item) =>
     translateOperationalString(localeKey, item)
   );
-  const localizedExecutiveBriefingFlows = executiveBriefingFlows.map((item) =>
-    translateOperationalString(localeKey, item)
+  const localizedExecutiveBriefingFlows = (
+    executiveBriefingFlows[localeKey as keyof typeof executiveBriefingFlows] ??
+    executiveBriefingFlows['en-CA']
   );
-  const localizedGovernanceReviewSimulationLayers = governanceReviewSimulationLayers.map((item) =>
-    translateOperationalString(localeKey, item)
+  const localizedGovernanceReviewSimulationLayers = (
+    governanceReviewSimulationLayers[localeKey as keyof typeof governanceReviewSimulationLayers] ??
+    governanceReviewSimulationLayers['en-CA']
   );
-  const localizedProcurementEvidenceBinder = procurementEvidenceBinder.map((item) =>
-    translateOperationalString(localeKey, item)
+  const localizedProcurementEvidenceBinder = (
+    procurementEvidenceBinder[localeKey as keyof typeof procurementEvidenceBinder] ??
+    procurementEvidenceBinder['en-CA']
   );
   const localizedExecutiveDashboardSignals = executiveDashboardSignals.map((item) => ({
     ...item,
     title: translateOperationalString(localeKey, item.title),
   }));
-  const localizedLeadershipTransitionContinuityScenarios = leadershipTransitionContinuityScenarios.map((item) => ({
-    ...item,
-    scenario: translateOperationalString(localeKey, item.scenario),
-    focus: translateOperationalString(localeKey, item.focus),
-  }));
-  const localizedGovernanceFrictionSimulationFlows = governanceFrictionSimulationFlows.map((item) => ({
-    ...item,
-    friction: translateOperationalString(localeKey, item.friction),
-  }));
-  const localizedInstitutionalContinuityEventWalkthroughs = institutionalContinuityEventWalkthroughs.map((item) => ({
-    ...item,
-    event: translateOperationalString(localeKey, item.event),
-    continuityFocus: translateOperationalString(localeKey, item.continuityFocus),
-  }));
-  const localizedOperationalDisruptionModels = operationalDisruptionModels.map((item) => ({
-    ...item,
-    area: translateOperationalString(localeKey, item.area),
-    focus: translateOperationalString(localeKey, item.focus),
-  }));
-  const localizedOrganizationalStabilizationSimulationFlow = organizationalStabilizationSimulationFlow.map((item) =>
-    translateOperationalString(localeKey, item)
+  const localizedLeadershipTransitionContinuityScenarios = (
+    leadershipTransitionContinuityScenarios[localeKey as keyof typeof leadershipTransitionContinuityScenarios] ??
+    leadershipTransitionContinuityScenarios['en-CA']
   );
-  const localizedOnboardingContinuityIntelligenceScenarios = onboardingContinuityIntelligenceScenarios.map((item) => ({
-    ...item,
-    scenario: translateOperationalString(localeKey, item.scenario),
-    focus: translateOperationalString(localeKey, item.focus),
-  }));
-  const localizedFederationScaleContinuityScenarios = federationScaleContinuityScenarios.map((item) => ({
-    ...item,
-    area: translateOperationalString(localeKey, item.area),
-    focus: translateOperationalString(localeKey, item.focus),
-  }));
-  const localizedCommitteeCoordinationSimulations = committeeCoordinationSimulations.map((item) => ({
-    ...item,
-    simulation: translateOperationalString(localeKey, item.simulation),
-  }));
-  const localizedInstitutionalMemoryDisruptionModels = institutionalMemoryDisruptionModels.map((item) => ({
-    ...item,
-    area: translateOperationalString(localeKey, item.area),
-    focus: translateOperationalString(localeKey, item.focus),
-  }));
-  const localizedExecutiveDecisionPathwaySystems = executiveDecisionPathwaySystems.map((item) => ({
-    ...item,
-    decision: translateOperationalString(localeKey, item.decision),
-    continuityFocus: translateOperationalString(localeKey, item.continuityFocus),
-  }));
-  const localizedMultiStakeholderGovernanceNarratives = multiStakeholderGovernanceNarratives.map((item) => ({
-    ...item,
-    stakeholders: translateOperationalString(localeKey, item.stakeholders),
-  }));
-  const localizedLongitudinalContinuityEvolutionStories = longitudinalContinuityEvolutionStories.map((item) => ({
-    ...item,
-    stage: translateOperationalString(localeKey, item.stage),
-  }));
+  const localizedGovernanceFrictionSimulationFlows = (
+    governanceFrictionSimulationFlows[localeKey as keyof typeof governanceFrictionSimulationFlows] ??
+    governanceFrictionSimulationFlows['en-CA']
+  );
+  const localizedInstitutionalContinuityEventWalkthroughs = (
+    institutionalContinuityEventWalkthroughs[localeKey as keyof typeof institutionalContinuityEventWalkthroughs] ??
+    institutionalContinuityEventWalkthroughs['en-CA']
+  );
+  const localizedOperationalDisruptionModels = (
+    operationalDisruptionModels[localeKey as keyof typeof operationalDisruptionModels] ??
+    operationalDisruptionModels['en-CA']
+  );
+  const localizedOrganizationalStabilizationSimulationFlow = (
+    organizationalStabilizationSimulationFlow[localeKey as keyof typeof organizationalStabilizationSimulationFlow] ??
+    organizationalStabilizationSimulationFlow['en-CA']
+  );
+  const localizedOnboardingContinuityIntelligenceScenarios = (
+    onboardingContinuityIntelligenceScenarios[localeKey as keyof typeof onboardingContinuityIntelligenceScenarios] ??
+    onboardingContinuityIntelligenceScenarios['en-CA']
+  );
+  const localizedFederationScaleContinuityScenarios = (
+    federationScaleContinuityScenarios[localeKey as keyof typeof federationScaleContinuityScenarios] ??
+    federationScaleContinuityScenarios['en-CA']
+  );
+  const localizedCommitteeCoordinationSimulations = (
+    committeeCoordinationSimulations[localeKey as keyof typeof committeeCoordinationSimulations] ??
+    committeeCoordinationSimulations['en-CA']
+  );
+  const localizedInstitutionalMemoryDisruptionModels = (
+    institutionalMemoryDisruptionModels[localeKey as keyof typeof institutionalMemoryDisruptionModels] ??
+    institutionalMemoryDisruptionModels['en-CA']
+  );
+  const localizedExecutiveDecisionPathwaySystems = (
+    executiveDecisionPathwaySystems[localeKey as keyof typeof executiveDecisionPathwaySystems] ??
+    executiveDecisionPathwaySystems['en-CA']
+  );
+  const localizedMultiStakeholderGovernanceNarratives = (
+    multiStakeholderGovernanceNarratives[localeKey as keyof typeof multiStakeholderGovernanceNarratives] ??
+    multiStakeholderGovernanceNarratives['en-CA']
+  );
+  const localizedLongitudinalContinuityEvolutionStories = (
+    longitudinalContinuityEvolutionStories[localeKey as keyof typeof longitudinalContinuityEvolutionStories] ??
+    longitudinalContinuityEvolutionStories['en-CA']
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -945,7 +1002,7 @@ export default async function ProofPage({
               <p className="text-gray-600 max-w-3xl mb-8">{copy.evidenceDesc}</p>
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {localizedEvidenceArchitecture.map((item, index) => {
-                  const Icon = iconByTitle[evidenceArchitecture[index]?.title ?? ''] ?? FileText;
+                  const Icon = iconByTitle[evidenceArchitectureArr[index]?.title ?? ''] ?? FileText;
                   return (
                     <article key={item.title} className="p-5 rounded-2xl border border-gray-100 bg-gray-50">
                       <div className="w-10 h-10 rounded-xl bg-electric/10 flex items-center justify-center mb-4">
@@ -1074,14 +1131,14 @@ export default async function ProofPage({
           </TabsContent>
 
           <TabsContent value="scenario" className="space-y-12">
-            <section>              <h2 className="text-3xl font-bold text-navy mb-3">Lived transition pressure points and calm continuity responses</h2>
+            <section>              <h2 className="text-3xl font-bold text-navy mb-3">{copy.sectionTransitionPressure}</h2>
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {localizedLeadershipTransitionContinuityScenarios.map((item) => (
                   <article key={item.scenario} className="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">{item.focus}</p>
                     <h3 className="text-base font-bold text-navy mb-2">{item.scenario}</h3>
                     <p className="text-sm text-gray-600 mb-2">{item.livedSignal}</p>
-                    <p className="text-sm text-navy"><span className="font-semibold">Stabilization move: </span>{item.stabilizationMove}</p>
+                    <p className="text-sm text-navy"><span className="font-semibold">{copy.stabilizationMoveLabel}: </span>{item.stabilizationMove}</p>
                   </article>
                 ))}
               </div>
@@ -1089,19 +1146,19 @@ export default async function ProofPage({
 
             <section className="grid lg:grid-cols-2 gap-8">
               <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-                <h3 className="text-xl font-bold text-navy mb-3">Governance friction simulation flows</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">{copy.sectionFrictionFlows}</h3>
                 <div className="space-y-3">
                   {localizedGovernanceFrictionSimulationFlows.map((item) => (
                     <article key={item.friction} className="p-4 rounded-xl border border-gray-100 bg-white">
                       <h4 className="text-sm font-bold text-navy mb-1">{item.friction}</h4>
                       <p className="text-sm text-gray-600 mb-1">{item.continuityImpact}</p>
-                      <p className="text-xs text-gray-700"><span className="font-semibold">Manage through: </span>{item.managementPath}</p>
+                      <p className="text-xs text-gray-700"><span className="font-semibold">{copy.manageThroughLabel}: </span>{item.managementPath}</p>
                     </article>
                   ))}
                 </div>
               </div>
               <div className="p-6 rounded-2xl bg-white border border-gray-100">
-                <h3 className="text-xl font-bold text-navy mb-3">Institutional continuity event walkthroughs</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">{copy.sectionEventWalkthroughs}</h3>
                 <div className="space-y-3">
                   {localizedInstitutionalContinuityEventWalkthroughs.map((item) => (
                     <article key={item.event} className="p-4 rounded-xl border border-gray-100 bg-gray-50">
@@ -1116,20 +1173,20 @@ export default async function ProofPage({
 
             <section className="grid lg:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-xl font-bold text-navy mb-3">Continuity stress modeling</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">{copy.sectionContinuityStress}</h3>
                 <div className="space-y-3">
                   {localizedOperationalDisruptionModels.map((item) => (
                     <article key={item.area} className="p-4 rounded-xl border border-gray-100 bg-white">
                       <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{item.focus}</p>
                       <h4 className="text-sm font-bold text-navy mb-1">{item.area}</h4>
                       <p className="text-sm text-gray-600 mb-1">{item.signal}</p>
-                      <p className="text-xs text-gray-700"><span className="font-semibold">Stabilize with: </span>{item.mitigation}</p>
+                      <p className="text-xs text-gray-700"><span className="font-semibold">{copy.stabilizeWithLabel}: </span>{item.mitigation}</p>
                     </article>
                   ))}
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-navy mb-3">Organizational stabilization simulation</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">{copy.sectionOrgStabilization}</h3>
                 <div className="p-5 rounded-2xl border border-gray-100 bg-gray-50">
                   <div className="grid sm:grid-cols-2 gap-2">
                     {localizedOrganizationalStabilizationSimulationFlow.map((stage, index) => (
@@ -1140,7 +1197,7 @@ export default async function ProofPage({
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-navy mt-6 mb-3">Onboarding continuity intelligence</h3>
+                <h3 className="text-xl font-bold text-navy mt-6 mb-3">{copy.sectionOnboardingIntel}</h3>
                 <div className="space-y-3">
                   {localizedOnboardingContinuityIntelligenceScenarios.map((item) => (
                     <article key={item.scenario} className="p-4 rounded-xl border border-gray-100 bg-white">
@@ -1155,7 +1212,7 @@ export default async function ProofPage({
 
             <section className="grid lg:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-xl font-bold text-navy mb-3">Federation-scale continuity scenarios</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">{copy.sectionFederationScale}</h3>
                 <div className="space-y-3">
                   {localizedFederationScaleContinuityScenarios.map((item) => (
                     <article key={item.area} className="p-4 rounded-xl border border-gray-100 bg-white">
@@ -1166,20 +1223,20 @@ export default async function ProofPage({
                   ))}
                 </div>
 
-                <h3 className="text-xl font-bold text-navy mt-6 mb-3">Committee coordination simulations</h3>
+                <h3 className="text-xl font-bold text-navy mt-6 mb-3">{copy.sectionCommitteeCoord}</h3>
                 <div className="space-y-3">
                   {localizedCommitteeCoordinationSimulations.map((item) => (
                     <article key={item.simulation} className="p-4 rounded-xl border border-gray-100 bg-gray-50">
                       <h4 className="text-sm font-bold text-navy mb-1">{item.simulation}</h4>
                       <p className="text-sm text-gray-600 mb-1">{item.coordinationSignal}</p>
-                      <p className="text-xs text-gray-700"><span className="font-semibold">Stabilize with: </span>{item.stabilizationApproach}</p>
+                      <p className="text-xs text-gray-700"><span className="font-semibold">{copy.stabilizeWithLabel}: </span>{item.stabilizationApproach}</p>
                     </article>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-navy mb-3">Institutional memory stress models</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">{copy.sectionMemoryStress}</h3>
                 <div className="space-y-3">
                   {localizedInstitutionalMemoryDisruptionModels.map((item) => (
                     <article key={item.area} className="p-4 rounded-xl border border-gray-100 bg-white">
@@ -1190,7 +1247,7 @@ export default async function ProofPage({
                   ))}
                 </div>
 
-                <h3 className="text-xl font-bold text-navy mt-6 mb-3">Executive decision pathway systems</h3>
+                <h3 className="text-xl font-bold text-navy mt-6 mb-3">{copy.sectionDecisionPathways}</h3>
                 <div className="space-y-3">
                   {localizedExecutiveDecisionPathwaySystems.map((item) => (
                     <article key={item.decision} className="p-4 rounded-xl border border-gray-100 bg-gray-50">
@@ -1205,7 +1262,7 @@ export default async function ProofPage({
 
             <section className="grid lg:grid-cols-2 gap-8">
               <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-                <h3 className="text-xl font-bold text-navy mb-3">Multi-stakeholder governance narratives</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">{copy.sectionMultiStakeholder}</h3>
                 <div className="space-y-3">
                   {localizedMultiStakeholderGovernanceNarratives.map((item) => (
                     <article key={item.stakeholders} className="p-4 rounded-xl border border-gray-100 bg-white">
@@ -1216,7 +1273,7 @@ export default async function ProofPage({
                 </div>
               </div>
               <div className="p-6 rounded-2xl bg-white border border-gray-100">
-                <h3 className="text-xl font-bold text-navy mb-3">Longitudinal continuity evolution stories</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">{copy.sectionLongitudinal}</h3>
                 <div className="space-y-3">
                   {localizedLongitudinalContinuityEvolutionStories.map((item) => (
                     <article key={item.stage} className="p-4 rounded-xl border border-gray-100 bg-gray-50">

@@ -9,17 +9,17 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Portfolio',
-  description: `${platformCoverageLabel()}, ${governedCoverageLabel()}. Explore the full Nzila Ventures portfolio.`,
+  description: `${platformCoverageLabel()}, ${governedCoverageLabel()}. Explore the Nzila Ventures continuity infrastructure portfolio.`,
   openGraph: {
     title: 'Nzila Ventures Portfolio',
-    description: `${MARKETING_FACTS.productPlatforms} product platforms, ${MARKETING_FACTS.governedApplications} governed applications, 12,000+ data entities, ${MARKETING_FACTS.totalTamLabel} TAM.`,
+    description: `Nzila OS, Union Eyes, and ${MARKETING_FACTS.governedApplications} governed operational applications for continuity-critical institutions.`,
     images: [{ url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Data analytics dashboard with glowing charts and metrics' }],
   },
   alternates: { canonical: '/portfolio' },
 };
 
 const platforms = [
-  { name: 'UnionEyes', vertical: 'Uniontech', orgs: '4,773', complexity: 'EXTREME', readiness: 9.5, status: 'Flagship', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
+  { name: 'Union Eyes', vertical: 'Uniontech', orgs: '4,773', complexity: 'EXTREME', readiness: 9.5, status: 'Flagship validation wedge', tam: 'Pilot-paid', description: 'Institutional continuity infrastructure for labor organizations' },
   { name: 'FAIRCASE', vertical: 'Justice/Legaltech', orgs: '132', complexity: 'EXTREME', readiness: 9.2, status: 'Flagship', tam: '$1.5B+', description: 'Institutional anti-racism governance, tribunal intelligence, and evidence-ready remediation workflows' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', orgs: '485', complexity: 'EXTREME', readiness: 6.5, status: 'Flagship', tam: '$100B', description: 'Diaspora banking, KYC/AML, international transfers' },
   { name: 'Zonga', vertical: 'Entertainment', orgs: '83+', complexity: 'HIGH-EXTREME', readiness: 10.0, status: 'Production Ready', tam: '$50B', description: 'Music streaming, royalty management, event ticketing' },
@@ -83,29 +83,29 @@ export default async function Portfolio() {
     {
       title: isFr ? 'J evalue les produits' : 'I am Evaluating Products',
       description: isFr
-        ? 'Commencez par la grille pour comparer verticale, maturite et disponibilite production.'
-        : 'Start with the platform grid to compare vertical, readiness, and production status.',
-      href: '#platform-grid',
-      eventName: 'portfolio_start_here_products',
-      cta: isFr ? 'Voir la grille des plateformes' : 'View Platform Grid',
+        ? 'Commencez par Union Eyes et les preuves de continuité avant de comparer les autres lignes.'
+        : 'Start with Union Eyes and continuity evidence before comparing other product lines.',
+      href: '/union-eyes',
+      eventName: 'portfolio_start_here_union_eyes',
+      cta: isFr ? 'Voir Union Eyes' : 'View Union Eyes',
     },
     {
-      title: isFr ? 'J explore l impact et la mission' : 'I am Exploring Mission and Impact',
+      title: isFr ? 'J explore le risque de continuité' : 'I am Exploring Continuity Risk',
       description: isFr
-        ? 'Consultez les verticales, cas d usage et preuve d impact social par secteur.'
-        : 'See how each vertical ties to social outcomes, practical deployment, and measurable change.',
-      href: '/verticals',
-      eventName: 'portfolio_start_here_impact',
-      cta: isFr ? 'Explorer les verticales' : 'Explore Verticals',
+        ? 'Consultez le diagnostic ICRA et les symptômes de fragilité institutionnelle.'
+        : 'Review the ICRA diagnostic and the symptoms of institutional fragility.',
+      href: '/continuity-assessment',
+      eventName: 'portfolio_start_here_assessment',
+      cta: isFr ? 'Commencer l évaluation' : 'Begin Assessment',
     },
     {
-      title: isFr ? 'J envisage un investissement' : 'I am Considering Investment',
+      title: isFr ? 'Je veux comprendre la doctrine' : 'I want to understand the doctrine',
       description: isFr
-        ? 'Accedez directement a la these investisseur, metriques cles et feuille de route de croissance.'
-        : 'Go directly to investor thesis, market metrics, and the scaling roadmap.',
-      href: '/investors',
-      eventName: 'portfolio_start_here_invest',
-      cta: isFr ? 'Voir la page investisseurs' : 'View Investors Page',
+        ? 'Lisez les engagements publics de gouvernance, souveraineté et anti-surveillance.'
+        : 'Read the public governance, sovereignty, and anti-surveillance commitments.',
+      href: '/doctrine',
+      eventName: 'portfolio_start_here_doctrine',
+      cta: isFr ? 'Lire la doctrine' : 'Read Doctrine',
     },
   ];
 
@@ -136,8 +136,8 @@ export default async function Portfolio() {
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
               {isFr
-                ? `${MARKETING_FACTS.productPlatforms} plateformes produit sur ${MARKETING_FACTS.verticalsLabel} verticales, livrees via ${MARKETING_FACTS.governedApplications} applications gouvernées sur une Backbone intelligente.`
-                : `${MARKETING_FACTS.productPlatforms} product platforms across ${MARKETING_FACTS.verticalsLabel} verticals, delivered through ${MARKETING_FACTS.governedApplications} governed applications on one intelligent Backbone.`}
+                ? `Nzila OS, Union Eyes et ${MARKETING_FACTS.governedApplications} applications opérationnelles gouvernées pour les institutions sensibles à la confiance.`
+                : `Nzila OS, Union Eyes, and ${MARKETING_FACTS.governedApplications} governed operational applications for trust-sensitive institutions.`}
             </p>
           </ScrollReveal>
 
@@ -279,15 +279,15 @@ export default async function Portfolio() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge={isFr ? 'Feuille de route' : 'Roadmap'}
-            title={isFr ? 'Parcours de migration' : 'Migration Journey'}
-            subtitle={isFr ? 'Approche par phases pour unifier les 15 plateformes produit et 17 applications gouvernées sur la Backbone partagée' : 'Phased approach to unifying all 15 product platforms and 17 governed applications onto the shared Backbone'}
+            title={isFr ? 'Parcours Nzila OS' : 'Nzila OS Journey'}
+            subtitle={isFr ? 'Approche par phases pour aligner les applications gouvernées sur continuité, preuves, souveraineté et explicabilité.' : 'Phased approach to aligning governed applications with continuity, evidence, sovereignty, and explainability.'}
             light
           />
 
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             {[
-              { phase: 'Phase 1', title: isFr ? 'Fondation' : 'Foundation', weeks: isFr ? '16 semaines' : '16 weeks', detail: isFr ? 'Coeur Backbone' : 'Backbone core', color: 'from-electric to-blue-700' },
-              { phase: 'Phase 2-3', title: 'Django PoC', weeks: isFr ? '20 semaines' : '20 weeks', detail: 'eExports, UnionEyes', color: 'from-violet to-purple-700' },
+              { phase: 'Phase 1', title: isFr ? 'Fondation' : 'Foundation', weeks: isFr ? '16 semaines' : '16 weeks', detail: isFr ? 'Coeur Nzila OS' : 'Nzila OS core', color: 'from-electric to-blue-700' },
+              { phase: 'Phase 2-3', title: 'Validation', weeks: isFr ? '20 semaines' : '20 weeks', detail: 'Union Eyes, evidence trails', color: 'from-violet to-purple-700' },
               { phase: 'Phase 4-7', title: isFr ? 'Passage a l echelle' : 'Scale', weeks: isFr ? '100 semaines' : '100 weeks', detail: 'Fintech, EdTech, Commerce', color: 'from-gold to-amber-700' },
               { phase: 'Phase 8', title: isFr ? 'Complet' : 'Complété', weeks: isFr ? '16 semaines' : '16 weeks', detail: isFr ? 'Agrotech, consolidation' : 'Agrotech, Consolidate', color: 'from-emerald to-green-700' },
             ].map((phase, i) => (
@@ -331,9 +331,6 @@ export default async function Portfolio() {
     </main>
   );
 }
-
-
-
 
 
 

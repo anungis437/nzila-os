@@ -14,11 +14,11 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Home',
-  description: `Nzila Ventures builds ${MARKETING_FACTS.productPlatforms} software products and ${MARKETING_FACTS.governedApplications} live tools across healthcare, finance, agriculture, labor rights, and justice.`,
+  description: 'Nzila Ventures builds institutional continuity infrastructure for trust-sensitive organizations that need governance, operational memory, evidence, and trust to survive transition.',
   openGraph: {
-    title: 'Nzila Ventures | Trusted Technology for Social Impact',
-    description: `${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools for essential industries.`,
-    images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing global digital connectivity — Nzila Ventures' }],
+    title: 'Nzila Ventures | Institutional Continuity Infrastructure',
+    description: 'Governed operational infrastructure for continuity, operational memory, audit evidence, and institutional trust.',
+    images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing institutional continuity infrastructure' }],
   },
   alternates: { canonical: '/' },
 };
@@ -37,17 +37,17 @@ const verticals = [
 ];
 
 const flagships = [
-  { name: 'UnionEyes', vertical: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'UnionEyes — comprehensive union management platform', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
-  { name: 'Zonga', vertical: 'Music & Creator Economy', image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800', alt: 'Zonga — African music platform for artists, streaming, and creator royalties', tam: '$20B+', description: 'Africa-first music distribution and streaming platform for artists and creator payouts' },
-  { name: 'Flow', vertical: 'Commerce & Operations', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800', alt: 'Flow — enterprise order-to-cash and supply chain management platform', tam: '$100B+', description: 'Commerce operations platform covering order-to-cash, inventory, and multi-channel workflows' },
-  { name: 'FAIRCASE', vertical: 'Justice & Equity', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800', alt: 'FAIRCASE — institutional anti-racism governance and legal intelligence platform', tam: '$1.5B+', description: 'Institutional anti-racism governance platform with evidence-grade case workflows, analytics, and remediation oversight' },
+  { name: 'Union Eyes', vertical: 'Flagship validation wedge', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'Union Eyes - continuity infrastructure for labor organizations', tam: 'Pilot-paid', description: 'Continuity and governance infrastructure for unions: grievance lineage, steward handoffs, operational memory, and evidence-sealed audit trails.' },
+  { name: 'TrustCore', vertical: 'Governance operations', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800', alt: 'TrustCore - governance and compliance operations infrastructure', tam: 'Governance', description: 'Governance and compliance operations infrastructure for organizations that need decisions, approvals, and evidence to remain explainable.' },
+  { name: 'Veridian Care', vertical: 'Healthcare continuity', image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800', alt: 'Veridian Care - healthcare coordination and continuity infrastructure', tam: 'Healthcare', description: 'Continuity-first coordination infrastructure for healthcare organizations, designed around handoffs, auditability, privacy, and human accountability.' },
+  { name: 'Memora', vertical: 'Cognitive continuity', image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800', alt: 'Memora - cognitive continuity systems designed around dignity and memory', tam: 'Dignity', description: 'Cognitive continuity systems designed around dignity, memory, care, and consent-aware operational support.' },
 ];
 
 const intelligenceCapabilities = [
-  { name: 'Natural Language Processing', metric: 'Domain-specific', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'Digital language processing with connected data nodes', description: 'Context-aware assistance across legal, healthcare, and education' },
-  { name: 'Predictive Analytics', metric: 'Purpose-built', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', alt: 'Predictive analytics dashboard with colorful data visualizations', description: 'Pension forecasting, crop yields, insurance risk scoring' },
-  { name: 'Anomaly Détéction', metric: 'Real-time', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800', alt: 'Real-time network monitoring console détécting anomalies', description: 'Fraud prevention, compliance monitoring, threat intelligence' },
-  { name: 'Computer Vision', metric: 'Multi-modal', image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800', alt: 'Computer vision system analyzing visual data with recognition overlays', description: 'Document processing, agricultural imaging, identity verification' },
+  { name: 'Operational Memory', metric: 'Continuity', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'Structured operational records connected across time', description: 'Preserved procedures, precedents, workflows, decisions, rationale, and institutional context' },
+  { name: 'Governance Evidence', metric: 'Audit-ready', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', alt: 'Governance evidence dashboard with traceable records', description: 'Decision lineage, approvals, audit trails, reviewable records, and governance replay' },
+  { name: 'Explainable Assistance', metric: 'Human-led', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800', alt: 'Explainable system infrastructure with visible controls', description: 'AI-assisted summaries and recommendations that remain traceable, inspectable, and overridable' },
+  { name: 'Sovereign Federation', metric: 'Portable', image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800', alt: 'Federated infrastructure preserving local data boundaries', description: 'Cross-organization coordination without centralizing control or weakening local ownership' },
 ];
 
 const verticalDescriptionFr: Record<string, string> = {
@@ -64,32 +64,32 @@ const verticalDescriptionFr: Record<string, string> = {
 };
 
 const flagshipDescriptionFr: Record<string, string> = {
-  UnionEyes: 'Gestion syndicale, prevision des pensions, suivi des griefs',
-  Zonga: 'Plateforme africaine de distribution et de streaming musical pour artistes et paiements de redevances.',
-  Flow: 'Plateforme d operations commerciales couvrant order-to-cash, inventaire et flux multicanaux.',
-  FAIRCASE: 'Plateforme de gouvernance anti-racisme avec workflows de preuve, intelligence juridique et pilotage de remediation.',
+  'Union Eyes': 'Infrastructure de continuité et de gouvernance pour les syndicats: griefs, transitions de délégués, mémoire opérationnelle et journaux de preuve.',
+  TrustCore: 'Infrastructure d opérations de gouvernance et conformité pour rendre décisions, approbations et preuves explicables.',
+  'Veridian Care': 'Infrastructure de coordination santé axée continuité, transferts, auditabilité, confidentialité et responsabilité humaine.',
+  Memora: 'Systèmes de continuité cognitive conçus autour de la dignité, de la mémoire, du soin et du consentement.',
 };
 
 const intelligenceFr: Record<string, { name: string; metric: string; description: string }> = {
-  'Natural Language Processing': {
-    name: 'Traitement du langage naturel',
-    metric: 'Specifique au domaine',
-    description: 'Assistance contextuelle en droit, sante et education',
+  'Operational Memory': {
+    name: 'Mémoire opérationnelle',
+    metric: 'Continuité',
+    description: 'Procédures, précédents, décisions, raisons et contexte institutionnel préservés',
   },
-  'Predictive Analytics': {
-    name: 'Analytique predictive',
-    metric: 'Concu pour usage réel',
-    description: 'Prevision des pensions, rendements agricoles et notation du risque',
+  'Governance Evidence': {
+    name: 'Preuves de gouvernance',
+    metric: 'Audit-ready',
+    description: 'Lignée des décisions, approbations, journaux d audit et gouvernance rejouable',
   },
-  'Anomaly Détéction': {
-    name: 'Détéction des anomalies',
-    metric: 'Temps réel',
-    description: 'Prevention de la fraude, suivi de conformite et intelligence de menace',
+  'Explainable Assistance': {
+    name: 'Assistance explicable',
+    metric: 'Responsabilité humaine',
+    description: 'Résumés et recommandations traçables, inspectables et révisables par des humains',
   },
-  'Computer Vision': {
-    name: 'Vision par ordinateur',
-    metric: 'Multimodale',
-    description: 'Traitement documentaire, imagerie agricole et verification d identite',
+  'Sovereign Federation': {
+    name: 'Fédération souveraine',
+    metric: 'Portable',
+    description: 'Coordination entre organisations sans centraliser le contrôle ni affaiblir la propriété locale',
   },
 };
 
@@ -115,29 +115,58 @@ export default async function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              {isFr ? "Technologie de confiance pour l'impact social" : 'Trusted Technology for Social Impact'}
+              {isFr ? 'Infrastructure de continuité institutionnelle' : 'Institutional Continuity Infrastructure'}
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.05}>
             <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-emerald/10 text-emerald mb-4 border border-emerald/20">
-              🌿 {isFr ? 'Démarché de certification B Corp - Personnes, Planète, Mission' : 'Pursuing B Corp Certification - People, Planet, Purpose'}
+              {isFr ? 'Anti-surveillance par doctrine' : 'Anti-surveillance by doctrine'}
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              {isFr ? "Construire l'avenir" : 'Building the Future'}<br />
-              <span className="gradient-text">{isFr ? 'Un secteur à la fois' : 'One Vertical at a Time'}</span>
+              {isFr ? 'Les organisations ne devraient pas perdre' : 'Organizations should not lose'}<br />
+              <span className="gradient-text">{isFr ? 'leur continuité' : 'continuity when key people leave'}</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
               {isFr
-                ? `${MARKETING_FACTS.productPlatforms} produits logiciels dans ${MARKETING_FACTS.verticalsLabel} industries - livres via ${MARKETING_FACTS.governedApplications} outils en service pour la sante, la finance, l agriculture, les droits du travail et la justice.`
-                : `${MARKETING_FACTS.productPlatforms} software products across ${MARKETING_FACTS.verticalsLabel} industries - delivered through ${MARKETING_FACTS.governedApplications} live tools for healthcare, finance, agriculture, labor rights, and justice.`}
+                ? 'Nzila Ventures construit Nzila OS: une infrastructure gouvernée qui préserve la mémoire opérationnelle, les décisions, les preuves et la confiance institutionnelle pendant les transitions.'
+                : 'Nzila Ventures builds Nzila OS: governed infrastructure that preserves operational memory, decision rationale, evidence, and institutional trust across leadership change, restructuring, and system transition.'}
             </p>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.25}>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <TrackedLink
+                href="/continuity-assessment"
+                eventName="cta_continuity_assessment"
+                eventProps={{ source: 'home_hero' }}
+                className="inline-flex items-center justify-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-all text-lg shadow-lg shadow-gold/30 btn-press"
+              >
+                {isFr ? 'Commencer l évaluation' : 'Begin Continuity Assessment'}
+              </TrackedLink>
+              <TrackedLink
+                href="/union-eyes"
+                eventName="cta_union_eyes"
+                eventProps={{ source: 'home_hero' }}
+                className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg btn-press"
+              >
+                {isFr ? 'Explorer Union Eyes' : 'Explore Union Eyes'}
+              </TrackedLink>
+              <TrackedLink
+                href="/anti-surveillance"
+                eventName="cta_anti_surveillance"
+                eventProps={{ source: 'home_hero' }}
+                className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-white font-bold rounded-xl border border-white/20 hover:bg-white/10 transition-all text-lg btn-press"
+              >
+                {isFr ? 'Lire l engagement' : 'Read the Commitment'}
+              </TrackedLink>
+            </div>
           </ScrollReveal>
 
         </div>
@@ -156,10 +185,10 @@ export default async function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { target: MARKETING_FACTS.productPlatforms, suffix: '', label: isFr ? 'Produits' : 'Products' },
-              { target: MARKETING_FACTS.governedApplications, suffix: '', label: isFr ? 'Outils en service' : 'Live Tools' },
-              { target: 10, suffix: '+', label: isFr ? 'Industries' : 'Industries' },
-              { target: 100, prefix: '$', suffix: 'B+', label: isFr ? 'Marché total' : 'Total Market Size' },
+              { target: 1, prefix: '', suffix: '', label: isFr ? 'Produit de validation phare' : 'Flagship Validation Wedge' },
+              { target: MARKETING_FACTS.governedApplications, prefix: '', suffix: '', label: isFr ? 'Applications gouvernées' : 'Governed Applications' },
+              { target: 10, prefix: '', suffix: '+', label: isFr ? 'Secteurs sensibles à la confiance' : 'Trust-Sensitive Sectors' },
+              { target: 7, prefix: '', suffix: '', label: isFr ? 'Piliers de doctrine' : 'Doctrine Pillars' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-white mb-2">
@@ -184,20 +213,20 @@ export default async function Home() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <ScrollReveal direction="left">
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                {isFr ? 'Notre mission' : 'Our Mission'}
+                {isFr ? 'Le problème' : 'The Problem'}
               </span>
               <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                {isFr ? 'Infrastructure pour ' : 'Infrastructure for '}<span className="text-electric">{isFr ? "l'impact social" : 'Social Impact'}</span>{isFr ? ' à grande échelle' : ' at Scale'}
+                {isFr ? 'La gouvernance devient fragile quand ' : 'Governance becomes fragile when '}<span className="text-electric">{isFr ? 'la mémoire opérationnelle disparaît' : 'operational memory disappears'}</span>
               </h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
                 {isFr
-                  ? "Nous transformons des systèmes existants en logiciels modernes et évolutifs, au service des communautés en santé, en droit, en assurance, en agriculture et au-delà. Notre infrastructure partagée accélère l'innovation tout en préservant une forte intégrité éthique, conformément aux normes sociales, environnementales et de gouvernance de la certification B Corp."
-                  : 'We transform legacy platforms into modern, scalable software that serves communities across healthcare, legal systems, insurance, agriculture, and beyond. Our shared platform infrastructure powers innovation while maintaining ethical integrity - built to meet the rigorous social, environmental, and governance standards of B Corp certification.'}
+                  ? 'La plupart des institutions dépendent de quelques personnes qui se souviennent des décisions, des précédents, des relations et des exceptions. Quand ces personnes partent, l organisation perd plus que du temps: elle perd du contexte, de la confiance et de la capacité de gouverner.'
+                  : 'Most institutions depend on a few people who remember the decisions, precedents, relationships, and exceptions. When those people leave, the organization loses more than time: it loses context, trust, and the ability to govern consistently.'}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 {(isFr
-                  ? ['Pilote par les données', "Centre sur l'humain", 'Automatisation de confiance', 'Aligne B Corp']
-                  : ['Data-Driven', 'Human-Centered', 'Trusted Automation', 'B Corp Aligned']).map((item) => (
+                  ? ['Mémoire opérationnelle', 'Gouvernance visible', 'Preuves auditables', 'Souveraineté des données']
+                  : ['Operational Memory', 'Visible Governance', 'Auditable Evidence', 'Data Sovereignty']).map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-electric" />
                     <span className="text-sm font-medium text-gray-700">{item}</span>
@@ -225,12 +254,12 @@ export default async function Home() {
                     <div className="w-px h-10 bg-white/20" />
                     <div>
                       <div className="text-2xl font-bold">56%</div>
-                      <div className="text-xs text-gray-300">{isFr ? 'Gain de temps' : 'Time Savings'}</div>
+                      <div className="text-xs text-gray-300">{isFr ? 'Réduction pilote visée' : 'Pilot Reduction Target'}</div>
                     </div>
                     <div className="w-px h-10 bg-white/20" />
                     <div>
                       <div className="text-2xl font-bold">80%+</div>
-                      <div className="text-xs text-gray-300">{isFr ? 'Reutilisation de code' : 'Code Reuse'}</div>
+                      <div className="text-xs text-gray-300">{isFr ? 'Réutilisation gouvernée' : 'Governed Reuse'}</div>
                     </div>
                   </div>
                 </div>
@@ -241,20 +270,20 @@ export default async function Home() {
           <ScrollReveal className="mt-12">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <TrackedLink
-                href="/portfolio"
-                eventName="cta_portfolio"
+                href="/institutional-continuity"
+                eventName="cta_institutional_continuity"
                 eventProps={{ source: 'home_mission' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
               >
-                {isFr ? 'Explorer notre portefeuille' : 'Explore Our Portfolio'}
+                {isFr ? 'Comprendre la continuité' : 'Understand Continuity'}
               </TrackedLink>
               <TrackedLink
-                href="/investors"
-                eventName="cta_investors"
+                href="/starter-kit"
+                eventName="cta_starter_kit"
                 eventProps={{ source: 'home_mission' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-navy text-white font-bold rounded-xl border border-navy hover:bg-navy-light transition-all text-lg btn-press"
               >
-                {isFr ? 'Pour les investisseurs' : 'For Investors'}
+                {isFr ? 'Kit de démarrage' : 'Get the Starter Kit'}
               </TrackedLink>
             </div>
           </ScrollReveal>
@@ -267,9 +296,9 @@ export default async function Home() {
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge={isFr ? 'Produits phares' : 'Flagship Products'}
-            title={isFr ? 'Plateformes prêtes pour la production' : 'Production-Ready Platforms'}
-            subtitle={isFr ? 'Quatre produits phares qui resolvent des problemes critiques avec une automatisation pragmatique' : 'Four flagship products solving critical problems with practical automation across diverse sectors'}
+            badge={isFr ? 'Architecture de marque' : 'Brand Architecture'}
+            title={isFr ? 'Une infrastructure, un produit de validation, plusieurs lignes de continuité' : 'One operating infrastructure, one flagship wedge, multiple continuity lines'}
+            subtitle={isFr ? 'Nzila Ventures est la société d exploitation. Nzila OS est l infrastructure gouvernée. Union Eyes est la preuve commerciale la plus claire.' : 'Nzila Ventures is the operating company. Nzila OS is the governed infrastructure. Union Eyes is the clearest commercial proof point.'}
           />
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -278,7 +307,7 @@ export default async function Home() {
                 <ImageCard src={platform.image} alt={platform.alt} aspect="video">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-electric/80 text-white">
-                      {isFr ? 'Phare' : 'Flagship'}
+                      {platform.name === 'Union Eyes' ? (isFr ? 'Produit phare' : 'Flagship') : (isFr ? 'Ligne produit' : 'Product line')}
                     </span>
                     <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white/20 text-white backdrop-blur-sm">
                       {platform.vertical}
@@ -287,7 +316,7 @@ export default async function Home() {
                   <h3 className="text-2xl font-bold text-white mb-1">{platform.name}</h3>
                   <p className="text-gray-300 text-sm mb-3">{isFr ? (flagshipDescriptionFr[platform.name] ?? platform.description) : platform.description}</p>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-gold font-semibold">{platform.tam} {isFr ? 'taille du marché' : 'market size'}</span>
+                    <span className="text-gold font-semibold">{platform.tam}</span>
                   </div>
                 </ImageCard>
               </ScrollReveal>
@@ -296,12 +325,12 @@ export default async function Home() {
 
           <ScrollReveal className="text-center mt-12">
             <TrackedLink
-              href="/portfolio"
-              eventName="cta_portfolio"
+              href="/union-eyes"
+              eventName="cta_union_eyes"
               eventProps={{ source: 'home_flagships' }}
               className="inline-flex items-center text-electric font-semibold hover:text-blue-700 text-lg"
             >
-              {isFr ? `Voir ${MARKETING_FACTS.productPlatforms} plateformes produit ->` : `View ${MARKETING_FACTS.productPlatforms} Product Platforms ->`}
+              {isFr ? 'Voir le chemin Union Eyes ->' : 'View the Union Eyes path ->'}
             </TrackedLink>
           </ScrollReveal>
         </div>
@@ -312,9 +341,9 @@ export default async function Home() {
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge={isFr ? 'Moteur d intelligence' : 'Intelligence Engine'}
-            title={isFr ? 'Des insights pour chaque verticale' : 'The Insights Behind Every Vertical'}
-            subtitle={isFr ? 'Modeles et automatisations concus pour produire des actions utiles sur toutes les plateformes' : 'Purpose-built models and automation powering actionable insights across all platforms'}
+            badge={isFr ? 'Ce que Nzila OS préserve' : 'What Nzila OS Preserves'}
+            title={isFr ? 'La continuité devient une propriété du système' : 'Continuity becomes a system property'}
+            subtitle={isFr ? 'Le système structure les décisions, la mémoire, les preuves et les droits d accès pour que l institution puisse rester gouvernable.' : 'The system structures decisions, memory, evidence, and access rights so the institution remains governable across change.'}
             light
           />
 
@@ -350,9 +379,9 @@ export default async function Home() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge={isFr ? 'Couverture de marché' : 'Market Reach'}
-            title={isFr ? '10+ industries stratégiques' : '10+ Strategic Industries'}
-            subtitle={isFr ? 'Notre portefeuille couvre des secteurs divers, chacun alimente par une technologie concue pour son domaine' : 'Our portfolio spans diverse sectors, each powered by purpose-built technology'}
+            badge={isFr ? 'Institutions servies' : 'Who We Serve'}
+            title={isFr ? 'Des secteurs où la continuité est matérielle' : 'Sectors where continuity is materially important'}
+            subtitle={isFr ? 'Nous servons les organisations qui ne peuvent pas se permettre de perdre mémoire, preuves ou gouvernance lors des transitions.' : 'We serve organizations that cannot afford to lose memory, evidence, or governance during transitions.'}
           />
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -394,17 +423,17 @@ export default async function Home() {
         <div className="absolute inset-0 bg-mesh opacity-40" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge={isFr ? 'Propriété intellectuelle' : 'Intellectual Property'}
-            title={isFr ? 'Avantage a long terme' : 'Long-Term Advantage'}
-            subtitle={isFr ? 'Des années d expertise metier encodees dans des modèles, systemes de données et secrets commerciaux proprietaires' : 'Years of domain expertise encoded into proprietary models, data systems, and trade secrets'}
+            badge={isFr ? 'Confiance et preuves' : 'Trust and Evidence'}
+            title={isFr ? 'L adoption institutionnelle exige des preuves, pas du bruit' : 'Institutional adoption requires evidence, not noise'}
+            subtitle={isFr ? 'Les pilotes, évaluations et études de cas doivent montrer des améliorations mesurables de continuité, gouvernance et confiance.' : 'Pilots, assessments, and case studies must show measurable improvement in continuity, governance, and trust.'}
             light
           />
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { value: '$5.7M-$7.5M', label: isFr ? 'Valeur du portefeuille PI' : 'IP Portfolio Value', color: 'from-electric to-violet' },
-              { value: isFr ? 'Proprietaire' : 'Proprietary', label: isFr ? 'Bibliotheque de prompts de decision' : 'Decision Prompt Library', color: 'from-gold to-gold-light' },
-              { value: '12,000+', label: isFr ? 'Entités de base de données' : 'Database Entities', color: 'from-emerald to-cyan-400' },
+              { value: 'ICRA', label: isFr ? 'Diagnostic de continuité' : 'Continuity Diagnostic', color: 'from-electric to-violet' },
+              { value: 'UE', label: isFr ? 'Validation Union Eyes' : 'Union Eyes Validation', color: 'from-gold to-gold-light' },
+              { value: 'ICI', label: isFr ? 'Indice de continuité' : 'Continuity Index', color: 'from-emerald to-cyan-400' },
             ].map((item, i) => (
               <ScrollReveal key={item.label} delay={i * 0.15}>
                 <div className="relative rounded-2xl p-8 text-center bg-white/5 border border-white/10 hover-lift">
@@ -429,11 +458,3 @@ export default async function Home() {
     </main>
   );
 }
-
-
-
-
-
-
-
-

@@ -5,20 +5,20 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Case studies',
-  description: 'Pilots, deployments, and outcomes across the Nzila portfolio.',
+  description: 'Pilots, deployments, and continuity evidence across the Nzila portfolio.',
   alternates: { canonical: '/case-studies' },
 };
 
 const studies = [
   {
-    slug: 'shopmoica-flow',
-    en: { product: 'Flow', customer: 'Shopmoica', headline: 'End-to-end commerce ops in 30 days', metric: 'Time-to-first-order: 28 days' },
-    fr: { product: 'Flow', customer: 'Shopmoica', headline: 'Opérations e-commerce de bout en bout en 30 jours', metric: 'Première commande : 28 jours' },
+    slug: 'cupe-pilot-union-eyes',
+    en: { product: 'Union Eyes', customer: 'CUPE pilot', headline: 'Grievance lineage and governance evidence preserved in one continuity record', metric: '> 100 cases tracked, hash-chained audit trail' },
+    fr: { product: 'Union Eyes', customer: 'Pilote SCFP', headline: 'Lignée des griefs et preuves de gouvernance préservées dans un dossier de continuité', metric: '> 100 dossiers suivis, journal d audit chaîné' },
   },
   {
-    slug: 'cupe-pilot-union-eyes',
-    en: { product: 'Union Eyes', customer: 'CUPE pilot', headline: 'Grievance + claims in one source of truth', metric: '> 100 cases tracked, hash-chained audit trail' },
-    fr: { product: 'Union Eyes', customer: 'Pilote SCFP', headline: 'Griefs + réclamations dans une seule source de vérité', metric: '> 100 dossiers suivis, journal d audit chaîné' },
+    slug: 'shopmoica-flow',
+    en: { product: 'Flow', customer: 'Shopmoica', headline: 'Auditable trade operations in 30 days', metric: 'Time-to-first-order: 28 days' },
+    fr: { product: 'Flow', customer: 'Shopmoica', headline: 'Opérations commerciales auditables en 30 jours', metric: 'Première commande : 28 jours' },
   },
   {
     slug: 'zonga-launch',
@@ -38,7 +38,7 @@ export default async function CaseStudiesPage() {
           <p className="text-electric text-sm font-semibold tracking-widest uppercase mb-3">{isFr ? 'Commercial' : 'Commercial'}</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{isFr ? 'Études de cas' : 'Case studies'}</h1>
           <p className="text-gray-300 max-w-2xl">
-            {isFr ? 'Pilotes et déploiements en cours — preuves vérifiables, pas de noms inventés.' : 'Pilots and deployments in flight — verifiable proof, no fabricated logos.'}
+            {isFr ? 'Pilotes et déploiements en cours - preuves vérifiables, résultats de continuité, pas de logos inventés.' : 'Pilots and deployments in flight - verifiable proof, continuity outcomes, no fabricated logos.'}
           </p>
         </div>
       </section>
@@ -58,8 +58,8 @@ export default async function CaseStudiesPage() {
           })}
         </div>
         <div className="mt-12">
-          <Link href="/demo" className="px-6 py-3 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition">
-            {isFr ? 'Voir une démo' : 'See a demo'}
+          <Link href="/union-eyes" className="px-6 py-3 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition">
+            {isFr ? 'Explorer Union Eyes' : 'Explore Union Eyes'}
           </Link>
         </div>
       </section>
