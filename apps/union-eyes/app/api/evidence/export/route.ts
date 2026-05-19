@@ -11,8 +11,16 @@
  */
 import { NextResponse } from 'next/server'
 import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { recordEvidenceExport } from '@/app/api/governance/telemetry/route'
+
+/**
+ * Roles that may NOT access the evidence export endpoint.
+ * Plain members have no operational need for the full evidence pack.
+ * All staff, steward, admin, governance, and platform roles are allowed.
+ */
+const MEMBER_ONLY_ROLES = new Set(['member', 'MEMBER'])
 
 const APP = 'union-eyes'
 const VERSION = process.env.npm_package_version ?? '0.0.0'
@@ -24,8 +32,18 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   return withRequestContext(request, () =>
     withSpan('api.evidence.export', { 'http.method': 'GET' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
+      const authResult = await authenticateUser()
+      if (!authResult.ok) return authResult.response
+
+      // Role gate: evidence export is restricted to staff/admin/governance.
+      // authenticateUser() only checks identity — we need the resolved role.
+      const { orgRole } = await auth()
+      if (!orgRole || MEMBER_ONLY_ROLES.has(orgRole)) {
+        return NextResponse.json(
+          { error: 'Forbidden', message: 'Evidence export requires staff-level access.' },
+          { status: 403 },
+        )
+      }
 
       const { searchParams } = new URL(request.url)
       const orgId = searchParams.get('orgId') ?? 'unscoped'
