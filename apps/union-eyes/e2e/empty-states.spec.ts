@@ -116,12 +116,16 @@ test.describe('Empty states', () => {
 
     // InboxConsole fetches /api/claims and /api/notifications — stub both so
     // the component sees zero items and renders its empty state.
-    await page.route('**/api/claims**', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() });
-    });
-    await page.route('**/api/notifications**', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() });
-    });
+    // Use URL function predicates (not glob patterns) so matching is
+    // evaluated synchronously and never races against early requests.
+    await page.route(
+      (url) => url.pathname.startsWith('/api/claims'),
+      (route) => route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() }),
+    );
+    await page.route(
+      (url) => url.pathname.startsWith('/api/notifications'),
+      (route) => route.fulfill({ status: 200, contentType: 'application/json', body: emptyList() }),
+    );
 
     await page.goto('/en-CA/dashboard/inbox', { waitUntil: 'domcontentloaded' });
     // InboxConsole is a client-only component (useSearchParams) so React may

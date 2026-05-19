@@ -58,10 +58,12 @@ test.describe('Permission boundaries — role gate enforcement', () => {
       expect([401, 403]).toContain(response.status());
     });
 
-    test('unauthenticated POST to /api/cases/transition returns 401 or 403', async ({ request }) => {
-      // GAP-04: unauthenticated POST to transition endpoint.
-      const response = await request.post('/api/cases/FAKE-CASE-001/transition', {
-        data: { toStatus: 'resolved' },
+    test('unauthenticated PATCH to /api/cases/transition returns 401', async ({ request }) => {
+      // GAP-04: unauthenticated request to the transition endpoint.
+      // The route only exposes PATCH — using POST returns 405 before auth
+      // fires, which is a method-routing decision, not an auth gate.
+      const response = await request.patch('/api/cases/FAKE-CASE-001/transition', {
+        data: { targetStatus: 'resolved' },
         headers: { 'Content-Type': 'application/json' },
       });
       expect([401, 403, 404]).toContain(response.status());
