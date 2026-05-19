@@ -124,10 +124,12 @@ test.describe('Empty states', () => {
     });
 
     await page.goto('/en-CA/dashboard/inbox', { waitUntil: 'domcontentloaded' });
-    // InboxConsole starts with loading=true (spinner). Wait for the spinner
-    // to detach so that the empty-state text ("No signals yet") is committed
-    // to the DOM before assertEmptyStateVisible reads innerText().
-    await page.locator('.animate-spin').waitFor({ state: 'detached', timeout: 15000 }).catch(() => {});
+    // InboxConsole is a client-only component (useSearchParams) so React may
+    // mount AFTER networkidle fires. waitForLoadState('networkidle') inside
+    // assertEmptyStateVisible would then resolve before the fetch even starts.
+    // Instead, wait directly for the empty-state text to become visible in
+    // the DOM — this is deterministic regardless of network timing.
+    await page.locator('text=No signals yet').waitFor({ state: 'visible', timeout: 20000 });
     await assertEmptyStateVisible(page);
   });
 

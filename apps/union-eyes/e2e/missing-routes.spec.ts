@@ -37,7 +37,7 @@ test.describe('Missing routes — known 404 gaps (pending)', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/404|not found/i);
   });
 });
@@ -95,7 +95,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.waitForLoadState('networkidle');
     await expect(page.locator('body')).toBeVisible();
     // intake form should show a heading, not a 404
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/\b404\b/);
   });
 
@@ -115,7 +115,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/404|not found/i);
   });
 
@@ -125,7 +125,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/404|not found/i);
   });
 
@@ -135,7 +135,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/404|not found/i);
   });
 });
