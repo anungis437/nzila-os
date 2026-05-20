@@ -1,40 +1,38 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-20T16:04:00.174Z
+> Generated: 2026-05-20T20:46:19.827Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1668 |
-| Total Findings | 2458 |
+| Files Scanned | 1675 |
+| Total Findings | 2467 |
 | Errors | 0 |
-| Warnings | 1198 |
-| Info | 1260 |
+| Warnings | 1193 |
+| Info | 1274 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1253 |
-| stale-reference | 1037 |
+| naming-inconsistency | 1267 |
+| stale-reference | 1032 |
 | missing-package-readme | 105 |
 | stale-package-ref | 53 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1037)
+## stale-reference (1032)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
-- 🟡 `ARCHITECTURE.md:122` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
 - 🟡 `ARCHITECTURE.md:128` — Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:12` — Possible broken link: [docs/repo-contract/README.md](docs/repo-contract/README.md)
 - 🟡 `CONTRIBUTING.md:82` — Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
 - 🟡 `CONTRIBUTING.md:83` — Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
 - 🟡 `CONTRIBUTING.md:84` — Possible broken link: [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `CONTRIBUTING.md:85` — Possible broken link: [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)
-- 🟡 `CONTRIBUTING.md:86` — Possible broken link: [Evidence Lifecycle Policy](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
 - 🟡 `CONTRIBUTING.md:87` — Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)
 - 🟡 `CONTRIBUTING.md:88` — Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:89` — Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
@@ -43,9 +41,6 @@
 - 🟡 `README.md:171` — Possible broken link: [docs/builders/](docs/builders/)
 - 🟡 `README.md:173` — Possible broken link: [docs/buyers/](docs/buyers/)
 - 🟡 `README.md:175` — Possible broken link: [docs/investor/](docs/investor/)
-- 🟡 `docs/architecture/AUDIT_ENFORCEMENT.md:4` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](../platform/EVIDENCE_LIFECYCLE_POLICY.md)
-- 🟡 `docs/architecture/AUDIT_ENFORCEMENT.md:5` — Possible broken link: [docs/platform/AUDIT_ENFORCEMENT.md](../platform/AUDIT_ENFORCEMENT.md)
-- 🟡 `docs/architecture/ORG_SCOPED_TABLES.md:5` — Possible broken link: [docs/platform/ORG_SCOPED_TABLES.md](../platform/ORG_SCOPED_TABLES.md)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:64` — Possible broken link: [convert/route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/convert/route.ts)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:117` — Possible broken link: [portal/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/page.tsx)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:118` — Possible broken link: [claims/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/claims/page.tsx)
@@ -1119,7 +1114,7 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 
-## naming-inconsistency (1253)
+## naming-inconsistency (1267)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -1764,8 +1759,11 @@
 - ℹ️ `docs/categories/platform-and-operations/reference/packages.md:79` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/reference/README.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/platform-and-operations/reference/TENANT_INVENTORY.md:352` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md:37` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md:141` — "evidence bundle" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md:60` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md:61` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md:63` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md:99` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md:203` — "evidence bundle" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/categories/platform-and-operations/releases/finance-core-readiness.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/platform-and-operations/releases/finance-core-readiness.md:68` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/risk/nzila-ai-risk-register-memora-deferred.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2137,6 +2135,13 @@
 - ℹ️ `docs/categories/stakeholders/tutorials/first-app.md:122` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md:54` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md:62` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/compliance/soc2/control-mapping.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/compliance/soc2/control-mapping.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/compliance/soc2/evidence-inventory.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/compliance/soc2/gap-log.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/compliance/soc2/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/compliance/soc2/README.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/compliance/soc2/README.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md:12` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/constitution.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/constitution.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2316,6 +2321,10 @@
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:126` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:127` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/platform/AUDIT_ENFORCEMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/platform/EVIDENCE_LIFECYCLE_POLICY.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/portfolio-matrix.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/proof-center/portfolio-proof-index.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)

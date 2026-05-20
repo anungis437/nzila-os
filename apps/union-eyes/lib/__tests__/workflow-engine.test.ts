@@ -229,32 +229,69 @@ describe('workflow-engine', () => {
   // ── assignClaim ───────────────────────────────────────────────────────────
   describe('assignClaim', () => {
     it('assigns claim to steward', async () => {
-      mocks.mockSelect.mockReturnValueOnce(chain([{ claimId: 'c1', status: 'submitted' }]));
+      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: unknown) => unknown) => {
+        const mockTx = {
+          select: vi.fn(() => chain([{ claimId: 'c1', status: 'submitted', organizationId: 'org-1' }])),
+          update: vi.fn(() => chain(undefined)),
+          insert: vi.fn(() => chain(undefined)),
+        };
+        return fn(mockTx);
+      });
       mocks.mockValidateTransition.mockReturnValueOnce({ allowed: true });
-      mocks.mockUpdate.mockReturnValueOnce(chain(undefined));
-      mocks.mockInsert.mockReturnValueOnce(chain(undefined));
-      const result = await assignClaim('c1', 'steward1', 'admin1');
+      const result = await assignClaim('c1', 'steward1', 'admin1', 'org-1');
       expect(result).toEqual({ success: true });
     });
 
     it('rejects assignment when FSM blocks the transition', async () => {
-      mocks.mockSelect.mockReturnValueOnce(chain([{ claimId: 'c1', status: 'closed' }]));
+      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: unknown) => unknown) => {
+        const mockTx = {
+          select: vi.fn(() => chain([{ claimId: 'c1', status: 'closed', organizationId: 'org-1' }])),
+          update: vi.fn(() => chain(undefined)),
+          insert: vi.fn(() => chain(undefined)),
+        };
+        return fn(mockTx);
+      });
       mocks.mockValidateTransition.mockReturnValueOnce({ allowed: false, reason: 'closed claims cannot be reassigned' });
-      const result = await assignClaim('c1', 'steward1', 'admin1');
+      const result = await assignClaim('c1', 'steward1', 'admin1', 'org-1');
       expect(result.success).toBe(false);
       expect(result.error).toMatch(/FSM rejection/);
     });
 
-    it('returns error when claim not found', async () => {
-      mocks.mockSelect.mockReturnValueOnce(chain([]));
-      const result = await assignClaim('missing', 's1', 'a1');
-      expect(result).toEqual({ success: false, error: 'Claim not found' });
+    it('returns error when claim not found in organization', async () => {
+      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: unknown) => unknown) => {
+        const mockTx = {
+          select: vi.fn(() => chain([])),
+          update: vi.fn(() => chain(undefined)),
+          insert: vi.fn(() => chain(undefined)),
+        };
+        return fn(mockTx);
+      });
+      const result = await assignClaim('missing', 's1', 'a1', 'org-1');
+      expect(result).toEqual({ success: false, error: 'Claim not found in organization' });
     });
 
     it('returns error on db failure', async () => {
-      mocks.mockSelect.mockImplementationOnce(() => { throw new Error('DB fail'); });
-      const result = await assignClaim('c1', 's1', 'a1');
+      mocks.mockWithRLS.mockImplementationOnce(async () => {
+        throw new Error('DB fail');
+      });
+      const result = await assignClaim('c1', 's1', 'a1', 'org-1');
       expect(result).toEqual({ success: false, error: 'DB fail' });
+    });
+
+    it('denies access when claim belongs to a different organization', async () => {
+      // org-2 submits a request for a claim that belongs to org-1 → claim not found
+      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: unknown) => unknown) => {
+        const mockTx = {
+          // Query is org-scoped — returns empty when org does not match
+          select: vi.fn(() => chain([])),
+          update: vi.fn(() => chain(undefined)),
+          insert: vi.fn(() => chain(undefined)),
+        };
+        return fn(mockTx);
+      });
+      const result = await assignClaim('c1-from-org1', 'steward2', 'admin2', 'org-2');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Claim not found in organization');
     });
   });
 

@@ -49,12 +49,29 @@ UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exist
 - **March estimate:** ~25–40 person-days
 - **May 20 remaining:** ~5–8 person-days
 - **May 22 remaining:** ~2–4 person-days (pure UI polish + admin console finishing); all critical-path engineering gaps closed
+- **May 2026 P0 sprint remaining:** 0 — P0 trust-hardening sprint complete (see below)
+
+### P0 Trust-Hardening Sprint (2026-05-14)
+
+A second sprint addressed the P0 security gaps identified in the May 2026 senior assessment (CISO: 6.0/10 → target ≥8.0/10):
+
+| Gap | Fix | Tests |
+|---|---|---|
+| RLS context fail-open (warn+proceed on missing orgId) | `with-rls-context.ts`: throws `"Organization context is required..."` on missing orgId; added `withSystemRLSContext` + `withPlatformAdminRLSContext` explicit wrappers | 27/27 pass |
+| Intake idempotency hash cross-org collision | Hash now includes `orgId` prefix; duplicate check inside `withRLSContext` with org-scoped `and()` WHERE | 4/4 cross-org isolation tests pass |
+| `assignClaim` unscoped DB access in workflow-engine | Wrapped in `withRLSContext`; both SELECT and UPDATE use org-scoped WHERE; cross-org denial tested | 38/38 workflow-engine tests pass |
+| `claims-queries.ts` missing org scoping | `getClaimsByMember`, `updateClaimStatus`, `assignClaim` now require `organizationId` | Covered by workflow-engine + intake tests |
+| Raw DB import sprawl in case/claim modules | `scripts/check-ue-db-import-guard.ts` governance CI guard; 13 pre-existing violations in allowlist as P1 migration backlog | Guard exits 0 in CI |
+| No canonical runtime truth source | `reports/runtime/platform-runtime-truth-latest.json` + `.md` created; status = DEGRADED (prod/staging share resource group — P1) | n/a |
+
+**Revised overall readiness post-sprint:** ~95–97% for controlled pilot with sensitive data; remaining P1 = prod/staging blast-radius separation + 13 claim module raw-DB migrations.
 
 ### What this means for the assessment
 
 - Treat any "❌ Missing" / "⚠️ Partial" rows below for PR-022/030/031/032/040/042/061/070 as **outdated**. The verified status is in the delta table above.
 - The architectural verdict, security/privacy verdict, scope discipline observations, and polyglot maintenance concerns from the March baseline remain accurate.
-- "Several focused sprints away" framing should be revised to **"one focused sprint of polish + terminology + SOC 2 prep."**
+- "Several focused sprints away" framing should be revised to **"P0 trust-hardening complete; one P1 sprint remains (prod/staging separation + DB migration backlog)."**
+- Buyer-facing docs should reference `reports/runtime/platform-runtime-truth-latest.md` as the authoritative runtime status (not individual wave reports).
 
 ---
 

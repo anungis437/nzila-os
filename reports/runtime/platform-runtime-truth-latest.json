@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "reportId": "platform-runtime-truth-2026-05",
+  "generatedAt": "2026-05-14T00:00:00.000Z",
+  "authoritative": true,
+  "supersedes": [
+    "reports/runtime/runtime-latest.json",
+    "reports/runtime/azure-runtime-latest.json",
+    "reports/runtime/health-latest.json",
+    "reports/runtime/runtime-health-status-latest.json",
+    "reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json"
+  ],
+  "overallStatus": "DEGRADED",
+  "overallStatusReason": "Production and staging share the same Azure resource group and container app environment. This is a P1 blast-radius risk. No data-residency violations detected in deployed container apps (all canadacentral). P0 org-isolation controls fixed in this sprint.",
+  "goNogo": {
+    "controlledDemo": "GO",
+    "controlledPilot": "GO — P0 RLS/idempotency fixes applied this sprint",
+    "sensitiveMulitOrgProduction": "NO-GO — prod/staging blast-radius separation required first",
+    "investorReview": "GO",
+    "enterpriseProcurement": "CONDITIONAL — buyer pack must distinguish pilot-ready from production-hardened"
+  },
+  "sections": {
+    "health": {
+      "status": "HEALTHY",
+      "source": "reports/runtime/runtime-latest.json",
+      "summary": "May 2026 monthly: 1 deploy, 0 rollbacks, 0 hotfixes, 100% CI success rate.",
+      "freshness": "2026-05-01T17:11:54.444Z"
+    },
+    "deployment": {
+      "status": "DEGRADED",
+      "source": "reports/runtime/azure-runtime-latest.json",
+      "summary": "All 14 container apps deployed to canadacentral (correct). Production and staging share resource group 'nzila-canada-staging-rg' and environment 'nzila-canada-staging-env'. Shared blast radius is a P1 risk requiring separation before sensitive multi-org production.",
+      "deployedApps": [
+        "nzila-os-web",
+        "nzila-os-console",
+        "nzila-os-partners",
+        "nzila-os-union-eyes",
+        "nzila-os-zonga",
+        "nzila-os-control-plane",
+        "nzila-os-platform-admin",
+        "nzila-os-flow",
+        "nzila-os-cfo",
+        "nzila-os-agrimo",
+        "nzila-os-cora",
+        "nzila-os-trade",
+        "nzila-os-mobility",
+        "nzila-os-abr"
+      ],
+      "allAppsRegion": "canadacentral",
+      "productionResourceGroup": "nzila-canada-staging-rg",
+      "stagingResourceGroup": "nzila-canada-staging-rg",
+      "sharedBlastRadius": true,
+      "freshness": "2026-05-01T17:06:55.730Z"
+    },
+    "dataResidency": {
+      "status": "HEALTHY",
+      "summary": "All 14 deployed container app FQDNs resolve to canadacentral.azurecontainerapps.io. No eastus/eastus2 violations detected in container app endpoints. Note: underlying Azure subscription may contain non-data-bearing operational resources in other regions — these require a signed exception ledger entry if present.",
+      "allowedRegions": ["canadacentral", "canadaeast"],
+      "detectedRegions": ["canadacentral"],
+      "violations": [],
+      "knownExceptions": [],
+      "freshness": "2026-05-01T17:06:55.730Z"
+    },
+    "orgIsolation": {
+      "status": "FIXED",
+      "summary": "P0 trust-hardening sprint applied. withRLSContext now throws on missing orgId (fail-closed). withSystemRLSContext and withPlatformAdminRLSContext added as explicit audited bypass paths. Intake idempotency hash now includes organizationId. assignClaim in workflow-engine.ts wrapped in withRLSContext with org-scoped WHERE clause. Cross-org denial regression tests added.",
+      "fixes": [
+        "apps/union-eyes/lib/db/with-rls-context.ts — fail-closed throw on missing orgId",
+        "apps/union-eyes/app/api/cases/intake/route.ts — org-scoped idempotency hash and duplicate check",
+        "apps/union-eyes/db/queries/claims-queries.ts — organizationId required in getClaimsByMember, updateClaimStatus, assignClaim",
+        "apps/union-eyes/lib/workflow-engine.ts — assignClaim wrapped in withRLSContext, org-scoped WHERE"
+      ],
+      "remainingDebt": "13 other Union Eyes API/query files still use raw db client (documented in scripts/check-ue-db-import-guard.ts allowlist as P1 migration backlog)"
+    },
+    "instrumentation": {
+      "status": "PARTIAL",
+      "summary": "Core Union Eyes paths instrumented. Django backend has governance correlation fields (logging.py, middleware.py). Some Tier 2 apps not yet instrumented. Parity tests: 5/5 pass.",
+      "tier1Coverage": "union-eyes, flow, abr — instrumented",
+      "tier2Coverage": "zonga, agrimo, cora, trade, mobility — partial or not instrumented"
+    },
+    "knownExceptions": [
+      {
+        "id": "EXC-001",
+        "type": "blast-radius",
+        "description": "Production and staging share Azure resource group and container app environment (nzila-canada-staging-rg / nzila-canada-staging-env). Acceptable for controlled pilot. Must be separated before sensitive multi-org production.",
+        "status": "open",
+        "severity": "P1",
+        "owner": "platform-ops",
+        "targetResolution": "pre-production-separation-sprint"
+      }
+    ]
+  },
+  "reportFreshness": {
+    "staleReports": [
+      "reports/runtime/runtime-health-status-2026-05-11.json — superseded",
+      "reports/runtime/live-health-failure-matrix.json — superseded",
+      "reports/runtime/mainline-runtime-baseline-2026-05-12.json — superseded"
+    ],
+    "authoritativeSource": "reports/runtime/platform-runtime-truth-latest.json (this file)"
+  }
+}

@@ -69,10 +69,12 @@ export const createClaim = async (
 };
 
 /**
- * Get all claims for a specific member
+ * Get all claims for a specific member, scoped to an organization.
+ * organizationId is mandatory — prevents cross-org data leakage.
  */
 export const getClaimsByMember = async (
   memberId: string,
+  organizationId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ) => {
@@ -82,12 +84,12 @@ export const getClaimsByMember = async (
       const memberClaims = await dbOrTx
         .select()
         .from(claims)
-        .where(eq(claims.memberId, memberId))
+        .where(and(eq(claims.memberId, memberId), eq(claims.organizationId, organizationId)))
         .orderBy(desc(claims.createdAt));
       
       return memberClaims;
     } catch (error) {
-      logger.error("Error fetching claims by member", { error, memberId });
+      logger.error("Error fetching claims by member", { error, memberId, organizationId });
       throw new Error("Failed to fetch claims");
     }
   };
@@ -191,12 +193,13 @@ export const getClaimById = async (
 };
 
 /**
- * Update claim status
+ * Update claim status, scoped to organization to prevent cross-org mutation.
  */
 export const updateClaimStatus = async (
   claimId: string, 
   newStatus: SelectClaim['status'],
   updatedBy: string,
+  organizationId: string,
   notes?: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
@@ -204,14 +207,14 @@ export const updateClaimStatus = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
-      // Update the claim
+      // Update the claim, org-scoped to prevent cross-org mutation
       const [updatedClaim] = await dbOrTx
         .update(claims)
         .set({
           status: newStatus,
           updatedAt: new Date(),
         })
-        .where(eq(claims.claimId, claimId))
+        .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)))
         .returning();
       
       // Create an update record
@@ -224,7 +227,7 @@ export const updateClaimStatus = async (
       
       return updatedClaim;
     } catch (error) {
-      logger.error("Error updating claim status", { error, claimId, newStatus });
+      logger.error("Error updating claim status", { error, claimId, newStatus, organizationId });
       throw new Error("Failed to update claim status");
     }
   };
@@ -238,12 +241,13 @@ export const updateClaimStatus = async (
 };
 
 /**
- * Assign claim to a user
+ * Assign claim to a user, scoped to organization to prevent cross-org assignment.
  */
 export const assignClaim = async (
   claimId: string,
   assignedTo: string,
   assignedBy: string,
+  organizationId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ) => {
@@ -257,7 +261,7 @@ export const assignClaim = async (
           assignedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(claims.claimId, claimId))
+        .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)))
         .returning();
       
       // Create an update record
@@ -270,7 +274,7 @@ export const assignClaim = async (
       
       return updatedClaim;
     } catch (error) {
-      logger.error("Error assigning claim", { error, claimId, assignedTo });
+      logger.error("Error assigning claim", { error, claimId, assignedTo, organizationId });
       throw new Error("Failed to assign claim");
     }
   };
@@ -284,12 +288,12 @@ export const assignClaim = async (
 };
 
 /**
- * Get claims assigned to a specific user (for stewards/officers)
- * @param organizationSlug - Optional organization slug (TEXT) from organization_members.organization_id
+ * Get claims assigned to a specific user, always org-scoped for multi-org isolation.
+ * @param organizationSlug - Required organization slug for scoping
  */
 export const getClaimsAssignedToUser = async (
   userId: string,
-  organizationSlug?: string,
+  organizationSlug: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ) => {
@@ -298,19 +302,17 @@ export const getClaimsAssignedToUser = async (
     try {
       const conditions = [eq(claims.assignedTo, userId)];
       
-      // Filter by organization if provided (for multi-org isolation)
-      if (organizationSlug) {
-        // Convert organization slug to UUID
-        const [org] = await dbOrTx
-          .select({ id: organizations.id })
-          .from(organizations)
-          .where(eq(organizations.slug, organizationSlug))
-          .limit(1);
-        
-        if (org) {
-          conditions.push(eq(claims.organizationId, org.id));
-        }
+      // organizationSlug is required — always apply org scope for multi-org isolation
+      const [org] = await dbOrTx
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.slug, organizationSlug))
+        .limit(1);
+      
+      if (!org) {
+        throw new Error(`Organization with slug ${organizationSlug} not found`);
       }
+      conditions.push(eq(claims.organizationId, org.id));
       
       const assignedClaims = await dbOrTx
         .select()

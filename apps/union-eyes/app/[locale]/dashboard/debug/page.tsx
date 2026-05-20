@@ -10,7 +10,6 @@ export const dynamic = 'force-dynamic';
 import { currentUser } from '@nzila/platform-auth/entra/server';
 import { requireUser } from "@/lib/api-auth-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getClaimsAssignedToUser } from "@/db/queries/claims-queries";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
@@ -32,15 +31,9 @@ export default async function DebugPage({ params }: PageProps) {
   const orgId = authContext.organizationId;
   const user = await currentUser();
   
-  // Get assigned claims
+  // Get assigned claims — requires org slug; skipped in debug page (dev tool only, no slug available).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let assignedClaims: any[] = [];
-  if (userId) {
-    try {
-      assignedClaims = await getClaimsAssignedToUser(userId);
-    } catch (_error) {
-}
-  }
+  const assignedClaims: any[] = [];
 
   return (
     <div className="container mx-auto py-8 space-y-6">

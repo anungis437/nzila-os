@@ -105,11 +105,14 @@ export async function withRLSContext<T>(
     }
   }
 
-  // Organization context required — warn when missing (platform admins may lack active org)
+  // Organization context is mandatory — fail closed if missing.
+  // For system/background jobs, use withSystemRLSContext().
+  // For platform-admin operations, use withPlatformAdminRLSContext().
   if (!orgId) {
-    logger.warn(
-      '[withRLSContext] Organization context required but orgId is null — ' +
-        'proceeding without org isolation. User must have an active Org selected for RLS.',
+    throw new Error(
+      'Organization context is required for scoped data access. ' +
+        'User must have an active organization selected. ' +
+        'For system operations, use withSystemRLSContext() instead.',
     )
   }
 
@@ -396,4 +399,51 @@ export function withRLS<TArgs extends unknown[], TReturn>(
   return async (...args: TArgs): Promise<TReturn> => {
     return withRLSContext(() => handler(...args))
   }
+}
+
+/**
+ * Named, audited system context wrapper.
+ *
+ * Use ONLY for background jobs, webhooks, and scheduled tasks that run
+ * outside a user request.  Every call is audit-logged with a mandatory reason.
+ * The operation runs without user or org RLS context — RLS policies must
+ * accept empty userId/orgId for these paths.
+ *
+ * @param reason  — Human-readable description of why system access is needed.
+ * @param operation — The operation to execute.
+ */
+export async function withSystemRLSContext<T>(
+  reason: string,
+  operation: (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>,
+): Promise<T> {
+  logger.info('[withSystemRLSContext] System operation executing', { reason })
+  return withSystemContext(operation)
+}
+
+/**
+ * Named, audited platform-admin context wrapper.
+ *
+ * Use ONLY for explicit cross-org administrative operations (e.g. support
+ * tooling, data migration, compliance exports).  Every call is audit-logged
+ * with the admin actor ID and the declared operation name.
+ * The user context is set to adminId; org context is explicitly cleared so
+ * that the admin operates without tenant isolation.
+ *
+ * @param adminId   — Platform admin user ID performing the operation.
+ * @param operation — Declared operation name for the audit trail.
+ * @param fn        — The operation to execute.
+ */
+export async function withPlatformAdminRLSContext<T>(
+  adminId: string,
+  operation: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  if (!adminId) {
+    throw new Error('Platform admin ID is required for withPlatformAdminRLSContext')
+  }
+  logger.info('[withPlatformAdminRLSContext] Platform admin operation executing', {
+    adminId,
+    operation,
+  })
+  return withExplicitUserContext(adminId, fn)
 }

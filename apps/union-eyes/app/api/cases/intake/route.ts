@@ -12,18 +12,16 @@ import { auth } from '@nzila/platform-auth/entra/server';
 import { validateIntakeRequest } from '@nzila/cupe-vocabulary';
 import { getCaseTypeById } from '@nzila/cupe-vocabulary';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { createClaim } from '@/db/queries/claims-queries';
+import { createClaim, getClaimsByMember } from '@/db/queries/claims-queries';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { eventBus, AppEvents } from '@/lib/events';
 import '@/lib/events/pilot-event-listeners';
-import { getClaimsByMember } from '@/db/queries/claims-queries';
 import { createHash } from 'crypto';
-import { db } from '@/db/db';
 import { claims } from '@/db/schema/claims-schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { enforceDecision } from '@nzila/decision-core';
 import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
@@ -121,22 +119,33 @@ export async function POST(request: Request) {
       severity = caseType?.defaultSeverity ?? 'moderate';
     }
 
-    // 4b. Idempotency: content-hash deduplication
+    // 4b. Idempotency: org-scoped content-hash deduplication
+    // orgId is included in the hash to prevent cross-org hash collisions
     const idempotencyHash = createHash('sha256')
-      .update(`${data.memberId}|${data.caseType}|${data.incidentDate}|${data.title}`)
+      .update(`${orgId}|${data.memberId}|${data.caseType}|${data.incidentDate}|${data.title}`)
       .digest('hex');
 
-    const [existing] = await db
-      .select({ claimId: claims.claimId, claimNumber: claims.claimNumber })
-      .from(claims)
-      .where(eq(claims.idempotencyHash, idempotencyHash))
-      .limit(1);
+    // 4c. Org-scoped duplicate check — runs inside withRLSContext to ensure
+    //     RLS policies are active and cross-org leakage is impossible.
+    const existingCheck = await withRLSContext(async (tx) => {
+      const [found] = await tx
+        .select({ claimId: claims.claimId, claimNumber: claims.claimNumber })
+        .from(claims)
+        .where(
+          and(
+            eq(claims.idempotencyHash, idempotencyHash),
+            eq(claims.organizationId, orgId),
+          ),
+        )
+        .limit(1);
+      return found ?? null;
+    });
 
-    if (existing) {
+    if (existingCheck) {
       const duplicateDecision = await enforceDecision({
         decisionType: 'union.grievance.intake.submitted',
         organizationId: orgId,
-        resourceId: existing.claimId,
+        resourceId: existingCheck.claimId,
         actor: {
           id: userId,
           type: 'user',
@@ -163,8 +172,8 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: true,
-          claimId: existing.claimId,
-          claimNumber: existing.claimNumber,
+          claimId: existingCheck.claimId,
+          claimNumber: existingCheck.claimNumber,
           status: 'duplicate',
           message: 'A case with identical details already exists.',
           decision: duplicateDecision.decision,
@@ -273,7 +282,7 @@ export async function POST(request: Request) {
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_INTAKE_SUBMITTED' }))
 
     // 7. Pilot observability: emit case-created event
-    const memberClaims = await getClaimsByMember(data.memberId).catch(() => []);
+    const memberClaims = await getClaimsByMember(data.memberId, orgId).catch(() => []);
     eventBus.emit(AppEvents.CLAIM_CREATED, {
       claimId: claim.claimId,
       organizationId: orgId,

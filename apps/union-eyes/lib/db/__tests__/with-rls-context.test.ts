@@ -48,6 +48,8 @@ import {
   getCurrentRLSContext,
   createSecureServerAction,
   withRLS,
+  withSystemRLSContext,
+  withPlatformAdminRLSContext,
 } from "../with-rls-context";
 
 /* ── tests ──────────────────────────────────────────────────────────── */
@@ -78,12 +80,12 @@ describe("with-rls-context", () => {
       expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
     });
 
-    it("warns when orgId is missing but proceeds", async () => {
+    it("throws when orgId is missing — fails closed for org isolation", async () => {
       mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
-      const result = await withRLSContext(async () => "ok");
-      expect(result).toBe("ok");
-      // Only 1 execute call: set user_id (org skipped)
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(1);
+      // currentUser returns no org metadata → all fallbacks exhausted → must throw
+      await expect(withRLSContext(async () => "ok")).rejects.toThrow(
+        "Organization context is required for scoped data access",
+      );
     });
 
     it("falls back to publicMetadata.organizationId", async () => {
@@ -113,12 +115,12 @@ describe("with-rls-context", () => {
       expect(result).toBe(42);
     });
 
-    it("handles currentUser() failure gracefully", async () => {
+    it("throws when currentUser() fails and orgId is null — fails closed", async () => {
       mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
       mocks.mockCurrentUser.mockRejectedValueOnce(new Error("edge case"));
-      // Should still proceed (warns, no org context)
-      const result = await withRLSContext(async () => "ok");
-      expect(result).toBe("ok");
+      await expect(withRLSContext(async () => "ok")).rejects.toThrow(
+        "Organization context is required for scoped data access",
+      );
     });
 
     /* ── Batch 32: branch gap-fill ── */
@@ -145,13 +147,12 @@ describe("with-rls-context", () => {
       expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
     });
 
-    it("returns null user from currentUser() — no orgId", async () => {
+    it("throws when currentUser() returns null and no orgId — fails closed", async () => {
       mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
       mocks.mockCurrentUser.mockResolvedValueOnce(null);
-      const result = await withRLSContext(async () => "ok");
-      expect(result).toBe("ok");
-      // Only user_id is set, no org call
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(1);
+      await expect(withRLSContext(async () => "ok")).rejects.toThrow(
+        "Organization context is required for scoped data access",
+      );
     });
   });
 
@@ -251,6 +252,43 @@ describe("with-rls-context", () => {
       const result = await wrapped("test", 42);
       expect(result).toBe("test-42");
       expect(handler).toHaveBeenCalledWith("test", 42);
+    });
+  });
+
+  // ── withSystemRLSContext ──────────────────────────────────────────
+  describe("withSystemRLSContext", () => {
+    it("executes and clears user + org context", async () => {
+      const result = await withSystemRLSContext("test: seed user creation", async () => "done");
+      expect(result).toBe("done");
+      // withSystemContext sets '' for both user_id and org_id → 2 execute calls
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+    });
+
+    it("requires a reason string", async () => {
+      // reason is typed as string so an empty reason is accepted at runtime,
+      // but calling the function works without throwing
+      const result = await withSystemRLSContext("bulk-import-job", async () => 42);
+      expect(result).toBe(42);
+    });
+  });
+
+  // ── withPlatformAdminRLSContext ───────────────────────────────────
+  describe("withPlatformAdminRLSContext", () => {
+    it("throws when adminId is empty", async () => {
+      await expect(
+        withPlatformAdminRLSContext("", "compliance-export", async () => "x"),
+      ).rejects.toThrow("Platform admin ID is required");
+    });
+
+    it("executes with explicit user context for a valid admin", async () => {
+      const result = await withPlatformAdminRLSContext(
+        "admin-123",
+        "compliance-export",
+        async () => "exported",
+      );
+      expect(result).toBe("exported");
+      // withExplicitUserContext sets user_id → at least 1 execute call
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(1);
     });
   });
 });

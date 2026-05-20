@@ -31,6 +31,10 @@
 | SOC2-CL-002 | FSM transition + SLA guard tests | May 2026 | `apps/union-eyes/lib/workflow/__tests__/case-lifecycle.test.ts` |
 | SOC2-CL-003 | Django ↔ TS correlation header parity | May 2026 | `apps/union-eyes/backend/observability/tests/test_correlation_parity.py` |
 | SOC2-CL-004 | Multi-org SaaS terminology consistency (docs) | May 2026 | `scripts/migrate-tenant-to-org.ts` + 5 doc updates |
+| SOC2-CL-005 | Union Eyes RLS fail-open (CC6.1, CC6.6) | May 2026 P0 sprint | `apps/union-eyes/lib/db/with-rls-context.ts` fail-closed throw; 27/27 tests pass |
+| SOC2-CL-006 | Cross-org idempotency collision risk (CC6.1) | May 2026 P0 sprint | `intake/route.ts` org-scoped hash + `withRLSContext` duplicate check; 4/4 cross-org isolation tests |
+| SOC2-CL-007 | Unscoped assignClaim / claim mutation helpers (CC6.1) | May 2026 P0 sprint | `workflow-engine.ts` + `claims-queries.ts` org-scoped; 38/38 tests pass |
+| SOC2-CL-008 | No canonical runtime truth source (A1.2, CC9.2) | May 2026 P0 sprint | `reports/runtime/platform-runtime-truth-latest.json` (status: DEGRADED — EXC-001 open) |
 
 ## Notes
 

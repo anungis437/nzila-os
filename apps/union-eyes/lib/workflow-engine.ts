@@ -572,69 +572,73 @@ export async function updateClaimStatusById(
 }
 
 /**
- * Assign claim to a steward
+ * Assign claim to a steward — org-scoped to prevent cross-org mutation.
+ * organizationId is mandatory; the function wraps all DB operations in withRLSContext.
  */
 export async function assignClaim(
   claimId: string,
   stewardId: string,
-  assignedBy: string
+  assignedBy: string,
+  organizationId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const [claim] = await db
-      .select()
-      .from(claims)
-      .where(eq(claims.claimId, claimId))
-      .limit(1);
+    return await withRLSContext(async (tx) => {
+      const [claim] = await tx
+        .select()
+        .from(claims)
+        .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)))
+        .limit(1);
 
-    if (!claim) {
-      return { success: false, error: "Claim not found" };
-    }
+      if (!claim) {
+        return { success: false, error: "Claim not found in organization" };
+      }
 
-    // Validate via FSM before mutating status — prevents invalid "assigned" transitions
-    const fsmResult = validateClaimTransition({
-      claimId,
-      currentStatus: claim.status as ClaimStatus,
-      targetStatus: "assigned" as ClaimStatus,
-      userId: assignedBy,
-      userRole: "steward",
-      priority: (claim.priority ?? "medium") as ClaimPriority,
-      statusChangedAt: claim.updatedAt ?? new Date(),
+      // Validate via FSM before mutating status — prevents invalid "assigned" transitions
+      const fsmResult = validateClaimTransition({
+        claimId,
+        currentStatus: claim.status as ClaimStatus,
+        targetStatus: "assigned" as ClaimStatus,
+        userId: assignedBy,
+        userRole: "steward",
+        priority: (claim.priority ?? "medium") as ClaimPriority,
+        statusChangedAt: claim.updatedAt ?? new Date(),
+      });
+      if (fsmResult && !fsmResult.allowed) {
+        return {
+          success: false,
+          error: `FSM rejection: cannot transition '${claim.status}' → 'assigned': ${fsmResult.reason ?? 'invalid transition'}`,
+        };
+      }
+
+      // Update claim assignment — org-scoped WHERE prevents cross-org mutation
+      await tx
+        .update(claims)
+        .set({
+          assignedTo: stewardId,
+          assignedAt: new Date(),
+          status: "assigned",
+          updatedAt: new Date(),
+          progress: 30,
+        })
+        .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)));
+
+      // Create audit trail
+      await tx.insert(claimUpdates).values({
+        claimId,
+        updateType: "assignment",
+        message: `Claim assigned to steward`,
+        createdBy: assignedBy,
+        isInternal: true,
+        metadata: {
+          stewardId,
+          previousStatus: claim.status,
+        },
+      });
+
+      return { success: true };
     });
-    if (fsmResult && !fsmResult.allowed) {
-      return {
-        success: false,
-        error: `FSM rejection: cannot transition '${claim.status}' → 'assigned': ${fsmResult.reason ?? 'invalid transition'}`,
-      };
-    }
-
-    // Update claim assignment
-    await db
-      .update(claims)
-      .set({
-        assignedTo: stewardId,
-        assignedAt: new Date(),
-        status: "assigned",
-        updatedAt: new Date(),
-        progress: 30,
-      })
-      .where(eq(claims.claimId, claimId));
-
-    // Create audit trail
-    await db.insert(claimUpdates).values({
-      claimId,
-      updateType: "assignment",
-      message: `Claim assigned to steward`,
-      createdBy: assignedBy,
-      isInternal: true,
-      metadata: {
-        stewardId,
-        previousStatus: claim.status,
-      },
-    });
-
-    return { success: true };
   } catch (error) {
-return {
+    return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
     };
