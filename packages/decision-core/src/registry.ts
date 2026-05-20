@@ -59,6 +59,19 @@ export function verifyDecisionRegistry(
   }
 }
 
+/**
+ * Initial policy-version allow-list for v1 registry entries.
+ *
+ * All in-tree call sites today (control-plane governance actions, NAR
+ * tests, decision-intelligence tests, audit-pack verifier) use `1.0.0`.
+ * Pinning here means a stray caller sending `'1.0.1'` or `'2026-05-01'`
+ * is rejected with `POLICY_VERSION_NOT_ALLOWED` instead of silently
+ * recorded with a drifting version. To roll a new policy version: add
+ * it to this list (or to a per-entry override) — drop the old one only
+ * after all callers migrate.
+ */
+const PINNED_V1: readonly string[] = ['1.0.0']
+
 export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
   registerDecisionType({
     type: 'union.grievance.intake.submitted',
@@ -66,6 +79,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'grievance',
     requiredAuthority: ['grievance:create'],
     requiredPolicy: 'labour.grievance.intake',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -81,6 +95,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'case',
     requiredAuthority: ['case:escalate'],
     requiredPolicy: 'labour.case.escalation',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -96,6 +111,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'case',
     requiredAuthority: ['case:classify'],
     requiredPolicy: 'legal.case.classification',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -111,6 +127,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'quote',
     requiredAuthority: ['quote:create'],
     requiredPolicy: 'commerce.quote.approval',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -126,6 +143,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'vendor-selection',
     requiredAuthority: ['vendor:select'],
     requiredPolicy: 'commerce.vendor.selection',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -141,6 +159,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'rights',
     requiredAuthority: ['rights:validate'],
     requiredPolicy: 'media.rights.validation',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -156,6 +175,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'payout',
     requiredAuthority: ['payout:approve'],
     requiredPolicy: 'media.payout.approval',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -171,6 +191,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'workflow',
     requiredAuthority: ['workflow:authorize'],
     requiredPolicy: 'platform.workflow.authorization',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -186,6 +207,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'organization',
     requiredAuthority: ['org:entitlement:check'],
     requiredPolicy: 'platform.org.entitlement',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -201,6 +223,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'governance-action',
     requiredAuthority: ['governance:action:execute'],
     requiredPolicy: 'platform.governance.action',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
@@ -216,6 +239,7 @@ export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
     resourceType: 'workflow-execution',
     requiredAuthority: ['workflow:execute'],
     requiredPolicy: 'platform.workflow.execution',
+    allowedPolicyVersions: PINNED_V1,
     auditRequired: true,
     replaySupported: true,
     exportSupported: true,
