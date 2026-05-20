@@ -15,6 +15,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { InboxConsole } from "@/components/inbox/inbox-console";
+import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+import { Cupe4373InboxPage } from "@/components/demo/cupe4373-inbox-page";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -34,6 +36,10 @@ export default async function InboxPage() {
     await requireUser();
   } catch {
     redirect("/login");
+  }
+
+  if (isCupe4373DemoRuntime()) {
+    return <Cupe4373InboxPage />;
   }
 
   return <InboxConsole />;

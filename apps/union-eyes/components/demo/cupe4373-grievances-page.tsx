@@ -1,5 +1,8 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CalendarClock, FileText, Scale, ShieldCheck, type LucideIcon } from "lucide-react";
+import { AlertTriangle, CalendarClock, FileText, Scale, Search, ShieldCheck, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
@@ -16,6 +19,38 @@ const urgencyStyles = {
 };
 
 export function Cupe4373GrievancesPage({ locale }: Props) {
+  const [query, setQuery] = useState("");
+  const [urgencyFilter, setUrgencyFilter] = useState<"all" | "urgent" | "watch" | "steady">("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const statuses = useMemo(
+    () => [...new Set(demoGrievanceCases.map((c) => c.status))],
+    [],
+  );
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return demoGrievanceCases.filter((item) => {
+      if (urgencyFilter !== "all" && item.urgency !== urgencyFilter) return false;
+      if (statusFilter !== "all" && item.status !== statusFilter) return false;
+      if (!q) return true;
+      const haystack = [
+        item.id,
+        item.title,
+        item.summary,
+        item.worker,
+        item.unit,
+        item.assignedSteward,
+        item.type,
+        ...item.agreementRefs,
+        ...item.flags,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [query, urgencyFilter, statusFilter]);
+
   const urgentCount = demoGrievanceCases.filter((item) => item.urgency === "urgent").length;
   const pendingResponseCount = demoGrievanceCases.filter((item) =>
     item.status.toLowerCase().includes("response") ||
@@ -48,8 +83,58 @@ export function Cupe4373GrievancesPage({ locale }: Props) {
         </div>
       </section>
 
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by member, unit, steward, article, or keyword..."
+                className="h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+            <select
+              value={urgencyFilter}
+              onChange={(e) => setUrgencyFilter(e.target.value as typeof urgencyFilter)}
+              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-400"
+              aria-label="Urgency filter"
+            >
+              <option value="all">All urgencies</option>
+              <option value="urgent">Urgent</option>
+              <option value="watch">Watch</option>
+              <option value="steady">Steady</option>
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-400"
+              aria-label="Status filter"
+            >
+              <option value="all">All statuses</option>
+              {statuses.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <div className="text-xs text-slate-500">
+              {filtered.length} of {demoGrievanceCases.length}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4">
-        {demoGrievanceCases.map((item) => (
+        {filtered.length === 0 && (
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="p-6 text-center text-sm text-slate-500">
+              No grievances match the current filters.
+            </CardContent>
+          </Card>
+        )}
+        {filtered.map((item) => (
           <Link
             key={item.id}
             href={`/${locale}/dashboard/cases/${item.id}`}

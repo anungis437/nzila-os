@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
 
 type Mode = 'password' | 'magic-link' | 'sso';
 
@@ -25,8 +26,15 @@ const DEFAULT_METHODS: MethodAvailability = {
   inviteRequired: false,
 };
 
-export function LoginForm() {
+type LoginFormProps = {
+  postLoginPath?: string;
+};
+
+export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormProps) {
   const router = useRouter();
+  const postLoginPath =
+    configuredPostLoginPath
+    ?? (isCupe4373DemoRuntime() ? '/en-CA/dashboard' : '/en-CA/dashboard/priorities');
   const [mode, setMode] = useState<Mode>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -85,7 +93,7 @@ export function LoginForm() {
         setInfo('Enter the 6-digit code from your authenticator app.');
         return;
       }
-      router.push('/en-CA/dashboard/priorities');
+      router.push(postLoginPath);
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
@@ -112,7 +120,7 @@ export function LoginForm() {
         setError(data.error || 'Verification failed');
         return;
       }
-      router.push('/en-CA/dashboard/priorities');
+      router.push(postLoginPath);
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
@@ -152,7 +160,7 @@ export function LoginForm() {
   }
 
   function continueWithSso() {
-    const cb = encodeURIComponent('/en-CA/dashboard/priorities');
+    const cb = encodeURIComponent(postLoginPath);
     window.location.href = `/api/auth/signin/azure-ad?callbackUrl=${cb}`;
   }
 

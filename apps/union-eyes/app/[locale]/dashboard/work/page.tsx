@@ -13,6 +13,8 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { WorkSurface } from "@/components/work/work-surface";
+import { Cupe4373CasesConsole } from "@/components/demo/cupe4373-cases-console";
+import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,10 @@ export default async function WorkPage({ params }: PageProps) {
   if (!user) redirect(`/${locale}/sign-in`);
   const authorized = await hasMinRole("steward");
   if (!authorized) redirect(`/${locale}/dashboard/inbox`);
+
+  if (isCupe4373DemoRuntime()) {
+    return <Cupe4373CasesConsole />;
+  }
 
   return <WorkSurface />;
 }

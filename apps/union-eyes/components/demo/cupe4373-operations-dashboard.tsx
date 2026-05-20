@@ -1,14 +1,29 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, FileText } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Gavel,
+  Inbox as InboxIcon,
+  MessageSquare,
+  Target,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
+import { Cupe4373DoctrineFooter } from "@/components/demo/cupe4373-doctrine-footer";
 import {
+  broadcastHistory,
+  calendarEvents,
   continuityIndicators,
   dashboardPriorityCards,
+  decisionsOfRecord,
   demoCases,
+  inboxItems,
+  motions,
   statusBreakdown,
   trustSignals,
   workloadDistribution,
@@ -27,10 +42,68 @@ const urgencyStyles = {
 export function Cupe4373OperationsDashboard({ locale }: Props) {
   const totalStatus = statusBreakdown.reduce((sum, item) => sum + item.count, 0);
   const urgentCases = demoCases.filter((item) => item.urgency === "urgent");
+  const newInbox = inboxItems.filter((i) => i.status === "new").length;
+  const scheduledMotions = motions.filter((m) => m.status === "scheduled-vote").length;
+  const sentBroadcasts = broadcastHistory.length;
+
+  const foundationSurfaces = [
+    {
+      href: `/${locale}/dashboard/inbox`,
+      label: "Inbox",
+      value: String(newInbox),
+      detail: `${newInbox} new of ${inboxItems.length} · unified intake stream`,
+      icon: InboxIcon,
+    },
+    {
+      href: `/${locale}/dashboard/priorities`,
+      label: "Priorities",
+      value: String(urgentCases.length + calendarEvents.length),
+      detail: "Commitments owed this cadence cycle",
+      icon: Target,
+    },
+    {
+      href: `/${locale}/dashboard/governance`,
+      label: "Governance",
+      value: String(decisionsOfRecord.length),
+      detail: `${scheduledMotions} motion${scheduledMotions === 1 ? "" : "s"} scheduled for vote`,
+      icon: Gavel,
+    },
+    {
+      href: `/${locale}/dashboard/communications`,
+      label: "Communications",
+      value: String(sentBroadcasts),
+      detail: "Bulletins on the operating record (30d)",
+      icon: MessageSquare,
+    },
+  ];
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <Cupe4373SectionNav />
+
+      <section className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3">
+          <FileText className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
+          <div>
+            <p className="font-semibold text-blue-950">Suggested demo path</p>
+            <p className="mt-0.5 text-xs leading-5 text-blue-800">
+              Open the most urgent case <span className="font-mono">UE-4373-026</span>, scan the
+              chronology and agreement refs, click <em>Prepare meeting package</em>, and download
+              the brief. End at <em>Reports</em> to export the continuity package.
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button asChild size="sm">
+            <Link href={`/${locale}/dashboard/cases/UE-4373-026`}>
+              Start with UE-4373-026 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+          </Button>
+          <Button asChild size="sm" variant="outline" className="bg-white">
+            <Link href={`/${locale}/dashboard/reports`}>Continuity brief</Link>
+          </Button>
+        </div>
+      </section>
 
       <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -80,6 +153,41 @@ export function Cupe4373OperationsDashboard({ locale }: Props) {
             </Card>
           );
         })}
+      </section>
+
+      <section aria-label="Foundation operational surfaces" className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            Foundation surfaces
+          </h2>
+          <p className="text-xs text-slate-500">
+            Inbox · Priorities · Governance · Communications
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {foundationSurfaces.map((surface) => {
+            const Icon = surface.icon;
+            return (
+              <Link
+                key={surface.href}
+                href={surface.href}
+                className="group flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50/40"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-slate-700 group-hover:bg-blue-100 group-hover:text-blue-800">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-sm font-semibold text-slate-950">{surface.label}</p>
+                    <span className="text-lg font-semibold text-slate-900">{surface.value}</span>
+                  </div>
+                  <p className="mt-0.5 text-xs leading-5 text-slate-600">{surface.detail}</p>
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-blue-700" />
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
@@ -196,6 +304,12 @@ export function Cupe4373OperationsDashboard({ locale }: Props) {
           <span>Demo path: dashboard opens here, cases carry the narrative, and the case chronology shows how operational context survives handoff.</span>
         </div>
       </section>
+
+      <Cupe4373DoctrineFooter
+        reviewerOfRecord="Chief Steward (Denise Laurent) for operational reads; Executive for strategic posture"
+        escalation="Anything that resists the cadence rolls into the next labour-management or executive meeting"
+        context="All counts and breakdowns derive from the visible case roster, calendar, and operating record. No member scoring, no productivity ranking."
+      />
     </div>
   );
 }

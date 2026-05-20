@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BylawsViewer from "@/components/governance/BylawsViewer";
 import PolicyManager from "@/components/governance/PolicyManager";
 import SignatoryManager from "@/components/governance/SignatoryManager";
+import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+import { Cupe4373GovernancePage } from "@/components/demo/cupe4373-governance-page";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -26,7 +28,11 @@ export default async function GovernancePage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "governancePage" });
   const user = await requireUser();
-  
+
+  if (isCupe4373DemoRuntime()) {
+    return <Cupe4373GovernancePage />;
+  }
+
   // Require at least officer level (60) to view governance
   const hasAccess = await hasMinRole("officer");
   

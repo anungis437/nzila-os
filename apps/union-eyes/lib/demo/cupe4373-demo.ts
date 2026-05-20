@@ -617,28 +617,79 @@ export const demoCases: DemoCase[] = [
 
 export const demoGrievanceCases = demoCases.filter((item) => item.caseworkStream === "grievance");
 
+// Computed counters keep dashboard metrics honest — derived from `demoCases` and `calendarEvents`
+// so we never display fabricated numbers that don't match what the user can browse to.
+const _openCases = demoCases.filter((c) => c.status !== "Closed");
+const _urgent = demoCases.filter((c) => c.urgency === "urgent");
+const _awaitingResponse = demoCases.filter(
+  (c) =>
+    /response/i.test(c.status) ||
+    c.flags.some((f) => /response/i.test(f)) ||
+    /response/i.test(c.continuityState),
+);
+const _updatedThisWeek = demoCases.filter((c) => {
+  const updated = new Date(c.updated).getTime();
+  return Date.now() - updated <= 1000 * 60 * 60 * 24 * 14; // 2-week window for demo
+}).length;
+
 export const dashboardPriorityCards = [
-  { label: "Open Cases", value: "32", detail: "Across active hospital units", icon: ClipboardList },
-  { label: "Urgent Follow-Ups", value: "6", detail: "Due before next labour-management cycle", icon: AlertTriangle },
-  { label: "Awaiting Response", value: "9", detail: "Employer or member response pending", icon: FolderClock },
-  { label: "Upcoming Meetings", value: "4", detail: "This week", icon: CalendarDays },
-  { label: "Updated Files", value: "11", detail: "New chronology or document activity", icon: FileCheck2 },
+  {
+    label: "Open Cases",
+    value: String(_openCases.length),
+    detail: "Across active hospital units",
+    icon: ClipboardList,
+  },
+  {
+    label: "Urgent Follow-Ups",
+    value: String(_urgent.length),
+    detail: "Due before next labour-management cycle",
+    icon: AlertTriangle,
+  },
+  {
+    label: "Awaiting Response",
+    value: String(_awaitingResponse.length),
+    detail: "Employer or member response pending",
+    icon: FolderClock,
+  },
+  {
+    label: "Upcoming Meetings",
+    // Kept in sync with `calendarEvents` (declared below); update both together.
+    value: "4",
+    detail: "Across the next two weeks",
+    icon: CalendarDays,
+  },
+  {
+    label: "Recently Updated",
+    value: String(_updatedThisWeek),
+    detail: "Chronology or document activity (14-day window)",
+    icon: FileCheck2,
+  },
 ];
 
-export const workloadDistribution = [
-  { steward: "Denise Laurent", open: 9, urgent: 2 },
-  { steward: "Marc Okafor", open: 7, urgent: 2 },
-  { steward: "Aisha Tremblay", open: 6, urgent: 1 },
-  { steward: "Chief Steward Office", open: 10, urgent: 1 },
-];
+// Workload + status now mirror actual cases so totals reconcile with the cases console.
+const _stewards = [...new Set(demoCases.map((c) => c.assignedSteward))];
+export const workloadDistribution = _stewards.map((steward) => ({
+  steward,
+  open: demoCases.filter((c) => c.assignedSteward === steward && c.status !== "Closed").length,
+  urgent: demoCases.filter(
+    (c) => c.assignedSteward === steward && c.urgency === "urgent",
+  ).length,
+}));
 
-export const statusBreakdown = [
-  { label: "Follow-up due", count: 6, color: "bg-amber-500" },
-  { label: "Awaiting response", count: 9, color: "bg-sky-500" },
-  { label: "Documentation review", count: 7, color: "bg-slate-500" },
-  { label: "Meeting scheduled", count: 5, color: "bg-emerald-500" },
-  { label: "Under review", count: 5, color: "bg-indigo-500" },
-];
+const _statusColors: Record<string, string> = {
+  "Follow-up due": "bg-amber-500",
+  "Awaiting response": "bg-sky-500",
+  "Documentation review": "bg-slate-500",
+  "Meeting scheduled": "bg-emerald-500",
+  "Under review": "bg-indigo-500",
+  "Closed": "bg-zinc-400",
+};
+const _statuses = [...new Set(demoCases.map((c) => c.status))];
+export const statusBreakdown = _statuses.map((label) => ({
+  label,
+  count: demoCases.filter((c) => c.status === label).length,
+  color: _statusColors[label] ?? "bg-slate-500",
+}));
 
 export const continuityIndicators = [
   "4 files need handoff notes before upcoming meetings.",
@@ -726,8 +777,8 @@ export const trustSignals = [
   { label: "Secure documents", icon: FileText },
 ];
 
-export function getDemoCase(id: string): DemoCase {
-  return demoCases.find((item) => item.id === id) ?? demoCases[0];
+export function getDemoCase(id: string): DemoCase | null {
+  return demoCases.find((item) => item.id === id) ?? null;
 }
 
 // ── Demo document library ────────────────────────────────────────────────────
@@ -746,20 +797,20 @@ export type DemoDocument = {
 export const demoDocuments: DemoDocument[] = [
   {
     id: 'DOC-001',
-    title: 'CUPE Local 4373 Collective Agreement 2022–2025',
+    title: 'CUPE Local 4373 Collective Agreement 2024–2027',
     category: 'collective-agreement',
     privacyLabel: 'public_internal',
-    lastUpdated: '2022-04-01',
+    lastUpdated: '2024-04-01',
     description:
       'Full collective agreement between CUPE Local 4373 and Hamilton Health Sciences. Articles 1–47 including compensation schedules.',
     fileType: 'PDF',
   },
   {
     id: 'DOC-002',
-    title: 'MOU — Scheduling Flexibility Pilot (2024)',
+    title: 'MOU — Scheduling Flexibility Pilot (2025)',
     category: 'collective-agreement',
     privacyLabel: 'public_internal',
-    lastUpdated: '2024-03-15',
+    lastUpdated: '2025-03-15',
     description:
       'Memorandum of Understanding on the voluntary flexible scheduling pilot covering weekend rotation changes.',
     fileType: 'PDF',
@@ -847,3 +898,345 @@ export const demoDocuments: DemoDocument[] = [
     fileType: 'DOCX',
   },
 ];
+
+// ── Retention policy (surfaced across Inbox/Communications/Documents) ────────
+
+export const retentionPolicy = {
+  windowMonths: 24,
+  shortLabel: "24-month operational retention",
+  fullLabel:
+    "Operational memory: 24-month retention per CUPE 4373 institutional policy. Grievance and arbitration files held for the statutory retention window.",
+  basis: "CUPE National records retention guidance · OLRA s. 96 statutory limitation window",
+} as const;
+
+// ── Inbox: member messages + federation notifications ────────────────────────
+
+export type InboxItem = {
+  id: string;
+  channel: "case" | "member-message" | "federation" | "operational-alert";
+  subject: string;
+  from: string;
+  fromContext: string;
+  received: string;
+  body: string;
+  status: "new" | "triaged" | "linked";
+  linkedCaseId?: string;
+  urgency: "urgent" | "watch" | "steady";
+  retentionExpires: string;
+};
+
+const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
+
+export const inboxItems: InboxItem[] = [
+  {
+    id: "IN-4373-001",
+    channel: "member-message",
+    subject: "Mandatory overtime on stat holiday",
+    from: "Maya B.",
+    fromContext: "Registered Practical Nurse · 7 West Medicine",
+    received: "2026-05-18T07:42:00-04:00",
+    body:
+      "I was told at 6am that I had to stay for a double on Victoria Day. No notice, no relief offered. This is the third time in six weeks. What can the union do?",
+    status: "linked",
+    linkedCaseId: "UE-4373-026",
+    urgency: "urgent",
+    retentionExpires: new Date(Date.now() + 24 * ONE_MONTH).toISOString(),
+  },
+  {
+    id: "IN-4373-002",
+    channel: "member-message",
+    subject: "Return-to-work accommodation question",
+    from: "Joseph T.",
+    fromContext: "Personal Support Worker · Long-Term Care",
+    received: "2026-05-18T14:05:00-04:00",
+    body:
+      "My functional abilities form is dated last Thursday. Manager is asking me to come back full-duties Monday. I think I'm supposed to have modified duties first?",
+    status: "triaged",
+    urgency: "watch",
+    retentionExpires: new Date(Date.now() + 24 * ONE_MONTH).toISOString(),
+  },
+  {
+    id: "IN-4373-003",
+    channel: "federation",
+    subject: "OCHU/CUPE bulletin — Bill 124 remediation payments",
+    from: "OCHU/CUPE",
+    fromContext: "Sector federation · hospital division",
+    received: "2026-05-17T16:00:00-04:00",
+    body:
+      "Hospitals are required to issue retroactive adjustments under the Bill 124 remediation settlement by June 30. Locals should confirm member-by-member calculations.",
+    status: "new",
+    urgency: "watch",
+    retentionExpires: new Date(Date.now() + 24 * ONE_MONTH).toISOString(),
+  },
+  {
+    id: "IN-4373-004",
+    channel: "case",
+    subject: "New intake — schedule change without notice",
+    from: "Steward intake form",
+    fromContext: "Filed by Denise Laurent on behalf of member",
+    received: "2026-05-18T09:18:00-04:00",
+    body:
+      "Member reports a 12-hour shift change pushed through the scheduling system at 22:00 the night before. Wants clarification on Article 14 notice provisions.",
+    status: "new",
+    urgency: "watch",
+    retentionExpires: new Date(Date.now() + 24 * ONE_MONTH).toISOString(),
+  },
+  {
+    id: "IN-4373-005",
+    channel: "operational-alert",
+    subject: "Step 1 grievance reply window expiring tomorrow",
+    from: "UnionEyes",
+    fromContext: "Operational alert · case UE-4373-019",
+    received: "2026-05-18T05:00:00-04:00",
+    body:
+      "Employer reply window for UE-4373-019 (overnight staffing) closes 2026-05-19 at 17:00. If no response, escalate to Step 2 per CBA Article 9.",
+    status: "new",
+    linkedCaseId: "UE-4373-019",
+    urgency: "urgent",
+    retentionExpires: new Date(Date.now() + 24 * ONE_MONTH).toISOString(),
+  },
+  {
+    id: "IN-4373-006",
+    channel: "member-message",
+    subject: "Question about pension buy-back",
+    from: "Linda G.",
+    fromContext: "Registered Practical Nurse · 5 East",
+    received: "2026-05-16T11:30:00-04:00",
+    body:
+      "I had a maternity leave in 2019 — can I buy back those months for HOOPP? Who do I talk to?",
+    status: "triaged",
+    urgency: "steady",
+    retentionExpires: new Date(Date.now() + 24 * ONE_MONTH).toISOString(),
+  },
+  {
+    id: "IN-4373-007",
+    channel: "federation",
+    subject: "Hospital sector pattern bargaining update",
+    from: "CUPE Ontario",
+    fromContext: "Federation coordination",
+    received: "2026-05-15T13:45:00-04:00",
+    body:
+      "Central table settlement reached at three sister locals. Pattern includes 3% Year-1, 2.75% Year-2, premium parity for evenings and nights.",
+    status: "new",
+    urgency: "steady",
+    retentionExpires: new Date(Date.now() + 24 * ONE_MONTH).toISOString(),
+  },
+];
+
+// ── Baseline Governance: decisions of record + motions ───────────────────────
+
+export type DecisionOfRecord = {
+  id: string;
+  date: string;
+  body: "Executive" | "Stewards Council" | "General Membership Meeting";
+  title: string;
+  decision: string;
+  votesFor: number;
+  votesAgainst: number;
+  abstain: number;
+  carriedBy: "majority" | "two-thirds" | "consensus";
+  precedentFor: string[];
+};
+
+export const decisionsOfRecord: DecisionOfRecord[] = [
+  {
+    id: "DOR-2026-014",
+    date: "2026-05-12",
+    body: "Executive",
+    title: "Authorize Step 2 grievance — overtime notice pattern",
+    decision:
+      "Executive authorizes consolidation of three overtime-notice files into a single Step 2 grievance with Article 14 as the governing clause.",
+    votesFor: 6,
+    votesAgainst: 0,
+    abstain: 1,
+    carriedBy: "majority",
+    precedentFor: ["UE-4373-026", "UE-4373-019", "UE-4373-031"],
+  },
+  {
+    id: "DOR-2026-013",
+    date: "2026-05-05",
+    body: "Stewards Council",
+    title: "Standing direction — accommodation file handling",
+    decision:
+      "All accommodation files restricted to assigned steward + Chief Steward; no executive-level review without member written consent.",
+    votesFor: 11,
+    votesAgainst: 0,
+    abstain: 0,
+    carriedBy: "consensus",
+    precedentFor: ["Accommodations stream"],
+  },
+  {
+    id: "DOR-2026-012",
+    date: "2026-04-28",
+    body: "Executive",
+    title: "Approve labour-management agenda — May cycle",
+    decision:
+      "Adopt agenda covering overtime patterns, portering rotation, overnight staffing, and outstanding RTW files. Chief Steward to lead presentation.",
+    votesFor: 7,
+    votesAgainst: 0,
+    abstain: 0,
+    carriedBy: "consensus",
+    precedentFor: ["Labour-management cycle"],
+  },
+  {
+    id: "DOR-2026-011",
+    date: "2026-04-21",
+    body: "General Membership Meeting",
+    title: "Ratify Bill 124 remediation distribution method",
+    decision:
+      "Membership ratifies CUPE National's per-member calculation method for Bill 124 remediation payments. Local will publish individual calculations within 30 days of employer issuance.",
+    votesFor: 84,
+    votesAgainst: 6,
+    abstain: 3,
+    carriedBy: "two-thirds",
+    precedentFor: ["Remediation distribution"],
+  },
+  {
+    id: "DOR-2026-010",
+    date: "2026-04-14",
+    body: "Stewards Council",
+    title: "Retention policy reaffirmation",
+    decision:
+      "Council reaffirms 24-month operational memory retention for case files, with statutory-window extension for grievance and arbitration material.",
+    votesFor: 9,
+    votesAgainst: 0,
+    abstain: 1,
+    carriedBy: "consensus",
+    precedentFor: ["All operational records"],
+  },
+  {
+    id: "DOR-2026-009",
+    date: "2026-04-07",
+    body: "Executive",
+    title: "Steward training cadence — Q2",
+    decision:
+      "Quarterly steward training scheduled for May 27. Required for newly elected stewards; recommended for all. CBA-update module included.",
+    votesFor: 6,
+    votesAgainst: 1,
+    abstain: 0,
+    carriedBy: "majority",
+    precedentFor: ["Steward continuity"],
+  },
+];
+
+export type Motion = {
+  id: string;
+  status: "tabled" | "in-discussion" | "scheduled-vote";
+  body: "Executive" | "Stewards Council" | "General Membership Meeting";
+  title: string;
+  movedBy: string;
+  seconded: string;
+  scheduled: string;
+  summary: string;
+};
+
+export const motions: Motion[] = [
+  {
+    id: "MOT-2026-021",
+    status: "scheduled-vote",
+    body: "Executive",
+    title: "Authorize Step 3 referral — UE-4373-019 (overnight staffing)",
+    movedBy: "Denise Laurent (Chief Steward)",
+    seconded: "Marcus O. (Vice-President)",
+    scheduled: "2026-05-26",
+    summary:
+      "If employer reply window expires without resolution, refer the overnight staffing grievance to Step 3 with LRO support.",
+  },
+  {
+    id: "MOT-2026-020",
+    status: "in-discussion",
+    body: "Stewards Council",
+    title: "Adopt standardized intake script for member messages",
+    movedBy: "Aisha P. (Steward, 5 East)",
+    seconded: "Kareem J. (Steward, LTC)",
+    scheduled: "2026-05-27",
+    summary:
+      "Standard 7-question intake script to ensure consistent capture across all stewards and reduce continuity gaps at handoff.",
+  },
+  {
+    id: "MOT-2026-019",
+    status: "tabled",
+    body: "Executive",
+    title: "Joint workload review — emergency department",
+    movedBy: "Marcus O. (Vice-President)",
+    seconded: "Denise Laurent (Chief Steward)",
+    scheduled: "2026-06-09",
+    summary:
+      "Open joint workload review with employer per Article 19. Tabled pending preliminary staffing data from members.",
+  },
+];
+
+// ── Communications: broadcast log + templates ────────────────────────────────
+
+export type BroadcastMessage = {
+  id: string;
+  sent: string;
+  audience: string;
+  audienceCount: number;
+  subject: string;
+  body: string;
+  channel: "email" | "sms" | "bulletin-board";
+  sender: string;
+  continuityNote: string;
+};
+
+export const broadcastHistory: BroadcastMessage[] = [
+  {
+    id: "BR-2026-018",
+    sent: "2026-05-17T16:30:00-04:00",
+    audience: "All members",
+    audienceCount: 612,
+    subject: "Labour-management meeting — May cycle agenda published",
+    body:
+      "The May 23 labour-management meeting agenda is now available on the members' portal. Items include overtime notice patterns, portering rotation, and outstanding RTW files.",
+    channel: "email",
+    sender: "Denise Laurent (Chief Steward)",
+    continuityNote: "Logged on the operating record · linked to MOT-2026-021",
+  },
+  {
+    id: "BR-2026-017",
+    sent: "2026-05-14T09:00:00-04:00",
+    audience: "Stewards only",
+    audienceCount: 14,
+    subject: "Bill 124 remediation — member calculation timeline",
+    body:
+      "Calculations must be confirmed member-by-member by June 15. Use the federation template. Flag discrepancies on the operational alert channel.",
+    channel: "email",
+    sender: "Marcus O. (Vice-President)",
+    continuityNote: "Linked to DOR-2026-011",
+  },
+  {
+    id: "BR-2026-016",
+    sent: "2026-05-11T18:45:00-04:00",
+    audience: "7 West Medicine",
+    audienceCount: 38,
+    subject: "Reminder — overtime self-tracking template",
+    body:
+      "Please continue logging overtime instances using the self-tracking template. The pattern data is what made the Step 2 consolidation possible.",
+    channel: "bulletin-board",
+    sender: "Denise Laurent (Chief Steward)",
+    continuityNote: "Anonymized aggregation only · no individual scoring",
+  },
+];
+
+export const broadcastTemplates = [
+  {
+    id: "TPL-meeting",
+    label: "Meeting reminder",
+    body:
+      "Reminder: {{meeting}} on {{date}} at {{time}}, {{location}}. Agenda: {{agenda}}. Reply if you cannot attend so we capture coverage.",
+  },
+  {
+    id: "TPL-action",
+    label: "Action requested",
+    body:
+      "Action requested: {{action}} by {{deadline}}. Why this matters: {{rationale}}. Confirm receipt to {{steward}}.",
+  },
+  {
+    id: "TPL-update",
+    label: "Case pattern update",
+    body:
+      "Update on the {{topic}} pattern: {{status}}. What's next: {{next}}. No individual member is identified in this update.",
+  },
+];
+

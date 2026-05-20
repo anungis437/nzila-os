@@ -1,10 +1,12 @@
-import { auth } from '@nzila/platform-auth/entra/server';
-import { redirect } from 'next/navigation';
-import { getUserRole } from '@/lib/auth/rbac-server';
-import { getRoleLandingPath } from '@/lib/dashboard/role-experience';
-import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from '@/lib/organization-utils';
-import { UserRole } from '@/lib/auth/roles';
-import { logger } from '@/lib/logger';
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { auth } from "@nzila/platform-auth/entra/server";
+import { Cupe4373OperationsDashboard } from "@/components/demo/cupe4373-operations-dashboard";
+import { PortalHome } from "@/components/home/portal-home";
+import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+import { logger } from "@/lib/logger";
+
+export const dynamic = "force-dynamic";
 
 type DashboardRootPageProps = {
   params: Promise<{
@@ -12,51 +14,34 @@ type DashboardRootPageProps = {
   }>;
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  if (isCupe4373DemoRuntime()) {
+    return {
+      title: "Steward Operations Center | UnionEyes",
+      description: "CUPE Local 4373 continuity-focused steward operations demo.",
+    };
+  }
+  return {
+    title: "Dashboard | UnionEyes",
+    description: "Union operations dashboard.",
+  };
+}
+
 export default async function DashboardRootPage({ params }: DashboardRootPageProps) {
   const { locale } = await params;
   const { userId } = await auth();
 
   if (!userId) {
-    logger.error('[dashboard:root] auth() returned null userId — redirecting to /login', {
-      stage: 'auth',
+    logger.error("[dashboard:root] auth() returned null userId - redirecting to /login", {
+      stage: "auth",
       locale,
     });
-    redirect('/login');
+    redirect("/login");
   }
 
-  let organizationId: string = DEFAULT_ORGANIZATION_ID;
-  try {
-    organizationId = await getOrganizationIdForUser(userId);
-  } catch (error) {
-    logger.warn('[dashboard:root] getOrganizationIdForUser threw — falling back to default org', {
-      stage: 'organization',
-      userId,
-      error: error instanceof Error ? error.message : String(error),
-    });
+  if (isCupe4373DemoRuntime()) {
+    return <Cupe4373OperationsDashboard locale={locale} />;
   }
 
-  let userRole: UserRole = UserRole.MEMBER;
-  try {
-    userRole = await getUserRole(userId, organizationId);
-  } catch (error) {
-    logger.warn('[dashboard:root] getUserRole threw — falling back to member role', {
-      stage: 'role',
-      userId,
-      organizationId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-
-  const landingPath = getRoleLandingPath(userRole);
-
-  logger.info('[dashboard:root] resolved role landing — issuing redirect', {
-    stage: 'redirect',
-    userId,
-    organizationId,
-    userRole,
-    landingPath,
-    locale,
-  });
-
-  redirect(`/${locale}${landingPath}`);
+  return <PortalHome locale={locale} displayName="" email="" isCupeDemo={false} />;
 }

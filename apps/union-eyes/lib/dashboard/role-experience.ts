@@ -3,7 +3,13 @@ export type DashboardExperience = 'member' | 'staff' | 'executive' | 'governance
 export type NavigationItem = {
   label: string;
   href: string;
-  icon?: 'dashboard' | 'cases' | 'grievances' | 'agreements' | 'calendar' | 'reports' | 'documents';
+  icon?: 'dashboard' | 'cases' | 'grievances' | 'members' | 'agreements' | 'calendar' | 'reports' | 'documents' | 'inbox' | 'priorities' | 'communications' | 'governance';
+  group?: string;
+};
+
+export type NavigationGroup = {
+  key: string;
+  label: string;
 };
 
 const ADMIN_ROLES = new Set([
@@ -57,27 +63,48 @@ const STAFF_ROLES = new Set([
 const CUPE4373_DEMO_PROFILE = 'cupe4373';
 
 const CUPE4373_DEMO_NAVIGATION: NavigationItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-  { label: 'Cases', href: '/dashboard/cases', icon: 'cases' },
-  { label: 'Grievances', href: '/dashboard/grievances', icon: 'grievances' },
-  { label: 'Agreements', href: '/dashboard/agreements', icon: 'agreements' },
-  { label: 'Calendar', href: '/dashboard/calendar', icon: 'calendar' },
-  { label: 'Documents', href: '/dashboard/documents', icon: 'documents' },
-  { label: 'Reports', href: '/dashboard/reports', icon: 'reports' },
+  { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', group: 'daily' },
+  { label: 'Inbox', href: '/dashboard/inbox', icon: 'inbox', group: 'daily' },
+  { label: 'Priorities', href: '/dashboard/priorities', icon: 'priorities', group: 'daily' },
+  { label: 'Cases', href: '/dashboard/cases', icon: 'cases', group: 'casework' },
+  { label: 'Grievances', href: '/dashboard/grievances', icon: 'grievances', group: 'casework' },
+  { label: 'Members', href: '/dashboard/members', icon: 'members', group: 'records' },
+  { label: 'Agreements', href: '/dashboard/agreements', icon: 'agreements', group: 'records' },
+  { label: 'Calendar', href: '/dashboard/calendar', icon: 'calendar', group: 'records' },
+  { label: 'Documents', href: '/dashboard/documents', icon: 'documents', group: 'records' },
+  { label: 'Communications', href: '/dashboard/communications', icon: 'communications', group: 'oversight' },
+  { label: 'Governance', href: '/dashboard/governance', icon: 'governance', group: 'oversight' },
+  { label: 'Reports', href: '/dashboard/reports', icon: 'reports', group: 'oversight' },
+];
+
+const CUPE4373_DEMO_GROUPS: NavigationGroup[] = [
+  { key: 'daily', label: 'Daily Work' },
+  { key: 'casework', label: 'Casework' },
+  { key: 'records', label: 'Member Records' },
+  { key: 'oversight', label: 'Oversight & Comms' },
 ];
 
 export function getCupe4373DemoNavigation(): NavigationItem[] {
   return CUPE4373_DEMO_NAVIGATION;
 }
 
+export function getCupe4373DemoGroups(): NavigationGroup[] {
+  return CUPE4373_DEMO_GROUPS;
+}
+
 const CUPE4373_DEMO_ALLOWED_PREFIXES = [
   '/dashboard',
   '/dashboard/work',
+  '/dashboard/inbox',
   '/dashboard/cases',
   '/dashboard/grievances',
+  '/dashboard/priorities',
+  '/dashboard/communications',
+  '/dashboard/members',
   '/dashboard/agreements',
   '/dashboard/calendar',
   '/dashboard/documents',
+  '/dashboard/governance',
   '/dashboard/reports',
   '/dashboard/profile',
 ];
