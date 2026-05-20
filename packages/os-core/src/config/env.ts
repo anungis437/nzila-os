@@ -40,15 +40,12 @@ const authMixin = {
   AZURE_AD_TENANT_ID: z.string().min(1).optional(),
 }
 
-/** @deprecated Use authMixin directly */
-const clerkMixin = authMixin
-
 // ---------------------------------------------------------------------------
 // App-specific extensions
 // ---------------------------------------------------------------------------
 const consoleSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url(),
-  ...clerkMixin,
+  ...authMixin,
   STRIPE_SECRET_KEY: z.string().startsWith('sk_').optional(),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_').optional(),
 })
@@ -56,7 +53,7 @@ const consoleSchema = baseSchema.extend({
 const partnersSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_PARTNERS_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const webSchema = baseSchema.extend({
@@ -70,7 +67,7 @@ const unionEyesSchema = baseSchema.extend({
 
 const cfoSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
   STRIPE_SECRET_KEY: z.string().startsWith('sk_').optional(),
   QBO_CLIENT_ID: z.string().min(1).optional(),
   QBO_CLIENT_SECRET: z.string().min(1).optional(),
@@ -80,17 +77,17 @@ const shopQuoterSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   NEXT_PUBLIC_CONSOLE_URL: z.string().url().default('http://localhost:3001'),
   NEXT_PUBLIC_WEB_URL: z.string().url().default('http://localhost:3000'),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const nacpExamsSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const zongaSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
   STRIPE_SECRET_KEY: z.string().startsWith('sk_').optional(),
 })
 
@@ -98,7 +95,7 @@ const abrSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   NEXT_PUBLIC_API_URL: z.string().url().default('http://localhost:8001'),
   EVIDENCE_SEAL_KEY: z.string().min(1).optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const orchestratorSchema = baseSchema.extend({
@@ -112,38 +109,38 @@ const orchestratorSchema = baseSchema.extend({
 
 const mobilitySchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const mobilityClientPortalSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const agrimoSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const coraSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const tradeSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
   STRIPE_SECRET_KEY: z.string().startsWith('sk_').optional(),
 })
 
 const platformAdminSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 const controlPlaneSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  ...clerkMixin,
+  ...authMixin,
 })
 
 // ---------------------------------------------------------------------------
