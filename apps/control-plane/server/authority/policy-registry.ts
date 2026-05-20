@@ -80,9 +80,8 @@ export interface WorkflowPolicy {
   readonly policyHash?: string | null
 }
 
-// ga-check:exempt — REGISTRY is a read-only DI container (populated at module-load time from
-// static policy declarations). Primary persistence is governed_policies in PostgreSQL.
-/** Internal registry — keyed by workflowId. */
+/** Internal registry — keyed by workflowId. Read-only DI container; primary persistence is governed_policies in PostgreSQL. */
+// ga-check:exempt — populated at module-load time from static policy declarations, not a persistence store
 const REGISTRY = new Map<string, WorkflowPolicy>()
 
 export function registerWorkflowPolicy(policy: WorkflowPolicy): void {
