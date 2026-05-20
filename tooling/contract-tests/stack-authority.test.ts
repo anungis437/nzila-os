@@ -29,6 +29,7 @@ import {
   formatViolations,
   type Violation,
 } from './governance-helpers'
+import { findAliasedMutations } from './stack-authority-ast'
 
 // ── Configuration ───────────────────────────────────────────────────────────
 
@@ -85,10 +86,12 @@ const SCAFFOLD_TEST_EXCLUSIONS = new Set(['test-scaffold-gp'])
  * that renaming `insert` to `insertMany`/`bulkInsert`/`upsert` does not
  * silently slip past the gate.
  *
- * KNOWN GAP: this regex cannot detect *pure* aliases without a recognised
- * suffix (e.g. `const writer = db; writer.insert(...)`). Closing that gap
- * requires AST-level scope analysis. Tracked separately; this regex is the
- * defence-in-depth layer for the common renaming-without-suffix pattern.
+ * KNOWN GAP (regex only): this pattern cannot detect *pure* aliases
+ * without a recognised suffix (e.g. `const writer = db; writer.insert(...)`).
+ * That gap is closed by the AST-level detector in
+ * {@link ./stack-authority-ast.ts} and exercised by the two
+ * `…(AST)` test cases at the bottom of this file. The regex check is
+ * retained as defence-in-depth.
  */
 const DB_HANDLE_NAME = String.raw`[A-Za-z_$][\w$]*(?:[dD]b|[dD]atabase|[cC]lient|[cC]onn(?:ection)?|[tT]x|[tT]rx|[tT]ransaction|[dD]rizzle|[sS]ql|[pP]g)`
 const MUTATION_METHODS = [
@@ -369,6 +372,89 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
             'Wrap mutations in withRLSContext() for user-scoped routes or ' +
             'withSystemContext() for system routes (webhooks, seeds). ' +
             'If excepted, add to governance/exceptions/stack-authority.json',
+        })
+      }
+    }
+
+    expect(violations, formatViolations(violations)).toHaveLength(0)
+  })
+
+  it('Django-authoritative apps must not contain aliased Drizzle mutations (AST)', () => {
+    const violations: Violation[] = []
+
+    const APP_LAYER_DIRS = ['actions', 'app']
+
+    for (const app of DJANGO_AUTHORITATIVE_APPS) {
+      const appDir = join(ROOT, 'apps', app)
+      if (!existsSync(appDir)) continue
+
+      const tsFiles: string[] = []
+      for (const layerDir of APP_LAYER_DIRS) {
+        const dir = join(appDir, layerDir)
+        if (existsSync(dir)) tsFiles.push(...walkTsFiles(dir))
+      }
+
+      for (const file of tsFiles) {
+        const rel = relative(ROOT, file).split(sep).join('/')
+
+        if (isExcepted(rel, exceptionFile.entries)) continue
+        if (rel.includes('.test.') || rel.includes('.spec.')) continue
+        if (rel.endsWith('.d.ts') || rel.endsWith('.config.ts')) continue
+        if (rel.includes('/db/') || rel.includes('/queries/')) continue
+
+        const content = readFileSync(file, 'utf-8')
+        const findings = findAliasedMutations(rel, content)
+
+        for (const f of findings) {
+          violations.push({
+            ruleId: 'STACK_AUTHORITY_001',
+            filePath: rel,
+            line: f.line,
+            snippet: f.snippet,
+            offendingValue: `Aliased Drizzle mutation \`${f.alias}.${f.method}(...)\` (alias of \`${f.root}\`) in Django-authoritative app`,
+            remediation:
+              'Route mutations through djangoProxy(), withRLSContext(), or createAuditedScopedDb(). ' +
+              'If this is a legitimate exception, add to governance/exceptions/stack-authority.json.',
+          })
+        }
+      }
+    }
+
+    expect(violations, formatViolations(violations)).toHaveLength(0)
+  })
+
+  it('union-eyes app-layer aliased mutations must use withRLSContext or withSystemContext (AST)', () => {
+    const violations: Violation[] = []
+
+    const appDir = join(ROOT, 'apps', 'union-eyes')
+    if (!existsSync(appDir)) return
+
+    const tsFiles: string[] = []
+    const dir = join(appDir, 'app')
+    if (existsSync(dir)) tsFiles.push(...walkTsFiles(dir))
+
+    for (const file of tsFiles) {
+      const rel = relative(ROOT, file).split(sep).join('/')
+
+      if (isExcepted(rel, exceptionFile.entries)) continue
+      if (rel.includes('.test.') || rel.includes('.spec.')) continue
+      if (rel.endsWith('.d.ts') || rel.endsWith('.config.ts')) continue
+      if (rel.includes('/db/') || rel.includes('/queries/')) continue
+
+      const content = readFileSync(file, 'utf-8')
+      const findings = findAliasedMutations(rel, content)
+
+      for (const f of findings) {
+        violations.push({
+          ruleId: 'STACK_AUTHORITY_001',
+          filePath: rel,
+          line: f.line,
+          snippet: f.snippet,
+          offendingValue: `Unaudited aliased Drizzle mutation \`${f.alias}.${f.method}(...)\` (alias of \`${f.root}\`) in union-eyes app layer`,
+          remediation:
+            'Wrap mutations in withRLSContext() for user-scoped routes or ' +
+            'withSystemContext() for system routes (webhooks, seeds). ' +
+            'If excepted, add to governance/exceptions/stack-authority.json.',
         })
       }
     }
