@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-19T00:00:00.000Z",
+  "generatedAt": "2026-05-20T00:00:00.000Z",
   "appCount": 26,
   "packageCount": 215,
   "workspacePackageCount": 247,
   "workflowCount": 48,
-  "contractTestCount": 251,
-  "tsTestFileCount": 1442,
+  "contractTestCount": 253,
+  "tsTestFileCount": 1455,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -233,7 +233,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 300
+      "codeFileCount": 321
     },
     {
       "name": "cora",
@@ -454,7 +454,7 @@
         "policies"
       ],
       "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
-      "codeFileCount": 32
+      "codeFileCount": 34
     },
     {
       "name": "partners",
@@ -522,7 +522,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 37
+      "codeFileCount": 38
     },
     {
       "name": "test-scaffold-gp",
@@ -666,7 +666,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3677
+      "codeFileCount": 3748
     },
     {
       "name": "veridian-admin",
