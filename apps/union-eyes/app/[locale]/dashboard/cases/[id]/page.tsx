@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import {
   AlertTriangle,
   ArrowLeft,
+  Brain,
   CalendarClock,
   FileText,
   FolderClock,
@@ -25,6 +26,10 @@ import { decisionsOfRecord, inboxItems } from "@/lib/demo/cupe4373-demo";
 import { getDemoCaseFromDb } from "@/lib/demo/server/cupe4373-cases-repo";
 import { listDecisionsForCase } from "@/lib/demo/server/cupe4373-governance";
 import { getRetentionStatusForCase } from "@/lib/demo/server/cupe4373-retention";
+import {
+  deriveCaseUuid,
+  getOrComputePriorityScoreForCase,
+} from "@/lib/demo/server/cupe4373-cognition";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
 
@@ -80,6 +85,10 @@ export default async function CaseDetailPage({ params }: PageProps) {
   );
   const liveDecisions = await listDecisionsForCase(demoCase.id);
   const retention = await getRetentionStatusForCase(demoCase);
+  const priorityScore = await getOrComputePriorityScoreForCase(
+    demoCase,
+    deriveCaseUuid(demoCase.id),
+  );
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
@@ -481,6 +490,65 @@ export default async function CaseDetailPage({ params }: PageProps) {
                     Reg: {retention.policy.regulatoryReference}
                   </p>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {priorityScore && (
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Brain className="h-4 w-4 text-violet-600" />
+                  Priority intelligence
+                  <Badge
+                    variant="outline"
+                    className="border-violet-200 bg-violet-50 text-[10px] uppercase tracking-wider text-violet-700"
+                  >
+                    {priorityScore.predictedPriority}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-xs uppercase tracking-wider text-slate-500">
+                    Score
+                  </span>
+                  <span className="font-mono text-base text-slate-900">
+                    {(priorityScore.score * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-700 space-y-1">
+                  <div className="flex justify-between">
+                    <span>urgency ({priorityScore.features.urgencyWeight.toFixed(2)})</span>
+                    <span className="text-slate-500">× 0.40</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>status ({priorityScore.features.statusWeight.toFixed(2)})</span>
+                    <span className="text-slate-500">× 0.25</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>
+                      impacted ({priorityScore.features.membersImpacted} →{" "}
+                      {priorityScore.features.membersImpactedWeight.toFixed(2)})
+                    </span>
+                    <span className="text-slate-500">× 0.20</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>
+                      arbitration kw (
+                      {priorityScore.features.hasArbitrationKeyword ? "yes" : "no"})
+                    </span>
+                    <span className="text-slate-500">× 0.15</span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Model: <span className="font-mono">{priorityScore.modelKey}</span> v
+                  {priorityScore.modelVersion}
+                </p>
+                <p className="text-[11px] text-slate-500">
+                  Computed:{" "}
+                  {new Date(priorityScore.occurredAt).toLocaleString("en-CA")}
+                </p>
               </CardContent>
             </Card>
           )}

@@ -33,6 +33,13 @@ if (!process.env.DATABASE_URL) {
 import { db, client } from '../db/db';
 import { grievances } from '../db/schema/grievance-schema';
 import { demoCases, type DemoCase } from '../lib/demo/cupe4373-demo';
+import {
+  PRIORITY_FEATURE_SPEC,
+  PRIORITY_MODEL_ALGORITHM,
+  PRIORITY_MODEL_KEY,
+  PRIORITY_MODEL_VERSION,
+  scoreCaseFeatures,
+} from '../lib/demo/cupe4373-cognition-core';
 
 // ── Stable UUIDs ────────────────────────────────────────────────────────────
 // Hand-picked so seeds are deterministic across runs and across instances.
@@ -465,6 +472,85 @@ async function seedRetentionPolicies() {
   `);
 }
 
+async function seedPriorityScores() {
+  console.log('[seed] ml_scores_ue_cases_priority (cognition envelope)');
+  // Upsert model row
+  await db.execute(sql`
+    INSERT INTO ml_models (
+      entity_id, model_key, algorithm, version, status,
+      hyperparams_json, feature_spec_json, approved_by, approved_at,
+      created_at, updated_at
+    ) VALUES (
+      ${ENTITY_LOCAL_ID}::uuid,
+      ${PRIORITY_MODEL_KEY}::text,
+      ${PRIORITY_MODEL_ALGORITHM}::text,
+      ${PRIORITY_MODEL_VERSION},
+      'active'::ml_model_status,
+      ${'{}'}::jsonb,
+      ${JSON.stringify(PRIORITY_FEATURE_SPEC)}::jsonb,
+      ${'system:foundation-seed'}::text,
+      now(),
+      now(), now()
+    )
+    ON CONFLICT (entity_id, model_key, version) DO UPDATE
+      SET status = 'active',
+          feature_spec_json = EXCLUDED.feature_spec_json,
+          updated_at = now();
+  `);
+  const modelRows = (await db.execute(sql`
+    SELECT id::text AS id FROM ml_models
+     WHERE entity_id = ${ENTITY_LOCAL_ID}::uuid
+       AND model_key = ${PRIORITY_MODEL_KEY}::text
+       AND version = ${PRIORITY_MODEL_VERSION}
+     LIMIT 1;
+  `)) as unknown as Array<{ id: string }>;
+  const modelId = modelRows[0]?.id;
+  if (!modelId) {
+    console.warn('[seed]   no model row created — skipping scores');
+    return;
+  }
+
+  for (const c of demoCases) {
+    const caseUuid = grievanceUuid(c.id);
+    const computed = scoreCaseFeatures(c);
+    const occurredAt = new Date().toISOString();
+    const envelope = {
+      schemaVersion: 1,
+      provenance: {
+        modelKey: PRIORITY_MODEL_KEY,
+        modelVersion: PRIORITY_MODEL_VERSION,
+        algorithm: PRIORITY_MODEL_ALGORITHM,
+        computedAt: occurredAt,
+        source: 'seed-cupe4373-demo.seedPriorityScores',
+        orgId: ORG_ID,
+      },
+      features: computed.features,
+    };
+    await db.execute(sql`
+      INSERT INTO ml_scores_ue_cases_priority (
+        entity_id, case_id, occurred_at, score, predicted_priority,
+        features_json, model_id
+      ) VALUES (
+        ${ENTITY_LOCAL_ID}::uuid,
+        ${caseUuid}::uuid,
+        ${occurredAt}::timestamptz,
+        ${computed.score},
+        ${computed.predictedPriority}::text,
+        ${JSON.stringify(envelope)}::jsonb,
+        ${modelId}::uuid
+      )
+      ON CONFLICT (entity_id, case_id, model_id) DO UPDATE
+        SET score = EXCLUDED.score,
+            predicted_priority = EXCLUDED.predicted_priority,
+            features_json = EXCLUDED.features_json,
+            occurred_at = EXCLUDED.occurred_at;
+    `);
+    console.log(
+      `[seed]   ${c.id} → score=${computed.score.toFixed(3)} band=${computed.predictedPriority}`,
+    );
+  }
+}
+
 async function main() {
   console.log('[seed] CUPE 4373 foundation demo seed starting');
   console.log('[seed] DATABASE_URL host:', new URL(process.env.DATABASE_URL!).host);
@@ -476,6 +562,7 @@ async function main() {
     await seedGrievances();
     await seedRoutingCases();
     await seedRetentionPolicies();
+    await seedPriorityScores();
     console.log('[seed] OK');
   } catch (err) {
     const cause = (err as { cause?: unknown })?.cause;
