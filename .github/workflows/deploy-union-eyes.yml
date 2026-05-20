@@ -526,6 +526,12 @@ jobs:
               "NEXT_PUBLIC_UE_DEMO_PROFILE=${{ needs.plan.outputs.demo_profile }}"
               "UE_DEMO_ORG_ID=${{ needs.plan.outputs.demo_org_id }}"
               "NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ needs.plan.outputs.demo_org_slug }}"
+              # Demo personas log in from CI/manual probes with no prior
+              # session history; the risk scorer would otherwise classify
+              # first-seen IP + short UA as "medium" and force MFA enrollment
+              # that demo accounts cannot complete. Bypassing risk here keeps
+              # the demo personas reachable without weakening real auth.
+              "UE_E2E_RISK_BYPASS=true"
             )
           fi
 
@@ -635,6 +641,29 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Persona authz smoke (demo only, soft)
+        if: ${{ needs.plan.outputs.demo_profile != '' }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          FQDN=$(az containerapp show \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "properties.configuration.ingress.fqdn" \
+            -o tsv)
+          BASE="https://$FQDN"
+          echo "Persona smoke against $BASE"
+          # Soft until demo DB bootstrap is fully baked in (mfa_totp +
+          # org_auth_policies schemas + persona seed). Promote to hard once
+          # the bootstrap job is added to this workflow.
+          if node apps/union-eyes/scripts/smoke-cupe4373-personas.mjs --base "$BASE"; then
+            echo "✅ persona smoke passed"
+          else
+            echo "::warning::Persona smoke against $BASE failed — verify demo DB has mfa_totp/org_auth_policies tables and cupe4373 personas seeded (see /memories/repo/ue-demo-auth-bootstrap.md)."
+          fi
 
       - name: DNS record verification (post-deploy)
         if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
