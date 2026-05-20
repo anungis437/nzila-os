@@ -7,13 +7,13 @@
  * forwards/rejects requests) and to allow it to be imported and tested
  * independently of Next.js framework conventions.
  *
- * NEXT.JS ENTRYPOINT:
- * Next.js requires the middleware entrypoint to be named `middleware.ts` at
- * the application root and to export a function named `middleware` (or
- * `default`). That thin entrypoint lives in `middleware.ts` and simply
- * re-exports from this file:
- *
- *   export { proxy as middleware, config } from './proxy';
+  * NEXT.JS ENTRYPOINT:
+  * Next.js requires the middleware entrypoint to be named `middleware.ts` at
+  * the application root and to export a function named `middleware` (or
+  * `default`). That thin entrypoint lives in `middleware.ts` and simply
+  * re-exports from this file (added as T-001 — see commit f641b5487):
+  *
+  *   export { proxy as middleware, config } from './proxy';
  *
  * MIDDLEWARE STACK (in execution order):
  * ================================
