@@ -18,5 +18,23 @@ export {
   getDecisionsByCorrelationId,
   getDecisionsByWorkflowId,
   getDecisionsForOrg,
+  getDecisionsByCaseId,
+  getDecisionsByActor,
+  getDecisionsByPolicy,
+  getDecisionsByDateRange,
 } from './decision'
-export type { RecordDecisionInput, DecisionRecord } from './decision'
+export type { RecordDecisionInput, DecisionRecord, CanonicalDecision } from './decision'
+
+export {
+  registerWorkflowPolicy,
+  getPolicyForWorkflow,
+  listRegisteredPolicies,
+  evaluateWorkflowPolicy,
+  SUPPORTED_DOMAINS,
+} from './policy-registry'
+export type {
+  WorkflowPolicy,
+  PolicyDecision,
+  PolicyEvaluationContext,
+  PolicyDomain,
+} from './policy-registry'

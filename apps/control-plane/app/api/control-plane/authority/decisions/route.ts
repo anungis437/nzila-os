@@ -27,16 +27,23 @@ const logger = createLogger('control-plane:api:authority:decisions')
 const RecordDecisionBodySchema = z.object({
   type: DecisionEventTypeSchema,
   orgId: z.string().uuid(),
+  domain: z.string().min(1),
   actorId: z.string().min(1),
+  actorRole: z.string().min(1),
   action: z.string().min(1),
   resource: z.string().min(1),
   resourceId: z.string().optional(),
   outcome: z.enum(['allowed', 'denied', 'approved_required', 'executed', 'recorded']),
+  reasonCode: z.string().min(1),
   reason: z.string().optional(),
-  policyIds: z.array(z.string()).optional(),
+  policyId: z.string().min(1),
+  policyVersion: z.string().min(1),
   workflowId: z.string().optional(),
+  caseId: z.string().optional(),
   correlationId: z.string().uuid().optional(),
   requestId: z.string().uuid().optional(),
+  traceId: z.string().optional(),
+  evaluatedContext: z.record(z.unknown()).optional(),
   metadata: z.record(z.unknown()).optional(),
 })
 
@@ -53,19 +60,19 @@ export async function GET(request: NextRequest) {
   const workflowId = searchParams.get('workflowId')
 
   if (correlationId) {
-    const records = getDecisionsByCorrelationId(correlationId)
+    const records = await getDecisionsByCorrelationId(correlationId)
     return NextResponse.json({ ok: true, data: records, count: records.length })
   }
 
   if (workflowId) {
-    const records = getDecisionsByWorkflowId(workflowId)
+    const records = await getDecisionsByWorkflowId(workflowId)
     return NextResponse.json({ ok: true, data: records, count: records.length })
   }
 
   if (orgId) {
     const limitStr = searchParams.get('limit')
     const limit = limitStr ? Math.min(parseInt(limitStr, 10), 200) : 50
-    const records = getDecisionsForOrg(orgId, limit)
+    const records = await getDecisionsForOrg(orgId, limit)
     return NextResponse.json({ ok: true, data: records, count: records.length })
   }
 
