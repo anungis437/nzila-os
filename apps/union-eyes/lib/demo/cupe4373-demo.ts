@@ -123,7 +123,7 @@ export const demoCases: DemoCase[] = [
         notes:
           "Article 18.2 and Article 14 linked to the file. Similar March case added as related context.",
         attachments: ["Article extract.pdf"],
-        followUp: "Request schedule record from unit clerk.",
+        followUp: "Request schedule record from unit scheduler.",
       },
       {
         id: "tl-3",

@@ -18,6 +18,7 @@
 
 import 'server-only';
 import { and, desc, eq } from 'drizzle-orm';
+import { createLogger } from '@nzila/os-core/telemetry';
 
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/grievance-schema';
@@ -26,6 +27,8 @@ import {
   type DemoCase,
   type DemoTimelineEntry,
 } from '@/lib/demo/cupe4373-demo';
+
+const log = createLogger('cupe4373-cases-repo');
 
 const DEFAULT_FOUNDATION_ORG_ID = 'a4373000-0000-4000-8000-000000000001';
 const FOUNDATION_ORG_ID =
@@ -207,7 +210,7 @@ export async function getDemoCasesFromDb(): Promise<DemoCase[]> {
     if (rows.length === 0) return staticDemoCases;
     return rows.map(reconstructDemoCase);
   } catch (err) {
-    console.warn('[cupe4373-cases-repo] DB read failed, falling back to static:', err);
+    log.warn('DB read failed, falling back to static', { error: err });
     return staticDemoCases;
   }
 }
@@ -232,7 +235,7 @@ export async function getDemoCaseFromDb(id: string): Promise<DemoCase | null> {
     }
     return reconstructDemoCase(rows[0]);
   } catch (err) {
-    console.warn('[cupe4373-cases-repo] DB read failed for', id, err);
+    log.warn('DB read failed for case', { caseId: id, error: err });
     return staticDemoCases.find((c) => c.id === id) ?? null;
   }
 }

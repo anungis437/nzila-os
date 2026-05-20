@@ -15,9 +15,12 @@ import 'server-only';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { sql } from 'drizzle-orm';
+import { createLogger } from '@nzila/os-core/telemetry';
 
 import { db } from '@/db/db';
 import type { DemoCase } from '@/lib/demo/cupe4373-demo';
+
+const log = createLogger('cupe4373-retention');
 
 const FOUNDATION_ORG_ID =
   process.env.NZILA_FOUNDATION_ORG_ID ?? 'a4373000-0000-4000-8000-000000000001';
@@ -78,7 +81,7 @@ async function loadActiveCaseFilesPolicy(): Promise<PolicyRow | null> {
     `)) as unknown as PolicyRow[];
     return rows[0] ?? null;
   } catch (err) {
-    console.warn('[cupe4373-retention] policy lookup failed:', err);
+    log.warn('policy lookup failed', { error: err });
     return null;
   }
 }
@@ -169,7 +172,7 @@ export async function recordRetentionEnforcement(): Promise<{
        WHERE id = ${policy.id}::uuid;
     `);
   } catch (err) {
-    console.warn('[cupe4373-retention] enforcement update failed:', err);
+    log.warn('enforcement update failed', { error: err });
   }
 
   try {
@@ -200,7 +203,7 @@ export async function recordRetentionEnforcement(): Promise<{
       'utf-8',
     );
   } catch (err) {
-    console.warn('[cupe4373-retention] enforcement artifact emit failed:', err);
+    log.warn('enforcement artifact emit failed', { error: err });
   }
 
   return { enforcedAt, policyId: policy.id };

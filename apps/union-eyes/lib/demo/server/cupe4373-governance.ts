@@ -20,8 +20,11 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
 import { sql } from 'drizzle-orm';
+import { createLogger } from '@nzila/os-core/telemetry';
 
 import { db } from '@/db/db';
+
+const log = createLogger('cupe4373-governance');
 
 const DEFAULT_FOUNDATION_ORG_ID = 'a4373000-0000-4000-8000-000000000001';
 const FOUNDATION_ORG_ID =
@@ -121,7 +124,7 @@ async function findExistingByIdempotencyKey(
       recordedAt: hit.recorded_at,
     };
   } catch (err) {
-    console.warn('[cupe4373-governance] idempotency lookup failed:', err);
+    log.warn('idempotency lookup failed', { error: err });
     return null;
   }
 }
@@ -150,7 +153,7 @@ async function emitDoraEvent(
       'utf-8',
     );
   } catch (err) {
-    console.warn('[cupe4373-governance] DORA emit failed:', err);
+    log.warn('DORA emit failed', { error: err });
   }
 }
 
@@ -307,7 +310,7 @@ export async function logCaseDecision(
   try {
     proofPackPath = await emitProofPack(decisionId, pipelineRunId, input, recordedAt);
   } catch (err) {
-    console.warn('[cupe4373-governance] proof-pack emit failed:', err);
+    log.warn('proof-pack emit failed', { error: err });
   }
 
   // 4. Emit DORA-aligned action record (change lead time = receipt → completion).
@@ -383,7 +386,7 @@ export async function listDecisionsForCase(caseId: string): Promise<CaseDecision
       pipelineRunId: r.pipeline_run_id,
     }));
   } catch (err) {
-    console.warn('[cupe4373-governance] listDecisionsForCase failed:', err);
+    log.warn('listDecisionsForCase failed', { error: err });
     return [];
   }
 }

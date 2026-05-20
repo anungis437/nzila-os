@@ -8,9 +8,12 @@
 
 import 'server-only';
 import { sql } from 'drizzle-orm';
+import { createLogger } from '@nzila/os-core/telemetry';
 
 import { db } from '@/db/db';
 import type { DemoCase } from '@/lib/demo/cupe4373-demo';
+
+const log = createLogger('cupe4373-cognition');
 import {
   PRIORITY_FEATURE_SPEC,
   PRIORITY_MODEL_ALGORITHM,
@@ -78,7 +81,7 @@ export async function ensurePriorityModel(): Promise<string | null> {
     `)) as unknown as Array<{ id: string }>;
     return rows[0]?.id ?? null;
   } catch (err) {
-    console.warn('[cupe4373-cognition] ensurePriorityModel failed:', err);
+    log.warn('ensurePriorityModel failed', { error: err });
     return null;
   }
 }
@@ -127,7 +130,7 @@ export async function recordPriorityScore(
             occurred_at = EXCLUDED.occurred_at;
     `);
   } catch (err) {
-    console.warn('[cupe4373-cognition] recordPriorityScore failed:', err);
+    log.warn('recordPriorityScore failed', { error: err });
     return null;
   }
 
@@ -202,10 +205,7 @@ export async function getLatestPriorityScoreForCase(
           : (r.occurred_at as string),
     };
   } catch (err) {
-    console.warn(
-      '[cupe4373-cognition] getLatestPriorityScoreForCase failed:',
-      err,
-    );
+    log.warn('getLatestPriorityScoreForCase failed', { error: err });
     return null;
   }
 }
