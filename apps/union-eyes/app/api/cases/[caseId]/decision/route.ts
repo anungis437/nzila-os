@@ -15,6 +15,7 @@ import { z } from 'zod';
 
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { auth } from '@nzila/platform-auth/entra/server';
+import { createLogger } from '@nzila/os-core/telemetry';
 import {
   logCaseDecision,
   mapUrgencyToPriority,
@@ -22,6 +23,7 @@ import {
   type CaseDecisionStatus,
 } from '@/lib/demo/server/cupe4373-governance';
 
+const log = createLogger('api-cases-decision');
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -117,7 +119,7 @@ export async function POST(
     );
   } catch (err) {
     const cause = (err as { cause?: { code?: string; message?: string } } | undefined)?.cause;
-    console.error('[api/cases/decision] insert failed', {
+    log.error('insert failed', {
       caseId,
       message: (err as Error)?.message,
       causeCode: cause?.code,

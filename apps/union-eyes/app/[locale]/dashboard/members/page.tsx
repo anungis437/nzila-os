@@ -10,7 +10,9 @@ import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
 import { eq, isNull, and, asc } from 'drizzle-orm';
+import { createLogger } from '@nzila/os-core/telemetry';
 
+const log = createLogger('members-page');
 const CUPE4373_ORG_ID = '11111111-1111-4111-8111-111111111111';
 
 type PageProps = {
@@ -87,7 +89,7 @@ export default async function MembersPage({ params }: PageProps) {
         memberCategory:         r.memberCategory ?? null,
       }));
     } catch (err) {
-      console.error('[MembersPage] DB query failed:', err);
+      log.error('DB query failed', { error: err });
     }
     return <Cupe4373MembersConsole members={members} locale={locale} />;
   }
