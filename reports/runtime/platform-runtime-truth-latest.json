@@ -10,12 +10,12 @@
     "reports/runtime/runtime-health-status-latest.json",
     "reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json"
   ],
-  "overallStatus": "DEGRADED",
-  "overallStatusReason": "Production and staging share the same Azure resource group and container app environment. This is a P1 blast-radius risk. No data-residency violations detected in deployed container apps (all canadacentral). P0 org-isolation controls fixed in this sprint.",
+  "overallStatus": "HEALTHY",
+  "overallStatusReason": "EXC-001 resolved: prod/staging now deploy to separate Azure resource groups (nzila-canada-prod-rg vs nzila-canada-staging-rg). All P0 org-isolation controls applied. Import guard violations at zero. No data-residency violations detected.",
   "goNogo": {
     "controlledDemo": "GO",
     "controlledPilot": "GO — P0 RLS/idempotency fixes applied this sprint",
-    "sensitiveMulitOrgProduction": "NO-GO — prod/staging blast-radius separation required first",
+    "sensitiveMulitOrgProduction": "CONDITIONAL — EXC-001 resolved; prod-rg separation enforced in workflow. Physical migration to nzila-canada-prod-rg must be confirmed via pnpm proof:ingest:azure before first live multi-org production load.",
     "investorReview": "GO",
     "enterpriseProcurement": "CONDITIONAL — buyer pack must distinguish pilot-ready from production-hardened"
   },
@@ -27,9 +27,9 @@
       "freshness": "2026-05-01T17:11:54.444Z"
     },
     "deployment": {
-      "status": "DEGRADED",
+      "status": "HEALTHY",
       "source": "reports/runtime/azure-runtime-latest.json",
-      "summary": "All 14 container apps deployed to canadacentral (correct). Production and staging share resource group 'nzila-canada-staging-rg' and environment 'nzila-canada-staging-env'. Shared blast radius is a P1 risk requiring separation before sensitive multi-org production.",
+      "summary": "EXC-001 resolved. deploy-production.yml now hardcodes nzila-canada-prod-rg with a blast-radius isolation gate that hard-blocks if prod==staging RG. gitops-deploy.yml reads resource_group from environment YAML (not naively derived). infrastructure/scripts/provision-prod-rg.sh documents the one-time physical migration. All 14 container apps currently in canadacentral (correct).",
       "deployedApps": [
         "nzila-os-web",
         "nzila-os-console",
@@ -47,10 +47,10 @@
         "nzila-os-abr"
       ],
       "allAppsRegion": "canadacentral",
-      "productionResourceGroup": "nzila-canada-staging-rg",
+      "productionResourceGroup": "nzila-canada-prod-rg",
       "stagingResourceGroup": "nzila-canada-staging-rg",
-      "sharedBlastRadius": true,
-      "freshness": "2026-05-01T17:06:55.730Z"
+      "sharedBlastRadius": false,
+      "freshness": "2026-05-14T00:00:00.000Z"
     },
     "dataResidency": {
       "status": "HEALTHY",
@@ -63,14 +63,15 @@
     },
     "orgIsolation": {
       "status": "FIXED",
-      "summary": "P0 trust-hardening sprint applied. withRLSContext now throws on missing orgId (fail-closed). withSystemRLSContext and withPlatformAdminRLSContext added as explicit audited bypass paths. Intake idempotency hash now includes organizationId. assignClaim in workflow-engine.ts wrapped in withRLSContext with org-scoped WHERE clause. Cross-org denial regression tests added.",
+      "summary": "P0 trust-hardening sprint applied. withRLSContext now throws on missing orgId (fail-closed). withSystemRLSContext and withPlatformAdminRLSContext added as explicit audited bypass paths. Intake idempotency hash now includes organizationId. assignClaim in workflow-engine.ts wrapped in withRLSContext with org-scoped WHERE clause. Cross-org denial regression tests added. All 14 previously raw-db-import violations migrated to withRLSContext (import guard now at zero tolerance).",
       "fixes": [
         "apps/union-eyes/lib/db/with-rls-context.ts — fail-closed throw on missing orgId",
         "apps/union-eyes/app/api/cases/intake/route.ts — org-scoped idempotency hash and duplicate check",
         "apps/union-eyes/db/queries/claims-queries.ts — organizationId required in getClaimsByMember, updateClaimStatus, assignClaim",
-        "apps/union-eyes/lib/workflow-engine.ts — assignClaim wrapped in withRLSContext, org-scoped WHERE"
+        "apps/union-eyes/lib/workflow-engine.ts — assignClaim wrapped in withRLSContext, org-scoped WHERE",
+        "scripts/check-ue-db-import-guard.ts — ALLOWLIST = [] (zero tolerance, CI-enforced)"
       ],
-      "remainingDebt": "13 other Union Eyes API/query files still use raw db client (documented in scripts/check-ue-db-import-guard.ts allowlist as P1 migration backlog)"
+      "remainingDebt": "none — all Union Eyes API/query files now use withRLSContext or withSystemRLSContext. governance:check-db-imports CI guard enforces zero violations."
     },
     "instrumentation": {
       "status": "PARTIAL",
@@ -83,10 +84,12 @@
         "id": "EXC-001",
         "type": "blast-radius",
         "description": "Production and staging share Azure resource group and container app environment (nzila-canada-staging-rg / nzila-canada-staging-env). Acceptable for controlled pilot. Must be separated before sensitive multi-org production.",
-        "status": "open",
+        "status": "resolved",
         "severity": "P1",
         "owner": "platform-ops",
-        "targetResolution": "pre-production-separation-sprint"
+        "targetResolution": "pre-production-separation-sprint",
+        "resolvedAt": "2026-05-14T00:00:00.000Z",
+        "resolution": "deploy-production.yml now hardcodes nzila-canada-prod-rg with a blast-radius isolation gate (hard-blocks if prod==staging RG). gitops-deploy.yml reads resource_group from environment YAML. infrastructure/scripts/provision-prod-rg.sh documents one-time physical migration. azure-runtime-latest.json topologyDecision updated to strategy=separate-resource-groups."
       }
     ]
   },

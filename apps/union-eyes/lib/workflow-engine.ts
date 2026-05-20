@@ -14,8 +14,7 @@
  * Handles status transitions, validation, and deadline tracking
  */
 
-import { db } from "../db/db";
-import { withRLSContext } from "./db/with-rls-context";
+import { withRLSContext, withSystemRLSContext } from "./db/with-rls-context";
 import { claims, claimUpdates } from "../db/schema/claims-schema";
 import { organizationMembers } from "../db/schema/organization-members-schema";
 import { users } from "../db/schema/user-management-schema";
@@ -650,7 +649,7 @@ export async function assignClaim(
  */
 export async function getOverdueClaims(): Promise<unknown[]> {
   try {
-    const allClaims = await db.select().from(claims);
+    const allClaims = await withSystemRLSContext('background-job: overdue-claims-scan', async (tx) => tx.select().from(claims));
     
     const overdueClaims = allClaims.filter((claim) => {
       // Don&apos;t check closed claims
@@ -680,7 +679,7 @@ return [];
  */
 export async function getClaimsApproachingDeadline(): Promise<unknown[]> {
   try {
-    const allClaims = await db.select().from(claims);
+    const allClaims = await withSystemRLSContext('background-job: approaching-deadline-scan', async (tx) => tx.select().from(claims));
     
     const approachingDeadline = allClaims.filter((claim) => {
       if (claim.status === "closed") return false;

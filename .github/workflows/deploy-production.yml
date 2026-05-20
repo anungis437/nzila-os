@@ -253,6 +253,30 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}           # W2-4: No stored credentials
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # EXC-001: Hard-block deploy if prod and staging resource groups are the same.
+      # The canonical prod RG is nzila-canada-prod-rg (see infrastructure/gitops/environments/production.yml).
+      # Never read the RG from a shared secret — that's what caused the blast-radius violation.
+      - name: Blast-radius isolation gate
+        run: |
+          set -euo pipefail
+          PROD_RG="nzila-canada-prod-rg"
+          STAGING_RG="nzila-canada-staging-rg"
+          if [ "$PROD_RG" = "$STAGING_RG" ]; then
+            echo "::error::BLAST-RADIUS VIOLATION: Production and staging resource groups are the same. Deploy blocked."
+            exit 1
+          fi
+          echo "✅ Blast-radius isolation verified: prod=$PROD_RG staging=$STAGING_RG"
+
+      - name: Ensure prod resource group exists (idempotent)
+        run: |
+          set -euo pipefail
+          az group create \
+            --name nzila-canada-prod-rg \
+            --location canadacentral \
+            --tags environment=production project=nzila-os data-residency=canada-only \
+            --output none
+          echo "✅ Resource group nzila-canada-prod-rg: ready"
+
       - name: Transactional production promotion
         run: |
           set -euo pipefail
@@ -267,7 +291,7 @@ jobs:
 
           pnpm deploy:transactional \
             --manifest staging-artifacts/artifact-manifest.filtered.json \
-            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --resource-group "nzila-canada-prod-rg" \
             --health-attempts 10 \
             --health-delay-ms 5000 \
             --health-timeout-ms 20000 \

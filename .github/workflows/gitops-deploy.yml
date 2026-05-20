@@ -284,14 +284,19 @@ jobs:
           ENV="${{ needs.plan.outputs.environment }}"
           VERSION="${{ needs.plan.outputs.version }}"
           APPS="${{ needs.plan.outputs.apps }}"
-          RG="nzila-canada-${ENV}-rg"
+          CONFIG_PATH="infrastructure/gitops/environments/${ENV}.yml"
+          # Read canonical resource_group and container_apps.environment from the gitops YAML.
+          # Never derive these from the env name — naming conventions vary (e.g. rg-nzila-dev vs nzila-canada-prod-rg).
+          RG=$(python3 -c "import yaml; d=yaml.safe_load(open('$CONFIG_PATH')); print(d['resource_group'])")
+          CA_ENV=$(python3 -c "import yaml; d=yaml.safe_load(open('$CONFIG_PATH')); print(d['container_apps']['environment'])")
           ACR="${{ env.ACR_NAME }}.azurecr.io"
 
           echo "Deploying to $ENV with version $VERSION"
+          echo "Resource group: $RG | Container App Env: $CA_ENV"
 
           # Resolve the Container Apps Environment default domain
           DOMAIN=$(az containerapp env show \
-            --name "nzila-canada-${ENV}-env" \
+            --name "$CA_ENV" \
             --resource-group "$RG" \
             --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "")
           if [ -n "$DOMAIN" ]; then

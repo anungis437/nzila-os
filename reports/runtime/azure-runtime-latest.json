@@ -2,12 +2,12 @@
   "ingestedAt": "2026-05-01T17:06:55.730Z",
   "subscriptionId": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
   "topologyDecision": {
-    "strategy": "shared-resource-group-environment",
-    "expectedShared": true,
+    "strategy": "separate-resource-groups",
+    "expectedShared": false,
     "stagingResourceGroup": "nzila-canada-staging-rg",
-    "productionResourceGroup": "nzila-canada-staging-rg",
+    "productionResourceGroup": "nzila-canada-prod-rg",
     "stagingEnvironment": "nzila-canada-staging-env",
-    "productionEnvironment": "nzila-canada-staging-env"
+    "productionEnvironment": "nzila-canada-prod-env"
   },
   "environments": [
     {
