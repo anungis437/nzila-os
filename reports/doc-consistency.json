@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-19T02:06:15.117Z",
+  "generatedAt": "2026-05-19T20:04:42.795Z",
   "filesScanned": 1667,
-  "totalFindings": 2450,
+  "totalFindings": 2451,
   "findingsByRule": {
     "stale-reference": 1034,
     "stale-package-ref": 53,
-    "naming-inconsistency": 1248,
+    "naming-inconsistency": 1249,
     "stale-date": 7,
     "missing-required-doc": 3,
     "missing-package-readme": 105
@@ -13,7 +13,7 @@
   "findingsBySeverity": {
     "error": 0,
     "warning": 1195,
-    "info": 1255
+    "info": 1256
   },
   "findings": [
     {
@@ -4556,14 +4556,14 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/categories/products-and-market/union-eyes/release/release-governance-standard.md",
-      "line": 52,
+      "line": 55,
       "message": "Possible broken link: [`apps/union-eyes/lib/runtime/environment.ts`](../../../apps/union-eyes/lib/runtime/environment.ts)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/categories/products-and-market/union-eyes/release/release-governance-standard.md",
-      "line": 91,
+      "line": 94,
       "message": "Possible broken link: [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../apps/union-eyes/lib/runtime/production-guard.ts)"
     },
     {
@@ -13544,14 +13544,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md",
-      "line": 21,
-      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md",
-      "line": 25,
+      "line": 12,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -13565,21 +13558,35 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md",
-      "line": 27,
+      "line": 30,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md",
-      "line": 28,
+      "line": 31,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md",
-      "line": 192,
+      "line": 32,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md",
+      "line": 33,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md",
+      "line": 197,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16366,49 +16373,49 @@
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"February 17, 2026\" is 90 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",

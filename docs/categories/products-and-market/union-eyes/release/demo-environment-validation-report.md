@@ -9,6 +9,11 @@
 **Topology:** [Transitional Controlled Shared-Secret Topology (TSOSA)](./transitional-shared-secret-topology.md)
 **Last commit at provisioning:** `5429a11fe` (`feat/trustcore-trust-ops-v1`)
 
+> Current demo profile: the Azure Container App `nzila-os-union-eyes-demo`
+> now carries the dedicated `cupe4373` demo profile through
+> `UE_DEPLOYMENT_TYPE=cupe4373-demo`, `UE_FEATURE_PROFILE=cupe4373`, and
+> `NEXT_PUBLIC_UE_DEMO_PROFILE=cupe4373`.
+
 ---
 
 ## 1. Provisioned Resources
