@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
-import { getProfileByUserId } from '@/lib/db/queries/profiles-queries';
+import { getProfileByUserId } from '@/db/queries/profiles-queries';
 
 /**
  * GET /api/payment/status
