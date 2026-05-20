@@ -422,6 +422,49 @@ async function seedRoutingCases() {
   }
 }
 
+async function seedRetentionPolicies() {
+  // One canonical retention policy per data class covered by the Cases
+  // vertical. The id is deterministic so re-runs are idempotent.
+  console.log('[seed] retention_policies (case files)');
+  const policyId = 'a4373002-0000-4000-8000-000000000001';
+  await db.execute(sql`
+    INSERT INTO retention_policies (
+      id, name, description, organization_id,
+      data_type, data_category, retention_period_years, retention_trigger,
+      action_on_expiry, can_be_held, minimum_retention,
+      legal_basis, regulatory_reference,
+      status, effective_date,
+      created_at, updated_at,
+      created_by, metadata
+    ) VALUES (
+      ${policyId}::uuid,
+      ${'Case files \u2014 CUPE 4373'}::varchar,
+      ${'Retain grievance/case records for 7 years from closure; archive on expiry.'}::text,
+      ${ORG_ID}::uuid,
+      ${'case_files'}::varchar,
+      ${'legal'}::varchar,
+      7,
+      ${'from_closure'}::varchar,
+      ${'archive'}::varchar,
+      true,
+      2,
+      ${'Ontario Labour Relations Act + CUPE national records policy'}::text,
+      ${'OLRA s.96; CUPE NL-RP-2019'}::text,
+      ${'active'}::varchar,
+      ${'2024-01-01'}::date,
+      now(), now(),
+      ${'system:foundation-seed'}::varchar,
+      ${'{"foundationProfile":"cupe4373-healthcare","seededVia":"seed-cupe4373-demo"}'}::jsonb
+    )
+    ON CONFLICT (id) DO UPDATE
+      SET description = EXCLUDED.description,
+          retention_period_years = EXCLUDED.retention_period_years,
+          retention_trigger = EXCLUDED.retention_trigger,
+          action_on_expiry = EXCLUDED.action_on_expiry,
+          updated_at = now();
+  `);
+}
+
 async function main() {
   console.log('[seed] CUPE 4373 foundation demo seed starting');
   console.log('[seed] DATABASE_URL host:', new URL(process.env.DATABASE_URL!).host);
@@ -432,6 +475,7 @@ async function main() {
     await seedMembers();
     await seedGrievances();
     await seedRoutingCases();
+    await seedRetentionPolicies();
     console.log('[seed] OK');
   } catch (err) {
     const cause = (err as { cause?: unknown })?.cause;

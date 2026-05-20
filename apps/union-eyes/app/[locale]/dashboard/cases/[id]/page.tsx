@@ -24,6 +24,7 @@ import { Cupe4373CaseLifecycle } from "@/components/demo/cupe4373-case-lifecycle
 import { decisionsOfRecord, inboxItems } from "@/lib/demo/cupe4373-demo";
 import { getDemoCaseFromDb } from "@/lib/demo/server/cupe4373-cases-repo";
 import { listDecisionsForCase } from "@/lib/demo/server/cupe4373-governance";
+import { getRetentionStatusForCase } from "@/lib/demo/server/cupe4373-retention";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
 
@@ -78,6 +79,7 @@ export default async function CaseDetailPage({ params }: PageProps) {
     d.precedentFor.includes(demoCase.id),
   );
   const liveDecisions = await listDecisionsForCase(demoCase.id);
+  const retention = await getRetentionStatusForCase(demoCase);
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
@@ -431,6 +433,57 @@ export default async function CaseDetailPage({ params }: PageProps) {
               )}
             </CardContent>
           </Card>
+
+          {retention && (
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ShieldCheck className="h-4 w-4 text-indigo-600" />
+                  Retention policy
+                  <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-[10px] uppercase tracking-wider text-indigo-700">
+                    {retention.policy.actionOnExpiry}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div>
+                  <p className="font-medium text-slate-900">{retention.policy.name}</p>
+                  <p className="text-xs text-slate-600">
+                    {retention.policy.retentionPeriodYears} years ·{" "}
+                    {retention.policy.retentionTrigger.replace(/_/g, " ")}
+                  </p>
+                </div>
+                {retention.eligibleAt ? (
+                  <div className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-700">
+                    Eligible for {retention.policy.actionOnExpiry}:{" "}
+                    <span className="font-mono">{retention.eligibleAt.slice(0, 10)}</span>
+                    {typeof retention.daysUntilEligible === "number" && (
+                      <span className="ml-2 text-slate-500">
+                        ({retention.daysUntilEligible >= 0
+                          ? `in ${retention.daysUntilEligible} days`
+                          : `${Math.abs(retention.daysUntilEligible)} days overdue`})
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                    Retention clock starts at case closure ({retention.policy.retentionTrigger.replace(/_/g, " ")}).
+                  </div>
+                )}
+                <p className="text-[11px] text-slate-500">
+                  Last enforced:{" "}
+                  {retention.lastEnforcedAt
+                    ? new Date(retention.lastEnforcedAt).toLocaleString("en-CA")
+                    : "never"}
+                </p>
+                {retention.policy.regulatoryReference && (
+                  <p className="text-[11px] text-slate-500">
+                    Reg: {retention.policy.regulatoryReference}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </aside>
       </div>
     </div>

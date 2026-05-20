@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FileDown, Gavel, NotebookPen } from "lucide-react";
+import { FileDown, Gavel, NotebookPen, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -101,6 +101,36 @@ export function Cupe4373CaseActions({ demoCase }: { demoCase: DemoCase }) {
     pipelineRunId: string;
   } | null>(null);
   const [submitting, startSubmit] = useTransition();
+  const [proofPackBusy, startProofPack] = useTransition();
+  const [proofPackError, setProofPackError] = useState<string | null>(null);
+
+  const downloadProofPack = () => {
+    setProofPackError(null);
+    startProofPack(async () => {
+      try {
+        const res = await fetch(
+          `/api/cases/${encodeURIComponent(demoCase.id)}/proof-pack`,
+          { method: "GET" },
+        );
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          setProofPackError(`Download failed: HTTP ${res.status}${text ? ` — ${text.slice(0, 200)}` : ""}`);
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${demoCase.id}-proof-pack.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        setProofPackError((err as Error).message ?? "Network error");
+      }
+    });
+  };
 
   const submitNote = () => {
     const text = draft.trim();
@@ -181,6 +211,10 @@ export function Cupe4373CaseActions({ demoCase }: { demoCase: DemoCase }) {
           <Gavel className="mr-2 h-4 w-4" />
           Log decision
         </Button>
+        <Button variant="outline" onClick={downloadProofPack} disabled={proofPackBusy}>
+          <Package className="mr-2 h-4 w-4" />
+          {proofPackBusy ? "Packaging…" : "Download evidence"}
+        </Button>
         <Button
           onClick={() =>
             download(`${demoCase.id}-meeting-package.txt`, buildMeetingPackage(demoCase, notes))
@@ -190,6 +224,11 @@ export function Cupe4373CaseActions({ demoCase }: { demoCase: DemoCase }) {
           Prepare meeting package
         </Button>
       </div>
+      {proofPackError && (
+        <div className="mt-2 rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-800">
+          {proofPackError}
+        </div>
+      )}
 
       <Sheet open={noteOpen} onOpenChange={setNoteOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md">

@@ -106,8 +106,10 @@ export async function POST(
         pipelineRunId: result.pipelineRunId,
         recordedAt: result.recordedAt,
         proofPackPath: result.proofPackPath || null,
+        idempotencyKey: result.idempotencyKey,
+        replayed: result.replayed,
       },
-      { status: 201 },
+      { status: result.replayed ? 200 : 201 },
     );
   } catch (err) {
     const cause = (err as { cause?: { code?: string; message?: string } } | undefined)?.cause;

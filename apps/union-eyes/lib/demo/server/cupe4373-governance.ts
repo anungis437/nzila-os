@@ -18,7 +18,7 @@
 import 'server-only';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 
 import { db } from '@/db/db';
@@ -60,6 +60,8 @@ export type LoggedCaseDecision = {
   pipelineRunId: string;
   proofPackPath: string;
   recordedAt: string;
+  idempotencyKey: string;
+  replayed: boolean;
 };
 
 function mapUrgencyToPriority(urgency?: string): CaseDecisionPriority {
@@ -76,6 +78,81 @@ function mapUrgencyToPriority(urgency?: string): CaseDecisionPriority {
 }
 
 export { mapUrgencyToPriority };
+
+function computeIdempotencyKey(orgId: string, input: LogCaseDecisionInput): string {
+  const material = [
+    orgId,
+    input.caseId,
+    input.title.trim(),
+    input.rationale.trim(),
+    input.priority ?? '',
+    input.status ?? '',
+    input.owner ?? '',
+    input.dueDate ?? '',
+  ].join('\u0000');
+  return createHash('sha256').update(material).digest('hex');
+}
+
+async function findExistingByIdempotencyKey(
+  orgId: string,
+  key: string,
+): Promise<{ decisionId: string; pipelineRunId: string; recordedAt: string } | null> {
+  try {
+    const rows = (await db.execute(sql`
+      SELECT id AS pipeline_run_id,
+             metadata->>'decisionId' AS decision_id,
+             started_at::text         AS recorded_at
+      FROM decision_pipeline_runs
+      WHERE pipeline_name = ${PIPELINE_NAME}
+        AND organization_id = ${orgId}
+        AND metadata->>'idempotencyKey' = ${key}
+      ORDER BY started_at DESC
+      LIMIT 1;
+    `)) as unknown as Array<{
+      pipeline_run_id: string;
+      decision_id: string | null;
+      recorded_at: string;
+    }>;
+    const hit = rows[0];
+    if (!hit?.decision_id) return null;
+    return {
+      decisionId: hit.decision_id,
+      pipelineRunId: hit.pipeline_run_id,
+      recordedAt: hit.recorded_at,
+    };
+  } catch (err) {
+    console.warn('[cupe4373-governance] idempotency lookup failed:', err);
+    return null;
+  }
+}
+
+async function emitDoraEvent(
+  event: 'decision.logged' | 'decision.replayed',
+  payload: Record<string, unknown>,
+): Promise<void> {
+  // DORA-aligned action record. Persisted to disk so the existing
+  // collect-dora-metrics tooling (or any external aggregator) can ingest
+  // it. Failure is non-fatal — the decision is already durable.
+  try {
+    const dir = resolve(
+      process.cwd(),
+      'artifacts',
+      'runtime',
+      `${FOUNDATION_PROFILE}-demo`,
+      'dora',
+    );
+    await mkdir(dir, { recursive: true });
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const file = resolve(dir, `${stamp}-${event.replace('.', '_')}.json`);
+    await writeFile(
+      file,
+      JSON.stringify({ schemaVersion: 1, event, emittedAt: new Date().toISOString(), ...payload }, null, 2),
+      'utf-8',
+    );
+  } catch (err) {
+    console.warn('[cupe4373-governance] DORA emit failed:', err);
+  }
+}
 
 async function emitProofPack(
   decisionId: string,
@@ -134,6 +211,41 @@ async function emitProofPack(
 export async function logCaseDecision(
   input: LogCaseDecisionInput,
 ): Promise<LoggedCaseDecision> {
+  const receivedAt = new Date();
+  const orgId = FOUNDATION_ORG_ID;
+  const idempotencyKey = computeIdempotencyKey(orgId, input);
+
+  // Idempotency replay path: if we've seen this exact (org, case, title,
+  // rationale, priority, status, owner, dueDate) tuple, return the
+  // existing decision without double-writing.
+  const existing = await findExistingByIdempotencyKey(orgId, idempotencyKey);
+  if (existing) {
+    await emitDoraEvent('decision.replayed', {
+      idempotencyKey,
+      orgId,
+      caseId: input.caseId,
+      decisionId: existing.decisionId,
+      pipelineRunId: existing.pipelineRunId,
+      changeLeadTimeMs: 0,
+      actor: input.actor ?? null,
+    });
+    return {
+      decisionId: existing.decisionId,
+      pipelineRunId: existing.pipelineRunId,
+      proofPackPath: resolve(
+        process.cwd(),
+        'artifacts',
+        'runtime',
+        `${FOUNDATION_PROFILE}-demo`,
+        'governance',
+        `${existing.decisionId}.json`,
+      ),
+      recordedAt: existing.recordedAt,
+      idempotencyKey,
+      replayed: true,
+    };
+  }
+
   const decisionId = randomUUID();
   const pipelineRunId = `run-${decisionId}`;
   const recordedAt = new Date().toISOString();
@@ -162,6 +274,8 @@ export async function logCaseDecision(
         caseTitle: input.caseTitle,
         actor: input.actor ?? null,
         profile: FOUNDATION_PROFILE,
+        idempotencyKey,
+        decisionId,
       })}::jsonb
     );
   `);
@@ -196,7 +310,21 @@ export async function logCaseDecision(
     console.warn('[cupe4373-governance] proof-pack emit failed:', err);
   }
 
-  return { decisionId, pipelineRunId, proofPackPath, recordedAt };
+  // 4. Emit DORA-aligned action record (change lead time = receipt → completion).
+  const changeLeadTimeMs = Date.now() - receivedAt.getTime();
+  await emitDoraEvent('decision.logged', {
+    idempotencyKey,
+    orgId,
+    caseId: input.caseId,
+    decisionId,
+    pipelineRunId,
+    changeLeadTimeMs,
+    priority,
+    status,
+    actor: input.actor ?? null,
+  });
+
+  return { decisionId, pipelineRunId, proofPackPath, recordedAt, idempotencyKey, replayed: false };
 }
 
 export type CaseDecisionRecord = {
