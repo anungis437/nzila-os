@@ -40,6 +40,7 @@ import {
   PRIORITY_MODEL_VERSION,
   scoreCaseFeatures,
 } from '../lib/demo/cupe4373-cognition-core';
+import { hashPassword } from '@nzila/platform-auth/password';
 
 // ── Stable UUIDs ────────────────────────────────────────────────────────────
 // Hand-picked so seeds are deterministic across runs and across instances.
@@ -551,6 +552,92 @@ async function seedPriorityScores() {
   }
 }
 
+// =============================================================================
+// AUTH PERSONAS — real argon2id-hashed login for member/steward/officer
+// =============================================================================
+// Demo password used by all 3 personas. CLEARLY surfaced in the persona picker.
+const DEMO_PERSONA_PASSWORD = 'Demo!2026-Foundation';
+
+interface PersonaSpec {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'member' | 'steward' | 'officer';
+}
+
+const PERSONAS: PersonaSpec[] = [
+  { userId: MEMBER_USER_ID,  email: 'member@cupe4373.demo',  firstName: 'Maya',    lastName: 'Bertrand', role: 'member'  },
+  { userId: STEWARD_USER_ID, email: 'steward@cupe4373.demo', firstName: 'Denise',  lastName: 'Laurent',  role: 'steward' },
+  { userId: OFFICER_USER_ID, email: 'officer@cupe4373.demo', firstName: 'Aubert',  lastName: 'N.',       role: 'officer' },
+];
+
+async function seedAuthPersonas() {
+  console.log('[seed] auth personas (member/steward/officer)');
+  // Hash once — Argon2id is deterministic only with same salt, so each call
+  // produces a new hash. That's fine: we always upsert.
+  const passwordHash = await hashPassword(DEMO_PERSONA_PASSWORD);
+
+  for (const p of PERSONAS) {
+    // 1. user_management.users
+    await db.execute(sql`
+      INSERT INTO user_management.users (
+        user_id, email, first_name, last_name, password_hash,
+        is_active, account_source, lifecycle_state,
+        failed_login_attempts,
+        created_at, updated_at
+      )
+      VALUES (
+        ${p.userId}::text,
+        ${p.email}::text,
+        ${p.firstName}::text,
+        ${p.lastName}::text,
+        ${passwordHash}::text,
+        true,
+        'local'::text,
+        'active'::text,
+        0,
+        now(), now()
+      )
+      ON CONFLICT (user_id) DO UPDATE
+        SET email = EXCLUDED.email,
+            first_name = EXCLUDED.first_name,
+            last_name = EXCLUDED.last_name,
+            password_hash = EXCLUDED.password_hash,
+            is_active = true,
+            account_source = 'local',
+            lifecycle_state = 'active',
+            failed_login_attempts = 0,
+            account_locked_until = NULL,
+            updated_at = now();
+    `);
+
+    // 2. user_management.organization_users — role binding
+    await db.execute(sql`
+      INSERT INTO user_management.organization_users (
+        organization_id, user_id, role, is_primary, is_active,
+        joined_at, created_at, updated_at
+      )
+      VALUES (
+        ${ORG_ID}::uuid,
+        ${p.userId}::text,
+        ${p.role}::text,
+        true,
+        true,
+        now(), now(), now()
+      )
+      ON CONFLICT (organization_id, user_id) DO UPDATE
+        SET role = EXCLUDED.role,
+            is_active = true,
+            is_primary = true,
+            updated_at = now();
+    `);
+
+    console.log(`[seed]   ${p.role.padEnd(8)} → ${p.email}  (id=${p.userId})`);
+  }
+  console.log(`[seed]   shared password: ${DEMO_PERSONA_PASSWORD}`);
+}
+
 async function main() {
   console.log('[seed] CUPE 4373 foundation demo seed starting');
   console.log('[seed] DATABASE_URL host:', new URL(process.env.DATABASE_URL!).host);
@@ -559,6 +646,7 @@ async function main() {
     await seedOrgsExecutiveLayer();
     await seedOrganization();
     await seedMembers();
+    await seedAuthPersonas();
     await seedGrievances();
     await seedRoutingCases();
     await seedRetentionPolicies();

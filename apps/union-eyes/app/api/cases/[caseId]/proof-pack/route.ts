@@ -23,7 +23,7 @@ import archiver from 'archiver';
 
 import { getDemoCaseFromDb } from '@/lib/demo/server/cupe4373-cases-repo';
 import { listDecisionsForCase } from '@/lib/demo/server/cupe4373-governance';
-import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
+import { auth } from '@nzila/platform-auth/entra/server';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -85,14 +85,11 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ caseId: string }> },
 ) {
-  if (!isCupe4373DemoRuntime()) {
+  const { userId } = await auth();
+  if (!userId) {
     return NextResponse.json(
-      {
-        error: 'DEMO_ONLY',
-        message:
-          'Proof-pack download is currently demo-only; real-runtime wiring is tracked under Gap 7.',
-      },
-      { status: 403 },
+      { error: 'UNAUTHENTICATED', message: 'Sign-in required.' },
+      { status: 401 },
     );
   }
 

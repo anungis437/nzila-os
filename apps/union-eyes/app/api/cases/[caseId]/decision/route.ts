@@ -3,18 +3,18 @@
  *
  * Persist a case-level decision through the executive decision pipeline
  * (executive_decisions + decision_pipeline_runs) and emit a proof-pack
- * artifact. This is the Gap 3 governance wire-up for the foundation demo.
+ * artifact.
  *
- * In demo runtime the endpoint accepts unauthenticated POSTs (the demo
- * surface itself is gated). In non-demo runtimes it requires an
- * authenticated user with `record_decision` capability — that wiring lives
- * with Gap 7 (real auth) and is intentionally deferred here.
+ * Authorization: requires steward role or higher (the role resolution chain
+ * is the canonical one used by the dashboard layout — see
+ * `lib/api-auth-guard.ts:hasMinRole`).
  */
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
+import { hasMinRole } from '@/lib/api-auth-guard';
+import { auth } from '@nzila/platform-auth/entra/server';
 import {
   logCaseDecision,
   mapUrgencyToPriority,
@@ -52,13 +52,17 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ caseId: string }> },
 ) {
-  if (!isCupe4373DemoRuntime()) {
+  const { userId } = await auth();
+  if (!userId) {
     return NextResponse.json(
-      {
-        error: 'DEMO_ONLY',
-        message:
-          'Decision logging via this endpoint is currently demo-only; real-runtime wiring is tracked under Gap 7.',
-      },
+      { error: 'UNAUTHENTICATED', message: 'Sign-in required.' },
+      { status: 401 },
+    );
+  }
+  const allowed = await hasMinRole('steward');
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'FORBIDDEN', message: 'Steward role or higher required to record decisions.' },
       { status: 403 },
     );
   }

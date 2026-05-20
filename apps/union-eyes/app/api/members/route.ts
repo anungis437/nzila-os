@@ -39,7 +39,6 @@ export const GET = withApi(
     }
 
     // Validate that the caller belongs to the requested org unless they are a platform admin.
-    // This prevents authenticated users from enumerating members of other organisations.
     if (requestedOrgId && requestedOrgId !== organizationId) {
       const callerRole = normalizeRole(user?.role ?? 'member');
       const callerLevel = ROLE_HIERARCHY[callerRole as keyof typeof ROLE_HIERARCHY] ?? 0;
