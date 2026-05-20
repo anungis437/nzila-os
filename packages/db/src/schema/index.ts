@@ -34,6 +34,7 @@ export * from './decision-aggregates'
 export * from './decision-pipeline-checkpoints'
 export * from './decision-pipeline-runs'
 export * from './decision-events'
+export * from './org-entitlements'
 export * from './pipeline-alerts'
 export * from './healthcare-surveys'
 

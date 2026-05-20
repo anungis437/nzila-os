@@ -108,6 +108,10 @@ export const ORG_SCOPED_TABLES = [
   // Control Plane authority decision ledger (immutable, hash-chained).
   'decisionEvents',
 
+  // ── org-entitlements.ts ─────────────────────────────────
+  // Per-org feature entitlement ledger (Control Plane authority).
+  'orgEntitlements',
+
   // ── ml.ts ───────────────────────────────────────────────
   'mlDatasets',
   'mlModels',

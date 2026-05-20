@@ -95,7 +95,11 @@ function isOpenEntitlementMode(): boolean {
  *   - `stub`     — conservative default allow-list only (current behaviour);
  *                  acknowledges that the real source is not yet wired.
  *   - `open`     — every feature granted (requires `*_ALLOW_OPEN_*=1`).
- *   - `db`       — read from `org_entitlements` (not yet implemented; throws).
+ *   - `db`       — read live entitlements from the `org_entitlements`
+ *                  table via `server/adapters/entitlements-db.ts`. Rows
+ *                  with NULL `expires_at` (or an expiry in the future)
+ *                  grant the feature; missing rows deny with
+ *                  `FEATURE_NOT_ENTITLED`.
  * In non-production, an unset value defaults to `stub` so dev/test/demo keep
  * working. In production, an unset value resolves to `not_configured` and
  * every entitlement query is denied with a stable reason code.
@@ -178,24 +182,128 @@ export async function resolveEntitlements(
     }
   }
   if (declaredSource === 'db') {
-    // Explicit DB source requested but not yet implemented. Fail closed
-    // instead of silently falling through to the stub allow-list.
-    logger.error('CONTROL_PLANE_ENTITLEMENT_SOURCE=db but no DB adapter is wired', {
-      orgId: query.orgId,
-      feature: query.feature,
-      decisionId,
-    })
-    return {
-      orgId: query.orgId,
-      feature: query.feature,
-      granted: false,
-      tier: null,
-      limit: null,
-      expiresAt: null,
-      source: 'denied',
-      reasonCode: 'ENTITLEMENT_DB_ADAPTER_NOT_WIRED',
-      resolvedAt,
-      decisionId,
+    try {
+      const { resolveEntitlementFromDb } = await import(
+        '@/server/adapters/entitlements-db'
+      )
+      const { orgs } = await import('@nzila/db/schema')
+      const { eq } = await import('drizzle-orm')
+
+      const org = await platformDb
+        .select({ id: orgs.id })
+        .from(orgs)
+        .where(eq(orgs.id, query.orgId))
+        .limit(1)
+        .then((rows) => rows[0] ?? null)
+
+      if (!org) {
+        await recordAuditEvent({
+          orgId: query.orgId,
+          actorClerkUserId: query.actorId ?? 'system',
+          action: AUDIT_ACTIONS.POLICY_DENIED,
+          targetType: 'entitlement',
+          targetId: query.feature,
+          afterJson: {
+            feature: query.feature,
+            granted: false,
+            decisionId,
+            source: 'denied',
+            reasonCode: 'ORG_NOT_FOUND',
+          },
+        })
+        return {
+          orgId: query.orgId,
+          feature: query.feature,
+          granted: false,
+          tier: null,
+          limit: null,
+          expiresAt: null,
+          source: 'denied',
+          reasonCode: 'ORG_NOT_FOUND',
+          resolvedAt,
+          decisionId,
+        }
+      }
+
+      const row = await resolveEntitlementFromDb(
+        platformDb as unknown as Parameters<typeof resolveEntitlementFromDb>[0],
+        query.orgId,
+        query.feature,
+      )
+
+      if (!row) {
+        await recordAuditEvent({
+          orgId: query.orgId,
+          actorClerkUserId: query.actorId ?? 'system',
+          action: AUDIT_ACTIONS.POLICY_DENIED,
+          targetType: 'entitlement',
+          targetId: query.feature,
+          afterJson: {
+            feature: query.feature,
+            granted: false,
+            decisionId,
+            source: 'denied',
+            reasonCode: 'FEATURE_NOT_ENTITLED',
+          },
+        })
+        return {
+          orgId: query.orgId,
+          feature: query.feature,
+          granted: false,
+          tier: null,
+          limit: null,
+          expiresAt: null,
+          source: 'denied',
+          reasonCode: 'FEATURE_NOT_ENTITLED',
+          resolvedAt,
+          decisionId,
+        }
+      }
+
+      await recordAuditEvent({
+        orgId: query.orgId,
+        actorClerkUserId: query.actorId ?? 'system',
+        action: AUDIT_ACTIONS.POLICY_ALLOWED,
+        targetType: 'entitlement',
+        targetId: query.feature,
+        afterJson: {
+          feature: query.feature,
+          granted: true,
+          decisionId,
+          source: 'subscription',
+          tier: row.tier,
+        },
+      })
+      return {
+        orgId: query.orgId,
+        feature: query.feature,
+        granted: true,
+        tier: row.tier,
+        limit: row.limit,
+        expiresAt: row.expiresAt,
+        source: 'subscription',
+        resolvedAt,
+        decisionId,
+      }
+    } catch (err) {
+      logger.error('Entitlement DB resolution failed', {
+        orgId: query.orgId,
+        feature: query.feature,
+        decisionId,
+        error: err,
+      })
+      return {
+        orgId: query.orgId,
+        feature: query.feature,
+        granted: false,
+        tier: null,
+        limit: null,
+        expiresAt: null,
+        source: 'denied',
+        reasonCode: 'ENTITLEMENT_RESOLUTION_ERROR',
+        resolvedAt,
+        decisionId,
+      }
     }
   }
 
