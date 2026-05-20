@@ -535,6 +535,34 @@ jobs:
             --set-env-vars "${FRONTEND_ENV_VARS[@]}" \
             --container-name "$TARGET_APP" \
             --image ${{ env.IMAGE }}:${{ github.sha }}
+
+          # Ensure backend secretref aliases exist: some environments seed
+          # secrets with an environment suffix (e.g. auth-webhook-secret-demo)
+          # while the backend container references bare names. Mirror the
+          # suffixed value into the bare name so secretref lookup succeeds.
+          # Idempotent: if bare alias already exists this is a no-op overwrite.
+          ENV_SUFFIX="${{ needs.plan.outputs.environment }}"
+          EXISTING_SECRETS=$(az containerapp secret list \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "[].name" -o tsv)
+          for BARE in auth-webhook-secret; do
+            SUFFIXED="${BARE}-${ENV_SUFFIX}"
+            if echo "$EXISTING_SECRETS" | grep -qx "$SUFFIXED" \
+               && ! echo "$EXISTING_SECRETS" | grep -qx "$BARE"; then
+              echo "::notice::Mirroring secret $SUFFIXED -> $BARE for backend secretref compatibility"
+              VAL=$(az containerapp secret show \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --secret-name "$SUFFIXED" \
+                --query value -o tsv)
+              az containerapp secret set \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --secrets "${BARE}=${VAL}" >/dev/null
+            fi
+          done
+
           # Backend runs migrations automatically on startup (Dockerfile CMD)
           az containerapp update \
             --name "$TARGET_APP" \
