@@ -1,0 +1,123 @@
+# UE Demo — CUPE Local 4373
+# Nzila OS — GitOps profile
+#
+# Purpose: live demonstration environment for healthcare-sector CUPE chief
+# steward audiences. This profile intentionally curates the Union Eyes surface
+# around operational continuity, case chronology, agreements, calendar, and
+# reports.
+#
+# Azure attachment:
+# - Container App: nzila-os-union-eyes-demo
+# - Container Apps environment: nzila-canada-demo-env
+# - Resource group: nzila-canada-demo-rg
+# - Public URL: https://demo.unioneyes.app
+#
+# SECRETS: Do NOT store secrets here. Use KeyVault nzila-canada-demo-kv.
+
+environment: ue-demo-cupe4373
+region: canadacentral
+resource_group: nzila-canada-demo-rg
+dr_region: canadaeast
+
+container_apps:
+  environment: nzila-canada-demo-env
+  revision_mode: Single
+  min_replicas: 1
+  max_replicas: 3
+
+apps:
+  union-eyes:
+    container_app_name: nzila-os-union-eyes-demo
+    image_tag: "${VERSION}"
+    public_url: https://demo.unioneyes.app
+    port: 3000
+    cpu: 1.0
+    memory: 2Gi
+    scale_rules:
+      - name: http-requests
+        type: http
+        metadata:
+          concurrentRequests: "20"
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: UE_ENVIRONMENT
+        value: demo
+      - name: NEXT_PUBLIC_APP_ENV
+        value: demo
+      - name: NZILA_MODE
+        value: demo
+      - name: UE_DEPLOYMENT_TYPE
+        value: cupe4373-demo
+      - name: UE_FEATURE_PROFILE
+        value: cupe4373
+      - name: NEXT_PUBLIC_UE_FEATURE_PROFILE
+        value: cupe4373
+      - name: UE_DEMO_PROFILE
+        value: cupe4373
+      - name: NEXT_PUBLIC_UE_DEMO_PROFILE
+        value: cupe4373
+      - name: UE_DEMO_ORG_ID
+        value: cupe-local-4373
+      - name: NEXT_PUBLIC_UE_DEMO_ORG_SLUG
+        value: cupe-local-4373
+      - name: UE_MARKETING_URL
+        value: https://demo.unioneyes.app
+      - name: UE_APP_URL
+        value: https://demo.unioneyes.app
+      - name: NEXT_PUBLIC_SITE_URL
+        value: https://demo.unioneyes.app
+      - name: NEXT_PUBLIC_APP_URL
+        value: https://demo.unioneyes.app
+      - name: AUTH_URL
+        value: https://demo.unioneyes.app
+      - name: AUTH_TRUST_HOST
+        value: "true"
+      - name: ENVIRONMENT_ISOLATION
+        value: full
+      - name: SECRET_TOPOLOGY
+        value: isolated
+      - name: SECRET_AUTHORITY
+        value: nzila-canada-demo-kv
+      - name: RUNTIME_FAIL_CLOSED
+        value: "true"
+      - name: WEB_CONCURRENCY
+        value: "2"
+      - name: CONN_MAX_AGE
+        value: "600"
+      - name: DATABASE_POOL_SIZE
+        value: "10"
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-union-eyes-demo-cupe4373
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "1.0"
+
+database:
+  name: nzila-os-union-eyes-demo-db
+  database_name: nzila_os_demo
+  sku: GP_Standard_D2ds_v5
+  tier: GeneralPurpose
+  version: '15'
+  storage_gb: 32
+  backup_retention_days: 14
+  high_availability: false
+  pgbouncer:
+    enabled: true
+    pool_mode: session
+    default_pool_size: 10
+    max_client_connections: 100
+
+acr:
+  name: nzilacanadaacr
+  sku: Basic

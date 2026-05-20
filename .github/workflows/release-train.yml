@@ -100,7 +100,10 @@ jobs:
           path: ./
           base: HEAD~10
           head: HEAD
-          extra_args: --only-verified
+          # Report ALL detected secrets, not just verified ones. Unverified findings
+          # (rotated, revoked, custom-format, or internal-only secrets) are still
+          # leaks and must surface in CI rather than being silently dropped.
+          extra_args: --results=verified,unknown
 
   # ─── Gate 3: Build all apps ───────────────────────────────────────────────
   build:

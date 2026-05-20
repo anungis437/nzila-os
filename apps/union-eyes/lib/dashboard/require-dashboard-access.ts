@@ -33,6 +33,11 @@ import type { UserRole } from "@/lib/api-auth-guard";
  * Verifies authentication and role. Redirects to /dashboard if the
  * authenticated user does not meet the minimum role requirement.
  *
+ * Role resolution uses the canonical chain in `hasMinRole` →
+ * `getUserRole(userId, getOrganizationIdForUser(userId))`. The CUPE 4373
+ * demo runtime no longer bypasses this — demo personas are seeded with
+ * real member/steward/officer roles in `user_management.organization_users`.
+ *
  * @param minRole - Minimum role in ROLE_HIERARCHY required to access this section.
  */
 export async function requireDashboardAccess(minRole: UserRole): Promise<void> {

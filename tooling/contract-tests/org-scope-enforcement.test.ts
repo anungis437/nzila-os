@@ -75,6 +75,7 @@ const EXEMPT_ROUTES = new Set([
   'analytics',      // Public marketing analytics events (anonymous)
   'monday-reset',   // Public weekly checklist (static content)
   'billing/checkout', // Public SaaS checkout (Stripe-hosted)
+  'icra',           // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated)
   '_perf',          // Web vitals sendBeacon endpoint (anonymous, no org context)
 ])
 

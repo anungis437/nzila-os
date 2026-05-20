@@ -4,8 +4,10 @@
 # ============================================
 FROM node:20-slim AS base
 
-# Install wget for healthchecks (not included in slim by default)
-RUN apt-get update && apt-get install -y --no-install-recommends wget && rm -rf /var/lib/apt/lists/*
+# Install wget for healthchecks (not included in slim by default).
+# apt-get upgrade -y patches OS-level CVEs in the base image (e.g. libgnutls30 CVE-2026-33845,
+# CVE-2026-42010) that require an upstream Debian package update beyond our direct control.
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends wget && rm -rf /var/lib/apt/lists/*
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -81,6 +83,14 @@ ARG NEXT_PUBLIC_APP_URL=https://app.unioneyes.app
 ARG NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app
 ARG NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app
 ARG UE_ENVIRONMENT=production
+ARG NEXT_PUBLIC_APP_ENV=production
+ARG UE_DEPLOYMENT_TYPE=prod
+ARG UE_FEATURE_PROFILE=executive
+ARG NEXT_PUBLIC_UE_FEATURE_PROFILE=executive
+ARG UE_DEMO_PROFILE=
+ARG NEXT_PUBLIC_UE_DEMO_PROFILE=
+ARG UE_DEMO_ORG_ID=
+ARG NEXT_PUBLIC_UE_DEMO_ORG_SLUG=
 ARG UE_MARKETING_URL=https://unioneyes.app
 ARG UE_APP_URL=https://app.unioneyes.app
 ARG NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
@@ -101,6 +111,14 @@ ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_SITE_URL_STAGING=$NEXT_PUBLIC_SITE_URL_STAGING
 ENV NEXT_PUBLIC_APP_URL_STAGING=$NEXT_PUBLIC_APP_URL_STAGING
 ENV UE_ENVIRONMENT=$UE_ENVIRONMENT
+ENV NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV
+ENV UE_DEPLOYMENT_TYPE=$UE_DEPLOYMENT_TYPE
+ENV UE_FEATURE_PROFILE=$UE_FEATURE_PROFILE
+ENV NEXT_PUBLIC_UE_FEATURE_PROFILE=$NEXT_PUBLIC_UE_FEATURE_PROFILE
+ENV UE_DEMO_PROFILE=$UE_DEMO_PROFILE
+ENV NEXT_PUBLIC_UE_DEMO_PROFILE=$NEXT_PUBLIC_UE_DEMO_PROFILE
+ENV UE_DEMO_ORG_ID=$UE_DEMO_ORG_ID
+ENV NEXT_PUBLIC_UE_DEMO_ORG_SLUG=$NEXT_PUBLIC_UE_DEMO_ORG_SLUG
 ENV UE_MARKETING_URL=$UE_MARKETING_URL
 ENV UE_APP_URL=$UE_APP_URL
 ENV NEXT_PUBLIC_CFO_URL=$NEXT_PUBLIC_CFO_URL

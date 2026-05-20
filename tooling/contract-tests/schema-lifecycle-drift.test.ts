@@ -186,6 +186,9 @@ describe('SCHEMA_LIFECYCLE_DRIFT_001 — Schema-to-Manifest Drift Detection', ()
       'automation', 'tax', 'indirect_tax', 'nacp', 'zonga', 'platform',
       'trade', 'gtm', 'mobility', 'agri',
       'trustcore', 'trustops',  // TrustCore privacy/compliance + TrustOps mandate management
+      'decision_',  // Control Plane authority decision ledger (decision_events, etc.)
+      'policy_',  // Governance policy ledger (governed_policies, policy_governance_events, policy_replay_*, policy_conflicts)
+      'governed_',  // Governance-managed entities (governed_policies + approval chains)
     ]
 
     const uncoveredTables: string[] = []

@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server'
 import { getBuildMetadata } from '@nzila/os-core/health'
+import { getEnvironmentSnapshot } from '@/lib/runtime/environment'
 
 const APP = 'union-eyes'
 
-function inferSurfaceEnvironment(host: string): 'staging' | 'production' | 'unknown' {
+function inferSurfaceEnvironment(host: string): 'demo' | 'staging' | 'production' | 'unknown' {
   const normalized = host.toLowerCase()
+
+  if (
+    normalized.includes('demo.unioneyes.app')
+    || normalized.includes('nzila-os-union-eyes-demo')
+  ) {
+    return 'demo'
+  }
 
   if (
     normalized.includes('staging.unioneyes.app')
@@ -27,6 +35,7 @@ function inferSurfaceEnvironment(host: string): 'staging' | 'production' | 'unkn
 
 export async function GET(request: Request) {
   const metadata = getBuildMetadata(APP)
+  const environmentSnapshot = getEnvironmentSnapshot()
   const hostHeader = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
   const surfaceEnvironment = inferSurfaceEnvironment(hostHeader)
 
@@ -34,6 +43,10 @@ export async function GET(request: Request) {
     ...metadata,
     configuredEnvironment: metadata.environment,
     surfaceEnvironment,
+    runtimeEnvironment: environmentSnapshot.environment,
+    deploymentType: environmentSnapshot.deploymentType,
+    featureProfile: environmentSnapshot.featureProfile,
+    demoProfile: process.env.UE_DEMO_PROFILE ?? process.env.NEXT_PUBLIC_UE_DEMO_PROFILE ?? null,
     requestHost: hostHeader || null,
   })
 }

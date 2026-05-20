@@ -24,7 +24,7 @@
 1. [Purpose and Positioning](#1-purpose-and-positioning)
 2. [Assessment Structure](#2-assessment-structure)
 3. [Scoring Methodology](#3-scoring-methodology)
-4. [Assessment Instrument — Full Question Bank](#4-assessment-instrument--full-question-bank)
+4. [Assessment Instrument — Full Question Bank](#4-assessment-instrument-full-question-bank)
 5. [Interpretation Logic](#5-interpretation-logic)
 6. [Assessment UX Flow](#6-assessment-ux-flow)
 7. [Output Report Architecture](#7-output-report-architecture)

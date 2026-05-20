@@ -18,7 +18,7 @@
 3. [Vocabulary System](#3-canonical-vocabulary-system)
 4. [Operating Doctrine](#4-the-nzila-operating-doctrine)
 5. [Signature Strategic Frameworks](#5-signature-strategic-frameworks)
-6. [Union Eyes — Flagship Wedge](#6-union-eyes--flagship-wedge-narrative)
+6. [Union Eyes — Flagship Wedge](#6-union-eyes-flagship-wedge-narrative)
 7. [Strategic Narrative Hierarchy](#7-strategic-narrative-hierarchy)
 8. [Founder Narrative Scaffold](#8-founder-narrative-scaffold)
 9. [Messaging Pillars](#9-strategic-messaging-pillars)

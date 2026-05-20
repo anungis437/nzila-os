@@ -45,7 +45,10 @@ test.describe('UnionEyes stakeholder demo journeys', () => {
     }
 
     const body = await getVisiblePageText(page);
-    expect(body).toMatch(/continuity|operational|leadership/);
+    // The last step is the Member Outcomes Ledger (/dashboard/outcomes) which
+    // shows member metrics. "outcomes" is valid executive content alongside
+    // the continuity/leadership pages visited earlier in the path.
+    expect(body).toMatch(/continuity|operational|leadership|outcomes/);
     expect(body).not.toMatch(/finite state machine|workflow builder|orchestration engine|ai hype/);
   });
 

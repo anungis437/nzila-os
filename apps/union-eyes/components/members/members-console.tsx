@@ -106,10 +106,10 @@ function findMemberArrayInPayload(payload: unknown, depth = 0): unknown[] {
   return [];
 }
 
-export default function MembersConsole() {
+export default function MembersConsole({ organizationId: orgIdProp }: { organizationId?: string } = {}) {
   const t = useTranslations();
   const { organizationId, userOrganizations, isLoading: orgLoading } = useOrganization();
-  const effectiveOrganizationId = organizationId ?? userOrganizations[0]?.id ?? null;
+  const effectiveOrganizationId = orgIdProp ?? organizationId ?? userOrganizations[0]?.id ?? null;
   const router = useRouter();
   const locale = useLocale();
   
@@ -131,7 +131,7 @@ export default function MembersConsole() {
   
   // Fetch members from API with organization-aware cache key
   const { data, error, isLoading } = useSWR(
-    orgLoading ? null : ['members', effectiveOrganizationId ?? 'auto'] as const,
+    (orgIdProp || !orgLoading) ? ['members', effectiveOrganizationId ?? 'auto'] as const : null,
     async ([, orgId]) => {
       const extractMemberCount = (payload: unknown): number => {
         const anyPayload = payload as Record<string, unknown>;

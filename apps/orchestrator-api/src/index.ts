@@ -15,7 +15,7 @@ import { executeRoutes } from './routes/execute.js'
 import { itsmRoutes } from './routes/itsm.js'
 import { startExecutionRecoveryLoop } from './execution-engine.js'
 import { createLogger } from '@nzila/os-core'
-import { getEventBus } from './platform.js'
+import { getEventBus, setEventStore } from './platform.js'
 import { telemetryHooks } from './telemetry-hooks.js'
 import { requireApiKey, requireIdempotencyKey } from './api-guards.js'
 import { getOrchestratorEnv } from './env.js'
@@ -60,7 +60,23 @@ const HOST = env.HOST
 const API_KEY = env.ORCHESTRATOR_API_KEY ?? ''
 
 // ── Platform Integration (event-fabric) ────────────────────────────────────
+// HA path: when ORCHESTRATOR_DURABLE_EVENT_STORE=1 and DATABASE_URL is set,
+// inject the Postgres-backed store BEFORE first getEventBus() call so events
+// survive restarts and are visible across replicas. Otherwise fall back to
+// the in-memory store (which platform.ts will warn about in production
+// unless ORCHESTRATOR_ALLOW_IN_MEMORY_EVENT_STORE=1).
 try {
+  if (process.env.ORCHESTRATOR_DURABLE_EVENT_STORE === '1') {
+    if (!process.env.DATABASE_URL) {
+      logger.error('ORCHESTRATOR_DURABLE_EVENT_STORE=1 requires DATABASE_URL — falling back to in-memory store')
+    } else {
+      const { getDb } = await import('./db.js')
+      const { createPostgresEventStore } = await import('./event-store/postgres.js')
+      const { db } = getDb()
+      setEventStore(createPostgresEventStore(db))
+      logger.info('Durable Postgres event store wired')
+    }
+  }
   getEventBus()
   logger.info('Platform event bus initialized')
 } catch (err) {

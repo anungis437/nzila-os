@@ -28,7 +28,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: E2E · ${{ matrix.app }}
-    timeout-minutes: 30
+    timeout-minutes: 45  # union-eyes includes DB migration + seed; other apps finish in ≤5 min
     strategy:
       fail-fast: false
       matrix:

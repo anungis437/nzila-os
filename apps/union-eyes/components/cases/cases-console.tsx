@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Cases Console
@@ -7,16 +7,15 @@
  * Consumes GET /api/cases — steward+ access required.
  */
 
-import { useState, useEffect } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { CaseList, type CaseListItem } from '@/components/cases/case-list';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, Plus, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
+import { CaseList, type CaseListItem } from "@/components/cases/case-list";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle, Plus, RefreshCw } from "lucide-react";
 
 export function CasesConsole() {
-  const t = useTranslations('casesPage');
   const locale = useLocale();
   const router = useRouter();
 
@@ -28,18 +27,20 @@ export function CasesConsole() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/cases');
+      const res = await fetch("/api/cases");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setCases(Array.isArray(data) ? data : (data.cases ?? []));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load cases');
+      setError(err instanceof Error ? err.message : "Failed to load cases");
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => { fetchCases(); }, []);
+  useEffect(() => {
+    fetchCases();
+  }, []);
 
   if (loading) {
     return (

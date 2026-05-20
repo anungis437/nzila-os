@@ -51,6 +51,7 @@ const SCHEMA_EXEMPT_PATHS = [
   'whop/unauthenticated',       // Unauthenticated payment checkout (pay-first flow)
   'shopify/webhook',            // Shopify webhook — verified via HMAC signature (createHmac)
   '_perf/vitals',               // Anonymous web vitals beacon — manual validation (ALLOWED set + range check)
+  'api/icra',                   // ICRA public routes — pseudonymous, rate-limited; no org context required
 ]
 
 function findRouteFiles(app: string): string[] {
