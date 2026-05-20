@@ -70,10 +70,6 @@ export function NzilaAppShell({
     }]
   }, [orgLoaded, organization, membership, orgRole])
 
-  if (!authLoaded || !userLoaded) {
-    return <>{children}</>
-  }
-
   return (
     <ShellProvider
       user={shellUser}
