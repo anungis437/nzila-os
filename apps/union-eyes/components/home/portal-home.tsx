@@ -15,6 +15,11 @@ import {
   Settings,
   ArrowUpRight,
   ShieldCheck,
+  Upload,
+  FileText,
+  AlarmClock,
+  Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -153,6 +158,48 @@ const DEFAULT_TILES: Tile[] = [
   },
 ];
 
+// ─── Demo enrichment data ─────────────────────────────────────────────────────
+
+const DEMO_PULSE: Array<{
+  label: string;
+  value: number;
+  color: string;
+  bg: string;
+  border: string;
+}> = [
+  { label: 'Open Cases',         value: 4,  color: 'text-violet-400', bg: 'bg-violet-500/10', border: 'border-violet-500/20' },
+  { label: 'Active Grievances',  value: 2,  color: 'text-amber-400',  bg: 'bg-amber-500/10',  border: 'border-amber-500/20'  },
+  { label: 'Deadline in 3 days', value: 1,  color: 'text-rose-400',   bg: 'bg-rose-500/10',   border: 'border-rose-500/20'   },
+  { label: 'Documents',          value: 12, color: 'text-teal-400',   bg: 'bg-teal-500/10',   border: 'border-teal-500/20'   },
+];
+
+const DEMO_URGENT = {
+  title:  'Response Due in 3 Days',
+  detail: 'Grievance GRV-2024-014 · Ahmed Al-Rashid · Employer response deadline: May 22, 2026',
+  href:   '/dashboard/grievances',
+};
+
+const DEMO_QUICK_ACTIONS: Array<{ label: string; href: string; icon: LucideIcon }> = [
+  { label: 'File Grievance',  href: '/dashboard/grievances', icon: Scale            },
+  { label: 'Open Case',       href: '/dashboard/cases',      icon: BriefcaseBusiness },
+  { label: 'Upload Evidence', href: '/dashboard/documents',  icon: Upload            },
+];
+
+const DEMO_RECENT: Array<{ label: string; sub: string; href: string; icon: LucideIcon }> = [
+  { label: 'GRV-2024-014 · Ahmed Al-Rashid', sub: 'Wrongful Discipline · Updated 2 days ago',   href: '/dashboard/grievances', icon: Scale            },
+  { label: 'CASE-2024-089 · Maria Santos',   sub: 'Leave Entitlement · Updated 4 days ago',     href: '/dashboard/cases',      icon: BriefcaseBusiness },
+  { label: 'CUPE 4373 CBA 2023–2025.pdf',    sub: 'Collective Agreement · Uploaded 1 week ago', href: '/dashboard/documents',  icon: FileText          },
+];
+
+const DEMO_SPOTLIGHT = {
+  title: 'Agreement Advisor',
+  sub:   'Ask about any clause in the CUPE Local 4373 Collective Agreement — leave entitlements, discipline procedures, Article 17.3 and beyond.',
+  cta:   'Ask a question',
+  href:  '/dashboard/agreements',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function getGreeting(): string {
   const h = new Date().getHours();
   if (h < 12) return 'Good morning';
@@ -272,7 +319,7 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-14"
+          className="mb-10"
         >
           <p className="mb-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-sky-400/60">
             {greeting}
@@ -283,11 +330,79 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
           <p className="mt-3 text-sm text-white/35">{email}</p>
         </motion.div>
 
+        {/* Quick actions */}
+        {isCupeDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.28, duration: 0.4, ease: 'easeOut' }}
+            className="mb-8 flex flex-wrap gap-2.5"
+          >
+            {DEMO_QUICK_ACTIONS.map(({ label, href, icon: Icon }) => (
+              <Link
+                key={href}
+                href={withLocale(href)}
+                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-xs font-semibold text-white/65 transition-all hover:border-white/20 hover:bg-white/[0.09] hover:text-white"
+              >
+                <Icon size={12} />
+                {label}
+              </Link>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Operational pulse strip */}
+        {isCupeDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.38, duration: 0.4, ease: 'easeOut' }}
+            className="mb-8 flex flex-wrap gap-2"
+          >
+            {DEMO_PULSE.map(({ label, value, color, bg, border }) => (
+              <div
+                key={label}
+                className={`flex items-center gap-2 rounded-full border ${border} ${bg} px-3.5 py-1.5 text-xs`}
+              >
+                <span className={`text-sm font-bold tabular-nums ${color}`}>{value}</span>
+                <span className="text-white/40">{label}</span>
+              </div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Urgent callout */}
+        {isCupeDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.46, duration: 0.4, ease: 'easeOut' }}
+            className="mb-10"
+          >
+            <Link
+              href={withLocale(DEMO_URGENT.href)}
+              className="group flex items-center gap-3.5 rounded-xl border border-amber-500/30 bg-amber-500/[0.07] px-4 py-3.5 transition-all hover:border-amber-500/50 hover:bg-amber-500/[0.11]"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20">
+                <AlarmClock size={14} className="text-amber-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-amber-300">{DEMO_URGENT.title}</p>
+                <p className="mt-0.5 truncate text-xs text-white/40">{DEMO_URGENT.detail}</p>
+              </div>
+              <ChevronRight
+                size={14}
+                className="shrink-0 text-amber-500/35 transition-transform group-hover:translate-x-0.5"
+              />
+            </Link>
+          </motion.div>
+        )}
+
         {/* Section label */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.28, duration: 0.4 }}
+          transition={{ delay: 0.54, duration: 0.4 }}
           className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/20"
         >
           Where would you like to go?
@@ -336,11 +451,82 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
           })}
         </motion.div>
 
+        {/* Recent items */}
+        {isCupeDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0, duration: 0.5, ease: 'easeOut' }}
+            className="mt-14"
+          >
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/20">
+              Recently accessed
+            </p>
+            <div className="flex flex-col gap-2">
+              {DEMO_RECENT.map(({ label, sub, href, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={withLocale(href)}
+                  className="group flex items-center gap-3.5 rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3 transition-all hover:border-white/[0.11] hover:bg-white/[0.05]"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.04]">
+                    <Icon size={14} className="text-white/35" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="truncate text-sm font-medium text-white/70 transition-colors group-hover:text-white/90">
+                      {label}
+                    </p>
+                    <p className="truncate text-xs text-white/28">{sub}</p>
+                  </div>
+                  <ArrowUpRight
+                    size={12}
+                    className="shrink-0 text-white/10 transition-all group-hover:text-white/35"
+                  />
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Spotlight card */}
+        {isCupeDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.08, duration: 0.5, ease: 'easeOut' }}
+            className="mt-5"
+          >
+            <Link
+              href={withLocale(DEMO_SPOTLIGHT.href)}
+              className="group relative flex items-center gap-5 overflow-hidden rounded-xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/10 via-violet-600/8 to-sky-600/10 px-6 py-5 transition-all hover:border-indigo-500/35 hover:shadow-xl hover:shadow-indigo-950/30"
+            >
+              {/* glow orb */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-indigo-500/[0.07] blur-2xl"
+              />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-500/25 bg-indigo-600/20">
+                <Sparkles size={18} className="text-indigo-300" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white/85">{DEMO_SPOTLIGHT.title}</p>
+                <p className="mt-0.5 line-clamp-1 text-xs leading-relaxed text-white/32">
+                  {DEMO_SPOTLIGHT.sub}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5 rounded-lg border border-indigo-500/22 bg-indigo-600/18 px-3.5 py-2 text-xs font-semibold text-indigo-300 transition-all group-hover:border-indigo-500/38 group-hover:bg-indigo-600/28">
+                {DEMO_SPOTLIGHT.cta}
+                <ArrowUpRight size={11} />
+              </div>
+            </Link>
+          </motion.div>
+        )}
+
         {/* Footer tagline */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.6 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
           className="mt-20 text-center text-xs text-white/12"
         >
           Union Eyes · Governance-safe institutional intelligence for Canadian labour
