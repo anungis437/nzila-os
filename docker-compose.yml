@@ -154,6 +154,69 @@ services:
       - ALL
     restart: unless-stopped
 
+  # Control Plane (production)
+  control-plane:
+    build:
+      context: .
+      target: control-plane
+      dockerfile: Dockerfile
+    ports:
+      - "3013:3013"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AZURE_AD_CLIENT_ID=${AZURE_AD_CLIENT_ID:-}
+      - AZURE_AD_CLIENT_SECRET=${AZURE_AD_CLIENT_SECRET:-}
+      - AZURE_AD_TENANT_ID=${AZURE_AD_TENANT_ID:-}
+      - NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_CONSOLE_URL=${NEXT_PUBLIC_CONSOLE_URL:-http://localhost:3001}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  # Platform Admin (production)
+  platform-admin:
+    build:
+      context: .
+      target: platform-admin
+      dockerfile: Dockerfile
+    ports:
+      - "3014:3014"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AZURE_AD_CLIENT_ID=${AZURE_AD_CLIENT_ID:-}
+      - AZURE_AD_CLIENT_SECRET=${AZURE_AD_CLIENT_SECRET:-}
+      - AZURE_AD_TENANT_ID=${AZURE_AD_TENANT_ID:-}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  # Orchestrator API (production)
+  orchestrator-api:
+    build:
+      context: .
+      target: orchestrator-api
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DATABASE_URL=${DATABASE_URL}
+      - AUTH_SECRET=${AUTH_SECRET}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
   # Build-only service (for CI/CD)
   build:
     build:

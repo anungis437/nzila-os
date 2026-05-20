@@ -19,7 +19,9 @@ logs/
 tmp-art/
 tmp-e2e-report/
 tmp-gov-report/
+.kilo/
 .copilot-governance.log
+.*.log
 audit-out.txt
 audit-output.txt
 migration-run-output.txt
