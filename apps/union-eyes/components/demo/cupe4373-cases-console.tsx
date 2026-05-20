@@ -290,7 +290,7 @@ export function Cupe4373CasesConsole({ cases: casesProp, dataSource = "static" }
             return fixture ? (
               <Link
                 key={item.id}
-                href={`/${locale}/dashboard/cases/${item.id}`}
+                href={`/${locale}/dashboard/cases/${encodeURIComponent(item.id)}`}
                 className="block rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:bg-slate-50"
               >
                 {inner}
