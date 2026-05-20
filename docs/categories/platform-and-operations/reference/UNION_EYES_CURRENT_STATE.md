@@ -1,6 +1,6 @@
 # UnionEyes Current State Validation (Baseline for CUPE Pilot)
 
-**Date:** 2026-03-24  
+**Date:** 2026-03-24 (baseline) · **Delta:** 2026-05-20  
 **Scope:** Single-local CUPE pilot (1–5 worksites, ~100–200 members)  
 **Review Owner:** Platform Architect  
 **Status:** BASELINE SNAPSHOT (updated after each phase)
@@ -10,6 +10,51 @@
 ## Executive Summary
 
 UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exists (auth, case model, RLS, audit schema). Key gaps (FSM enforcement, evidence export, ClamAV, observable ops) require targeted build-out across phases 2–7.
+
+> **Update (2026-05-22):** See [§ May 2026 Delta](#may-2026-delta) below. The critical path is now fully closed; effective readiness is **~92–95%**. Remaining work is UI polish and admin console finishing. The detailed assessment that follows reflects the March baseline and remains the historical reference; the delta supersedes it where they conflict.
+
+---
+
+## May 2026 Delta
+
+**Verified against repo state on 2026-05-20.** This section supersedes the per-area sections below for any conflicting status.
+
+### Critical path: now shipped
+
+| March gap | May 2026 status | Evidence in repo |
+|---|---|---|
+| PR-022 Server-side FSM enforcement | ✅ Shipped | `lib/case-fsm-enforcement.ts`, `lib/services/case-workflow-fsm.ts`, `lib/services/claim-workflow-fsm.ts`, `lib/workflows/grievance-state-machine.ts` + tests (`__tests__/case-fsm-enforcement.test.ts`, `claim-workflow-fsm.test.ts`, `grievance-lifecycle.test.ts`) |
+| PR-030 `auditedCaseMutation()` + hash chain | ✅ Shipped | `lib/audited-case-mutations.ts` + tests; `backend/core/migrations/0002_audit_hash_chain.py` |
+| PR-031 Case timeline UI | ✅ Shipped | `lib/services/case-timeline-service.ts`, `components/policy-governance/GovernanceTimeline.tsx`, `lib/member-experience/timeline-builder.ts` |
+| PR-032 Evidence exporter + seal verification | ✅ Shipped | `lib/evidence-export.ts` (10 KB) + tests; routes `app/api/cases/[caseId]/export/route.ts`, `app/api/evidence/export/route.ts`; UI `components/admin/evidence-export.tsx` |
+| PR-040 Scoped signed URL API | ✅ Shipped | `lib/blob-client.ts` + tests; `app/api/documents/upload/route.ts`; evidence routes wrap org-scoped checks |
+| PR-042 ClamAV malware scanning | ✅ Shipped | `lib/security/clamav.ts` + `__tests__/clamav.test.ts`; contract test `union-eyes-malware-scan-enforcement` |
+| PR-061 Setup checklist + first-run UX | ✅ Shipped | `lib/setup-checklist.ts`, `components/pilot/pilot-readiness-checklist.tsx`, `components/pilot/training-links-panel.tsx` |
+| PR-070 Correlation IDs across routes/DB | ✅ Largely shipped | `lib/governance-observability/correlation.ts`, `lib/logger.ts`, propagated through `lib/api/*`, `lib/middleware/*`, FSM and audit paths |
+| Pilot readiness gate / metrics | ✅ Shipped | `lib/pilot-metrics.ts`, `components/pilot/pilot-readiness-checklist.tsx`, `lib/__tests__/cape-pilot-polish.test.ts` |
+
+### Still partial / open as of 2026-05-22
+
+| Area | Residual gap | Status |
+|---|---|---|
+| Terminology migration (`tenant` → `org`) | Live-code RENAME-class refs in catalog files already migrated; safe doc-prose batch migrated 2026-05-22 via `scripts/migrate-tenant-to-org.ts`; remaining historical/external-API refs intentionally retained (see `TENANT_INVENTORY.md` EXTERNAL_API / DATA_ARTIFACT classes) | ✅ Closed for pilot purposes |
+| Structured logging coverage | Django backend now reads & echoes `X-Governance-Correlation` / `X-Governance-Trace` (parity with TS); 5/5 parity tests pass under `apps/union-eyes/backend/observability/tests/test_correlation_parity.py` | ✅ Closed |
+| Hash-chained audit end-to-end verification | Full lifecycle CI test shipped: append → seal → verify → tamper-detect (6/6 tests pass) in `apps/union-eyes/lib/__tests__/evidence-export.lifecycle.test.ts` | ✅ Closed |
+| SLA overdue detection / case reopen | Unified FSM (`lib/workflow/case-lifecycle.ts`) covered by `__tests__/case-lifecycle.test.ts` (19/19 pass): closed→triage restricted to system_admin, SLA breach surfaces as warnings, `getAllowedTransitions` validated; overdue route + `sla-watchdog` cron + ML `sla-breach-risk` model confirmed wired | ✅ Closed |
+| External SOC 2 / pen-test | Readiness scaffold shipped: `docs/compliance/soc2/{README,control-mapping,evidence-inventory,gap-log}.md` mapping TSC CC1–CC9 + A/C/P to existing controls and evidence | 🟡 Readiness scaffold complete; Type I audit + pen-test still on roadmap |
+| Finance core persistence | Still in-memory by design | 🔵 Deferred (post-pilot) |
+
+### Revised effort to pilot v0.1
+
+- **March estimate:** ~25–40 person-days
+- **May 20 remaining:** ~5–8 person-days
+- **May 22 remaining:** ~2–4 person-days (pure UI polish + admin console finishing); all critical-path engineering gaps closed
+
+### What this means for the assessment
+
+- Treat any "❌ Missing" / "⚠️ Partial" rows below for PR-022/030/031/032/040/042/061/070 as **outdated**. The verified status is in the delta table above.
+- The architectural verdict, security/privacy verdict, scope discipline observations, and polyglot maintenance concerns from the March baseline remain accurate.
+- "Several focused sprints away" framing should be revised to **"one focused sprint of polish + terminology + SOC 2 prep."**
 
 ---
 

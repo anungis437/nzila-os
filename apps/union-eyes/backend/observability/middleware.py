@@ -24,10 +24,19 @@ class ObservabilityMiddleware:
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
-        # Determine request context.
+        # Determine request context. We honour, in order:
+        #   1. X-Request-Id  (standard)
+        #   2. traceparent   (W3C trace context, truncated)
+        #   3. X-Governance-Correlation  (Nzila TS frontend chain)
+        #   4. fresh uuid4
+        governance_correlation_id = request.META.get(
+            "HTTP_X_GOVERNANCE_CORRELATION", ""
+        )
+        governance_trace_id = request.META.get("HTTP_X_GOVERNANCE_TRACE", "")
         request_id = (
             request.META.get("HTTP_X_REQUEST_ID")
             or request.META.get("HTTP_TRACEPARENT", "")[:32]
+            or governance_correlation_id
             or str(uuid4())
         )
         org_id = str(getattr(request, "organization_id", "") or "")
@@ -38,6 +47,8 @@ class ObservabilityMiddleware:
             org_id=org_id,
             user_id=user_id,
             service="union-eyes-backend",
+            governance_correlation_id=governance_correlation_id,
+            governance_trace_id=governance_trace_id,
         )
 
         start = time.monotonic()
@@ -52,8 +63,13 @@ class ObservabilityMiddleware:
             latency_ms=elapsed_ms,
         )
 
-        # Propagate correlation header.
+        # Propagate correlation headers so the chain remains intact on the
+        # response side and clients can echo them to downstream services.
         response["X-Request-Id"] = request_id
+        if governance_correlation_id:
+            response["X-Governance-Correlation"] = governance_correlation_id
+        if governance_trace_id:
+            response["X-Governance-Trace"] = governance_trace_id
 
         clear_request_context()
         return response

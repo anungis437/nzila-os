@@ -30,7 +30,7 @@ Every meaningful action — a payment approval, a regulatory filing, a contract 
 For high-stakes business events (contract completions, compliance attestations, terminal decisions), Nzila OS bundles supporting documents, actor identity, timestamps, and a cryptographic seal into an immutable **evidence pack** stored in Azure Blob with WORM semantics. Auditors get a verifiable artifact, not a folder of PDFs.
 
 ### 3. Org-scoped by construction
-There is no "default" org, no global data, no cross-tenant leakage. Org isolation is enforced in the schema, in row-level security, in the API guards, and re-verified by ~250 contract tests on every PR. New tables that don't declare an `org_id` (or an explicit FK-scoped exemption) fail CI.
+There is no "default" org, no global data, no cross-org leakage. Org isolation is enforced in the schema, in row-level security, in the API guards, and re-verified by ~250 contract tests on every PR. New tables that don't declare an `org_id` (or an explicit FK-scoped exemption) fail CI.
 
 ### 4. AI under governance
 Every AI / ML capability is bounded by a **per-app AI profile**: budget caps, model allow-list, prompt versioning, drift monitoring, red-team adversarial tests. No app calls a model provider directly — all inference flows through `@nzila/platform-governed-ai` so spend, content, and risk are observable in one place.

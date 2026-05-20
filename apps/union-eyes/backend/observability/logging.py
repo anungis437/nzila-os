@@ -35,16 +35,33 @@ def set_request_context(
     org_id: str = "",
     user_id: str = "",
     service: str = "union-eyes",
+    governance_correlation_id: str = "",
+    governance_trace_id: str = "",
 ) -> None:
-    """Set contextual fields that appear in every log line."""
+    """Set contextual fields that appear in every log line.
+
+    Governance correlation IDs are sourced from the upstream TS frontend
+    (`X-Governance-Correlation` / `X-Governance-Trace`). They span a request
+    chain across services so a single governance unit of work can be reliably
+    traced end-to-end.
+    """
     _context.request_id = request_id
     _context.org_id = org_id
     _context.user_id = user_id
     _context.service = service
+    _context.governance_correlation_id = governance_correlation_id
+    _context.governance_trace_id = governance_trace_id
 
 
 def clear_request_context() -> None:
-    for attr in ("request_id", "org_id", "user_id", "service"):
+    for attr in (
+        "request_id",
+        "org_id",
+        "user_id",
+        "service",
+        "governance_correlation_id",
+        "governance_trace_id",
+    ):
         try:
             delattr(_context, attr)
         except AttributeError:
@@ -57,6 +74,10 @@ def get_request_context() -> Dict[str, str]:
         "org_id": getattr(_context, "org_id", ""),
         "user_id": getattr(_context, "user_id", ""),
         "service": getattr(_context, "service", "union-eyes"),
+        "governance_correlation_id": getattr(
+            _context, "governance_correlation_id", ""
+        ),
+        "governance_trace_id": getattr(_context, "governance_trace_id", ""),
     }
 
 
@@ -107,6 +128,15 @@ class StructuredJsonFormatter(logging.Formatter):
             "logger": record.name,
             "event": record.getMessage(),
         }
+
+        # Governance correlation — only present when upstream sent them, so we
+        # avoid polluting every log line with empty strings.
+        gcid = ctx.get("governance_correlation_id", "")
+        gtid = ctx.get("governance_trace_id", "")
+        if gcid:
+            entry["governance_correlation_id"] = gcid
+        if gtid:
+            entry["governance_trace_id"] = gtid
 
         # Merge extra fields (exclude internal logging attrs).
         extras = {

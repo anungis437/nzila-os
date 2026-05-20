@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The Nzila Backbone Platform is a **multi-tenant SaaS infrastructure** that serves as the foundation for 7+ healthcare and education technology products. By building shared services ONCE, we accelerate product launches by 50-78% while ensuring unified compliance (PIPEDA, GDPR, HIPAA) and governance.
+The Nzila Backbone Platform is a **multi-org SaaS infrastructure** that serves as the foundation for 7+ healthcare and education technology products. By building shared services ONCE, we accelerate product launches by 50-78% while ensuring unified compliance (PIPEDA, GDPR, HIPAA) and governance.
 
 ### Strategic Value
 - **Memora**: 12 weeks (vs 24 standalone) - 50% faster

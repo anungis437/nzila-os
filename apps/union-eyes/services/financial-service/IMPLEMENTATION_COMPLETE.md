@@ -348,7 +348,7 @@ pnpm dev
 
 The financial microservice is production-ready with:
 
-- Robust architecture supporting multi-tenant SaaS
+- Robust architecture supporting multi-org SaaS
 - Secure payment processing via Stripe
 - Flexible dues calculation system
 - Complete collections management workflow

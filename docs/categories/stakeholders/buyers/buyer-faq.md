@@ -14,7 +14,7 @@ Nzila OS is an enterprise software platform built on a shared operating system â
 **Q: Which products are available for pilot today?**  
 Union Eyes (labour operations) and Flow (SMB ops) are the two TIER 1 flagship products ready for pilot engagement. CFO and Partners are TIER 2 and can enter pilot conversations. See [product-capability-matrix.md](product-capability-matrix.md) for full details.
 
-**Q: Is this a multi-tenant SaaS or a dedicated deployment?**  
+**Q: Is this a multi-org SaaS or a dedicated deployment?**  
 The current staging deployment is multi-tenant with strict org-scoping. Each organisation's data is isolated at the database query level. Dedicated deployment (single-tenant) is available on request and discussed in the pilot agreement.
 
 **Q: Are these products GA (generally available)?**  
