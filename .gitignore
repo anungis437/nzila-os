@@ -15,6 +15,18 @@ infotech/
 demo-output/
 logs/
 
+# ----- Scratch / temporary working dirs (never commit) ------
+tmp-art/
+tmp-e2e-report/
+tmp-gov-report/
+.copilot-governance.log
+audit-out.txt
+audit-output.txt
+migration-run-output.txt
+orch-logs.txt
+tmp-run.txt
+validate-docs-output.txt
+
 # ----- Staging / seed / ad-hoc SQL & CSV at repo root ------
 staging-*.sql
 staging-*.csv

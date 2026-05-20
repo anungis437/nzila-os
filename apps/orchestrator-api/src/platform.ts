@@ -33,21 +33,50 @@ export function getEventBus(): PlatformEventBus {
 
 /**
  * Emit a command lifecycle event to the platform event bus.
+ *
+ * Callers commonly invoke this fire-and-forget (`void emitCommandEvent(...)`)
+ * from within request handlers. To avoid silently dropping bus failures, this
+ * function catches and logs any publish error internally — the returned
+ * promise is guaranteed not to reject. If you need to react to a failure,
+ * pass an `onError` handler or `await` and inspect the result.
  */
 export async function emitCommandEvent(
   eventType: string,
   payload: Record<string, unknown>,
   actorId: string,
   tenantId = 'system',
-): Promise<void> {
-  const bus = getEventBus()
-  const event = buildPlatformEvent({
-    type: eventType as Parameters<typeof buildPlatformEvent>[0]['type'],
-    payload,
-    actorId,
-    tenantId,
-    source: 'orchestrator-api',
-  })
-  await bus.publish(event)
-  logger.info('Platform event emitted', { eventType, actorId })
+  onError?: (err: Error) => void,
+): Promise<{ ok: boolean; error?: Error }> {
+  try {
+    const bus = getEventBus()
+    const event = buildPlatformEvent({
+      type: eventType as Parameters<typeof buildPlatformEvent>[0]['type'],
+      payload,
+      actorId,
+      tenantId,
+      source: 'orchestrator-api',
+    })
+    await bus.publish(event)
+    logger.info('Platform event emitted', { eventType, actorId })
+    return { ok: true }
+  } catch (rawErr) {
+    const err = rawErr instanceof Error ? rawErr : new Error(String(rawErr))
+    logger.error('Platform event emission failed', {
+      eventType,
+      actorId,
+      tenantId,
+      error: err.message,
+      stack: err.stack,
+    })
+    if (onError) {
+      try {
+        onError(err)
+      } catch (handlerErr) {
+        logger.error('emitCommandEvent onError handler threw', {
+          error: handlerErr instanceof Error ? handlerErr.message : String(handlerErr),
+        })
+      }
+    }
+    return { ok: false, error: err }
+  }
 }

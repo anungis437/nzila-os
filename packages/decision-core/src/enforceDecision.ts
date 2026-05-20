@@ -37,6 +37,19 @@ function isBlocking(level: DecisionEnforcementLevel): boolean {
   return level === 'block'
 }
 
+/**
+ * Policy version must be a recognizable semver-shaped identifier:
+ *   - `MAJOR.MINOR.PATCH` (e.g. `1.2.3`)
+ *   - optional pre-release / build metadata (e.g. `1.2.3-rc.1+sha.abc`)
+ *   - or a date-stamped policy id (`YYYY-MM-DD` or `YYYY-MM-DD.N`)
+ * A blank, whitespace, or free-form string is rejected to prevent silent
+ * acceptance of malformed policy references at the enforcement boundary.
+ */
+const POLICY_VERSION_RE = /^(?:\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)*|\d{4}-\d{2}-\d{2}(?:\.\d+)?)$/
+function isValidPolicyVersion(version: string): boolean {
+  return POLICY_VERSION_RE.test(version.trim())
+}
+
 export async function enforceDecision(request: EnforceDecisionRequest): Promise<DecisionEvaluationResult> {
   const entry = getDecisionType(request.decisionType)
   const now = request.now ?? new Date().toISOString()
@@ -79,7 +92,7 @@ export async function enforceDecision(request: EnforceDecisionRequest): Promise<
 
   const authority = buildAuthority(entry.requiredAuthority, granted)
   const missingInputFields = findMissingInputFields(request.input, entry.requiredInputFields)
-  const policyValid = request.policy.id === entry.requiredPolicy && request.policy.version.trim().length > 0
+  const policyValid = request.policy.id === entry.requiredPolicy && isValidPolicyVersion(request.policy.version)
   const enforcementLevel: DecisionEnforcementLevel = entry.enforcementLevel ?? 'block'
 
   const failedReasonCode = !authority.valid

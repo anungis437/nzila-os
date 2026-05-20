@@ -25,7 +25,7 @@
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
-    "drizzle-orm": "^0.39.0",
+    "drizzle-orm": "^0.45.2",
     "stripe": "^20.4.0",
     "zod": "^3.24.0"
   },

@@ -24,10 +24,13 @@ export type {
 export { DECISION_DOMAINS } from './types'
 export {
   DEFAULT_DECISION_TYPES,
+  REQUIRED_DECISION_TYPES,
+  DecisionRegistryStartupError,
   clearDecisionRegistry,
   getDecisionType,
   listDecisionTypes,
   registerDecisionType,
+  verifyDecisionRegistry,
 } from './registry'
 export { enforceDecision } from './enforceDecision'
 export { evaluateStrictCoverageFailures } from './coverage-gate'

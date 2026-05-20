@@ -74,13 +74,17 @@ const SCAFFOLD_TEST_EXCLUSIONS = new Set(['test-scaffold-gp'])
 
 /**
  * Patterns that indicate a direct Drizzle mutation (not a read).
- * We look for `.insert(`, `.update(`, `.delete(` preceded by `db.` or on
- * a drizzle table chain (e.g. `db.insert(tableName)`).
+ * We look for `.insert(`, `.update(`, `.delete(` preceded by a likely
+ * database handle identifier. The identifier list is intentionally broad
+ * (db, database, client, conn[ection], tx, trx, transaction, drizzle, sql,
+ * pg, scoped, scopedDb, anything ending in `Db` or `Database`) so simple
+ * variable renames cannot bypass the contract check.
  */
+const DB_HANDLE_NAME = String.raw`[A-Za-z_$][\w$]*(?:[dD]b|[dD]atabase|[cC]lient|[cC]onn(?:ection)?|[tT]x|[tT]rx|[tT]ransaction|[dD]rizzle|[sS]ql|[pP]g)`
 const DRIZZLE_MUTATION_PATTERNS = [
-  /\bdb\s*\.\s*insert\s*\(/,
-  /\bdb\s*\.\s*update\s*\(/,
-  /\bdb\s*\.\s*delete\s*\(/,
+  new RegExp(String.raw`\b${DB_HANDLE_NAME}\s*\.\s*insert\s*\(`),
+  new RegExp(String.raw`\b${DB_HANDLE_NAME}\s*\.\s*update\s*\(`),
+  new RegExp(String.raw`\b${DB_HANDLE_NAME}\s*\.\s*delete\s*\(`),
 ]
 
 /**

@@ -138,7 +138,7 @@ export async function GET(
   await archive.finalize();
   const zip = await bufferPromise;
 
-  return new NextResponse(zip, {
+  return new NextResponse(new Uint8Array(zip), {
     status: 200,
     headers: {
       'Content-Type': 'application/zip',

@@ -39,8 +39,55 @@ export interface EntitlementResult {
 // ── Entitlement resolution ───────────────────────────────────────────────────
 
 /**
+ * Default entitlement set granted to any active org until a real subscription
+ * source (org_entitlements / billing) is wired in. Kept intentionally small so
+ * stub mode does not silently leak premium capabilities.
+ *
+ * Override by setting `CONTROL_PLANE_DEFAULT_ENTITLEMENTS` to a comma-separated
+ * list, or by setting `CONTROL_PLANE_ENTITLEMENTS_OPEN=1` (dev/demo only) to
+ * grant every feature.
+ */
+const FALLBACK_DEFAULT_FEATURES: ReadonlySet<string> = new Set([
+  'core.read',
+  'core.basic',
+])
+
+function getDefaultFeatures(): ReadonlySet<string> {
+  const raw = process.env.CONTROL_PLANE_DEFAULT_ENTITLEMENTS
+  if (!raw) return FALLBACK_DEFAULT_FEATURES
+  const items = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  return items.length > 0 ? new Set(items) : FALLBACK_DEFAULT_FEATURES
+}
+
+function isOpenEntitlementMode(): boolean {
+  const flag = process.env.CONTROL_PLANE_ENTITLEMENTS_OPEN
+  if (flag === '1' || flag === 'true') {
+    if (process.env.NODE_ENV === 'production' && process.env.CONTROL_PLANE_ALLOW_OPEN_ENTITLEMENTS_IN_PROD !== '1') {
+      logger.warn('CONTROL_PLANE_ENTITLEMENTS_OPEN ignored in production', {})
+      return false
+    }
+    return true
+  }
+  if (flag === '0' || flag === 'false') return false
+  // Default: open in non-production (preserves legacy behaviour for dev/test/
+  // staging/demo until a real entitlement source is wired in), closed in
+  // production so missing config fails safely as deny-by-default.
+  return process.env.NODE_ENV !== 'production'
+}
+
+/**
  * Resolve whether an org is entitled to a feature.
  * Records a decision audit event for every resolution.
+ *
+ * NOTE: This is a stub implementation pending a real org_entitlements /
+ * subscription table. It grants only the features listed in
+ * `CONTROL_PLANE_DEFAULT_ENTITLEMENTS` (or a hardcoded conservative default
+ * set) to any active org, and denies everything else by default. Set
+ * `CONTROL_PLANE_ENTITLEMENTS_OPEN=1` in non-production to restore the legacy
+ * "any active org gets any feature" behaviour.
  */
 export async function resolveEntitlements(
   query: EntitlementQuery,
@@ -67,10 +114,20 @@ export async function resolveEntitlements(
       .limit(1)
       .then((rows) => rows[0] ?? null)
 
-    // Default entitlement model — tier-based grants
-    // In production this queries org_entitlements/subscription tables
-    const granted = org !== null // If the org exists, it has basic access
-    const source: EntitlementResult['source'] = org ? 'subscription' : 'denied'
+    // Stub model: org existence is a precondition, not the entitlement itself.
+    // Until a real subscription/entitlement source is wired in, only the
+    // conservative default feature set is granted.
+    const orgActive = org !== null
+    const openMode = isOpenEntitlementMode()
+    const defaults = getDefaultFeatures()
+    const granted = orgActive && (openMode || defaults.has(query.feature))
+    const source: EntitlementResult['source'] = !orgActive
+      ? 'denied'
+      : openMode
+        ? 'override'
+        : granted
+          ? 'default'
+          : 'denied'
 
     await recordAuditEvent({
       orgId: query.orgId,
@@ -85,7 +142,7 @@ export async function resolveEntitlements(
       orgId: query.orgId,
       feature: query.feature,
       granted,
-        tier: null,
+      tier: null,
       limit: null,
       expiresAt: null,
       source,

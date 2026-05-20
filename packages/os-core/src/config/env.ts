@@ -65,10 +65,7 @@ const webSchema = baseSchema.extend({
 
 const unionEyesSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  AUTH_SECRET: z.string().min(10).optional(),
-  AZURE_AD_CLIENT_ID: z.string().min(1).optional(),
-  AZURE_AD_CLIENT_SECRET: z.string().min(1).optional(),
-  AZURE_AD_TENANT_ID: z.string().min(1).optional(),
+  ...authMixin,
 })
 
 const cfoSchema = baseSchema.extend({

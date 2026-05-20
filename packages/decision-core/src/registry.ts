@@ -19,6 +19,46 @@ export function clearDecisionRegistry() {
   decisionRegistry.clear()
 }
 
+/**
+ * Decision types that MUST be registered for the platform to operate.
+ * Verified at startup via `verifyDecisionRegistry()` to catch tree-shaking
+ * regressions, import-order bugs, or accidental removals that would
+ * otherwise surface only at request time as `UNREGISTERED_DECISION_TYPE`.
+ */
+export const REQUIRED_DECISION_TYPES: readonly string[] = [
+  'union.grievance.intake.submitted',
+  'union.case.escalated',
+  'faircase.case.classified',
+  'flow.quote.created',
+  'flow.vendor.selected',
+  'zonga.rights.validated',
+  'zonga.payout.approved',
+  'platform.workflow.authorized',
+  'platform.org.entitlement.checked',
+  'platform.governance.action.executed',
+  'platform.workflow.executed',
+] as const
+
+export class DecisionRegistryStartupError extends Error {
+  constructor(public readonly missing: readonly string[]) {
+    super(`Decision registry is missing required types: ${missing.join(', ')}`)
+    this.name = 'DecisionRegistryStartupError'
+  }
+}
+
+/**
+ * Throws if any required decision type is missing from the registry.
+ * Call once during process bootstrap (server entrypoint, worker init, etc.).
+ */
+export function verifyDecisionRegistry(
+  required: readonly string[] = REQUIRED_DECISION_TYPES,
+): void {
+  const missing = required.filter((type) => !decisionRegistry.has(type))
+  if (missing.length > 0) {
+    throw new DecisionRegistryStartupError(missing)
+  }
+}
+
 export const DEFAULT_DECISION_TYPES: DecisionRegistryEntry[] = [
   registerDecisionType({
     type: 'union.grievance.intake.submitted',
