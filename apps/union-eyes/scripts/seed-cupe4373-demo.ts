@@ -184,6 +184,30 @@ async function seedEntities() {
   `);
 }
 
+async function seedOrgsExecutiveLayer() {
+  // `orgs` is the executive-layer table (FK target for executive_decisions,
+  // execution_initiatives, treasury_snapshots, etc.). It runs in parallel
+  // with `organizations` (the union-structure table). We use the SAME UUID
+  // so a single foundation organization spans both layers.
+  console.log('[seed] orgs (executive layer)');
+  await db.execute(sql`
+    INSERT INTO orgs (id, legal_name, jurisdiction, fiscal_year_end, policy_config, status, created_at, updated_at)
+    VALUES (
+      ${ORG_ID}::uuid,
+      ${'Canadian Union of Public Employees Local 4373'}::text,
+      ${'CA-ON'}::varchar,
+      ${'12-31'}::varchar,
+      ${'{"foundationProfile":"cupe4373-healthcare"}'}::jsonb,
+      'active'::org_status,
+      now(), now()
+    )
+    ON CONFLICT (id) DO UPDATE
+      SET legal_name = EXCLUDED.legal_name,
+          policy_config = EXCLUDED.policy_config,
+          updated_at = now();
+  `);
+}
+
 async function seedOrganization() {
   console.log('[seed] organizations');
   await db.execute(sql`
@@ -403,6 +427,7 @@ async function main() {
   console.log('[seed] DATABASE_URL host:', new URL(process.env.DATABASE_URL!).host);
   try {
     await seedEntities();
+    await seedOrgsExecutiveLayer();
     await seedOrganization();
     await seedMembers();
     await seedGrievances();

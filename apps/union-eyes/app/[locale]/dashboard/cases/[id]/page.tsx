@@ -23,6 +23,7 @@ import { Cupe4373CaseActions } from "@/components/demo/cupe4373-case-actions";
 import { Cupe4373CaseLifecycle } from "@/components/demo/cupe4373-case-lifecycle";
 import { decisionsOfRecord, inboxItems } from "@/lib/demo/cupe4373-demo";
 import { getDemoCaseFromDb } from "@/lib/demo/server/cupe4373-cases-repo";
+import { listDecisionsForCase } from "@/lib/demo/server/cupe4373-governance";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
 
@@ -76,6 +77,7 @@ export default async function CaseDetailPage({ params }: PageProps) {
   const citingDecisions = decisionsOfRecord.filter((d) =>
     d.precedentFor.includes(demoCase.id),
   );
+  const liveDecisions = await listDecisionsForCase(demoCase.id);
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
@@ -380,6 +382,52 @@ export default async function CaseDetailPage({ params }: PageProps) {
                 ))
               ) : (
                 <p className="text-sm text-slate-500">Not yet cited as precedent.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Gavel className="h-4 w-4 text-emerald-600" />
+                Decisions logged (live)
+                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-[10px] uppercase tracking-wider text-emerald-700">
+                  pipeline
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {liveDecisions.length > 0 ? (
+                liveDecisions.map((d) => (
+                  <div
+                    key={d.id}
+                    className="rounded-md border border-emerald-100 bg-emerald-50/40 px-3 py-2 text-sm"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-slate-900">{d.title}</p>
+                      <Badge variant="outline" className="text-[10px] uppercase">
+                        {d.priority}
+                      </Badge>
+                    </div>
+                    {d.rationale && (
+                      <p className="mt-1 text-xs text-slate-600">{d.rationale}</p>
+                    )}
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      {d.status}
+                      {d.owner ? ` · ${d.owner}` : ""}
+                      {d.dueDate ? ` · due ${d.dueDate}` : ""}
+                    </p>
+                    {d.pipelineRunId && (
+                      <p className="mt-1 font-mono text-[10px] text-slate-400 break-all">
+                        run: {d.pipelineRunId}
+                      </p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500">
+                  No decisions logged yet — use “Log decision” above to record one.
+                </p>
               )}
             </CardContent>
           </Card>
