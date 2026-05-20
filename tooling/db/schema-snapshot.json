@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-05-17T13:01:49.664Z",
+  "capturedAt": "2026-05-20T16:15:51.109Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -37,6 +37,10 @@
     "packages/db/src/schema/decision-aggregates.ts": {
       "hash": "c795603f1014e48c90a770860e8461c421599c9948e70aacc9f7c08b676b73b7",
       "size": 2040
+    },
+    "packages/db/src/schema/decision-events.ts": {
+      "hash": "e8f2aa6e3e8cdc49737567dd71b9a9d082a96483b8ee2cb6548ce3fb9f9a03cb",
+      "size": 2975
     },
     "packages/db/src/schema/decision-pipeline-checkpoints.ts": {
       "hash": "964926aef95a35ad544f9b08349e36dcfb9d56a6c3ee5709546c5e516f207fc7",
@@ -126,6 +130,10 @@
       "hash": "bb8a212287eaba316edd07dad1f580416848b94126c4e0997338d6f505cee4d7",
       "size": 4293
     },
+    "packages/db/src/schema/governed-policies.ts": {
+      "hash": "922a2a771f9abdf4cc5e6e91930c54e498412c18202cde1ad6d8010424c5f23f",
+      "size": 8882
+    },
     "packages/db/src/schema/grants.ts": {
       "hash": "997099f91df00ecce6775d1b3df40ba8f573090145b4c9ce240525c0fb8bd4fe",
       "size": 1850
@@ -135,8 +143,8 @@
       "size": 5342
     },
     "packages/db/src/schema/index.ts": {
-      "hash": "e939c16f66f8b9764c67e9b6afd46a0d1909654e3bb1985720d4afc2b9326108",
-      "size": 1798
+      "hash": "3241b9412a9b605d84f696f34bcfd797582ce6054713567ace415e099a8c2335",
+      "size": 2068
     },
     "packages/db/src/schema/integrations.ts": {
       "hash": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65",
@@ -162,6 +170,10 @@
       "hash": "3c67520448dd24e6060b223a26954e1e467e126fbf54fb931816826f943c124c",
       "size": 9517
     },
+    "packages/db/src/schema/org-entitlements.ts": {
+      "hash": "d3b260dab36235d4accf64e100660538b45be307aaaea272c57a03e153e8b46c",
+      "size": 2573
+    },
     "packages/db/src/schema/orgs.ts": {
       "hash": "1ff125a6d59bd9a840c9d4094c9c4a9667a7fbcc8f038e8b6a818e9ee84d9570",
       "size": 3443
@@ -186,6 +198,22 @@
       "hash": "52f3b8ec098e9fbce3fffc9adf5d5735c3b178e2095bf9081adb7c7b690cfeb3",
       "size": 7663
     },
+    "packages/db/src/schema/policy-conflicts.ts": {
+      "hash": "7cbfc19681c1a77565508476cbd2e704bc23bbb099c8b90aeaa09bd030e46d2b",
+      "size": 3411
+    },
+    "packages/db/src/schema/policy-governance-events.ts": {
+      "hash": "97cb3539fc6ec3154b2057fe9e0e8e47d05db1f33785bf25efc02aab0d4adc94",
+      "size": 3621
+    },
+    "packages/db/src/schema/policy-governance-snapshots.ts": {
+      "hash": "6632b37d4f2b459108111118e638d4785eb41148c46ddd1c72c527bf06f6f0b0",
+      "size": 4260
+    },
+    "packages/db/src/schema/policy-replay-sessions.ts": {
+      "hash": "54ba07b7cf91e88d371b93f4395a7bd25aa7587826387791b996461328b115d7",
+      "size": 5546
+    },
     "packages/db/src/schema/tax.ts": {
       "hash": "9ffab36dffdc66b2b633d4fcd6dd75e880f06f67e4c6f0aee1bb7055dcec010d",
       "size": 8243
@@ -207,5 +235,5 @@
       "size": 38020
     }
   },
-  "compositeHash": "5f600e78f686ad4a64f6cc8a733a9da4669617c25318d985a3a5bb5e051509b2"
+  "compositeHash": "aa3fe7ef1c816462de8cecb358ad97921919c48b18a03a885bf7d0702413d419"
 }

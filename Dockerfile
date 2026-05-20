@@ -4,8 +4,10 @@
 # ============================================
 FROM node:20-slim AS base
 
-# Install wget for healthchecks (not included in slim by default)
-RUN apt-get update && apt-get install -y --no-install-recommends wget && rm -rf /var/lib/apt/lists/*
+# Install wget for healthchecks (not included in slim by default).
+# apt-get upgrade -y patches OS-level CVEs in the base image (e.g. libgnutls30 CVE-2026-33845,
+# CVE-2026-42010) that require an upstream Debian package update beyond our direct control.
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends wget && rm -rf /var/lib/apt/lists/*
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
