@@ -371,5 +371,8 @@ function buildEvaluatedContext(
     priority: ctx.executionContext?.priority ?? 'normal',
     policyDomain: policy.domain,
     payloadKeys: Object.keys(ctx.payload ?? {}),
+    // Governance lifecycle traceability — set for governed_policies rows,
+    // null for statically-registered policies not yet migrated.
+    policyHash: policy.policyHash ?? null,
   }
 }

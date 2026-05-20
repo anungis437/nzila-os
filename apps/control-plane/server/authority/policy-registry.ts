@@ -72,6 +72,12 @@ export interface WorkflowPolicy {
   readonly evaluate?: (ctx: PolicyEvaluationContext) => PolicyDecision | undefined
   /** Free-form rationale persisted alongside every decision. */
   readonly rationale: string
+  /**
+   * SHA-256 content hash frozen at publish time.
+   * Propagated into decision event payloads for downstream audit.
+   * NULL for statically-registered policies (not yet migrated to governed_policies).
+   */
+  readonly policyHash?: string | null
 }
 
 /** Internal registry — keyed by workflowId. */
@@ -117,6 +123,142 @@ export function listRegisteredPolicies(): readonly WorkflowPolicy[] {
 /** Test-only — never call from production code. */
 export function __resetRegistryForTests(): void {
   REGISTRY.clear()
+}
+
+// ── Governed policy bridge ────────────────────────────────────────────────────
+//
+// Loads platform-level governed_policies from the DB and registers them as
+// WorkflowPolicy instances. This bridges the immutable DB-backed governed
+// artifact world with the in-process evaluation registry.
+
+/**
+ * Register a governed policy row as an in-process WorkflowPolicy.
+ *
+ * FAIL-CLOSED:
+ *  - Throws if the policy does not have a content_hash (unsigned policies
+ *    may not be activated in the registry)
+ *  - Throws if the policy lifecycle_status is not 'active' or 'published'
+ */
+export function registerGovernedPolicy(
+  row: {
+    id: string
+    semver: string
+    domain: string
+    workflowBindings: unknown
+    contentHash: string | null
+    lifecycleStatus: string
+    governanceRationale: string
+    riskClassification: string
+    authorRole: string
+  },
+): void {
+  if (!['active', 'published'].includes(row.lifecycleStatus)) {
+    throw new Error(
+      `[policy-registry] UNSIGNED_POLICY_ACTIVATION_BLOCKED: ` +
+        `Policy ${row.id}@${row.semver} has lifecycle_status "${row.lifecycleStatus}". ` +
+        'Only active or published policies may be registered.',
+    )
+  }
+
+  if (!row.contentHash) {
+    throw new Error(
+      `[policy-registry] UNSIGNED_POLICY_ACTIVATION_BLOCKED: ` +
+        `Policy ${row.id}@${row.semver} has no content_hash. ` +
+        'Policies must be hashed before registration.',
+    )
+  }
+
+  const bindings = Array.isArray(row.workflowBindings)
+    ? row.workflowBindings.filter((v): v is string => typeof v === 'string')
+    : []
+
+  if (bindings.length === 0) {
+    // Governance-only policies with no workflow bindings — skip registration silently
+    return
+  }
+
+  const domain = SUPPORTED_DOMAINS.includes(row.domain as PolicyDomain)
+    ? (row.domain as PolicyDomain)
+    : 'platform'
+
+  const policy: WorkflowPolicy = {
+    id: row.id,
+    version: row.semver,
+    domain,
+    workflowIds: bindings,
+    allowedActions: ['workflow.trigger'],
+    allowedActorTypes: ['user', 'system'],
+    allowedRoles: [row.authorRole],
+    rationale: row.governanceRationale,
+    policyHash: row.contentHash,
+  }
+
+  registerWorkflowPolicy(policy)
+}
+
+/**
+ * Bootstrap the in-process registry from the DB.
+ *
+ * Loads all active + published governed_policies, verifies integrity, and
+ * registers each as a WorkflowPolicy. Fail-closed: a single integrity failure
+ * aborts the entire bootstrap.
+ *
+ * Call this during control-plane startup before accepting any requests.
+ */
+export async function bootstrapFromDB(db: Record<string, unknown>): Promise<{
+  registeredCount: number
+  skippedCount: number
+}> {
+  // Lazy import to avoid circular deps at module evaluation time
+  const { governedPolicies } = await import('@nzila/db/schema')
+  const { eq, or } = await import('drizzle-orm')
+  const { assertIntegrityOrThrow } = await import('./policy-integrity')
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dbTyped = db as any
+
+  const rows = await dbTyped
+    .select()
+    .from(governedPolicies)
+    .where(
+      or(
+        eq(governedPolicies.lifecycleStatus, 'active'),
+        eq(governedPolicies.lifecycleStatus, 'published'),
+      ),
+    )
+
+  let registeredCount = 0
+  let skippedCount = 0
+
+  for (const row of rows) {
+    // Integrity verification (fail-closed)
+    assertIntegrityOrThrow(
+      {
+        policyFamilyId: row.policyFamilyId,
+        semver: row.semver,
+        name: row.name,
+        domain: row.domain,
+        workflowBindings: row.workflowBindings,
+        operationalScope: row.operationalScope,
+        governanceRationale: row.governanceRationale,
+        riskClassification: row.riskClassification,
+        reviewCadenceDays: row.reviewCadenceDays,
+        replayCompatibilityVersion: row.replayCompatibilityVersion,
+        effectiveFrom: row.effectiveFrom?.toISOString() ?? null,
+        effectiveUntil: row.effectiveUntil?.toISOString() ?? null,
+      },
+      row.contentHash,
+    )
+
+    try {
+      registerGovernedPolicy(row)
+      registeredCount++
+    } catch {
+      skippedCount++
+    }
+  }
+
+  return { registeredCount, skippedCount }
 }
 
 /**

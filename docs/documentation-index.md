@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-05-20T13:47:14.232Z
+Generated: 2026-05-20T15:50:00.845Z
 
 Total documents indexed: 1018
 Stale documents (>90 days since repo validation): 0
@@ -39,9 +39,9 @@ Stale documents (>90 days since repo validation): 0
 | --- | --- | --- | --- |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | root | 2026-05-19 | current |
 | [CHANGELOG.md](CHANGELOG.md) | root | 2026-05-11 | current |
-| [docs/architecture/AUDIT_ENFORCEMENT.md](docs/architecture/AUDIT_ENFORCEMENT.md) | architecture | 2026-05-11 | current |
+| [docs/architecture/AUDIT_ENFORCEMENT.md](docs/architecture/AUDIT_ENFORCEMENT.md) | architecture | 2026-05-20 | current |
 | [docs/architecture/authority-policy-registry-and-decision-events.md](docs/architecture/authority-policy-registry-and-decision-events.md) | architecture | 2026-05-20 | current |
-| [docs/architecture/ORG_SCOPED_TABLES.md](docs/architecture/ORG_SCOPED_TABLES.md) | architecture | 2026-05-11 | current |
+| [docs/architecture/ORG_SCOPED_TABLES.md](docs/architecture/ORG_SCOPED_TABLES.md) | architecture | 2026-05-20 | current |
 | [docs/backlog/abr-backend.md](docs/backlog/abr-backend.md) | backlog | 2026-05-11 | current |
 | [docs/categories/historical-archive/archive/AI_ML_REMEDIATION_STATUS.md](docs/categories/historical-archive/archive/AI_ML_REMEDIATION_STATUS.md) | categories | 2026-05-11 | current |
 | [docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md](docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md) | categories | 2026-05-11 | current |

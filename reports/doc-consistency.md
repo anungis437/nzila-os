@@ -1,15 +1,15 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-20T13:47:11.822Z
+> Generated: 2026-05-20T15:49:58.632Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Files Scanned | 1668 |
-| Total Findings | 2455 |
+| Total Findings | 2458 |
 | Errors | 0 |
-| Warnings | 1195 |
+| Warnings | 1198 |
 | Info | 1260 |
 
 ## Findings by Rule
@@ -17,13 +17,13 @@
 | Rule | Count |
 |------|-------|
 | naming-inconsistency | 1253 |
-| stale-reference | 1034 |
+| stale-reference | 1037 |
 | missing-package-readme | 105 |
 | stale-package-ref | 53 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1034)
+## stale-reference (1037)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -43,6 +43,9 @@
 - 🟡 `README.md:171` — Possible broken link: [docs/builders/](docs/builders/)
 - 🟡 `README.md:173` — Possible broken link: [docs/buyers/](docs/buyers/)
 - 🟡 `README.md:175` — Possible broken link: [docs/investor/](docs/investor/)
+- 🟡 `docs/architecture/AUDIT_ENFORCEMENT.md:4` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](../platform/EVIDENCE_LIFECYCLE_POLICY.md)
+- 🟡 `docs/architecture/AUDIT_ENFORCEMENT.md:5` — Possible broken link: [docs/platform/AUDIT_ENFORCEMENT.md](../platform/AUDIT_ENFORCEMENT.md)
+- 🟡 `docs/architecture/ORG_SCOPED_TABLES.md:5` — Possible broken link: [docs/platform/ORG_SCOPED_TABLES.md](../platform/ORG_SCOPED_TABLES.md)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:64` — Possible broken link: [convert/route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/convert/route.ts)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:117` — Possible broken link: [portal/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/page.tsx)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:118` — Possible broken link: [claims/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/claims/page.tsx)

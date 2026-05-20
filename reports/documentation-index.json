@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-20T13:47:14.232Z",
+  "generatedAt": "2026-05-20T15:50:00.845Z",
   "totalDocuments": 1018,
   "staleDocuments": 0,
   "categories": [
@@ -135,7 +135,7 @@
     {
       "path": "docs/architecture/AUDIT_ENFORCEMENT.md",
       "category": "architecture",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -147,7 +147,7 @@
     {
       "path": "docs/architecture/ORG_SCOPED_TABLES.md",
       "category": "architecture",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {

@@ -112,6 +112,13 @@ export const ORG_SCOPED_TABLES = [
   // Per-org feature entitlement ledger (Control Plane authority).
   'orgEntitlements',
 
+  // ── governed-policies.ts / policy-governance-events.ts ──
+  // Governance policy ledger + telemetry (org-scoped where applicable).
+  'governedPolicies',
+  'policyGovernanceEvents',
+  'policyGovernanceSnapshots',
+  'policyReplaySessions',
+
   // ── ml.ts ───────────────────────────────────────────────
   'mlDatasets',
   'mlModels',
@@ -434,6 +441,11 @@ export const NON_ORG_SCOPED_TABLES = [
   // ── executive.ts (FK-scoped via recommendation_id) ────────────
   { table: 'executiveRecommendationFeedback', reason: 'Scoped via recommendation_id FK → executiveRecommendations (Org-scoped)' },
   { table: 'executiveRecommendationOutcomes', reason: 'Scoped via recommendation_id FK → executiveRecommendations (Org-scoped)' },
+  // ── governed-policies.ts / policy-replay-sessions.ts / policy-conflicts.ts ──
+  { table: 'policyApprovalChains', reason: 'Scoped via policy_id FK → governedPolicies (Org-scoped)' },
+  { table: 'policyApprovalActions', reason: 'Scoped via chain_id FK → policyApprovalChains (FK chain to Org-scoped)' },
+  { table: 'policyReplayResults', reason: 'Scoped via session_id FK → policyReplaySessions (Org-scoped)' },
+  { table: 'policyConflicts', reason: 'Scoped via policy_id FK → governedPolicies (Org-scoped); cross-policy conflict ledger has no direct org_id column' },
 ] as const
 
 /**

@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-20T13:47:11.822Z",
+  "generatedAt": "2026-05-20T15:49:58.632Z",
   "filesScanned": 1668,
-  "totalFindings": 2455,
+  "totalFindings": 2458,
   "findingsByRule": {
-    "stale-reference": 1034,
+    "stale-reference": 1037,
     "stale-package-ref": 53,
     "naming-inconsistency": 1253,
     "stale-date": 7,
@@ -12,7 +12,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1195,
+    "warning": 1198,
     "info": 1260
   },
   "findings": [
@@ -141,6 +141,27 @@
       "file": "README.md",
       "line": 175,
       "message": "Possible broken link: [docs/investor/](docs/investor/)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/architecture/AUDIT_ENFORCEMENT.md",
+      "line": 4,
+      "message": "Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](../platform/EVIDENCE_LIFECYCLE_POLICY.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/architecture/AUDIT_ENFORCEMENT.md",
+      "line": 5,
+      "message": "Possible broken link: [docs/platform/AUDIT_ENFORCEMENT.md](../platform/AUDIT_ENFORCEMENT.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/architecture/ORG_SCOPED_TABLES.md",
+      "line": 5,
+      "message": "Possible broken link: [docs/platform/ORG_SCOPED_TABLES.md](../platform/ORG_SCOPED_TABLES.md)"
     },
     {
       "rule": "stale-reference",
