@@ -104,6 +104,10 @@ export const ORG_SCOPED_TABLES = [
   // ── ai-governance.ts ────────────────────────────────────
   'aiGovernanceDecisionLog',
 
+  // ── decision-events.ts ──────────────────────────────────
+  // Control Plane authority decision ledger (immutable, hash-chained).
+  'decisionEvents',
+
   // ── ml.ts ───────────────────────────────────────────────
   'mlDatasets',
   'mlModels',
