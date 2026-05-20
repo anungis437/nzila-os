@@ -17,7 +17,6 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { UserButton } from '@nzila/platform-auth/entra/client';
 
 type Tile = {
   label: string;
@@ -242,16 +241,13 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
             Go to Dashboard
             <ArrowUpRight size={14} />
           </Link>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5">
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: 'w-7 h-7',
-                  userButtonTrigger: 'w-7 h-7 rounded-full',
-                },
-              }}
-            />
-          </div>
+          <Link
+            href="/sign-out"
+            title="Sign out"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-sky-600/30 text-xs font-bold uppercase text-sky-300 transition-all hover:border-sky-500/40 hover:bg-sky-600/50"
+          >
+            {(displayName?.slice(0, 2) ?? 'ME').toUpperCase()}
+          </Link>
         </div>
       </header>
 
