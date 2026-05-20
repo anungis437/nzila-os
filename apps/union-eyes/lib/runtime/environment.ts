@@ -7,8 +7,8 @@
  * Variables (set by deploy-union-eyes.yml `plan` step):
  *   UE_ENVIRONMENT       — 'local'|'dev'|'staging'|'demo'|'pilot'|'production'
  *   NZILA_MODE           — 'demo'|'pilot'|'staging'|'production'
- *   UE_DEPLOYMENT_TYPE   — 'clc-demo'|'pilot'|'staging'|'prod'
- *   UE_FEATURE_PROFILE   — 'clc'|'executive'|'internal'
+ *   UE_DEPLOYMENT_TYPE   — 'cupe4373-demo'|'clc-demo'|'pilot'|'staging'|'prod'
+ *   UE_FEATURE_PROFILE   — 'cupe4373'|'clc'|'executive'|'internal'
  *   NEXT_PUBLIC_APP_ENV  — public mirror of UE_ENVIRONMENT (rendered to client)
  *   NEXT_PUBLIC_SITE_URL — canonical marketing URL for the env
  */
@@ -22,8 +22,8 @@ export type UeEnvironment =
   | 'production'
 
 export type NzilaMode = 'demo' | 'pilot' | 'staging' | 'production'
-export type UeDeploymentType = 'clc-demo' | 'pilot' | 'staging' | 'prod'
-export type UeFeatureProfile = 'clc' | 'executive' | 'internal'
+export type UeDeploymentType = 'cupe4373-demo' | 'clc-demo' | 'pilot' | 'staging' | 'prod'
+export type UeFeatureProfile = 'cupe4373' | 'clc' | 'executive' | 'internal'
 
 const VALID_ENVS: ReadonlySet<UeEnvironment> = new Set([
   'local',
@@ -62,22 +62,22 @@ export function getNzilaMode(): NzilaMode | undefined {
 
 export function getDeploymentType(): UeDeploymentType {
   const t = readEnvVar('UE_DEPLOYMENT_TYPE')
-  if (t === 'clc-demo' || t === 'pilot' || t === 'staging' || t === 'prod') return t
+  if (t === 'cupe4373-demo' || t === 'clc-demo' || t === 'pilot' || t === 'staging' || t === 'prod') return t
 
   // Derive from environment when not explicitly set.
   const env = getUeEnvironment()
   if (env === 'production') return 'prod'
-  if (env === 'demo') return 'clc-demo'
+  if (env === 'demo') return 'cupe4373-demo'
   if (env === 'pilot') return 'pilot'
   return 'staging'
 }
 
 export function getFeatureProfile(): UeFeatureProfile {
   const p = readEnvVar('UE_FEATURE_PROFILE')
-  if (p === 'clc' || p === 'executive' || p === 'internal') return p
+  if (p === 'cupe4373' || p === 'clc' || p === 'executive' || p === 'internal') return p
 
   const env = getUeEnvironment()
-  if (env === 'demo') return 'clc'
+  if (env === 'demo') return 'cupe4373'
   if (env === 'production' || env === 'pilot') return 'executive'
   return 'internal'
 }

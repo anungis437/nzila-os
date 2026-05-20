@@ -16,8 +16,17 @@ ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS membership_number text
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS seniority integer;
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS union_join_date timestamptz;
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS preferred_contact_method text;
-ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS metadata text;
+ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS metadata jsonb;
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS is_primary boolean DEFAULT false;
+
+-- Per-capita exemption columns (added to Drizzle schema, missing from older local DBs)
+ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS member_category text;
+ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS exempt_from_per_capita boolean;
+ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS exemption_reason text;
+ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS exemption_approved_by varchar(255);
+ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS exemption_approved_at timestamptz;
+-- Full-text search vector (populated by trigger)
+ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS search_vector text;
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'active';
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS joined_at timestamptz DEFAULT now();
