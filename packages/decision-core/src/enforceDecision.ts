@@ -92,13 +92,20 @@ export async function enforceDecision(request: EnforceDecisionRequest): Promise<
 
   const authority = buildAuthority(entry.requiredAuthority, granted)
   const missingInputFields = findMissingInputFields(request.input, entry.requiredInputFields)
-  const policyValid = request.policy.id === entry.requiredPolicy && isValidPolicyVersion(request.policy.version)
+  const policyIdMatches = request.policy.id === entry.requiredPolicy
+  const policyVersionShapeOk = isValidPolicyVersion(request.policy.version)
+  const policyVersionAllowed =
+    entry.allowedPolicyVersions === undefined
+    || entry.allowedPolicyVersions.includes(request.policy.version)
+  const policyValid = policyIdMatches && policyVersionShapeOk && policyVersionAllowed
   const enforcementLevel: DecisionEnforcementLevel = entry.enforcementLevel ?? 'block'
 
   const failedReasonCode = !authority.valid
     ? 'AUTHORITY_SCOPE_MISSING'
     : !policyValid
-      ? 'POLICY_REFERENCE_INVALID'
+      ? (!policyIdMatches || !policyVersionShapeOk
+          ? 'POLICY_REFERENCE_INVALID'
+          : 'POLICY_VERSION_NOT_ALLOWED')
       : 'DECISION_INPUT_INCOMPLETE'
 
   const outcome: DecisionOutcome = authority.valid && policyValid && missingInputFields.length === 0
@@ -115,7 +122,13 @@ export async function enforceDecision(request: EnforceDecisionRequest): Promise<
         reasonCode: failedReasonCode,
         explanationTrace: [
           !authority.valid ? `Missing authority: ${authority.missing.join(', ')}` : 'Authority validated.',
-          !policyValid ? `Expected policy ${entry.requiredPolicy}.` : `Policy ${request.policy.id}@${request.policy.version} validated.`,
+          !policyIdMatches
+            ? `Expected policy ${entry.requiredPolicy}.`
+            : !policyVersionShapeOk
+              ? `Policy version ${JSON.stringify(request.policy.version)} is not a valid semver or ISO-date identifier.`
+              : !policyVersionAllowed
+                ? `Policy version ${request.policy.version} is not in the allow-list [${(entry.allowedPolicyVersions ?? []).join(', ')}].`
+                : `Policy ${request.policy.id}@${request.policy.version} validated.`,
           missingInputFields.length > 0 ? `Missing input fields: ${missingInputFields.join(', ')}` : 'Required input fields were present.',
         ],
       }

@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-19T20:04:45.723Z
+Generated: 2026-05-20T13:47:14.232Z
 
-Total documents indexed: 1017
+Total documents indexed: 1018
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -12,7 +12,7 @@ Stale documents (>90 days since repo validation): 0
 | GOLDEN_PATH_DEVELOPER_GUIDE.md | 1 | 0 |
 | INDEX.md | 1 | 0 |
 | README.md | 1 | 0 |
-| architecture | 2 | 0 |
+| architecture | 3 | 0 |
 | backlog | 1 | 0 |
 | categories | 919 | 0 |
 | doctrine | 15 | 0 |
@@ -40,6 +40,7 @@ Stale documents (>90 days since repo validation): 0
 | [ARCHITECTURE.md](ARCHITECTURE.md) | root | 2026-05-19 | current |
 | [CHANGELOG.md](CHANGELOG.md) | root | 2026-05-11 | current |
 | [docs/architecture/AUDIT_ENFORCEMENT.md](docs/architecture/AUDIT_ENFORCEMENT.md) | architecture | 2026-05-11 | current |
+| [docs/architecture/authority-policy-registry-and-decision-events.md](docs/architecture/authority-policy-registry-and-decision-events.md) | architecture | 2026-05-20 | current |
 | [docs/architecture/ORG_SCOPED_TABLES.md](docs/architecture/ORG_SCOPED_TABLES.md) | architecture | 2026-05-11 | current |
 | [docs/backlog/abr-backend.md](docs/backlog/abr-backend.md) | backlog | 2026-05-11 | current |
 | [docs/categories/historical-archive/archive/AI_ML_REMEDIATION_STATUS.md](docs/categories/historical-archive/archive/AI_ML_REMEDIATION_STATUS.md) | categories | 2026-05-11 | current |
@@ -976,7 +977,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-19 | current |
 | [docs/doctrine/SCORING_MODELS.md](docs/doctrine/SCORING_MODELS.md) | doctrine | 2026-05-19 | current |
 | [docs/doctrine/vocabulary.md](docs/doctrine/vocabulary.md) | doctrine | 2026-05-19 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-19 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-20 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
@@ -1027,8 +1028,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-19 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-19 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-20 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-20 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
 | [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-14 | current |
 | [docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md](docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md) | platform | 2026-05-11 | current |

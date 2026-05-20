@@ -1,22 +1,22 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-19T20:04:42.795Z
+> Generated: 2026-05-20T13:47:11.822Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1667 |
-| Total Findings | 2451 |
+| Files Scanned | 1668 |
+| Total Findings | 2455 |
 | Errors | 0 |
 | Warnings | 1195 |
-| Info | 1256 |
+| Info | 1260 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1249 |
+| naming-inconsistency | 1253 |
 | stale-reference | 1034 |
 | missing-package-readme | 105 |
 | stale-package-ref | 53 |
@@ -1116,7 +1116,7 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 
-## naming-inconsistency (1249)
+## naming-inconsistency (1253)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -1135,6 +1135,10 @@
 - ℹ️ `README.business.md:210` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:280` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:96` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:157` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:159` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:161` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md:13` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md:57` — "orgId" should be "org_id" (tenant identifier)
@@ -2196,7 +2200,7 @@
 - ℹ️ `docs/doctrine/SCORING_MODELS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/vocabulary.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/vocabulary.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:951` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:952` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2370,13 +2374,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 91 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 91 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 91 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 91 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 91 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 91 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 91 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 92 days old — may be stale
 
 ## missing-required-doc (3)
 

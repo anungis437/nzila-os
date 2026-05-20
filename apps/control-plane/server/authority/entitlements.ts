@@ -31,7 +31,18 @@ export interface EntitlementResult {
   tier: string | null
   limit: number | null
   expiresAt: string | null
-  source: 'subscription' | 'override' | 'default' | 'denied'
+  /**
+   * Where the resolution came from. Distinct values let auditors tell apart:
+   *   - `subscription`: live `org_entitlements` row (not yet implemented).
+   *   - `override`: open-mode (dev/demo only) — every feature granted.
+   *   - `default`: matched the conservative `defaults` allow-list.
+   *   - `stub`: stub mode is active but feature is outside the defaults.
+   *   - `denied`: org missing, error, or feature not granted by any source.
+   *   - `not_configured`: production boot did not declare an entitlement
+   *     source — denied with `ENTITLEMENT_SOURCE_NOT_CONFIGURED`.
+   */
+  source: 'subscription' | 'override' | 'default' | 'stub' | 'denied' | 'not_configured'
+  reasonCode?: string
   resolvedAt: string
   decisionId: string
 }
@@ -79,6 +90,32 @@ function isOpenEntitlementMode(): boolean {
 }
 
 /**
+ * Resolved entitlement source declared by the operator. Production deploys
+ * MUST set `CONTROL_PLANE_ENTITLEMENT_SOURCE` to one of:
+ *   - `stub`     — conservative default allow-list only (current behaviour);
+ *                  acknowledges that the real source is not yet wired.
+ *   - `open`     — every feature granted (requires `*_ALLOW_OPEN_*=1`).
+ *   - `db`       — read from `org_entitlements` (not yet implemented; throws).
+ * In non-production, an unset value defaults to `stub` so dev/test/demo keep
+ * working. In production, an unset value resolves to `not_configured` and
+ * every entitlement query is denied with a stable reason code.
+ */
+type EntitlementSource = 'stub' | 'open' | 'db' | 'not_configured'
+
+function getDeclaredEntitlementSource(): EntitlementSource {
+  const raw = (process.env.CONTROL_PLANE_ENTITLEMENT_SOURCE ?? '').trim().toLowerCase()
+  if (raw === 'stub' || raw === 'open' || raw === 'db') return raw
+  if (raw.length > 0) {
+    logger.warn('Unknown CONTROL_PLANE_ENTITLEMENT_SOURCE value — treating as not_configured', { raw })
+    return 'not_configured'
+  }
+  // Backwards-compatible default: non-prod keeps the conservative stub so
+  // existing dev/test/staging flows do not regress. Production refuses to
+  // resolve until the operator explicitly declares a source.
+  return process.env.NODE_ENV === 'production' ? 'not_configured' : 'stub'
+}
+
+/**
  * Resolve whether an org is entitled to a feature.
  * Records a decision audit event for every resolution.
  *
@@ -101,6 +138,67 @@ export async function resolveEntitlements(
     decisionId,
   })
 
+  // ── Production boot guard ──────────────────────────────────────────────
+  // Refuse to resolve in production when the operator has not explicitly
+  // declared an entitlement source. This converts a silently-permissive
+  // "only the conservative defaults work" state into a loud denial with a
+  // stable reason code that monitoring can alert on.
+  const declaredSource = getDeclaredEntitlementSource()
+  if (declaredSource === 'not_configured') {
+    logger.error('Entitlement source not configured — denying by default', {
+      orgId: query.orgId,
+      feature: query.feature,
+      decisionId,
+    })
+    await recordAuditEvent({
+      orgId: query.orgId,
+      actorClerkUserId: query.actorId ?? 'system',
+      action: AUDIT_ACTIONS.POLICY_DENIED,
+      targetType: 'entitlement',
+      targetId: query.feature,
+      afterJson: {
+        feature: query.feature,
+        granted: false,
+        decisionId,
+        source: 'not_configured',
+        reasonCode: 'ENTITLEMENT_SOURCE_NOT_CONFIGURED',
+      },
+    })
+    return {
+      orgId: query.orgId,
+      feature: query.feature,
+      granted: false,
+      tier: null,
+      limit: null,
+      expiresAt: null,
+      source: 'not_configured',
+      reasonCode: 'ENTITLEMENT_SOURCE_NOT_CONFIGURED',
+      resolvedAt,
+      decisionId,
+    }
+  }
+  if (declaredSource === 'db') {
+    // Explicit DB source requested but not yet implemented. Fail closed
+    // instead of silently falling through to the stub allow-list.
+    logger.error('CONTROL_PLANE_ENTITLEMENT_SOURCE=db but no DB adapter is wired', {
+      orgId: query.orgId,
+      feature: query.feature,
+      decisionId,
+    })
+    return {
+      orgId: query.orgId,
+      feature: query.feature,
+      granted: false,
+      tier: null,
+      limit: null,
+      expiresAt: null,
+      source: 'denied',
+      reasonCode: 'ENTITLEMENT_DB_ADAPTER_NOT_WIRED',
+      resolvedAt,
+      decisionId,
+    }
+  }
+
   try {
     // Query the platform DB for org entitlements
     // Falls back gracefully if no entitlement record exists
@@ -118,16 +216,23 @@ export async function resolveEntitlements(
     // Until a real subscription/entitlement source is wired in, only the
     // conservative default feature set is granted.
     const orgActive = org !== null
-    const openMode = isOpenEntitlementMode()
+    const openModeRequested = declaredSource === 'open' || isOpenEntitlementMode()
+    const openMode = openModeRequested && isOpenEntitlementMode()
     const defaults = getDefaultFeatures()
-    const granted = orgActive && (openMode || defaults.has(query.feature))
+    const inDefaults = defaults.has(query.feature)
+    const granted = orgActive && (openMode || inDefaults)
     const source: EntitlementResult['source'] = !orgActive
       ? 'denied'
       : openMode
         ? 'override'
-        : granted
+        : inDefaults
           ? 'default'
-          : 'denied'
+          : 'stub'
+    const reasonCode = granted
+      ? undefined
+      : !orgActive
+        ? 'ORG_NOT_FOUND'
+        : 'FEATURE_NOT_IN_DEFAULT_ENTITLEMENTS'
 
     await recordAuditEvent({
       orgId: query.orgId,
@@ -146,6 +251,7 @@ export async function resolveEntitlements(
       limit: null,
       expiresAt: null,
       source,
+      reasonCode,
       resolvedAt,
       decisionId,
     }
@@ -164,6 +270,7 @@ export async function resolveEntitlements(
       limit: null,
       expiresAt: null,
       source: 'denied',
+      reasonCode: 'ENTITLEMENT_RESOLUTION_ERROR',
       resolvedAt,
       decisionId,
     }

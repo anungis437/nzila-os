@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-19T20:04:42.795Z",
-  "filesScanned": 1667,
-  "totalFindings": 2451,
+  "generatedAt": "2026-05-20T13:47:11.822Z",
+  "filesScanned": 1668,
+  "totalFindings": 2455,
   "findingsByRule": {
     "stale-reference": 1034,
     "stale-package-ref": 53,
-    "naming-inconsistency": 1249,
+    "naming-inconsistency": 1253,
     "stale-date": 7,
     "missing-required-doc": 3,
     "missing-package-readme": 105
@@ -13,7 +13,7 @@
   "findingsBySeverity": {
     "error": 0,
     "warning": 1195,
-    "info": 1256
+    "info": 1260
   },
   "findings": [
     {
@@ -7747,6 +7747,34 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/architecture/authority-policy-registry-and-decision-events.md",
+      "line": 96,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/authority-policy-registry-and-decision-events.md",
+      "line": 157,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/authority-policy-registry-and-decision-events.md",
+      "line": 159,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/authority-policy-registry-and-decision-events.md",
+      "line": 161,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
       "line": 3,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
@@ -15175,7 +15203,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 951,
+      "line": 952,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16373,49 +16401,49 @@
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"February 17, 2026\" is 91 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",

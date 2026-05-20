@@ -71,6 +71,14 @@ export type DecisionRegistryEntry = {
   resourceType: string
   requiredAuthority: readonly string[]
   requiredPolicy: string
+  /**
+   * Optional allow-list of accepted `policy.version` values. When present,
+   * `enforceDecision` rejects requests whose `policy.version` is not in the
+   * list with `POLICY_VERSION_NOT_ALLOWED`. Leave undefined to accept any
+   * well-formed (semver or ISO-date) version — useful during early
+   * iteration before policy versions are pinned.
+   */
+  allowedPolicyVersions?: readonly string[]
   auditRequired: boolean
   replaySupported: boolean
   exportSupported: boolean

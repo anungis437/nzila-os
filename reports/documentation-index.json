@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-19T20:04:45.723Z",
-  "totalDocuments": 1017,
+  "generatedAt": "2026-05-20T13:47:14.232Z",
+  "totalDocuments": 1018,
   "staleDocuments": 0,
   "categories": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "category": "architecture",
-      "count": 2,
+      "count": 3,
       "staleCount": 0
     },
     {
@@ -136,6 +136,12 @@
       "path": "docs/architecture/AUDIT_ENFORCEMENT.md",
       "category": "architecture",
       "lastValidated": "2026-05-11",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/authority-policy-registry-and-decision-events.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -5757,7 +5763,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -6063,13 +6069,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {

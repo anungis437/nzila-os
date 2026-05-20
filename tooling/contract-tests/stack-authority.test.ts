@@ -73,19 +73,39 @@ const TS_AUTHORITATIVE_APPS = [
 const SCAFFOLD_TEST_EXCLUSIONS = new Set(['test-scaffold-gp'])
 
 /**
- * Patterns that indicate a direct Drizzle mutation (not a read).
- * We look for `.insert(`, `.update(`, `.delete(` preceded by a likely
- * database handle identifier. The identifier list is intentionally broad
+ * Patterns that indicate a direct Drizzle (or Drizzle-shaped) mutation.
+ *
+ * We look for a mutation method invocation preceded by a likely database
+ * handle identifier. The handle suffix list is intentionally broad
  * (db, database, client, conn[ection], tx, trx, transaction, drizzle, sql,
- * pg, scoped, scopedDb, anything ending in `Db` or `Database`) so simple
- * variable renames cannot bypass the contract check.
+ * pg) so simple renames (`writerDb`, `scopedClient`, `auditTx`) cannot
+ * bypass the contract check.
+ *
+ * The method list also covers Drizzle-style bulk and upsert variants so
+ * that renaming `insert` to `insertMany`/`bulkInsert`/`upsert` does not
+ * silently slip past the gate.
+ *
+ * KNOWN GAP: this regex cannot detect *pure* aliases without a recognised
+ * suffix (e.g. `const writer = db; writer.insert(...)`). Closing that gap
+ * requires AST-level scope analysis. Tracked separately; this regex is the
+ * defence-in-depth layer for the common renaming-without-suffix pattern.
  */
 const DB_HANDLE_NAME = String.raw`[A-Za-z_$][\w$]*(?:[dD]b|[dD]atabase|[cC]lient|[cC]onn(?:ection)?|[tT]x|[tT]rx|[tT]ransaction|[dD]rizzle|[sS]ql|[pP]g)`
-const DRIZZLE_MUTATION_PATTERNS = [
-  new RegExp(String.raw`\b${DB_HANDLE_NAME}\s*\.\s*insert\s*\(`),
-  new RegExp(String.raw`\b${DB_HANDLE_NAME}\s*\.\s*update\s*\(`),
-  new RegExp(String.raw`\b${DB_HANDLE_NAME}\s*\.\s*delete\s*\(`),
-]
+const MUTATION_METHODS = [
+  'insert',
+  'insertMany',
+  'insertInto',
+  'bulkInsert',
+  'update',
+  'updateMany',
+  'delete',
+  'deleteMany',
+  'upsert',
+  'merge',
+] as const
+const DRIZZLE_MUTATION_PATTERNS = MUTATION_METHODS.map(
+  (method) => new RegExp(String.raw`\b${DB_HANDLE_NAME}\s*\.\s*${method}\s*\(`),
+)
 
 /**
  * Patterns that indicate a safe mutation context (transaction param, RLS wrapper).
