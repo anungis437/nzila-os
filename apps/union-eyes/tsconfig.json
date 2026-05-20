@@ -51,6 +51,10 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
+  "files": [
+    "db/queries/claims-queries.ts",
+    "lib/workflow-engine.ts"
+  ],
   "exclude": [
     "node_modules",
     ".next",
@@ -62,7 +66,6 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "lib/workflow-automation-engine.ts",
-    "lib/workflow-engine.ts",
     "lib/services/transfer-pricing-service.ts",
     "lib/workers/**",
     "lib/graphql/**",
