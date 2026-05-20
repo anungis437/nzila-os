@@ -33,62 +33,83 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   };
 }
 
-const outcomes = [
-  {
-    icon: ShieldCheck,
-    title: 'Labour-safe modernization by design',
-    desc: 'Modernize operations without opening a surveillance pathway or weakening member protections.',
+const PAGE_COPY = {
+  'en-CA': {
+    badge: 'Solutions · Policy & Labour Leadership',
+    heading: 'Labour-safe modernization without compromise.',
+    description:
+      'UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform.',
+    primaryCta: 'Request an Executive Briefing',
+    secondaryCta: 'View Governance & Trust',
+    challengeHeading: 'The policy challenge',
+    challenges: [
+      'AI adoption pressure can outpace governance readiness and policy safeguards',
+      'Members and representatives need clear guarantees against surveillance misuse',
+      'Human review can be inconsistent when standards are not enforced structurally',
+      'Policy intent gets diluted when operational teams work from fragmented systems',
+    ],
+    outcomesHeading: 'What policy and labour leaders gain',
+    outcomes: [
+      { icon: ShieldCheck, title: 'Labour-safe modernization by design', desc: 'Modernize operations without opening a surveillance pathway or weakening member protections.' },
+      { icon: Eye, title: 'Human oversight enforced', desc: 'No automated decision path bypasses elected leadership, policy review, or representation judgment.' },
+      { icon: Scale, title: 'Democratic accountability preserved', desc: 'Governance controls keep strategic decisions with people, not opaque systems.' },
+      { icon: Users, title: 'Member trust strengthened', desc: 'Clear safeguards and explainable outputs increase confidence from members and frontline reps.' },
+      { icon: HeartHandshake, title: 'Policy coherence across teams', desc: 'Policy, governance, and operations stay aligned through leadership transitions and organizational change.' },
+    ],
+    relatedHeading: 'Explore related solutions',
+    finalHeading: 'Build member trust into modernization',
+    finalBody: 'See a labour-safe implementation path in a guided demo.',
   },
-  {
-    icon: Eye,
-    title: 'Human oversight enforced',
-    desc: 'No automated decision path bypasses elected leadership, policy review, or representation judgment.',
+  'fr-CA': {
+    badge: 'Solutions · Leadership politique et syndical',
+    heading: 'Modernisation sûre pour le travail, sans compromis.',
+    description:
+      'UnionEyes donne aux responsables politiques et syndicaux une voie de modernisation sûre pour la gouvernance : résultats explicables, surveillance humaine et protections anti-surveillance intégrées à la plateforme.',
+    primaryCta: 'Demander un breffage exécutif',
+    secondaryCta: 'Voir gouvernance et confiance',
+    challengeHeading: 'Le défi politique',
+    challenges: [
+      'La pression d’adopter l’IA peut dépasser la préparation de gouvernance et les garanties politiques',
+      'Les membres et représentantes ou représentants ont besoin de garanties claires contre les usages de surveillance',
+      'La revue humaine devient incohérente lorsque les normes ne sont pas imposées structurellement',
+      'L’intention politique se dilue quand les équipes travaillent à partir de systèmes fragmentés',
+    ],
+    outcomesHeading: 'Ce que les responsables politiques et syndicaux gagnent',
+    outcomes: [
+      { icon: ShieldCheck, title: 'Modernisation sûre pour le travail par conception', desc: 'Modernisez les opérations sans ouvrir de voie de surveillance ni affaiblir les protections des membres.' },
+      { icon: Eye, title: 'Surveillance humaine imposée', desc: 'Aucun chemin de décision automatisé ne contourne le leadership élu, la revue politique ou le jugement de représentation.' },
+      { icon: Scale, title: 'Responsabilité démocratique préservée', desc: 'Les contrôles de gouvernance gardent les décisions stratégiques entre les mains des personnes, pas de systèmes opaques.' },
+      { icon: Users, title: 'Confiance des membres renforcée', desc: 'Des garanties claires et des résultats explicables renforcent la confiance des membres et des représentantes et représentants.' },
+      { icon: HeartHandshake, title: 'Cohérence politique entre les équipes', desc: 'La politique, la gouvernance et les opérations restent alignées pendant les transitions et les changements organisationnels.' },
+    ],
+    relatedHeading: 'Explorer les solutions connexes',
+    finalHeading: 'Intégrez la confiance des membres à la modernisation',
+    finalBody: 'Voyez un parcours de mise en œuvre sûr pour le travail dans une démonstration guidée.',
   },
-  {
-    icon: Scale,
-    title: 'Democratic accountability preserved',
-    desc: 'Governance controls keep strategic decisions with people, not opaque systems.',
-  },
-  {
-    icon: Users,
-    title: 'Member trust strengthened',
-    desc: 'Clear safeguards and explainable outputs increase confidence from members and frontline reps.',
-  },
-  {
-    icon: HeartHandshake,
-    title: 'Policy coherence across teams',
-    desc: 'Policy, governance, and operations stay aligned through leadership transitions and organizational change.',
-  },
-];
-
-const challenges = [
-  'AI adoption pressure can outpace governance readiness and policy safeguards',
-  'Members and representatives need clear guarantees against surveillance misuse',
-  'Human review can be inconsistent when standards are not enforced structurally',
-  'Policy intent gets diluted when operational teams work from fragmented systems',
-];
+};
 
 export default async function LabourLeadershipPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const carousel = getCarouselNav('labour-leadership', locale);
+  const copy = PAGE_COPY[locale as keyof typeof PAGE_COPY] ?? PAGE_COPY['en-CA'];
   return (
     <div className="bg-white min-h-screen">
       <MarketingHeroSection
         imageUrl={heroImagery.labourLeadership}
         badge={
           <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white backdrop-blur-sm">
-            Solutions · Policy & Labour Leadership
+            {copy.badge}
           </span>
         }
-        heading={<>Labour-safe modernization<br />without compromise.</>}
-        description="UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform."
+        heading={<>{copy.heading}</>}
+        description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request an Executive Briefing
+            <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+              {copy.primaryCta}
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
-              View Governance & Trust
+              {copy.secondaryCta}
             </Link>
           </div>
         }
@@ -97,9 +118,9 @@ export default async function LabourLeadershipPage({ params }: { params: Promise
       <section className="py-16 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <h2 className="text-2xl font-bold text-navy mb-4">The policy challenge</h2>
+            <h2 className="text-2xl font-bold text-navy mb-4">{copy.challengeHeading}</h2>
             <ul className="space-y-3">
-              {challenges.map((c) => (
+              {copy.challenges.map((c) => (
                 <li key={c} className="flex items-start gap-3 text-gray-700 text-sm leading-relaxed">
                   <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
                   {c}
@@ -112,9 +133,9 @@ export default async function LabourLeadershipPage({ params }: { params: Promise
 
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What policy and labour leaders gain</h2>
+          <h2 className="text-2xl font-bold text-navy mb-10 text-center">{copy.outcomesHeading}</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {outcomes.map((o) => (
+            {copy.outcomes.map((o) => (
               <div key={o.title} className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
                 <div className="w-10 h-10 rounded-xl bg-electric/10 flex items-center justify-center mb-4">
                   <o.icon className="h-5 w-5 text-electric" />
@@ -129,7 +150,7 @@ export default async function LabourLeadershipPage({ params }: { params: Promise
 
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-base font-bold text-navy mb-6">Explore related solutions</h3>
+          <h3 className="text-base font-bold text-navy mb-6">{copy.relatedHeading}</h3>
           <div className="grid sm:grid-cols-2 gap-4">
             {carousel.previous ? (
               <Link href={carousel.previous.href} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 text-sm font-medium text-navy hover:text-electric transition-colors">
@@ -147,10 +168,10 @@ export default async function LabourLeadershipPage({ params }: { params: Promise
 
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Build member trust into modernization</h2>
-          <p className="text-white/70 mb-8">See a labour-safe implementation path in a guided demo.</p>
-          <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request an Executive Briefing
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
+          <p className="text-white/70 mb-8">{copy.finalBody}</p>
+          <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+            {copy.primaryCta}
           </Link>
         </div>
       </section>

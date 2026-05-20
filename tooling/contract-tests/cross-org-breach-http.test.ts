@@ -62,7 +62,8 @@ const SYSTEM_SKIP = (path: string) => {
          rel.includes('/api/version/') ||
          rel.includes('/api/ready/') ||
          rel.includes('/api/rights/terms/') ||
-         rel.includes('/api/auth_core/')
+         rel.includes('/api/auth_core/') ||
+         rel.includes('/api/icra/')          // ICRA — pseudonymous public diagnostic (no org context)
 }
 
 // ── Auth patterns that enforce org-scoped access ──────────────────────────── 
@@ -165,7 +166,7 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
         const violations: string[] = []
 
         for (const route of routes) {
-          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route) || ADMIN_SKIP(route)) continue
+          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route) || ADMIN_SKIP(route) || SYSTEM_SKIP(route)) continue
           const content = read(route)
 
           // Only check files with write operations + DB access

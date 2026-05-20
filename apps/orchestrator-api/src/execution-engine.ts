@@ -193,7 +193,7 @@ export async function executeWorkflow(
   })
   const record = created.record
 
-  void emitCommandEvent(
+  await emitCommandEvent(
     'workflow.run.created',
     {
       runId: record.id,
@@ -268,7 +268,7 @@ async function processRun(runId: string): Promise<void> {
       return
     }
 
-    void emitCommandEvent(
+    await emitCommandEvent(
       'workflow.run.started',
       {
         runId: run.id,
@@ -320,7 +320,7 @@ async function processRun(runId: string): Promise<void> {
           completed: true,
         })
         if (success.record) {
-          void emitCommandEvent(
+          await emitCommandEvent(
             'workflow.run.succeeded',
             {
               runId: success.record.id,
@@ -355,7 +355,7 @@ async function processRun(runId: string): Promise<void> {
             completed: true,
           })
           if (terminal.record) {
-            void emitCommandEvent(
+            await emitCommandEvent(
               deadLettered ? 'workflow.run.dead_lettered' : 'workflow.run.failed',
               {
                 runId: terminal.record.id,
@@ -384,7 +384,7 @@ async function processRun(runId: string): Promise<void> {
         args.failureClass = failureClass
         args.failureMessage = String(error)
 
-        void emitCommandEvent(
+        await emitCommandEvent(
           'workflow.run.step.retrying',
           {
             runId: run.id,
@@ -449,7 +449,7 @@ export async function cancelWorkflowRun(
     completed: true,
   })
 
-  void emitCommandEvent(
+  await emitCommandEvent(
     'workflow.run.cancelled',
     {
       runId: cancelled.id,
@@ -485,7 +485,7 @@ export async function retryWorkflowRun(
     setResult: { retriedFromFailure: true },
   })
 
-  void emitCommandEvent(
+  await emitCommandEvent(
     'workflow.run.step.retrying',
     {
       runId: retried.id,

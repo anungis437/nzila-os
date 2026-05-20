@@ -37,7 +37,7 @@ test.describe('Missing routes — known 404 gaps (pending)', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/404|not found/i);
   });
 });
@@ -64,7 +64,10 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.goto(`/${LOCALE}/dashboard/admin`, { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    // Use innerText() — not textContent() — so that <script> tag content
+    // (Next.js build manifests that always reference the "/404" route) is
+    // excluded from the check.
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/\b404\b/);
   });
 
@@ -92,7 +95,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.waitForLoadState('networkidle');
     await expect(page.locator('body')).toBeVisible();
     // intake form should show a heading, not a 404
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/\b404\b/);
   });
 
@@ -112,7 +115,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/404|not found/i);
   });
 
@@ -122,7 +125,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/404|not found/i);
   });
 
@@ -132,7 +135,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
-    const body = (await page.textContent('body')) ?? '';
+    const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/404|not found/i);
   });
 });

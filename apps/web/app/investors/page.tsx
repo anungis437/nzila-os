@@ -11,10 +11,10 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Investors',
-  description: `Series A investment opportunity - ${MARKETING_FACTS.totalTamLabel} market size, ${MARKETING_FACTS.productPlatforms} products, ${MARKETING_FACTS.governedApplications} live tools, and one shared platform.`,
+  description: 'Investment context for Nzila Ventures: institutional continuity infrastructure, Union Eyes validation, Nzila OS, and governed operational applications.',
   openGraph: {
     title: 'Invest in Nzila Ventures',
-    description: `${MARKETING_FACTS.totalTamLabel} market size. ${MARKETING_FACTS.productPlatforms} products. ${MARKETING_FACTS.governedApplications} live tools.`,
+    description: 'Institutional continuity infrastructure with Union Eyes as the flagship validation wedge.',
     images: [{ url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Modern glass skyscraper reaching skyward — representing growth and investment ambition' }],
   },
   alternates: { canonical: '/investors' },
@@ -30,7 +30,7 @@ const keyMetrics = [
 ];
 
 const flagships = [
-  { name: 'UnionEyes', vertical: 'Uniontech', tam: '$50B', stage: 'Production', description: 'Comprehensive union operations platform — pension forecasting, grievance tracking, and analytics at enterprise scale.' },
+  { name: 'Union Eyes', vertical: 'Uniontech', tam: '$50B', stage: 'Pilot-paid', description: 'Flagship continuity infrastructure for labor organizations: grievance lineage, steward handoffs, governance evidence, and operational memory.' },
   { name: 'Zonga', vertical: 'Music & Creator Economy', tam: '$20B+', stage: 'Production', description: 'Africa-first music distribution and streaming platform with catalog workflows and transparent creator royalty payouts.' },
   { name: 'Flow', vertical: 'Commerce & Operations', tam: '$100B+', stage: 'Production', description: 'Order-to-cash and commerce operations platform with inventory, production, and multi-channel execution flows.' },
   { name: 'Agrimo', vertical: 'Agriculture & Supply Chain', tam: '$8B', stage: 'Production', description: 'Agricultural supply-chain and field operations platform with harvest tracking, quality workflows, and traceability.' },
@@ -47,15 +47,15 @@ const useOfFunds = [
 const timeline = [
   { year: '2019–2022', title: 'Foundation', description: 'Built core IP, a proprietary decision library, and pioneered union and diaspora banking technology.' },
   { year: '2023', title: 'Platform Expansion', description: 'Expanded to 15 products across 10 industries and 17 live tools. Shared platform architecture.' },
-  { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. UnionEyes 83% migrated. Production deployments on Azure.' },
+  { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. Union Eyes 83% migrated. Production deployments on Azure.' },
   { year: '2025', title: 'Series A Ready', description: 'Revenue activation across flagships. $6M ARR target. Strategic partnerships pipeline.' },
 ];
 
 const moats = [
-  { title: 'Proprietary Data', description: 'A deeply curated proprietary data foundation across labor, finance, agriculture, and legal domains — difficult to replicate.' },
-  { title: 'Proprietary Decision Systems', description: 'Purpose-built prompts and predictive models for social-impact verticals — proprietary and not available in off-the-shelf tools.' },
-  { title: 'Multi-Vertical Network', description: 'Cross-pollination between 10+ verticals creates compounding defensibility and data flywheel effects.' },
-  { title: 'First-Mover Advantage', description: 'Only platform company operating simultaneously across uniontech, diaspora banking, and agrotech.' },
+  { title: 'Operational Memory', description: 'Continuity infrastructure becomes more valuable as institutions preserve decisions, rationale, records, and context over time.' },
+  { title: 'Governance Evidence', description: 'Evidence-native operations produce traceability, reviewability, audit posture, and procurement credibility as the system is used.' },
+  { title: 'Union Eyes Wedge', description: 'Labor organizations provide the clearest validation path for governance resilience, operational memory, and anti-surveillance trust.' },
+  { title: 'Doctrine-Governed Category', description: 'The doctrine constrains product direction around continuity, explainability, sovereignty, evidence, and human accountability.' },
 ];
 
 const keyMetricFr: Record<string, string> = {
@@ -95,16 +95,16 @@ export default async function InvestorsPage() {
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              {isFr ? 'La plateforme qui alimente' : 'The Platform Powering'}<br />
-              <span className="gradient-text">{isFr ? '100B+ de marchés' : '$100B+ in Markets'}</span>
+              {isFr ? 'La catégorie est' : 'The category is'}<br />
+              <span className="gradient-text">{isFr ? 'la continuité institutionnelle' : 'institutional continuity'}</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mb-10">
               {isFr
-                ? `${MARKETING_FACTS.productPlatforms} produits. ${MARKETING_FACTS.governedApplications} outils en service. Une plateforme partagée. Nzila Ventures est la couche d infrastructure pour la technologie à impact social en sante, finance, travail, agriculture et justice.`
-                : `${MARKETING_FACTS.productPlatforms} products. ${MARKETING_FACTS.governedApplications} live tools. One shared platform. Nzila Ventures is the infrastructure layer for social-impact technology - healthcare, finance, labor, agriculture, and justice.`}
+                ? `Nzila Ventures construit une infrastructure de continuité institutionnelle. Union Eyes valide le wedge, Nzila OS porte l architecture, et ${MARKETING_FACTS.governedApplications} applications gouvernées étendent la couche opérationnelle.`
+                : `Nzila Ventures builds institutional continuity infrastructure. Union Eyes validates the wedge, Nzila OS carries the platform architecture, and ${MARKETING_FACTS.governedApplications} governed applications extend the operating layer.`}
             </p>
           </ScrollReveal>
 
@@ -365,9 +365,6 @@ export default async function InvestorsPage() {
     </main>
   );
 }
-
-
-
 
 
 

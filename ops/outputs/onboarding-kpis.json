@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-18T19:37:06.264Z",
+  "timestamp": "2026-05-20T16:04:33.433Z",
   "period": "quarterly",
   "population_size": 1,
   "metrics": {
@@ -16,7 +16,7 @@
   "github_enrichment": {
     "repo": "anungis437/nzila-os",
     "window_days": 30,
-    "window_start": "2026-04-18",
+    "window_start": "2026-04-20",
     "records_with_api_data": 1,
     "records": [
       {

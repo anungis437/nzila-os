@@ -7,7 +7,7 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Trust Center',
-  description: 'Nzila Ventures Trust Center — security posture, governance, reliability, and privacy commitments across the platform.',
+  description: 'Nzila Ventures Trust Center - anti-surveillance, security, privacy, reliability, governance, and sovereignty commitments.',
   alternates: { canonical: '/trust' },
 };
 
@@ -31,6 +31,7 @@ export default async function TrustCenter() {
   const listings = loadListings();
 
   const sections = [
+    { href: '/anti-surveillance', titleEn: 'Anti-Surveillance', titleFr: 'Anti-surveillance', descEn: 'Continuity intelligence, human dignity, and prohibited use cases.', descFr: 'Intelligence de continuité, dignité humaine et usages interdits.' },
     { href: '/security', titleEn: 'Security', titleFr: 'Sécurité', descEn: 'Authentication, encryption, secrets, audit logging.', descFr: 'Authentification, chiffrement, secrets, journalisation.' },
     { href: '/privacy', titleEn: 'Privacy', titleFr: 'Confidentialité', descEn: 'Data residency, retention, subject rights.', descFr: 'Résidence des données, rétention, droits des personnes.' },
     { href: '/reliability', titleEn: 'Reliability', titleFr: 'Fiabilité', descEn: 'Uptime targets, incident response, change management.', descFr: 'Cibles de disponibilité, gestion des incidents et des changements.' },
@@ -45,8 +46,21 @@ export default async function TrustCenter() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{isFr ? 'Centre de confiance' : 'Trust Center'}</h1>
           <p className="text-gray-300 max-w-2xl">
             {isFr
-              ? 'Comment Nzila construit, exploite et garantit chaque produit du portefeuille — sécurité, confidentialité, fiabilité et gouvernance.'
-              : 'How Nzila builds, runs, and guarantees every product in the portfolio — security, privacy, reliability, and governance.'}
+              ? 'Comment Nzila construit et exploite une infrastructure de continuité sans devenir un système de surveillance: sécurité, confidentialité, souveraineté, fiabilité et gouvernance.'
+              : 'How Nzila builds and runs continuity infrastructure without becoming a surveillance system: security, privacy, sovereignty, reliability, and governance.'}
+          </p>
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-gray-100">
+        <div className="rounded-2xl border border-electric/20 bg-electric/5 p-6 md:p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            {isFr ? 'La distinction principale' : 'The core distinction'}
+          </h2>
+          <p className="text-gray-700 max-w-3xl">
+            {isFr
+              ? 'Nzila mesure la posture institutionnelle: cohérence de gouvernance, exposition de continuité, traçabilité opérationnelle et résilience. Nzila ne mesure pas la productivité, le comportement, la localisation ou la performance individuelle.'
+              : 'Nzila measures institutional posture: governance coherence, continuity exposure, operational traceability, and resilience. Nzila does not measure individual productivity, behavior, location, or performance.'}
           </p>
         </div>
       </section>

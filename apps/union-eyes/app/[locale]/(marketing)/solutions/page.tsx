@@ -121,8 +121,114 @@ const solutions = [
   },
 ];
 
+const pageCopy = {
+  'en-CA': {
+    badge: 'Solutions',
+    heading: 'Built for every institutional stakeholder',
+    description:
+      'UnionEyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role.',
+    ctaHeading: 'Ready to explore your stakeholder journey?',
+    ctaDescription:
+      'Request an Executive Briefing tailored to your role and institutional context.',
+    cta: 'Request an Executive Briefing',
+    solutions,
+  },
+  'fr-CA': {
+    badge: 'Solutions',
+    heading: 'Conçu pour chaque partie prenante institutionnelle',
+    description:
+      'UnionEyes s’organise autour des parcours des parties prenantes institutionnelles, pas autour de systèmes techniques. Chaque capacité met en avant les résultats utiles à votre rôle.',
+    ctaHeading: 'Prêt à explorer votre parcours institutionnel?',
+    ctaDescription:
+      'Demandez une présentation exécutive adaptée à votre rôle et à votre contexte institutionnel.',
+    cta: 'Demander une présentation exécutive',
+    solutions: [
+      {
+        icon: Users,
+        audience: 'Direction exécutive syndicale',
+        href: 'solutions/executive-leadership',
+        challenge:
+          'La continuité stratégique est fragilisée lorsque la connaissance institutionnelle vit chez des personnes plutôt que dans l’organisation.',
+        outcomes: [
+          'Visibilité sur la continuité organisationnelle lors des transitions de leadership',
+          'Cohérence stratégique pendant la succession et le changement',
+          'Synthèses opérationnelles de niveau exécutif sans complexité technique',
+        ],
+        cta: 'Solutions pour la direction exécutive',
+      },
+      {
+        icon: ShieldCheck,
+        audience: 'Direction de la gouvernance',
+        href: 'solutions/governance-leadership',
+        challenge:
+          'La modernisation de la gouvernance exige explicabilité, contrôles de supervision et continuité — pas une IA opaque.',
+        outcomes: [
+          'Intelligence explicable de gouvernance officielle avec supervision humaine',
+          'Modernisation de la gouvernance avec pistes d’audit complètes',
+          'Supervision de continuité à travers les transitions de gouvernance',
+        ],
+        cta: 'Solutions pour la gouvernance',
+      },
+      {
+        icon: Settings,
+        audience: 'Direction des opérations',
+        href: 'solutions/operations-leadership',
+        challenge:
+          'La fragmentation opérationnelle affaiblit la résilience institutionnelle avec le temps.',
+        outcomes: [
+          'Cohérence opérationnelle entre équipes distribuées',
+          'Préservation de la mémoire institutionnelle pendant le changement',
+          'Planification de continuité pour la résilience opérationnelle',
+        ],
+        cta: 'Solutions pour les opérations',
+      },
+      {
+        icon: Cpu,
+        audience: 'Direction technologique',
+        href: 'solutions/technology-leadership',
+        challenge:
+          'Les organisations syndicales ont besoin d’une IA sécuritaire, explicable, gouvernée et fiable — pas expérimentale.',
+        outcomes: [
+          'IA respectueuse de la gouvernance avec garanties d’explicabilité',
+          'Sécurité d’entreprise et résidence des données au Canada',
+          'Infrastructure de confiance institutionnelle avec capacités d’audit',
+        ],
+        cta: 'Solutions pour la technologie',
+      },
+      {
+        icon: Heart,
+        audience: 'Direction des politiques et du travail',
+        href: 'solutions/labour-leadership',
+        challenge:
+          'L’adoption de l’IA en milieu syndical exige une posture clairement respectueuse du travail et de la supervision humaine.',
+        outcomes: [
+          'Anti-surveillance par conception — aucune notation de conduite individuelle',
+          'Supervision humaine dans toutes les recommandations d’intelligence',
+          'Modernisation respectueuse du travail avec contrôles démocratiques',
+        ],
+        cta: 'Solutions politiques et travail',
+      },
+      {
+        icon: Briefcase,
+        audience: 'Parties prenantes à l’approvisionnement',
+        href: 'solutions/procurement',
+        challenge:
+          'Les décisions d’approvisionnement exigent crédibilité opérationnelle, préparation de mise en œuvre et validation de confiance institutionnelle.',
+        outcomes: [
+          'Déploiement modulaire avec parcours de mise en œuvre par phases',
+          'Documentation du centre de confiance et exports prêts pour l’audit',
+          'Évaluation de préparation au pilote et briefings de gouvernance',
+        ],
+        cta: 'Ressources d’approvisionnement',
+      },
+    ],
+  },
+} as const;
+
 export default async function SolutionsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  const copy = pageCopy[locale as keyof typeof pageCopy] ?? pageCopy['en-CA'];
+
   return (
     <div className="bg-white min-h-screen">
       {/* Hero with Imagery */}
@@ -130,17 +236,17 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
         imageUrl={heroImagery.solutions}
         badge={
           <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white backdrop-blur-sm">
-            Solutions
+            {copy.badge}
           </span>
         }
-        heading="Built for every institutional stakeholder"
-        description="UnionEyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role."
+        heading={copy.heading}
+        description={copy.description}
       />
 
       {/* ── Solutions Grid ── */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="space-y-10">
-          {solutions.map((sol) => (
+          {copy.solutions.map((sol) => (
             <div
               key={sol.audience}
               className="flex flex-col md:flex-row gap-8 p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors"
@@ -178,16 +284,16 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
       <section className="bg-navy text-white py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Ready to explore your stakeholder journey?
+            {copy.ctaHeading}
           </h2>
           <p className="text-white/70 mb-8">
-            Request an Executive Briefing tailored to your role and institutional context.
+            {copy.ctaDescription}
           </p>
           <Link
             href={`/${locale}/pilot-request`}
             className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
-            Request an Executive Briefing
+            {copy.cta}
           </Link>
         </div>
       </section>

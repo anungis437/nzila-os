@@ -119,6 +119,7 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/billing/checkout',           // Public SaaS checkout (Stripe-hosted)
   '/api/billing/webhook',            // Stripe billing webhook (Stripe-verified, not user-auth)
   '/api/leads',                      // Public lead capture (pre-onboarding soft gate, no user-auth)
+  '/api/icra',                       // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated)
   '/_perf/',                         // Web vitals sendBeacon (anonymous, no org context)
 ]
 

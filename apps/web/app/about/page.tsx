@@ -9,10 +9,10 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'About Us — Nzila Ventures',
-  description: 'Technology with soul. We build generational AI-powered ventures across care, learning, and decision-making — Canada-based, globally built, and shaped by Congolese heritage.',
+  description: 'Nzila Ventures is the operating company behind Nzila OS, building institutional continuity infrastructure for trust-sensitive organizations.',
   openGraph: {
     title: 'About Nzila Ventures',
-    description: 'A venture studio building ethical, human-centered technology for generational impact across healthcare, education, and justice.',
+    description: 'The operating company behind Nzila OS, Union Eyes, and governed continuity product lines.',
     images: [{ url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Nzila Ventures — Technology with soul' }],
   },
   alternates: { canonical: '/about' },
@@ -53,7 +53,7 @@ const values = [
 
 const timeline = [
   { year: '2025', title: 'Nzila is Born', description: 'From the Kikongo concept of Nzila — "path" — we consolidate into a studio model. Eight ventures unified. One ethical core. A new name. A chosen way forward.' },
-  { year: '2025–2026', title: 'Walking the Path', description: 'UnionEyes, Zonga, Flow, FAIRCASE, and more. Each platform speaks with the others. Each voice carries memory, consent, and governance for builders and communities across all sectors.' },
+  { year: '2025–2026', title: 'Walking the Path', description: 'Union Eyes, Zonga, Flow, FAIRCASE, and more. Each platform speaks with the others. Each voice carries memory, consent, and governance for builders and communities across all sectors.' },
   { year: '2025+', title: 'Generational Impact', description: 'From Canada to Global Impact — our dream: an ecosystem where technology remembers who we are and helps us become who we\'re meant to be. Not just an app. A new operating system for dignity.' },
 ];
 
@@ -87,7 +87,7 @@ const timelineFr: Record<string, { title: string; description: string }> = {
   },
   'Walking the Path': {
     title: 'Marcher le chemin',
-    description: 'UnionEyes, Zonga, Flow, FAIRCASE, et plus. Chaque plateforme parle avec les autres. Chaque voix porte la mémoire, le consentement et la gouvernance pour les constructeurs et les communautés de tous les secteurs.',
+    description: 'Union Eyes, Zonga, Flow, FAIRCASE, et plus. Chaque plateforme parle avec les autres. Chaque voix porte la mémoire, le consentement et la gouvernance pour les constructeurs et les communautés de tous les secteurs.',
   },
   'Generational Impact': {
     title: 'Impact générationnel',
@@ -117,20 +117,20 @@ export default async function About() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              {isFr ? 'Nzila — Le chemin' : 'Nzila — The Path'}
+              {isFr ? 'Société d exploitation' : 'Operating Company'}
             </span>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              {isFr ? 'Technologie avec' : 'Technology with'}<br />
-              <span className="gradient-text">{isFr ? 'l\'âme' : 'Soul'}</span>
+              {isFr ? 'Construire la continuité' : 'Building continuity'}<br />
+              <span className="gradient-text">{isFr ? 'pour les institutions' : 'for institutions'}</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl">
               {isFr
-                ? 'Du concept kikongo de Nzila — « chemin » — nous construisons une génération de technologie IA éthique et profondément humaine. Un studio qui avance du soin à la cognition, de l\'apprentissage à la prise de décision, en écoutant les générations.'
-                : 'From the Kikongo concept of Nzila — "path" — we build a generation of ethical, deeply human AI-powered technology. A studio advancing from care to cognition, from learning to decision-making, across all ages.'}
+                ? 'Nzila Ventures est la société d exploitation derrière Nzila OS, Union Eyes et des lignes produit gouvernées pour les organisations où continuité, preuves et confiance comptent.'
+                : 'Nzila Ventures is the operating company behind Nzila OS, Union Eyes, and governed product lines for organizations where continuity, evidence, and trust matter.'}
             </p>
           </ScrollReveal>
         </div>
@@ -152,8 +152,8 @@ export default async function About() {
                   </h2>
                   <p className="text-lg text-gray-600 leading-relaxed">
                     {isFr
-                      ? 'Construire une technologie IA gouvernée éthiquement et profondément humaine qui habilite les vies à travers les soins, l\'apprentissage et la prise de décision. Nzila n\'est pas une startup — c\'est un studio qui pose une question plus grande : qu\'est-ce que nos systèmes devraient mémoriser de nous ? Et quel avenir construisons-nous dans chaque interaction, chaque donnée, chaque ligne de code ?'
-                      : 'To build generational technology — AI-powered, ethically governed, deeply human — that empowers lives across care, learning, and decision-making. Nzila isn\'t a startup. It\'s a venture studio grounded in a higher question: What should our systems remember about us? And what future are we embedding into every interaction, dataset, and line of code?'}
+                      ? 'Construire une infrastructure opérationnelle gouvernée qui aide les institutions sensibles à la confiance à préserver mémoire opérationnelle, preuves, décisions et continuité pendant les transitions.'
+                      : 'To build governed operational infrastructure that helps trust-sensitive institutions preserve operational memory, evidence, decision rationale, and continuity across transitions.'}
                   </p>
                 </div>
               </div>
@@ -171,8 +171,8 @@ export default async function About() {
                   </h2>
                   <p className="text-lg text-gray-600 leading-relaxed">
                     {isFr
-                      ? 'Du Canada à l\'impact mondial — un écosystème où la technologie se souvient de qui nous sommes et nous aide à devenir ce que nous sommes destinés à être. Inspiré par l\'héritage congolais, nous tissons un nouveau système d\'exploitation pour la dignité — dans le travail, l\'apprentissage et les systèmes du quotidien — avec mémoire, soin et l\'âme de Nzila.'
-                      : 'From Canada to Global Impact — an ecosystem where technology remembers who we are and helps us become who we\'re meant to be. Inspired by Congolese heritage, we are weaving a new operating system for dignity in work, learning, and everyday systems, with memory, care, and the soul of Nzila.'}
+                      ? 'Un écosystème où les institutions restent gouvernables, explicables et opérationnellement continues même quand les personnes, systèmes ou dirigeants changent.'
+                      : 'An ecosystem where institutions remain governable, explainable, and operationally continuous when people, systems, or leadership change.'}
                   </p>
                 </div>
               </div>
@@ -266,18 +266,18 @@ export default async function About() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-bold text-navy mb-6">
-              {isFr ? 'Nzila n\'est pas une startup' : 'Nzila is Not a Startup'}
+              {isFr ? 'Nzila est une infrastructure de continuité' : 'Nzila is continuity infrastructure'}
             </h2>
             <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
               {isFr
-                ? 'C\'est un système. Nous tissons un nouveau système d\'exploitation pour la dignité — dans le commerce, le travail et l\'apprentissage. Avec mémoire. Avec soin. Comme Nzila.'
-                : 'It\'s a system. We are weaving a new operating system for dignity — in commerce, work, and learning. With memory. With care. As Nzila.'}
+                ? 'La société, la plateforme et les produits existent pour préserver mémoire opérationnelle, gouvernance, preuves et confiance institutionnelle.'
+                : 'The company, platform, and products exist to preserve operational memory, governance, evidence, and institutional trust.'}
             </p>
             <div className="inline-flex items-center gap-3 bg-emerald/5 border border-emerald/20 rounded-xl px-6 py-4 mb-10">
-              <span className="text-2xl">🛤️</span>
+              <span className="text-2xl">N</span>
               <div className="text-left">
-                <div className="text-sm font-bold text-navy">{isFr ? 'Nzila signifie « chemin »' : 'Nzila Means "Path"'}</div>
-                <div className="text-xs text-gray-500">{isFr ? 'Une manière choisie d\'avancer. Avec intention, rythme et générations.' : 'A chosen way forward. With intention, rhythm, and generations.'}</div>
+                <div className="text-sm font-bold text-navy">{isFr ? 'Une société, une plateforme, plusieurs lignes' : 'One company, one platform, multiple lines'}</div>
+                <div className="text-xs text-gray-500">{isFr ? 'Nzila Ventures opère Nzila OS. Union Eyes valide la catégorie.' : 'Nzila Ventures operates Nzila OS. Union Eyes validates the category.'}</div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -300,10 +300,6 @@ export default async function About() {
     </main>
   );
 }
-
-
-
-
 
 
 

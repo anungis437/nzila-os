@@ -7,13 +7,13 @@
  * forwards/rejects requests) and to allow it to be imported and tested
  * independently of Next.js framework conventions.
  *
- * NEXT.JS ENTRYPOINT:
- * Next.js requires the middleware entrypoint to be named `middleware.ts` at
- * the application root and to export a function named `middleware` (or
- * `default`). That thin entrypoint lives in `middleware.ts` and simply
- * re-exports from this file:
- *
- *   export { proxy as middleware, config } from './proxy';
+  * NEXT.JS ENTRYPOINT:
+  * Next.js requires the middleware entrypoint to be named `middleware.ts` at
+  * the application root and to export a function named `middleware` (or
+  * `default`). That thin entrypoint lives in `middleware.ts` and simply
+  * re-exports from this file (added as T-001 — see commit f641b5487):
+  *
+  *   export { proxy as middleware, config } from './proxy';
  *
  * MIDDLEWARE STACK (in execution order):
  * ================================
@@ -240,6 +240,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
               'Access-Control-Allow-Origin': origin,
               'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
               'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Request-Id',
+              'Access-Control-Expose-Headers': 'X-Request-Id, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After',
               'Access-Control-Max-Age': '86400',
               'Vary': 'Origin',
             },
@@ -254,6 +255,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
       if (origin && isOriginAllowed(origin)) {
         response.headers.set('Access-Control-Allow-Origin', origin);
         response.headers.set('Access-Control-Allow-Credentials', 'true');
+        response.headers.set('Access-Control-Expose-Headers', 'X-Request-Id, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After');
         response.headers.set('Vary', 'Origin');
       }
       return withRequestId(response, requestId);

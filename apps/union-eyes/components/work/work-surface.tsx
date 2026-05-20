@@ -16,12 +16,18 @@ import { useOrganization } from "@/contexts/organization-context";
 import { BookOpen } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
+import { Cupe4373CasesConsole } from "@/components/demo/cupe4373-cases-console";
+import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
 
 export function WorkSurface() {
   const t = useTranslations();
   const tWork = useTranslations("workSurface");
   const locale = useLocale();
   const { organizationId } = useOrganization();
+
+  if (isCupe4373DemoRuntime()) {
+    return <Cupe4373CasesConsole />;
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">

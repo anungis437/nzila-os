@@ -30,7 +30,7 @@
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
-    "drizzle-orm": "^0.39.0",
+    "drizzle-orm": "^0.45.2",
     "framer-motion": "^11.3.30",
     "next": "16.2.3",
     "next-intl": "^4.9.1",

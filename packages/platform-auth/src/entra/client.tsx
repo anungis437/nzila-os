@@ -380,7 +380,12 @@ export function useOrganization(): OrgState {
 export function useAuthActions() {
   return {
     signOut: async (callbackUrl?: string) => {
-      await nextAuthSignOut({ redirectTo: callbackUrl ?? '/' })
+      // Clear PG session cookie (primary auth method)
+      try {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+      } catch { /* ignore */ }
+      // Hard navigate — works for both PG and Entra sessions
+      window.location.href = callbackUrl ?? '/'
     },
     openUserProfile: () => {
       // Entra doesn't have a hosted profile UI — navigate to settings

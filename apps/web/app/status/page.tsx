@@ -190,7 +190,7 @@ export default async function StatusPage() {
         <p className="text-gray-600 text-sm mb-4">
           {isFr
             ? "Les services internes ne sont pas exposés publiquement. Leur état est surveillé via Azure Monitor et déclenche l'astreinte; les incidents apparaissent dans la bannière en haut de cette page lorsqu'ils affectent des utilisateurs."
-            : 'Internal services are not publicly exposed. Their state is monitored via Azure Monitor and pages on-call; incidents that affect users appear in the banner at the top of this page.'}
+            : 'Internal services are not publicly exposed. Their state is monitored via Azure Monitor and pages on-call; incidents that affect members, operators, or institutions appear in the banner at the top of this page.'}
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {privateResults.map((r) => (

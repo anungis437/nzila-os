@@ -1,7 +1,8 @@
 /**
  * STACK_AUTHORITY_001 — "Django-authoritative apps must not mutate via Drizzle directly"
  *
- * Enforces the Stack Authority Rules (docs/architecture/STACK_AUTHORITY.md):
+ * Enforces the Stack Authority Rules
+ * (docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md):
  *
  * 1. Django-authoritative apps (union-eyes, abr): TS layer MUST NOT contain
  *    direct Drizzle mutations (db.insert, db.update, db.delete) unless:
@@ -13,7 +14,7 @@
  *    (no `django-proxy.ts`, no Python `manage.py`, no `backend/` directory)
  *
  * 3. No app may introduce a new Django backend without updating
- *    docs/architecture/STACK_AUTHORITY.md
+ *    docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md
  *
  * @invariant STACK_AUTHORITY_001
  */
@@ -28,6 +29,7 @@ import {
   formatViolations,
   type Violation,
 } from './governance-helpers'
+import { findAliasedMutations } from './stack-authority-ast'
 
 // ── Configuration ───────────────────────────────────────────────────────────
 
@@ -72,15 +74,41 @@ const TS_AUTHORITATIVE_APPS = [
 const SCAFFOLD_TEST_EXCLUSIONS = new Set(['test-scaffold-gp'])
 
 /**
- * Patterns that indicate a direct Drizzle mutation (not a read).
- * We look for `.insert(`, `.update(`, `.delete(` preceded by `db.` or on
- * a drizzle table chain (e.g. `db.insert(tableName)`).
+ * Patterns that indicate a direct Drizzle (or Drizzle-shaped) mutation.
+ *
+ * We look for a mutation method invocation preceded by a likely database
+ * handle identifier. The handle suffix list is intentionally broad
+ * (db, database, client, conn[ection], tx, trx, transaction, drizzle, sql,
+ * pg) so simple renames (`writerDb`, `scopedClient`, `auditTx`) cannot
+ * bypass the contract check.
+ *
+ * The method list also covers Drizzle-style bulk and upsert variants so
+ * that renaming `insert` to `insertMany`/`bulkInsert`/`upsert` does not
+ * silently slip past the gate.
+ *
+ * KNOWN GAP (regex only): this pattern cannot detect *pure* aliases
+ * without a recognised suffix (e.g. `const writer = db; writer.insert(...)`).
+ * That gap is closed by the AST-level detector in
+ * {@link ./stack-authority-ast.ts} and exercised by the two
+ * `…(AST)` test cases at the bottom of this file. The regex check is
+ * retained as defence-in-depth.
  */
-const DRIZZLE_MUTATION_PATTERNS = [
-  /\bdb\s*\.\s*insert\s*\(/,
-  /\bdb\s*\.\s*update\s*\(/,
-  /\bdb\s*\.\s*delete\s*\(/,
-]
+const DB_HANDLE_NAME = String.raw`[A-Za-z_$][\w$]*(?:[dD]b|[dD]atabase|[cC]lient|[cC]onn(?:ection)?|[tT]x|[tT]rx|[tT]ransaction|[dD]rizzle|[sS]ql|[pP]g)`
+const MUTATION_METHODS = [
+  'insert',
+  'insertMany',
+  'insertInto',
+  'bulkInsert',
+  'update',
+  'updateMany',
+  'delete',
+  'deleteMany',
+  'upsert',
+  'merge',
+] as const
+const DRIZZLE_MUTATION_PATTERNS = MUTATION_METHODS.map(
+  (method) => new RegExp(String.raw`\b${DB_HANDLE_NAME}\s*\.\s*${method}\s*\(`),
+)
 
 /**
  * Patterns that indicate a safe mutation context (transaction param, RLS wrapper).
@@ -145,9 +173,7 @@ function walkTsFiles(dir: string): string[] {
  *
  * Returns array of lines with violations.
  */
-function findDirectMutations(
-  content: string,
-): { line: number; text: string }[] {
+function findDirectMutations(content: string): { line: number; text: string }[] {
   const violations: { line: number; text: string }[] = []
   const lines = content.split('\n')
 
@@ -162,9 +188,7 @@ function findDirectMutations(
     // If the function is inside a withRLSContext callback or uses
     // createAuditedScopedDb, it's safe
     const contextWindow = lines.slice(Math.max(0, i - 50), i + 1).join('\n')
-    const isSafe = SAFE_MUTATION_CONTEXTS.some((ctx) =>
-      contextWindow.includes(ctx),
-    )
+    const isSafe = SAFE_MUTATION_CONTEXTS.some((ctx) => contextWindow.includes(ctx))
     if (isSafe) continue
 
     violations.push({ line: i + 1, text: line.trim().slice(0, 120) })
@@ -175,9 +199,7 @@ function findDirectMutations(
 // ── STACK_AUTHORITY_001 ─────────────────────────────────────────────────────
 
 describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
-  const exceptionFile = loadExceptions(
-    'governance/exceptions/stack-authority.json',
-  )
+  const exceptionFile = loadExceptions('governance/exceptions/stack-authority.json')
 
   it('Django-authoritative apps must not contain direct Drizzle mutations in app-layer TS files', () => {
     const violations: Violation[] = []
@@ -223,8 +245,7 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
             filePath: rel,
             line: mut.line,
             snippet: mut.text,
-            offendingValue:
-              'Direct Drizzle mutation in Django-authoritative app',
+            offendingValue: 'Direct Drizzle mutation in Django-authoritative app',
             remediation:
               'Route mutations through djangoProxy(), withRLSContext(), or createAuditedScopedDb(). ' +
               'If this is a legitimate exception, add to governance/exceptions/stack-authority.json',
@@ -254,7 +275,7 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
             offendingValue: `Django marker file "${marker}" found in TS-authoritative app`,
             remediation:
               'TS-authoritative apps must not have a Django backend. ' +
-              'If this app needs Django, update docs/architecture/STACK_AUTHORITY.md first.',
+              'If this app needs Django, update docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md first.',
           })
         }
       }
@@ -267,11 +288,10 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
           violations.push({
             ruleId: 'STACK_AUTHORITY_001',
             filePath: `apps/${app}/backend/manage.py`,
-            offendingValue:
-              'Django backend/ directory found in TS-authoritative app',
+            offendingValue: 'Django backend/ directory found in TS-authoritative app',
             remediation:
               'TS-authoritative apps must not have a Django backend. ' +
-              'If this app needs Django, update docs/architecture/STACK_AUTHORITY.md first.',
+              'If this app needs Django, update docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md first.',
           })
         }
       }
@@ -282,11 +302,10 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
         violations.push({
           ruleId: 'STACK_AUTHORITY_001',
           filePath: `apps/${app}/lib/django-proxy.ts`,
-          offendingValue:
-            'Django proxy file found in TS-authoritative app',
+          offendingValue: 'Django proxy file found in TS-authoritative app',
           remediation:
             'TS-authoritative apps must not proxy to Django. ' +
-            'If this app needs Django, update docs/architecture/STACK_AUTHORITY.md first.',
+            'If this app needs Django, update docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md first.',
         })
       }
     }
@@ -302,18 +321,17 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
       .filter((d) => d.isDirectory())
       .map((d) => d.name)
 
-    const classified = new Set([
-      ...DJANGO_AUTHORITATIVE_APPS,
-      ...TS_AUTHORITATIVE_APPS,
-    ])
+    const classified = new Set([...DJANGO_AUTHORITATIVE_APPS, ...TS_AUTHORITATIVE_APPS])
 
-    const unclassified = allApps.filter((app) => !classified.has(app) && !SCAFFOLD_TEST_EXCLUSIONS.has(app))
+    const unclassified = allApps.filter(
+      (app) => !classified.has(app) && !SCAFFOLD_TEST_EXCLUSIONS.has(app),
+    )
 
     expect(
       unclassified,
       `Unclassified apps found: ${unclassified.join(', ')}. ` +
         'Add them to DJANGO_AUTHORITATIVE_APPS or TS_AUTHORITATIVE_APPS ' +
-        'in stack-authority.test.ts and update docs/architecture/STACK_AUTHORITY.md',
+        'in stack-authority.test.ts and update docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md',
     ).toHaveLength(0)
   })
 
@@ -349,12 +367,94 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
           filePath: rel,
           line: mut.line,
           snippet: mut.text,
-          offendingValue:
-            'Unaudited Drizzle mutation in union-eyes app layer',
+          offendingValue: 'Unaudited Drizzle mutation in union-eyes app layer',
           remediation:
             'Wrap mutations in withRLSContext() for user-scoped routes or ' +
             'withSystemContext() for system routes (webhooks, seeds). ' +
             'If excepted, add to governance/exceptions/stack-authority.json',
+        })
+      }
+    }
+
+    expect(violations, formatViolations(violations)).toHaveLength(0)
+  })
+
+  it('Django-authoritative apps must not contain aliased Drizzle mutations (AST)', () => {
+    const violations: Violation[] = []
+
+    const APP_LAYER_DIRS = ['actions', 'app']
+
+    for (const app of DJANGO_AUTHORITATIVE_APPS) {
+      const appDir = join(ROOT, 'apps', app)
+      if (!existsSync(appDir)) continue
+
+      const tsFiles: string[] = []
+      for (const layerDir of APP_LAYER_DIRS) {
+        const dir = join(appDir, layerDir)
+        if (existsSync(dir)) tsFiles.push(...walkTsFiles(dir))
+      }
+
+      for (const file of tsFiles) {
+        const rel = relative(ROOT, file).split(sep).join('/')
+
+        if (isExcepted(rel, exceptionFile.entries)) continue
+        if (rel.includes('.test.') || rel.includes('.spec.')) continue
+        if (rel.endsWith('.d.ts') || rel.endsWith('.config.ts')) continue
+        if (rel.includes('/db/') || rel.includes('/queries/')) continue
+
+        const content = readFileSync(file, 'utf-8')
+        const findings = findAliasedMutations(rel, content)
+
+        for (const f of findings) {
+          violations.push({
+            ruleId: 'STACK_AUTHORITY_001',
+            filePath: rel,
+            line: f.line,
+            snippet: f.snippet,
+            offendingValue: `Aliased Drizzle mutation \`${f.alias}.${f.method}(...)\` (alias of \`${f.root}\`) in Django-authoritative app`,
+            remediation:
+              'Route mutations through djangoProxy(), withRLSContext(), or createAuditedScopedDb(). ' +
+              'If this is a legitimate exception, add to governance/exceptions/stack-authority.json.',
+          })
+        }
+      }
+    }
+
+    expect(violations, formatViolations(violations)).toHaveLength(0)
+  })
+
+  it('union-eyes app-layer aliased mutations must use withRLSContext or withSystemContext (AST)', () => {
+    const violations: Violation[] = []
+
+    const appDir = join(ROOT, 'apps', 'union-eyes')
+    if (!existsSync(appDir)) return
+
+    const tsFiles: string[] = []
+    const dir = join(appDir, 'app')
+    if (existsSync(dir)) tsFiles.push(...walkTsFiles(dir))
+
+    for (const file of tsFiles) {
+      const rel = relative(ROOT, file).split(sep).join('/')
+
+      if (isExcepted(rel, exceptionFile.entries)) continue
+      if (rel.includes('.test.') || rel.includes('.spec.')) continue
+      if (rel.endsWith('.d.ts') || rel.endsWith('.config.ts')) continue
+      if (rel.includes('/db/') || rel.includes('/queries/')) continue
+
+      const content = readFileSync(file, 'utf-8')
+      const findings = findAliasedMutations(rel, content)
+
+      for (const f of findings) {
+        violations.push({
+          ruleId: 'STACK_AUTHORITY_001',
+          filePath: rel,
+          line: f.line,
+          snippet: f.snippet,
+          offendingValue: `Unaudited aliased Drizzle mutation \`${f.alias}.${f.method}(...)\` (alias of \`${f.root}\`) in union-eyes app layer`,
+          remediation:
+            'Wrap mutations in withRLSContext() for user-scoped routes or ' +
+            'withSystemContext() for system routes (webhooks, seeds). ' +
+            'If excepted, add to governance/exceptions/stack-authority.json.',
         })
       }
     }

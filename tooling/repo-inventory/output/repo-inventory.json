@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-12T00:00:00.000Z",
+  "generatedAt": "2026-05-20T00:00:00.000Z",
   "appCount": 26,
-  "packageCount": 213,
-  "workspacePackageCount": 245,
+  "packageCount": 215,
+  "workspacePackageCount": 247,
   "workflowCount": 48,
-  "contractTestCount": 248,
-  "tsTestFileCount": 1382,
+  "contractTestCount": 253,
+  "tsTestFileCount": 1455,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -141,6 +141,7 @@
         "governance-operations",
         "governance-review",
         "governed-workflow",
+        "healthcare-surveys",
         "itsm-core",
         "ml-sdk",
         "operational-convergence",
@@ -172,7 +173,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 364
+      "codeFileCount": 384
     },
     {
       "name": "control-plane",
@@ -232,7 +233,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 300
+      "codeFileCount": 321
     },
     {
       "name": "cora",
@@ -453,7 +454,7 @@
         "policies"
       ],
       "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
-      "codeFileCount": 30
+      "codeFileCount": 34
     },
     {
       "name": "partners",
@@ -521,7 +522,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 37
+      "codeFileCount": 38
     },
     {
       "name": "test-scaffold-gp",
@@ -648,6 +649,7 @@
         "governance-otel",
         "governance-review",
         "institutional-cognition-core",
+        "institutional-governance-graph",
         "ml-sdk",
         "nar",
         "operational-convergence",
@@ -664,7 +666,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3526
+      "codeFileCount": 3748
     },
     {
       "name": "veridian-admin",
@@ -739,7 +741,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 81
+      "codeFileCount": 88
     },
     {
       "name": "weekone",

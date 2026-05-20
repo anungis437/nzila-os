@@ -88,8 +88,12 @@ jobs:
       - name: Audit Python requirements files
         run: |
           EXIT_CODE=0
+          # PYSEC-2025-183: pyjwt — disputed by supplier (key length chosen by application).
+          # PYSEC-2024-277: joblib — disputed by supplier (only affects caching of trusted content).
+          # Neither has a published fix version; waivers reviewed 2026-05 and re-verified disputed.
+          IGNORE_FLAGS="--ignore-vuln PYSEC-2025-183 --ignore-vuln PYSEC-2024-277"
           for req in $(find . -name 'requirements*.txt' -not -path '*/node_modules/*' -not -path '*/.venv/*' -not -path '*/tech-repo-scaffold/*'); do
             echo "── Auditing $req ──"
-            pip-audit -r "$req" --desc || EXIT_CODE=1
+            pip-audit -r "$req" --desc $IGNORE_FLAGS || EXIT_CODE=1
           done
           exit $EXIT_CODE

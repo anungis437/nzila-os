@@ -36,14 +36,14 @@ pre-commit:
 
     link-check:
       glob: "*.md"
-      run: npx tsx scripts/link-check.ts {staged_files}
+      run: pnpm exec tsx scripts/link-check.ts {staged_files}
       fail_text: "Broken markdown links detected. Run `pnpm link-check` to see details."
 
 pre-push:
   commands:
     contract-tests:
       run: >
-        npx vitest run
+        pnpm exec vitest run
         --config tooling/contract-tests/vitest.config.ts
         --dir tooling/contract-tests
       fail_text: |

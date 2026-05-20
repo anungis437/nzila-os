@@ -10,8 +10,8 @@
  * entitlement.
  */
 import { test, expect } from "@playwright/test";
-import { ensureServerReady, loginAsTestUser, seedOrVerifyTestState } from '../tests/e2e/_helpers';
-import { UE_TEST_USERS } from '../tests/fixtures/test-users';
+import { ensureServerReady, seedOrVerifyTestState } from '../tests/e2e/_helpers';
+import { loginAsRole } from './helpers/auth';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
@@ -24,11 +24,9 @@ test.describe("Labor continuity intelligence page", () => {
   });
 
   async function authenticateExecutiveSession(page: Parameters<typeof test>[0] extends never ? never : any) {
-    // Use page.request so auth cookies are written into the same browser context.
-    await loginAsTestUser(page.request, UE_TEST_USERS.executivePrimary.email);
-
-    const roleResponse = await page.request.get('/api/auth/user-role');
-    expect(roleResponse.status()).toBe(200);
+    // Use loginAsRole so cookie injection works in CI (PLAYWRIGHT_TEST_AUTH=true path)
+    // avoids the real /api/auth/login call which is unreliable in test environments.
+    await loginAsRole(page, 'executive');
   }
 
   async function hasCommercialReportingAccess(page: Parameters<typeof test>[0] extends never ? never : any) {

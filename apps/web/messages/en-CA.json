@@ -15,21 +15,25 @@
     "verticals": "Verticals",
     "investors": "Investors",
     "contact": "Contact",
+    "continuity": "Continuity",
+    "unionEyes": "Union Eyes",
+    "trust": "Trust",
+    "insights": "Insights",
     "partners": "Partners",
     "resources": "Resources",
     "portfolio": "Portfolio",
     "legal": "Legal",
     "signIn": "Sign In",
-    "requestDemo": "Request Demo",
+    "requestDemo": "Book Review",
     "apps": "Apps",
     "console": "Console",
     "partnerPortal": "Partner Portal",
     "language": "Language"
   },
   "hero": {
-    "title": "The APEX of AI in Social Impact",
-    "subtitle": "Venture studio building 15 AI-powered platforms across 10+ verticals — healthcare, finance, agriculture, labour rights, and justice.",
-    "cta": "Explore Our Platform"
+    "title": "Organizations should not lose continuity when key people leave.",
+    "subtitle": "Nzila builds governed infrastructure that preserves operational memory, decision rationale, evidence, and institutional trust across transitions.",
+    "cta": "Begin Continuity Assessment"
   },
   "legal": {
     "privacy": "Privacy Policy",

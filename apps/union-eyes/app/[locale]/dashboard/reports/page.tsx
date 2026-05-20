@@ -1,81 +1,33 @@
-"use client";
+import { redirect } from "next/navigation";
+import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
+import { Cupe4373ReportsPage } from "@/components/demo/cupe4373-reports-page";
+import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
+import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-/**
- * Reports Management Page
- * 
- * Reporting center integrating:
- * - Custom report builder
- * - Saved reports library
- * - Report sharing hub
- * - Data export scheduler
- * 
- * @page app/[locale]/reports/page.tsx
- */
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
 
-import * as React from "react";
-import { useTranslations } from "next-intl";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { CustomReportBuilder } from "@/components/analytics/custom-report-builder";
-import { ReportSharingHub } from "@/components/analytics/report-sharing-hub";
-import { DataExportScheduler } from "@/components/analytics/data-export-scheduler";
+export default async function ReportsPage({ params }: PageProps) {
+  const { locale } = await params;
 
-export default function ReportsPage() {
-  const t = useTranslations("reportsCenter");
-  const [showReportBuilder, setShowReportBuilder] = React.useState(false);
+  try {
+    await requireUser();
+  } catch {
+    redirect(`/${locale}/login`);
+  }
+
+  const hasAccess = !isCupe4373DemoRuntime() ? await hasMinRole("steward") : true;
+  if (!hasAccess) {
+    redirect(`/${locale}/dashboard`);
+  }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{t("title")}</h1>
-          <p className="text-gray-600 mt-2">
-            {t("subtitle")}
-          </p>
-        </div>
-        <Button onClick={() => setShowReportBuilder(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          {t("createReport")}
-        </Button>
-      </div>
-
-      <Tabs defaultValue="reports">
-        <TabsList>
-          <TabsTrigger value="reports">{t("tabs.myReports")}</TabsTrigger>
-          <TabsTrigger value="sharing">{t("tabs.sharing")}</TabsTrigger>
-          <TabsTrigger value="exports">{t("tabs.scheduledExports")}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="reports">
-          <div className="space-y-4">
-            <p className="text-gray-600">
-              {t("savedReportsHint")}
-            </p>
-            {/* Saved reports list would be implemented here */}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="sharing">
-          <ReportSharingHub />
-        </TabsContent>
-
-        <TabsContent value="exports">
-          <DataExportScheduler />
-        </TabsContent>
-      </Tabs>
-
-      {/* Report Builder Modal */}
-      {showReportBuilder && (
-        <CustomReportBuilder
-          onSave={async (_report) => {
-setShowReportBuilder(false);
-          }}
-        />
-      )}
+    <div className="mx-auto max-w-7xl space-y-6">
+      <Cupe4373SectionNav />
+      <Cupe4373ReportsPage />
     </div>
   );
 }

@@ -141,3 +141,24 @@ export { employers, type Employer } from "./domains/compliance";
 
 // Steward assignments - union-structure-schema is the canonical source
 export { stewardAssignments, stewardAssignmentsRelations, type StewardAssignment } from "./union-structure-schema";
+
+// ICRA — Institutional Continuity Risk Assessment
+export {
+  icraOrganizations,
+  icraAssessments,
+  icraAssessmentAnswers,
+  icraMaturityProfiles,
+  icraContinuityScores,
+  icraGovernanceFlags,
+  icraOperationalIndicators,
+  icraFollowupRecommendations,
+  icraBenchmarkGroups,
+  icraAnonymizedMetrics,
+  type IcraAssessment,
+  type NewIcraAssessment,
+  type IcraAnswer,
+  type IcraProfile,
+} from "./icra-schema";
+
+// Policy Lifecycle — platform governance extension for Union Eyes
+export * from "./policy-lifecycle-schema";

@@ -7,7 +7,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@nzila/platform-auth/entra/client';
-import { checkPaymentFailedAction } from "@/actions/profiles-actions";
 
 /**
  * Payment status alert component that uses server actions to check payment status
@@ -29,9 +28,9 @@ export function PaymentStatusAlert() {
     const checkPaymentStatus = async () => {
       try {
         setIsLoading(true);
-        // Use server action (more efficient than API route)
-        const { paymentFailed } = await checkPaymentFailedAction();
-        setHasPaymentFailed(paymentFailed);
+        const res = await fetch('/api/payment/status', { credentials: 'include' });
+        const data: { paymentFailed: boolean } = res.ok ? await res.json() : { paymentFailed: false };
+        setHasPaymentFailed(data.paymentFailed);
       } catch (_error) {
 } finally {
         setIsLoading(false);

@@ -14,15 +14,12 @@ export interface ShellLayoutProps {
 
 export function ShellLayout({ children, moduleSidebar, hideNav }: ShellLayoutProps) {
   const { user } = useShell();
-
-  if (hideNav || !user) {
-    return <>{children}</>;
-  }
+  const showNav = !hideNav && !!user;
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      <GlobalNav />
-      {moduleSidebar && (
+      {showNav && <GlobalNav />}
+      {showNav && moduleSidebar && (
         <aside className="hidden w-64 border-r border-gray-200 bg-white lg:block">
           {moduleSidebar}
         </aside>

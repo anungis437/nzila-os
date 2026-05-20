@@ -1,38 +1,34 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-18T18:56:53.385Z
+> Generated: 2026-05-20T16:04:00.174Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1651 |
-| Total Findings | 2387 |
+| Files Scanned | 1668 |
+| Total Findings | 2458 |
 | Errors | 0 |
-| Warnings | 1199 |
-| Info | 1188 |
+| Warnings | 1198 |
+| Info | 1260 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1181 |
-| stale-reference | 1038 |
+| naming-inconsistency | 1253 |
+| stale-reference | 1037 |
 | missing-package-readme | 105 |
 | stale-package-ref | 53 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1038)
+## stale-reference (1037)
 
-- 🟡 `ARCHITECTURE.md:92` — Possible broken link: [docs/architecture/STACK_AUTHORITY.md](./docs/architecture/STACK_AUTHORITY.md)
-- 🟡 `ARCHITECTURE.md:99` — Possible broken link: [docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md](./docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md)
-- 🟡 `ARCHITECTURE.md:100` — Possible broken link: [docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md](./docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md)
-- 🟡 `ARCHITECTURE.md:102` — Possible broken link: [docs/platform/PACKAGE_OWNERSHIP_MATRIX.md](./docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
-- 🟡 `ARCHITECTURE.md:107` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
-- 🟡 `ARCHITECTURE.md:111` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
-- 🟡 `ARCHITECTURE.md:115` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
-- 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
+- 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
+- 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
+- 🟡 `ARCHITECTURE.md:122` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
+- 🟡 `ARCHITECTURE.md:128` — Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:12` — Possible broken link: [docs/repo-contract/README.md](docs/repo-contract/README.md)
 - 🟡 `CONTRIBUTING.md:82` — Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
 - 🟡 `CONTRIBUTING.md:83` — Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
@@ -47,6 +43,9 @@
 - 🟡 `README.md:171` — Possible broken link: [docs/builders/](docs/builders/)
 - 🟡 `README.md:173` — Possible broken link: [docs/buyers/](docs/buyers/)
 - 🟡 `README.md:175` — Possible broken link: [docs/investor/](docs/investor/)
+- 🟡 `docs/architecture/AUDIT_ENFORCEMENT.md:4` — Possible broken link: [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](../platform/EVIDENCE_LIFECYCLE_POLICY.md)
+- 🟡 `docs/architecture/AUDIT_ENFORCEMENT.md:5` — Possible broken link: [docs/platform/AUDIT_ENFORCEMENT.md](../platform/AUDIT_ENFORCEMENT.md)
+- 🟡 `docs/architecture/ORG_SCOPED_TABLES.md:5` — Possible broken link: [docs/platform/ORG_SCOPED_TABLES.md](../platform/ORG_SCOPED_TABLES.md)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:64` — Possible broken link: [convert/route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/convert/route.ts)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:117` — Possible broken link: [portal/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/page.tsx)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:118` — Possible broken link: [claims/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/claims/page.tsx)
@@ -624,8 +623,8 @@
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:323` — Possible broken link: [README](../../../apps/union-eyes/db/migrations/README.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md:187` — Possible broken link: [seed-cupe-pilot.mjs](../../../apps/union-eyes/scripts/seed-cupe-pilot.mjs)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md:241` — Possible broken link: [provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:52` — Possible broken link: [`apps/union-eyes/lib/runtime/environment.ts`](../../../apps/union-eyes/lib/runtime/environment.ts)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:91` — Possible broken link: [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../apps/union-eyes/lib/runtime/production-guard.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:55` — Possible broken link: [`apps/union-eyes/lib/runtime/environment.ts`](../../../apps/union-eyes/lib/runtime/environment.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:94` — Possible broken link: [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../apps/union-eyes/lib/runtime/production-guard.ts)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/schema-parity-report.md:59` — Possible broken link: [`apps/union-eyes/db/migrations/README.md`](../../../apps/union-eyes/db/migrations/README.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/revenue-profile.md:96` — Possible broken link: [Procurement Pack](../governance/procurement-pack.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/user-guide.md:107` — Possible broken link: [Glossary](../index/glossary.md)
@@ -1120,11 +1119,12 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 
-## naming-inconsistency (1181)
+## naming-inconsistency (1253)
 
+- ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `ARCHITECTURE.md:233` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `ARCHITECTURE.md:243` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `AWS_ZONGA_SETUP.md:339` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `CLAUDE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `CONTRIBUTING.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -1138,6 +1138,10 @@
 - ℹ️ `README.business.md:210` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:280` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:96` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:157` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:159` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:161` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md:13` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md:57` — "orgId" should be "org_id" (tenant identifier)
@@ -1966,12 +1970,13 @@
 - ℹ️ `docs/categories/products-and-market/union-eyes/integration-playbook.md:241` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/final-labor-continuity-readiness-review.md:56` — "procurement package" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:37` — "audit pack" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:21` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:25` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:12` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:26` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:27` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:28` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:192` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:30` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:31` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:32` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:33` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:197` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:30` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:31` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:32` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2132,7 +2137,73 @@
 - ℹ️ `docs/categories/stakeholders/tutorials/first-app.md:122` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md:54` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md:62` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/documentation-index.md:950` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md:12` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:21` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:35` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:54` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:64` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:76` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:84` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:94` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:104` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:118` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:183` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/constitution.md:199` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:36` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:44` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:61` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:87` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:93` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:113` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:125` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:136` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:138` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:149` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:161` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:169` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:203` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:219` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:244` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:252` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:275` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:308` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:336` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:549` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:717` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:835` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:993` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1159` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1231` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1252` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1375` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1426` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE.md:1495` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_GOVERNANCE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:154` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:155` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:170` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:182` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/DOCTRINE_TRACEABILITY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/frameworks.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/frameworks.md:122` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/frameworks.md:229` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/narrative-playbooks.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/narrative-playbooks.md:101` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:19` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:145` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:149` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/positioning.md:157` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/principles.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/principles.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/SCORING_MODELS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/vocabulary.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/vocabulary.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:952` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2306,13 +2377,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 90 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 90 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 90 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 90 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 90 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 90 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 90 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 92 days old — may be stale
 
 ## missing-required-doc (3)
 

@@ -49,12 +49,24 @@ export async function register() {
       const osLogger = createLogger('union-eyes');
 
       // ── os-core env validation ──────────────────────────────────────
+      // Production: fail-fast. The os-core `unionEyesSchema` enforces
+      // strength constraints (e.g. AUTH_SECRET min length) that the legacy
+      // critical-vars check below does NOT cover. Swallowing this error
+      // would silently boot the app with a weak or malformed AUTH_SECRET.
+      // Non-production: warn-and-continue so developers can iterate
+      // without a fully-populated .env.
       try {
         const { validateEnv } = await import('@nzila/os-core/config');
         validateEnv('union-eyes');
         osLogger.info('os-core env validation passed');
       } catch (envError) {
-        osLogger.warn('os-core env validation issue', { error: envError });
+        if (process.env.NODE_ENV === 'production') {
+          osLogger.error('FATAL: os-core env validation failed in production', { error: envError });
+          throw envError instanceof Error
+            ? envError
+            : new Error(`os-core env validation failed: ${String(envError)}`);
+        }
+        osLogger.warn('os-core env validation issue (non-production)', { error: envError });
       }
 
       // ── Legacy env validation (kept for backwards compat) ──────────
@@ -170,8 +182,16 @@ export async function register() {
     } catch (error) {
       const { logger } = await import('./lib/logger');
       logger.error('Startup validation error', { error });
-      // Do not re-throw — let the server start so health probes and
-      // monitoring remain reachable even when config is incomplete.
+      // Propagate FATAL errors so the process exits rather than booting
+      // with a known-bad configuration. Inner blocks use the "FATAL:"
+      // prefix (or throw RuntimeContractError) to opt in to fail-fast.
+      const message = error instanceof Error ? error.message : String(error);
+      const isRuntimeContractError = error instanceof Error && error.name === 'RuntimeContractError';
+      if (isRuntimeContractError || message.startsWith('FATAL')) {
+        throw error;
+      }
+      // Otherwise: let the server start so health probes and monitoring
+      // remain reachable even when non-critical config is incomplete.
     }
 
     await import('./sentry.server.config');
