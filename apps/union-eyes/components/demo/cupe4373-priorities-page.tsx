@@ -122,7 +122,7 @@ const urgencyStyles = {
 
 export function Cupe4373PrioritiesPage() {
   const locale = useLocale();
-  const all = useMemo(buildCommitments, []);
+  const all = useMemo(() => buildCommitments(), []);
   const [metIds, setMetIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
