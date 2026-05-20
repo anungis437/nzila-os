@@ -159,3 +159,6 @@ export {
   type IcraAnswer,
   type IcraProfile,
 } from "./icra-schema";
+
+// Policy Lifecycle — platform governance extension for Union Eyes
+export * from "./policy-lifecycle-schema";

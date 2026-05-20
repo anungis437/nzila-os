@@ -21,6 +21,8 @@ import { db } from "@/db";
 import { campaigns, messageTemplates, newsletterDistributionLists, smsCampaigns } from "@/db/schema";
 import { eq, and, inArray, count, sum, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+import { Cupe4373CommunicationsPage } from "@/components/demo/cupe4373-communications-page";
 
 /** Fetch all hub metrics in parallel */
 async function getHubMetrics(orgId: string) {
@@ -134,6 +136,11 @@ export default async function CommunicationsDashboard({
   } catch {
     redirect(`/${locale}/login`);
   }
+
+  if (isCupe4373DemoRuntime()) {
+    return <Cupe4373CommunicationsPage />;
+  }
+
   if (!(await hasMinRole("steward"))) {
     redirect(`/${locale}/dashboard`);
   }

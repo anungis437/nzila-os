@@ -32,9 +32,12 @@ Every release MUST set the following on its target Container App:
 | `NODE_ENV`             | constant                                | `production`                         |
 | `UE_ENVIRONMENT`       | plan step                               | `staging` \| `demo` \| `pilot` \| `production` |
 | `NEXT_PUBLIC_APP_ENV`  | mirror of `UE_ENVIRONMENT`              | `production`                         |
-| `NZILA_MODE`           | plan step                               | `staging` \| `demo` \| `pilot` \| `prod` |
-| `UE_DEPLOYMENT_TYPE`   | plan step                               | `staging` \| `clc-demo` \| `pilot` \| `prod` |
-| `UE_FEATURE_PROFILE`   | plan step                               | `internal` \| `clc` \| `executive`   |
+| `NZILA_MODE`           | plan step                               | `staging` \| `demo` \| `pilot` \| `production` |
+| `UE_DEPLOYMENT_TYPE`   | plan step                               | `staging` \| `cupe4373-demo` \| `clc-demo` \| `pilot` \| `prod` |
+| `UE_FEATURE_PROFILE`   | plan step                               | `internal` \| `cupe4373` \| `clc` \| `executive` |
+| `NEXT_PUBLIC_UE_FEATURE_PROFILE` | public mirror for client-side curation | `cupe4373` \| `clc` \| `internal` \| `executive` |
+| `UE_DEMO_PROFILE`      | plan step for demo environments only    | `cupe4373`                            |
+| `NEXT_PUBLIC_UE_DEMO_PROFILE` | public mirror for curated demo UX | `cupe4373`                            |
 | `GITHUB_SHA`           | `${{ github.sha }}`                     | 40-char SHA                          |
 | `RELEASE_ID`           | plan step (`UE-YYYY-MM-DD-shortsha`)    | `UE-2026-05-09-df936f4`              |
 | `BUILD_TIME`           | plan step (`date -u +%Y-%m-%dT%H:%M:%SZ`) | ISO 8601 UTC                       |

@@ -55,10 +55,11 @@ describe('validateEnv', () => {
     expect(env.NODE_ENV).toBe('test')
   })
 
-  it('validates union-eyes schema (auth keys optional)', () => {
-    Object.assign(process.env, VALID_BASE_ENV)
+  it('validates union-eyes schema (auth keys required, matches authMixin)', () => {
+    Object.assign(process.env, VALID_BASE_ENV, AUTH_ENV)
     const env = validateEnv('union-eyes')
     expect(env.NODE_ENV).toBe('test')
+    expect(env.AUTH_SECRET).toBe('test_auth_secret_32chars_xxxxxxxxxxxx')
   })
 
   it('validates all 15 app schemas have entries', () => {

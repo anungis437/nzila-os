@@ -39,6 +39,18 @@
       "expiresOn": "2026-09-30"
     },
     {
+      "path": "apps/union-eyes/app/api/cases/intake/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "NAR proof adapter persistRecord callback — system-level audit-chain insert into auditRecords. Surfaced 2026-05-20 by AST-level stack-authority detector (Watch 4); regex previously missed it due to 50-line context-window false-negative. Wrap in withSystemContext() or extract to a domain service in Phase 3.",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/*/escalate/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "NAR proof adapter persistRecord callback in apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts — system-level audit-chain insert into auditRecords. Surfaced 2026-05-20 by AST-level stack-authority detector (Watch 4); regex previously missed it due to 50-line context-window false-negative. Wrap in withSystemContext() or extract to a domain service in Phase 3. (Glob uses `*` because minimatch treats `[caseId]` as a char class.)",
+      "expiresOn": "2026-09-30"
+    },
+    {
       "path": "apps/union-eyes/app/api/pilot/onboarding/route.ts",
       "owner": "@nzila/union-eyes",
       "justification": "Pilot checklist — TS-only tables (no Django model). RLS policies applied. Scoped to CAPE pilot lifecycle.",
@@ -145,6 +157,12 @@
       "owner": "@nzila/union-eyes",
       "justification": "Exit-interview lifecycle event inserts (exit_interview_events) — TS-only event table, no Django model. cognitionRoute/withApi auth (officer) enforced; organizationId scoped via withApi context. Migrate to djangoProxy() in Phase 3.",
       "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/abr/app/api/abr/incidents/route.ts",
+      "owner": "@nzila/abr",
+      "justification": "NAR proof persistence — auditRecords is the platform immutable audit ledger written via createNarProofAdapter persistRecord callback. This is a cross-cutting governance write to platformDb, not an app-data mutation; no Django model exists for the NAR ledger.",
+      "expiresOn": "2026-12-31"
     }
   ]
 }

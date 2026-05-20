@@ -22,7 +22,7 @@
 
 1. [Canonical Doctrine Statement](#1-canonical-doctrine-statement)
 2. [Continuity Intelligence vs. Worker Surveillance](#2-continuity-intelligence-vs-worker-surveillance)
-3. [Red-Line Policies — Prohibited Use Cases](#3-red-line-policies--prohibited-use-cases)
+3. [Red-Line Policies — Prohibited Use Cases](#3-red-line-policies-prohibited-use-cases)
 4. [Procurement-Safe Operating Principles](#4-procurement-safe-operating-principles)
 5. [Human Dignity Protections](#5-human-dignity-protections)
 6. [Governance Constraints on Leadership Use](#6-governance-constraints-on-leadership-use)

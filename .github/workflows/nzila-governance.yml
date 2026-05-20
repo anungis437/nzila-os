@@ -267,7 +267,10 @@ jobs:
             --format json \
             --output abr-audit-report.json \
             --skip-editable \
-            --ignore-vuln CVE-2026-4539
+            --ignore-vuln CVE-2026-4539 \
+            --ignore-vuln PYSEC-2025-183
+          # PYSEC-2025-183: pyjwt — disputed by supplier (key length chosen by application);
+          # no published fix version. Reviewed 2026-05.
           echo "pip-audit passed (no vulnerabilities)"
 
       - name: Capture full pip-audit report (non-blocking, for artifact)

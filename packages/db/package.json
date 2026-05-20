@@ -36,7 +36,7 @@
     "@nzila/platform-reasoning-engine": "workspace:*",
     "@nzila/platform-semantic-search": "workspace:*",
     "@nzila/trustcore-core": "workspace:*",
-    "drizzle-orm": "^0.39.0",
+    "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.5",
     "zod": "^3.24.0"
   },

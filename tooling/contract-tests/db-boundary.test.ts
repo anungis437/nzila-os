@@ -62,6 +62,8 @@ const EXEMPT_PATHS = [
   'apps/union-eyes/db/',
   'apps/union-eyes/lib/database/',
   'apps/union-eyes/lib/db/',
+  // Union-Eyes — scripts/ is dev tooling (predev schema-align, seeders); not app runtime
+  'apps/union-eyes/scripts/',
   // Union-Eyes — financial-service is a sidecar with its own DB client + migration scripts
   'apps/union-eyes/services/',
   // Flow — db setup files exempt, route handlers enforced via getDbContext.

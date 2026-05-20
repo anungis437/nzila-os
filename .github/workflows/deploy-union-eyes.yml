@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
     paths:
       - 'apps/union-eyes/**'
+      - 'infrastructure/gitops/environments/ue-demo-cupe4373.yml'
       - 'Dockerfile'
       - '.github/workflows/deploy-union-eyes.yml'
       - 'governance/release/deployment-inventory.json'
@@ -48,6 +49,9 @@ jobs:
       nzila_mode: ${{ steps.plan.outputs.nzila_mode }}
       deployment_type: ${{ steps.plan.outputs.deployment_type }}
       feature_profile: ${{ steps.plan.outputs.feature_profile }}
+      demo_profile: ${{ steps.plan.outputs.demo_profile }}
+      demo_org_id: ${{ steps.plan.outputs.demo_org_id }}
+      demo_org_slug: ${{ steps.plan.outputs.demo_org_slug }}
       release_id: ${{ steps.plan.outputs.release_id }}
       build_time: ${{ steps.plan.outputs.build_time }}
     steps:
@@ -64,6 +68,10 @@ jobs:
           else
             DEPLOY_ENV="staging"
           fi
+
+          DEMO_PROFILE=""
+          DEMO_ORG_ID=""
+          DEMO_ORG_SLUG=""
 
           if [ "$DEPLOY_ENV" = "production" ]; then
             APP_NAME="nzila-os-union-eyes-prod"
@@ -85,8 +93,11 @@ jobs:
             RESOURCE_GROUP="${{ vars.AZURE_RESOURCE_GROUP_DEMO }}"
             CONTAINERAPP_ENVIRONMENT="${{ vars.AZURE_CONTAINERAPPS_ENVIRONMENT_DEMO }}"
             NZILA_MODE_VAL="demo"
-            DEPLOYMENT_TYPE="clc-demo"
-            FEATURE_PROFILE="clc"
+            DEPLOYMENT_TYPE="cupe4373-demo"
+            FEATURE_PROFILE="cupe4373"
+            DEMO_PROFILE="cupe4373"
+            DEMO_ORG_ID="cupe-local-4373"
+            DEMO_ORG_SLUG="cupe-local-4373"
           elif [ "$DEPLOY_ENV" = "pilot" ]; then
             APP_NAME="nzila-os-union-eyes-pilot"
             MARKETING_URL="https://pilot.unioneyes.app"
@@ -183,6 +194,9 @@ jobs:
           echo "nzila_mode=$NZILA_MODE_VAL" >> "$GITHUB_OUTPUT"
           echo "deployment_type=$DEPLOYMENT_TYPE" >> "$GITHUB_OUTPUT"
           echo "feature_profile=$FEATURE_PROFILE" >> "$GITHUB_OUTPUT"
+          echo "demo_profile=$DEMO_PROFILE" >> "$GITHUB_OUTPUT"
+          echo "demo_org_id=$DEMO_ORG_ID" >> "$GITHUB_OUTPUT"
+          echo "demo_org_slug=$DEMO_ORG_SLUG" >> "$GITHUB_OUTPUT"
           echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           echo "build_time=$BUILD_TIME" >> "$GITHUB_OUTPUT"
 
@@ -194,6 +208,9 @@ jobs:
           echo "- ACR: $ACR_NAME" >> "$GITHUB_STEP_SUMMARY"
           echo "- Marketing URL: $MARKETING_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "- App URL: $APP_URL" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$DEMO_PROFILE" ]; then
+            echo "- Demo profile: $DEMO_PROFILE ($DEMO_ORG_SLUG)" >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ "$DEPLOY_ENV" = "production" ]; then
             echo "- Note: production currently runs in staging-named Azure infrastructure; this workflow preserves that live topology intentionally." >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -372,11 +389,19 @@ jobs:
             --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
             --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
             --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
-            --build-arg NEXT_PUBLIC_SITE_URL=https://unioneyes.app \
-            --build-arg NEXT_PUBLIC_APP_URL=https://app.unioneyes.app \
+            --build-arg NEXT_PUBLIC_SITE_URL=${{ needs.plan.outputs.marketing_url }} \
+            --build-arg NEXT_PUBLIC_APP_URL=${{ needs.plan.outputs.app_url }} \
             --build-arg NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app \
             --build-arg NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app \
             --build-arg UE_ENVIRONMENT=${{ needs.plan.outputs.environment }} \
+            --build-arg NEXT_PUBLIC_APP_ENV=${{ needs.plan.outputs.environment }} \
+            --build-arg UE_DEPLOYMENT_TYPE=${{ needs.plan.outputs.deployment_type }} \
+            --build-arg UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }} \
+            --build-arg NEXT_PUBLIC_UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }} \
+            --build-arg UE_DEMO_PROFILE=${{ needs.plan.outputs.demo_profile }} \
+            --build-arg NEXT_PUBLIC_UE_DEMO_PROFILE=${{ needs.plan.outputs.demo_profile }} \
+            --build-arg UE_DEMO_ORG_ID=${{ needs.plan.outputs.demo_org_id }} \
+            --build-arg NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ needs.plan.outputs.demo_org_slug }} \
             --build-arg UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }} \
             --build-arg UE_APP_URL=${{ needs.plan.outputs.app_url }} \
             -t ${{ env.IMAGE }}:${{ github.sha }} \
@@ -468,35 +493,82 @@ jobs:
             exit 1
           }
 
+          FRONTEND_ENV_VARS=(
+            "NODE_ENV=production"
+            "PORT=3000"
+            "NEXT_PUBLIC_APP_ENV=${{ needs.plan.outputs.environment }}"
+            "UE_ENVIRONMENT=${{ needs.plan.outputs.environment }}"
+            "UE_DEPLOYMENT_TYPE=${{ needs.plan.outputs.deployment_type }}"
+            "UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }}"
+            "NEXT_PUBLIC_UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }}"
+            "NZILA_MODE=${{ needs.plan.outputs.nzila_mode }}"
+            "GITHUB_SHA=${{ github.sha }}"
+            "RELEASE_ID=${{ needs.plan.outputs.release_id }}"
+            "BUILD_TIME=${{ needs.plan.outputs.build_time }}"
+            "BUILD_TIMESTAMP=${{ needs.plan.outputs.build_time }}"
+            "ARTIFACT_ID=${{ github.sha }}"
+            "UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }}"
+            "UE_APP_URL=${{ needs.plan.outputs.app_url }}"
+            "NEXT_PUBLIC_SITE_URL=${{ needs.plan.outputs.marketing_url }}"
+            "NEXT_PUBLIC_APP_URL=${{ needs.plan.outputs.app_url }}"
+            "NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app"
+            "NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app"
+            "AUTH_URL=${{ needs.plan.outputs.app_url }}"
+            "AUTH_TRUST_HOST=true"
+            "DJANGO_API_URL=http://localhost:8000"
+            "PLATFORM_ADMIN_USER_IDS=${{ secrets.PLATFORM_ADMIN_USER_IDS }}"
+            "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}"
+          )
+
+          if [ -n "${{ needs.plan.outputs.demo_profile }}" ]; then
+            FRONTEND_ENV_VARS+=(
+              "UE_DEMO_PROFILE=${{ needs.plan.outputs.demo_profile }}"
+              "NEXT_PUBLIC_UE_DEMO_PROFILE=${{ needs.plan.outputs.demo_profile }}"
+              "UE_DEMO_ORG_ID=${{ needs.plan.outputs.demo_org_id }}"
+              "NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ needs.plan.outputs.demo_org_slug }}"
+              # Demo personas log in from CI/manual probes with no prior
+              # session history; the risk scorer would otherwise classify
+              # first-seen IP + short UA as "medium" and force MFA enrollment
+              # that demo accounts cannot complete. Bypassing risk here keeps
+              # the demo personas reachable without weakening real auth.
+              "UE_E2E_RISK_BYPASS=true"
+            )
+          fi
+
           az containerapp update \
             --name "$TARGET_APP" \
             --resource-group "$TARGET_RG" \
-            --set-env-vars \
-              "NODE_ENV=production" \
-              "PORT=3000" \
-              "NEXT_PUBLIC_APP_ENV=${{ needs.plan.outputs.environment }}" \
-              "UE_ENVIRONMENT=${{ needs.plan.outputs.environment }}" \
-              "UE_DEPLOYMENT_TYPE=${{ needs.plan.outputs.deployment_type }}" \
-              "UE_FEATURE_PROFILE=${{ needs.plan.outputs.feature_profile }}" \
-              "NZILA_MODE=${{ needs.plan.outputs.nzila_mode }}" \
-              "GITHUB_SHA=${{ github.sha }}" \
-              "RELEASE_ID=${{ needs.plan.outputs.release_id }}" \
-              "BUILD_TIME=${{ needs.plan.outputs.build_time }}" \
-              "BUILD_TIMESTAMP=${{ needs.plan.outputs.build_time }}" \
-              "ARTIFACT_ID=${{ github.sha }}" \
-              "UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }}" \
-              "UE_APP_URL=${{ needs.plan.outputs.app_url }}" \
-              "NEXT_PUBLIC_SITE_URL=${{ needs.plan.outputs.marketing_url }}" \
-              "NEXT_PUBLIC_APP_URL=${{ needs.plan.outputs.app_url }}" \
-              "NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app" \
-              "NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app" \
-              "AUTH_URL=${{ needs.plan.outputs.app_url }}" \
-              "AUTH_TRUST_HOST=true" \
-              "DJANGO_API_URL=http://localhost:8000" \
-              "PLATFORM_ADMIN_USER_IDS=${{ secrets.PLATFORM_ADMIN_USER_IDS }}" \
-              "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}" \
+            --set-env-vars "${FRONTEND_ENV_VARS[@]}" \
             --container-name "$TARGET_APP" \
             --image ${{ env.IMAGE }}:${{ github.sha }}
+
+          # Ensure backend secretref aliases exist: some environments seed
+          # secrets with an environment suffix (e.g. auth-webhook-secret-demo)
+          # while the backend container references bare names. Mirror the
+          # suffixed value into the bare name so secretref lookup succeeds.
+          # Idempotent: if bare alias already exists this is a no-op overwrite.
+          ENV_SUFFIX="${{ needs.plan.outputs.environment }}"
+          EXISTING_SECRETS=$(az containerapp secret list \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "[].name" -o tsv)
+          for BARE in auth-webhook-secret; do
+            SUFFIXED="${BARE}-${ENV_SUFFIX}"
+            if echo "$EXISTING_SECRETS" | grep -qx "$SUFFIXED" \
+               && ! echo "$EXISTING_SECRETS" | grep -qx "$BARE"; then
+              echo "::notice::Mirroring secret $SUFFIXED -> $BARE for backend secretref compatibility"
+              VAL=$(az containerapp secret show \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --secret-name "$SUFFIXED" \
+                --query value -o tsv)
+              az containerapp secret set \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --secrets "${BARE}=${VAL}" >/dev/null
+            fi
+          done
+
           # Backend runs migrations automatically on startup (Dockerfile CMD)
           az containerapp update \
             --name "$TARGET_APP" \
@@ -569,6 +641,29 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Persona authz smoke (demo only, soft)
+        if: ${{ needs.plan.outputs.demo_profile != '' }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          FQDN=$(az containerapp show \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "properties.configuration.ingress.fqdn" \
+            -o tsv)
+          BASE="https://$FQDN"
+          echo "Persona smoke against $BASE"
+          # Soft until demo DB bootstrap is fully baked in (mfa_totp +
+          # org_auth_policies schemas + persona seed). Promote to hard once
+          # the bootstrap job is added to this workflow.
+          if node apps/union-eyes/scripts/smoke-cupe4373-personas.mjs --base "$BASE"; then
+            echo "✅ persona smoke passed"
+          else
+            echo "::warning::Persona smoke against $BASE failed — verify demo DB has mfa_totp/org_auth_policies tables and cupe4373 personas seeded (see /memories/repo/ue-demo-auth-bootstrap.md)."
+          fi
 
       - name: DNS record verification (post-deploy)
         if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
