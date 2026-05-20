@@ -4,7 +4,7 @@
  * Drizzle ORM — direct database access (migrated from Django proxy)
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievanceTransitions } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/api-auth-guard';
@@ -24,15 +24,18 @@ export async function GET(_req: NextRequest, { params }: Params) {
   }
 
   const { id } = await params;
-  const history = await db
-    .select()
-    .from(grievanceTransitions)
-    .where(
-      and(
-        eq(grievanceTransitions.claimId, id),
-        eq(grievanceTransitions.organizationId, user.organizationId),
+  const orgId = user.organizationId; // narrowed to string by guard above
+  const history = await withRLSContext(async (tx) =>
+    tx
+      .select()
+      .from(grievanceTransitions)
+      .where(
+        and(
+          eq(grievanceTransitions.claimId, id),
+          eq(grievanceTransitions.organizationId, orgId),
+        )
       )
-    )
-    .orderBy(desc(grievanceTransitions.transitionedAt));
+      .orderBy(desc(grievanceTransitions.transitionedAt))
+  );
   return NextResponse.json(history);
 }

@@ -10,7 +10,7 @@
  */
 
 import { sql, SQL } from 'drizzle-orm';
-import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { safeColumnName } from '@/lib/safe-sql-identifiers';
 
 // ============================================================================
@@ -112,7 +112,7 @@ export async function getExecutiveSummary(
   const { startDate, endDate } = dateRange;
   
   // Get current period metrics
-  const currentMetrics = await db.execute(sql`
+  const currentMetrics = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       COUNT(DISTINCT c.id) AS total_claims,
       COUNT(DISTINCT c.id) FILTER (WHERE c.status = 'open') AS open_claims,
@@ -125,24 +125,24 @@ export async function getExecutiveSummary(
     FROM claims c
     WHERE c.organization_id = ${organizationId}
       AND c.created_at BETWEEN ${startDate} AND ${endDate}
-  `);
+  `));
 
   // Get deadline compliance
-  const deadlineMetrics = await db.execute(sql`
+  const deadlineMetrics = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       ROUND(100.0 * COUNT(*) FILTER (WHERE cd.status = 'completed' AND cd.completed_at <= cd.current_deadline) / 
             NULLIF(COUNT(*) FILTER (WHERE cd.status IN ('completed', 'overdue')), 0), 1) AS on_time_rate
     FROM claim_deadlines cd
     WHERE cd.organization_id = ${organizationId}
       AND cd.created_at BETWEEN ${startDate} AND ${endDate}
-  `);
+  `));
 
   // Get previous period for comparison (same length as current period)
   const periodLengthDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const prevStartDate = new Date(startDate.getTime() - periodLengthDays * 24 * 60 * 60 * 1000);
   const prevEndDate = startDate;
 
-  const prevMetrics = await db.execute(sql`
+  const prevMetrics = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       COUNT(DISTINCT c.id) AS total_claims,
       AVG(EXTRACT(EPOCH FROM (c.resolved_at - c.created_at))/86400.0) FILTER (WHERE c.resolved_at IS NOT NULL) AS avg_resolution_days,
@@ -150,7 +150,7 @@ export async function getExecutiveSummary(
     FROM claims c
     WHERE c.organization_id = ${organizationId}
       AND c.created_at BETWEEN ${prevStartDate} AND ${prevEndDate}
-  `);
+  `));
 
   const current = currentMetrics[0];
   const prev = prevMetrics[0];
@@ -186,7 +186,7 @@ export async function getMonthlyTrends(
   organizationId: string,
   monthsBack: number = 12
 ): Promise<TrendData[]> {
-  const trends = await db.execute(sql`
+  const trends = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       TO_CHAR(month, 'YYYY-MM') AS period,
       total_claims AS value,
@@ -195,7 +195,7 @@ export async function getMonthlyTrends(
     WHERE organization_id = ${organizationId}
       AND month >= NOW() - INTERVAL '${monthsBack} months'
     ORDER BY month DESC
-  `);
+  `));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return trends.map((row: any) => ({
@@ -220,7 +220,7 @@ export async function getClaimsAnalytics(
   const { startDate, endDate } = dateRange;
 
   // Get aggregate metrics
-  const metrics = await db.execute(sql`
+  const metrics = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       COUNT(*) AS total_claims,
       AVG(EXTRACT(EPOCH FROM (c.resolved_at - c.created_at))/86400.0) FILTER (WHERE c.resolved_at IS NOT NULL) AS avg_resolution_days,
@@ -229,37 +229,37 @@ export async function getClaimsAnalytics(
     FROM claims c
     WHERE c.organization_id = ${organizationId}
       AND c.created_at BETWEEN ${startDate} AND ${endDate}
-  `);
+  `));
 
   // Get claims by status
-  const statusBreakdown = await db.execute(sql`
+  const statusBreakdown = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT c.status, COUNT(*) AS count
     FROM claims c
     WHERE c.organization_id = ${organizationId}
       AND c.created_at BETWEEN ${startDate} AND ${endDate}
     GROUP BY c.status
-  `);
+  `));
 
   // Get claims by type
-  const typeBreakdown = await db.execute(sql`
+  const typeBreakdown = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT c.claim_type, COUNT(*) AS count
     FROM claims c
     WHERE c.organization_id = ${organizationId}
       AND c.created_at BETWEEN ${startDate} AND ${endDate}
     GROUP BY c.claim_type
-  `);
+  `));
 
   // Get claims by priority
-  const priorityBreakdown = await db.execute(sql`
+  const priorityBreakdown = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT c.priority, COUNT(*) AS count
     FROM claims c
     WHERE c.organization_id = ${organizationId}
       AND c.created_at BETWEEN ${startDate} AND ${endDate}
     GROUP BY c.priority
-  `);
+  `));
 
   // Get resolution trend (daily)
-  const resolutionTrend = await db.execute(sql`
+  const resolutionTrend = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       TO_CHAR(report_date, 'YYYY-MM-DD') AS date,
       resolved_claims AS count,
@@ -268,10 +268,10 @@ export async function getClaimsAnalytics(
     WHERE organization_id = ${organizationId}
       AND report_date BETWEEN ${startDate} AND ${endDate}
     ORDER BY report_date
-  `);
+  `));
 
   // Get top stewards by performance
-  const topStewards = await db.execute(sql`
+  const topStewards = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       steward_id AS id,
       first_name || ' ' || last_name AS name,
@@ -281,7 +281,7 @@ export async function getClaimsAnalytics(
     WHERE organization_id = ${organizationId}
     ORDER BY performance_score DESC NULLS LAST
     LIMIT 10
-  `);
+  `));
 
   return {
     totalClaims: Number(metrics[0]?.total_claims || 0),
@@ -362,7 +362,9 @@ export async function getClaimsByDateRange(
 
   query = sql`${query} ORDER BY c.created_at DESC`;
 
-  return await db.execute(query);
+  const result = await withRLSContext(async (tx) => tx.execute(query));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return result.rows as any[];
 }
 
 // ============================================================================
@@ -379,25 +381,25 @@ export async function getMemberAnalytics(
   const { _startDate, _endDate } = dateRange;
 
   // Get member counts
-  const memberCounts = await db.execute(sql`
+  const memberCounts = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       COUNT(*) AS total_members,
       COUNT(*) FILTER (WHERE status = 'active') AS active_members,
       COUNT(*) FILTER (WHERE created_at >= ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)}) AS new_members_30_days
     FROM organization_members
     WHERE organization_id = ${organizationId}
-  `);
+  `));
 
   // Get retention rate from cohorts
-  const retention = await db.execute(sql`
+  const retention = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT AVG(retention_rate) AS avg_retention_rate
     FROM mv_member_cohorts
     WHERE organization_id = ${organizationId}
       AND cohort_month >= NOW() - INTERVAL '12 months'
-  `);
+  `));
 
   // Get engagement distribution
-  const engagementDist = await db.execute(sql`
+  const engagementDist = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       CASE 
         WHEN engagement_score >= 75 THEN 'high'
@@ -409,17 +411,17 @@ export async function getMemberAnalytics(
     FROM mv_member_engagement
     WHERE organization_id = ${organizationId}
     GROUP BY engagement_level
-  `);
+  `));
 
   // Get avg claims per member
-  const avgClaims = await db.execute(sql`
+  const avgClaims = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT AVG(total_claims) AS avg_claims
     FROM mv_member_engagement
     WHERE organization_id = ${organizationId}
-  `);
+  `));
 
   // Get top members
-  const topMembers = await db.execute(sql`
+  const topMembers = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       member_id AS id,
       first_name || ' ' || last_name AS name,
@@ -429,10 +431,10 @@ export async function getMemberAnalytics(
     WHERE organization_id = ${organizationId}
     ORDER BY total_claims DESC
     LIMIT 10
-  `);
+  `));
 
   // Get cohort analysis
-  const cohortAnalysis = await db.execute(sql`
+  const cohortAnalysis = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       TO_CHAR(cohort_month, 'YYYY-MM') AS cohort_month,
       cohort_size AS size,
@@ -441,7 +443,7 @@ export async function getMemberAnalytics(
     WHERE organization_id = ${organizationId}
       AND cohort_month >= NOW() - INTERVAL '12 months'
     ORDER BY cohort_month DESC
-  `);
+  `));
 
   return {
     totalMembers: Number(memberCounts[0]?.total_members || 0),
@@ -481,7 +483,7 @@ export async function getDeadlineAnalytics(
   const { startDate, endDate } = dateRange;
 
   // Get deadline metrics
-  const metrics = await db.execute(sql`
+  const metrics = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       COUNT(*) AS total_deadlines,
       COUNT(*) FILTER (WHERE status = 'overdue') AS overdue_count,
@@ -492,20 +494,20 @@ export async function getDeadlineAnalytics(
     FROM claim_deadlines
     WHERE organization_id = ${organizationId}
       AND created_at BETWEEN ${startDate} AND ${endDate}
-  `);
+  `));
 
   // Get extension approval rate
-  const extensionMetrics = await db.execute(sql`
+  const extensionMetrics = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'approved') / NULLIF(COUNT(*), 0), 1) AS approval_rate
     FROM deadline_extensions de
     JOIN claim_deadlines cd ON cd.id = de.deadline_id
     WHERE cd.organization_id = ${organizationId}
       AND de.created_at BETWEEN ${startDate} AND ${endDate}
-  `);
+  `));
 
   // Get compliance trend
-  const complianceTrend = await db.execute(sql`
+  const complianceTrend = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       TO_CHAR(report_date, 'YYYY-MM-DD') AS date,
       on_time_percentage AS on_time_rate,
@@ -514,16 +516,16 @@ export async function getDeadlineAnalytics(
     WHERE organization_id = ${organizationId}
       AND report_date BETWEEN ${startDate} AND ${endDate}
     ORDER BY report_date
-  `);
+  `));
 
   // Get deadlines by priority
-  const priorityBreakdown = await db.execute(sql`
+  const priorityBreakdown = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT priority, COUNT(*) AS count
     FROM claim_deadlines
     WHERE organization_id = ${organizationId}
       AND created_at BETWEEN ${startDate} AND ${endDate}
     GROUP BY priority
-  `);
+  `));
 
   return {
     totalDeadlines: Number(metrics[0]?.total_deadlines || 0),
@@ -557,7 +559,7 @@ export async function getFinancialAnalytics(
   const { startDate, endDate } = dateRange;
 
   // Get financial metrics
-  const metrics = await db.execute(sql`
+  const metrics = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       SUM(COALESCE((metadata->>'claim_value')::numeric, 0)) AS total_claim_value,
       SUM(COALESCE((metadata->>'settlement_amount')::numeric, 0)) AS total_settlements,
@@ -578,10 +580,10 @@ export async function getFinancialAnalytics(
     FROM claims
     WHERE organization_id = ${organizationId}
       AND created_at BETWEEN ${startDate} AND ${endDate}
-  `);
+  `));
 
   // Get financial trend
-  const financialTrend = await db.execute(sql`
+  const financialTrend = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       TO_CHAR(report_date, 'YYYY-MM-DD') AS date,
       total_claim_value AS claim_value,
@@ -591,10 +593,10 @@ export async function getFinancialAnalytics(
     WHERE organization_id = ${organizationId}
       AND report_date BETWEEN ${startDate} AND ${endDate}
     ORDER BY report_date
-  `);
+  `));
 
   // Get outcome distribution with values
-  const outcomeDistribution = await db.execute(sql`
+  const outcomeDistribution = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       outcome,
       COUNT(*) AS count,
@@ -604,7 +606,7 @@ export async function getFinancialAnalytics(
       AND created_at BETWEEN ${startDate} AND ${endDate}
       AND outcome IS NOT NULL
     GROUP BY outcome
-  `);
+  `));
 
   return {
     totalClaimValue: Number(metrics[0]?.total_claim_value || 0),
@@ -639,7 +641,7 @@ export async function getFinancialAnalytics(
  * Get weekly activity heatmap data
  */
 export async function getWeeklyActivityHeatmap(organizationId: string): Promise<HeatmapData[]> {
-  const heatmapData = await db.execute(sql`
+  const heatmapData = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       day_of_week,
       hour_of_day,
@@ -648,7 +650,7 @@ export async function getWeeklyActivityHeatmap(organizationId: string): Promise<
     FROM mv_weekly_activity
     WHERE organization_id = ${organizationId}
     ORDER BY day_of_week, hour_of_day
-  `);
+  `));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return heatmapData.map((r: any) => ({
@@ -696,7 +698,9 @@ export async function getReportsLegacy(organizationId: string, userId?: string):
 
   query = sql`${query} ORDER BY r.updated_at DESC`;
 
-  return await db.execute(query);
+  const result = await withRLSContext(async (tx) => tx.execute(query));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return result.rows as any[];
 }
 
 /**
@@ -718,7 +722,7 @@ export async function createReportLegacy(
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO reports (
       organization_id, name, description, report_type, category, config, 
       is_public, is_template, template_id, created_by
@@ -729,7 +733,7 @@ export async function createReportLegacy(
       ${reportData.templateId || null}, ${userId}
     )
     RETURNING *
-  `);
+  `));
 
   return result[0];
 }
@@ -738,12 +742,12 @@ export async function createReportLegacy(
  * Update report run statistics
  */
 export async function updateReportRunStats(reportId: string): Promise<void> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE reports
     SET last_run_at = NOW(),
         run_count = run_count + 1
     WHERE id = ${reportId}
-  `);
+  `));
 }
 
 // ============================================================================
@@ -763,12 +767,12 @@ export async function createExportJob(
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO export_jobs (organization_id, report_id, schedule_id, export_type, created_by)
     VALUES (${organizationId}, ${exportData.reportId || null}, ${exportData.scheduleId || null}, 
             ${exportData.exportType}, ${userId})
     RETURNING *
-  `);
+  `));
 
   return result[0];
 }
@@ -785,29 +789,29 @@ export async function updateExportJobStatus(
   const now = new Date();
   
   if (status === 'processing') {
-    await db.execute(sql`
+    await withRLSContext(async (tx) => tx.execute(sql`
       UPDATE export_jobs
       SET status = ${status},
           processing_started_at = ${now}
       WHERE id = ${jobId}
-    `);
+    `));
   } else if (status === 'completed') {
-    await db.execute(sql`
+    await withRLSContext(async (tx) => tx.execute(sql`
       UPDATE export_jobs
       SET status = ${status},
           file_url = ${fileUrl},
           processing_completed_at = ${now},
           processing_duration_ms = EXTRACT(EPOCH FROM (${now} - processing_started_at)) * 1000
       WHERE id = ${jobId}
-    `);
+    `));
   } else if (status === 'failed') {
-    await db.execute(sql`
+    await withRLSContext(async (tx) => tx.execute(sql`
       UPDATE export_jobs
       SET status = ${status},
           error_message = ${errorMessage},
           processing_completed_at = ${now}
       WHERE id = ${jobId}
-    `);
+    `));
   }
 }
 
@@ -816,9 +820,9 @@ export async function updateExportJobStatus(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getExportJob(jobId: string): Promise<any> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM export_jobs WHERE id = ${jobId}
-  `);
+  `));
   return result[0];
 }
 
@@ -827,7 +831,7 @@ export async function getExportJob(jobId: string): Promise<any> {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getUserExportJobs(organizationId: string, userId: string): Promise<any[]> {
-  return await db.execute(sql`
+  return await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       ej.*,
       r.name AS report_name
@@ -837,7 +841,7 @@ export async function getUserExportJobs(organizationId: string, userId: string):
       AND ej.created_by = ${userId}
     ORDER BY ej.created_at DESC
     LIMIT 50
-  `);
+  `));
 }
 
 // ============================================================================
@@ -849,7 +853,7 @@ export async function getUserExportJobs(organizationId: string, userId: string):
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function refreshAnalyticsViews(): Promise<any[]> {
-  return await db.execute(sql`SELECT * FROM refresh_analytics_views()`);
+  return await withRLSContext(async (tx) => tx.execute(sql`SELECT * FROM refresh_analytics_views()`));
 }
 
 /**
@@ -857,7 +861,7 @@ export async function refreshAnalyticsViews(): Promise<any[]> {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getViewRefreshStats(): Promise<any[]> {
-  return await db.execute(sql`
+  return await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       schemaname,
       matviewname,
@@ -866,7 +870,7 @@ export async function getViewRefreshStats(): Promise<any[]> {
     WHERE schemaname = 'public'
       AND matviewname LIKE 'mv_%'
     ORDER BY last_refresh DESC NULLS LAST
-  `);
+  `));
 }
 
 // ============================================================================
@@ -912,7 +916,7 @@ export async function getReports(
 
   const whereClause = sql.join(conditions, sql` AND `);
 
-  const reports = await db.execute(sql`
+  const reports = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       r.*,
       COUNT(re.id) as execution_count,
@@ -922,7 +926,7 @@ export async function getReports(
     WHERE ${whereClause}
     GROUP BY r.id
     ORDER BY r.updated_at DESC
-  `);
+  `));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return reports as any[];
@@ -936,11 +940,11 @@ export async function getReportById(
   organizationId: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any | null> {
-  const reports = await db.execute(sql`
+  const reports = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT r.*
     FROM reports r
     WHERE r.id = ${reportId} AND r.tenant_id = ${organizationId}
-  `);
+  `));
 
   return reports[0] || null;
 }
@@ -964,7 +968,7 @@ export async function createReport(
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO reports (
       tenant_id, name, description, report_type, category, config,
       is_public, is_template, template_id, created_by, updated_by
@@ -974,7 +978,7 @@ export async function createReport(
       ${data.isTemplate || false}, ${data.templateId || null}, ${userId}, ${userId}
     )
     RETURNING *
-  `);
+  `));
 
   return result[0];
 }
@@ -1018,12 +1022,12 @@ export async function updateReport(
   // Join SET clauses with commas
   const setClause = sql.join(setClauses, sql`, `);
 
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE reports
     SET ${setClause}
     WHERE id = ${reportId} AND tenant_id = ${organizationId}
     RETURNING *
-  `);
+  `));
 
   return result[0];
 }
@@ -1035,10 +1039,10 @@ export async function deleteReport(
   reportId: string,
   organizationId: string
 ): Promise<boolean> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     DELETE FROM reports
     WHERE id = ${reportId} AND tenant_id = ${organizationId}
-  `);
+  `));
 
   return true;
 }
@@ -1063,7 +1067,7 @@ export async function logReportExecution(
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO report_executions (
       report_id, tenant_id, executed_by, format, parameters,
       result_count, execution_time_ms, file_url, file_size,
@@ -1076,14 +1080,14 @@ export async function logReportExecution(
       ${data.status}, ${data.errorMessage || null}
     )
     RETURNING *
-  `);
+  `));
 
   // Update report's last_run_at and run_count
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE reports
     SET last_run_at = NOW(), run_count = run_count + 1
     WHERE id = ${reportId}
-  `);
+  `));
 
   return result[0];
 }
@@ -1097,14 +1101,14 @@ export async function getReportExecutions(
   limit: number = 50
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[]> {
-  const executions = await db.execute(sql`
+  const executions = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT re.*, u.email as executed_by_email
     FROM report_executions re
     LEFT JOIN users u ON u.id = re.executed_by
     WHERE re.report_id = ${reportId} AND re.tenant_id = ${organizationId}
     ORDER BY re.executed_at DESC
     LIMIT ${limit}
-  `);
+  `));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return executions as any[];
@@ -1134,12 +1138,12 @@ export async function getReportTemplates(
 
   const whereClause = sql.join(conditions, sql` AND `);
 
-  const templates = await db.execute(sql`
+  const templates = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT rt.*
     FROM report_templates rt
     WHERE ${whereClause}
     ORDER BY rt.name ASC
-  `);
+  `));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return templates as any[];
@@ -1156,9 +1160,9 @@ export async function createReportFromTemplate(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   // Get template
-  const template = await db.execute(sql`
+  const template = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM report_templates WHERE id = ${templateId}
-  `);
+  `));
 
   if (template.length === 0) {
     throw new Error('Template not found');

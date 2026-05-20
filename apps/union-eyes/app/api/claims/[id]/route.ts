@@ -5,7 +5,6 @@
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
-import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -28,7 +27,7 @@ const GET = withApi(
     // Resolve organizationId: if null, fall back to the user's membership org
     let orgId = organizationId;
     if (!orgId && userId) {
-      const memberRows = await withRLSContext(async () => db.execute(
+      const memberRows = await withRLSContext(async (tx) => tx.execute(
         sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
       ));
       orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
@@ -41,7 +40,7 @@ const GET = withApi(
         ? sql`AND c.member_id = ${userId}`
         : sql`AND FALSE`;
 
-    const rows = await withRLSContext(async () => db.execute(sql`
+    const rows = await withRLSContext(async (tx) => tx.execute(sql`
       SELECT c.claim_id        AS "claimId",
              c.claim_number    AS "claimNumber",
              c.organization_id AS "organizationId",

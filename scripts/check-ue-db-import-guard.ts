@@ -49,21 +49,8 @@ const EXTENSIONS = ['.ts', '.tsx'];
  * withRLSContext() as part of the ongoing org-isolation hardening work.
  */
 const ALLOWLIST: Set<string> = new Set([
-  // ── Pre-existing violations — P1 migration backlog ──────────────────────────
-  'apps/union-eyes/app/api/cases/bulk-import/route.ts',          // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/cases/route.ts',                      // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts',    // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/cases/[caseId]/evidence/route.ts',    // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/cases/[caseId]/route.ts',             // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts',    // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/claims/route.ts',                     // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/claims/[id]/evidence/route.ts',       // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/claims/[id]/route.ts',                // TODO: migrate to withRLSContext
-  'apps/union-eyes/app/api/claims/[id]/workflow/history/route.ts', // TODO: migrate to withRLSContext
-  'apps/union-eyes/db/queries/analytics-queries.ts',             // TODO: migrate to withRLSContext
-  'apps/union-eyes/db/queries/deadline-queries.ts',              // TODO: migrate to withRLSContext
-  'apps/union-eyes/db/queries/enhanced-rbac-queries.ts',         // TODO: migrate to withRLSContext
-  'apps/union-eyes/lib/workflow-engine.ts',                      // PARTIAL: assignClaim migrated; remaining functions pending
+  // All pre-existing violations have been migrated to withRLSContext / withSystemRLSContext.
+  // Add new entries ONLY if a genuine system-level need exists (with justification).
 ]);
 
 // ── Scanner ───────────────────────────────────────────────────────────────────

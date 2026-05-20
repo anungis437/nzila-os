@@ -10,7 +10,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { z } from 'zod';
-import { db } from '@/db/db';
 import { claims } from '@/db/schema/claims-schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { createClaim } from '@/db/queries/claims-queries';
@@ -19,7 +18,7 @@ import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { createHash } from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
 export const dynamic = 'force-dynamic';
@@ -109,16 +108,18 @@ export async function POST(request: Request) {
       try {
         // Idempotency hash
         const hashInput = record.externalSourceId
-          ? `ext:${record.externalSourceId}`
-          : `${record.memberId}|${record.caseType}|${record.incidentDate}|${record.title}`;
+          ? `${orgId}|ext:${record.externalSourceId}`
+          : `${orgId}|${record.memberId}|${record.caseType}|${record.incidentDate}|${record.title}`;
         const idempotencyHash = createHash('sha256').update(hashInput).digest('hex');
 
-        // Check for existing
-        const [existing] = await db
-          .select({ claimId: claims.claimId, claimNumber: claims.claimNumber })
-          .from(claims)
-          .where(eq(claims.idempotencyHash, idempotencyHash))
-          .limit(1);
+        // Check for existing (org-scoped + RLS)
+        const [existing] = await withRLSContext(async (tx) =>
+          tx
+            .select({ claimId: claims.claimId, claimNumber: claims.claimNumber })
+            .from(claims)
+            .where(and(eq(claims.idempotencyHash, idempotencyHash), eq(claims.organizationId, orgId)))
+            .limit(1)
+        );
 
         if (existing) {
           results.push({

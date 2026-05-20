@@ -6,7 +6,6 @@
  * POST /api/cases   — Create a case (steward+ only — members must submit intakes)
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { NextResponse } from 'next/server';
@@ -57,8 +56,8 @@ export const GET = withApi(
     // Resolve organizationId: fall back to user's org membership
     let orgId = organizationId;
     if (!orgId && userId) {
-      const memberRows = await withRLSContext(async () =>
-        db.execute(
+      const memberRows = await withRLSContext(async (tx) =>
+        tx.execute(
           sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
         ),
       );
@@ -75,8 +74,8 @@ export const GET = withApi(
     const typeFilter   = type   ? sql`AND c.claim_type = ${type}` : sql``;
     const priorityFilter = priority ? sql`AND c.priority = ${priority}` : sql``;
 
-    const rows = await withRLSContext(async () =>
-      db.execute(sql`
+    const rows = await withRLSContext(async (tx) =>
+      tx.execute(sql`
         SELECT c.claim_id        AS "claimId",
                c.claim_number    AS "claimNumber",
                c.organization_id AS "organizationId",
@@ -154,8 +153,8 @@ export const POST = withApi(
       sourceIntakeId,
     } = parsed.data;
 
-    const rows = await withRLSContext(async () =>
-      db.execute(sql`
+    const rows = await withRLSContext(async (tx) =>
+      tx.execute(sql`
         INSERT INTO claims (
           organization_id, member_id, claim_type, description,
           incident_date, location, desired_outcome,

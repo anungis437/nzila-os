@@ -8,11 +8,10 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withApi } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { updateClaimStatusById } from '@/lib/workflow-engine';
@@ -124,12 +123,21 @@ export const POST = withApi(
       );
     }
 
-    // Fetch the claim
-    const [claim] = await db
-      .select()
-      .from(claims)
-      .where(eq(claims.claimId, caseId))
-      .limit(1);
+    if (!ctx.organizationId) {
+      return NextResponse.json(
+        { success: false, error: 'Organization context required' },
+        { status: 403 },
+      );
+    }
+
+    // Fetch the claim (org-scoped + RLS)
+    const [claim] = await withRLSContext(async (tx) =>
+      tx
+        .select()
+        .from(claims)
+        .where(and(eq(claims.claimId, caseId), eq(claims.organizationId, ctx.organizationId!)))
+        .limit(1)
+    );
 
     if (!claim) {
       return NextResponse.json(

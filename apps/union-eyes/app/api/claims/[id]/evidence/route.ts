@@ -9,7 +9,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth-guard'
-import { db } from '@/db/db'
+import { withRLSContext } from '@/lib/db/with-rls-context'
 import { claims, claimUpdates } from '@/db/schema'
 import { defensibilityPacks } from '@/db/schema/defensibility-packs-schema'
 import { eq, and, desc } from 'drizzle-orm'
@@ -34,30 +34,36 @@ export async function GET(
       ? and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId))
       : eq(claims.claimId, claimId)
 
-    const [claim] = await db
-      .select()
-      .from(claims)
-      .where(claimFilter)
-      .limit(1)
+    const [claim] = await withRLSContext(async (tx) =>
+      tx
+        .select()
+        .from(claims)
+        .where(claimFilter)
+        .limit(1)
+    )
 
     if (!claim) {
       return NextResponse.json({ error: 'Claim not found' }, { status: 404 })
     }
 
     // Fetch all updates (audit log)
-    const updates = await db
-      .select()
-      .from(claimUpdates)
-      .where(eq(claimUpdates.claimId, claimId))
-      .orderBy(claimUpdates.createdAt)
+    const updates = await withRLSContext(async (tx) =>
+      tx
+        .select()
+        .from(claimUpdates)
+        .where(eq(claimUpdates.claimId, claimId))
+        .orderBy(claimUpdates.createdAt)
+    )
 
     // Fetch latest defensibility pack if available
-    const [pack] = await db
-      .select()
-      .from(defensibilityPacks)
-      .where(eq(defensibilityPacks.caseId, claimId))
-      .orderBy(desc(defensibilityPacks.generatedAt))
-      .limit(1)
+    const [pack] = await withRLSContext(async (tx) =>
+      tx
+        .select()
+        .from(defensibilityPacks)
+        .where(eq(defensibilityPacks.caseId, claimId))
+        .orderBy(desc(defensibilityPacks.generatedAt))
+        .limit(1)
+    )
 
     return NextResponse.json({
       claim: {

@@ -4,7 +4,6 @@
  */
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { claims } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -28,7 +27,7 @@ export const GET = withApi(
     // Resolve organizationId: if null, fall back to the user's membership org
     let orgId = organizationId;
     if (!orgId && userId) {
-      const memberRows = await withRLSContext(async () => db.execute(
+      const memberRows = await withRLSContext(async (tx) => tx.execute(
         sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
       ));
       orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
@@ -41,7 +40,7 @@ export const GET = withApi(
         ? sql`AND c.member_id = ${userId}`
         : sql`AND FALSE`;
 
-    const rows = await withRLSContext(async () => db.execute(sql`
+    const rows = await withRLSContext(async (tx) => tx.execute(sql`
       SELECT c.claim_id        AS "claimId",
              c.claim_number    AS "claimNumber",
              c.organization_id AS "organizationId",
@@ -131,7 +130,7 @@ export const PATCH = withApi(
     // Resolve organizationId fallback
     let orgId = organizationId;
     if (!orgId && userId) {
-      const memberRows = await withRLSContext(async () => db.execute(
+      const memberRows = await withRLSContext(async (tx) => tx.execute(
         sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
       ));
       orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
@@ -142,7 +141,7 @@ export const PATCH = withApi(
       ? sql`AND organization_id = ${orgId}::uuid`
       : sql`AND FALSE`;
 
-    const existing = await withRLSContext(async () => db.execute(sql`
+    const existing = await withRLSContext(async (tx) => tx.execute(sql`
       SELECT claim_id, claim_number FROM claims
       WHERE (claim_number = ${id} OR claim_id::text = ${id})
         ${orgFilter}
@@ -197,8 +196,8 @@ export const PATCH = withApi(
       updates.assignedAt = new Date();
     }
 
-    await withRLSContext(async () =>
-      db.update(claims)
+    await withRLSContext(async (tx) =>
+      tx.update(claims)
         .set(updates)
         .where(and(eq(claims.claimId, claimId)))
     );

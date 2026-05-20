@@ -12,7 +12,6 @@
  *    (id, timestamp, type, description, actor).
  */
 import { withApi } from '@/lib/api/with-api';
-import { db } from '@/db/db';
 import { claimUpdates } from '@/db/schema';
 import { grievanceTimeline } from '@/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
@@ -36,8 +35,8 @@ export const GET = withApi(
     }
 
     // Resolve caseId (could be claim_number like "L123-2026-007" or a UUID)
-    const claimRows = await withRLSContext(() =>
-      db.execute(
+    const claimRows = await withRLSContext(async (tx) =>
+      tx.execute(
         sql`SELECT claim_id FROM claims WHERE claim_number = ${caseId} OR claim_id::text = ${caseId} LIMIT 1`,
       ),
     );
@@ -47,8 +46,8 @@ export const GET = withApi(
     }
 
     // 1. Fetch claimUpdates scoped to this case
-    const updates = await withRLSContext(() =>
-      db
+    const updates = await withRLSContext(async (tx) =>
+      tx
         .select()
         .from(claimUpdates)
         .where(eq(claimUpdates.claimId, resolvedClaimId))
@@ -68,8 +67,8 @@ export const GET = withApi(
     //    to grievances, so attempt a raw lookup and gracefully skip if
     //    the column doesn't exist.
     try {
-      const linkResult = await withRLSContext(() =>
-        db.execute(
+      const linkResult = await withRLSContext(async (tx) =>
+        tx.execute(
           sql`SELECT grievance_id FROM claims WHERE claim_id = ${resolvedClaimId} AND grievance_id IS NOT NULL LIMIT 1`,
         ),
       );
@@ -77,8 +76,8 @@ export const GET = withApi(
       const grievanceId = (rows[0] as Record<string, unknown> | undefined)?.grievance_id as string | undefined;
 
       if (grievanceId) {
-        const gEvents = await withRLSContext(() =>
-          db
+        const gEvents = await withRLSContext(async (tx) =>
+          tx
             .select()
             .from(grievanceTimeline)
             .where(eq(grievanceTimeline.grievanceId, grievanceId))

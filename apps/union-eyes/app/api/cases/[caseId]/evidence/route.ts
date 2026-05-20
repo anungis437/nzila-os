@@ -3,7 +3,6 @@
  */
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { putBlob, deleteBlob } from '@/lib/blob-client';
@@ -69,7 +68,7 @@ async function resolveCaseRecord(caseId: string, organizationId: string | null, 
       ? sql`AND c.member_id = ${userId}`
       : sql`AND FALSE`;
 
-  const rows = await withRLSContext(async () => db.execute(sql`
+  const rows = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.attachments
     FROM claims c
     WHERE (c.claim_number = ${caseId} OR c.claim_id::text = ${caseId})
@@ -87,7 +86,7 @@ async function resolveCaseRecord(caseId: string, organizationId: string | null, 
 
 async function persistAttachments(claimId: string, attachments: AttachmentMetadata[]): Promise<void> {
   const serialized = JSON.stringify(attachments);
-  await withRLSContext(async () => db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE claims
     SET attachments = ${serialized}::jsonb,
         updated_at = NOW()

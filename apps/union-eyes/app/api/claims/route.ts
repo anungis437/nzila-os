@@ -9,10 +9,9 @@
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
-import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemRLSContext } from '@/lib/db/with-rls-context';
 import { z } from 'zod';
 
 const claimCreateSchema = z.object({
@@ -74,16 +73,16 @@ export const POST = withApi(
       throw ApiError.badRequest('No active organization. Please select an organization and try again.');
     }
 
-    return withSystemContext(async () => {
+    return withSystemRLSContext('system-query: create-claim', async (tx) => {
       // Generate claim number: CLM-YYYYMMDD-XXXX
       const today = new Date();
       const datePart = today.toISOString().slice(0, 10).replace(/-/g, '');
       const prefix = `CLM-${datePart}-`;
 
-      const result = await db.execute(
+      const result = await tx.execute(
         sql`SELECT MAX(claim_number) AS max_num FROM claims WHERE claim_number LIKE ${prefix + '%'}`
       );
-      const rows = Array.from(result);
+      const rows = result.rows;
       const maxNum = (rows[0] as Record<string, unknown>)?.max_num as string | null;
       let seq = 1;
       if (maxNum) {
@@ -103,7 +102,7 @@ export const POST = withApi(
         memberId: userId,
       } as typeof claims.$inferInsert;
 
-      const [row] = await db.insert(claims).values(values).returning();
+      const [row] = await tx.insert(claims).values(values).returning();
       return { data: row };
     });
   },

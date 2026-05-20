@@ -9,7 +9,7 @@
  * - Business day calculations
  */
 
-import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
@@ -131,11 +131,11 @@ export interface Holiday {
  * Get all active deadline rules for organization
  */
 export async function getDeadlineRules(organizationId: string): Promise<DeadlineRule[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM deadline_rules
     WHERE organization_id = ${organizationId} AND is_active = TRUE
     ORDER BY rule_name
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -147,10 +147,10 @@ export async function getDeadlineRuleByCode(
   organizationId: string,
   ruleCode: string
 ): Promise<DeadlineRule | null> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM deadline_rules
     WHERE organization_id = ${organizationId} AND rule_code = ${ruleCode} AND is_active = TRUE
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any || null;
 }
@@ -163,14 +163,14 @@ export async function getApplicableDeadlineRules(
   claimType: string,
   priorityLevel?: string
 ): Promise<DeadlineRule[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM deadline_rules
     WHERE organization_id = ${organizationId}
       AND is_active = TRUE
       AND (claim_type IS NULL OR claim_type = ${claimType})
       AND (priority_level IS NULL OR priority_level = ${priorityLevel || null})
     ORDER BY step_number NULLS LAST, days_from_event
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -198,7 +198,7 @@ export async function createDeadlineRule(
     escalationDelayDays?: number;
   } = {}
 ): Promise<DeadlineRule> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO deadline_rules (
       organization_id, rule_name, rule_code, description, claim_type, priority_level,
       step_number, days_from_event, event_type, business_days_only,
@@ -214,7 +214,7 @@ export async function createDeadlineRule(
       ${createdBy}
     )
     RETURNING *
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
@@ -227,11 +227,11 @@ export async function createDeadlineRule(
  * Get all deadlines for a claim
  */
 export async function getClaimDeadlines(claimId: string): Promise<ClaimDeadline[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM claim_deadlines
     WHERE claim_id = ${claimId}
     ORDER BY due_date
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -240,11 +240,11 @@ export async function getClaimDeadlines(claimId: string): Promise<ClaimDeadline[
  * Get pending deadlines for a claim
  */
 export async function getPendingClaimDeadlines(claimId: string): Promise<ClaimDeadline[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM claim_deadlines
     WHERE claim_id = ${claimId} AND status = 'pending'
     ORDER BY due_date
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -256,13 +256,13 @@ export async function getPendingClaimDeadlines(claimId: string): Promise<ClaimDe
 export async function getCriticalDeadlines(organizationId: string): Promise<any[]> {
   try {
     // Check if v_critical_deadlines view exists
-    const viewCheck = await db.execute(sql`
+    const viewCheck = await withRLSContext(async (tx) => tx.execute(sql`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.views 
         WHERE table_schema = 'public' 
         AND table_name = 'v_critical_deadlines'
       ) as view_exists
-    `);
+    `));
     
     if (!viewCheck[0]?.view_exists) {
       logger.warn('Critical deadlines view missing; returning empty array', {
@@ -271,7 +271,7 @@ export async function getCriticalDeadlines(organizationId: string): Promise<any[
       return [];
     }
 
-    const result = await db.execute(sql`
+    const result = await withRLSContext(async (tx) => tx.execute(sql`
       SELECT * FROM v_critical_deadlines
       WHERE organization_id = ${organizationId}
       ORDER BY 
@@ -281,7 +281,7 @@ export async function getCriticalDeadlines(organizationId: string): Promise<any[
           ELSE 3
         END,
         due_date
-    `);
+    `));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return result as any[];
   } catch (error) {
@@ -320,22 +320,22 @@ export async function getMemberDeadlines(
   
   query = sql`${query} ORDER BY cd.due_date`;
   
-  const result = await db.execute(query);
+  const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 /**
  * Get overdue deadlines for organization
  */
 export async function getOverdueDeadlines(organizationId: string): Promise<ClaimDeadline[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM claim_deadlines
     WHERE organization_id = ${organizationId}
       AND status = 'pending'
       AND is_overdue = TRUE
     ORDER BY days_overdue DESC, priority DESC
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -362,7 +362,7 @@ export async function createClaimDeadline(
     ? await addBusinessDays(eventDate, daysFromEvent, organizationId)
     : new Date(eventDate.getTime() + daysFromEvent * 24 * 60 * 60 * 1000);
   
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO claim_deadlines (
       claim_id, organization_id, deadline_rule_id, deadline_name, deadline_type,
       event_date, original_deadline, due_date, priority, created_by
@@ -372,7 +372,7 @@ export async function createClaimDeadline(
       ${deadlineDate}, ${options.priority || 'medium'}, ${createdBy}
     )
     RETURNING *
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
@@ -426,7 +426,7 @@ export async function completeDeadline(
   notes?: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE claim_deadlines
     SET status = 'completed',
         completed_at = NOW(),
@@ -436,7 +436,7 @@ export async function completeDeadline(
         updated_by = ${completedBy}
     WHERE id = ${deadlineId}
     RETURNING *
-  `);
+  `));
   return result[0];
 }
 
@@ -444,9 +444,9 @@ export async function completeDeadline(
  * Mark deadline as missed (run by scheduled job)
  */
 export async function markOverdueDeadlines(): Promise<number> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT mark_overdue_deadlines() as count
-  `);
+  `));
   return (result[0]?.count as number) || 0;
 }
 
@@ -465,7 +465,7 @@ export async function requestDeadlineExtension(
   reason: string,
   requiresApproval: boolean = true
 ): Promise<DeadlineExtension> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO deadline_extensions (
       deadline_id, organization_id, requested_by, requested_days,
       request_reason, requires_approval
@@ -474,7 +474,7 @@ export async function requestDeadlineExtension(
       ${reason}, ${requiresApproval}
     )
     RETURNING *
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
@@ -489,12 +489,12 @@ export async function approveDeadlineExtension(
   approvalNotes?: string
 ): Promise<void> {
   // Get extension and deadline details
-  const extensionResult = await db.execute(sql`
+  const extensionResult = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT de.*, cd.due_date, cd.organization_id
     FROM deadline_extensions de
     JOIN claim_deadlines cd ON de.deadline_id = cd.id
     WHERE de.id = ${extensionId}
-  `);
+  `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const extension = extensionResult[0] as any;
@@ -507,7 +507,7 @@ export async function approveDeadlineExtension(
   const newDeadline = new Date(currentDeadline.getTime() + granted * 24 * 60 * 60 * 1000);
   
   // Update extension
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE deadline_extensions
     SET status = 'approved',
         approved_by = ${approvedBy},
@@ -516,10 +516,10 @@ export async function approveDeadlineExtension(
         new_deadline = ${newDeadline},
         days_granted = ${granted}
     WHERE id = ${extensionId}
-  `);
+  `));
   
   // Update claim deadline
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE claim_deadlines
     SET due_date = ${newDeadline},
         status = 'extended',
@@ -530,7 +530,7 @@ export async function approveDeadlineExtension(
         updated_at = NOW(),
         updated_by = ${approvedBy}
     WHERE id = ${extension.deadline_id}
-  `);
+  `));
 }
 
 /**
@@ -541,14 +541,14 @@ export async function denyDeadlineExtension(
   deniedBy: string,
   denialNotes?: string
 ): Promise<void> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE deadline_extensions
     SET status = 'denied',
         approved_by = ${deniedBy},
         approval_decision_at = NOW(),
         approval_notes = ${denialNotes || null}
     WHERE id = ${extensionId}
-  `);
+  `));
 }
 
 /**
@@ -557,7 +557,7 @@ export async function denyDeadlineExtension(
 export async function getPendingExtensionRequests(
   organizationId: string
 ): Promise<DeadlineExtension[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT de.*, cd.deadline_name, cd.due_date, c.claim_number
     FROM deadline_extensions de
     JOIN claim_deadlines cd ON de.deadline_id = cd.id
@@ -566,7 +566,7 @@ export async function getPendingExtensionRequests(
       AND de.status = 'pending'
       AND de.requires_approval = TRUE
     ORDER BY de.requested_at
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -593,7 +593,7 @@ export async function createDeadlineAlert(
     actionUrl?: string;
   } = {}
 ): Promise<DeadlineAlert> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO deadline_alerts (
       deadline_id, organization_id, recipient_id, alert_type, alert_severity,
       alert_trigger, recipient_role, delivery_method, subject, message, action_url
@@ -605,7 +605,7 @@ export async function createDeadlineAlert(
       ${options.actionUrl || null}
     )
     RETURNING *
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
@@ -618,24 +618,24 @@ export async function markAlertDelivered(
   deliveryStatus: 'delivered' | 'failed' | 'bounced',
   deliveryError?: string
 ): Promise<void> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE deadline_alerts
     SET delivery_status = ${deliveryStatus},
         delivered_at = CASE WHEN ${deliveryStatus} = 'delivered' THEN NOW() ELSE NULL END,
         delivery_error = ${deliveryError || null}
     WHERE id = ${alertId}
-  `);
+  `));
 }
 
 /**
  * Mark alert as viewed
  */
 export async function markAlertViewed(alertId: string): Promise<void> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE deadline_alerts
     SET viewed_at = NOW()
     WHERE id = ${alertId} AND viewed_at IS NULL
-  `);
+  `));
 }
 
 /**
@@ -645,13 +645,13 @@ export async function recordAlertAction(
   alertId: string,
   actionTaken: string
 ): Promise<void> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE deadline_alerts
     SET action_taken = ${actionTaken},
         action_taken_at = NOW(),
         acknowledged_at = COALESCE(acknowledged_at, NOW())
     WHERE id = ${alertId}
-  `);
+  `));
 }
 
 /**
@@ -661,7 +661,7 @@ export async function getUnreadAlerts(
   memberId: string,
   organizationId: string
 ): Promise<DeadlineAlert[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT da.*, cd.deadline_name, cd.due_date, c.claim_number
     FROM deadline_alerts da
     JOIN claim_deadlines cd ON da.deadline_id = cd.id
@@ -671,7 +671,7 @@ export async function getUnreadAlerts(
       AND da.viewed_at IS NULL
       AND da.delivery_method = 'in_app'
     ORDER BY da.sent_at DESC
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -685,7 +685,7 @@ export async function generateUpcomingDeadlineAlerts(
   let alertCount = 0;
   
   // Get deadlines due in 3 days (first alert)
-  const threeDayResult = await db.execute(sql`
+  const threeDayResult = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT cd.id, cd.deadline_name, cd.due_date, c.assigned_to, c.claim_number
     FROM claim_deadlines cd
     JOIN claims c ON cd.claim_id = c.id
@@ -696,7 +696,7 @@ export async function generateUpcomingDeadlineAlerts(
         SELECT 1 FROM deadline_alerts da
         WHERE da.deadline_id = cd.id AND da.alert_trigger = '3_days_before'
       )
-  `);
+  `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const deadline of threeDayResult as any[]) {
@@ -720,7 +720,7 @@ export async function generateUpcomingDeadlineAlerts(
   }
   
   // Get deadlines due tomorrow (second alert)
-  const oneDayResult = await db.execute(sql`
+  const oneDayResult = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT cd.id, cd.deadline_name, cd.due_date, c.assigned_to, c.claim_number
     FROM claim_deadlines cd
     JOIN claims c ON cd.claim_id = c.id
@@ -731,7 +731,7 @@ export async function generateUpcomingDeadlineAlerts(
         SELECT 1 FROM deadline_alerts da
         WHERE da.deadline_id = cd.id AND da.alert_trigger = '1_day_before'
       )
-  `);
+  `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const deadline of oneDayResult as any[]) {
@@ -755,7 +755,7 @@ export async function generateUpcomingDeadlineAlerts(
   }
   
   // Get deadlines due today (critical alert)
-  const todayResult = await db.execute(sql`
+  const todayResult = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT cd.id, cd.deadline_name, cd.due_date, c.assigned_to, c.claim_number
     FROM claim_deadlines cd
     JOIN claims c ON cd.claim_id = c.id
@@ -766,7 +766,7 @@ export async function generateUpcomingDeadlineAlerts(
         SELECT 1 FROM deadline_alerts da
         WHERE da.deadline_id = cd.id AND da.alert_trigger = 'day_of'
       )
-  `);
+  `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const deadline of todayResult as any[]) {
@@ -804,9 +804,9 @@ export async function calculateBusinessDays(
   endDate: Date,
   organizationId?: string
 ): Promise<number> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT calculate_business_days(${startDate}, ${endDate}, ${organizationId || null}) as days
-  `);
+  `));
   return (result[0]?.days as number) || 0;
 }
 
@@ -818,9 +818,9 @@ export async function addBusinessDays(
   daysToAdd: number,
   organizationId?: string
 ): Promise<Date> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT add_business_days(${startDate}, ${daysToAdd}, ${organizationId || null}) as result_date
-  `);
+  `));
   return result[0]?.result_date as Date;
 }
 
@@ -847,9 +847,9 @@ export async function getHolidays(
   
   query = sql`${query} ORDER BY holiday_date`;
   
-  const result = await db.execute(query);
+  const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 // ============================================================================
@@ -879,9 +879,9 @@ export async function getDeadlineComplianceMetrics(
   
   query = sql`${query} ORDER BY month DESC`;
   
-  const result = await db.execute(query);
+  const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 /**
@@ -892,10 +892,10 @@ export async function getMemberDeadlineSummary(
   organizationId: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM v_member_deadline_summary
     WHERE member_id = ${memberId} AND organization_id = ${organizationId}
-  `);
+  `));
   return result[0] || {
     total_deadlines: 0,
     overdue_count: 0,
@@ -910,7 +910,7 @@ export async function getMemberDeadlineSummary(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getDeadlineDashboardSummary(organizationId: string): Promise<any> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       COUNT(*) FILTER (WHERE status = 'pending') as active_deadlines,
       COUNT(*) FILTER (WHERE is_overdue = TRUE) as overdue_count,
@@ -921,7 +921,7 @@ export async function getDeadlineDashboardSummary(organizationId: string): Promi
       COUNT(*) FILTER (WHERE status IN ('completed', 'missed')) as total_completed
     FROM claim_deadlines
     WHERE organization_id = ${organizationId}
-  `);
+  `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const row = result[0] as any;

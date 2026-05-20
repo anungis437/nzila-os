@@ -9,7 +9,7 @@
  * - Audit logging
  */
 
-import { db } from '@/db/db';
+import { withRLSContext, withSystemRLSContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
@@ -152,38 +152,38 @@ export interface AuditLogEntry {
  * Get all active role definitions
  */
 export async function getAllRoleDefinitions(): Promise<RoleDefinition[]> {
-  const result = await db.execute(sql`
+  const result = await withSystemRLSContext('system-query: role-definitions', async (tx) => tx.execute(sql`
     SELECT * FROM role_definitions 
     WHERE is_active = TRUE 
     ORDER BY role_level DESC
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 /**
  * Get role definition by code
  */
 export async function getRoleDefinitionByCode(roleCode: string): Promise<RoleDefinition | null> {
-  const result = await db.execute(sql`
+  const result = await withSystemRLSContext('system-query: role-definitions', async (tx) => tx.execute(sql`
     SELECT * FROM role_definitions 
     WHERE role_code = ${roleCode} AND is_active = TRUE
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any || null;
+  return result.rows[0] as any || null;
 }
 
 /**
  * Get role definitions by level (at or above specified level)
  */
 export async function getRoleDefinitionsByLevel(minLevel: number): Promise<RoleDefinition[]> {
-  const result = await db.execute(sql`
+  const result = await withSystemRLSContext('system-query: role-definitions', async (tx) => tx.execute(sql`
     SELECT * FROM role_definitions 
     WHERE role_level >= ${minLevel} AND is_active = TRUE
     ORDER BY role_level DESC
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 /**
@@ -204,7 +204,7 @@ export async function createRoleDefinition(
     createdBy?: string;
   } = {}
 ): Promise<RoleDefinition> {
-  const result = await db.execute(sql`
+  const result = await withSystemRLSContext('system-query: role-definitions', async (tx) => tx.execute(sql`
     INSERT INTO role_definitions (
       role_code, role_name, role_description, role_level,
       is_elected, requires_board_approval, default_term_years, 
@@ -217,7 +217,7 @@ export async function createRoleDefinition(
       ${options.createdBy || null}, FALSE
     )
     RETURNING *
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
@@ -233,12 +233,12 @@ export async function getMemberRoles(
   memberId: string,
   organizationId: string
 ): Promise<MemberRoleWithDetails[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM v_active_member_roles
     WHERE member_id = ${memberId} 
       AND organization_id = ${organizationId}
     ORDER BY role_level DESC
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -250,7 +250,7 @@ export async function getMemberHighestRoleLevel(
   memberId: string,
   organizationId: string
 ): Promise<number> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT COALESCE(MAX(rd.role_level), 0) as max_level
     FROM member_roles mr
     JOIN role_definitions rd ON mr.role_code = rd.role_code
@@ -258,7 +258,7 @@ export async function getMemberHighestRoleLevel(
       AND mr.organization_id = ${organizationId}
       AND mr.status = 'active'
       AND (mr.end_date IS NULL OR mr.end_date >= CURRENT_DATE)
-  `);
+  `));
   return (result[0]?.max_level as number) || 0;
 }
 
@@ -269,7 +269,7 @@ export async function getMemberEffectivePermissions(
   memberId: string,
   organizationId: string
 ): Promise<string[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT DISTINCT jsonb_array_elements_text(rd.permissions) as permission
     FROM member_roles mr
     JOIN role_definitions rd ON mr.role_code = rd.role_code
@@ -277,7 +277,7 @@ export async function getMemberEffectivePermissions(
       AND mr.organization_id = ${organizationId}
       AND mr.status = 'active'
       AND (mr.end_date IS NULL OR mr.end_date >= CURRENT_DATE)
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result.map((row: any) => row.permission);
 }
@@ -311,8 +311,8 @@ export async function memberHasRole(
   
   query = sql`${query}) as has_role`;
   
-  const result = await db.execute(query);
-  return (result[0]?.has_role as boolean) || false;
+  const result = await withRLSContext(async (tx) => tx.execute(query));
+  return (result.rows[0]?.has_role as boolean) || false;
 }
 
 /**
@@ -345,8 +345,8 @@ export async function memberHasRoleLevel(
   
   query = sql`${query}) as has_level`;
   
-  const result = await db.execute(query);
-  return (result[0]?.has_level as boolean) || false;
+  const result = await withRLSContext(async (tx) => tx.execute(query));
+  return (result.rows[0]?.has_level as boolean) || false;
 }
 
 /**
@@ -378,7 +378,7 @@ export async function assignMemberRole(
   const assignmentType = options.assignmentType || 'appointed';
   const scopeType = options.scopeType || 'global';
   
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO member_roles (
       member_id, organization_id, role_code, scope_type, scope_value,
       start_date, end_date, term_years, assignment_type,
@@ -395,7 +395,7 @@ export async function assignMemberRole(
       ${options.requiresApproval ? 'pending_approval' : 'active'}, ${createdBy}
     )
     RETURNING *
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
@@ -445,10 +445,10 @@ export async function updateMemberRole(
   
   query = sql`${query} WHERE id = ${roleId} RETURNING *`;
   
-  const result = await db.execute(query);
+  const result = await withSystemRLSContext('system: update-role-definition', async (tx) => tx.execute(query));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result.rows[0] as any;
 }
 
 /**
@@ -459,7 +459,7 @@ export async function revokeMemberRole(
   revokedBy: string,
   reason?: string
 ): Promise<void> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE member_roles 
     SET end_date = CURRENT_DATE,
         status = 'expired',
@@ -469,7 +469,7 @@ export async function revokeMemberRole(
         updated_by = ${revokedBy},
         updated_at = NOW()
     WHERE id = ${roleId}
-  `);
+  `));
 }
 
 /**
@@ -479,14 +479,14 @@ export async function getExpiringRoles(
   organizationId: string,
   daysAhead: number = 90
 ): Promise<MemberRoleWithDetails[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM v_active_member_roles
     WHERE organization_id = ${organizationId}
       AND end_date IS NOT NULL
       AND end_date <= CURRENT_DATE + ${daysAhead}
       AND end_date >= CURRENT_DATE
     ORDER BY end_date
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -499,12 +499,12 @@ export async function getUpcomingElections(
   daysAhead: number = 180
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM v_upcoming_elections
     WHERE organization_id = ${organizationId}
       AND next_election_date <= CURRENT_DATE + ${daysAhead}
     ORDER BY next_election_date
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -513,14 +513,14 @@ export async function getUpcomingElections(
  * Check and expire old terms (run periodically)
  */
 export async function expireOldTerms(): Promise<number> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE member_roles
     SET status = 'expired', updated_at = NOW()
     WHERE status = 'active'
       AND end_date IS NOT NULL
       AND end_date < CURRENT_DATE
     RETURNING id
-  `);
+  `));
   return result.length;
 }
 
@@ -535,7 +535,7 @@ export async function getMemberPermissionExceptions(
   memberId: string,
   organizationId: string
 ): Promise<PermissionException[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM permission_exceptions
     WHERE member_id = ${memberId}
       AND organization_id = ${organizationId}
@@ -544,7 +544,7 @@ export async function getMemberPermissionExceptions(
       AND (expires_at IS NULL OR expires_at > NOW())
       AND (usage_limit IS NULL OR usage_count < usage_limit)
     ORDER BY effective_date DESC
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
@@ -580,8 +580,8 @@ export async function memberHasPermissionException(
   
   query = sql`${query}) as has_exception`;
   
-  const result = await db.execute(query);
-  return (result[0]?.has_exception as boolean) || false;
+  const result = await withRLSContext(async (tx) => tx.execute(query));
+  return (result.rows[0]?.has_exception as boolean) || false;
 }
 
 /**
@@ -602,7 +602,7 @@ export async function grantPermissionException(
     usageLimit?: number;
   } = {}
 ): Promise<PermissionException> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO permission_exceptions (
       member_id, organization_id, permission, resource_type, resource_id,
       reason, approved_by, approval_notes, effective_date, expires_at, usage_limit
@@ -612,9 +612,9 @@ export async function grantPermissionException(
       ${options.effectiveDate || new Date()}, ${options.expiresAt || null}, ${options.usageLimit || null}
     )
     RETURNING *
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result.rows[0] as any;
 }
 
 /**
@@ -625,7 +625,7 @@ export async function revokePermissionException(
   revokedBy: string,
   reason?: string
 ): Promise<void> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE permission_exceptions
     SET revoked_at = NOW(),
         revoked_by = ${revokedBy},
@@ -633,20 +633,20 @@ export async function revokePermissionException(
         is_active = FALSE,
         updated_at = NOW()
     WHERE id = ${exceptionId}
-  `);
+  `));
 }
 
 /**
  * Increment usage count for permission exception
  */
 export async function incrementExceptionUsage(exceptionId: string): Promise<void> {
-  await db.execute(sql`
+  await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE permission_exceptions
     SET usage_count = usage_count + 1,
         last_used_at = NOW(),
         updated_at = NOW()
     WHERE id = ${exceptionId}
-  `);
+  `));
 }
 
 // ============================================================================
@@ -688,15 +688,15 @@ export async function logPermissionCheck(entry: {
   const recordHash = Buffer.from(recordData).toString('base64').substring(0, 64);
   
   // Get previous hash for blockchain linking
-  const prevResult = await db.execute(sql`
+  const prevResult = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT record_hash FROM rbac_audit_log 
     WHERE organization_id = ${entry.organizationId}
     ORDER BY timestamp DESC LIMIT 1
-  `);
-  const previousHash = prevResult[0]?.record_hash || null;
+  `));
+  const previousHash = prevResult.rows[0]?.record_hash || null;
   
   // Insert audit log (fire and forget - don't block request)
-  db.execute(sql`
+  void withSystemRLSContext('rbac-audit-log-insert', async (tx) => tx.execute(sql`
     INSERT INTO rbac_audit_log (
       actor_id, actor_name, actor_role, action, action_category,
       resource_type, resource_id, organization_id, organization_name,
@@ -715,7 +715,7 @@ export async function logPermissionCheck(entry: {
       ${recordHash}, ${previousHash}, ${entry.executionTimeMs || null},
       ${entry.isSensitive || false}
     )
-  `).catch(err => {
+  `)).catch(err => {
     logger.error('Failed to write audit log', {
       error: err,
       organizationId: entry.organizationId,
@@ -762,9 +762,9 @@ export async function getMemberAuditLogs(
   
   query = sql`${query} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`;
   
-  const result = await db.execute(query);
+  const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 /**
@@ -776,51 +776,51 @@ export async function getResourceAuditLogs(
   organizationId: string,
   limit: number = 50
 ): Promise<AuditLogEntry[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM rbac_audit_log
     WHERE resource_type = ${resourceType}
       AND resource_id = ${resourceId}
       AND organization_id = ${organizationId}
     ORDER BY timestamp DESC
     LIMIT ${limit}
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 /**
- * Get denied access attempts (security monitoring)
+ * Get denied access attempts(security monitoring)
  */
 export async function getDeniedAccessAttempts(
   organizationId: string,
   hours: number = 24
 ): Promise<AuditLogEntry[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM rbac_audit_log
     WHERE organization_id = ${organizationId}
       AND granted = FALSE
       AND timestamp >= NOW() - INTERVAL '${hours} hours'
     ORDER BY timestamp DESC
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 /**
- * Get sensitive actions requiring review
+ * Get sensitive actionsrequiring review
  */
 export async function getSensitiveActionsForReview(
   organizationId: string
 ): Promise<AuditLogEntry[]> {
-  const result = await db.execute(sql`
+  const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM rbac_audit_log
     WHERE organization_id = ${organizationId}
       AND requires_review = TRUE
       AND reviewed_at IS NULL
     ORDER BY timestamp DESC
-  `);
+  `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result.rows as any[];
 }
 
 /**
@@ -855,9 +855,9 @@ export async function verifyAuditLogIntegrity(
     FROM log_chain
   `;
   
-  const result = await db.execute(query);
+  const result = await withSystemRLSContext('system: verify-audit-integrity', async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const row = result[0] as any;
+  const row = result.rows[0] as any;
   
   return {
     valid: row.invalid_records === 0,
