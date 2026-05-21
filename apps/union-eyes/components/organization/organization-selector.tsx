@@ -180,7 +180,7 @@ export function OrganizationSelector() {
     );
   }
 
-  const Icon = organizationTypeIcons[effectiveOrganization.type] || Building2;
+  const Icon = organizationTypeIcons[effectiveOrganization.type as keyof typeof organizationTypeIcons] || Building2;
   const resolvedPath = organizationPath.length > 0 ? organizationPath : fallbackPath;
   const hierarchyLabel = resolvedPath.length > 1
     ? resolvedPath.slice(0, -1).map((org) => org.name).join(' > ')
@@ -229,7 +229,7 @@ export function OrganizationSelector() {
             <CommandEmpty>No organization found.</CommandEmpty>
             <CommandGroup>
               {userOrganizations.map((org) => {
-                const OrgIcon = organizationTypeIcons[org.type] || Building2;
+                const OrgIcon = organizationTypeIcons[org.type as keyof typeof organizationTypeIcons] || Building2;
                 return (
                   <CommandItem
                     key={org.id}

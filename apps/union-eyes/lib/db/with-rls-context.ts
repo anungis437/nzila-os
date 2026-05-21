@@ -26,7 +26,9 @@ import { auth, currentUser } from '@/lib/api-auth-guard'
 import { db } from '@/db/db'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
+
+/** Convenience alias for the typed transaction/db handle passed to withRLSContext callbacks */
+export type RLSTx = typeof db
 
 /**
  * Execute database operation with automatic RLS context
@@ -50,30 +52,30 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
  *   });
  * }
  */
+export async function withRLSContext<T>(
+  operation: (tx: RLSTx) => Promise<T>,
+): Promise<T>
 export async function withRLSContext<T>(operation: () => Promise<T>): Promise<T>
 export async function withRLSContext<T>(
-  operation: (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>,
+  context: Record<string, unknown>,
+  operation: (tx: RLSTx) => Promise<T>,
 ): Promise<T>
 export async function withRLSContext<T>(
   context: Record<string, unknown>,
   operation: () => Promise<T>,
 ): Promise<T>
 export async function withRLSContext<T>(
-  context: Record<string, unknown>,
-  operation: (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>,
-): Promise<T>
-export async function withRLSContext<T>(
   contextOrOperation:
     | Record<string, unknown>
-    | ((tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>)
+    | ((tx: RLSTx) => Promise<T>)
     | (() => Promise<T>),
   maybeOperation?:
-    | ((tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>)
+    | ((tx: RLSTx) => Promise<T>)
     | (() => Promise<T>),
 ): Promise<T> {
   const operation = (
     typeof contextOrOperation === 'function' ? contextOrOperation : maybeOperation!
-  ) as (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>
+  ) as (tx: RLSTx) => Promise<T>
 
   // Get authenticated user from auth provider
   const { userId, orgId: clerkOrgId } = await auth()
@@ -131,7 +133,7 @@ export async function withRLSContext<T>(
     }
 
     // Execute the operation with user + org context set
-    const result = await operation(tx as unknown as NodePgDatabase<Record<string, unknown>>)
+    const result = await operation(tx as unknown as RLSTx)
 
     // Transaction commit automatically clears local config variables
     return result
@@ -211,12 +213,12 @@ export async function withExplicitUserContext<T>(
  *   });
  * }
  */
+export async function withSystemContext<T>(
+  operation: (tx: RLSTx) => Promise<T>,
+): Promise<T>
 export async function withSystemContext<T>(operation: () => Promise<T>): Promise<T>
 export async function withSystemContext<T>(
-  operation: (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>,
-): Promise<T>
-export async function withSystemContext<T>(
-  operation: (() => Promise<T>) | ((tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>),
+  operation: (() => Promise<T>) | ((tx: RLSTx) => Promise<T>),
 ): Promise<T> {
   // System operations don&apos;t set user context
   // RLS policies should handle this with service role checks
@@ -225,8 +227,8 @@ export async function withSystemContext<T>(
     await tx.execute(sql`SELECT set_config('app.current_user_id', '', true)`)
     // NzilaOS PR-UE-02: Explicitly clear org context for system operations
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
-    const result = await (operation as (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>)(
-      tx as unknown as NodePgDatabase<Record<string, unknown>>,
+    const result = await (operation as (tx: RLSTx) => Promise<T>)(
+      tx as unknown as RLSTx,
     )
     return result
   })
@@ -414,7 +416,7 @@ export function withRLS<TArgs extends unknown[], TReturn>(
  */
 export async function withSystemRLSContext<T>(
   reason: string,
-  operation: (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>,
+  operation: (tx: RLSTx) => Promise<T>,
 ): Promise<T> {
   logger.info('[withSystemRLSContext] System operation executing', { reason })
   return withSystemContext(operation)

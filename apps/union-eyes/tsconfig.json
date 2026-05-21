@@ -1,7 +1,7 @@
 {
   "extends": "@nzila/config/tsconfig/nextjs",
   "compilerOptions": {
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "useUnknownInCatchVariables": false,
     "jsx": "preserve",
     "paths": {

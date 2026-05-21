@@ -24,7 +24,7 @@ import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { moneyToNumber } from '@/lib/decimal-safe';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type RLSTx } from '@/lib/db/with-rls-context';
 
 // =============================================================================
 // TYPES
@@ -118,7 +118,7 @@ export class BillingCycleService {
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return await withRLSContext(async (tx: NodePgDatabase<any>) => {
+      return await withRLSContext(async (tx: RLSTx) => {
         // Step 1: Get all active members
         const activeMembers = await this.getActiveMembersForBilling(tx, organizationId, periodStart);
 
@@ -237,7 +237,7 @@ export class BillingCycleService {
    */
   private static async getActiveMembersForBilling(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx: NodePgDatabase<any>,
+    tx: RLSTx,
     organizationId: string,
     _periodStart: Date
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -281,7 +281,7 @@ export class BillingCycleService {
    */
   private static async processMemberBilling(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx: NodePgDatabase<any>,
+    tx: RLSTx,
     params: {
       organizationId: string;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -19,8 +19,7 @@ import {
 } from '@/lib/workflow/case-lifecycle';
 import { toLifecycleState } from '@/lib/workflow/state-bridge';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { claims } from '@/db/schema/claims-schema';
-import { claimUpdates } from '@/db/schema/claims-schema';
+import { claims, claimUpdates, claimStatusEnum } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { getOrganizationIdForUser, getUserRoleInOrganization } from '@/lib/organization-utils';
@@ -149,7 +148,7 @@ export async function PATCH(
       await tx
         .update(claims)
         .set({
-          status: toDbStatus,
+          status: toDbStatus as typeof claimStatusEnum.enumValues[number],
           updatedAt: now,
           ...(targetStatus === 'closed' ? { closedAt: now } : {}),
           ...(targetStatus === 'settled' || targetStatus === 'denied'

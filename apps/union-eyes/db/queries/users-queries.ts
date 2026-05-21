@@ -2,8 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { withRLSContext } from "@/lib/db/with-rls-context";
+import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 
 /**
@@ -13,10 +12,10 @@ import { logger } from "@/lib/logger";
 export const getUserByEmail = async (
   email: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [user] = await dbOrTx
         .select()
@@ -44,10 +43,10 @@ export const getUserByEmail = async (
 export const getUserById = async (
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [user] = await dbOrTx
         .select()

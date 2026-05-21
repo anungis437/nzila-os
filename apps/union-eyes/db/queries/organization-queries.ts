@@ -28,7 +28,7 @@ import {
 } from "@/db/schema-organizations";
 import { eq, and, or, inArray, isNull, sql, desc, asc } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { withRLSContext } from "@/lib/db/with-rls-context";
+import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 
 // =====================================================
@@ -60,10 +60,10 @@ export type SelectOrganizationRelationship = OrganizationRelationship;
 export async function getOrganizationById(
   id: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const result = await dbOrTx
         .select()
@@ -82,7 +82,7 @@ export async function getOrganizationById(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -104,10 +104,10 @@ export async function getOrganizationById(
 export async function getOrganizationBySlug(
   slug: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const result = await dbOrTx
         .select()
@@ -126,7 +126,7 @@ export async function getOrganizationBySlug(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -142,10 +142,10 @@ export async function getOrganizationBySlug(
 export async function getOrganizationWithParent(
   id: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<(SelectOrganization & { parent?: SelectOrganization }) | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Get the organization first
       const result = await dbOrTx
@@ -180,7 +180,7 @@ export async function getOrganizationWithParent(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -212,10 +212,10 @@ export async function getOrganizations(
   parentId?: string,
   includeInactive = false,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const conditions = [];
 
@@ -248,7 +248,7 @@ export async function getOrganizations(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -270,10 +270,10 @@ export async function getOrganizationChildren(
   parentId: string,
   includeInactive = false,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const conditions = [eq(organizations.parentId, parentId)];
 
@@ -298,7 +298,7 @@ export async function getOrganizationChildren(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -323,10 +323,10 @@ export async function getOrganizationDescendants(
   ancestorId: string,
   includeInactive = false,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Use hierarchy_path array containment for efficient descendant lookup
       // @> operator checks if left array contains right array
@@ -359,7 +359,7 @@ export async function getOrganizationDescendants(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -381,10 +381,10 @@ export async function getOrganizationDescendants(
 export async function getOrganizationAncestors(
   childIdOrSlug: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       logger.info("Organization ancestors lookup", { childIdOrSlug });
       
@@ -445,7 +445,7 @@ export async function getOrganizationAncestors(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -473,10 +473,10 @@ export async function getOrganizationTree(
   rootId?: string,
   maxDepth?: number,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const conditions = [eq(organizations.status, "active")];
 
@@ -528,7 +528,7 @@ export async function getOrganizationTree(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -551,10 +551,10 @@ export async function getOrganizationTree(
 export async function getUserVisibleOrganizations(
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Call database function that enforces RLS
       const result = await dbOrTx.execute<SelectOrganization>(
@@ -578,7 +578,7 @@ export async function getUserVisibleOrganizations(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -595,10 +595,10 @@ export async function getUserVisibleOrganizations(
 export async function getUserPrimaryOrganization(
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [result] = await dbOrTx
         .select({
@@ -630,7 +630,7 @@ export async function getUserPrimaryOrganization(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -652,10 +652,10 @@ export async function searchOrganizations(
   searchTerm: string,
   limit = 20,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const pattern = `%${searchTerm.toLowerCase()}%`;
 
@@ -685,7 +685,7 @@ export async function searchOrganizations(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -701,10 +701,10 @@ export async function getOrganizationsByType(
   type: 'platform' | 'congress' | 'federation' | 'union' | 'local' | 'region' | 'district',
   parentId?: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const conditions = [
         eq(organizations.organizationType, type),
@@ -732,7 +732,7 @@ export async function getOrganizationsByType(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -746,10 +746,10 @@ export async function getOrganizationsByType(
 export async function getCLCAffiliatedOrganizations(
   includeRoot = false,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const conditions = [
         eq(organizations.clcAffiliated, true),
@@ -777,7 +777,7 @@ export async function getCLCAffiliatedOrganizations(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -814,10 +814,10 @@ export async function getCLCAffiliatedOrganizations(
 export async function createOrganization(
   data: InsertOrganization,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Get parent to determine hierarchy
       let hierarchyPath: string[] = [];
@@ -864,7 +864,7 @@ export async function createOrganization(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -893,10 +893,10 @@ export async function updateOrganization(
   id: string,
   data: Partial<InsertOrganization>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Check if parent is changing
       if (data.parentId !== undefined) {
@@ -969,7 +969,7 @@ export async function updateOrganization(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -991,10 +991,10 @@ export async function updateOrganization(
 export async function deleteOrganization(
   id: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganization> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Check if organization has active children
       const children = await getOrganizationChildren(id, false, dbOrTx);
@@ -1030,7 +1030,7 @@ export async function deleteOrganization(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -1051,10 +1051,10 @@ export async function deleteOrganization(
 export async function createOrganizationRelationship(
   data: InsertOrganizationRelationship,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganizationRelationship> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [relationship] = await dbOrTx
         .insert(organizationRelationships)
@@ -1077,7 +1077,7 @@ export async function createOrganizationRelationship(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -1093,10 +1093,10 @@ export async function getOrganizationRelationships(
   orgId: string,
   asParent = true,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectOrganizationRelationship[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const field = asParent
         ? organizationRelationships.parentOrgId
@@ -1127,7 +1127,7 @@ export async function getOrganizationRelationships(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 
@@ -1149,14 +1149,14 @@ export async function getOrganizationMemberStats(
   id: string,
   includeDescendants = true,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<{
   totalMembers: number;
   activeMembers: number;
   descendantOrgs: number;
 }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       if (!includeDescendants) {
         const org = await getOrganizationById(id, dbOrTx);
@@ -1194,7 +1194,7 @@ export async function getOrganizationMemberStats(
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 }
 

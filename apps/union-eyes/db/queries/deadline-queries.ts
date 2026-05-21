@@ -9,7 +9,7 @@
  * - Business day calculations
  */
 
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
@@ -322,7 +322,7 @@ export async function getMemberDeadlines(
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**
@@ -849,7 +849,7 @@ export async function getHolidays(
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 // ============================================================================
@@ -881,7 +881,7 @@ export async function getDeadlineComplianceMetrics(
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**

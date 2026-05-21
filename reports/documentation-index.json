@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-20T16:04:02.724Z",
-  "totalDocuments": 1018,
+  "generatedAt": "2026-05-20T23:43:25.172Z",
+  "totalDocuments": 1025,
   "staleDocuments": 0,
   "categories": [
     {
@@ -31,6 +31,11 @@
     {
       "category": "categories",
       "count": 919,
+      "staleCount": 0
+    },
+    {
+      "category": "compliance",
+      "count": 4,
       "staleCount": 0
     },
     {
@@ -90,7 +95,7 @@
     },
     {
       "category": "platform",
-      "count": 2,
+      "count": 5,
       "staleCount": 0
     },
     {
@@ -123,7 +128,7 @@
     {
       "path": "ARCHITECTURE.md",
       "category": "root",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -2367,7 +2372,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/pentest-plan.md",
       "category": "categories",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -3339,7 +3344,7 @@
     {
       "path": "docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md",
       "category": "categories",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -4677,7 +4682,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md",
       "category": "categories",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -4701,7 +4706,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/release/release-governance-standard.md",
       "category": "categories",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -4899,7 +4904,7 @@
     {
       "path": "docs/categories/stakeholders/buyers/buyer-faq.md",
       "category": "categories",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -5671,93 +5676,117 @@
       "stale": false
     },
     {
+      "path": "docs/compliance/soc2/control-mapping.md",
+      "category": "compliance",
+      "lastValidated": "2026-05-20",
+      "stale": false
+    },
+    {
+      "path": "docs/compliance/soc2/evidence-inventory.md",
+      "category": "compliance",
+      "lastValidated": "2026-05-20",
+      "stale": false
+    },
+    {
+      "path": "docs/compliance/soc2/gap-log.md",
+      "category": "compliance",
+      "lastValidated": "2026-05-20",
+      "stale": false
+    },
+    {
+      "path": "docs/compliance/soc2/README.md",
+      "category": "compliance",
+      "lastValidated": "2026-05-20",
+      "stale": false
+    },
+    {
       "path": "docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/constitution.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/DOCTRINE_GOVERNANCE.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/DOCTRINE_STRESS_TEST.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/DOCTRINE_TRACEABILITY.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/DOCTRINE.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/FIRST_CONTACT_MESSAGING.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/frameworks.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/narrative-playbooks.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/positioning.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/principles.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/SCORING_MODELS.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
       "path": "docs/doctrine/vocabulary.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-19",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {
@@ -6082,6 +6111,24 @@
       "path": "docs/ops/sre/executive-reliability-dashboard.md",
       "category": "ops",
       "lastValidated": "2026-05-11",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AUDIT_ENFORCEMENT.md",
+      "category": "platform",
+      "lastValidated": "2026-05-20",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/EVIDENCE_LIFECYCLE_POLICY.md",
+      "category": "platform",
+      "lastValidated": "2026-05-20",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/ORG_SCOPED_TABLES.md",
+      "category": "platform",
+      "lastValidated": "2026-05-20",
       "stale": false
     },
     {

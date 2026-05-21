@@ -2,17 +2,16 @@
 
 import { eq } from "drizzle-orm";
 import { InsertProfile, profilesTable, SelectProfile } from "../schema/profiles-schema";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { withRLSContext } from "@/lib/db/with-rls-context";
+import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 
 export const createProfile = async (
   data: InsertProfile,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Calculate nextCreditRenewal date (4 weeks from now) if not provided
       const nextCreditRenewal = data.nextCreditRenewal || (() => {
@@ -61,10 +60,10 @@ export const createProfile = async (
 export const getProfileByUserId = async (
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       logger.info("Looking up profile by user ID", { userId });
       
@@ -95,10 +94,10 @@ export const getProfileByUserId = async (
 
 export const getAllProfiles = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<SelectProfile[]> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     return dbOrTx.select().from(profilesTable);
   };
 
@@ -113,10 +112,10 @@ export const updateProfile = async (
   userId: string,
   data: Partial<InsertProfile>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [updatedProfile] = await dbOrTx.update(profilesTable).set(data).where(eq(profilesTable.userId, userId)).returning();
       return updatedProfile;
@@ -137,10 +136,10 @@ export const updateProfileByStripeCustomerId = async (
   stripeCustomerId: string,
   data: Partial<InsertProfile>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [updatedProfile] = await dbOrTx.update(profilesTable).set(data).where(eq(profilesTable.stripeCustomerId, stripeCustomerId)).returning();
       return updatedProfile;
@@ -160,10 +159,10 @@ export const updateProfileByStripeCustomerId = async (
 export const deleteProfile = async (
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       await dbOrTx.delete(profilesTable).where(eq(profilesTable.userId, userId));
     } catch (error) {
@@ -187,10 +186,10 @@ export const updateProfileByWhopUserId = async (
   whopUserId: string,
   data: Partial<InsertProfile>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Log the database operation for audit purposes
       logger.info("Updating profile by Whop user ID", { whopUserId, data });
@@ -269,10 +268,10 @@ export const updateProfileByWhopUserId = async (
 export const getProfileByWhopUserId = async (
   whopUserId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       if (!whopUserId) {
         throw new Error("Whop user ID is required");
@@ -337,10 +336,10 @@ export const getProfileByWhopUserId = async (
 export const getProfileByUserEmail = async (
   email: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     if (!email) {
       logger.error("Email is required for profile lookup");
       return null;
@@ -383,10 +382,10 @@ export const getProfileByUserEmail = async (
 export const getProfileByEmail = async (
   email: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Query profiles with matching email
       const profiles = await dbOrTx.select().from(profilesTable).where(eq(profilesTable.email, email));
@@ -408,10 +407,10 @@ export const getProfileByEmail = async (
 export const getUserPlanInfo = async (
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       logger.info("Getting plan information for user", { userId });
       const profile = await getProfileByUserId(userId, dbOrTx);
@@ -448,10 +447,10 @@ export const getUserPlanInfo = async (
 export const deleteProfileById = async (
   profileId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       logger.info("Deleting profile by ID", { profileId });
       

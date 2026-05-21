@@ -244,17 +244,11 @@ export async function generatePredictions(params: {
         db.insert(mlPredictions).values({
           organizationId: orgId,
           predictionType: params.predictionType,
-          modelName: pred.modelName,
-          modelVersion: pred.modelVersion,
-          targetDate,
+          predictionDate: targetDate,
           predictedValue: pred.predictedValue.toString(),
-          confidenceInterval: pred.confidenceInterval,
-          confidenceScore: pred.confidenceScore.toString(),
-          features: pred.features,
-          metadata: {
-            historicalDataPoints: timeSeriesData.length,
-            generatedAt: new Date().toISOString()
-          }
+          lowerBound: pred.confidenceInterval.lower.toString(),
+          upperBound: pred.confidenceInterval.upper.toString(),
+          confidence: pred.confidenceScore.toString(),
         }).returning()
       );
       

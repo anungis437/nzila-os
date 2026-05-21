@@ -35,5 +35,5 @@ export default async function Page() {
     redirect("/dashboard");
   }
 
-  return <CommitteesPage userRole={user.role ?? "member"} />;
+  return <CommitteesPage userRole={user.roles?.[0] ?? "member"} />;
 }

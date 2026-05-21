@@ -42,7 +42,7 @@ export default async function Page({
         committeeId={id}
         organizationId={user.organizationId || "default"}
         userId={user.userId}
-        userRole={user.role ?? "member"}
+        userRole={user.roles?.[0] ?? "member"}
       />
     </div>
   );

@@ -9,7 +9,7 @@
  * - Audit logging
  */
 
-import { withRLSContext, withSystemRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
@@ -158,7 +158,7 @@ export async function getAllRoleDefinitions(): Promise<RoleDefinition[]> {
     ORDER BY role_level DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**
@@ -170,7 +170,7 @@ export async function getRoleDefinitionByCode(roleCode: string): Promise<RoleDef
     WHERE role_code = ${roleCode} AND is_active = TRUE
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows[0] as any || null;
+  return result[0] as any || null;
 }
 
 /**
@@ -183,7 +183,7 @@ export async function getRoleDefinitionsByLevel(minLevel: number): Promise<RoleD
     ORDER BY role_level DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**
@@ -312,7 +312,7 @@ export async function memberHasRole(
   query = sql`${query}) as has_role`;
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
-  return (result.rows[0]?.has_role as boolean) || false;
+  return (result[0]?.has_role as boolean) || false;
 }
 
 /**
@@ -346,7 +346,7 @@ export async function memberHasRoleLevel(
   query = sql`${query}) as has_level`;
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
-  return (result.rows[0]?.has_level as boolean) || false;
+  return (result[0]?.has_level as boolean) || false;
 }
 
 /**
@@ -448,7 +448,7 @@ export async function updateMemberRole(
   const result = await withSystemRLSContext('system: update-role-definition', async (tx) => tx.execute(query));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows[0] as any;
+  return result[0] as any;
 }
 
 /**
@@ -581,7 +581,7 @@ export async function memberHasPermissionException(
   query = sql`${query}) as has_exception`;
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
-  return (result.rows[0]?.has_exception as boolean) || false;
+  return (result[0]?.has_exception as boolean) || false;
 }
 
 /**
@@ -614,7 +614,7 @@ export async function grantPermissionException(
     RETURNING *
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows[0] as any;
+  return result[0] as any;
 }
 
 /**
@@ -693,7 +693,7 @@ export async function logPermissionCheck(entry: {
     WHERE organization_id = ${entry.organizationId}
     ORDER BY timestamp DESC LIMIT 1
   `));
-  const previousHash = prevResult.rows[0]?.record_hash || null;
+  const previousHash = prevResult[0]?.record_hash || null;
   
   // Insert audit log (fire and forget - don't block request)
   void withSystemRLSContext('rbac-audit-log-insert', async (tx) => tx.execute(sql`
@@ -764,7 +764,7 @@ export async function getMemberAuditLogs(
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**
@@ -785,7 +785,7 @@ export async function getResourceAuditLogs(
     LIMIT ${limit}
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**
@@ -803,7 +803,7 @@ export async function getDeniedAccessAttempts(
     ORDER BY timestamp DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**
@@ -820,7 +820,7 @@ export async function getSensitiveActionsForReview(
     ORDER BY timestamp DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**
@@ -857,7 +857,7 @@ export async function verifyAuditLogIntegrity(
   
   const result = await withSystemRLSContext('system: verify-audit-integrity', async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const row = result.rows[0] as any;
+  const row = result[0] as any;
   
   return {
     valid: row.invalid_records === 0,

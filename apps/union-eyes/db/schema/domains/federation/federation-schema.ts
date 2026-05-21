@@ -1061,7 +1061,7 @@ export const federationResources = pgTable(
     }),
     resourcesPreviousVersionFkey: foreignKey({
       columns: [table.previousVersionId],
-      foreignColumns: [federationResources.id],
+      foreignColumns: [table.id],
       name: 'federation_resources_previous_version_id_fkey',
     }),
     resourcesRelatedCampaignFkey: foreignKey({

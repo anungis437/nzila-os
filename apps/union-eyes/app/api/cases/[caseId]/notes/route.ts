@@ -164,7 +164,7 @@ export async function POST(
       userId,
       organizationId: orgId,
       resource: 'claim_updates',
-      resourceId: note.updateId,
+      resourceId: note.updateId ?? undefined,
       action: 'create',
       details: {
         event: 'CASE_NOTE_ADDED',

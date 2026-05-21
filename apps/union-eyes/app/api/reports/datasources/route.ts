@@ -17,7 +17,7 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-async function getHandler(_req: NextRequest, _context) {
+async function getHandler(_req: NextRequest, _context: Record<string, unknown>) {
   try {
     const user = await getCurrentUser();
     if (!user || !user.organizationId) {

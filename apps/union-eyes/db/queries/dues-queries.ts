@@ -2,8 +2,7 @@
 
 import { eq, and, desc, sql } from "drizzle-orm";
 import { duesTransactions, type DuesTransaction, type NewDuesTransaction } from "../schema/dues-transactions-schema";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { withRLSContext } from "@/lib/db/with-rls-context";
+import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 
 /**
@@ -12,10 +11,10 @@ import { logger } from "@/lib/logger";
 export const getDuesBalanceByMember = async (
   memberId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Get all transactions for the member
       const transactions = await dbOrTx
@@ -54,7 +53,7 @@ export const getDuesBalanceByMember = async (
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
 
@@ -70,10 +69,10 @@ export const getDuesTransactionsByMember = async (
     limit?: number;
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       let query = dbOrTx
         .select()
@@ -113,7 +112,7 @@ export const getDuesTransactionsByMember = async (
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
 
@@ -128,10 +127,10 @@ export const getDuesTransactionsByOrganization = async (
     endDate?: Date;
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const transactions = await dbOrTx
         .select()
@@ -164,7 +163,7 @@ export const getDuesTransactionsByOrganization = async (
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
 
@@ -174,10 +173,10 @@ export const getDuesTransactionsByOrganization = async (
 export const createDuesTransaction = async (
   data: NewDuesTransaction,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [transaction] = await dbOrTx
         .insert(duesTransactions)
@@ -195,7 +194,7 @@ export const createDuesTransaction = async (
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
 
@@ -211,10 +210,10 @@ export const updateDuesTransactionStatus = async (
     receiptUrl?: string;
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const updateData: Partial<DuesTransaction> = {
         status,
@@ -247,7 +246,7 @@ export const updateDuesTransactionStatus = async (
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
 
@@ -256,10 +255,10 @@ export const updateDuesTransactionStatus = async (
  */
 export const markOverdueTransactions = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const today = new Date();
       
@@ -288,7 +287,7 @@ export const markOverdueTransactions = async (
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
 
@@ -298,10 +297,10 @@ export const markOverdueTransactions = async (
 export const getOrganizationDuesSummary = async (
   organizationId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
+  const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const transactions = await dbOrTx
         .select()
@@ -351,7 +350,7 @@ export const getOrganizationDuesSummary = async (
     return executeQuery(tx);
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
+    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
 

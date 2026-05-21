@@ -253,7 +253,7 @@ export async function manuallyAssignGrievance(
           organizationId,
           claimId,
           assignedTo,
-          role,
+        role: role as (typeof grievanceAssignments.$inferInsert)['role'],
           status: "assigned",
           assignedBy,
           assignedAt: new Date(),

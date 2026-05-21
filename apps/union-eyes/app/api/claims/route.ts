@@ -82,8 +82,7 @@ export const POST = withApi(
       const result = await tx.execute(
         sql`SELECT MAX(claim_number) AS max_num FROM claims WHERE claim_number LIKE ${prefix + '%'}`
       );
-      const rows = result.rows;
-      const maxNum = (rows[0] as Record<string, unknown>)?.max_num as string | null;
+      const maxNum = (result[0] as Record<string, unknown>)?.max_num as string | null;
       let seq = 1;
       if (maxNum) {
         const lastSeq = parseInt(maxNum.slice(prefix.length), 10);

@@ -10,7 +10,7 @@
  */
 
 import { sql, SQL } from 'drizzle-orm';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { safeColumnName } from '@/lib/safe-sql-identifiers';
 
 // ============================================================================
@@ -364,7 +364,7 @@ export async function getClaimsByDateRange(
 
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 // ============================================================================
@@ -700,7 +700,7 @@ export async function getReportsLegacy(organizationId: string, userId?: string):
 
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.rows as any[];
+  return result as any[];
 }
 
 /**

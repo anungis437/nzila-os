@@ -263,7 +263,7 @@ export function validateClaimTransition(
   }
 
   // Check 2: Does user have required role for this transition?
-  const requiredRoles = currentState.requiresRole[targetStatus] || ['member'];
+  const requiredRoles = (currentState.requiresRole as Record<string, readonly string[]>)[targetStatus] || ['member'];
   if (!requiredRoles.includes(userRole) && userRole !== 'system') {
     return {
       allowed: false,
@@ -352,7 +352,7 @@ export function getAllowedClaimTransitions(
   
   // Filter transitions by user role
   return state.allowedTransitions.filter(targetStatus => {
-    const requiredRoles = state.requiresRole[targetStatus] || ['member'];
+    const requiredRoles = (state.requiresRole as Record<string, readonly string[]>)[targetStatus] || ['member'];
     return requiredRoles.includes(userRole) || userRole === 'system';
   });
 }
@@ -373,7 +373,7 @@ export function getTransitionRequirements(
   const state = CLAIM_FSM[currentStatus];
   
   return {
-    requiresRole: state.requiresRole[targetStatus] || ['member'],
+    requiresRole: ((state.requiresRole as Record<string, readonly string[]>)[targetStatus] || ['member']) as string[],
     minHours: state.minTimeInState / (1000 * 60 * 60),
     requiresDocumentation: state.requiresDocumentation,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

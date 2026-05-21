@@ -23,6 +23,7 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { type PgColumn } from 'drizzle-orm/pg-core';
 import { organizations } from '../schema-organizations';
 import { profiles } from './domains/member/profiles';
 import {
@@ -174,7 +175,7 @@ export const employers = pgTable(
     labourRelationsContactPhone: varchar('labour_relations_contact_phone', { length: 50 }),
 
     // Additional Information
-    parentCompanyId: uuid('parent_company_id').references(() => employers.id),
+    parentCompanyId: uuid('parent_company_id').references((): PgColumn<any> => employers.id as PgColumn<any>),
     notes: text('notes'),
     customFields: jsonb('custom_fields').$type<Record<string, unknown>>(),
 

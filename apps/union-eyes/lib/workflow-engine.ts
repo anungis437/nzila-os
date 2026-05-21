@@ -14,13 +14,12 @@
  * Handles status transitions, validation, and deadline tracking
  */
 
-import { withRLSContext, withSystemRLSContext } from "./db/with-rls-context";
+import { withRLSContext, withSystemRLSContext, type RLSTx } from "./db/with-rls-context";
 import { claims, claimUpdates } from "../db/schema/claims-schema";
 import { organizationMembers } from "../db/schema/organization-members-schema";
 import { users } from "../db/schema/user-management-schema";
 import { eq, and } from "drizzle-orm";
 import { sendClaimStatusNotification } from "./claim-notifications";
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { 
   validateClaimTransition, 
   getAllowedClaimTransitions,
@@ -79,7 +78,7 @@ export const PRIORITY_MULTIPLIERS = {
 async function getMemberName(
   memberId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<any>
+  tx: RLSTx
 ): Promise<string> {
   try {
     const result = await tx
@@ -189,12 +188,12 @@ export async function updateClaimStatus(
   userId: string,
   notes?: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<{ success: boolean; error?: string; claim?: unknown }> {
   // If no transaction provided, wrap in withRLSContext
   if (!tx) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (transaction: NodePgDatabase<any>) => {
+    return withRLSContext(async (transaction: RLSTx) => {
       return updateClaimStatus(claimNumber, newStatus, userId, notes, transaction);
     });
   }
@@ -535,11 +534,11 @@ export async function updateClaimStatusById(
   userId: string,
   notes?: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<{ success: boolean; error?: string; claim?: unknown }> {
   if (!tx) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (transaction: NodePgDatabase<any>) => {
+    return withRLSContext(async (transaction: RLSTx) => {
       return updateClaimStatusById(claimId, newStatus, userId, notes, transaction);
     });
   }
@@ -719,12 +718,12 @@ export async function addClaimNote(
   userId: string,
   isInternal: boolean = true,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx?: NodePgDatabase<any>
+  tx?: RLSTx
 ): Promise<{ success: boolean; error?: string }> {
   // If no transaction provided, wrap in withRLSContext
   if (!tx) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return withRLSContext(async (transaction: NodePgDatabase<any>) => {
+    return withRLSContext(async (transaction: RLSTx) => {
       return addClaimNote(claimNumber, message, userId, isInternal, transaction);
     });
   }

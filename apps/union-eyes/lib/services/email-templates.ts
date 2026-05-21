@@ -538,7 +538,7 @@ export function validateTemplateContext(
 
   const allText = template.subject + template.plainText + template.html;
   const variableMatches = allText.match(/\$\{"{([^}"]+)"}\}/g) || [];
-  const missingVariables = variableMatches.filter((match) => {
+  const missingVariables = variableMatches.filter((match: string) => {
     const varName = match.replace(/\$\{"{([^}"]+)"}\}/g, "$1");
     return !context[varName];
   });

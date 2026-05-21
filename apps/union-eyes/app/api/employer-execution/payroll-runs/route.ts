@@ -215,7 +215,7 @@ export const POST = withApi(
           duesAmount: item.duesAmount.toString(),
           benefitAmount: item.benefitAmount.toString(),
           pensionAmount: item.pensionAmount.toString(),
-          remittanceGroupKey: item.remittanceGroupKey,
+          remittanceGroupKey: item.remittanceGroupKey ?? 'default',
           traceJson: item.trace,
           traceHash: item.traceHash,
         })),

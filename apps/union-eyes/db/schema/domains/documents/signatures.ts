@@ -16,6 +16,7 @@ import {
   index,
   integer,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { organizations } from "../../../schema-organizations";
 import { profiles } from "../../profiles-schema";
 
@@ -472,4 +473,24 @@ export type SignatureTemplate = typeof signatureTemplates.$inferSelect;
 export type NewSignatureTemplate = typeof signatureTemplates.$inferInsert;
 export type SignatureWebhookLog = typeof signatureWebhooksLog.$inferSelect;
 export type NewSignatureWebhookLog = typeof signatureWebhooksLog.$inferInsert;
+
+// Drizzle relational query relations
+export const signatureDocumentsRelations = relations(signatureDocuments, ({ many }) => ({
+  signers: many(documentSigners),
+  auditTrail: many(signatureAuditTrail),
+}));
+
+export const documentSignersRelations = relations(documentSigners, ({ one }) => ({
+  document: one(signatureDocuments, {
+    fields: [documentSigners.documentId],
+    references: [signatureDocuments.id],
+  }),
+}));
+
+export const signatureAuditTrailRelations = relations(signatureAuditTrail, ({ one }) => ({
+  document: one(signatureDocuments, {
+    fields: [signatureAuditTrail.documentId],
+    references: [signatureDocuments.id],
+  }),
+}));
 

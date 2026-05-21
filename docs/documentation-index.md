@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-20T16:04:02.724Z
+Generated: 2026-05-20T23:43:25.172Z
 
-Total documents indexed: 1018
+Total documents indexed: 1025
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -15,6 +15,7 @@ Stale documents (>90 days since repo validation): 0
 | architecture | 3 | 0 |
 | backlog | 1 | 0 |
 | categories | 919 | 0 |
+| compliance | 4 | 0 |
 | doctrine | 15 | 0 |
 | documentation-index.md | 1 | 0 |
 | governance | 1 | 0 |
@@ -26,7 +27,7 @@ Stale documents (>90 days since repo validation): 0
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
 | ops | 4 | 0 |
-| platform | 2 | 0 |
+| platform | 5 | 0 |
 | proof-center | 1 | 0 |
 | public | 1 | 0 |
 | root | 4 | 0 |
@@ -37,7 +38,7 @@ Stale documents (>90 days since repo validation): 0
 
 | Path | Category | Last Validated | Status |
 | --- | --- | --- | --- |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | root | 2026-05-19 | current |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | root | 2026-05-20 | current |
 | [CHANGELOG.md](CHANGELOG.md) | root | 2026-05-11 | current |
 | [docs/architecture/AUDIT_ENFORCEMENT.md](docs/architecture/AUDIT_ENFORCEMENT.md) | architecture | 2026-05-20 | current |
 | [docs/architecture/authority-policy-registry-and-decision-events.md](docs/architecture/authority-policy-registry-and-decision-events.md) | architecture | 2026-05-20 | current |
@@ -411,7 +412,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/platform-and-operations/governance/incident-response-summary.md](docs/categories/platform-and-operations/governance/incident-response-summary.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/governance/PACKAGE_LIFECYCLE_POLICY.md](docs/categories/platform-and-operations/governance/PACKAGE_LIFECYCLE_POLICY.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/governance/PACKAGE_OWNERSHIP.md](docs/categories/platform-and-operations/governance/PACKAGE_OWNERSHIP.md) | categories | 2026-05-11 | current |
-| [docs/categories/platform-and-operations/governance/pentest-plan.md](docs/categories/platform-and-operations/governance/pentest-plan.md) | categories | 2026-05-11 | current |
+| [docs/categories/platform-and-operations/governance/pentest-plan.md](docs/categories/platform-and-operations/governance/pentest-plan.md) | categories | 2026-05-20 | current |
 | [docs/categories/platform-and-operations/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md](docs/categories/platform-and-operations/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/governance/PLATFORM_VS_APP_DECISION_RULE.md](docs/categories/platform-and-operations/governance/PLATFORM_VS_APP_DECISION_RULE.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/governance/platform-readiness.md](docs/categories/platform-and-operations/governance/platform-readiness.md) | categories | 2026-05-11 | current |
@@ -573,7 +574,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/platform-and-operations/reference/packages.md](docs/categories/platform-and-operations/reference/packages.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/reference/README.md](docs/categories/platform-and-operations/reference/README.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/reference/TENANT_INVENTORY.md](docs/categories/platform-and-operations/reference/TENANT_INVENTORY.md) | categories | 2026-05-11 | current |
-| [docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md](docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md) | categories | 2026-05-11 | current |
+| [docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md](docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md) | categories | 2026-05-20 | current |
 | [docs/categories/platform-and-operations/releases/finance-core-readiness.md](docs/categories/platform-and-operations/releases/finance-core-readiness.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/repo-contract/invariants.md](docs/categories/platform-and-operations/repo-contract/invariants.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/repo-contract/README.md](docs/categories/platform-and-operations/repo-contract/README.md) | categories | 2026-05-11 | current |
@@ -796,11 +797,11 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md](docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/quick-start.md](docs/categories/products-and-market/union-eyes/quick-start.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/README.md](docs/categories/products-and-market/union-eyes/README.md) | categories | 2026-05-11 | current |
-| [docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md](docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md) | categories | 2026-05-19 | current |
+| [docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md](docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md) | categories | 2026-05-20 | current |
 | [docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md](docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md](docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md](docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md) | categories | 2026-05-11 | current |
-| [docs/categories/products-and-market/union-eyes/release/release-governance-standard.md](docs/categories/products-and-market/union-eyes/release/release-governance-standard.md) | categories | 2026-05-19 | current |
+| [docs/categories/products-and-market/union-eyes/release/release-governance-standard.md](docs/categories/products-and-market/union-eyes/release/release-governance-standard.md) | categories | 2026-05-20 | current |
 | [docs/categories/products-and-market/union-eyes/release/schema-parity-report.md](docs/categories/products-and-market/union-eyes/release/schema-parity-report.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/release/transitional-shared-secret-topology.md](docs/categories/products-and-market/union-eyes/release/transitional-shared-secret-topology.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/revenue-profile.md](docs/categories/products-and-market/union-eyes/revenue-profile.md) | categories | 2026-05-11 | current |
@@ -833,7 +834,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/builders/COMMANDS.md](docs/categories/stakeholders/builders/COMMANDS.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/builders/CONTRIBUTING.md](docs/categories/stakeholders/builders/CONTRIBUTING.md) | categories | 2026-05-14 | current |
 | [docs/categories/stakeholders/builders/QUICKSTART.md](docs/categories/stakeholders/builders/QUICKSTART.md) | categories | 2026-05-11 | current |
-| [docs/categories/stakeholders/buyers/buyer-faq.md](docs/categories/stakeholders/buyers/buyer-faq.md) | categories | 2026-05-11 | current |
+| [docs/categories/stakeholders/buyers/buyer-faq.md](docs/categories/stakeholders/buyers/buyer-faq.md) | categories | 2026-05-20 | current |
 | [docs/categories/stakeholders/buyers/deployment-models.md](docs/categories/stakeholders/buyers/deployment-models.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/buyers/flow-buyer-pack.md](docs/categories/stakeholders/buyers/flow-buyer-pack.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/buyers/flow-revenue-playbook.md](docs/categories/stakeholders/buyers/flow-revenue-playbook.md) | categories | 2026-05-11 | current |
@@ -962,21 +963,25 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/tutorials/first-app.md](docs/categories/stakeholders/tutorials/first-app.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md](docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md) | categories | 2026-05-11 | current |
 | [docs/categories/stakeholders/tutorials/README.md](docs/categories/stakeholders/tutorials/README.md) | categories | 2026-05-11 | current |
-| [docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md](docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/constitution.md](docs/doctrine/constitution.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/DOCTRINE_GOVERNANCE.md](docs/doctrine/DOCTRINE_GOVERNANCE.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/DOCTRINE_STRESS_TEST.md](docs/doctrine/DOCTRINE_STRESS_TEST.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/DOCTRINE_TRACEABILITY.md](docs/doctrine/DOCTRINE_TRACEABILITY.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/DOCTRINE.md](docs/doctrine/DOCTRINE.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/FIRST_CONTACT_MESSAGING.md](docs/doctrine/FIRST_CONTACT_MESSAGING.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/frameworks.md](docs/doctrine/frameworks.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/narrative-playbooks.md](docs/doctrine/narrative-playbooks.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/positioning.md](docs/doctrine/positioning.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/principles.md](docs/doctrine/principles.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md](docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/SCORING_MODELS.md](docs/doctrine/SCORING_MODELS.md) | doctrine | 2026-05-19 | current |
-| [docs/doctrine/vocabulary.md](docs/doctrine/vocabulary.md) | doctrine | 2026-05-19 | current |
+| [docs/compliance/soc2/control-mapping.md](docs/compliance/soc2/control-mapping.md) | compliance | 2026-05-20 | current |
+| [docs/compliance/soc2/evidence-inventory.md](docs/compliance/soc2/evidence-inventory.md) | compliance | 2026-05-20 | current |
+| [docs/compliance/soc2/gap-log.md](docs/compliance/soc2/gap-log.md) | compliance | 2026-05-20 | current |
+| [docs/compliance/soc2/README.md](docs/compliance/soc2/README.md) | compliance | 2026-05-20 | current |
+| [docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md](docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/constitution.md](docs/doctrine/constitution.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/DOCTRINE_GOVERNANCE.md](docs/doctrine/DOCTRINE_GOVERNANCE.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/DOCTRINE_STRESS_TEST.md](docs/doctrine/DOCTRINE_STRESS_TEST.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/DOCTRINE_TRACEABILITY.md](docs/doctrine/DOCTRINE_TRACEABILITY.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/DOCTRINE.md](docs/doctrine/DOCTRINE.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/FIRST_CONTACT_MESSAGING.md](docs/doctrine/FIRST_CONTACT_MESSAGING.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/frameworks.md](docs/doctrine/frameworks.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/narrative-playbooks.md](docs/doctrine/narrative-playbooks.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/positioning.md](docs/doctrine/positioning.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/principles.md](docs/doctrine/principles.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md](docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/SCORING_MODELS.md](docs/doctrine/SCORING_MODELS.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/vocabulary.md](docs/doctrine/vocabulary.md) | doctrine | 2026-05-20 | current |
 | [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-20 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
@@ -1031,6 +1036,9 @@ Stale documents (>90 days since repo validation): 0
 | [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-20 | current |
 | [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-20 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
+| [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-20 | current |
+| [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-20 | current |
+| [docs/platform/ORG_SCOPED_TABLES.md](docs/platform/ORG_SCOPED_TABLES.md) | platform | 2026-05-20 | current |
 | [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-14 | current |
 | [docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md](docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md) | platform | 2026-05-11 | current |
 | [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md) | proof-center | 2026-05-11 | current |

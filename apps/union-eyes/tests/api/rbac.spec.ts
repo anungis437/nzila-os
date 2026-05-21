@@ -46,7 +46,7 @@ describe('UE QA - RBAC reality and route guard enforcement', () => {
     ]
 
     const incomplete = QA_ROUTE_INVENTORY.filter((entry) =>
-      requiredPersonas.some((persona) => !entry.expectedAuthorizationByPersona[persona]),
+      requiredPersonas.some((persona) => !entry.expectedAuthorizationByPersona[persona as keyof typeof entry.expectedAuthorizationByPersona]),
     ).map((entry) => `${entry.routeFile}:${entry.method}`)
 
     expect(incomplete, `Inventory items missing persona auth expectation: ${incomplete.join(', ')}`).toEqual(
