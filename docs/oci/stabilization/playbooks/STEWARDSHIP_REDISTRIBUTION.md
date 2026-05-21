@@ -76,6 +76,32 @@ A two-page brief returned to the governance body:
 - The originating steward's compensation, role, and standing are preserved or enhanced.
 - The institution records the broadened carrier set as institutional arrangement, not as the originating steward's replacement.
 
+## 12. Executable composition
+
+The playbook is operationalized by four composition engines under
+`apps/union-eyes/lib/workbook/engines/redistribution/`:
+
+- `reciprocityRatificationGate.ts` — deterministic gate enforcing
+  Section 11 reciprocity terms. Refuses to advance the playbook
+  unless every required term is ratified.
+- `carrierConsentLedger.ts` — pure event-sourced ledger of carrier
+  candidate consents (`proposed`, `consented`, `declined`,
+  `withdrawn`). Honours consent revocability per
+  [OCI_INTERVENTION_ETHICS.md](../OCI_INTERVENTION_ETHICS.md) §2.5.
+- `residualConcentrationReader.ts` — reads pre-/post-redistribution
+  carrier load and emits a categorical residual reading
+  (`relieved`, `partially_relieved`, `unchanged`, `worsened`).
+  Reads, not scores.
+- `redistributionExecutionEngine.ts` — composes the three engines
+  above with `stewardshipRedistributionEngine`,
+  `interventionTrackingEngine`, and the stabilization state engine
+  to produce a deterministic executable redistribution plan with
+  canonical signal envelopes.
+
+All four engines are pure, append-only where applicable, and write
+no database. They are read by the facilitator and the governance
+body; they do not act on behalf of the institution.
+
 ---
 
 ## Doctrine references
