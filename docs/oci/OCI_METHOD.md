@@ -154,6 +154,165 @@ The facilitator is not a consultant in the conventional sense. The facilitator d
 
 ## 6. Method boundaries
 
+The method is defined as much by what it refuses to do as by what it does.
+
+- The method does not produce performance evaluations of individual stewards.
+- The method does not produce ranked comparisons between institutions.
+- The method does not generate predictive inferences about people.
+- The method does not displace institutional decision-making to a tool, a model, or a facilitator.
+- The method does not retain institutional content beyond the agreed retention window.
+- The method does not operate outside an explicit, written engagement scope.
+- The method does not certify any practice as a substitute for the institution's own governance review.
+
+These boundaries are binding. A facilitator who crosses them is, in the method's understanding, no longer practising the method.
+
+---
+
+## 7. Analytical frameworks
+
+The method carries a small set of analytical frameworks. Each framework produces a structured reading the institution may accept, amend, or decline. None of the frameworks produce a number that stands alone; every reading is paired with the institutional context that justifies it.
+
+### 7.1 Stewardship Density Index
+
+A structural reading of how concentrated continuity responsibility is across the institution's recognised stewards. The index reports a band (distributed, observed, concentrated, fragile, critical) and the structural facts that support the band. It does not name individuals.
+
+### 7.2 Governance Entropy Scale
+
+An ordinal reading (levels 1 through 5) of the drift between an institution's recorded governance precedents and the way those precedents are currently interpreted in practice. Higher ordinals indicate that the institution's governance memory and its operational interpretation have diverged. The scale is paired with the precedent register that produced it.
+
+### 7.3 Continuity Burden Map
+
+A topology of where continuity load sits across the institution, including the surface zones where the institution is most exposed to a single steward's departure or unavailability. The map is rendered as bands and zones, never as a heat map of named people.
+
+### 7.4 Continuity Survivability Matrix
+
+A reading of how reconstructable the institution's continuity would be under defined breakpoint scenarios. The matrix returns reconstruction burden indicators (mean, peak, count of severe and substantial cases) and the structural facts that justify them.
+
+### 7.5 Reconstruction Burden Index
+
+A composite reading of how much institutional reconstruction work would be required to restore continuity after a defined breakpoint. The index is institutional, not personal; it speaks to the load the institution would carry, not the load any individual would bear.
+
+### 7.6 OCI Operational Profile
+
+A cross-module synthesis available only when more than one analytical framework has produced a result. The profile resolves a composite continuity posture (distributed, observed, concentrated, fragile, critical) with named facets for stewardship, governance, breakpoint exposure, modernization alignment, and lineage survivability. The profile is reserved for facilitated engagements because it requires the breadth of input only a facilitated session reliably produces.
+
+Every framework respects the anti-surveillance position. None of the frameworks produce signals about individuals.
+
+---
+
+## 8. Facilitation infrastructure
+
+The method is supported by a facilitation infrastructure that holds the practice consistent across facilitators, sessions, and institutions.
+
+### 8.1 Session types
+
+The method recognises five canonical session types, each with a defined purpose and a defined artefact:
+
+1. Recognition session — institutional reading and sponsor interpretation.
+2. Discovery session — structured continuity mapping under the Institutional Discovery Framework.
+3. Stabilization working session — reductive redistribution drafting.
+4. Governance ratification session — continuity plan presentation to the governance body.
+5. Embedding session — successor briefing and handover.
+
+A session that does not match one of these five types is not part of the method.
+
+### 8.2 Institutional Discovery Framework
+
+Discovery is organised into five structured sections: stewardship presence, governance memory, continuity exposures, modernization pressure, and succession horizon. Each section is led by a defined set of facilitator prompts and produces a defined set of structural inputs. Prompts are designed to be received as recognition, not interrogation.
+
+### 8.3 Conversation categories
+
+Facilitator prompts are organised into eight conversation categories so that any given prompt's purpose, register, and boundary are explicit: institutional reading, stewardship recognition, governance memory, continuity exposure, modernization alignment, succession horizon, redistribution drafting, and reflective closure. Categories are reviewed during facilitator certification.
+
+### 8.4 Voice discipline
+
+The method maintains an editorial register that institutions consistently report as recognising rather than diagnosing. Specific words and frames — including any language that positions the method as a productivity intervention, a behavioural analytics tool, or a replacement for institutional judgement — are excluded. Voice discipline is enforced in artefact drafting and audited during certification.
+
+---
+
+## 9. Benchmark intelligence architecture
+
+The method permits an aggregate intelligence layer that supports sector and size-band readings without exposing any contributing institution.
+
+- Participation is opt-in, written, and revocable.
+- Aggregation occurs only at a level that protects every contributing institution from re-identification (k-anonymity threshold of five contributing institutions per published band).
+- Only structural facts cross the aggregation boundary: bands, counts, ordinals, and categorical postures. No prose, no names, no notes, no document content.
+- An institution that withdraws consent has its contribution removed from subsequent aggregations and from any baseline an aggregation supports.
+- The benchmark layer never produces a public ranking of institutions.
+
+The benchmark architecture exists to give an institution a sense of where its readings sit relative to peers operating under similar structural conditions — never to position one institution against another.
+
+---
+
+## 10. Deployment model
+
+The method is delivered through a small number of defined deployment forms. Each form has a stated purpose and a stated boundary.
+
+### 10.1 Pilot engagement
+
+A bounded first engagement with an institution that has not previously practised the method. The pilot framework documents the four-phase delivery shape and the pilot exit conditions. A pilot is not a sales process; the institution is free to conclude the pilot without proceeding to ongoing practice.
+
+### 10.2 Workshop
+
+A single-session engagement, typically a recognition or discovery session, used to introduce the method to an institution or a governance body without committing to a full pilot.
+
+### 10.3 Executive session
+
+A senior-leader-only session, used either to prepare a sponsor for a pilot or to support a governance body receiving a continuity plan. Executive sessions are not abbreviated pilots.
+
+### 10.4 Board reporting
+
+A governance-receivable reading delivered to a board or equivalent governance body. The reading is structured to be amended, adopted, or declined by the governance body on its own terms.
+
+### 10.5 Ongoing practice
+
+A continuing relationship in which the institution has embedded the method into its own governance cadence and uses the facilitator only for periodic review. Ongoing practice presumes successful embedding under Phase 5.
+
+The method does not support engagement forms outside this list. Any new deployment form is treated as a doctrine extension and must pass the doctrine review process before being offered.
+
+---
+
+## 11. Certification pathway
+
+Facilitator certification is the mechanism by which the method protects its own integrity over time.
+
+- Candidates must complete the facilitator training curriculum documented in `OCI_FACILITATOR_TRAINING_CURRICULUM.md`.
+- Candidates must pass the facilitator certification rubric documented in `OCI_FACILITATOR_CERTIFICATION_RUBRIC.md`.
+- Certified facilitators are subject to recertification review on a stated cadence and after any reported doctrine drift incident.
+- Partners enabled to deliver the method under supervision operate under named, certified facilitators; partner enablement is not a substitute for certification.
+
+Decertification is an explicit institutional remedy. A facilitator who is no longer certified is no longer authorised to deliver the method under the OCI name.
+
+---
+
+## 12. Doctrine references
+
+The method is defined by this document together with the following canonical references. Where this document and a reference diverge, the reference governs the area it covers.
+
+- `OCI_ANTI_SURVEILLANCE_POSITION.md` — binding anti-surveillance commitments.
+- `OCI_AI_BOUNDARY.md` — reviewer-led use of any computational support.
+- `OCI_PRIVACY_POSITION.md` — institutional privacy commitments.
+- `OCI_DATA_HANDLING.md` — data handling, retention, and severance.
+- `OCI_SECURITY_OVERVIEW.md` — security posture for the method's supporting platform.
+- `OCI_DELIVERY_MODEL.md` — engagement shape and reciprocity terms.
+- `OCI_PILOT_FRAMEWORK.md` — four-phase pilot delivery view.
+- `OCI_PILOT_SCOPE_TEMPLATE.md` — scope template for pilot engagements.
+- `OCI_INSTITUTIONAL_ACTIVATION.md` — institutional activation conditions.
+- `OCI_FACILITATOR_TRAINING_CURRICULUM.md` — facilitator preparation.
+- `OCI_FACILITATOR_CERTIFICATION_RUBRIC.md` — facilitator certification.
+- `OCI_BOARD_OVERVIEW.md` — governance body overview.
+- `OCI_EXECUTIVE_BRIEFING_DECK.md` — executive briefing material.
+- `OCI_WORKSHOP_OPENING_SCRIPT.md` — workshop opening register.
+
+This document is the canonical entry point. A reader who reads this document and follows the references will hold the full doctrine surface of the method.
+
+---
+
+## 13. Amendment
+
+This document is amended only through the doctrine review process. Amendments are dated, attributed, and recorded in the method's change history. A reader who is unsure whether a given practice is part of the current method should consult the most recent ratified version of this document and its referenced canon.
+
+
 The method explicitly does not do certain things. These boundaries are part of the method's definition.
 
 The method does not:

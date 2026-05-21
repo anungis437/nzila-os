@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-21T16:09:50.230Z
+Generated: 2026-05-21T18:40:01.852Z
 
-Total documents indexed: 1040
+Total documents indexed: 1057
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -26,7 +26,7 @@ Stale documents (>90 days since repo validation): 0
 | nzila-runtime-integrity | 11 | 0 |
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
-| oci | 2 | 0 |
+| oci | 19 | 0 |
 | ops | 4 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
@@ -1033,6 +1033,23 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md](docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
+| [docs/oci/OCI_AI_BOUNDARY.md](docs/oci/OCI_AI_BOUNDARY.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md](docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_BOARD_OVERVIEW.md](docs/oci/OCI_BOARD_OVERVIEW.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_DATA_HANDLING.md](docs/oci/OCI_DATA_HANDLING.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_DELIVERY_MODEL.md](docs/oci/OCI_DELIVERY_MODEL.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_EXECUTIVE_BRIEFING_DECK.md](docs/oci/OCI_EXECUTIVE_BRIEFING_DECK.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_EXECUTIVE_EMAIL_SEQUENCE.md](docs/oci/OCI_EXECUTIVE_EMAIL_SEQUENCE.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_FACILITATOR_CERTIFICATION_RUBRIC.md](docs/oci/OCI_FACILITATOR_CERTIFICATION_RUBRIC.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_FACILITATOR_TRAINING_CURRICULUM.md](docs/oci/OCI_FACILITATOR_TRAINING_CURRICULUM.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_INSTITUTIONAL_ACTIVATION.md](docs/oci/OCI_INSTITUTIONAL_ACTIVATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_METHOD.md](docs/oci/OCI_METHOD.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_PILOT_FRAMEWORK.md](docs/oci/OCI_PILOT_FRAMEWORK.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_PILOT_INTRODUCTION_GUIDE.md](docs/oci/OCI_PILOT_INTRODUCTION_GUIDE.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_PILOT_SCOPE_TEMPLATE.md](docs/oci/OCI_PILOT_SCOPE_TEMPLATE.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_PRIVACY_POSITION.md](docs/oci/OCI_PRIVACY_POSITION.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_SECURITY_OVERVIEW.md](docs/oci/OCI_SECURITY_OVERVIEW.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md](docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md) | oci | 2026-05-21 | current |
 | [docs/oci/oci-method.md](docs/oci/oci-method.md) | oci | 2026-05-21 | current |
 | [docs/oci/oci-product-ladder.md](docs/oci/oci-product-ladder.md) | oci | 2026-05-21 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
