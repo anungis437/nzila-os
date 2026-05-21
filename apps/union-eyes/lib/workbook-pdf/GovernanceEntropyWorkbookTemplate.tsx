@@ -29,6 +29,8 @@ import type { ContinuityBreakpointResult } from '@/lib/workbook/engines/continui
 import type { ModernizationAlignmentResult } from '@/lib/workbook/engines/modernizationAlignmentEngine';
 import type { TransformationRoadmapResult } from '@/lib/workbook/engines/transformationRoadmapEngine';
 import type { WorkbookSynthesisResult } from '@/lib/workbook/engines/workbookSynthesisEngine';
+import type { StewardshipRedistributionResult } from '@/lib/workbook/engines/stewardshipRedistributionEngine';
+import type { GovernanceRecoveryResult } from '@/lib/workbook/engines/governanceRecoveryEngine';
 import type {
   WorkbookNarrative,
   ModuleNarrative,
@@ -40,6 +42,8 @@ import {
   buildModernizationNarrative,
   buildRoadmapNarrative,
   buildSynthesisNarrative,
+  buildStewardshipRedistributionNarrative,
+  buildGovernanceRecoveryNarrative,
 } from './workbookNarrativeEngine';
 
 export interface WorkbookModuleResults {
@@ -50,6 +54,8 @@ export interface WorkbookModuleResults {
   modernization?: ModernizationAlignmentResult;
   roadmap?: TransformationRoadmapResult;
   synthesis?: WorkbookSynthesisResult;
+  stewardshipRedistribution?: StewardshipRedistributionResult;
+  governanceRecovery?: GovernanceRecoveryResult;
 }
 
 export interface WorkbookPdfData {
@@ -561,6 +567,85 @@ export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfD
               </>
             );
           })()}
+
+          <View style={S.footer} fixed>
+            <Text>{title}</Text>
+            <Text render={({ pageNumber }) => String(pageNumber).padStart(2, '0')} />
+          </View>
+        </Page>
+      ) : null}
+
+      {/* Chapter 08 — Stabilization Direction. Facilitated-edition only: rendered
+          when either stewardshipRedistribution or governanceRecovery results are
+          present. When neither is present, a reserved-edition notice appears in
+          the reserved-chapters list above. */}
+      {data.modules?.stewardshipRedistribution || data.modules?.governanceRecovery ? (
+        <Page size={PAGE.size} style={S.page} wrap>
+          <Text style={S.sectionLabel}>
+            {fr ? 'Chapitre 08' : 'Chapter 08'}
+          </Text>
+          <Text style={S.sectionHeading}>
+            {fr ? 'Direction de stabilisation' : 'Stabilization Direction'}
+          </Text>
+          <View style={S.rule} />
+
+          {data.modules.stewardshipRedistribution ? (() => {
+            const n = buildStewardshipRedistributionNarrative(data.modules.stewardshipRedistribution);
+            const signals = data.modules.stewardshipRedistribution.signals;
+            return (
+              <View>
+                <Text style={[S.sectionLabel, { marginTop: SPACE.md }]}>
+                  {fr ? 'Redistribution de l\u2019intendance' : 'Stewardship redistribution'}
+                </Text>
+                <Text style={S.body}>{n.opening}</Text>
+                <Text style={[S.body, { marginTop: SPACE.sm }]}>{n.body}</Text>
+                {signals.length > 0 ? (
+                  <>
+                    <Text style={[S.sectionLabel, { marginTop: SPACE.md }]}>
+                      {n.signalsHeading}
+                    </Text>
+                    {signals.map((s, idx) => (
+                      <View key={`sr-${idx}`} style={S.signalRow}>
+                        <Text style={[S.signalLabel, { color: signalLabelColor(s.severity) }]}>
+                          {s.severity}
+                        </Text>
+                        <Text style={S.signalText}>{s.statement}</Text>
+                      </View>
+                    ))}
+                  </>
+                ) : null}
+              </View>
+            );
+          })() : null}
+
+          {data.modules.governanceRecovery ? (() => {
+            const n = buildGovernanceRecoveryNarrative(data.modules.governanceRecovery);
+            const signals = data.modules.governanceRecovery.signals;
+            return (
+              <View style={{ marginTop: SPACE.lg }}>
+                <Text style={[S.sectionLabel, { marginTop: SPACE.md }]}>
+                  {fr ? 'R\u00e9cup\u00e9ration de la gouvernance' : 'Governance recovery'}
+                </Text>
+                <Text style={S.body}>{n.opening}</Text>
+                <Text style={[S.body, { marginTop: SPACE.sm }]}>{n.body}</Text>
+                {signals.length > 0 ? (
+                  <>
+                    <Text style={[S.sectionLabel, { marginTop: SPACE.md }]}>
+                      {n.signalsHeading}
+                    </Text>
+                    {signals.map((s, idx) => (
+                      <View key={`gr-${idx}`} style={S.signalRow}>
+                        <Text style={[S.signalLabel, { color: signalLabelColor(s.severity) }]}>
+                          {s.severity}
+                        </Text>
+                        <Text style={S.signalText}>{s.statement}</Text>
+                      </View>
+                    ))}
+                  </>
+                ) : null}
+              </View>
+            );
+          })() : null}
 
           <View style={S.footer} fixed>
             <Text>{title}</Text>

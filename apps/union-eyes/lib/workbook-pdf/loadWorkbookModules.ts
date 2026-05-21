@@ -34,6 +34,7 @@ import {
   type ContinuityLineageResult,
 } from '@/lib/workbook/engines/continuityLineageEngine';
 import { runWorkbookSynthesis } from '@/lib/workbook/engines/workbookSynthesisEngine';
+import { runGovernanceRecovery } from '@/lib/workbook/engines/governanceRecoveryEngine';
 import type { PrecedentInput, PrecedentEra } from '@/lib/workbook/engines/precedentContinuityMapper';
 import type { WorkbookModuleResults } from './GovernanceEntropyWorkbookTemplate';
 
@@ -90,6 +91,22 @@ export async function loadWorkbookContext(input: {
       governanceDomains: [],
     });
     modules.lineage = lineage;
+  }
+
+  // Governance recovery (Product 3 / Stabilization): composable from lineage
+  // rows alone. Stewardship redistribution remains reserved for the
+  // facilitated edition because its carrier/process inputs require a
+  // facilitator-captured form that does not exist in schema yet.
+  if (lineage) {
+    modules.governanceRecovery = runGovernanceRecovery({
+      status: input.status,
+      lineage: {
+        workbookId: input.workbookId,
+        precedents: lineageRows.map(toPrecedentInput),
+        governanceDomains: [],
+      },
+      governanceRatificationCommitted: false,
+    });
   }
 
   // Synthesis: only meaningful when at least landscape + lineage are present,

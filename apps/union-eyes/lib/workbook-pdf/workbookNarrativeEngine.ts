@@ -12,6 +12,8 @@ import type { ContinuityBreakpointResult } from '@/lib/workbook/engines/continui
 import type { ModernizationAlignmentResult } from '@/lib/workbook/engines/modernizationAlignmentEngine';
 import type { TransformationRoadmapResult } from '@/lib/workbook/engines/transformationRoadmapEngine';
 import type { WorkbookSynthesisResult } from '@/lib/workbook/engines/workbookSynthesisEngine';
+import type { StewardshipRedistributionResult } from '@/lib/workbook/engines/stewardshipRedistributionEngine';
+import type { GovernanceRecoveryResult } from '@/lib/workbook/engines/governanceRecoveryEngine';
 
 export interface WorkbookNarrative {
   density: string;
@@ -129,6 +131,29 @@ export function buildSynthesisNarrative(result: WorkbookSynthesisResult): Module
     opening: result.profile.reading,
     body: `Composite continuity posture is ${humanize(result.profile.posture)} (index ${result.profile.compositeIndex.toFixed(2)}). Stewardship facet ${result.profile.facets.stewardship.toFixed(2)}, governance ${result.profile.facets.governance.toFixed(2)}, breakpoint ${result.profile.facets.breakpoint.toFixed(2)}, modernization ${result.profile.facets.modernization.toFixed(2)}, lineage ${result.profile.facets.lineage.toFixed(2)}.`,
     signalsHeading: 'Cross-module signals',
+  };
+}
+
+export function buildStewardshipRedistributionNarrative(
+  result: StewardshipRedistributionResult,
+): ModuleNarrative {
+  const targetCount = result.plan.targets.length;
+  return {
+    opening: result.preview,
+    body: `${targetCount} redistribution target${targetCount === 1 ? '' : 's'} identified across carriers, processes, and lineage entries. Reciprocity terms ${result.signals.some((s) => s.category === 'broadening_ready') ? 'are ratified' : 'remain to be ratified before redistribution begins'}.`,
+    signalsHeading: 'Redistribution signals',
+  };
+}
+
+export function buildGovernanceRecoveryNarrative(
+  result: GovernanceRecoveryResult,
+): ModuleNarrative {
+  const precedentCount = result.lineage.precedents.length;
+  const livingShare = result.lineage.survivability.livingShare;
+  return {
+    opening: result.preview,
+    body: `${precedentCount} precedent${precedentCount === 1 ? '' : 's'} read across the institution's lineage surface; living-lineage share is ${livingShare.toFixed(2)}. Governance ratification ${result.signals.some((s) => s.category === 'governance_ratification_pending') ? 'remains pending' : 'is committed'}.`,
+    signalsHeading: 'Recovery signals',
   };
 }
 
