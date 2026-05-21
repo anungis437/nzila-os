@@ -67,6 +67,19 @@ The authoritative map of who owns which schema in a Union Eyes database.
 - `ue_attestation.*` — release evidence support tables.
 - `ue_telemetry.*` — non-canonical telemetry buffers.
 
+**Delegated read-model projections** (per [drizzle-scope-reconstruction.md](./drizzle-scope-reconstruction.md) §2):
+
+- `public.icra_*` — Institutional Continuity Risk Assessment (continuity
+  observability scope). Pseudonymous, no PII required, no Django model
+  owns this surface. Tables: `icra_organizations`,
+  `icra_assessments`, `icra_assessment_answers`, `icra_maturity_profiles`,
+  `icra_continuity_scores`, `icra_governance_flags`,
+  `icra_operational_indicators`, `icra_followup_recommendations`,
+  `icra_benchmark_groups`, `icra_anonymized_metrics`.
+  Registered via `apps/union-eyes/db/schema-cache/cache.ts` on
+  2026-05-21. Fresh-DB bootstrap creates these via the scoped Drizzle
+  migration lineage in `db/migrations-cache/`.
+
 ### 2.3 Bootstrap-owned (extensions only)
 
 - `CREATE EXTENSION` statements for:
