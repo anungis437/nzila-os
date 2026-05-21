@@ -1,0 +1,137 @@
+{
+  "_description": "Live evidence manifest template for Union Eyes controlled pilot. Fill in and save to reports/runtime/live-captures/YYYY-MM-DD/evidence-manifest.json after executing LIVE_EVIDENCE_CAPTURE_RUNBOOK.md.",
+  "_version": "1.0",
+  "_template": true,
+
+  "generatedAt": "<ISO-8601 timestamp — e.g. 2026-05-20T14:00:00Z>",
+  "generatedBy": "<reviewer name or service principal>",
+  "environment": "production",
+
+  "azure": {
+    "subscriptionId": "<SUBSCRIPTION_ID>",
+    "tenantId": "<TENANT_ID>",
+    "region": "canadacentral",
+
+    "prodResourceGroup": {
+      "name": "nzila-canada-prod-rg",
+      "verified": false,
+      "captureFile": "rg-prod.json",
+      "notes": ""
+    },
+    "stagingResourceGroup": {
+      "name": "nzila-canada-staging-rg",
+      "verified": false,
+      "captureFile": "rg-staging.json",
+      "notes": ""
+    },
+    "prodStagingSeparated": {
+      "verified": false,
+      "captureFile": "rg-separation.txt",
+      "notes": ""
+    },
+
+    "prodContainerAppEnv": {
+      "name": "nzila-union-eyes-prod-env",
+      "fqdn": "<PROD_ENV_FQDN>",
+      "verified": false,
+      "captureFile": "container-app-env-prod.json",
+      "notes": ""
+    },
+    "stagingContainerAppEnv": {
+      "name": "nzila-union-eyes-staging-env",
+      "fqdn": "<STAGING_ENV_FQDN>",
+      "verified": false,
+      "captureFile": "container-app-env-staging.json",
+      "notes": ""
+    },
+
+    "prodKeyVault": {
+      "name": "nzila-prod-kv",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "softDeleteEnabled": null,
+      "verified": false,
+      "captureFile": "keyvault-prod.json",
+      "notes": ""
+    },
+    "stagingKeyVault": {
+      "name": "nzila-staging-kv",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "verified": false,
+      "captureFile": "keyvault-staging.json",
+      "notes": ""
+    },
+
+    "prodStorage": {
+      "accountName": "nzilaprodevidence",
+      "resourceGroup": "nzila-canada-prod-rg",
+      "httpsOnly": null,
+      "blobVersioning": null,
+      "verified": false,
+      "captureFile": "storage-prod.json",
+      "notes": ""
+    },
+    "stagingStorage": {
+      "accountName": "<STAGING_STORAGE_ACCOUNT>",
+      "resourceGroup": "nzila-canada-staging-rg",
+      "verified": false,
+      "notes": ""
+    }
+  },
+
+  "healthCheck": {
+    "url": "https://<PROD_FQDN>/api/health",
+    "httpStatus": null,
+    "responseBody": null,
+    "verified": false,
+    "captureFile": "health-prod.json",
+    "notes": ""
+  },
+
+  "readinessCheck": {
+    "url": "https://<PROD_FQDN>/api/ready",
+    "httpStatus": null,
+    "responseBody": null,
+    "verified": false,
+    "captureFile": "ready-prod.json",
+    "notes": ""
+  },
+
+  "monitorWorkbook": {
+    "logAnalyticsWorkspace": "nzila-prod-logs",
+    "resourceGroup": "nzila-canada-prod-rg",
+    "alertRulesConfirmed": null,
+    "verified": false,
+    "captureFile": "monitor-workspace.json",
+    "notes": ""
+  },
+
+  "restoreDrill": {
+    "dbServerName": "nzila-prod-db",
+    "backupRetentionDays": null,
+    "geoRedundantBackup": null,
+    "lastBackupConfirmed": null,
+    "verified": false,
+    "captureFile": "db-backup-list.json",
+    "notes": ""
+  },
+
+  "overallStatus": "PENDING",
+  "reviewer": {
+    "name": "",
+    "role": "",
+    "signOffDate": "",
+    "signature": ""
+  },
+
+  "exceptions": [],
+
+  "_guidance": {
+    "postureLayers": {
+      "codeConfigPosture": "HEALTHY — verified by platform-runtime-truth-latest.json",
+      "liveOperationalProof": "PENDING — fill this manifest to convert to VERIFIED",
+      "productionExpansion": "CONDITIONAL — requires VERIFIED live proof + security review sign-off"
+    },
+    "completionCriteria": "Set overallStatus to VERIFIED only when all 'verified' flags above are true and reviewer block is signed.",
+    "storageLocation": "Commit completed manifest to reports/runtime/live-captures/YYYY-MM-DD/evidence-manifest.json"
+  }
+}

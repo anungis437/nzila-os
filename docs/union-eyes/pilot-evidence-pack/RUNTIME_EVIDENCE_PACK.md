@@ -1,8 +1,17 @@
 # Union Eyes — Runtime Evidence Pack
 
-**Status:** PARTIAL — Code evidence captured; live environment confirmation pending  
-**Date:** 2026-05-20  
-**Authority:** `reports/runtime/platform-runtime-truth-latest.json`
+**Status:** Section A ✅ COMPLETE (code-verified) / Section B ⏳ PENDING (requires Azure access)  
+**Last updated:** 2026-05-14  
+**Source of truth:** `reports/runtime/platform-runtime-truth-latest.json` (code/config posture)  
+**Supersedes:** All versions referencing DEGRADED or EXC-001 open  
+**Live-evidence dependencies:** All of Section B — execute LIVE_EVIDENCE_CAPTURE_RUNBOOK.md to complete
+
+---
+
+> **Three-layer distinction:**
+> - **Code/config posture:** HEALTHY (this document, Section A)
+> - **Live operational proof:** PENDING (Section B — requires Azure access)
+> - **Production expansion:** CONDITIONAL (requires live proof + security sign-off)
 
 ---
 

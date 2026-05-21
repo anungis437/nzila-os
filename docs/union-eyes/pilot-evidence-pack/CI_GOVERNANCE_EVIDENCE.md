@@ -1,8 +1,10 @@
 # Union Eyes — CI / Governance Evidence
 
-**Captured:** 2026-05-20  
-**Sprint:** noImplicitAny hardening (commit `b08e98840`)  
-**Source:** Live CI gates — `pnpm typecheck`, `pnpm governance:check-db-imports`, contract tests
+**Status:** CURRENT  
+**Last updated:** 2026-05-14  
+**Source of truth:** Live CI gates — `pnpm typecheck`, `pnpm governance:check-db-imports`, contract tests  
+**Supersedes:** All pre-2026-05-14 versions  
+**Live-evidence dependencies:** Live environment health checks — see RUNTIME_EVIDENCE_PACK.md §B
 
 ---
 

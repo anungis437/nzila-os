@@ -1,8 +1,11 @@
 # Union Eyes — Pilot Scope Lock
 
 **Version:** 1.0  
-**Date:** 2026-05-20  
-**Status:** LOCKED — do not expand scope without explicit Engineering Lead sign-off
+**Status:** LOCKED  
+**Last updated:** 2026-05-14  
+**Source of truth:** This document — do not expand scope without Engineering Lead sign-off  
+**Supersedes:** N/A (first scope lock)  
+**Live-evidence dependencies:** None
 
 ---
 

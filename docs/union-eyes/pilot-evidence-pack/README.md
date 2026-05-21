@@ -1,8 +1,8 @@
 # Union Eyes — Pilot Evidence Pack
 
-**Version:** 1.0  
-**Date:** 2026-05-20  
-**Sprint:** Pilot Evidence Pack  
+**Version:** 2.0  
+**Date:** 2026-05-14  
+**Sprint:** 10/10 Pilot Readiness  
 **Status:** ✅ CONTROLLED PILOT — GO
 
 This directory contains the complete evidence package for the Union Eyes v0.1 controlled CUPE pilot.
@@ -13,11 +13,18 @@ This directory contains the complete evidence package for the Union Eyes v0.1 co
 
 | Document | Purpose | Status |
 |---|---|---|
-| [PILOT_READINESS_MEMO.md](./PILOT_READINESS_MEMO.md) | Executive memo — GO/NO-GO decision, conditions, what changed | ✅ Complete |
+| [BUYER_REVIEW_INDEX.md](./BUYER_REVIEW_INDEX.md) | **Start here** — guided review paths by role | ✅ Complete |
+| [PILOT_READINESS_MEMO.md](./PILOT_READINESS_MEMO.md) | Executive memo — GO/NO-GO decision, conditions | ✅ Complete |
 | [PILOT_SCOPE_LOCK.md](./PILOT_SCOPE_LOCK.md) | Frozen pilot scope — in-scope modules, parameters, freeze process | ✅ Complete |
-| [SECURITY_BUYER_PACK.md](./SECURITY_BUYER_PACK.md) | CISO-facing security controls pack — org isolation, residency, audit, AI boundary | ✅ Complete |
-| [CI_GOVERNANCE_EVIDENCE.md](./CI_GOVERNANCE_EVIDENCE.md) | CI gate captures — typecheck 0 errors, DB guard 0 violations, test results | ✅ Complete |
-| [RUNTIME_EVIDENCE_PACK.md](./RUNTIME_EVIDENCE_PACK.md) | Runtime evidence — code-verified (complete) + live env confirmation (pending) | 🟡 Partial |
+| [SECURITY_BUYER_PACK.md](./SECURITY_BUYER_PACK.md) | CISO-facing security controls pack | ✅ Complete (v2.0) |
+| [CI_GOVERNANCE_EVIDENCE.md](./CI_GOVERNANCE_EVIDENCE.md) | CI gate captures — typecheck 0 errors, DB guard 0 violations | ✅ Complete |
+| [RUNTIME_EVIDENCE_PACK.md](./RUNTIME_EVIDENCE_PACK.md) | Runtime evidence — code-verified (complete) + live env (pending) | 🟡 Section A ✅ / Section B ⏳ |
+| [LIVE_EVIDENCE_CAPTURE_RUNBOOK.md](./LIVE_EVIDENCE_CAPTURE_RUNBOOK.md) | Exact `az` CLI commands for Azure proof | ✅ Template ready |
+| [ORG_ISOLATION_CONTROL_MAP.md](./ORG_ISOLATION_CONTROL_MAP.md) | 9 org-isolation controls — code locations, tests, residual risks | ✅ Complete |
+| [READINESS_COMMANDS.md](./READINESS_COMMANDS.md) | Canonical readiness gate commands with expected outputs | ✅ Complete |
+| [PILOT_OPERATIONS_RUNBOOK.md](./PILOT_OPERATIONS_RUNBOOK.md) | Kickoff, onboarding, support, incident, expansion gate | ✅ Complete |
+| [PILOT_SUCCESS_METRICS.md](./PILOT_SUCCESS_METRICS.md) | 90-day success criteria and expansion thresholds | ✅ Complete |
+| [INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md](./INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md) | Technical moat, risk register, valuation implications | ✅ Complete |
 
 ---
 
@@ -26,26 +33,36 @@ This directory contains the complete evidence package for the Union Eyes v0.1 co
 | Question | Answer |
 |---|---|
 | Is Union Eyes pilot-safe? | **Yes** — controlled pilot, 1 org, signed DPA required |
-| Any CISO-level blockers? | **No** — EXC-001 resolved, RLS fail-closed, zero raw-db imports, strict TS |
-| What's pending for broad production? | Live smoke tests, Azure RG proof, Key Vault separation, restore drill (see RUNTIME_EVIDENCE_PACK.md §B) |
-| Data residency compliant? | **Yes** — Azure Canada Central, 0 violations |
-| Can buyers review today? | **Yes** — send SECURITY_BUYER_PACK.md; do not send any pre-2026-05-20 version |
+| Any CISO-level blockers? | **No** — EXC-001 resolved, RLS fail-closed, 0 raw-db imports, strict TS |
+| What's pending for broad production? | Live Azure evidence (see RUNTIME_EVIDENCE_PACK.md §B + LIVE_EVIDENCE_CAPTURE_RUNBOOK.md) |
+| Data residency compliant? | **Yes** — Azure Canada Central, contractual no-US-processing |
+| Can buyers review today? | **Yes** — direct them to BUYER_REVIEW_INDEX.md |
+
+---
+
+## Three-Layer Runtime Status
+
+| Layer | State | Source |
+|-------|-------|--------|
+| Code/config posture | ✅ HEALTHY | `reports/runtime/platform-runtime-truth-latest.json` |
+| Live operational proof | ⏳ PENDING | `LIVE_EVIDENCE_CAPTURE_RUNBOOK.md` |
+| Production expansion | 🔒 CONDITIONAL | Expansion gate in `PILOT_OPERATIONS_RUNBOOK.md` §10 |
 
 ---
 
 ## Evidence Freshness
 
-All CI evidence is from commit `b08e98840` (noImplicitAny sprint — 2026-05-20).
-
-| Runtime truth | `reports/runtime/platform-runtime-truth-latest.json` — HEALTHY |
-|---|---|
-| Supersedes | All prior `DEGRADED` / EXC-001-open reports |
+All CI evidence is from the 10/10 readiness sprint (2026-05-14).  
+Runtime truth: `reports/runtime/platform-runtime-truth-latest.json` — **HEALTHY**  
+Supersedes: All prior `DEGRADED` / EXC-001-open reports
 
 ---
 
-## What to Do Before Expanding Pilot
+## Quick Local Validation
 
-1. Complete `RUNTIME_EVIDENCE_PACK.md` Section B (live env confirmation)
-2. Get DPA signed by union IT contact
-3. Deliver `PILOT_SCOPE_LOCK.md` to the union pilot contact for acknowledgement
-4. Update `platform-runtime-truth-latest.json` with confirmed `nzila-canada-prod-rg` placement
+```bash
+pnpm readiness:union-eyes
+```
+
+Runs: TypeScript check, DB import guard, Union Eyes tests, runtime truth JSON parse.
+

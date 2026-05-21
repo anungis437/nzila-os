@@ -1,9 +1,12 @@
 # Union Eyes — Security Buyer Pack
 
-**Version:** 2.0 (May 2026 — post-hardening)  
-**Replaces:** Any version referencing EXC-001, DEGRADED status, or fail-open org isolation  
+**Version:** 2.0 (2026-05-14 — post-hardening)  
+**Status:** CURRENT  
+**Last updated:** 2026-05-14  
+**Source of truth:** `apps/union-eyes/lib/db/with-rls-context.ts`, `scripts/check-ue-db-import-guard.ts`, `reports/runtime/platform-runtime-truth-latest.json`  
+**Supersedes:** Any version referencing EXC-001 open, DEGRADED status, or fail-open org isolation  
 **Audience:** Enterprise buyers, CISO review, union IT/Privacy Directors  
-**Status:** CURRENT — reflects live codebase as of `b08e98840`
+**Live-evidence dependencies:** Azure resource group separation, Key Vault isolation — pending (see LIVE_EVIDENCE_CAPTURE_RUNBOOK.md)
 
 ---
 

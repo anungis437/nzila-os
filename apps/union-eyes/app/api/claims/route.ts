@@ -75,12 +75,13 @@ export const POST = withApi(
 
     return withSystemRLSContext('system-query: create-claim', async (tx) => {
       // Generate claim number: CLM-YYYYMMDD-XXXX
+      // Sequence is scoped to organizationId to prevent cross-org information leakage.
       const today = new Date();
       const datePart = today.toISOString().slice(0, 10).replace(/-/g, '');
       const prefix = `CLM-${datePart}-`;
 
       const result = await tx.execute(
-        sql`SELECT MAX(claim_number) AS max_num FROM claims WHERE claim_number LIKE ${prefix + '%'}`
+        sql`SELECT MAX(claim_number) AS max_num FROM claims WHERE claim_number LIKE ${prefix + '%'} AND organization_id = ${organizationId}`
       );
       const maxNum = (result[0] as Record<string, unknown>)?.max_num as string | null;
       let seq = 1;

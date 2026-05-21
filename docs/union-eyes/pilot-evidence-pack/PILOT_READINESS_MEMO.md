@@ -1,9 +1,11 @@
 # Union Eyes — Controlled Pilot Readiness Memo
 
 **Classification:** Internal — Executive & Buyer Review  
-**Date:** 2026-05-20  
-**Author:** Platform Engineering  
 **Status:** ✅ CONTROLLED PILOT — GO  
+**Last updated:** 2026-05-14  
+**Source of truth:** `apps/union-eyes/` codebase + `reports/runtime/platform-runtime-truth-latest.json`  
+**Supersedes:** All versions dated before 2026-05-14  
+**Live-evidence dependencies:** RUNTIME_EVIDENCE_PACK.md §B — pending Azure access
 
 ---
 
