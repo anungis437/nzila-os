@@ -112,7 +112,7 @@ export async function withRLSContext<T>(
   // For platform-admin operations, use withPlatformAdminRLSContext().
   if (!orgId) {
     throw new Error(
-      'Organization context is required for scoped data access. ' +
+      'Organization context required for scoped data access. ' +
         'User must have an active organization selected. ' +
         'For system operations, use withSystemRLSContext() instead.',
     )

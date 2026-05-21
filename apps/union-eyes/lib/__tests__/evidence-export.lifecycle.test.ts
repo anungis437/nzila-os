@@ -13,7 +13,7 @@
  * This guards the make-or-break arbitration-defensibility surface called out
  * in `docs/categories/platform-and-operations/reference/UNION_EYES_CURRENT_STATE.md`.
  *
- * Pure in-memory; no DB, no Clerk, no blob — the audit-logger module is mocked
+ * Pure in-memory; no DB, no auth provider, no blob — the audit-logger module is mocked
  * to write into a captured ring buffer so we can assert against the trail
  * shape directly.
  */

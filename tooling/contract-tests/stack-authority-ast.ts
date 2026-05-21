@@ -47,6 +47,9 @@ const MUTATION_METHOD_SET = new Set<string>(MUTATION_METHODS)
 export const SAFE_MUTATION_CONTEXTS = [
   'withRLSContext',
   'withSystemContext',
+  'withSystemRLSContext',
+  'withPlatformAdminRLSContext',
+  'withExplicitUserContext',
   'createAuditedScopedDb',
   'createScopedDb',
 ] as const
