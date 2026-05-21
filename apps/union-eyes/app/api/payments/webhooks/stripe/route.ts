@@ -20,6 +20,7 @@ import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { evaluateFee, captureTransactionFee, reverseTransactionFee, reconcileExternalInvoicePayment } from '@/services/platform-economics';
 import { logger } from '@/lib/logger';
 import { syncIcraPurchase } from '@/lib/hubspot/syncIcraPurchase';
+import { syncWorkbookPurchase } from '@/lib/hubspot/syncWorkbookPurchase';
 import type { ExecutivePersonaId, ReportTierId } from '@/lib/icra/types';
 import crypto from 'crypto';
 
@@ -489,7 +490,31 @@ export async function POST(request: NextRequest) {
               claimEmailPresent: Boolean(customerEmail),
             });
 
-            // CRM sync (anti-surveillance) is wired in Phase I (syncWorkbookPurchase).
+            // CRM sync (anti-surveillance). Non-blocking and never throws.
+            try {
+              await syncWorkbookPurchase({
+                workbookId,
+                tier: 'workbook_self_guided',
+                paymentReference: paymentRef,
+                amount:
+                  typeof session?.amount_total === 'number'
+                    ? session.amount_total / 100
+                    : undefined,
+                email: customerEmail ?? undefined,
+                organizationName:
+                  (session?.metadata?.organization_name as string | undefined) ?? undefined,
+                attribution: {
+                  source: (session?.metadata?.utm_source as string | undefined) ?? null,
+                  medium: (session?.metadata?.utm_medium as string | undefined) ?? null,
+                  campaign: (session?.metadata?.utm_campaign as string | undefined) ?? null,
+                },
+              });
+            } catch (crmErr) {
+              logger.warn('[stripe-webhook] workbook CRM sync failed (non-blocking)', {
+                workbookId,
+                err: crmErr instanceof Error ? crmErr.message : String(crmErr),
+              });
+            }
           } catch (wbErr) {
             logger.error('[stripe-webhook] Workbook fulfillment error', {
               workbookId,

@@ -30,8 +30,21 @@ interface Holder {
 }
 
 interface Cartography {
-  density: { index: number; band: string; loadBearingWithoutSuccessor: number; institutionCriticalCount: number };
-  signals: ReadonlyArray<{ id: string; severity: string; category: string; statement: string }>;
+  density: {
+    index: number;
+    band: string;
+    totalCarriers: number;
+    loadBearingCount: number;
+    institutionCriticalCount: number;
+    unsuccessedLoadBearingCount: number;
+    unsuccessedInstitutionCriticalCount: number;
+  };
+  signals: ReadonlyArray<{
+    signalId: string;
+    severity: string;
+    category: string;
+    statement: string;
+  }>;
   preview: string;
 }
 
@@ -379,7 +392,7 @@ export default function MemoryHoldersClient({
                   <dt className="text-stone-500">
                     {locale === 'fr-CA' ? 'Porteurs sans successeur' : 'Without successor'}
                   </dt>
-                  <dd className="text-stone-900">{cartography.density.loadBearingWithoutSuccessor}</dd>
+                  <dd className="text-stone-900">{cartography.density.unsuccessedLoadBearingCount}</dd>
                 </div>
               </dl>
             </div>
@@ -392,7 +405,7 @@ export default function MemoryHoldersClient({
                 <ul className="mt-4 space-y-3">
                   {cartography.signals.map((s) => (
                     <li
-                      key={s.id}
+                      key={s.signalId}
                       className="border-l-2 border-stone-300 pl-3 text-sm leading-relaxed text-stone-700"
                     >
                       {s.statement}
