@@ -303,6 +303,24 @@ The method is defined by this document together with the following canonical ref
 - `OCI_BOARD_OVERVIEW.md` — governance body overview.
 - `OCI_EXECUTIVE_BRIEFING_DECK.md` — executive briefing material.
 - `OCI_WORKSHOP_OPENING_SCRIPT.md` — workshop opening register.
+- `stabilization/OCI_STABILIZATION_FRAMEWORK.md` — Product 3 framework spec (Diagnostic & Stabilization Program™).
+- `stabilization/OCI_INTERVENTION_MODEL.md` — intervention methodology for Product 3 delivery.
+- `stabilization/OCI_STABILIZATION_PRINCIPLES.md` — binding principles for stabilization engagements.
+- `stabilization/OCI_STABILIZATION_LIFECYCLE.md` — five-phase Product 3 delivery lifecycle.
+- `stabilization/OCI_STABILIZATION_SEVERITY_MODEL.md` — Severity Model for engagement findings and engine signals.
+- `stabilization/OCI_CONTINUITY_DEBT.md` — Continuity Debt™ signature vocabulary and the five debt categories.
+- `stabilization/OCI_STABILIZATION_READINESS.md` — Readiness Thresholds gating engagement entry and per-move advancement.
+- `stabilization/OCI_INTERVENTION_ETHICS.md` — binding ethical frame for the intervention layer.
+- `stabilization/OCI_STABILIZATION_PERSONAS.md` — institutional executive stabilization personas (role-states, never personality profiles).
+- `stabilization/OCI_ACTION_SYSTEM.md` — continuity-native action architecture for Product 3.
+- `stabilization/OCI_STABILIZATION_TRACKING.md` — tracking spec for stabilization engagements.
+- `stabilization/STEWARDSHIP_REDISTRIBUTION.md` — Stewardship Redistribution Framework™.
+- `stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md` — Governance Survivability Recovery™.
+- `stabilization/OCI_ONBOARDING_STABILIZATION.md` — Continuity-Aware Onboarding Stabilization™.
+- `stabilization/OCI_STABILIZATION_EVOLUTION.md` — longitudinal stabilization foundations and Product 5 hand-off.
+- `stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md` — Nzila OS platform service alignment for stabilization.
+- `stabilization/OCI_STABILIZATION_COMMERCIALIZATION.md` — Product 3 commercialization architecture.
+- `stabilization/playbooks/README.md` — index of the seven stabilization playbooks and the common template.
 
 This document is the canonical entry point. A reader who reads this document and follows the references will hold the full doctrine surface of the method.
 
