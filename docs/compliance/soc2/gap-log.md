@@ -34,7 +34,7 @@
 | SOC2-CL-005 | Union Eyes RLS fail-open (CC6.1, CC6.6) | May 2026 P0 sprint | `apps/union-eyes/lib/db/with-rls-context.ts` fail-closed throw; 27/27 tests pass |
 | SOC2-CL-006 | Cross-org idempotency collision risk (CC6.1) | May 2026 P0 sprint | `intake/route.ts` org-scoped hash + `withRLSContext` duplicate check; 4/4 cross-org isolation tests |
 | SOC2-CL-007 | Unscoped assignClaim / claim mutation helpers (CC6.1) | May 2026 P0 sprint | `workflow-engine.ts` + `claims-queries.ts` org-scoped; 38/38 tests pass |
-| SOC2-CL-008 | No canonical runtime truth source (A1.2, CC9.2) | May 2026 P0 sprint | `reports/runtime/platform-runtime-truth-latest.json` (status: DEGRADED — EXC-001 open) |
+| SOC2-CL-008 | No canonical runtime truth source (A1.2, CC9.2) | May 2026 P0 sprint | `reports/runtime/platform-runtime-truth-latest.json` (status: HEALTHY — EXC-001 resolved 2026-05-14; prod/staging separated, `sharedBlastRadius: false`) |
 
 ## Notes
 
