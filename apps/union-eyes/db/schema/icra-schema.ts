@@ -57,6 +57,13 @@ export const icraAssessments = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
     reportTierId: varchar('report_tier_id', { length: 64 }).notNull().default('continuity_reflection'),
+    stripePaymentRef: varchar('stripe_payment_ref', { length: 255 }),
+    claimEmail: varchar('claim_email', { length: 320 }),
+    claimToken: varchar('claim_token', { length: 128 }),
+    claimTokenExpiresAt: timestamp('claim_token_expires_at', { withTimezone: true }),
+    claimedByUserId: varchar('claimed_by_user_id', { length: 128 }),
+    claimedOrgId: uuid('claimed_org_id'),
+    claimedAt: timestamp('claimed_at', { withTimezone: true }),
     utmSource: varchar('utm_source', { length: 128 }),
     utmMedium: varchar('utm_medium', { length: 128 }),
     utmCampaign: varchar('utm_campaign', { length: 128 }),
@@ -64,6 +71,7 @@ export const icraAssessments = pgTable(
   (t) => ({
     statusIdx: index('icra_assessments_status_idx').on(t.status),
     createdIdx: index('icra_assessments_created_idx').on(t.createdAt),
+    claimTokenIdx: index('icra_assessments_claim_token_idx').on(t.claimToken),
   }),
 );
 

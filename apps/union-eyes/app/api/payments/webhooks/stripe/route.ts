@@ -12,6 +12,8 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { platformPayments, billingAccounts, transactionFeeEvents } from '@/db/schema';
 import { icraAssessments } from '@/db/schema/icra-schema';
 import { icraMaturityProfiles } from '@/db/schema/icra-schema';
+import { workbooks, workbookPurchases } from '@/db/schema/workbook-schema';
+import { generateClaimToken, computeClaimExpiry } from '@/lib/icra/claim-tokens';
 import { eq } from 'drizzle-orm';
 import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
@@ -410,6 +412,91 @@ export async function POST(request: NextRequest) {
               err: icraErr,
             });
             // Fall through — return 200 to prevent Stripe retries, issue is logged
+          }
+        } else if (session?.metadata?.product === 'workbook') {
+          // ── Workbook (Self-Guided) tier fulfillment ──
+          const workbookId = session?.metadata?.workbook_id as string | undefined;
+          const workbookTierId = session?.metadata?.workbook_tier_id as string | undefined;
+
+          if (!workbookId || !workbookTierId) {
+            logger.warn('[stripe-webhook] Workbook session missing required metadata', {
+              sessionId: session?.id,
+            });
+            break;
+          }
+
+          try {
+            const [existing] = await db
+              .select({ reportTierId: workbooks.reportTierId, claimToken: workbooks.claimToken })
+              .from(workbooks)
+              .where(eq(workbooks.id, workbookId))
+              .limit(1);
+
+            if (!existing) {
+              logger.warn('[stripe-webhook] Workbook not found', { workbookId });
+              break;
+            }
+
+            // Idempotency: tier already upgraded with a token issued
+            if (existing.reportTierId === workbookTierId && existing.claimToken) {
+              logger.info('[stripe-webhook] Workbook tier already fulfilled', {
+                workbookId,
+                tierId: existing.reportTierId,
+              });
+              break;
+            }
+
+            const claimToken = generateClaimToken();
+            const claimExpiry = computeClaimExpiry();
+            const customerEmail =
+              (session?.customer_details?.email as string | undefined) ??
+              (session?.customer_email as string | undefined) ??
+              null;
+            const paymentRef =
+              (session?.payment_intent as string | undefined) ?? (session?.id as string);
+
+            await db
+              .update(workbooks)
+              .set({
+                reportTierId: workbookTierId,
+                stripePaymentRef: paymentRef,
+                claimEmail: customerEmail,
+                claimToken,
+                claimTokenExpiresAt: claimExpiry,
+                status: 'awaiting_claim',
+                updatedAt: new Date(),
+              })
+              .where(eq(workbooks.id, workbookId));
+
+            // Audit-grade purchase record (uniq on stripePaymentRef \u2014 idempotent)
+            await db
+              .insert(workbookPurchases)
+              .values({
+                workbookId,
+                stripePaymentRef: paymentRef,
+                tierId: workbookTierId,
+                amountCents:
+                  typeof session?.amount_total === 'number' ? session.amount_total : 0,
+                currency: (session?.currency as string | undefined)?.toUpperCase() ?? 'CAD',
+                customerEmail,
+              })
+              .onConflictDoNothing();
+
+            logger.info('[stripe-webhook] Workbook tier upgraded & claim token issued', {
+              workbookId,
+              tierId: workbookTierId,
+              sessionId: session.id,
+              claimEmailPresent: Boolean(customerEmail),
+            });
+
+            // CRM sync (anti-surveillance) is wired in Phase I (syncWorkbookPurchase).
+          } catch (wbErr) {
+            logger.error('[stripe-webhook] Workbook fulfillment error', {
+              workbookId,
+              workbookTierId,
+              err: wbErr,
+            });
+            // Fall through \u2014 return 200 to prevent Stripe retries
           }
         } else if (!isIcraReport) {
           // Non-ICRA checkout.session.completed — log for visibility
