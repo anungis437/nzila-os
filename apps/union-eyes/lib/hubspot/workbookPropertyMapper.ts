@@ -177,8 +177,8 @@ export function buildContinuityIntelligenceProperties(
 
   if (input.breakpoint) {
     props.oci_reconstruction_burden_mean = input.breakpoint.reconstructionAggregate.meanScore.toFixed(2);
-    props.oci_breakpoint_critical_count = kAnonCount(
-      input.breakpoint.reconstructionAggregate.criticalCount,
+    props.oci_breakpoint_severe_count = kAnonCount(
+      input.breakpoint.reconstructionAggregate.severeCount,
     );
     props.oci_onboarding_critical_count = kAnonCount(input.breakpoint.onboarding.criticalCount);
     props.oci_onboarding_fragile_count = kAnonCount(input.breakpoint.onboarding.fragileCount);
