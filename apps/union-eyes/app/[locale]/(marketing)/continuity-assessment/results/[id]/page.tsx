@@ -16,6 +16,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 interface PageProps {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -30,13 +31,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function ResultsPage({ params }: PageProps) {
+export default async function ResultsPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const sp = await searchParams;
+  const tierUnlocked = typeof sp.tier_unlocked === 'string' ? sp.tier_unlocked : null;
 
   if (!id || !UUID_RE.test(id)) notFound();
 
   const profile = await getIcraProfile(id);
   if (!profile) notFound();
+
+  const tierLabel: Record<string, string> = {
+    executive_continuity_brief: 'Executive Continuity Brief',
+    institutional_continuity_diagnostic: 'Institutional Continuity Diagnostic',
+  };
 
   return (
     <main className="mx-auto max-w-5xl px-6 pb-24 pt-16 md:pt-20">
@@ -48,7 +56,15 @@ export default async function ResultsPage({ params }: PageProps) {
           ← About this assessment
         </Link>
       </div>
-      <ICRAProfile profile={profile} />
+
+      {tierUnlocked && tierLabel[tierUnlocked] && (
+        <div className="mb-8 rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-4 text-sm text-emerald-800">
+          <span className="font-semibold">{tierLabel[tierUnlocked]}</span> unlocked.{' '}
+          Your full report is now available below.
+        </div>
+      )}
+
+      <ICRAProfile profile={profile} tierId={profile.reportTierId} />
     </main>
   );
 }

@@ -56,6 +56,10 @@ export const icraAssessments = pgTable(
     locale: varchar('locale', { length: 16 }).notNull().default('en-CA'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
+    reportTierId: varchar('report_tier_id', { length: 64 }).notNull().default('continuity_reflection'),
+    utmSource: varchar('utm_source', { length: 128 }),
+    utmMedium: varchar('utm_medium', { length: 128 }),
+    utmCampaign: varchar('utm_campaign', { length: 128 }),
   },
   (t) => ({
     statusIdx: index('icra_assessments_status_idx').on(t.status),

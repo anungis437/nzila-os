@@ -29,6 +29,7 @@ import type {
 } from './types'
 import { resolveMaturityBand } from './maturity'
 import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from './questions'
+import { generateInsights } from './insight-engine'
 
 export const SCORING_VERSION = '1.0.0'
 
@@ -212,6 +213,7 @@ export function scoreAssessment(
 
   const observations = generateObservations(dimensionScores, sections, questionTraces)
   const recommendations = generateRecommendations(composite, dimensionScores)
+  const insightOutput = generateInsights(dimensionScores, sections)
 
   const trace: ScoringTrace = {
     assessmentId,
@@ -234,6 +236,10 @@ export function scoreAssessment(
     recommendations,
     answeredQuestionCount: answers.length,
     questionBankVersion: QUESTION_BANK_VERSION,
+    insights: insightOutput.insights,
+    continuitySignals: insightOutput.continuitySignals,
+    stewardshipSignals: insightOutput.stewardshipSignals,
+    burdenIndex: insightOutput.burdenIndex,
   }
 
   return { profile, trace }

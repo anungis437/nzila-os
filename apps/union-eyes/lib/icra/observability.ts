@@ -20,7 +20,11 @@ export type IcraEventKind =
   | 'assessment_submitted'
   | 'results_viewed'
   | 'scoring_error'
-  | 'submission_error';
+  | 'submission_error'
+  | 'report_unlock_requested'
+  | 'enterprise_diagnostic_requested'
+  | 'landing_page_viewed'
+  | 'cta_clicked';
 
 export interface IcraEvent {
   kind: IcraEventKind;
@@ -29,6 +33,9 @@ export interface IcraEvent {
   metadata?: Record<string, string | number | boolean>;
   occurredAt: string;
   ipHash?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
 }
 
 export function hashIp(ip: string | null | undefined): string | undefined {
@@ -82,3 +89,40 @@ function buildInsertSql(event: IcraEvent): { sql: string; params: unknown[] } {
 function generateEventId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UTM capture helper — client-side, sessionStorage-backed
+// ─────────────────────────────────────────────────────────────────────────────
+
+import type { UtmParams } from './types';
+
+/**
+ * Capture UTM parameters from URL search params.
+ * Returns only the UTM-relevant fields; ignores everything else.
+ * Safe to call with any URLSearchParams — returns empty object if none found.
+ */
+export function captureUtmFromUrl(
+  searchParams: URLSearchParams | Record<string, string>,
+): UtmParams {
+  const get = (key: string): string | undefined => {
+    if (searchParams instanceof URLSearchParams) {
+      return searchParams.get(key) ?? undefined;
+    }
+    return (searchParams as Record<string, string>)[key];
+  };
+
+  const source = get('utm_source');
+  const medium = get('utm_medium');
+  const campaign = get('utm_campaign');
+  const content = get('utm_content');
+  const term = get('utm_term');
+
+  const result: UtmParams = {};
+  if (source) result.source = source;
+  if (medium) result.medium = medium;
+  if (campaign) result.campaign = campaign;
+  if (content) result.content = content;
+  if (term) result.term = term;
+  return result;
+}
+

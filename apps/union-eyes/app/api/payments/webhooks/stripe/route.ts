@@ -10,7 +10,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { platformPayments, billingAccounts, transactionFeeEvents } from '@/db/schema';
+import { icraAssessments } from '@/db/schema/icra-schema';
+import { icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { eq } from 'drizzle-orm';
+import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { evaluateFee, captureTransactionFee, reverseTransactionFee, reconcileExternalInvoicePayment } from '@/services/platform-economics';
 import { logger } from '@/lib/logger';
@@ -293,6 +296,90 @@ export async function POST(request: NextRequest) {
       default:
         // Unhandled event type — acknowledge receipt
         break;
+
+      case 'checkout.session.completed': {
+        const session = event.data?.object;
+        const icraAssessmentId = session?.metadata?.icra_assessment_id as string | undefined;
+        const icraTierId = session?.metadata?.icra_tier_id as string | undefined;
+        const isIcraReport = session?.metadata?.product === 'icra_report';
+
+        if (isIcraReport && icraAssessmentId && icraTierId) {
+          // ── ICRA report tier fulfillment ──
+          try {
+            const [existing] = await db
+              .select({ reportTierId: icraAssessments.reportTierId })
+              .from(icraAssessments)
+              .where(eq(icraAssessments.id, icraAssessmentId))
+              .limit(1);
+
+            if (!existing) {
+              logger.warn('[stripe-webhook] ICRA assessment not found', { icraAssessmentId });
+              break;
+            }
+
+            const tierRank: Record<string, number> = {
+              continuity_reflection: 0,
+              executive_continuity_brief: 1,
+              institutional_continuity_diagnostic: 2,
+            };
+            const currentRank = tierRank[existing.reportTierId ?? 'continuity_reflection'] ?? 0;
+            const requestedRank = tierRank[icraTierId] ?? 0;
+
+            if (currentRank >= requestedRank) {
+              // Already fulfilled — idempotent
+              logger.info('[stripe-webhook] ICRA tier already fulfilled', {
+                icraAssessmentId,
+                existingTier: existing.reportTierId,
+                requestedTier: icraTierId,
+              });
+              break;
+            }
+
+            // Upgrade the assessment tier
+            await db
+              .update(icraAssessments)
+              .set({ reportTierId: icraTierId })
+              .where(eq(icraAssessments.id, icraAssessmentId));
+
+            // Patch the stored profile payload so the results page reflects the new tier
+            const [profileRow] = await db
+              .select({ profilePayload: icraMaturityProfiles.profilePayload })
+              .from(icraMaturityProfiles)
+              .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId))
+              .limit(1);
+
+            if (profileRow?.profilePayload) {
+              const updated: InstitutionalContinuityProfile = {
+                ...(profileRow.profilePayload as InstitutionalContinuityProfile),
+                reportTierId: icraTierId as InstitutionalContinuityProfile['reportTierId'],
+              };
+              await db
+                .update(icraMaturityProfiles)
+                .set({ profilePayload: updated })
+                .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId));
+            }
+
+            logger.info('[stripe-webhook] ICRA tier upgraded', {
+              icraAssessmentId,
+              tierId: icraTierId,
+              sessionId: session.id,
+            });
+          } catch (icraErr) {
+            logger.error('[stripe-webhook] ICRA fulfillment error', {
+              icraAssessmentId,
+              icraTierId,
+              err: icraErr,
+            });
+            // Fall through — return 200 to prevent Stripe retries, issue is logged
+          }
+        } else if (!isIcraReport) {
+          // Non-ICRA checkout.session.completed — log for visibility
+          logger.info('[stripe-webhook] checkout.session.completed (non-ICRA)', {
+            sessionId: session?.id,
+          });
+        }
+        break;
+      }
     }
 
     await auditLog({

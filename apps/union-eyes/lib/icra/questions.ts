@@ -21,7 +21,7 @@ import type {
   SectionId,
 } from './types';
 
-export const QUESTION_BANK_VERSION = 1;
+export const QUESTION_BANK_VERSION = 2;
 
 /** Section display metadata for the assessment UI */
 export interface SectionDefinition {
@@ -239,6 +239,23 @@ const OPERATIONAL_DEPENDENCY: MaturitySelectQuestion[] = [
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Onboarding readiness reflects the depth of externalized institutional memory.',
   },
+  // ── New v2 questions: invisible continuity burden ──
+  {
+    id: 'icb_01', section: 'operational_dependency', order: 6, type: 'maturity_select',
+    prompt: 'To what extent does your organization recognize and account for the informal continuity work that certain staff or leaders carry on behalf of the institution?',
+    helpText: 'Consider whether the time spent compensating for absent institutional memory — translating context, explaining history, maintaining relationships — is visible to leadership or absorbed silently into individual roles.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Invisible continuity labour is the primary precursor of burnout and sudden institutional knowledge loss.',
+  },
+  {
+    id: 'icb_02', section: 'operational_dependency', order: 7, type: 'maturity_select',
+    prompt: 'How deliberately does your organization distribute continuity responsibilities — so that institutional knowledge is not quietly concentrated in a small number of people?',
+    helpText: 'As opposed to allowing continuity knowledge to accumulate with whoever happens to have been around the longest or is most engaged.',
+    weights: { institutional_continuity: 1.0, operational_memory: 0.8 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Continuity equity prevents single points of knowledge failure and protects institutional memory holders from unsustainable burden.',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -278,6 +295,15 @@ const GOVERNANCE_VISIBILITY: MaturitySelectQuestion[] = [
     riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Divergence between written and practiced governance is a leading fragility indicator.',
   },
+  // ── New v2 question: governance interpretation survivability ──
+  {
+    id: 'gis_01', section: 'governance_visibility', order: 5, type: 'maturity_select',
+    prompt: 'How consistently do governance interpretations — how policies are applied, how disputes are resolved, how discretion is exercised — survive leadership transitions?',
+    helpText: 'Consider whether incoming leaders typically inherit documented interpretive guidance, or whether they develop their own interpretations independently, sometimes reversing what came before.',
+    weights: { institutional_continuity: 0.8, governance_fragility: 1.0 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Governance interpretation survivability is the quiet test of whether governance continuity is real or nominal.',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -316,6 +342,32 @@ const INSTITUTIONAL_MEMORY: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 1, operational_memory: 1.0 },
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Whether memory is treated as infrastructure determines whether it compounds or decays.',
+  },
+  // ── New v2 questions: operational reconstruction labour, institutional forgetting ──
+  {
+    id: 'orl_01', section: 'institutional_memory', order: 5, type: 'maturity_select',
+    prompt: 'How often does your organization find itself solving the same operational problems that were previously solved — because the earlier solution was not preserved?',
+    helpText: 'This includes re-establishing vendor relationships, re-negotiating terms that were previously settled, re-developing procedures that once existed, or re-learning institutional context already known to former staff.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    riskInverted: true,
+    rationale: 'Repeated operational reconstruction is the direct cost of institutional forgetting.',
+  },
+  {
+    id: 'orl_02', section: 'institutional_memory', order: 6, type: 'maturity_select',
+    prompt: 'How well does your organization preserve the context behind decisions — not just what was decided, but why, what was considered, and what was rejected?',
+    helpText: 'Decision context allows successors to understand the reasoning behind current practices, rather than inheriting outcomes without explanation.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Preserved decision context is what allows institutions to learn from their own history.',
+  },
+  {
+    id: 'if_01', section: 'institutional_memory', order: 7, type: 'maturity_select',
+    prompt: 'To what extent does your organization retain the operational knowledge gained during challenging periods — restructurings, disputes, crises, or significant transitions?',
+    helpText: 'Consider whether the institutional learning from difficult periods is preserved and accessible, or whether it is absorbed into the informal memory of those who were present and lost when they leave.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Institutional learning from adversity is among the most valuable and most frequently lost forms of organizational memory.',
   },
 ];
 
@@ -364,6 +416,15 @@ const TRANSITION_READINESS: MaturitySelectQuestion[] = [
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Strategic continuity during transitions preserves institutional legitimacy.',
   },
+  // ── New v2 question: onboarding continuity ──
+  {
+    id: 'onb_01', section: 'transition_readiness', order: 6, type: 'maturity_select',
+    prompt: 'How effectively does your onboarding process transfer institutional intelligence — not just role responsibilities, but the operational context, relational history, and governance understanding that allow a new person to act effectively?',
+    helpText: 'As opposed to onboarding that covers formal procedures and tools, but leaves new staff to absorb institutional context through observation and informal conversation over months or years.',
+    weights: { institutional_continuity: 0.8, transition_readiness: 1.0, operational_memory: 0.6 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Onboarding quality determines how much institutional intelligence survives each transition.',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -410,6 +471,15 @@ const OPERATIONAL_COORDINATION: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 1, operational_memory: 0.6 },
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Evidence-based reporting indicates institutional operational discipline.',
+  },
+  // ── New v2 question: continuity fairness ──
+  {
+    id: 'cf_01', section: 'operational_coordination', order: 6, type: 'maturity_select',
+    prompt: 'How equitably is continuity responsibility distributed across your organization — rather than concentrated in a small number of individuals who quietly carry disproportionate institutional burden?',
+    helpText: 'Consider whether the work of maintaining institutional continuity — keeping context, translating between teams, preserving relationships — is recognized and shared, or whether it falls to the same people repeatedly.',
+    weights: { institutional_continuity: 0.8, operational_memory: 0.6 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Continuity fairness is both an equity concern and an institutional resilience indicator.',
   },
 ];
 
@@ -497,6 +567,23 @@ const SOVEREIGNTY_GOVERNANCE: MaturitySelectQuestion[] = [
     riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Technology governance is an increasingly significant source of sovereignty risk.',
   },
+  // ── New v2 questions: modernization trauma ──
+  {
+    id: 'mt_01', section: 'sovereignty_governance', order: 5, type: 'maturity_select',
+    prompt: 'How well does your organization preserve institutional context and operational memory when transitioning between systems, platforms, or technology approaches?',
+    helpText: 'Consider whether past transitions — moving between case management systems, financial platforms, communication tools — resulted in institutional memory loss or whether context was preserved and transferred.',
+    weights: { institutional_continuity: 0.8, operational_memory: 0.8, trust_debt: 0.4 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Technology transitions are one of the primary pathways through which institutional memory is silently lost.',
+  },
+  {
+    id: 'mt_02', section: 'sovereignty_governance', order: 6, type: 'maturity_select',
+    prompt: 'How deliberately does your organization evaluate whether modernization efforts preserve — rather than replace — institutional continuity?',
+    helpText: 'Consider whether modernization decisions account for the institutional knowledge embedded in current practices, relationships, and systems — or whether they prioritize capability gains without assessing continuity risk.',
+    weights: { institutional_continuity: 0.8, operational_memory: 0.6, trust_debt: 0.4 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Modernization without continuity assessment is among the most common causes of institutional forgetting.',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -524,7 +611,7 @@ export const ALL_QUESTIONS: Question[] = [
   ...SOVEREIGNTY_GOVERNANCE,
 ];
 
-export const TOTAL_SCORED_QUESTIONS = ALL_QUESTIONS.length; // 32
+export const TOTAL_SCORED_QUESTIONS = ALL_QUESTIONS.length; // 42
 
 /** @deprecated Use ALL_QUESTIONS. Kept for backwards compatibility. */
 export const QUESTIONS: readonly Question[] = ALL_QUESTIONS;
