@@ -58,6 +58,7 @@ export const workbooks = pgTable(
     stripePaymentRef: varchar('stripe_payment_ref', { length: 128 }),
     claimEmail: varchar('claim_email', { length: 320 }),
     claimToken: varchar('claim_token', { length: 128 }),
+    claimTokenExpiresAt: timestamp('claim_token_expires_at', { withTimezone: true }),
     claimedByUserId: text('claimed_by_user_id'),
     claimedOrgId: uuid('claimed_org_id'),
     claimedAt: timestamp('claimed_at', { withTimezone: true }),
