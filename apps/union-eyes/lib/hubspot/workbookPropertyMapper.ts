@@ -12,6 +12,20 @@
  */
 
 import type { CartographyResult } from '@/lib/workbook/engines/stewardshipCartography';
+import type { ContinuityLandscapeResult } from '@/lib/workbook/engines/continuityMappingEngine';
+import type { ContinuityLineageResult } from '@/lib/workbook/engines/continuityLineageEngine';
+import type { GovernanceEntropyResult } from '@/lib/workbook/engines/governanceEntropyEngine';
+import type { ContinuityBreakpointResult } from '@/lib/workbook/engines/continuityBreakpointEngine';
+import type { ModernizationAlignmentResult } from '@/lib/workbook/engines/modernizationAlignmentEngine';
+import type { TransformationRoadmapResult } from '@/lib/workbook/engines/transformationRoadmapEngine';
+import type { WorkbookSynthesisResult } from '@/lib/workbook/engines/workbookSynthesisEngine';
+
+/**
+ * K-anonymity floor for CRM-bound counts. Any aggregate below this
+ * threshold is suppressed (reported as the literal "<5") to avoid
+ * re-identifying small carrier populations through compounded fields.
+ */
+export const K_ANONYMITY_THRESHOLD = 5;
 
 export const WORKBOOK_TIER_LABELS = {
   workbook_self_guided: 'Self-Guided Workbook',
@@ -105,3 +119,100 @@ export function workbookTierToStage(tier: WorkbookTierKey): WorkbookDealStageKey
       return 'workbook_enterprise_inquiry';
   }
 }
+
+/**
+ * Suppress counts below the k-anonymity floor. Returns the literal "<K"
+ * for sub-threshold positive integers so HubSpot views don\u2019t accidentally
+ * profile small carrier populations. Zero passes through as "0".
+ */
+export function kAnonCount(n: number): string {
+  if (!Number.isFinite(n) || n < 0) return '0';
+  if (n === 0) return '0';
+  if (n < K_ANONYMITY_THRESHOLD) return `<${K_ANONYMITY_THRESHOLD}`;
+  return String(Math.trunc(n));
+}
+
+export interface ContinuityIntelligenceInput {
+  landscape?: ContinuityLandscapeResult;
+  lineage?: ContinuityLineageResult;
+  entropy?: GovernanceEntropyResult;
+  breakpoint?: ContinuityBreakpointResult;
+  modernization?: ModernizationAlignmentResult;
+  roadmap?: TransformationRoadmapResult;
+  synthesis?: WorkbookSynthesisResult;
+}
+
+/**
+ * Build COMPANY-level continuity intelligence properties.
+ *
+ * Every value is an aggregate (band id, count, mean, ordinal, posture).
+ * No carrier names, no responsibility text, no notes. Counts below the
+ * k-anonymity threshold are suppressed via kAnonCount().
+ */
+export function buildContinuityIntelligenceProperties(
+  input: ContinuityIntelligenceInput,
+): Record<string, string> {
+  const props: Record<string, string> = {};
+
+  if (input.landscape) {
+    props.oci_continuity_overall_posture = input.landscape.overallPosture;
+    props.oci_continuity_signal_count = kAnonCount(input.landscape.signals.length);
+  }
+
+  if (input.lineage) {
+    const s = input.lineage.survivability;
+    props.oci_lineage_total = kAnonCount(s.total);
+    props.oci_lineage_living = kAnonCount(s.living);
+    props.oci_lineage_observed = kAnonCount(s.observed);
+    props.oci_lineage_fading = kAnonCount(s.fading);
+    props.oci_lineage_lapsed_count = kAnonCount(s.lapsed);
+    props.oci_lineage_interpretation_drift = input.lineage.aggregateInterpretationDrift.toFixed(2);
+  }
+
+  if (input.entropy) {
+    props.oci_governance_entropy_aggregate = input.entropy.aggregateDrift.toFixed(2);
+    props.oci_governance_entropy_level = input.entropy.level.id;
+    props.oci_governance_entropy_ordinal = String(input.entropy.level.ordinal);
+  }
+
+  if (input.breakpoint) {
+    props.oci_reconstruction_burden_mean = input.breakpoint.reconstructionAggregate.meanScore.toFixed(2);
+    props.oci_breakpoint_critical_count = kAnonCount(
+      input.breakpoint.reconstructionAggregate.criticalCount,
+    );
+    props.oci_onboarding_critical_count = kAnonCount(input.breakpoint.onboarding.criticalCount);
+    props.oci_onboarding_fragile_count = kAnonCount(input.breakpoint.onboarding.fragileCount);
+  }
+
+  if (input.modernization) {
+    const aligned = input.modernization.modernizationMatrix.filter(
+      (c) => c.posture === 'continuity_safe',
+    ).length;
+    const eroding = input.modernization.modernizationMatrix.filter(
+      (c) => c.posture === 'continuity_eroding',
+    ).length;
+    props.oci_modernization_initiative_count = kAnonCount(
+      input.modernization.modernizationMatrix.length,
+    );
+    props.oci_modernization_aligned_count = kAnonCount(aligned);
+    props.oci_modernization_eroding_count = kAnonCount(eroding);
+    props.oci_modernization_continuity_gap_count = kAnonCount(input.modernization.continuityGaps.length);
+  }
+
+  if (input.roadmap) {
+    props.oci_stabilization_candidate_count = kAnonCount(input.roadmap.stabilization.length);
+    props.oci_redistribution_target_count = kAnonCount(input.roadmap.redistribution.targets.length);
+    if (input.roadmap.pathway?.currentStage) {
+      props.oci_maturity_stage = input.roadmap.pathway.currentStage;
+    }
+  }
+
+  if (input.synthesis) {
+    props.oci_continuity_posture = input.synthesis.profile.posture;
+    props.oci_continuity_composite_index = input.synthesis.profile.compositeIndex.toFixed(2);
+    props.oci_cross_module_signal_count = kAnonCount(input.synthesis.crossModuleSignals.length);
+  }
+
+  return props;
+}
+
