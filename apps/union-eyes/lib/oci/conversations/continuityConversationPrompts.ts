@@ -779,6 +779,159 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
       ],
     },
   },
+  // ─────────────────────────────────────────────────────────────────────────
+  // Module-specific extensions — engine v2.0.0 alignment
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: 'im-101',
+    category: 'institutional-memory',
+    question: {
+      'en-CA':
+        'Which precedents in the institution are living, which are observed, which are fading, and which have lapsed without succession of memory?',
+    },
+    whyItMatters: {
+      'en-CA':
+        'Names lineage as a continuity layer in its own right, distinct from documentation or process.',
+    },
+    whatToListenFor: {
+      'en-CA': [
+        'Recognition that lapsed precedents may not be recoverable from records alone',
+        'Living precedents whose continuity rests on a single carrier',
+        'Acceptance that some fading precedents are appropriate to release deliberately',
+      ],
+    },
+    avoidIfShared: {
+      'en-CA': [
+        'Disputes over which past precedent was correct',
+        'Plans to revive a precedent the institution has consciously released',
+      ],
+    },
+  },
+  {
+    id: 'im-102',
+    category: 'institutional-memory',
+    question: {
+      'en-CA':
+        'Where would the institution\u2019s reading of its own history change if a long-tenured steward were no longer present to anchor it?',
+    },
+    whyItMatters: {
+      'en-CA':
+        'Surfaces interpretation drift risk at the lineage layer without naming individuals as the source of truth.',
+    },
+    whatToListenFor: {
+      'en-CA': [
+        'Historical readings carried by one steward without secondary witness',
+        'Willingness to broaden the reading deliberately rather than wait for departure',
+        'Acceptance that some readings will shift after transition and that is institutional',
+      ],
+    },
+    avoidIfShared: {
+      'en-CA': [
+        'Personal characterisation of the steward as the only correct reader',
+        'Plans to formalise the steward\u2019s reading into doctrine without discussion',
+      ],
+    },
+  },
+  {
+    id: 'mr-101',
+    category: 'modernization-risk',
+    question: {
+      'en-CA':
+        'For each modernization initiative under way, are the carriers of the displaced practice consulted before the practice is replaced, or after?',
+    },
+    whyItMatters: {
+      'en-CA':
+        'Distinguishes continuity-safe modernization from continuity-eroding modernization at the consultation gate.',
+    },
+    whatToListenFor: {
+      'en-CA': [
+        'Initiatives where carrier consultation is a precondition, not an afterthought',
+        'Initiatives where lineage capture is in scope before displacement',
+        'Initiatives where successor identification is part of the rollout, not a residual task',
+      ],
+    },
+    avoidIfShared: {
+      'en-CA': [
+        'Characterisation of carriers as obstacles to modernization',
+        'Internal disputes about specific vendors or platforms',
+      ],
+    },
+  },
+  {
+    id: 'mr-102',
+    category: 'modernization-risk',
+    question: {
+      'en-CA':
+        'Which modernization initiatives, if completed as currently scoped, would erase a body of practice the institution has no other carrier for?',
+    },
+    whyItMatters: {
+      'en-CA':
+        'Names the compound modernization–lineage erosion pattern as a continuity question rather than an IT question.',
+    },
+    whatToListenFor: {
+      'en-CA': [
+        'Recognition that some initiatives carry continuity cost even when they succeed technically',
+        'Willingness to add lineage capture to scope before displacement begins',
+        'Acceptance that scope renegotiation is sometimes the continuity-safe path',
+      ],
+    },
+    avoidIfShared: {
+      'en-CA': [
+        'Blame directed at initiative sponsors',
+        'Disputes about budget ownership for lineage capture',
+      ],
+    },
+  },
+  {
+    id: 'of-101',
+    category: 'onboarding-fragility',
+    question: {
+      'en-CA':
+        'For the roles the institution considers critical, how long does competency take to form, and what is the institution\u2019s position if a transition compresses that window?',
+    },
+    whyItMatters: {
+      'en-CA':
+        'Names onboarding fragility as a continuity question, distinct from training.',
+    },
+    whatToListenFor: {
+      'en-CA': [
+        'Roles where competency exceeds typical handover windows',
+        'Recognition that shadowing is sometimes structurally infeasible',
+        'Willingness to broaden practice before transition rather than after',
+      ],
+    },
+    avoidIfShared: {
+      'en-CA': [
+        'Personal performance assessments of current carriers',
+        'Plans to accelerate transition without continuity preparation',
+      ],
+    },
+  },
+  {
+    id: 'of-102',
+    category: 'onboarding-fragility',
+    question: {
+      'en-CA':
+        'Where the written onboarding for a role is thin or absent, what does the institution accept will be reconstructed by the next carrier rather than transferred?',
+    },
+    whyItMatters: {
+      'en-CA':
+        'Surfaces the reconstruction burden honestly, without staging it as a documentation gap that can be \u201cfixed\u201d.',
+    },
+    whatToListenFor: {
+      'en-CA': [
+        'Acceptance that some practice is institutional rather than transferable',
+        'Recognition of the burden the next carrier will inherit',
+        'Willingness to extend the handover window where the burden is highest',
+      ],
+    },
+    avoidIfShared: {
+      'en-CA': [
+        'Characterisation of current carriers as having failed to document',
+        'Plans to retrofit onboarding by interview without carrier consent',
+      ],
+    },
+  },
 ];
 
 /** Lookup: prompts grouped by category. */
