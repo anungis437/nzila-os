@@ -44,6 +44,34 @@ vi.mock('@/db/schema', () => ({
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn().mockImplementation((fn: () => Promise<unknown>) => fn()),
+  withSystemRLSContext: vi.fn().mockImplementation(
+    (_reason: string, fn: (tx: unknown) => Promise<unknown>) => {
+      const tx = {
+        execute: vi.fn().mockResolvedValue([{ max_num: null }]),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockImplementation((vals: Record<string, unknown>) => {
+            capturedInsertValues = vals;
+            return {
+              returning: vi.fn().mockResolvedValue([{
+                claimId: '11111111-1111-1111-1111-111111111111',
+                claimNumber: 'CLM-20260327-0001',
+                claimType: 'grievance_discipline',
+                organizationId: '9210418f-6a4f-4dab-a7d2-4450d581dc81',
+                memberId: 'user_3BP6IlC0zg9MwHJDDNn7KCcR0MV',
+                incidentDate: new Date('2026-03-27'),
+                location: 'Main Floor',
+                description: 'Test incident',
+                desiredOutcome: 'Resolution',
+                witnessesPresent: false,
+                status: 'submitted',
+              }]),
+            };
+          }),
+        }),
+      };
+      return fn(tx);
+    },
+  ),
 }));
 
 vi.mock('@/lib/api/with-api', () => ({
