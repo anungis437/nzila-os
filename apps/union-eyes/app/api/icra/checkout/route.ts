@@ -33,8 +33,8 @@ const bodySchema = z.object({
 
 // ── Pricing (CAD) — midpoint of published ranges, override via env ──────────
 
-const BRIEF_AMOUNT_CENTS = 112500; // $1,125 CAD
-const DIAGNOSTIC_AMOUNT_CENTS = 550000; // $5,500 CAD
+const BRIEF_AMOUNT_CENTS = 120000; // $1,200 CAD (canonical)
+const DIAGNOSTIC_AMOUNT_CENTS = 650000; // $6,500 CAD (canonical)
 
 function buildLineItems(
   tierId: 'executive_continuity_brief' | 'institutional_continuity_diagnostic',

@@ -197,7 +197,7 @@ export default async function InstitutionalContinuityRiskPage({
     {
       id: 'institutional_continuity_diagnostic',
       name: isFr ? 'Diagnostic institutionnel de continuité' : 'Institutional Continuity Diagnostic',
-      price: isFr ? '3 500–7 500 $' : '$3,500–$7,500',
+      price: isFr ? '6 500 $' : '$6,500',
       description: isFr
         ? 'Engagement complet avec revue facilitée, atelier et cartographie de la mémoire institutionnelle.'
         : 'Full engagement with facilitated review, workshop, and institutional memory lineage mapping.',

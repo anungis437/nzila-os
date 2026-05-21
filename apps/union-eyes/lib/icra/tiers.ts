@@ -63,7 +63,7 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
     name: 'Executive Continuity Brief',
     tagline:
       'A board-grade analysis of your continuity posture, for leadership conversations that require evidence.',
-    priceLabel: '$750–$1,500 CAD',
+    priceLabel: '$1,200 CAD',
     includes: [
       'Everything in the Continuity Reflection',
       'Governance Entropy Analysis — continuity drift indicators and governance inconsistency patterns',
@@ -90,7 +90,7 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
     name: 'Institutional Continuity Diagnostic',
     tagline:
       'A facilitated institutional review for organizations ready to act on what they have learned.',
-    priceLabel: '$3,500–$7,500 CAD',
+    priceLabel: '$6,500 CAD',
     includes: [
       'Everything in the Executive Continuity Brief',
       'Facilitated leadership continuity review session',
@@ -102,6 +102,96 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
     excludes: [],
     ctaLabel: 'Open an Institutional Continuity Diagnostic conversation',
     ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P2 — Governance Entropy Workbook™ tiers
+// Canonical per docs/oci/oci-product-ladder.md. Pricing is flat; no ranges.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type WorkbookTierId =
+  | 'workbook_self_guided'
+  | 'workbook_facilitated'
+  | 'workbook_enterprise';
+
+export interface WorkbookTierDefinition {
+  id: WorkbookTierId;
+  name: string;
+  tagline: string;
+  priceLabel: string;
+  amountCents: number | null;
+  currency: 'CAD';
+  includes: string[];
+  ctaLabel: string;
+  ctaHref: string;
+  /** Self-serve checkout supported. Enterprise/Facilitated are sales-led. */
+  selfServe: boolean;
+}
+
+export const WORKBOOK_TIERS: Record<WorkbookTierId, WorkbookTierDefinition> = {
+  workbook_self_guided: {
+    id: 'workbook_self_guided',
+    name: 'Governance Entropy Workbook — Self-Guided',
+    tagline:
+      'Map your institution\u2019s continuity terrain at your own pace. Begins with the people who carry the institution.',
+    priceLabel: '$2,400 CAD',
+    amountCents: 240000,
+    currency: 'CAD',
+    includes: [
+      'Six-module continuity mapping workbook',
+      'Institutional Memory Holders module \u2014 fully unlocked',
+      'Stewardship Density Index\u2122 analysis',
+      'Continuity Burden Map\u2122 visualization',
+      'Executive PDF export with cover, table of contents, and unlocked chapters',
+      'Workbook claimable to your account post-purchase',
+      'Other five modules visible and reserved for the Facilitated Edition',
+    ],
+    ctaLabel: 'Begin Workbook',
+    ctaHref: '/workbook/start',
+    selfServe: true,
+  },
+
+  workbook_facilitated: {
+    id: 'workbook_facilitated',
+    name: 'Governance Entropy Workbook — Facilitated Institutional Edition',
+    tagline:
+      'A facilitated mapping engagement that unlocks all six modules with a stewardship lead.',
+    priceLabel: '$8,500 CAD',
+    amountCents: 850000,
+    currency: 'CAD',
+    includes: [
+      'Everything in the Self-Guided Workbook',
+      'All six modules unlocked: Continuity Landscape, Memory Holders, Governance Lineage, Continuity Breakpoints, Modernization Alignment, Transformation Roadmap',
+      'Two facilitated continuity mapping sessions with a stewardship lead',
+      'Governance Entropy Scale\u2122 calibration',
+      'Continuity Survivability Matrix\u2122 review',
+      'Executive PDF export with all chapters and stewardship commentary',
+    ],
+    ctaLabel: 'Speak with a stewardship lead',
+    ctaHref: '/contact?topic=workbook-facilitated',
+    selfServe: false,
+  },
+
+  workbook_enterprise: {
+    id: 'workbook_enterprise',
+    name: 'Governance Entropy Workbook — Enterprise Continuity Mapping',
+    tagline:
+      'A full continuity mapping engagement for institutions with federated structures or distributed stewardship.',
+    priceLabel: '$18,000 \u2013 $45,000 CAD',
+    amountCents: null,
+    currency: 'CAD',
+    includes: [
+      'Everything in the Facilitated Edition',
+      'Multi-unit continuity mapping across federated or distributed structures',
+      'On-site or hybrid facilitation',
+      'Reconstruction Burden Index\u2122 quantification',
+      'Board-ready executive briefing',
+      'Transition into the OCI Diagnostic (P3) where appropriate',
+    ],
+    ctaLabel: 'Discuss continuity mapping engagement',
+    ctaHref: '/contact?topic=workbook-enterprise',
+    selfServe: false,
   },
 };
 

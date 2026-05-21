@@ -198,15 +198,15 @@ export const COPY = {
       id: 'executive_continuity_brief' as const,
       name: 'Executive Continuity Brief',
       tagline: 'A board-grade analysis of your continuity posture, for leadership conversations.',
-      price: '$750–$1,500 CAD',
-      priceLabel: '$750–$1,500 CAD',
+      price: '$1,200 CAD',
+      priceLabel: '$1,200 CAD',
     },
     diagnostic: {
       id: 'institutional_continuity_diagnostic' as const,
       name: 'Institutional Continuity Diagnostic',
       tagline: 'A facilitated institutional review for organizations ready to act.',
-      price: '$3,500–$7,500 CAD',
-      priceLabel: '$3,500–$7,500 CAD',
+      price: '$6,500 CAD',
+      priceLabel: '$6,500 CAD',
     },
   },
   /**
@@ -220,7 +220,7 @@ export const COPY = {
     diagnosticCtaLabel: 'Open an Institutional Continuity Diagnostic conversation',
     diagnosticCtaHref: '/contact?topic=institutional-continuity-diagnostic',
     gateNote:
-      'The Executive Continuity Brief is available at $750–$1,500 CAD and is designed for board presentation and executive decision-making.',
+      'The Executive Continuity Brief is available at $1,200 CAD and is designed for board presentation and executive decision-making.',
   },
   governance: {
     auditableNote:

@@ -32,3 +32,12 @@
 // Risk Assessment) tables capture pseudonymous continuity scoring results
 // and are continuity-observability scope, not canonical operational entities.
 export * from "../schema/icra-schema";
+
+// Delegated read-model projection — see canonical-schema-topology.md §2.2.
+// The Governance Entropy Workbook™ (OCI P2) tables capture pseudonymous
+// continuity mapping artifacts: memory holders, stewardship signals,
+// governance lineage, breakpoints, modernization alignment, and a
+// transformation roadmap. Continuity-observability scope, not canonical
+// operational entities. Hybrid claim model (pseudonymous → account-claim
+// on purchase) is documented in docs/oci/oci-product-ladder.md.
+export * from "../schema/workbook-schema";
