@@ -1,8 +1,10 @@
 /**
  * Governance Entropy Workbook \u2014 PDF render entry point.
  *
- * Node.js runtime only. Loads workbook + holders + cartography, runs the
- * deterministic narrative engine, and renders to Buffer for streaming.
+ * Node.js runtime only. Loads the full workbook context (cartography,
+ * holders, every module result the engines can produce today, and
+ * cross-module synthesis), runs the deterministic narrative engine,
+ * and renders to Buffer for streaming.
  */
 
 import React from 'react';
@@ -10,10 +12,10 @@ import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer';
 import type { ReactElement, JSXElementConstructor } from 'react';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { workbookMemoryHolders, workbooks } from '@/db/schema/workbook-schema';
-import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
+import { workbooks } from '@/db/schema/workbook-schema';
 import { GovernanceEntropyWorkbookTemplate, type WorkbookPdfData } from './GovernanceEntropyWorkbookTemplate';
 import { buildWorkbookNarrative } from './workbookNarrativeEngine';
+import { loadWorkbookContext } from './loadWorkbookModules';
 
 export interface GenerateWorkbookPdfInput {
   workbookId: string;
@@ -33,33 +35,17 @@ export async function generateWorkbookPdf(input: GenerateWorkbookPdfInput): Prom
 
   if (!wb) return null;
 
-  const holderRows = await db
-    .select({
-      role: workbookMemoryHolders.role,
-      displayName: workbookMemoryHolders.displayName,
-      responsibility: workbookMemoryHolders.responsibility,
-      tenureBand: workbookMemoryHolders.tenureBand,
-      criticality: workbookMemoryHolders.criticality,
-      successorIdentified: workbookMemoryHolders.successorIdentified,
-    })
-    .from(workbookMemoryHolders)
-    .where(eq(workbookMemoryHolders.workbookId, input.workbookId))
-    .orderBy(workbookMemoryHolders.capturedAt);
+  // Facilitated tier unlocks the cross-module synthesis profile reading
+  // and any future facilitator-captured module inputs.
+  const status: 'facilitated' | 'self-guided' =
+    wb.reportTierId === 'workbook_facilitated' || wb.reportTierId === 'workbook_enterprise'
+      ? 'facilitated'
+      : 'self-guided';
 
-  const cartography = runStewardshipCartography(
-    holderRows.map((h, idx) => ({
-      id: String(idx),
-      role: h.role,
-      criticality: h.criticality as
-        | 'routine'
-        | 'important'
-        | 'load_bearing'
-        | 'institution_critical'
-        | null,
-      tenureBand: h.tenureBand as '0_3y' | '3_7y' | '7_15y' | '15y_plus' | null,
-      successorIdentified: h.successorIdentified,
-    })),
-  );
+  const { cartography, holders, modules } = await loadWorkbookContext({
+    workbookId: input.workbookId,
+    status,
+  });
 
   const narrative = buildWorkbookNarrative(cartography);
 
@@ -70,7 +56,8 @@ export async function generateWorkbookPdf(input: GenerateWorkbookPdfInput): Prom
     generatedAt: new Date(),
     cartography,
     narrative,
-    holders: holderRows,
+    holders,
+    modules,
   };
 
   const element = React.createElement(GovernanceEntropyWorkbookTemplate, {
