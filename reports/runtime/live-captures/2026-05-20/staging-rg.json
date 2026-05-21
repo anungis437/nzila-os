@@ -1,0 +1,11 @@
+{
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg",
+  "location": "canadacentral",
+  "managedBy": null,
+  "name": "nzila-canada-staging-rg",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}

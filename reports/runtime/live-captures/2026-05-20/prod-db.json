@@ -1,0 +1,85 @@
+{
+  "administratorLogin": "nzilaadmin",
+  "administratorLoginPassword": null,
+  "authConfig": {
+    "activeDirectoryAuth": "Disabled",
+    "passwordAuth": "Enabled",
+    "tenantId": null
+  },
+  "availabilityZone": "2",
+  "backup": {
+    "backupRetentionDays": 30,
+    "earliestRestoreDate": "2026-05-11T05:48:48.367275+00:00",
+    "geoRedundantBackup": "Enabled"
+  },
+  "cluster": null,
+  "createMode": null,
+  "dataEncryption": {
+    "geoBackupEncryptionKeyStatus": null,
+    "geoBackupKeyUri": null,
+    "geoBackupUserAssignedIdentityId": null,
+    "primaryEncryptionKeyStatus": null,
+    "primaryKeyUri": null,
+    "primaryUserAssignedIdentityId": null,
+    "type": "SystemManaged"
+  },
+  "fullyQualifiedDomainName": "nzila-os-union-eyes-prod-db.postgres.database.azure.com",
+  "highAvailability": {
+    "mode": "ZoneRedundant",
+    "standbyAvailabilityZone": "1",
+    "state": "Healthy"
+  },
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-os-union-eyes-prod-db",
+  "identity": null,
+  "location": "Canada Central",
+  "maintenanceWindow": {
+    "customWindow": "Disabled",
+    "dayOfWeek": 0,
+    "startHour": 0,
+    "startMinute": 0
+  },
+  "minorVersion": "13",
+  "name": "nzila-os-union-eyes-prod-db",
+  "network": {
+    "delegatedSubnetResourceId": null,
+    "privateDnsZoneArmResourceId": null,
+    "publicNetworkAccess": "Enabled"
+  },
+  "pointInTimeUtc": null,
+  "privateEndpointConnections": [],
+  "replica": {
+    "capacity": 5,
+    "promoteMode": null,
+    "promoteOption": null,
+    "replicationState": null,
+    "role": "Primary"
+  },
+  "replicaCapacity": 5,
+  "replicationRole": "Primary",
+  "resourceGroup": "nzila-canada-prod-rg",
+  "sku": {
+    "name": "Standard_D2s_v3",
+    "tier": "GeneralPurpose"
+  },
+  "sourceServerResourceId": null,
+  "state": "Ready",
+  "storage": {
+    "autoGrow": "Enabled",
+    "iops": 1100,
+    "storageSizeGb": 256,
+    "throughput": null,
+    "tier": "P15",
+    "type": ""
+  },
+  "systemData": {
+    "createdAt": "2026-05-11T05:39:32.121712+00:00",
+    "createdBy": null,
+    "createdByType": null,
+    "lastModifiedAt": null,
+    "lastModifiedBy": null,
+    "lastModifiedByType": null
+  },
+  "tags": null,
+  "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+  "version": "16"
+}

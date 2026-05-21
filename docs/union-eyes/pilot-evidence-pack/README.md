@@ -18,8 +18,8 @@ This directory contains the complete evidence package for the Union Eyes v0.1 co
 | [PILOT_SCOPE_LOCK.md](./PILOT_SCOPE_LOCK.md) | Frozen pilot scope — in-scope modules, parameters, freeze process | ✅ Complete |
 | [SECURITY_BUYER_PACK.md](./SECURITY_BUYER_PACK.md) | CISO-facing security controls pack | ✅ Complete (v2.0) |
 | [CI_GOVERNANCE_EVIDENCE.md](./CI_GOVERNANCE_EVIDENCE.md) | CI gate captures — typecheck 0 errors, DB guard 0 violations | ✅ Complete |
-| [RUNTIME_EVIDENCE_PACK.md](./RUNTIME_EVIDENCE_PACK.md) | Runtime evidence — code-verified (complete) + live env (pending) | 🟡 Section A ✅ / Section B ⏳ |
-| [LIVE_EVIDENCE_CAPTURE_RUNBOOK.md](./LIVE_EVIDENCE_CAPTURE_RUNBOOK.md) | Exact `az` CLI commands for Azure proof | ✅ Template ready |
+| [RUNTIME_EVIDENCE_PACK.md](./RUNTIME_EVIDENCE_PACK.md) | Runtime evidence — code-verified + live Azure VERIFIED 2026-05-21 | ✅ Section A + Section B |
+| [LIVE_EVIDENCE_CAPTURE_RUNBOOK.md](./LIVE_EVIDENCE_CAPTURE_RUNBOOK.md) | Exact `az` CLI commands for Azure proof (executed 2026-05-20) | ✅ Executed |
 | [ORG_ISOLATION_CONTROL_MAP.md](./ORG_ISOLATION_CONTROL_MAP.md) | 9 org-isolation controls — code locations, tests, residual risks | ✅ Complete |
 | [READINESS_COMMANDS.md](./READINESS_COMMANDS.md) | Canonical readiness gate commands with expected outputs | ✅ Complete |
 | [PILOT_OPERATIONS_RUNBOOK.md](./PILOT_OPERATIONS_RUNBOOK.md) | Kickoff, onboarding, support, incident, expansion gate | ✅ Complete |
@@ -33,9 +33,9 @@ This directory contains the complete evidence package for the Union Eyes v0.1 co
 | Question | Answer |
 |---|---|
 | Is Union Eyes pilot-safe? | **Yes** — controlled pilot, 1 org, signed DPA required |
-| Any CISO-level blockers? | **No** — EXC-001 resolved, RLS fail-closed, 0 raw-db imports, strict TS |
-| What's pending for broad production? | Live Azure evidence (see RUNTIME_EVIDENCE_PACK.md §B + LIVE_EVIDENCE_CAPTURE_RUNBOOK.md) |
-| Data residency compliant? | **Yes** — Azure Canada Central, contractual no-US-processing |
+| Any CISO-level blockers? | **No** — EXC-001 resolved, RLS fail-closed, 0 raw-db imports, strict TS, live Azure verified |
+| What's pending for broad production? | Live restore drill execution + DPA signature (live Azure inventory now verified — see `reports/runtime/live-captures/2026-05-20/`) |
+| Data residency compliant? | **Yes** — Azure Canada Central verified live 2026-05-21 |
 | Can buyers review today? | **Yes** — direct them to BUYER_REVIEW_INDEX.md |
 
 ---
@@ -45,8 +45,8 @@ This directory contains the complete evidence package for the Union Eyes v0.1 co
 | Layer | State | Source |
 |-------|-------|--------|
 | Code/config posture | ✅ HEALTHY | `reports/runtime/platform-runtime-truth-latest.json` |
-| Live operational proof | ⏳ PENDING | `LIVE_EVIDENCE_CAPTURE_RUNBOOK.md` |
-| Production expansion | 🔒 CONDITIONAL | Expansion gate in `PILOT_OPERATIONS_RUNBOOK.md` §10 |
+| Live operational proof | ✅ VERIFIED 2026-05-21 | `reports/runtime/live-captures/2026-05-20/live-evidence-manifest.2026-05-20.json` |
+| Production expansion | 🔒 CONDITIONAL | Pending live restore drill + DPA (expansion gate in `PILOT_OPERATIONS_RUNBOOK.md` §10) |
 
 ---
 

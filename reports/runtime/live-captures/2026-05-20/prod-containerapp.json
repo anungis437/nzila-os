@@ -1,0 +1,403 @@
+{
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/containerapps/nzila-os-union-eyes-prod",
+  "identity": {
+    "principalId": "264f8347-4c8c-4732-983f-3bb06b563a0a",
+    "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+    "type": "SystemAssigned"
+  },
+  "location": "Canada Central",
+  "name": "nzila-os-union-eyes-prod",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "identitySettings": [],
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": [
+          {
+            "bindingType": "SniEnabled",
+            "certificateId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env/managedCertificates/mc-nzila-canada-p-app-unioneyes-ap-1545",
+            "name": "app.unioneyes.app"
+          }
+        ],
+        "exposedPort": 0,
+        "external": true,
+        "fqdn": "nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 3000,
+        "traffic": [
+          {
+            "revisionName": "nzila-os-union-eyes-prod--0000096",
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": 100,
+      "registries": [
+        {
+          "identity": "system",
+          "passwordSecretRef": "",
+          "server": "nzilacanadaacr.azurecr.io",
+          "username": ""
+        }
+      ],
+      "runtime": null,
+      "secrets": [
+        {
+          "name": "django-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/evidence-storage-key/3131545712f442018ec1072a645035f0",
+          "name": "evidence-storage-key"
+        },
+        {
+          "name": "pii-key"
+        },
+        {
+          "name": "voting-secret"
+        },
+        {
+          "name": "database-url"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/upstash-redis-token/e6f3f755cba54d33ac3d4d5e7e50889b",
+          "name": "upstash-redis-token"
+        },
+        {
+          "name": "auth-webhook-secret"
+        },
+        {
+          "name": "azure-ad-client-secret"
+        },
+        {
+          "identity": "system",
+          "keyVaultUrl": "https://nzila-canada-prod-kv.vault.azure.net/secrets/upstash-redis-url/e281334250f64b9388cd6d9de2b27540",
+          "name": "upstash-redis-url"
+        },
+        {
+          "name": "enc-key"
+        }
+      ],
+      "service": null
+    },
+    "customDomainVerificationId": "FE461FBBBD0EED3AB57D7D4AFA3C5B7D948C9CC77CED0FA6DDE389D5DDE26FF8",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env",
+    "eventStreamEndpoint": "https://canadacentral.azurecontainerapps.dev/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/containerApps/nzila-os-union-eyes-prod/eventstream",
+    "latestReadyRevisionName": "nzila-os-union-eyes-prod--0000096",
+    "latestRevisionFqdn": "nzila-os-union-eyes-prod--0000096.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io",
+    "latestRevisionName": "nzila-os-union-eyes-prod--0000096",
+    "managedEnvironmentId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env",
+    "outboundIpAddresses": [
+      "20.104.39.81"
+    ],
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "NODE_ENV",
+              "value": "production"
+            },
+            {
+              "name": "PORT",
+              "value": "3000"
+            },
+            {
+              "name": "UE_ENVIRONMENT",
+              "value": "production"
+            },
+            {
+              "name": "NEXT_PUBLIC_APP_ENV",
+              "value": "production"
+            },
+            {
+              "name": "NZILA_MODE",
+              "value": "prod"
+            },
+            {
+              "name": "UE_DEPLOYMENT_TYPE",
+              "value": "prod"
+            },
+            {
+              "name": "UE_FEATURE_PROFILE",
+              "value": "executive"
+            },
+            {
+              "name": "PGHOST",
+              "value": "nzila-os-union-eyes-prod-db.postgres.database.azure.com"
+            },
+            {
+              "name": "PGUSER",
+              "value": "nzilaadmin"
+            },
+            {
+              "name": "PGDATABASE",
+              "value": "nzila_os_prod"
+            },
+            {
+              "name": "PGSSLMODE",
+              "value": "require"
+            },
+            {
+              "name": "DATABASE_URL",
+              "secretRef": "database-url"
+            },
+            {
+              "name": "AUTH_SECRET",
+              "secretRef": "enc-key"
+            },
+            {
+              "name": "VOTING_SECRET",
+              "secretRef": "voting-secret"
+            },
+            {
+              "name": "NEXT_PUBLIC_APP_URL",
+              "value": "https://app.unioneyes.app"
+            },
+            {
+              "name": "NEXT_PUBLIC_SITE_URL",
+              "value": "https://unioneyes.app"
+            },
+            {
+              "name": "AZURE_AD_CLIENT_ID",
+              "value": "b7b0cb9a-110d-4bf4-baa7-d936d7450181"
+            },
+            {
+              "name": "AZURE_AD_TENANT_ID",
+              "value": "5082b8be-b04d-4a13-b61c-b6397670177b"
+            },
+            {
+              "name": "GITHUB_SHA",
+              "value": "050532f20050b4c523626cec14bfb98a5a68b882"
+            },
+            {
+              "name": "RELEASE_ID",
+              "value": "UE-2026-05-20-050532f"
+            },
+            {
+              "name": "BUILD_TIME",
+              "value": "2026-05-20T19:59:40Z"
+            },
+            {
+              "name": "BUILD_TIMESTAMP",
+              "value": "2026-05-20T19:59:40Z"
+            },
+            {
+              "name": "ARTIFACT_ID",
+              "value": "050532f20050b4c523626cec14bfb98a5a68b882"
+            },
+            {
+              "name": "UE_MARKETING_URL",
+              "value": "https://unioneyes.app"
+            },
+            {
+              "name": "UE_APP_URL",
+              "value": "https://app.unioneyes.app"
+            },
+            {
+              "name": "NEXT_PUBLIC_SITE_URL_STAGING",
+              "value": "https://staging.unioneyes.app"
+            },
+            {
+              "name": "NEXT_PUBLIC_APP_URL_STAGING",
+              "value": "https://staging-app.unioneyes.app"
+            },
+            {
+              "name": "AUTH_URL",
+              "value": "https://app.unioneyes.app"
+            },
+            {
+              "name": "AUTH_TRUST_HOST",
+              "value": "true"
+            },
+            {
+              "name": "DJANGO_API_URL",
+              "value": "http://localhost:8000"
+            },
+            {
+              "name": "PLATFORM_ADMIN_USER_IDS",
+              "value": "user_35NlrrNcfTv0DMh2kzBHyXZRtpb,user_37Zo7OrvP4jy0J0MU5APfkDtE2V"
+            },
+            {
+              "name": "SUPER_ADMIN_ORG_ID",
+              "value": ""
+            },
+            {
+              "name": "UPSTASH_REDIS_REST_URL",
+              "secretRef": "upstash-redis-url"
+            },
+            {
+              "name": "UPSTASH_REDIS_REST_TOKEN",
+              "secretRef": "upstash-redis-token"
+            },
+            {
+              "name": "FALLBACK_ENCRYPTION_KEY",
+              "secretRef": "enc-key"
+            },
+            {
+              "name": "EVIDENCE_SEAL_KEY",
+              "secretRef": "pii-key"
+            },
+            {
+              "name": "AZURE_AD_CLIENT_SECRET",
+              "secretRef": "azure-ad-client-secret"
+            },
+            {
+              "name": "AUTH_WEBHOOK_SECRET",
+              "secretRef": "auth-webhook-secret"
+            },
+            {
+              "name": "DJANGO_SECRET_KEY",
+              "secretRef": "django-secret"
+            },
+            {
+              "name": "SECRET_TOPOLOGY",
+              "value": "aca-kv-integrated"
+            },
+            {
+              "name": "SECRET_AUTHORITY",
+              "value": "azure-key-vault"
+            },
+            {
+              "name": "ENVIRONMENT_ISOLATION",
+              "value": "full"
+            },
+            {
+              "name": "AZURE_EVIDENCE_STORAGE_ACCOUNT",
+              "value": "nzilacanadaprodev"
+            },
+            {
+              "name": "AZURE_EVIDENCE_STORAGE_CONTAINER",
+              "value": "union-eyes-evidence"
+            },
+            {
+              "name": "AZURE_EVIDENCE_STORAGE_KEY",
+              "secretRef": "evidence-storage-key"
+            },
+            {
+              "name": "NEXT_PUBLIC_UE_FEATURE_PROFILE",
+              "value": "executive"
+            }
+          ],
+          "image": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes:050532f20050b4c523626cec14bfb98a5a68b882",
+          "name": "nzila-os-union-eyes-prod",
+          "resources": {
+            "cpu": 1.0,
+            "ephemeralStorage": "4Gi",
+            "memory": "2Gi"
+          }
+        },
+        {
+          "env": [
+            {
+              "name": "AUTH_JWKS_URL",
+              "value": ""
+            },
+            {
+              "name": "AUTH_WEBHOOK_SECRET",
+              "secretRef": "auth-webhook-secret"
+            },
+            {
+              "name": "DJANGO_ALLOWED_HOSTS",
+              "value": "localhost,127.0.0.1,nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io"
+            },
+            {
+              "name": "CORS_ALLOWED_ORIGINS",
+              "value": "https://unioneyes.app,https://app.unioneyes.app"
+            },
+            {
+              "name": "DJANGO_SECRET_KEY",
+              "secretRef": "django-secret"
+            },
+            {
+              "name": "PGDATABASE",
+              "value": "nzila_os_prod"
+            },
+            {
+              "name": "PGUSER",
+              "value": "nzilaadmin"
+            },
+            {
+              "name": "PGPASSWORD",
+              "value": "9SFMj41kpqsAoFUzmZiDS6Lv3MFWIQDy"
+            },
+            {
+              "name": "PGHOST",
+              "value": "nzila-os-union-eyes-prod-db.postgres.database.azure.com"
+            },
+            {
+              "name": "PGPORT",
+              "value": "5432"
+            },
+            {
+              "name": "PGSSLMODE",
+              "value": "require"
+            },
+            {
+              "name": "WEB_CONCURRENCY",
+              "value": "1"
+            },
+            {
+              "name": "DJANGO_DEBUG",
+              "value": "False"
+            },
+            {
+              "name": "AUTH_SECRET",
+              "secretRef": "enc-key"
+            }
+          ],
+          "image": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend:050532f20050b4c523626cec14bfb98a5a68b882",
+          "name": "django-backend",
+          "resources": {
+            "cpu": 0.5,
+            "ephemeralStorage": "2Gi",
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "cooldownPeriod": 300,
+        "maxReplicas": 6,
+        "minReplicas": 2,
+        "pollingInterval": 30,
+        "rules": [
+          {
+            "http": {
+              "metadata": {
+                "concurrentRequests": "10"
+              }
+            },
+            "name": "http-scaler"
+          }
+        ]
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": null
+  },
+  "resourceGroup": "nzila-canada-prod-rg",
+  "systemData": {
+    "createdAt": "2026-05-11T05:49:42.5514274",
+    "createdBy": "support@onelabtech.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-05-20T20:17:06.3300012",
+    "lastModifiedBy": "f79055d7-d32b-4068-a01a-3cd3aa814697",
+    "lastModifiedByType": "Application"
+  },
+  "type": "Microsoft.App/containerApps"
+}

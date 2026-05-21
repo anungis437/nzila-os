@@ -1,0 +1,38 @@
+[
+  {
+    "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+    "location": "eastus",
+    "name": "nzila-staging-kv",
+    "resourceGroup": "nzila-staging-rg",
+    "systemData": null,
+    "tags": {},
+    "type": "Microsoft.KeyVault/vaults"
+  },
+  {
+    "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-demo-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-demo-kv",
+    "location": "canadacentral",
+    "name": "nzila-canada-demo-kv",
+    "resourceGroup": "nzila-canada-demo-rg",
+    "systemData": null,
+    "tags": {},
+    "type": "Microsoft.KeyVault/vaults"
+  },
+  {
+    "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-pilot-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-pilot-kv",
+    "location": "canadacentral",
+    "name": "nzila-canada-pilot-kv",
+    "resourceGroup": "nzila-canada-pilot-rg",
+    "systemData": null,
+    "tags": {},
+    "type": "Microsoft.KeyVault/vaults"
+  },
+  {
+    "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv",
+    "location": "canadacentral",
+    "name": "nzila-canada-prod-kv",
+    "resourceGroup": "nzila-canada-prod-rg",
+    "systemData": null,
+    "tags": {},
+    "type": "Microsoft.KeyVault/vaults"
+  }
+]

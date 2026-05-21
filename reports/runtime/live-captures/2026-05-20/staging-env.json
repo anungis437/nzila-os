@@ -1,0 +1,70 @@
+{
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env",
+  "location": "Canada Central",
+  "name": "nzila-canada-staging-env",
+  "properties": {
+    "appInsightsConfiguration": null,
+    "appLogsConfiguration": {
+      "destination": "log-analytics",
+      "logAnalyticsConfiguration": {
+        "customerId": "f5b0d5cf-bce9-437b-9297-a843fceeca11",
+        "sharedKey": null
+      }
+    },
+    "customDomainConfiguration": {
+      "certificateKeyVaultProperties": null,
+      "certificatePassword": null,
+      "certificateValue": null,
+      "customDomainVerificationId": "FE461FBBBD0EED3AB57D7D4AFA3C5B7D948C9CC77CED0FA6DDE389D5DDE26FF8",
+      "dnsSuffix": null,
+      "expirationDate": null,
+      "subjectName": null,
+      "thumbprint": null
+    },
+    "daprAIConnectionString": null,
+    "daprAIInstrumentationKey": null,
+    "daprConfiguration": {
+      "version": "1.16.4-msft.6"
+    },
+    "defaultDomain": "jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+    "eventStreamEndpoint": "https://canadacentral.azurecontainerapps.dev/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/managedEnvironments/nzila-canada-staging-env/eventstream",
+    "infrastructureResourceGroup": null,
+    "ingressConfiguration": null,
+    "kedaConfiguration": {
+      "version": "2.18.1"
+    },
+    "openTelemetryConfiguration": null,
+    "peerAuthentication": {
+      "mtls": {
+        "enabled": false
+      }
+    },
+    "peerTrafficConfiguration": {
+      "encryption": {
+        "enabled": false
+      }
+    },
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "staticIp": "20.175.163.48",
+    "vnetConfiguration": null,
+    "workloadProfiles": [
+      {
+        "enableFips": false,
+        "name": "Consumption",
+        "workloadProfileType": "Consumption"
+      }
+    ],
+    "zoneRedundant": false
+  },
+  "resourceGroup": "nzila-canada-staging-rg",
+  "systemData": {
+    "createdAt": "2026-04-05T16:17:44.8523055",
+    "createdBy": "support@onelabtech.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-04-05T16:17:44.8523055",
+    "lastModifiedBy": "support@onelabtech.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/managedEnvironments"
+}

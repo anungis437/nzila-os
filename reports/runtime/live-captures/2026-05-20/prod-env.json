@@ -1,0 +1,64 @@
+{
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-prod-env",
+  "location": "Canada Central",
+  "name": "nzila-canada-prod-env",
+  "properties": {
+    "appInsightsConfiguration": null,
+    "appLogsConfiguration": {
+      "destination": "log-analytics",
+      "logAnalyticsConfiguration": {
+        "customerId": "59580fa5-66f3-4456-97ea-a6b38704eb4d",
+        "sharedKey": null
+      }
+    },
+    "customDomainConfiguration": {
+      "certificateKeyVaultProperties": null,
+      "certificatePassword": null,
+      "certificateValue": null,
+      "customDomainVerificationId": "FE461FBBBD0EED3AB57D7D4AFA3C5B7D948C9CC77CED0FA6DDE389D5DDE26FF8",
+      "dnsSuffix": null,
+      "expirationDate": null,
+      "subjectName": null,
+      "thumbprint": null
+    },
+    "daprAIConnectionString": null,
+    "daprAIInstrumentationKey": null,
+    "daprConfiguration": {
+      "version": "1.16.4-msft.6"
+    },
+    "defaultDomain": "bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io",
+    "eventStreamEndpoint": "https://canadacentral.azurecontainerapps.dev/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/managedEnvironments/nzila-canada-prod-env/eventstream",
+    "infrastructureResourceGroup": null,
+    "ingressConfiguration": null,
+    "kedaConfiguration": {
+      "version": "2.18.1"
+    },
+    "openTelemetryConfiguration": null,
+    "peerAuthentication": {
+      "mtls": {
+        "enabled": false
+      }
+    },
+    "peerTrafficConfiguration": {
+      "encryption": {
+        "enabled": false
+      }
+    },
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "staticIp": "4.174.220.122",
+    "vnetConfiguration": null,
+    "workloadProfiles": null,
+    "zoneRedundant": false
+  },
+  "resourceGroup": "nzila-canada-prod-rg",
+  "systemData": {
+    "createdAt": "2026-05-11T05:39:41.3739727",
+    "createdBy": "support@onelabtech.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-05-11T05:39:41.3739727",
+    "lastModifiedBy": "support@onelabtech.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/managedEnvironments"
+}

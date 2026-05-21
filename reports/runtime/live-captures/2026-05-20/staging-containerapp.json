@@ -1,0 +1,354 @@
+{
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerapps/nzila-os-union-eyes-staging",
+  "identity": {
+    "type": "None"
+  },
+  "location": "Canada Central",
+  "name": "nzila-os-union-eyes-staging",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "identitySettings": [],
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": null,
+        "exposedPort": 0,
+        "external": true,
+        "fqdn": "nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 3000,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": 100,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "nzilacanadaacrazurecrio-nzilacanadaacr",
+          "server": "nzilacanadaacr.azurecr.io",
+          "username": "nzilacanadaacr"
+        }
+      ],
+      "runtime": null,
+      "secrets": [
+        {
+          "name": "nzilacanadaacrazurecrio-nzilacanadaacr"
+        }
+      ],
+      "service": null
+    },
+    "customDomainVerificationId": "FE461FBBBD0EED3AB57D7D4AFA3C5B7D948C9CC77CED0FA6DDE389D5DDE26FF8",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env",
+    "eventStreamEndpoint": "https://canadacentral.azurecontainerapps.dev/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/containerApps/nzila-os-union-eyes-staging/eventstream",
+    "latestReadyRevisionName": "nzila-os-union-eyes-staging--0000001",
+    "latestRevisionFqdn": "nzila-os-union-eyes-staging--0000001.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+    "latestRevisionName": "nzila-os-union-eyes-staging--0000001",
+    "managedEnvironmentId": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/managedEnvironments/nzila-canada-staging-env",
+    "outboundIpAddresses": [
+      "20.175.131.120",
+      "20.175.131.81",
+      "20.175.131.103",
+      "20.175.131.130",
+      "20.116.137.89",
+      "20.116.137.87",
+      "20.116.137.109",
+      "20.116.137.103",
+      "20.116.137.113",
+      "20.116.137.115",
+      "130.107.205.172",
+      "4.248.202.254",
+      "40.82.191.244",
+      "130.107.46.96",
+      "130.107.173.153",
+      "20.104.32.225",
+      "20.116.177.220",
+      "20.116.246.7",
+      "20.200.81.197",
+      "4.174.180.192",
+      "20.200.85.249",
+      "20.48.139.35",
+      "52.228.119.253",
+      "4.174.175.68",
+      "4.174.175.70",
+      "4.174.180.200",
+      "4.229.200.51",
+      "4.204.170.160",
+      "20.175.200.167",
+      "4.248.248.134",
+      "4.239.150.24",
+      "20.116.82.189",
+      "4.174.175.75",
+      "4.204.170.92",
+      "4.229.201.31",
+      "4.174.152.86",
+      "20.116.244.184",
+      "4.204.170.69",
+      "52.237.59.72",
+      "20.116.244.185",
+      "20.116.84.192",
+      "4.174.158.204",
+      "52.237.59.66",
+      "4.204.170.182",
+      "20.175.236.144",
+      "20.116.84.193",
+      "4.174.201.196",
+      "4.248.203.103",
+      "20.151.197.121",
+      "4.239.150.79",
+      "4.239.149.204",
+      "4.248.251.46",
+      "20.175.234.210",
+      "4.174.180.158",
+      "20.116.244.136",
+      "20.151.195.107",
+      "4.174.175.52",
+      "52.228.119.226",
+      "20.200.119.178",
+      "4.204.170.40",
+      "4.174.222.157",
+      "4.248.242.51",
+      "20.116.176.36",
+      "20.200.119.179",
+      "4.204.170.31",
+      "20.200.116.181",
+      "4.174.175.43",
+      "4.174.200.55",
+      "4.174.201.183",
+      "20.151.197.120",
+      "52.139.6.234",
+      "52.237.59.55",
+      "4.174.180.114",
+      "4.204.170.22",
+      "52.237.59.50",
+      "20.200.74.93",
+      "130.107.44.151",
+      "52.237.59.60",
+      "20.200.119.126",
+      "20.175.200.127",
+      "20.200.119.152",
+      "20.200.119.174",
+      "20.200.119.159",
+      "20.200.119.172",
+      "4.172.39.65",
+      "4.172.39.74",
+      "4.172.39.70",
+      "4.172.39.51",
+      "4.172.39.53",
+      "4.172.39.43",
+      "20.48.129.204",
+      "20.175.174.5",
+      "4.204.7.167",
+      "4.204.168.135",
+      "4.248.202.54",
+      "4.204.168.35",
+      "20.175.151.139",
+      "4.174.173.113",
+      "4.172.71.186",
+      "4.172.70.204",
+      "20.116.128.132",
+      "20.220.240.101",
+      "4.172.71.66",
+      "20.175.151.155",
+      "4.172.130.209",
+      "4.174.173.127",
+      "4.172.124.210",
+      "20.175.151.154",
+      "52.228.105.111",
+      "4.172.133.122",
+      "20.116.230.58",
+      "4.172.71.53",
+      "4.229.202.100",
+      "130.107.43.250",
+      "20.116.251.108",
+      "20.116.128.133",
+      "52.228.105.71",
+      "20.116.173.188",
+      "20.116.224.64",
+      "20.116.168.140",
+      "130.107.42.174",
+      "4.174.173.62",
+      "130.107.43.100",
+      "20.175.151.138",
+      "4.172.70.189",
+      "40.82.190.173",
+      "4.204.7.137",
+      "4.174.173.86",
+      "20.175.216.0",
+      "4.172.124.93",
+      "20.200.113.105",
+      "20.116.230.55",
+      "4.229.200.246",
+      "4.174.173.107",
+      "20.48.175.244",
+      "20.116.133.59",
+      "20.175.151.146",
+      "4.172.122.254",
+      "4.172.29.235",
+      "20.104.5.211",
+      "20.116.169.38",
+      "20.175.130.229",
+      "4.204.168.150",
+      "20.175.173.77",
+      "20.175.223.218",
+      "4.204.168.70",
+      "4.174.173.24",
+      "4.172.124.0",
+      "4.229.201.188",
+      "4.172.70.165",
+      "4.174.228.0",
+      "20.175.173.190",
+      "52.228.104.242",
+      "20.200.86.1",
+      "4.204.7.82",
+      "4.204.6.255",
+      "20.151.246.175",
+      "20.151.191.222",
+      "20.116.242.147",
+      "4.204.6.230",
+      "4.172.16.81"
+    ],
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "NODE_ENV",
+              "value": "production"
+            },
+            {
+              "name": "PORT",
+              "value": "3000"
+            },
+            {
+              "name": "NEXT_PUBLIC_APP_ENV",
+              "value": "staging"
+            },
+            {
+              "name": "UE_ENVIRONMENT",
+              "value": "staging"
+            },
+            {
+              "name": "UE_DEPLOYMENT_TYPE",
+              "value": "staging"
+            },
+            {
+              "name": "UE_FEATURE_PROFILE",
+              "value": "internal"
+            },
+            {
+              "name": "NZILA_MODE",
+              "value": "staging"
+            },
+            {
+              "name": "GITHUB_SHA",
+              "value": "7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233"
+            },
+            {
+              "name": "RELEASE_ID",
+              "value": "UE-2026-05-18-7a0d193"
+            },
+            {
+              "name": "BUILD_TIME",
+              "value": "2026-05-18T03:32:12Z"
+            },
+            {
+              "name": "BUILD_TIMESTAMP",
+              "value": "2026-05-18T03:32:12Z"
+            },
+            {
+              "name": "ARTIFACT_ID",
+              "value": "7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233"
+            },
+            {
+              "name": "UE_MARKETING_URL",
+              "value": "https://staging.unioneyes.app"
+            },
+            {
+              "name": "UE_APP_URL",
+              "value": "https://staging-app.unioneyes.app"
+            },
+            {
+              "name": "NEXT_PUBLIC_SITE_URL",
+              "value": "https://staging.unioneyes.app"
+            },
+            {
+              "name": "NEXT_PUBLIC_APP_URL",
+              "value": "https://staging-app.unioneyes.app"
+            },
+            {
+              "name": "NEXT_PUBLIC_SITE_URL_STAGING",
+              "value": "https://staging.unioneyes.app"
+            },
+            {
+              "name": "NEXT_PUBLIC_APP_URL_STAGING",
+              "value": "https://staging-app.unioneyes.app"
+            },
+            {
+              "name": "AUTH_URL",
+              "value": "https://staging-app.unioneyes.app"
+            },
+            {
+              "name": "AUTH_TRUST_HOST",
+              "value": "true"
+            },
+            {
+              "name": "DJANGO_API_URL",
+              "value": "http://localhost:8000"
+            },
+            {
+              "name": "PLATFORM_ADMIN_USER_IDS",
+              "value": "user_35NlrrNcfTv0DMh2kzBHyXZRtpb,user_37Zo7OrvP4jy0J0MU5APfkDtE2V"
+            },
+            {
+              "name": "SUPER_ADMIN_ORG_ID",
+              "value": ""
+            }
+          ],
+          "image": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes:7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233",
+          "name": "nzila-os-union-eyes-staging",
+          "resources": {
+            "cpu": 1.0,
+            "ephemeralStorage": "4Gi",
+            "memory": "2Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "cooldownPeriod": 300,
+        "maxReplicas": 3,
+        "minReplicas": 1,
+        "pollingInterval": 30,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": "Consumption"
+  },
+  "resourceGroup": "nzila-canada-staging-rg",
+  "systemData": {
+    "createdAt": "2026-05-18T03:40:31.7885374",
+    "createdBy": "f79055d7-d32b-4068-a01a-3cd3aa814697",
+    "createdByType": "Application",
+    "lastModifiedAt": "2026-05-18T03:40:49.4294724",
+    "lastModifiedBy": "f79055d7-d32b-4068-a01a-3cd3aa814697",
+    "lastModifiedByType": "Application"
+  },
+  "type": "Microsoft.App/containerApps"
+}

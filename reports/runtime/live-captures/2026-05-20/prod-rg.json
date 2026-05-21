@@ -1,0 +1,15 @@
+{
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg",
+  "location": "canadacentral",
+  "managedBy": null,
+  "name": "nzila-canada-prod-rg",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": {
+    "env": "prod",
+    "managed-by": "bicep",
+    "product": "union-eyes"
+  },
+  "type": "Microsoft.Resources/resourceGroups"
+}

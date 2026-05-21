@@ -1,0 +1,38 @@
+{
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.KeyVault/vaults/nzila-canada-prod-kv",
+  "location": "canadacentral",
+  "name": "nzila-canada-prod-kv",
+  "properties": {
+    "accessPolicies": [],
+    "createMode": null,
+    "enablePurgeProtection": true,
+    "enableRbacAuthorization": true,
+    "enableSoftDelete": true,
+    "enabledForDeployment": false,
+    "enabledForDiskEncryption": null,
+    "enabledForTemplateDeployment": null,
+    "hsmPoolResourceId": null,
+    "networkAcls": null,
+    "privateEndpointConnections": null,
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "sku": {
+      "family": "A",
+      "name": "standard"
+    },
+    "softDeleteRetentionInDays": 90,
+    "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+    "vaultUri": "https://nzila-canada-prod-kv.vault.azure.net/"
+  },
+  "resourceGroup": "nzila-canada-prod-rg",
+  "systemData": {
+    "createdAt": "2026-05-11T05:39:18.951000+00:00",
+    "createdBy": "support@onelabtech.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-05-11T05:39:18.951000+00:00",
+    "lastModifiedBy": "support@onelabtech.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {},
+  "type": "Microsoft.KeyVault/vaults"
+}

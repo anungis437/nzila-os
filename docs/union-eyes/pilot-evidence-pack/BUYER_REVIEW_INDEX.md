@@ -131,7 +131,7 @@ All evidence files in this pack:
 | `SECURITY_BUYER_PACK.md` | CISO/buyer | ✅ Current (v2.0) |
 | `CI_GOVERNANCE_EVIDENCE.md` | CI captures | ✅ Current |
 | `PILOT_SCOPE_LOCK.md` | Scope freeze | ✅ Current |
-| `RUNTIME_EVIDENCE_PACK.md` | Runtime posture | ✅ Section A / ⏳ Section B PENDING |
+| `RUNTIME_EVIDENCE_PACK.md` | Runtime posture | ✅ Section A + Section B VERIFIED 2026-05-21 |
 | `LIVE_EVIDENCE_CAPTURE_RUNBOOK.md` | Azure runbook | ✅ Template ready |
 | `ORG_ISOLATION_CONTROL_MAP.md` | Security controls | ✅ Current |
 | `READINESS_COMMANDS.md` | Gate commands | ✅ Current |
