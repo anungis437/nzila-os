@@ -22,7 +22,35 @@ import {
 import { PAGE, COLORS, FONTS, TYPE, SPACE } from '@/lib/icra-pdf/reportTheme';
 import { WORKBOOK_PALETTE } from './workbookTheme';
 import type { CartographyResult, CartographySignal } from '@/lib/workbook/engines/stewardshipCartography';
-import type { WorkbookNarrative } from './workbookNarrativeEngine';
+import type { ContinuityLandscapeResult } from '@/lib/workbook/engines/continuityMappingEngine';
+import type { ContinuityLineageResult } from '@/lib/workbook/engines/continuityLineageEngine';
+import type { GovernanceEntropyResult } from '@/lib/workbook/engines/governanceEntropyEngine';
+import type { ContinuityBreakpointResult } from '@/lib/workbook/engines/continuityBreakpointEngine';
+import type { ModernizationAlignmentResult } from '@/lib/workbook/engines/modernizationAlignmentEngine';
+import type { TransformationRoadmapResult } from '@/lib/workbook/engines/transformationRoadmapEngine';
+import type { WorkbookSynthesisResult } from '@/lib/workbook/engines/workbookSynthesisEngine';
+import type {
+  WorkbookNarrative,
+  ModuleNarrative,
+} from './workbookNarrativeEngine';
+import {
+  buildLandscapeNarrative,
+  buildLineageNarrative,
+  buildBreakpointNarrative,
+  buildModernizationNarrative,
+  buildRoadmapNarrative,
+  buildSynthesisNarrative,
+} from './workbookNarrativeEngine';
+
+export interface WorkbookModuleResults {
+  landscape?: ContinuityLandscapeResult;
+  lineage?: ContinuityLineageResult;
+  entropy?: GovernanceEntropyResult;
+  breakpoint?: ContinuityBreakpointResult;
+  modernization?: ModernizationAlignmentResult;
+  roadmap?: TransformationRoadmapResult;
+  synthesis?: WorkbookSynthesisResult;
+}
 
 export interface WorkbookPdfData {
   workbookId: string;
@@ -39,6 +67,7 @@ export interface WorkbookPdfData {
     criticality: string | null;
     successorIdentified: boolean;
   }>;
+  modules?: WorkbookModuleResults;
 }
 
 const RESERVED_CHAPTERS = [
@@ -243,6 +272,67 @@ function signalLabelColor(severity: CartographySignal['severity']) {
   }
 }
 
+type AnySignal = { signalId: string; severity: 'note' | 'observation' | 'warning' | 'critical'; statement: string };
+
+function moduleNarrativeFor(
+  id: (typeof RESERVED_CHAPTERS)[number]['id'],
+  modules: WorkbookModuleResults | undefined,
+): ModuleNarrative | null {
+  if (!modules) return null;
+  switch (id) {
+    case 'lineage':
+      return modules.lineage ? buildLineageNarrative(modules.lineage) : null;
+    case 'breakpoints':
+      return modules.breakpoint ? buildBreakpointNarrative(modules.breakpoint) : null;
+    case 'entropy':
+      return modules.entropy
+        ? {
+            opening: modules.entropy.reading,
+            body: `Aggregate governance drift across mapped domains: ${modules.entropy.aggregateDrift.toFixed(2)} — ${modules.entropy.level.label}.`,
+            signalsHeading: 'Entropy attribution',
+          }
+        : null;
+    case 'modernization':
+      return modules.modernization ? buildModernizationNarrative(modules.modernization) : null;
+    case 'roadmap':
+      return modules.roadmap ? buildRoadmapNarrative(modules.roadmap) : null;
+    default:
+      return null;
+  }
+}
+
+function moduleSignalsFor(
+  id: (typeof RESERVED_CHAPTERS)[number]['id'],
+  modules: WorkbookModuleResults | undefined,
+): readonly AnySignal[] {
+  if (!modules) return [];
+  switch (id) {
+    case 'lineage':
+      return modules.lineage?.signals ?? [];
+    case 'breakpoints':
+      return modules.breakpoint?.signals ?? [];
+    case 'modernization':
+      return modules.modernization?.signals ?? [];
+    case 'roadmap':
+      return modules.roadmap?.signals ?? [];
+    case 'entropy':
+      return (modules.entropy?.attribution ?? []).map((a) => ({
+        signalId: `entropy_${a.domainId}`,
+        severity:
+          a.level.ordinal >= 4
+            ? 'critical'
+            : a.level.ordinal === 3
+              ? 'warning'
+              : a.level.ordinal === 2
+                ? 'observation'
+                : 'note',
+        statement: `${a.label}: drift ${a.drift.toFixed(2)} — ${a.level.label}.`,
+      }));
+    default:
+      return [];
+  }
+}
+
 export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfData }) {
   const fr = data.locale === 'fr-CA';
   const title = fr ? 'Cahier d\u2019Entropie de Gouvernance' : 'Governance Entropy Workbook';
@@ -390,26 +480,94 @@ export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfD
         </View>
       </Page>
 
-      {/* Reserved chapters */}
-      {RESERVED_CHAPTERS.map((c) => (
-        <Page key={c.id} size={PAGE.size} style={S.page}>
+      {/* Reserved chapters — render real content when modules data is provided. */}
+      {RESERVED_CHAPTERS.map((c) => {
+        const moduleNarrative = moduleNarrativeFor(c.id, data.modules);
+        const signals = moduleSignalsFor(c.id, data.modules);
+        return (
+          <Page key={c.id} size={PAGE.size} style={S.page} wrap>
+            <Text style={S.sectionLabel}>
+              {fr ? `Chapitre ${c.n}` : `Chapter ${c.n}`}
+            </Text>
+            <Text style={S.sectionHeading}>{fr ? c.fr : c.en}</Text>
+            <View style={S.rule} />
+            {moduleNarrative ? (
+              <>
+                <Text style={S.body}>{moduleNarrative.opening}</Text>
+                <Text style={[S.body, { marginTop: SPACE.md }]}>{moduleNarrative.body}</Text>
+                {signals.length > 0 ? (
+                  <>
+                    <Text style={[S.sectionLabel, { marginTop: SPACE.lg }]}>
+                      {moduleNarrative.signalsHeading}
+                    </Text>
+                    {signals.map((s, idx) => (
+                      <View key={`${c.id}-${idx}`} style={S.signalRow}>
+                        <Text style={[S.signalLabel, { color: signalLabelColor(s.severity) }]}>
+                          {s.severity}
+                        </Text>
+                        <Text style={S.signalText}>{s.statement}</Text>
+                      </View>
+                    ))}
+                  </>
+                ) : null}
+              </>
+            ) : (
+              <Text style={S.reservedNote}>
+                {fr
+                  ? 'R\u00e9serv\u00e9 \u00e0 l\u2019\u00e9dition facilit\u00e9e. Cette section exige un dialogue institutionnel encadr\u00e9 par un facilitateur OCI.'
+                  : 'Reserved for the Facilitated Edition. This chapter requires an institutional dialogue led by an OCI facilitator.'}
+              </Text>
+            )}
+
+            <View style={S.footer} fixed>
+              <Text>{title}</Text>
+              <Text render={({ pageNumber }) => String(pageNumber).padStart(2, '0')} />
+            </View>
+          </Page>
+        );
+      })}
+
+      {/* Cross-module synthesis — rendered only if synthesis result is provided. */}
+      {data.modules?.synthesis ? (
+        <Page size={PAGE.size} style={S.page} wrap>
           <Text style={S.sectionLabel}>
-            {fr ? `Chapitre ${c.n}` : `Chapter ${c.n}`}
+            {fr ? 'Chapitre 07' : 'Chapter 07'}
           </Text>
-          <Text style={S.sectionHeading}>{fr ? c.fr : c.en}</Text>
+          <Text style={S.sectionHeading}>
+            {fr ? 'Synth\u00e8se inter-modules' : 'Cross-Module Synthesis'}
+          </Text>
           <View style={S.rule} />
-          <Text style={S.reservedNote}>
-            {fr
-              ? 'R\u00e9serv\u00e9 \u00e0 l\u2019\u00e9dition facilit\u00e9e. Cette section exige un dialogue institutionnel encadr\u00e9 par un facilitateur OCI.'
-              : 'Reserved for the Facilitated Edition. This chapter requires an institutional dialogue led by an OCI facilitator.'}
-          </Text>
+          {(() => {
+            const n = buildSynthesisNarrative(data.modules.synthesis);
+            return (
+              <>
+                <Text style={S.body}>{n.opening}</Text>
+                <Text style={[S.body, { marginTop: SPACE.md }]}>{n.body}</Text>
+                {data.modules.synthesis.crossModuleSignals.length > 0 ? (
+                  <>
+                    <Text style={[S.sectionLabel, { marginTop: SPACE.lg }]}>
+                      {n.signalsHeading}
+                    </Text>
+                    {data.modules.synthesis.crossModuleSignals.map((s, idx) => (
+                      <View key={`syn-${idx}`} style={S.signalRow}>
+                        <Text style={[S.signalLabel, { color: signalLabelColor(s.severity) }]}>
+                          {s.severity}
+                        </Text>
+                        <Text style={S.signalText}>{s.statement}</Text>
+                      </View>
+                    ))}
+                  </>
+                ) : null}
+              </>
+            );
+          })()}
 
           <View style={S.footer} fixed>
             <Text>{title}</Text>
             <Text render={({ pageNumber }) => String(pageNumber).padStart(2, '0')} />
           </View>
         </Page>
-      ))}
+      ) : null}
 
       {/* Closing reflection */}
       <Page size={PAGE.size} style={S.page}>
