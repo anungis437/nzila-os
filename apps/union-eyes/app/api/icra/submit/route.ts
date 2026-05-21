@@ -183,7 +183,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ assessmentId }, { status: 201 })
     })
   } catch (err) {
-    logger.error('icra.assessment.submit_failed', { error: (err as Error).message })
+    const e = err as Error & { cause?: unknown; code?: string }
+    const cause = e.cause as { message?: string; code?: string; detail?: string } | undefined
+    logger.error('icra.assessment.submit_failed', {
+      error: e.message,
+      code: e.code,
+      causeMessage: cause?.message,
+      causeCode: cause?.code,
+      causeDetail: cause?.detail,
+    })
     fireAndForgetEvent({
       kind: 'submission_error',
       metadata: { error: String(err) },

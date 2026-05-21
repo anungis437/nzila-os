@@ -11,7 +11,7 @@
  * No auth required. Redirects to /continuity-assessment/results/[id].
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Answer, ConsentRecord, SectionId } from '@/lib/icra/types';
 import type { MetadataQuestion } from '@/lib/icra/questions';
@@ -91,6 +91,13 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   const [currentSectionAnswers, setCurrentSectionAnswers] = useState<Map<string, string>>(new Map());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Scroll to top whenever the user advances to a new step (section transition,
+  // consent → org context, org context → first section, etc.).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
 
   // Step 0 → 1
   function handleConsent(record: ConsentRecord) {

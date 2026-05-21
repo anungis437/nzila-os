@@ -24,6 +24,7 @@ import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type { InstitutionalContinuityProfile, OrganizationContext } from '@/lib/icra/types';
 import { mapToPdfReportData } from '@/lib/icra-pdf/reportDataMapper';
 import { generateExecutiveContinuityPdf } from '@/lib/icra-pdf/generateExecutiveContinuityPdf';
+import { logger } from '@/lib/logger';
 
 const PDF_ELIGIBLE_TIERS = new Set([
   'executive_continuity_brief',
@@ -120,7 +121,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     });
   } catch (error) {
     // Log server-side; do not leak stack or internal details to client.
-    console.error('[icra-pdf] render failed', {
+    logger.error('[icra-pdf] render failed', {
       assessmentId,
       message: error instanceof Error ? error.message : 'unknown',
     });
