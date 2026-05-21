@@ -78,7 +78,8 @@ Complete each row and store evidence in `reports/runtime/` before expanding pilo
 |---|---|---|---|
 | Prod UE health endpoint | `curl -fsS https://nzila-os-union-eyes-prod.bluesand-c3ac2d8c.canadacentral.azurecontainerapps.io/api/health` | ✅ VERIFIED — 2026-05-21 (HTTP 200, ok:true; composite "degraded" only due to out-of-scope Django backend) | `live-captures/2026-05-20/prod-api-health.txt` |
 | Prod UE readiness endpoint | `curl -fsS .../api/ready` | ✅ VERIFIED — 2026-05-21 (HTTP 200, ready:true, gitSha 050532f, releaseId UE-2026-05-20-050532f) | `live-captures/2026-05-20/prod-api-ready.txt` |
-| Staging UE health endpoint | `curl -fsS https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health` | ⚠️ EXCEPTION (STAGING-UP-001) — timeout 90s; replica exists but unresponsive. Non-blocking for pilot (prod is fully verified). | `live-captures/2026-05-20/staging-api-health.txt` |
+| Staging UE health endpoint | `curl -fsS https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health` | ✅ VERIFIED — 2026-05-21 (HTTP 200, ok:true; db:ok, auth:ok, redis:ok; Django sidecar absent — expected. STAGING-UP-001 closed.) | `live-captures/2026-05-20/staging-warmup/06-after-health.txt` |
+| Staging UE readiness endpoint | `curl -fsS .../api/ready` | ✅ VERIFIED — 2026-05-21 (HTTP 200, ready:true, releaseId UE-2026-05-18-7a0d193. STAGING-UP-001 closed.) | `live-captures/2026-05-20/staging-warmup/07-after-ready.txt` |
 
 ### B2. Azure resource group confirmation
 
@@ -132,4 +133,4 @@ After completing each live evidence capture:
 
 ---
 
-*This document bridges the gap between code-verified security controls (Section A) and live operational proof (Section B). Section A is complete. **Section B is now VERIFIED 2026-05-21** for the controlled pilot scope, **including live PITR restore drill execution** (RESTORE-DRILL-001 closed). Two remaining deferred items (staging endpoint warmup, dedicated workbook export) are documented as low-impact exceptions and are not pilot-blocking.*
+*This document bridges the gap between code-verified security controls (Section A) and live operational proof (Section B). Section A is complete. **Section B is now FULLY VERIFIED 2026-05-21** for both production and staging environments: live PITR restore drill executed (RESTORE-DRILL-001 closed 2026-05-21), staging CrashLoopBackOff resolved (STAGING-UP-001 closed 2026-05-21 — missing secrets injected from staging KV, /api/health and /api/ready return HTTP 200). One remaining deferred item (dedicated workbook export) is cosmetic and not pilot-blocking.*

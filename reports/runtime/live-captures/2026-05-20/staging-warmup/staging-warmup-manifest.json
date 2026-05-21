@@ -1,0 +1,53 @@
+{
+  "environment": "staging",
+  "containerApp": "nzila-os-union-eyes-staging",
+  "capturedBy": "Copilot automated remediation",
+  "notes": [
+    "Django backend shows 'degraded' in /api/health — expected, no sidecar in staging; not a startup blocker.",
+    "STAGING-KV-001 accepted exception maintained: inline ACA secrets used (not KV-reference) — acceptable for staging.",
+    "Production resources not modified.",
+    "No secret values committed to git or written to disk."
+  ],
+  "issueRef": "STAGING-UP-001",
+  "evidenceFiles": [
+    "staging-warmup/01-before-containerapp.json",
+    "staging-warmup/02-before-revisions.json",
+    "staging-warmup/03-before-replicas.json",
+    "staging-warmup/04-before-logs.txt",
+    "staging-warmup/05-remediation-action.txt",
+    "staging-warmup/06-after-health.txt",
+    "staging-warmup/07-after-ready.txt",
+    "staging-warmup/08-after-replicas.json",
+    "staging-warmup/09-after-revisions.json",
+    "staging-warmup/10-after-logs.txt"
+  ],
+  "capturedAt": "2026-05-21T01:46:00Z",
+  "id": "STAGING-WARMUP-2026-05-21-001",
+  "beforeState": {
+    "readyEndpoint": "502 Bad Gateway",
+    "healthEndpoint": "TIMEOUT (90s)",
+    "revisionRunState": "Failed",
+    "replicaState": "CrashLoopBackOff",
+    "restartCount": 835,
+    "revisionState": "Failed"
+  },
+  "stagingUrl": "https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+  "afterState": {
+    "fatalErrors": "NONE",
+    "revisionName": "nzila-os-union-eyes-staging--0000002",
+    "readyEndpoint": "HTTP 200 - ready:true",
+    "healthEndpoint": "HTTP 200 - ok (db:ok, auth:ok, redis:ok, backend:degraded[expected-no-sidecar])",
+    "revisionState": "Running"
+  },
+  "remediationApplied": [
+    "Read 8 secrets from staging KV (nzila-staging-kv)",
+    "Generated VOTING_SECRET (cryptographically random 32-byte hex) and stored in staging KV",
+    "Injected 9 secrets as inline Container App secrets via az containerapp secret set",
+    "Updated 24 env vars via az containerapp update including DATABASE_URL, AUTH_SECRET, VOTING_SECRET secretrefs",
+    "New revision nzila-os-union-eyes-staging--0000002 created and reached Running state"
+  ],
+  "closedAt": "2026-05-21T01:46:00Z",
+  "status": "CLOSED",
+  "rootCause": "CrashLoopBackOff (835 restarts): DATABASE_URL and AUTH_SECRET were never injected into Container App at deployment. Staging DB (nzila-staging-db) and KV (nzila-staging-kv) existed but were not wired to the Container App.",
+  "resourceGroup": "nzila-canada-staging-rg"
+}

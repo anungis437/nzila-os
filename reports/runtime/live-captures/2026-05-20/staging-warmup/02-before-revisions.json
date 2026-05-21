@@ -1,0 +1,139 @@
+[
+  {
+    "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-union-eyes-staging/revisions/nzila-os-union-eyes-staging--0000001",
+    "name": "nzila-os-union-eyes-staging--0000001",
+    "properties": {
+      "active": true,
+      "createdTime": "2026-05-18T03:40:55+00:00",
+      "fqdn": "nzila-os-union-eyes-staging--0000001.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "healthState": "Unhealthy",
+      "provisioningError": "Container crashing: nzila-os-union-eyes-staging",
+      "provisioningState": "Failed",
+      "replicas": 1,
+      "runningState": "Failed",
+      "runningStateDetails": "1/1 Container crashing: nzila-os-union-eyes-staging",
+      "template": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "NODE_ENV",
+                "value": "production"
+              },
+              {
+                "name": "PORT",
+                "value": "3000"
+              },
+              {
+                "name": "NEXT_PUBLIC_APP_ENV",
+                "value": "staging"
+              },
+              {
+                "name": "UE_ENVIRONMENT",
+                "value": "staging"
+              },
+              {
+                "name": "UE_DEPLOYMENT_TYPE",
+                "value": "staging"
+              },
+              {
+                "name": "UE_FEATURE_PROFILE",
+                "value": "internal"
+              },
+              {
+                "name": "NZILA_MODE",
+                "value": "staging"
+              },
+              {
+                "name": "GITHUB_SHA",
+                "value": "7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233"
+              },
+              {
+                "name": "RELEASE_ID",
+                "value": "UE-2026-05-18-7a0d193"
+              },
+              {
+                "name": "BUILD_TIME",
+                "value": "2026-05-18T03:32:12Z"
+              },
+              {
+                "name": "BUILD_TIMESTAMP",
+                "value": "2026-05-18T03:32:12Z"
+              },
+              {
+                "name": "ARTIFACT_ID",
+                "value": "7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233"
+              },
+              {
+                "name": "UE_MARKETING_URL",
+                "value": "https://staging.unioneyes.app"
+              },
+              {
+                "name": "UE_APP_URL",
+                "value": "https://staging-app.unioneyes.app"
+              },
+              {
+                "name": "NEXT_PUBLIC_SITE_URL",
+                "value": "https://staging.unioneyes.app"
+              },
+              {
+                "name": "NEXT_PUBLIC_APP_URL",
+                "value": "https://staging-app.unioneyes.app"
+              },
+              {
+                "name": "NEXT_PUBLIC_SITE_URL_STAGING",
+                "value": "https://staging.unioneyes.app"
+              },
+              {
+                "name": "NEXT_PUBLIC_APP_URL_STAGING",
+                "value": "https://staging-app.unioneyes.app"
+              },
+              {
+                "name": "AUTH_URL",
+                "value": "https://staging-app.unioneyes.app"
+              },
+              {
+                "name": "AUTH_TRUST_HOST",
+                "value": "true"
+              },
+              {
+                "name": "DJANGO_API_URL",
+                "value": "http://localhost:8000"
+              },
+              {
+                "name": "PLATFORM_ADMIN_USER_IDS",
+                "value": "user_35NlrrNcfTv0DMh2kzBHyXZRtpb,user_37Zo7OrvP4jy0J0MU5APfkDtE2V"
+              },
+              {
+                "name": "SUPER_ADMIN_ORG_ID",
+                "value": ""
+              }
+            ],
+            "image": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes:7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233",
+            "name": "nzila-os-union-eyes-staging",
+            "probes": [],
+            "resources": {
+              "cpu": 1.0,
+              "memory": "2Gi"
+            }
+          }
+        ],
+        "initContainers": null,
+        "revisionSuffix": null,
+        "scale": {
+          "cooldownPeriod": null,
+          "maxReplicas": 3,
+          "minReplicas": 1,
+          "pollingInterval": null,
+          "rules": null
+        },
+        "serviceBinds": null,
+        "terminationGracePeriodSeconds": null,
+        "volumes": null
+      },
+      "trafficWeight": 100
+    },
+    "resourceGroup": "nzila-canada-staging-rg",
+    "type": "Microsoft.App/containerapps/revisions"
+  }
+]

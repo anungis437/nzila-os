@@ -1,0 +1,14 @@
+ERROR: az containerapp logs show: 'text' is not a valid value for '--output'. Allowed values: json, jsonc, yaml, yamlc, table, tsv, none.
+
+Examples from AI knowledge base:
+az containerapp logs show -n my-containerapp -g MyResourceGroup --follow --tail 30
+Fetch 30 lines of past logs logs from an app and print logs as they come in
+
+az containerapp logs show -n my-containerapp -g MyResourceGroup
+Fetch the past 20 lines of logs from an app and return
+
+az containerapp logs show -n my-containerapp -g MyResourceGroup --type system
+Fetch the past 20 lines of system logs from an app and return
+
+https://aka.ms/cli_ref
+Read more about the command in reference docs

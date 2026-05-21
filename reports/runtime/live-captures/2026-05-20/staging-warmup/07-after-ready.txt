@@ -1,0 +1,2 @@
+HTTP/200 OK
+{"ready":true,"status":"ready","app":"union-eyes","environment":"staging","gitSha":"7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233","buildTimestamp":"2026-05-18T03:32:12Z","artifactId":"7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233","releaseId":"UE-2026-05-18-7a0d193","appVersion":"0.0.0","timestamp":"2026-05-21T01:46:06.117Z","checks":{"process":"ok","database":"ok","storage":"unknown","thirdParty":"unknown"}}

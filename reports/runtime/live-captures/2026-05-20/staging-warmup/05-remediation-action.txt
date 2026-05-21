@@ -1,0 +1,68 @@
+STAGING-UP-001 REMEDIATION ACTION
+==================================
+Date: 2026-05-21T01:42:50Z
+Operator: Copilot (full Azure access approval granted)
+
+ROOT CAUSE CONFIRMED
+--------------------
+Revision nzila-os-union-eyes-staging--0000001 was in CrashLoopBackOff (835 restarts).
+Startup logs showed FATAL: missing critical env vars: DATABASE_URL, AUTH_SECRET.
+VOTING_SECRET was also missing (Required level).
+The staging Container App was deployed but never had runtime secrets injected.
+The staging PostgreSQL DB exists: nzila-staging-db.postgres.database.azure.com (nzila-staging-rg).
+The staging Key Vault exists: nzila-staging-kv (nzila-staging-rg).
+The secrets existed in staging KV but were never wired to the Container App.
+
+REMEDIATION STEPS APPLIED
+--------------------------
+1. Read required secrets from staging KV (nzila-staging-kv):
+   - database-url -> DATABASE_URL
+   - enc-key -> AUTH_SECRET + FALLBACK_ENCRYPTION_KEY
+   - upstash-redis-url -> UPSTASH_REDIS_REST_URL
+   - upstash-redis-token -> UPSTASH_REDIS_REST_TOKEN
+   - auth-webhook-secret -> AUTH_WEBHOOK_SECRET
+   - django-secret -> DJANGO_SECRET_KEY
+   - pii-key -> EVIDENCE_SEAL_KEY
+   - prod-azure-ad-client-secret -> AZURE_AD_CLIENT_SECRET
+   - STORAGE-CONNECTION-STRING -> (storage connectivity)
+
+2. Generated VOTING_SECRET (cryptographically random 32-byte hex) and stored in staging KV
+   as 'voting-secret'.
+
+3. Injected all secrets as inline Container App secrets via:
+   az containerapp secret set (8 secrets set)
+
+4. Updated Container App env vars via az containerapp update --set-env-vars to:
+   - DATABASE_URL=secretref:database-url
+   - AUTH_SECRET=secretref:enc-key
+   - VOTING_SECRET=secretref:voting-secret
+   - FALLBACK_ENCRYPTION_KEY=secretref:enc-key
+   - EVIDENCE_SEAL_KEY=secretref:pii-key
+   - UPSTASH_REDIS_REST_URL=secretref:upstash-redis-url
+   - UPSTASH_REDIS_REST_TOKEN=secretref:upstash-redis-token
+   - AUTH_WEBHOOK_SECRET=secretref:auth-webhook-secret
+   - DJANGO_SECRET_KEY=secretref:django-secret
+   - AZURE_AD_CLIENT_SECRET=secretref:azure-ad-client-secret
+   - AZURE_EVIDENCE_STORAGE_ACCOUNT=nzilacanadastore
+   - AZURE_EVIDENCE_STORAGE_CONTAINER=union-eyes-evidence-staging
+   - UE_ENVIRONMENT=staging
+   - NZILA_MODE=staging
+   - UE_DEPLOYMENT_TYPE=staging
+   - PGHOST=nzila-staging-db.postgres.database.azure.com
+   - PGUSER=nzilaadmin
+   - PGSSLMODE=require
+   - AUTH_URL=https://staging-app.unioneyes.app
+   - AUTH_TRUST_HOST=true
+
+WHAT WAS NOT DONE
+-----------------
+- No production resources modified.
+- No secrets committed to git.
+- No Key Vault secrets rotated.
+- No CORS/CSP headers changed.
+- No app code changed.
+- STAGING-KV-001 accepted exception maintained (inline secrets vs KV ref - staging only).
+
+COST NOTE
+---------
+minReplicas was already 1 before this fix. No change to replica settings needed.

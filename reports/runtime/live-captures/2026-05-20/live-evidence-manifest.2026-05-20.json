@@ -154,10 +154,41 @@
 
   "stagingHealthCheck": {
     "url": "https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
-    "httpStatus": null,
-    "verified": false,
-    "captureFile": "staging-api-health.txt",
-    "notes": "Staging endpoint timed out after 90s; replica nzila-os-union-eyes-staging--0000001-68cc9fffd6-txbgd exists but is unresponsive. Documented as known staging-only issue; does NOT affect production pilot evidence. Tracked as follow-up SRE task."
+    "httpStatus": 200,
+    "ok": true,
+    "verified": true,
+    "verifiedAt": "2026-05-21T01:45:39Z",
+    "captureFile": "staging-warmup/06-after-health.txt",
+    "responseSummary": {
+      "ok": true,
+      "status": "degraded",
+      "app": "union-eyes",
+      "environment": "staging",
+      "checks": {
+        "process": "ok",
+        "database": "ok (155ms)",
+        "auth": "ok",
+        "redis": "ok (81ms)",
+        "backend": "degraded — Django sidecar not present in staging (expected, out-of-pilot-scope)"
+      }
+    },
+    "notes": "STAGING-UP-001 resolved. Root cause: DATABASE_URL and AUTH_SECRET were never injected. Fixed by reading secrets from nzila-staging-kv and injecting as Container App secrets. New revision --0000002 Running. HTTP 200; critical dependencies (DB, auth, redis) all healthy."
+  },
+  "stagingReadinessCheck": {
+    "url": "https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready",
+    "httpStatus": 200,
+    "ready": true,
+    "verified": true,
+    "verifiedAt": "2026-05-21T01:45:51Z",
+    "captureFile": "staging-warmup/07-after-ready.txt",
+    "responseSummary": {
+      "ready": true,
+      "status": "ready",
+      "gitSha": "7a0d193c9d5fac7fcdcbd0d3dbc91f55b4174233",
+      "buildTimestamp": "2026-05-18T03:32:12Z",
+      "releaseId": "UE-2026-05-18-7a0d193"
+    },
+    "notes": "HTTP 200; ready:true. Staging image is one release behind prod (expected for staging lane). Build provenance present."
   },
 
   "monitorWorkbook": {
@@ -202,7 +233,9 @@
   },
 
   "overallStatus": "VERIFIED",
-  "verificationScope": "Controlled pilot live-readiness for production environment. Live PITR restore drill executed and verified 2026-05-21. Staging endpoint and dedicated monitor workbook export remain tracked as follow-up tasks (not pilot blockers).",
+  "stagingStatus": "VERIFIED",
+  "stagingVerifiedAt": "2026-05-21T01:46:00Z",
+  "verificationScope": "Full live-readiness verified for both production and staging environments. Live PITR restore drill executed 2026-05-21 (RESTORE-DRILL-001 closed). Staging endpoint STAGING-UP-001 resolved 2026-05-21 — both /api/health and /api/ready return HTTP 200. Dedicated monitor workbook export remains a follow-up task (cosmetic; not pilot blocker).",
 
   "reviewer": {
     "name": "support@onelabtech.com",
@@ -223,8 +256,12 @@
       "id": "STAGING-UP-001",
       "summary": "Staging health endpoint unresponsive at capture time (replica exists but timed out at 90s).",
       "impact": "low",
-      "rationale": "Staging is non-production; production endpoints are fully verified. Tracked as SRE follow-up.",
-      "status": "open"
+      "rationale": "Staging is non-production; production endpoints are fully verified.",
+      "status": "closed",
+      "closedAt": "2026-05-21T01:46:00Z",
+      "closedBy": "Copilot automated remediation (full Azure access approval)",
+      "closureEvidence": "reports/runtime/live-captures/2026-05-20/staging-warmup/staging-warmup-manifest.json",
+      "closureNotes": "Root cause: DATABASE_URL and AUTH_SECRET never injected into staging Container App. Fix: read 8 secrets from nzila-staging-kv, generated VOTING_SECRET, injected as inline ACA secrets, updated env var refs. New revision --0000002 Running. /api/health HTTP 200 (db:ok, auth:ok, redis:ok). /api/ready HTTP 200 (ready:true). 835-restart CrashLoopBackOff fully resolved. Evidence in staging-warmup/ directory (10 capture files)."
     },
     {
       "id": "RESTORE-DRILL-001",

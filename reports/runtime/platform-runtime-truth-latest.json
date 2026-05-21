@@ -11,8 +11,8 @@
     "reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json"
   ],
   "overallStatus": "HEALTHY",
-  "overallStatusReason": "EXC-001 resolved: prod/staging now deploy to separate Azure resource groups (nzila-canada-prod-rg vs nzila-canada-staging-rg). All P0 org-isolation controls applied. Import guard violations at zero. No data-residency violations detected. Live Azure evidence VERIFIED 2026-05-21 via authenticated CLI capture (subscription 5d819f33-d16f-429c-a3c0-5b0e94740ba3). Live PostgreSQL PITR restore drill executed and verified 2026-05-21 (RESTORE-DRILL-2026-05-20-001): production database `nzila_os_prod` confirmed recoverable end-to-end with ~6 min RTO; RESTORE-DRILL-001 exception closed.",
-  "liveEvidenceVerifiedAt": "2026-05-21T01:35:00Z",
+  "overallStatusReason": "EXC-001 resolved: prod/staging now deploy to separate Azure resource groups (nzila-canada-prod-rg vs nzila-canada-staging-rg). All P0 org-isolation controls applied. Import guard violations at zero. No data-residency violations detected. Live Azure evidence VERIFIED 2026-05-21 via authenticated CLI capture (subscription 5d819f33-d16f-429c-a3c0-5b0e94740ba3). Live PostgreSQL PITR restore drill executed and verified 2026-05-21 (RESTORE-DRILL-2026-05-20-001): production database `nzila_os_prod` confirmed recoverable end-to-end with ~6 min RTO; RESTORE-DRILL-001 exception closed. Staging endpoint STAGING-UP-001 resolved 2026-05-21: CrashLoopBackOff fixed (missing secrets injected from staging KV), /api/health and /api/ready both return HTTP 200.",
+  "liveEvidenceVerifiedAt": "2026-05-21T01:46:00Z",
   "liveEvidenceManifest": "reports/runtime/live-captures/2026-05-20/live-evidence-manifest.2026-05-20.json",
   "lastRestoreDrillAt": "2026-05-21T01:31:09Z",
   "lastRestoreDrillManifest": "reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json",
@@ -60,7 +60,10 @@
       "productionResourceGroup": "nzila-canada-prod-rg",
       "stagingResourceGroup": "nzila-canada-staging-rg",
       "sharedBlastRadius": false,
-      "freshness": "2026-05-14T00:00:00.000Z"
+      "stagingEndpointVerifiedAt": "2026-05-21T01:46:00Z",
+      "stagingHealthStatus": "HEALTHY (HTTP 200, db:ok, auth:ok, redis:ok; Django sidecar absent — expected)",
+      "stagingReadyStatus": "READY (HTTP 200, ready:true)",
+      "freshness": "2026-05-21T01:46:00Z"
     },
     "dataResidency": {
       "status": "HEALTHY",
@@ -100,6 +103,16 @@
         "targetResolution": "pre-production-separation-sprint",
         "resolvedAt": "2026-05-14T00:00:00.000Z",
         "resolution": "deploy-production.yml now hardcodes nzila-canada-prod-rg with a blast-radius isolation gate (hard-blocks if prod==staging RG). gitops-deploy.yml reads resource_group from environment YAML. infrastructure/scripts/provision-prod-rg.sh documents one-time physical migration. azure-runtime-latest.json topologyDecision updated to strategy=separate-resource-groups."
+      },
+      {
+        "id": "STAGING-UP-001",
+        "type": "staging-endpoint",
+        "description": "Staging Container App (nzila-os-union-eyes-staging) was in CrashLoopBackOff (835 restarts) due to missing DATABASE_URL and AUTH_SECRET at deployment.",
+        "status": "closed",
+        "severity": "low",
+        "owner": "platform-ops",
+        "resolvedAt": "2026-05-21T01:46:00Z",
+        "resolution": "Injected 9 secrets from nzila-staging-kv as inline Container App secrets. Generated VOTING_SECRET and stored in staging KV. New revision --0000002 Running. /api/health HTTP 200, /api/ready HTTP 200. Evidence: reports/runtime/live-captures/2026-05-20/staging-warmup/."
       }
     ]
   },
