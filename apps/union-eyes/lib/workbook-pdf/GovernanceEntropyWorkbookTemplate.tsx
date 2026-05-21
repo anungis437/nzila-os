@@ -330,7 +330,7 @@ export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfD
         <View style={S.rule} />
 
         <Text style={S.density}>{data.cartography.density.index.toFixed(2)}</Text>
-        <Text style={S.bandLabel}>{data.cartography.density.band.replace(/_/g, ' ')}</Text>
+        <Text style={S.bandLabel}>{data.cartography.density.band.label}</Text>
 
         <Text style={S.body}>{data.narrative.density}</Text>
         <Text style={S.pullQuote}>{data.narrative.posture}</Text>

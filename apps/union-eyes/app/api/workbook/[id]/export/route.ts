@@ -55,7 +55,7 @@ export async function GET(
       return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
     }
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

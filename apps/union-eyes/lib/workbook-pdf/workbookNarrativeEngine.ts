@@ -36,14 +36,15 @@ const BAND_POSTURES: Record<string, string> = {
 
 export function buildWorkbookNarrative(cartography: CartographyResult): WorkbookNarrative {
   const { density } = cartography;
-  const label = BAND_LABELS[density.band] ?? density.band;
+  const bandId = density.band.id;
+  const label = BAND_LABELS[bandId] ?? bandId;
 
   const densitySentence =
     density.totalCarriers === 0
       ? 'No memory holders have been recorded yet. The cartography will begin when carriers are added.'
       : `Stewardship density stands at ${density.index.toFixed(2)} across ${density.totalCarriers} mapped carrier${density.totalCarriers === 1 ? '' : 's'} \u2014 ${label}.`;
 
-  const posture = BAND_POSTURES[density.band] ?? BAND_POSTURES.balanced;
+  const posture = BAND_POSTURES[bandId] ?? BAND_POSTURES.balanced;
 
   let concentration = '';
   if (density.institutionCriticalCount > 0) {

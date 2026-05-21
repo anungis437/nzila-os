@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-20T23:43:25.172Z",
-  "totalDocuments": 1025,
+  "generatedAt": "2026-05-21T16:09:50.230Z",
+  "totalDocuments": 1040,
   "staleDocuments": 0,
   "categories": [
     {
@@ -89,6 +89,11 @@
       "staleCount": 0
     },
     {
+      "category": "oci",
+      "count": 2,
+      "staleCount": 0
+    },
+    {
       "category": "ops",
       "count": 4,
       "staleCount": 0
@@ -115,7 +120,7 @@
     },
     {
       "category": "union-eyes",
-      "count": 15,
+      "count": 28,
       "staleCount": 0
     },
     {
@@ -1964,7 +1969,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md",
       "category": "categories",
-      "lastValidated": "2026-05-11",
+      "lastValidated": "2026-05-21",
       "stale": false
     },
     {
@@ -5690,7 +5695,7 @@
     {
       "path": "docs/compliance/soc2/gap-log.md",
       "category": "compliance",
-      "lastValidated": "2026-05-20",
+      "lastValidated": "2026-05-21",
       "stale": false
     },
     {
@@ -5792,7 +5797,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-05-20",
+      "lastValidated": "2026-05-21",
       "stale": false
     },
     {
@@ -6090,6 +6095,18 @@
       "stale": false
     },
     {
+      "path": "docs/oci/oci-method.md",
+      "category": "oci",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/oci-product-ladder.md",
+      "category": "oci",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
       "path": "docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
       "category": "ops",
       "lastValidated": "2026-05-11",
@@ -6098,13 +6115,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-05-20",
+      "lastValidated": "2026-05-21",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-05-20",
+      "lastValidated": "2026-05-21",
       "stale": false
     },
     {
@@ -6165,6 +6182,84 @@
       "path": "docs/union-eyes/dr/restore-drill-runbook.md",
       "category": "union-eyes",
       "lastValidated": "2026-05-11",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/PILOT_SCOPE_LOCK.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/READINESS_COMMANDS.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/README.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-21",
       "stale": false
     },
     {

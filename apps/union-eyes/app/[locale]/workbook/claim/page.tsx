@@ -10,7 +10,7 @@
  */
 
 import Link from 'next/link';
-import { auth } from '@nzila/platform-auth';
+import { auth } from '@nzila/platform-auth/entra/server';
 import ClaimWorkbookClient from './ClaimWorkbookClient';
 import { isFrench } from '@/lib/workbook/copy';
 

@@ -1,22 +1,22 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-20T23:43:23.053Z
+> Generated: 2026-05-21T16:09:46.327Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1675 |
-| Total Findings | 2467 |
+| Files Scanned | 1690 |
+| Total Findings | 2522 |
 | Errors | 0 |
 | Warnings | 1193 |
-| Info | 1274 |
+| Info | 1329 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1267 |
+| naming-inconsistency | 1322 |
 | stale-reference | 1032 |
 | missing-package-readme | 105 |
 | stale-package-ref | 53 |
@@ -315,7 +315,7 @@
 - 🟡 `docs/categories/platform-and-operations/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md:74` — Possible broken link: [route.meta.json](../../apps/console/route.meta.json)
 - 🟡 `docs/categories/platform-and-operations/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md:75` — Possible broken link: [route.meta.json](../../apps/platform-admin/route.meta.json)
 - 🟡 `docs/categories/platform-and-operations/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md:81` — Possible broken link: [platform-surface-migrations/README.md](../platform-surface-migrations/README.md)
-- 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md:142` — Possible broken link: [TSOSA](../../union-eyes/release/transitional-shared-secret-topology.md)
+- 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md:171` — Possible broken link: [TSOSA](../../union-eyes/release/transitional-shared-secret-topology.md)
 - 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/deployment-legitimacy-reconciliation.md:35` — Possible broken link: [`demo-environment-validation-report.md`](../../union-eyes/release/demo-environment-validation-report.md)
 - 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/orm-authority-runtime-governance-attachment.md:79` — Possible broken link: [`transitional-shared-secret-topology.md`](../../union-eyes/release/transitional-shared-secret-topology.md)
 - 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/orm-governance-readiness-review.md:144` — Possible broken link: [TSOSA §4](../../union-eyes/release/transitional-shared-secret-topology.md)
@@ -1114,7 +1114,7 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 
-## naming-inconsistency (1267)
+## naming-inconsistency (1322)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2208,7 +2208,7 @@
 - ℹ️ `docs/doctrine/SCORING_MODELS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/vocabulary.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/vocabulary.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:952` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:953` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2328,6 +2328,61 @@
 - ℹ️ `docs/platform/portfolio-matrix.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/proof-center/portfolio-proof-index.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md:43` — "Buyer Pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:63` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:67` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:85` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:90` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:33` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:105` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:107` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:23` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:142` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:179` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:153` — "buyer pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:270` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:280` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:300` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:17` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:19` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:31` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:60` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:66` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:75` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:88` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:89` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:144` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:147` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md:144` — "Evidence Package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md:174` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:34` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:35` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:74` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md:112` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md:125` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/README.md:8` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:38` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:39` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:40` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:41` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:42` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:43` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:44` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:45` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:46` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:47` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:48` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:49` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:50` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:51` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:79` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:81` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:27` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:34` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:37` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:1` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/qa/rbac-reality-map.md:29` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md:11` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/runtime-convergence/full-live-runtime-experience-certification.md:28` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2386,13 +2441,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 93 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 93 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 93 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 93 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 93 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 93 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 93 days old — may be stale
 
 ## missing-required-doc (3)
 

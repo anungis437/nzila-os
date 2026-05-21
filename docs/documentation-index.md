@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-20T23:43:25.172Z
+Generated: 2026-05-21T16:09:50.230Z
 
-Total documents indexed: 1025
+Total documents indexed: 1040
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -26,12 +26,13 @@ Stale documents (>90 days since repo validation): 0
 | nzila-runtime-integrity | 11 | 0 |
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
+| oci | 2 | 0 |
 | ops | 4 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
 | public | 1 | 0 |
 | root | 4 | 0 |
-| union-eyes | 15 | 0 |
+| union-eyes | 28 | 0 |
 | zonga | 2 | 0 |
 
 ## Documents
@@ -344,7 +345,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/platform-and-operations/architecture/ORG_SCOPED_TABLES.md](docs/categories/platform-and-operations/architecture/ORG_SCOPED_TABLES.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/ORM_BOUNDARY.md](docs/categories/platform-and-operations/architecture/ORM_BOUNDARY.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-boundary.md](docs/categories/platform-and-operations/architecture/orm-boundary.md) | categories | 2026-05-11 | current |
-| [docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md](docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md) | categories | 2026-05-11 | current |
+| [docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md](docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md) | categories | 2026-05-21 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/deployment-legitimacy-reconciliation.md](docs/categories/platform-and-operations/architecture/orm-governance/deployment-legitimacy-reconciliation.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md](docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/drizzle-scope-reconstruction.md](docs/categories/platform-and-operations/architecture/orm-governance/drizzle-scope-reconstruction.md) | categories | 2026-05-11 | current |
@@ -965,7 +966,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/tutorials/README.md](docs/categories/stakeholders/tutorials/README.md) | categories | 2026-05-11 | current |
 | [docs/compliance/soc2/control-mapping.md](docs/compliance/soc2/control-mapping.md) | compliance | 2026-05-20 | current |
 | [docs/compliance/soc2/evidence-inventory.md](docs/compliance/soc2/evidence-inventory.md) | compliance | 2026-05-20 | current |
-| [docs/compliance/soc2/gap-log.md](docs/compliance/soc2/gap-log.md) | compliance | 2026-05-20 | current |
+| [docs/compliance/soc2/gap-log.md](docs/compliance/soc2/gap-log.md) | compliance | 2026-05-21 | current |
 | [docs/compliance/soc2/README.md](docs/compliance/soc2/README.md) | compliance | 2026-05-20 | current |
 | [docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md](docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/constitution.md](docs/doctrine/constitution.md) | doctrine | 2026-05-20 | current |
@@ -982,7 +983,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/SCORING_MODELS.md](docs/doctrine/SCORING_MODELS.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/vocabulary.md](docs/doctrine/vocabulary.md) | doctrine | 2026-05-20 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-20 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-21 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
@@ -1032,9 +1033,11 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md](docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
+| [docs/oci/oci-method.md](docs/oci/oci-method.md) | oci | 2026-05-21 | current |
+| [docs/oci/oci-product-ladder.md](docs/oci/oci-product-ladder.md) | oci | 2026-05-21 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-20 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-20 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-21 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-21 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-20 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-20 | current |
@@ -1045,6 +1048,19 @@ Stale documents (>90 days since repo validation): 0
 | [docs/public/restore-readiness-summary.md](docs/public/restore-readiness-summary.md) | public | 2026-05-11 | current |
 | [docs/README.md](docs/README.md) | README.md | 2026-05-10 | current |
 | [docs/union-eyes/dr/restore-drill-runbook.md](docs/union-eyes/dr/restore-drill-runbook.md) | union-eyes | 2026-05-11 | current |
+| [docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md](docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md](docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md](docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md](docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md](docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md](docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md](docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/PILOT_SCOPE_LOCK.md](docs/union-eyes/pilot-evidence-pack/PILOT_SCOPE_LOCK.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md](docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/READINESS_COMMANDS.md](docs/union-eyes/pilot-evidence-pack/READINESS_COMMANDS.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/README.md](docs/union-eyes/pilot-evidence-pack/README.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md](docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md](docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md) | union-eyes | 2026-05-21 | current |
 | [docs/union-eyes/qa/rbac-reality-map.md](docs/union-eyes/qa/rbac-reality-map.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/qa/user-story-coverage-matrix.md](docs/union-eyes/qa/user-story-coverage-matrix.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md](docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md) | union-eyes | 2026-05-11 | current |

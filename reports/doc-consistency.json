@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-20T23:43:23.053Z",
-  "filesScanned": 1675,
-  "totalFindings": 2467,
+  "generatedAt": "2026-05-21T16:09:46.327Z",
+  "filesScanned": 1690,
+  "totalFindings": 2522,
   "findingsByRule": {
     "stale-reference": 1032,
     "stale-package-ref": 53,
-    "naming-inconsistency": 1267,
+    "naming-inconsistency": 1322,
     "stale-date": 7,
     "missing-required-doc": 3,
     "missing-package-readme": 105
@@ -13,7 +13,7 @@
   "findingsBySeverity": {
     "error": 0,
     "warning": 1193,
-    "info": 1274
+    "info": 1329
   },
   "findings": [
     {
@@ -2078,7 +2078,7 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md",
-      "line": 142,
+      "line": 171,
       "message": "Possible broken link: [TSOSA](../../union-eyes/release/transitional-shared-secret-topology.md)"
     },
     {
@@ -15259,7 +15259,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 952,
+      "line": 953,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16098,6 +16098,391 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md",
+      "line": 43,
+      "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
+      "line": 63,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
+      "line": 67,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
+      "line": 85,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
+      "line": 90,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 14,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 33,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 105,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 107,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 23,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 142,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 179,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md",
+      "line": 153,
+      "message": "\"buyer pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md",
+      "line": 270,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md",
+      "line": 280,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md",
+      "line": 300,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 17,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 19,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 31,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 60,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 66,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 75,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 88,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 89,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 144,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md",
+      "line": 147,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md",
+      "line": 144,
+      "message": "\"Evidence Package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md",
+      "line": 174,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md",
+      "line": 34,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md",
+      "line": 35,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md",
+      "line": 74,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md",
+      "line": 112,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md",
+      "line": 125,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/README.md",
+      "line": 8,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 38,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 39,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 40,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 41,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 42,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 43,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 44,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 45,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 46,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 47,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 48,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 49,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 50,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 51,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 79,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
+      "line": 81,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md",
+      "line": 27,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md",
+      "line": 34,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md",
+      "line": 37,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md",
+      "line": 1,
+      "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/union-eyes/qa/rbac-reality-map.md",
       "line": 29,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
@@ -16485,49 +16870,49 @@
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"February 17, 2026\" is 92 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",

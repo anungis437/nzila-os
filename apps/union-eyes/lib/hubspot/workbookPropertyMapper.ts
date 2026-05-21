@@ -79,7 +79,7 @@ export function buildWorkbookCompanyProperties(input: {
   const { density } = input.cartography;
   const props: Record<string, string> = {
     oci_stewardship_concentration_index: density.index.toFixed(2),
-    oci_stewardship_concentration_band: density.band,
+    oci_stewardship_concentration_band: density.band.id,
     oci_continuity_carrier_count: String(density.totalCarriers),
     oci_load_bearing_carriers: String(density.loadBearingCount),
     oci_load_bearing_without_successor: String(density.unsuccessedLoadBearingCount),

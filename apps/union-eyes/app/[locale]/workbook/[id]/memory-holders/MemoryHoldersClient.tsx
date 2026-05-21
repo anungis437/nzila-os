@@ -12,7 +12,10 @@
 
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
-import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
+import {
+  runStewardshipCartography,
+  type CartographyResult,
+} from '@/lib/workbook/engines/stewardshipCartography';
 import type { Locale } from '@/lib/workbook/copy';
 
 type TenureBand = '0_3y' | '3_7y' | '7_15y' | '15y_plus';
@@ -29,24 +32,7 @@ interface Holder {
   notes: string | null;
 }
 
-interface Cartography {
-  density: {
-    index: number;
-    band: string;
-    totalCarriers: number;
-    loadBearingCount: number;
-    institutionCriticalCount: number;
-    unsuccessedLoadBearingCount: number;
-    unsuccessedInstitutionCriticalCount: number;
-  };
-  signals: ReadonlyArray<{
-    signalId: string;
-    severity: string;
-    category: string;
-    statement: string;
-  }>;
-  preview: string;
-}
+type Cartography = CartographyResult;
 
 interface Props {
   workbookId: string;
@@ -123,7 +109,7 @@ export default function MemoryHoldersClient({
         successorIdentified: h.successorIdentified,
       })),
     );
-    setCartography(c as Cartography);
+    setCartography(c);
   };
 
   const persist = (id: string, patch: Partial<Holder>) => {
@@ -182,10 +168,10 @@ export default function MemoryHoldersClient({
   };
 
   const bandTone = useMemo(() => {
-    const band = cartography.density.band;
-    if (band === 'fragile' || band === 'critical' || band === 'severe') return 'text-rose-700';
-    if (band === 'concentrated' || band === 'high') return 'text-amber-700';
-    if (band === 'balanced' || band === 'moderate') return 'text-emerald-700';
+    const band = cartography.density.band.id;
+    if (band === 'fragile' || band === 'critical') return 'text-rose-700';
+    if (band === 'concentrated') return 'text-amber-700';
+    if (band === 'distributed' || band === 'observed') return 'text-emerald-700';
     return 'text-stone-700';
   }, [cartography.density.band]);
 
@@ -371,7 +357,7 @@ export default function MemoryHoldersClient({
                 {cartography.density.index.toFixed(2)}
               </p>
               <p className="mt-1 text-sm capitalize text-stone-600">
-                {cartography.density.band.replace(/_/g, ' ')}
+                {cartography.density.band.label}
               </p>
               <p className="mt-4 text-xs leading-relaxed text-stone-500">{t.densityDescription}</p>
 

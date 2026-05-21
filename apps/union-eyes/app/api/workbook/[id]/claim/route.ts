@@ -13,7 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
-import { auth } from '@nzila/platform-auth';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';

@@ -63,7 +63,16 @@ export default async function MemoryHoldersPage({
     <MemoryHoldersClient
       workbookId={id}
       locale={isFrench(locale) ? 'fr-CA' : 'en-CA'}
-      initialHolders={rows}
+      initialHolders={rows.map((r) => ({
+        ...r,
+        tenureBand: r.tenureBand as '0_3y' | '3_7y' | '7_15y' | '15y_plus' | null,
+        criticality: r.criticality as
+          | 'routine'
+          | 'important'
+          | 'load_bearing'
+          | 'institution_critical'
+          | null,
+      }))}
       initialCartography={cartography}
       hubHref={`/${locale}/workbook/${id}`}
     />
