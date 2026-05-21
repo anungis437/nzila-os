@@ -17,6 +17,8 @@ import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { evaluateFee, captureTransactionFee, reverseTransactionFee, reconcileExternalInvoicePayment } from '@/services/platform-economics';
 import { logger } from '@/lib/logger';
+import { syncIcraPurchase } from '@/lib/hubspot/syncIcraPurchase';
+import type { ExecutivePersonaId, ReportTierId } from '@/lib/icra/types';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -364,6 +366,43 @@ export async function POST(request: NextRequest) {
               tierId: icraTierId,
               sessionId: session.id,
             });
+
+            // ── Institutional continuity stewardship: HubSpot CRM sync ──
+            // Fire-and-forget. CRM unavailability MUST NOT block Stripe
+            // fulfilment, the PDF flow, or the assessment lifecycle.
+            // Only runs when the institution voluntarily provided an email
+            // (no enrichment, no scraping, no behavioural scoring).
+            const customerEmail =
+              (session?.customer_details?.email as string | undefined) ??
+              (session?.customer_email as string | undefined) ??
+              (session?.metadata?.email as string | undefined);
+            if (customerEmail) {
+              void syncIcraPurchase({
+                assessmentId: icraAssessmentId,
+                tierId: icraTierId as ReportTierId,
+                paymentReference:
+                  (session?.payment_intent as string | undefined) ?? session?.id,
+                amount:
+                  typeof session?.amount_total === 'number'
+                    ? session.amount_total / 100
+                    : undefined,
+                email: customerEmail,
+                firstName: session?.customer_details?.name as string | undefined,
+                organizationName: session?.metadata?.organization_name as string | undefined,
+                persona: session?.metadata?.icra_persona as ExecutivePersonaId | undefined,
+                attribution: {
+                  utmSource: session?.metadata?.utm_source as string | undefined,
+                  utmMedium: session?.metadata?.utm_medium as string | undefined,
+                  utmCampaign: session?.metadata?.utm_campaign as string | undefined,
+                },
+              }).catch((hsErr) => {
+                logger.error('[stripe-webhook] HubSpot ICRA sync failed (non-blocking)', {
+                  icraAssessmentId,
+                  tierId: icraTierId,
+                  message: hsErr instanceof Error ? hsErr.message : String(hsErr),
+                });
+              });
+            }
           } catch (icraErr) {
             logger.error('[stripe-webhook] ICRA fulfillment error', {
               icraAssessmentId,
