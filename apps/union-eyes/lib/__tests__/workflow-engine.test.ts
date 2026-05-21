@@ -47,6 +47,11 @@ vi.mock('@/db/db', () => ({
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: (...a: unknown[]) => mocks.mockWithRLS(...a),
+  withSystemRLSContext: (_reason: string, fn: (tx: unknown) => unknown) => fn({
+    select: (...a: unknown[]) => mocks.mockSelect(...a),
+    update: (...a: unknown[]) => mocks.mockUpdate(...a),
+    insert: (...a: unknown[]) => mocks.mockInsert(...a),
+  }),
 }));
 
 vi.mock('@/db/schema/claims-schema', () => ({

@@ -84,7 +84,7 @@ describe("with-rls-context", () => {
       mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
       // currentUser returns no org metadata → all fallbacks exhausted → must throw
       await expect(withRLSContext(async () => "ok")).rejects.toThrow(
-        "Organization context is required for scoped data access",
+        "Organization context required for scoped data access",
       );
     });
 
@@ -119,7 +119,7 @@ describe("with-rls-context", () => {
       mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
       mocks.mockCurrentUser.mockRejectedValueOnce(new Error("edge case"));
       await expect(withRLSContext(async () => "ok")).rejects.toThrow(
-        "Organization context is required for scoped data access",
+        "Organization context required for scoped data access",
       );
     });
 
@@ -151,7 +151,7 @@ describe("with-rls-context", () => {
       mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
       mocks.mockCurrentUser.mockResolvedValueOnce(null);
       await expect(withRLSContext(async () => "ok")).rejects.toThrow(
-        "Organization context is required for scoped data access",
+        "Organization context required for scoped data access",
       );
     });
   });
