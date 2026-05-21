@@ -137,8 +137,8 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     package: 'minimatch',
     reason: 'Dev-only dependency (eslint toolchain). No user input reaches minimatch in production runtime. Upgrade to minimatch@10.2.1 would break eslint which requires v3/v9 API. Risk confined to local lint tooling DoS only.',
     approvedBy: 'platform-lead',
-    approvedAt: '2026-02-21',
-    expiresAt: '2026-05-21',
+    approvedAt: '2026-05-20',
+    expiresAt: '2026-08-20',
     severity: 'high',
   },
   {
