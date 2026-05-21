@@ -423,3 +423,21 @@ The method has succeeded in an engagement when the institution can credibly stat
 Success is institutional. Success is not measured by the facilitator. Success is not measured by activity volume. Success is not measured by artefact count.
 
 The institution declares closure. The method then ends.
+
+---
+
+## 13. P3 Operationalization corpus
+
+The Phase 3 (Stabilization) operationalization corpus documents how stabilization is observed, scored, redistributed, and progressed within an institution. These documents are doctrinal and bind the engines under `apps/union-eyes/lib/workbook/engines/`.
+
+- `docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md` — stewardship redistribution framework and reversibility window.
+- `docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md` — governance survivability and recovery moves.
+- `docs/oci/stabilization/OCI_STABILIZATION_PROGRESSION.md` — progression bands (not_yet_readable, holding, advancing, regressing).
+- `docs/oci/stabilization/OCI_EXECUTIVE_STABILIZATION_OPERATIONS.md` — executive stabilization model and composite continuity operational health.
+- `docs/oci/stabilization/OCI_FACILITATOR_RUNTIME.md` — facilitator pacing, intervention sensitivity, and readiness signals.
+- `docs/oci/stabilization/OCI_RUNTIME_TRANSITION_MODEL.md` — the five named P3 -> P4 transitions and their gates.
+- `docs/oci/stabilization/OCI_CONTINUITY_OPERATIONALIZATION.md` — operationalization domains and hook inertness when readiness is insufficient.
+- `docs/oci/stabilization/OCI_LONGITUDINAL_STABILIZATION.md` — longitudinal stabilization runtime and k-anonymity floor.
+- `docs/oci/stabilization/OCI_RUNTIME_ALIGNMENT.md` — runtime alignment framework reconciling P3 corpus with the canonical five phases.
+
+These documents do not displace anything in §§1-12. They formalize the artefacts that institutions produce while practising Phase 3 and the gates that govern transition out of Phase 3.

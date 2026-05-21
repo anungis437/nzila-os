@@ -824,6 +824,38 @@ function ExecutiveReflectionPage({ data }: { data: PdfReportData }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Stabilization Movement Appendix (facilitated edition only)
+//
+// Optional appendix page rendered only when data.stabilizationMovement is
+// supplied. The mapper composes the paragraphs from the executive
+// stabilization model output. No appendix page is rendered for institutions
+// that have not requested a facilitated-edition reading.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function StabilizationMovementAppendixPage({ data }: { data: PdfReportData }) {
+  const paragraphs = data.stabilizationMovement?.paragraphs ?? [];
+  return (
+    <Page size={PAGE.size} style={S.page}>
+      <Text style={S.sectionLabel}>Appendix — Facilitated Edition</Text>
+      <Text style={S.sectionHeading}>Stabilization Movement</Text>
+      <View style={S.divider} />
+
+      {paragraphs.map((p, idx) => (
+        <View key={`sm-${idx}`} style={{ marginBottom: SPACE.lg }}>
+          <Text style={S.subsectionHeading}>{p.heading}</Text>
+          <Text style={S.bodyPara}>{p.body}</Text>
+        </View>
+      ))}
+
+      <PageFooter
+        institutionName={data.institutionName}
+        generatedAt={data.generatedAt}
+      />
+    </Page>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Assessment Metadata Page (back matter)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -943,6 +975,7 @@ export function ExecutiveContinuityBriefTemplate({
       <ModernizationReviewPage data={data} />
       <RecommendationsPage data={data} />
       <ExecutiveReflectionPage data={data} />
+      {data.stabilizationMovement ? <StabilizationMovementAppendixPage data={data} /> : null}
       <AssessmentMetadataPage data={data} />
     </Document>
   );

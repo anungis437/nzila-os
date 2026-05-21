@@ -586,3 +586,99 @@ export function generateExecutiveReflection(
 
   return [p1, p2, p3];
 }
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 8 — Stabilization Movement appendix builders
+//
+// These builders read the executive stabilization model output and produce
+// short, observational paragraphs for the optional Stabilization Movement
+// appendix in the Executive Continuity Brief PDF. They are facilitated-edition
+// only: the appendix is gated on the presence of an ExecutiveStabilizationResult
+// being supplied to the data mapper.
+//
+// Tone discipline matches the rest of this engine: calm, observational, no
+// forbidden vocabulary, no blame framing. Output is fully deterministic and
+// traces back to the engine bands and counts.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import type {
+  ExecutiveDomainBand,
+  ExecutiveDomainId,
+  ExecutiveStabilizationResult,
+} from '../workbook/engines/executive/executiveStabilizationModel';
+
+export interface StabilizationAppendixParagraph {
+  readonly heading: string;
+  readonly body: string;
+}
+
+function bandFor(
+  result: ExecutiveStabilizationResult,
+  domain: ExecutiveDomainId,
+): ExecutiveDomainBand {
+  return result.domains.find((d) => d.domain === domain)?.band ?? 'not_yet_readable';
+}
+
+function describeBand(band: ExecutiveDomainBand): string {
+  switch (band) {
+    case 'not_yet_readable':
+      return 'not yet readable on the available evidence';
+    case 'holding':
+      return 'holding without movement in either direction';
+    case 'stabilizing':
+      return 'showing movement consistent with stabilization';
+    case 'regressing':
+      return 'showing movement away from stabilization';
+  }
+}
+
+export function buildStabilizationMovementNarrative(
+  result: ExecutiveStabilizationResult,
+): StabilizationAppendixParagraph {
+  const composite = result.compositeBand;
+  const body =
+    `Across the eight stabilization domains read for this institution, composite continuity operational health is ${describeBand(composite)}. ` +
+    `This appendix is offered as a deterministic reading of the artefacts the institution has already produced. It is not a recommendation, and it is not a forward projection. The institution remains the authority on what to make of the reading.`;
+  return { heading: 'Stabilization movement', body };
+}
+
+export function buildContinuityDebtReductionNarrative(
+  result: ExecutiveStabilizationResult,
+): StabilizationAppendixParagraph {
+  const band = bandFor(result, 'intervention_ledger_health');
+  const body =
+    `Reading the intervention ledger, the reduction posture for continuity debt is ${describeBand(band)}. ` +
+    `Continuity debt reduces when interventions are ratified into the institution''s governance of record and when the reversibility window for a redistribution closes without withdrawal. The runtime reads the ledger only; it does not score the institution.`;
+  return { heading: 'Continuity debt reduction', body };
+}
+
+export function buildGovernanceRecoveryTrajectoryNarrative(
+  result: ExecutiveStabilizationResult,
+): StabilizationAppendixParagraph {
+  const band = bandFor(result, 'governance_recovery');
+  const body =
+    `The governance recovery trajectory is ${describeBand(band)}. ` +
+    `A recovery move is read only after the governance body has ratified it. Pending recovery moves are not read as recovery; they are read as pending. The institution''s governance body is the source of authority for what counts as ratified.`;
+  return { heading: 'Governance recovery trajectory', body };
+}
+
+export function buildOnboardingSurvivabilityNarrative(
+  result: ExecutiveStabilizationResult,
+): StabilizationAppendixParagraph {
+  const band = bandFor(result, 'onboarding_survivability');
+  const body =
+    `Onboarding survivability is ${describeBand(band)}. ` +
+    `Survivability is read from the institution''s own onboarding artefacts and the workflow completions that have been recorded for successor stewards. The reading is institutional. It is not a measurement of any individual.`;
+  return { heading: 'Onboarding survivability', body };
+}
+
+export function buildStewardshipRedistributionEvolutionNarrative(
+  result: ExecutiveStabilizationResult,
+): StabilizationAppendixParagraph {
+  const band = bandFor(result, 'stewardship_redistribution');
+  const body =
+    `The stewardship redistribution evolution is ${describeBand(band)}. ` +
+    `Redistribution evolves only when carriers have consented and the reversibility window has closed without withdrawal. Refusals and withdrawals are read as institutional evidence, not as friction.`;
+  return { heading: 'Stewardship redistribution evolution', body };
+}

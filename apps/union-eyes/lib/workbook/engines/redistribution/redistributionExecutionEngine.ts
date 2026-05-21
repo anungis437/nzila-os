@@ -166,7 +166,7 @@ export function runRedistributionExecutionEngine(
       severity: severityFor('consent_ledger_event_rejected'),
       category: 'consent_ledger_event_rejected',
       statement: `Consent ledger event ${rej.eventId} for carrier ${rej.carrierId} rejected: ${rej.reason}.`,
-      evidence: rej,
+      evidence: { ...rej },
     });
   }
 

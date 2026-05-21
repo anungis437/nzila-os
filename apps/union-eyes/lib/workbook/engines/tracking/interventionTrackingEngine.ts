@@ -215,7 +215,7 @@ export function runInterventionTrackingEngine(
       severity: severityFor('ledger_event_rejected'),
       category: 'ledger_event_rejected',
       statement: `Ledger event ${rej.eventId} for intervention ${rej.interventionId} rejected: ${rej.reason}.`,
-      evidence: rej,
+      evidence: { ...rej },
     });
   }
 

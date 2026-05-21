@@ -32,8 +32,15 @@ import {
   generateModernizationReview,
   generateRecommendations,
   generateExecutiveReflection,
+  buildStabilizationMovementNarrative,
+  buildContinuityDebtReductionNarrative,
+  buildGovernanceRecoveryTrajectoryNarrative,
+  buildOnboardingSurvivabilityNarrative,
+  buildStewardshipRedistributionEvolutionNarrative,
   type PdfRecommendation,
+  type StabilizationAppendixParagraph,
 } from './reportNarrativeEngine';
+import type { ExecutiveStabilizationResult } from '../workbook/engines/executive/executiveStabilizationModel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PdfReportData — the fully-assembled data structure for the template
@@ -82,6 +89,13 @@ export interface PdfReportData {
   // Stats
   answeredQuestionCount: number;
   questionBankVersion: number;
+
+  // Optional Stabilization Movement appendix (facilitated edition only).
+  // When supplied, the PDF template renders an appendix page after the
+  // executive reflection composed from these paragraphs.
+  stabilizationMovement?: {
+    paragraphs: readonly StabilizationAppendixParagraph[];
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,6 +105,7 @@ export interface PdfReportData {
 export function mapToPdfReportData(
   profile: InstitutionalContinuityProfile,
   orgContext?: OrganizationContext | null,
+  executiveStabilization?: ExecutiveStabilizationResult | null,
 ): PdfReportData {
   const persona = orgContext ? detectPersona(orgContext) : undefined;
 
@@ -170,5 +185,17 @@ export function mapToPdfReportData(
     persona,
     answeredQuestionCount: profile.answeredQuestionCount,
     questionBankVersion: profile.questionBankVersion,
+
+    stabilizationMovement: executiveStabilization
+      ? {
+          paragraphs: [
+            buildStabilizationMovementNarrative(executiveStabilization),
+            buildContinuityDebtReductionNarrative(executiveStabilization),
+            buildGovernanceRecoveryTrajectoryNarrative(executiveStabilization),
+            buildOnboardingSurvivabilityNarrative(executiveStabilization),
+            buildStewardshipRedistributionEvolutionNarrative(executiveStabilization),
+          ],
+        }
+      : undefined,
   };
 }
