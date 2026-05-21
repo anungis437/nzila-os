@@ -59,7 +59,7 @@ This is not a demo-only clearance. The security controls, type discipline, and o
 3. **Key Vault separation verification** — confirm prod Key Vault is `nzila-ue-prod-kv` (not staging); log in `reports/runtime/`.
 4. **DPA signature** — signed Data Processing Agreement (template at `docs/compliance/dpa-template.md`) on file before any real member data is entered.
 5. **Pilot scope acknowledgement** — the union IT contact (James persona) must receive and sign the pilot scope letter (template at `docs/union-eyes/pilot-evidence-pack/PILOT_SCOPE_LOCK.md`).
-6. **Restore drill** — complete at least one restore drill per `docs/union-eyes/dr/restore-drill-runbook.md`; record outcome.
+6. **Restore drill** — ✅ **COMPLETE 2026-05-21** (RESTORE-DRILL-2026-05-20-001; manifest at `reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json`). Quarterly cadence; next drill due 2026-08-21.
 
 ---
 

@@ -1,0 +1,4 @@
+az postgres flexible-server delete --name nzila-ue-drill-pitr-9684 --resource-group nzila-canada-prod-rg --yes
+Result: success (server removed, verified via subsequent show returning ResourceNotFound)
+RequestedUTC: 2026-05-21T01:30:05Z
+CompletedUTC: 2026-05-21T01:31:09Z

@@ -1,0 +1,8 @@
+WARNING: The --database-name/-d argument has been deprecated and will be removed in next breaking change release(2.86.0) scheduled for May 2026.
+WARNING: The --name/-n argument will be repurposed to specify the database name. The --server-name/-s argument will be introduced to specify the server name in next breaking change release(2.86.0) scheduled for May 2026.
+Charset    Collation    Name               ResourceGroup
+---------  -----------  -----------------  --------------------
+UTF8       en_US.utf8   azure_maintenance  nzila-canada-prod-rg
+UTF8       en_US.utf8   postgres           nzila-canada-prod-rg
+UTF8       en_US.utf8   azure_sys          nzila-canada-prod-rg
+UTF8       en_US.utf8   nzila_os_prod      nzila-canada-prod-rg

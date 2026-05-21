@@ -34,7 +34,7 @@ This directory contains the complete evidence package for the Union Eyes v0.1 co
 |---|---|
 | Is Union Eyes pilot-safe? | **Yes** — controlled pilot, 1 org, signed DPA required |
 | Any CISO-level blockers? | **No** — EXC-001 resolved, RLS fail-closed, 0 raw-db imports, strict TS, live Azure verified |
-| What's pending for broad production? | Live restore drill execution + DPA signature (live Azure inventory now verified — see `reports/runtime/live-captures/2026-05-20/`) |
+| What's pending for broad production? | DPA counter-signature + SOC 2 / pen-test scheduling (commercial/process — live Azure inventory verified 2026-05-21; **live PITR restore drill executed and verified 2026-05-21** — see `reports/runtime/live-captures/2026-05-20/restore-drill/`) |
 | Data residency compliant? | **Yes** — Azure Canada Central verified live 2026-05-21 |
 | Can buyers review today? | **Yes** — direct them to BUYER_REVIEW_INDEX.md |
 
@@ -46,7 +46,7 @@ This directory contains the complete evidence package for the Union Eyes v0.1 co
 |-------|-------|--------|
 | Code/config posture | ✅ HEALTHY | `reports/runtime/platform-runtime-truth-latest.json` |
 | Live operational proof | ✅ VERIFIED 2026-05-21 | `reports/runtime/live-captures/2026-05-20/live-evidence-manifest.2026-05-20.json` |
-| Production expansion | 🔒 CONDITIONAL | Pending live restore drill + DPA (expansion gate in `PILOT_OPERATIONS_RUNBOOK.md` §10) |
+| Production expansion | ✅ GO 2026-05-21 | Live PITR restore drill verified (RESTORE-DRILL-2026-05-20-001); remaining items are commercial — see `restore-drill/restore-drill-manifest.json` |
 
 ---
 

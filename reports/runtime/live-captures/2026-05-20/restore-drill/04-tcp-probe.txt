@@ -1,0 +1,5 @@
+DnsResolved: 20.220.147.202
+TcpTestSucceeded: False
+PingSucceeded: True
+Fqdn: nzila-ue-drill-pitr-9684.postgres.database.azure.com
+TestedAtUTC: 2026-05-21T01:29:52.5736148Z

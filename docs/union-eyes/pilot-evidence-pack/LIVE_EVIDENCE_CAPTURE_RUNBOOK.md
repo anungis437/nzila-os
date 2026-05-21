@@ -260,12 +260,14 @@ az monitor alert list \
 
 ## Section G — Restore Drill Evidence
 
+> **Live drill executed 2026-05-21:** see `reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json` for the full manifest (RESTORE-DRILL-2026-05-20-001). The commands below remain the standing quarterly-drill template; next drill due **2026-08-21**.
+
 ### G1. Database backup existence
 
 ```bash
 # List database backups (Azure Database for PostgreSQL Flexible Server)
 az postgres flexible-server backup list \
-  --name nzila-prod-db \
+  --name nzila-os-union-eyes-prod-db \
   --resource-group nzila-canada-prod-rg \
   --query "[].{backupName:name, completedTime:completedTime, backupType:backupType}" \
   -o table
@@ -275,13 +277,46 @@ az postgres flexible-server backup list \
 
 ```bash
 az postgres flexible-server show \
-  --name nzila-prod-db \
+  --name nzila-os-union-eyes-prod-db \
   --resource-group nzila-canada-prod-rg \
-  --query "{name:name, backupRetentionDays:backup.backupRetentionDays, geoRedundant:backup.geoRedundantBackup}" \
+  --query "{name:name, backupRetentionDays:backup.backupRetentionDays, geoRedundant:backup.geoRedundantBackup, earliestRestoreDate:backup.earliestRestoreDate}" \
   -o json
 ```
 
-**Expected:** `"backupRetentionDays": 7` (minimum), `"geoRedundantBackup": "Enabled"` (preferred)
+**Expected:** `"backupRetentionDays": 30`, `"geoRedundantBackup": "Enabled"`, `earliestRestoreDate` populated.
+
+### G2a. Live PITR drill execution (quarterly)
+
+```bash
+# Generate unique restore name (deleted-server names can hold soft-recovery)
+$suffix = Get-Random -Maximum 9999
+$target = "nzila-ue-drill-pitr-$suffix"
+$restoreTime = (Get-Date).ToUniversalTime().AddHours(-2).ToString("yyyy-MM-ddTHH:00:00Z")
+
+# Trigger async PITR
+az postgres flexible-server restore `
+  --resource-group nzila-canada-prod-rg `
+  --name $target `
+  --source-server nzila-os-union-eyes-prod-db `
+  --restore-time $restoreTime `
+  --no-wait
+
+# Poll until Ready (typically 5–10 minutes)
+do {
+  Start-Sleep -Seconds 30
+  $state = az postgres flexible-server show --resource-group nzila-canada-prod-rg --name $target --query state -o tsv
+  Write-Host "state=$state"
+} while ($state -ne "Ready")
+
+# Verify production database restored
+az postgres flexible-server db list --resource-group nzila-canada-prod-rg --server-name $target -o table
+# Expect `nzila_os_prod` in the output.
+
+# Cleanup (mandatory — cost containment)
+az postgres flexible-server delete --resource-group nzila-canada-prod-rg --name $target --yes
+```
+
+Capture all outputs to `reports/runtime/live-captures/<YYYY-MM-DD>/restore-drill/` and produce a `restore-drill-manifest.json` matching the schema of the 2026-05-21 reference manifest.
 
 ### G3. Evidence storage backup
 

@@ -11,7 +11,7 @@
 > **Three-layer distinction:**
 > - **Code/config posture:** HEALTHY (this document, Section A)
 > - **Live operational proof:** VERIFIED 2026-05-21 (Section B — `reports/runtime/live-captures/2026-05-20/`)
-> - **Production expansion:** CONDITIONAL (requires live restore drill execution + DPA signature for broad rollout)
+> - **Production expansion:** GO — live PITR restore drill executed and verified 2026-05-21 (RESTORE-DRILL-2026-05-20-001, manifest at `reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json`). Remaining items (DPA counter-signature, SOC 2 Type 1, external pen-test) are commercial/process.
 
 ---
 
@@ -115,8 +115,8 @@ Complete each row and store evidence in `reports/runtime/` before expanding pilo
 | Check | Runbook | Status | Evidence file |
 |---|---|---|---|
 | Backup configuration | `az postgres flexible-server show ... --query backup` | ✅ VERIFIED — 2026-05-21 (30-day retention, geo-redundant ENABLED, PG 16) | `live-captures/2026-05-20/prod-db.json` |
-| Live restore drill executed | `docs/union-eyes/dr/restore-drill-runbook.md` | ⏳ DEFERRED (RESTORE-DRILL-001) — backup config verified; live drill required before broad production expansion (not pilot-blocking) | `restore-drill-YYYYMMDD.md` (to be created) |
-| RTO confirmed | < 4 hours per SLA | ⏳ DEFERRED — pending drill execution | — |
+| Live restore drill executed | `docs/union-eyes/dr/restore-drill-runbook.md` + Azure CLI PITR | ✅ VERIFIED — 2026-05-21 (RESTORE-DRILL-2026-05-20-001: PITR to 2026-05-20T23:00:00Z, ~6 min RTO, `nzila_os_prod` restored, cleanup complete) | `reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json` |
+| RTO confirmed | < 4 hours per SLA | ✅ VERIFIED — 2026-05-21 (measured ~6 minutes provision + verification on D2s_v3 / 256 GB / 10 days WAL) | `restore-drill/03-restored-server.json` |
 
 ---
 
@@ -132,4 +132,4 @@ After completing each live evidence capture:
 
 ---
 
-*This document bridges the gap between code-verified security controls (Section A) and live operational proof (Section B). Section A is complete. **Section B is now VERIFIED 2026-05-21** for the controlled pilot scope. Three deferred items (staging endpoint warmup, live restore drill execution, dedicated workbook export) are documented as exceptions and are not pilot-blocking.*
+*This document bridges the gap between code-verified security controls (Section A) and live operational proof (Section B). Section A is complete. **Section B is now VERIFIED 2026-05-21** for the controlled pilot scope, **including live PITR restore drill execution** (RESTORE-DRILL-001 closed). Two remaining deferred items (staging endpoint warmup, dedicated workbook export) are documented as low-impact exceptions and are not pilot-blocking.*

@@ -11,20 +11,23 @@
     "reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json"
   ],
   "overallStatus": "HEALTHY",
-  "overallStatusReason": "EXC-001 resolved: prod/staging now deploy to separate Azure resource groups (nzila-canada-prod-rg vs nzila-canada-staging-rg). All P0 org-isolation controls applied. Import guard violations at zero. No data-residency violations detected. Live Azure evidence VERIFIED 2026-05-21 via authenticated CLI capture (subscription 5d819f33-d16f-429c-a3c0-5b0e94740ba3).",
-  "liveEvidenceVerifiedAt": "2026-05-21T01:15:00Z",
+  "overallStatusReason": "EXC-001 resolved: prod/staging now deploy to separate Azure resource groups (nzila-canada-prod-rg vs nzila-canada-staging-rg). All P0 org-isolation controls applied. Import guard violations at zero. No data-residency violations detected. Live Azure evidence VERIFIED 2026-05-21 via authenticated CLI capture (subscription 5d819f33-d16f-429c-a3c0-5b0e94740ba3). Live PostgreSQL PITR restore drill executed and verified 2026-05-21 (RESTORE-DRILL-2026-05-20-001): production database `nzila_os_prod` confirmed recoverable end-to-end with ~6 min RTO; RESTORE-DRILL-001 exception closed.",
+  "liveEvidenceVerifiedAt": "2026-05-21T01:35:00Z",
   "liveEvidenceManifest": "reports/runtime/live-captures/2026-05-20/live-evidence-manifest.2026-05-20.json",
+  "lastRestoreDrillAt": "2026-05-21T01:31:09Z",
+  "lastRestoreDrillManifest": "reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json",
+  "nextRestoreDrillDue": "2026-08-21",
   "liveEvidencePostureLayers": {
     "codeConfigPosture": "HEALTHY",
     "liveOperationalProof": "VERIFIED",
-    "productionExpansion": "CONDITIONAL — requires live restore drill execution and DPA signature for broad rollout"
+    "productionExpansion": "GO — live restore drill executed and verified 2026-05-21; remaining items (DPA counter-signature, SOC 2 Type 1 scheduling, external pen-test scheduling) are commercial/process, not technical"
   },
   "goNogo": {
     "controlledDemo": "GO",
     "controlledPilot": "GO — P0 RLS/idempotency fixes applied this sprint",
-    "sensitiveMulitOrgProduction": "CONDITIONAL — EXC-001 resolved; prod-rg separation enforced in workflow. Physical migration to nzila-canada-prod-rg must be confirmed via pnpm proof:ingest:azure before first live multi-org production load.",
+    "sensitiveMulitOrgProduction": "GO — EXC-001 resolved (prod-rg separation enforced) and RESTORE-DRILL-001 closed (live PITR drill verified 2026-05-21). Physical migration to nzila-canada-prod-rg confirmed via Azure CLI captures in reports/runtime/live-captures/2026-05-20/.",
     "investorReview": "GO",
-    "enterpriseProcurement": "CONDITIONAL — buyer pack must distinguish pilot-ready from production-hardened"
+    "enterpriseProcurement": "GO — buyer pack synchronized 2026-05-21 with live evidence + restore drill manifest; pilot-ready vs production-hardened distinction is explicit"
   },
   "sections": {
     "health": {
