@@ -205,7 +205,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     return (
       <div className="mx-auto max-w-xl py-24 text-center space-y-4">
         <div className="text-stone-400 text-4xl">⟳</div>
-        <h2 className="font-serif text-2xl font-semibold text-stone-900">
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-900">
           {copy.generatingTitle}
         </h2>
         <p className="text-stone-500 text-sm">{copy.generatingBody}</p>
@@ -244,7 +244,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
 
       {/* Section header */}
       <div className="space-y-2 border-b border-stone-200 pb-6">
-        <h2 className="font-serif text-2xl font-bold text-stone-900">{currentSectionDef.title}</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-stone-900">{currentSectionDef.title}</h2>
         {currentSectionDef.intro && (
           <p className="text-stone-600 text-sm leading-relaxed">{currentSectionDef.intro}</p>
         )}
@@ -332,7 +332,7 @@ function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
   return (
     <div className="mx-auto max-w-2xl space-y-8 py-10">
       <div className="space-y-2">
-        <h2 className="font-serif text-2xl font-bold text-stone-900">{copy.orgTitle}</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-stone-900">{copy.orgTitle}</h2>
         <p className="text-sm text-stone-600 leading-relaxed">
           {copy.orgBody}
         </p>

@@ -108,7 +108,7 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
   return (
     <div className="mx-auto max-w-2xl space-y-8 py-12">
       <div className="space-y-3">
-        <h1 className="font-serif text-3xl font-bold text-stone-900">
+        <h1 className="text-3xl font-bold tracking-tight text-stone-900">
           {copy.title}
         </h1>
         <p className="text-base leading-relaxed text-stone-600">

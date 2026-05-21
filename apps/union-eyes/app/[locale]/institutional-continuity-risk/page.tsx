@@ -1,12 +1,23 @@
 /**
- * ARTIFACT TYPE: Marketing Landing Page
- * DOCTRINE_VERSION: 1.0.0
+ * ARTIFACT TYPE: Marketing Landing Page (standalone)
+ * DOCTRINE_VERSION: 1.1.0
  * ROUTE: /[locale]/institutional-continuity-risk
  *
  * OCI Category Awakening Page — distinct from the /institutional-continuity
  * product substrate page. This page defines the category of Organizational
  * Continuity Infrastructure (OCI) as an institutional concern and introduces
  * the ICRA self-assessment as the entry point.
+ *
+ * Layout note:
+ * Intentionally placed OUTSIDE the (marketing) route group so it does not
+ * inherit the full site navigation or footer. A minimal branded top bar is
+ * provided by the sibling layout.tsx. The page must therefore stand on its
+ * own visually — hero imagery anchors it.
+ *
+ * Typography note:
+ * Tailwind's `font-sans` resolves to var(--font-poppins) via
+ * apps/union-eyes/tailwind.config.ts. All headings use Poppins weights
+ * (300 / 500 / 600 / 700) rather than a serif fallback.
  *
  * Tone:
  * - Calm, credible, unhurried
@@ -23,6 +34,20 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { COPY } from '@/lib/icra/copy';
+import HumanScenesCarousel from './_components/HumanScenesCarousel';
+
+// Institutional imagery — classical, calm, never stock-cliché.
+// All Unsplash; CSP allows img-src https: + Unsplash is whitelisted in next.config.
+const HERO_IMAGE_URL =
+  'https://images.unsplash.com/photo-1568667256549-094345857637?w=1920&q=80&auto=format';
+const MEMORY_HOLDERS_IMAGE_URL =
+  'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1400&q=80&auto=format'; // hands writing in a ledger
+const INTERSTITIAL_IMAGE_URL =
+  'https://images.unsplash.com/photo-1497366216548-37526070297c?w=2400&q=80&auto=format'; // empty boardroom
+const MOTIF_IMAGE_URL =
+  'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&q=80&auto=format'; // archive shelves
+const ASSESSMENT_IMAGE_URL =
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&q=80&auto=format'; // people in conversation
 
 export async function generateMetadata({
   params,
@@ -158,7 +183,7 @@ export default async function InstitutionalContinuityRiskPage({
     {
       id: 'executive_continuity_brief',
       name: isFr ? 'Note de continuité executive' : 'Executive Continuity Brief',
-      price: isFr ? '750–1 500 $' : '$750–$1,500',
+      price: isFr ? '1 200 $' : '$1,200',
       description: isFr
         ? 'Analyse institutionnelle approfondie avec analyse de la dette de continuité, des dépendances et des risques de modernisation.'
         : 'In-depth institutional analysis with governance entropy, continuity debt, dependency review, and modernization risk.',
@@ -220,78 +245,110 @@ export default async function InstitutionalContinuityRiskPage({
       ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* ── Hero ── */}
-      <section className="mx-auto max-w-5xl px-6 pt-24 pb-16 text-center space-y-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-stone-400">
-          {isFr ? 'Évaluation de la continuité institutionnelle' : 'Institutional Continuity Risk Assessment'}
-        </p>
-        <h1 className="font-serif text-4xl font-bold leading-tight text-stone-900 sm:text-5xl lg:text-6xl max-w-4xl mx-auto">
-          {isFr
-            ? "La plupart des institutions portent plus de risques de continuité qu'elles ne le réalisent."
-            : COPY.hero.headline}
-        </h1>
-        <p className="mx-auto max-w-2xl text-lg text-stone-600 leading-relaxed">
-          {isFr
-            ? "Chaque organisation a des personnes qui maintiennent silencieusement la continuité longtemps après que les systèmes autour d'elles ont cessé de le faire."
-            : COPY.hero.humanContinuityLine}
-        </p>
-        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Link
-            href="/continuity-assessment/start"
-            className="rounded-lg bg-stone-900 px-7 py-3.5 text-sm font-semibold text-white hover:bg-stone-700 transition-colors"
-          >
-            {isFr ? 'Évaluer le risque de continuité institutionnelle' : COPY.hero.primaryCta}
-          </Link>
-          <Link
-            href="#tiers"
-            className="rounded-lg border border-stone-200 bg-white px-6 py-3.5 text-sm font-medium text-stone-700 hover:border-stone-300 transition-colors"
-          >
-            {isFr ? 'Voir les options de rapport' : 'See report options'}
-          </Link>
+    <div className="min-h-screen bg-white font-sans">
+      {/* ── Hero (full-bleed institutional image, light text) ── */}
+      <section
+        className="relative isolate flex min-h-[640px] items-center overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(15,12,9,0.78) 0%, rgba(15,12,9,0.62) 50%, rgba(15,12,9,0.85) 100%), url(${HERO_IMAGE_URL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Soft top vignette helps the branded top bar in layout.tsx float legibly */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/40 to-transparent"
+        />
+
+        <div className="relative z-10 mx-auto w-full max-w-5xl px-6 pt-36 pb-28 text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-stone-300">
+            {isFr ? 'Évaluation de la continuité institutionnelle' : 'Institutional Continuity Risk Assessment'}
+          </p>
+          <h1 className="mx-auto mt-7 max-w-4xl text-balance text-4xl font-light leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            {isFr
+              ? "La plupart des institutions portent plus de risques de continuité qu'elles ne le réalisent."
+              : COPY.hero.headline}
+          </h1>
+          <p className="mx-auto mt-8 max-w-2xl text-pretty text-lg font-light leading-relaxed text-stone-200">
+            {isFr
+              ? "Chaque organisation a des personnes qui maintiennent silencieusement la continuité longtemps après que les systèmes autour d'elles ont cessé de le faire."
+              : COPY.hero.humanContinuityLine}
+          </p>
+          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/continuity-assessment/start"
+              className="rounded-lg bg-white px-7 py-3.5 text-sm font-semibold text-stone-900 shadow-sm transition-colors hover:bg-stone-100"
+            >
+              {isFr ? 'Évaluer le risque de continuité institutionnelle' : COPY.hero.primaryCta}
+            </Link>
+            <Link
+              href="#tiers"
+              className="rounded-lg border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/10"
+            >
+              {isFr ? 'Voir les options de rapport' : 'See report options'}
+            </Link>
+          </div>
+          <p className="mt-6 text-xs font-light text-stone-300/90">
+            {isFr
+              ? 'Gratuit. Pseudonyme. Aucune connexion requise.'
+              : 'Free. Pseudonymous. No login required.'}
+          </p>
         </div>
-        <p className="text-xs text-stone-400">
-          {isFr
-            ? 'Gratuit. Pseudonyme. Aucune connexion requise.'
-            : 'Free. Pseudonymous. No login required.'}
-        </p>
       </section>
 
-      {/* ── Human Scenes ── */}
+      {/* ── Human Scenes (interactive carousel) ── */}
       <section className="bg-stone-50 py-20">
-        <div className="mx-auto max-w-5xl px-6 space-y-12">
-          <div className="text-center space-y-3">
-            <h2 className="font-serif text-3xl font-bold text-stone-900">
+        <div className="mx-auto max-w-5xl space-y-12 px-6">
+          <div className="space-y-3 text-center">
+            <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
               {isFr ? 'Ce que vous reconnaîtrez peut-être' : 'What you may recognize'}
             </h2>
-            <p className="text-stone-500 max-w-xl mx-auto text-sm">
+            <p className="mx-auto max-w-xl text-sm font-light text-stone-500">
               {isFr
                 ? "Ces situations ne sont pas rares. Elles sont la façon normale dont la continuité s'érode — silencieusement, dans la pratique ordinaire."
                 : "These situations are not unusual. They are the normal way continuity erodes — quietly, in ordinary practice."}
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {humanScenes.map((scene) => (
-              <div
-                key={scene.id}
-                className="rounded-xl border border-stone-200 bg-white p-6 space-y-3"
-              >
-                <h3 className="font-serif text-base font-semibold text-stone-900">{scene.title}</h3>
-                <p className="text-sm text-stone-600 leading-relaxed">{scene.body}</p>
-              </div>
-            ))}
-          </div>
+          <HumanScenesCarousel
+            scenes={humanScenes}
+            labels={{
+              previous: isFr ? 'Scène précédente' : 'Previous scene',
+              next: isFr ? 'Scène suivante' : 'Next scene',
+              sceneOf: isFr ? 'Scène {current} sur {total}' : 'Scene {current} of {total}',
+            }}
+          />
+        </div>
+      </section>
+
+      {/* ── Interstitial imagery band ── */}
+      <section
+        aria-hidden="true"
+        className="relative h-64 sm:h-80"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(15,12,9,0.35) 0%, rgba(15,12,9,0.55) 100%), url(${INTERSTITIAL_IMAGE_URL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }}
+      >
+        <div className="absolute inset-0 flex items-center justify-center px-6">
+          <p className="max-w-2xl text-center text-xl font-light italic leading-relaxed text-stone-100 sm:text-2xl">
+            &ldquo;{isFr
+              ? 'Les institutions oublient lentement. Puis tout à la fois.'
+              : 'Institutions forget slowly. Then all at once.'}&rdquo;
+          </p>
         </div>
       </section>
 
       {/* ── Quiet Risk Signals ── */}
       <section className="py-20">
-        <div className="mx-auto max-w-5xl px-6 space-y-12">
-          <div className="text-center space-y-3">
-            <h2 className="font-serif text-3xl font-bold text-stone-900">
+        <div className="mx-auto max-w-5xl space-y-12 px-6">
+          <div className="space-y-3 text-center">
+            <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
               {isFr ? 'Les signaux de risque silencieux' : 'The quiet risk signals'}
             </h2>
-            <p className="text-stone-500 max-w-2xl mx-auto text-sm">
+            <p className="mx-auto max-w-2xl text-sm font-light text-stone-500">
               {isFr
                 ? "Le risque de continuité institutionnelle ne se manifeste pas comme une crise. Il se manifeste comme des frictions quotidiennes, légèrement trop élevées, légèrement trop fréquentes."
                 : "Institutional continuity risk does not present as a crisis. It presents as daily friction — slightly too high, slightly too frequent."}
@@ -301,68 +358,124 @@ export default async function InstitutionalContinuityRiskPage({
             {quietRiskCards.map((card) => (
               <div
                 key={card.label}
-                className="rounded-xl border border-stone-200 bg-stone-50 p-5 space-y-2"
+                className="space-y-2 rounded-xl border border-stone-200 bg-stone-50 p-5 transition-all hover:-translate-y-0.5 hover:border-stone-300 hover:bg-white hover:shadow-sm"
               >
-                <p className="font-semibold text-stone-900">{card.label}</p>
-                <p className="text-sm text-stone-600 leading-relaxed">{card.body}</p>
+                <p className="font-semibold tracking-tight text-stone-900">{card.label}</p>
+                <p className="text-sm font-light leading-relaxed text-stone-600">{card.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Institutional Memory Holders ── */}
+      {/* ── Institutional Memory Holders (side-by-side imagery + roles) ── */}
       <section className="bg-stone-50 py-20">
-        <div className="mx-auto max-w-5xl px-6 space-y-12">
-          <div className="space-y-4 max-w-3xl">
-            <h2 className="font-serif text-3xl font-bold text-stone-900">
-              {isFr ? 'Les détenteurs de mémoire institutionnelle' : 'Institutional Memory Holders'}
-            </h2>
-            <p className="text-stone-600 leading-relaxed">
-              {isFr
-                ? "Dans chaque organisation, il y a des personnes dont la présence maintient la cohérence institutionnelle — qui ne se définissent pas comme des détenteurs de mémoire, et dont l'organisation ne reconnaît pas toujours le rôle. Ces personnes constituent la première ligne de risque de continuité institutionnelle."
-                : "In every organization, there are people whose presence maintains institutional coherence — who do not think of themselves as memory holders, and whose role the organization does not always recognize. These people are the first line of institutional continuity risk."}
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {memoryHolderRoles.map((item) => (
-              <div key={item.role} className="rounded-xl border border-stone-200 bg-white p-5 space-y-2">
-                <p className="font-semibold text-stone-900">{item.role}</p>
-                <p className="text-sm text-stone-600 leading-relaxed">{item.desc}</p>
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
+            <div className="lg:col-span-5">
+              <div
+                className="aspect-[4/5] w-full overflow-hidden rounded-2xl bg-stone-200 ring-1 ring-stone-200"
+                style={{
+                  backgroundImage: `url(${MEMORY_HOLDERS_IMAGE_URL})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+                role="img"
+                aria-label={
+                  isFr
+                    ? 'Mains écrivant dans un registre institutionnel'
+                    : 'Hands writing in an institutional ledger'
+                }
+              />
+              <p className="mt-4 text-xs font-light italic text-stone-500">
+                {isFr
+                  ? 'La continuité institutionnelle est portée par des personnes, pas par des systèmes.'
+                  : 'Institutional continuity is carried by people, not by systems.'}
+              </p>
+            </div>
+
+            <div className="space-y-8 lg:col-span-7">
+              <div className="space-y-4">
+                <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
+                  {isFr ? 'Les détenteurs de mémoire institutionnelle' : 'Institutional Memory Holders'}
+                </h2>
+                <p className="font-light leading-relaxed text-stone-600">
+                  {isFr
+                    ? "Dans chaque organisation, il y a des personnes dont la présence maintient la cohérence institutionnelle — qui ne se définissent pas comme des détenteurs de mémoire, et dont l'organisation ne reconnaît pas toujours le rôle. Ces personnes constituent la première ligne de risque de continuité institutionnelle."
+                    : "In every organization, there are people whose presence maintains institutional coherence — who do not think of themselves as memory holders, and whose role the organization does not always recognize. These people are the first line of institutional continuity risk."}
+                </p>
               </div>
-            ))}
+              <div className="grid gap-3 sm:grid-cols-2">
+                {memoryHolderRoles.map((item) => (
+                  <div
+                    key={item.role}
+                    className="space-y-1.5 rounded-xl border border-stone-200 bg-white p-4 transition-colors hover:border-stone-300"
+                  >
+                    <p className="text-sm font-semibold tracking-tight text-stone-900">{item.role}</p>
+                    <p className="text-xs font-light leading-relaxed text-stone-600">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Tech With Soul (operationalized) ── */}
+      {/* ── How the assessment works (side-by-side with imagery) ── */}
       <section className="py-20">
-        <div className="mx-auto max-w-4xl px-6 space-y-10">
-          <div className="space-y-3">
-            <h2 className="font-serif text-3xl font-bold text-stone-900">
-              {isFr ? "Comment fonctionne l'évaluation" : 'How the assessment works'}
-            </h2>
-            <p className="text-stone-500 text-sm max-w-xl">
-              {isFr
-                ? "Déterministe, explicable, transparent. Aucun modèle opaque."
-                : "Deterministic, explainable, transparent. No opaque model."}
-            </p>
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
+            <div className="order-2 space-y-8 lg:order-1 lg:col-span-7">
+              <div className="space-y-3">
+                <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
+                  {isFr ? "Comment fonctionne l'évaluation" : 'How the assessment works'}
+                </h2>
+                <p className="max-w-xl text-sm font-light text-stone-500">
+                  {isFr
+                    ? 'Déterministe, explicable, transparent. Aucun modèle opaque.'
+                    : 'Deterministic, explainable, transparent. No opaque model.'}
+                </p>
+              </div>
+              <ul className="space-y-4">
+                {techWithSoulLines.map((line, i) => (
+                  <li key={i} className="flex items-start gap-4">
+                    <span className="mt-3 h-px w-5 shrink-0 bg-stone-300" />
+                    <p className="font-light leading-relaxed text-stone-700">{line}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="order-1 lg:order-2 lg:col-span-5">
+              <div
+                className="aspect-[4/5] w-full overflow-hidden rounded-2xl bg-stone-200 ring-1 ring-stone-200"
+                style={{
+                  backgroundImage: `url(${ASSESSMENT_IMAGE_URL})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+                role="img"
+                aria-label={
+                  isFr
+                    ? 'Conversation institutionnelle entre collègues'
+                    : 'Institutional conversation between colleagues'
+                }
+              />
+            </div>
           </div>
-          <ul className="space-y-4">
-            {techWithSoulLines.map((line, i) => (
-              <li key={i} className="flex items-start gap-4">
-                <span className="mt-1 h-px w-5 shrink-0 bg-stone-300" />
-                <p className="text-stone-700 leading-relaxed">{line}</p>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 
-      {/* ── OCI Motif ── */}
-      <section className="bg-stone-900 py-16 text-center">
-        <div className="mx-auto max-w-3xl px-6 space-y-4">
-          <p className="font-serif text-xl italic text-stone-300 leading-relaxed">
+      {/* ── OCI Motif (image-backed, deep institutional tone) ── */}
+      <section
+        className="relative isolate overflow-hidden py-24 text-center"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(10,8,6,0.86) 0%, rgba(10,8,6,0.78) 100%), url(${MOTIF_IMAGE_URL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="relative z-10 mx-auto max-w-3xl space-y-4 px-6">
+          <p className="text-xl font-light italic leading-relaxed text-stone-100 sm:text-2xl">
             &ldquo;{isFr
               ? "Les institutions sont finalement façonnées non seulement par ce qu'elles construisent, mais par ce qu'elles choisissent de se rappeler."
               : COPY.ociMotif}&rdquo;
@@ -372,12 +485,12 @@ export default async function InstitutionalContinuityRiskPage({
 
       {/* ── Tiers ── */}
       <section id="tiers" className="py-24">
-        <div className="mx-auto max-w-6xl px-6 space-y-12">
-          <div className="text-center space-y-3">
-            <h2 className="font-serif text-3xl font-bold text-stone-900">
+        <div className="mx-auto max-w-6xl space-y-12 px-6">
+          <div className="space-y-3 text-center">
+            <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
               {isFr ? 'Options de rapport' : 'Report options'}
             </h2>
-            <p className="text-stone-500 max-w-2xl mx-auto text-sm">
+            <p className="mx-auto max-w-2xl text-sm font-light text-stone-500">
               {isFr
                 ? "Commencez gratuitement. Une analyse plus approfondie est disponible pour les équipes qui ont besoin d'un rapport institutionnel complet."
                 : "Start free. Deeper analysis is available for organizations that need a full institutional report."}
@@ -387,26 +500,26 @@ export default async function InstitutionalContinuityRiskPage({
             {tiers.map((tier) => (
               <div
                 key={tier.id}
-                className={`rounded-2xl border p-7 space-y-5 flex flex-col ${
+                className={`flex flex-col space-y-5 rounded-2xl border p-7 transition-all hover:-translate-y-0.5 hover:shadow-md ${
                   tier.featured
                     ? 'border-stone-900 bg-stone-900 text-white'
                     : 'border-stone-200 bg-white'
                 }`}
               >
                 <div className="space-y-1">
-                  <p className={`text-xs font-semibold uppercase tracking-widest ${tier.featured ? 'text-stone-400' : 'text-stone-400'}`}>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-stone-400">
                     {tier.name}
                   </p>
-                  <p className={`text-2xl font-bold ${tier.featured ? 'text-white' : 'text-stone-900'}`}>
+                  <p className={`text-2xl font-semibold tracking-tight ${tier.featured ? 'text-white' : 'text-stone-900'}`}>
                     {tier.price}
                   </p>
                 </div>
-                <p className={`text-sm leading-relaxed ${tier.featured ? 'text-stone-300' : 'text-stone-600'}`}>
+                <p className={`text-sm font-light leading-relaxed ${tier.featured ? 'text-stone-300' : 'text-stone-600'}`}>
                   {tier.description}
                 </p>
-                <ul className="space-y-2 flex-1">
+                <ul className="flex-1 space-y-2">
                   {tier.includes.map((item, i) => (
-                    <li key={i} className={`flex items-start gap-2 text-sm ${tier.featured ? 'text-stone-300' : 'text-stone-700'}`}>
+                    <li key={i} className={`flex items-start gap-2 text-sm font-light ${tier.featured ? 'text-stone-300' : 'text-stone-700'}`}>
                       <span className="mt-0.5 shrink-0">·</span>
                       {item}
                     </li>
@@ -414,7 +527,7 @@ export default async function InstitutionalContinuityRiskPage({
                 </ul>
                 <a
                   href={tier.ctaHref}
-                  className={`block rounded-lg px-5 py-3 text-sm font-semibold text-center transition-colors ${
+                  className={`block rounded-lg px-5 py-3 text-center text-sm font-semibold transition-colors ${
                     tier.featured
                       ? 'bg-white text-stone-900 hover:bg-stone-100'
                       : 'border border-stone-200 bg-stone-50 text-stone-900 hover:border-stone-300 hover:bg-stone-100'
@@ -430,15 +543,15 @@ export default async function InstitutionalContinuityRiskPage({
 
       {/* ── Who this is for ── */}
       <section className="bg-stone-50 py-20">
-        <div className="mx-auto max-w-5xl px-6 space-y-12">
-          <h2 className="font-serif text-3xl font-bold text-stone-900 text-center">
+        <div className="mx-auto max-w-5xl space-y-12 px-6">
+          <h2 className="text-center text-3xl font-semibold tracking-tight text-stone-900">
             {isFr ? "À qui s'adresse cette évaluation" : 'Who this assessment is for'}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {personas.map((p) => (
-              <div key={p.role} className="rounded-xl border border-stone-200 bg-white p-5 space-y-2">
-                <p className="font-semibold text-stone-900">{p.role}</p>
-                <p className="text-sm text-stone-600 leading-relaxed">{p.signal}</p>
+              <div key={p.role} className="space-y-2 rounded-xl border border-stone-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-sm">
+                <p className="font-semibold tracking-tight text-stone-900">{p.role}</p>
+                <p className="text-sm font-light leading-relaxed text-stone-600">{p.signal}</p>
               </div>
             ))}
           </div>
@@ -446,29 +559,51 @@ export default async function InstitutionalContinuityRiskPage({
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="py-20">
-        <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
-          <h2 className="font-serif text-3xl font-bold text-stone-900">
+      <section className="py-24">
+        <div className="mx-auto max-w-3xl space-y-6 px-6 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
             {isFr
               ? 'Évaluer le risque de continuité institutionnelle de votre organisation'
               : 'Assess your organization\'s institutional continuity risk'}
           </h2>
-          <p className="text-stone-600 leading-relaxed">
+          <p className="font-light leading-relaxed text-stone-600">
             {isFr
               ? "L'évaluation prend environ vingt minutes. Elle est gratuite, pseudonyme et ne nécessite aucune connexion."
               : 'The assessment takes approximately twenty minutes. It is free, pseudonymous, and requires no login.'}
           </p>
           <Link
             href="/continuity-assessment/start"
-            className="inline-block rounded-lg bg-stone-900 px-8 py-4 text-sm font-semibold text-white hover:bg-stone-700 transition-colors"
+            className="inline-block rounded-lg bg-stone-900 px-8 py-4 text-sm font-semibold text-white transition-colors hover:bg-stone-700"
           >
             {isFr ? 'Commencer l\'évaluation' : COPY.hero.primaryCta}
           </Link>
-          <p className="text-xs text-stone-400">
+          <p className="text-xs font-light text-stone-400">
             {isFr
               ? "Aucune donnée personnelle n'est collectée. Les profils sont identifiés par des identifiants UUID uniquement."
               : 'No personal data is collected. Profiles are identified by UUID only.'}
           </p>
+        </div>
+
+        {/* Minimal branded footer line — no full marketing footer */}
+        <div className="mx-auto mt-16 max-w-5xl border-t border-stone-200 px-6 pt-8">
+          <div className="flex flex-col items-center justify-between gap-3 text-xs font-light text-stone-400 sm:flex-row">
+            <p>
+              {isFr
+                ? '© UnionEyes — Infrastructure de continuité organisationnelle.'
+                : '© UnionEyes — Organizational Continuity Infrastructure.'}
+            </p>
+            <div className="flex items-center gap-5">
+              <Link href={`/${locale}`} className="hover:text-stone-700">
+                {isFr ? 'Accueil' : 'Home'}
+              </Link>
+              <Link href={`/${locale}/contact`} className="hover:text-stone-700">
+                {isFr ? 'Contact' : 'Contact'}
+              </Link>
+              <Link href={`/${locale}/trust`} className="hover:text-stone-700">
+                {isFr ? 'Confiance et gouvernance' : 'Trust & governance'}
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>

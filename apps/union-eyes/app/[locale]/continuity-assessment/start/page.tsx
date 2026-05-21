@@ -3,7 +3,8 @@
  * DOCTRINE_VERSION: 1.0.0
  *
  * Assessment entry page — mounts the ICRAAssessmentFlow client component.
- * Fully public. No auth.
+ * Fully public. No auth. Renders under the standalone branded layout
+ * (no marketing chrome) for a focused, distraction-free experience.
  */
 
 import type { Metadata } from 'next';
@@ -42,8 +43,8 @@ export default async function AssessmentStartPage({ params }: PageProps) {
   const { locale } = await params;
 
   return (
-    <main className="mx-auto max-w-4xl px-6 pb-24 pt-16 md:pt-20">
+    <div className="mx-auto max-w-4xl px-6 pb-24 pt-12 md:pt-16">
       <ICRAAssessmentFlow locale={locale} />
-    </main>
+    </div>
   );
 }
