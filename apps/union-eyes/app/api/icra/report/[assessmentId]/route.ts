@@ -26,7 +26,11 @@ import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { mapToPdfReportData } from '@/lib/icra-pdf/reportDataMapper';
 import { generateExecutiveContinuityPdf } from '@/lib/icra-pdf/generateExecutiveContinuityPdf';
 import { logger } from '@/lib/logger';
-import { resolveAdaptiveContext, type RoutableQuestion } from '@/lib/icra/adaptation';
+import {
+  resolveAdaptiveContext,
+  resolveAdaptiveReportAISlot,
+  type RoutableQuestion,
+} from '@/lib/icra/adaptation';
 import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from '@/lib/icra/questions';
 
 const PDF_ELIGIBLE_TIERS = new Set([
@@ -59,6 +63,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
         status: icraAssessments.status,
         reportTierId: icraAssessments.reportTierId,
         organizationContext: icraAssessments.organizationContext,
+        locale: icraAssessments.locale,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
@@ -95,6 +100,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     }
 
     const profile = profileRow.profilePayload as unknown as InstitutionalContinuityProfile;
+    const locale = assessment.locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
     const orgContext = mapCtxToOrganizationContext(
       assessment.organizationContext as Record<string, unknown> | OrganizationContext | null,
     );
@@ -119,7 +125,23 @@ export async function GET(_request: Request, { params }: RouteContext) {
           return undefined;
         }
       })(),
+      adaptiveReportAISlot: resolveAdaptiveReportAISlot({
+        rawProfile: profile,
+        organizationContext: assessment.organizationContext,
+        questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
+        locale,
+        generatedAt: profile.generatedAt,
+      }),
+      locale,
     });
+
+    if (!reportData.aiAssistedNarrative) {
+      logger.warn('[icra-pdf] deterministic report slot unavailable or unapproved', {
+        assessmentId,
+        locale,
+      });
+    }
+
     const pdfBuffer = await generateExecutiveContinuityPdf(reportData);
 
     const date = reportData.generatedAt.toISOString().slice(0, 10);

@@ -41,7 +41,7 @@ import {
   type StabilizationAppendixParagraph,
 } from './reportNarrativeEngine';
 import type { ExecutiveStabilizationResult } from '../workbook/engines/executive/executiveStabilizationModel';
-import type { PersistedAdaptiveContext } from '../icra/adaptation';
+import type { AdaptiveReportAISlot, PersistedAdaptiveContext } from '../icra/adaptation';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PdfReportData — the fully-assembled data structure for the template
@@ -121,7 +121,33 @@ export interface PdfReportData {
 
 export interface MapToPdfReportDataOptions {
   readonly adaptiveContext?: PersistedAdaptiveContext | null;
+  readonly adaptiveReportAISlot?: AdaptiveReportAISlot | null;
   readonly locale?: string;
+}
+
+function mapApprovedAdaptiveReportSlot(
+  slot: AdaptiveReportAISlot | null | undefined,
+): PdfReportData['aiAssistedNarrative'] {
+  if (!slot || slot.reviewWorkflow.status !== 'approved') {
+    return undefined;
+  }
+
+  const auditRef =
+    slot.reviewWorkflow.auditTrail[slot.reviewWorkflow.auditTrail.length - 1]?.auditId
+    ?? slot.reviewWorkflow.workflowId;
+
+  const sections = [
+    slot.narrative.headerStatement,
+    ...slot.narrative.continuityContext,
+    ...slot.executive.paragraphs,
+  ].filter((section) => section.trim().length > 0);
+
+  return {
+    narrative: sections.join('\n\n'),
+    auditRecordRef: auditRef,
+    reviewStatus: 'approved',
+    locale: slot.locale,
+  };
 }
 
 export function mapToPdfReportData(
@@ -222,5 +248,8 @@ export function mapToPdfReportData(
       : undefined,
 
     adaptiveContext: options?.adaptiveContext ?? undefined,
+    aiAssistedNarrative: mapApprovedAdaptiveReportSlot(
+      options?.adaptiveReportAISlot,
+    ),
   };
 }

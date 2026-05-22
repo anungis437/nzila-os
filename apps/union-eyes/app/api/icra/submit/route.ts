@@ -11,6 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { eq } from 'drizzle-orm'
 import type { Answer, ConsentRecord } from '@/lib/icra/types'
 import { scoreAssessment } from '@/lib/icra/scoring'
 import { rateLimit } from '@/lib/rate-limit'
@@ -33,6 +34,8 @@ import {
   routeQuestionBank,
   buildPersistedAdaptiveContext,
   embedPersistedAdaptiveContext,
+  embedPersistedAdaptiveReportAISlot,
+  resolveAdaptiveReportAISlot,
   type RoutableQuestion,
 } from '@/lib/icra/adaptation'
 
@@ -144,13 +147,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const profileForRouting = classifyOrgContext({
           rawForm: normalizedOrgContext ?? {},
         })
-        const routedBank = routeQuestionBank(
+        const routed = routeQuestionBank(
           ALL_QUESTIONS as unknown as RoutableQuestion[],
           profileForRouting,
         )
         const adaptive = buildPersistedAdaptiveContext(
           profileForRouting,
-          routedBank,
+          routed,
           QUESTION_BANK_VERSION,
         )
         organizationContextForInsert = embedPersistedAdaptiveContext(
@@ -184,6 +187,35 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
 
       const { profile } = scoreAssessment(assessmentId, answers, normalizedOrgContext)
+
+      try {
+        const reportSlot = resolveAdaptiveReportAISlot({
+          rawProfile: profile,
+          organizationContext: organizationContextForInsert,
+          questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
+          locale: locale === 'fr-CA' ? 'fr-CA' : 'en-CA',
+          generatedAt: new Date(profile.generatedAt).toISOString(),
+        })
+        if (reportSlot) {
+          organizationContextForInsert = embedPersistedAdaptiveReportAISlot(
+            organizationContextForInsert,
+            reportSlot,
+          )
+        } else {
+          logger.warn('icra.assessment.report_ai_unresolved', {
+            assessmentId,
+          })
+        }
+        await tx
+          .update(icraAssessments)
+          .set({ organizationContext: organizationContextForInsert })
+          .where(eq(icraAssessments.id, assessmentId))
+      } catch (reportSlotErr) {
+        logger.warn('icra.assessment.report_ai_persist_skipped', {
+          assessmentId,
+          error: reportSlotErr instanceof Error ? reportSlotErr.message : 'unknown',
+        })
+      }
 
       // Run all dependent inserts in parallel — they each only depend on
       // assessmentId, so this collapses ~5 sequential round-trips into one.

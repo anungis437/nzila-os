@@ -27,3 +27,4 @@ export * from './deterministicReportContracts';
 export * from './deterministicReportGuardrails';
 export * from './deterministicReportValidator';
 export * from './deterministicReportEngine';
+export * from './deterministicReportPersistence';
