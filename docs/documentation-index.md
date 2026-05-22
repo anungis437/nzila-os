@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-22T01:28:13.410Z
+Generated: 2026-05-22T01:49:53.720Z
 
-Total documents indexed: 1115
+Total documents indexed: 1117
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -26,7 +26,7 @@ Stale documents (>90 days since repo validation): 0
 | nzila-runtime-integrity | 11 | 0 |
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
-| oci | 77 | 0 |
+| oci | 79 | 0 |
 | ops | 4 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
@@ -1033,6 +1033,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md](docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
+| [docs/oci/assessment/OCI_MODALITY_DOCTRINE.md](docs/oci/assessment/OCI_MODALITY_DOCTRINE.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md](docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md](docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md](docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md](docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md) | oci | 2026-05-22 | current |

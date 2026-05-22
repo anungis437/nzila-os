@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-22T01:28:13.410Z",
-  "totalDocuments": 1115,
+  "generatedAt": "2026-05-22T01:49:53.720Z",
+  "totalDocuments": 1117,
   "staleDocuments": 0,
   "categories": [
     {
@@ -90,7 +90,7 @@
     },
     {
       "category": "oci",
-      "count": 77,
+      "count": 79,
       "staleCount": 0
     },
     {
@@ -6092,6 +6092,18 @@
       "path": "docs/nzila-tier2-hardening/README.md",
       "category": "nzila-tier2-hardening",
       "lastValidated": "2026-05-11",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/assessment/OCI_MODALITY_DOCTRINE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
