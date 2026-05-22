@@ -74,13 +74,38 @@ const HEADING_PATTERNS = [
   /^Source Documents Used for This Revision$/i,
 ];
 
-const SECTION_IMAGE_URLS = [
-  heroImagery.institutionalContinuity,
-  heroImagery.governance,
-  heroImagery.insights,
-  heroImagery.platform,
-  heroImagery.story,
-  heroImagery.trust,
+const MAJOR_HEADING_PATTERNS = [
+  /^A Note on Stewardship and Memory$/i,
+  /^Executive Summary$/i,
+  /^Section\s+\d+/i,
+  /^Objections and Counterarguments$/i,
+  /^Legal and Regulatory Alignment$/i,
+  /^Category Declaration$/i,
+  /^Final Thesis$/i,
+  /^Research Foundations and Selected References$/i,
+  /^Source Documents Used for This Revision$/i,
+];
+
+const CURATED_SECTION_IMAGERY: Array<{ match: RegExp; imageUrl: string; alt: string }> = [
+  { match: /^Executive Summary$/i, imageUrl: heroImagery.insights, alt: 'Executive continuity summary' },
+  { match: /^Section\s+1\b/i, imageUrl: heroImagery.institutionalContinuity, alt: 'Institutional continuity risk landscape' },
+  { match: /^Section\s+2\b/i, imageUrl: heroImagery.story, alt: 'Demographic transition and workforce continuity' },
+  { match: /^Section\s+3\b/i, imageUrl: heroImagery.organizationalMemoryModule, alt: 'Organizational memory and tacit knowledge transfer' },
+  { match: /^Section\s+4\b/i, imageUrl: heroImagery.pricing, alt: 'Financial impact of continuity breakdowns' },
+  { match: /^Section\s+5\b/i, imageUrl: heroImagery.solutions, alt: 'Sector-specific continuity exposure' },
+  { match: /^Section\s+6\b/i, imageUrl: heroImagery.platform, alt: 'System design and continuity failure modes' },
+  { match: /^Section\s+7\b/i, imageUrl: heroImagery.operationalCoherenceModule, alt: 'Organizational Continuity Infrastructure architecture' },
+  { match: /^Section\s+8\b/i, imageUrl: heroImagery.governanceIntelligenceModule, alt: 'Continuity sensing and assessment intelligence' },
+  { match: /^Section\s+9\b/i, imageUrl: heroImagery.trust, alt: 'Trust, governance evidence, and runtime truth' },
+  { match: /^Section\s+10\b/i, imageUrl: heroImagery.explainableIntelligenceModule, alt: 'AI and continuity-aware governance' },
+  { match: /^Section\s+11\b/i, imageUrl: heroImagery.conventions, alt: 'Adoption roadmap and operating frameworks' },
+  { match: /^Section\s+12\b/i, imageUrl: heroImagery.labourLeadership, alt: 'Cross-sector continuity implications' },
+  { match: /^Section\s+13\b/i, imageUrl: heroImagery.executiveIntelligenceModule, alt: 'Future-state continuity-native institution' },
+  { match: /^Objections and Counterarguments$/i, imageUrl: heroImagery.governance, alt: 'Governance objections and review lens' },
+  { match: /^Legal and Regulatory Alignment$/i, imageUrl: heroImagery.governance, alt: 'Regulatory alignment and defensibility' },
+  { match: /^Category Declaration$/i, imageUrl: heroImagery.platform, alt: 'Organizational continuity category framing' },
+  { match: /^Final Thesis$/i, imageUrl: heroImagery.trust, alt: 'Final continuity thesis' },
+  { match: /^Research Foundations and Selected References$/i, imageUrl: heroImagery.insights, alt: 'Research foundations and evidence base' },
 ];
 
 const OPENING_PARAGRAPH =
@@ -104,6 +129,17 @@ function isHeadingLine(line: string): boolean {
   const candidate = line.trim();
   if (!candidate) return false;
   return HEADING_PATTERNS.some((pattern) => pattern.test(candidate));
+}
+
+function isMajorHeadingLine(line: string): boolean {
+  const candidate = line.trim();
+  if (!candidate) return false;
+  return MAJOR_HEADING_PATTERNS.some((pattern) => pattern.test(candidate));
+}
+
+function getSectionImage(heading: string): { imageUrl: string; alt: string } | null {
+  const match = CURATED_SECTION_IMAGERY.find((item) => item.match.test(heading));
+  return match ? { imageUrl: match.imageUrl, alt: match.alt } : null;
 }
 
 type ContentSegment =
@@ -164,12 +200,13 @@ function parseContentSegments(body: string): ContentSegment[] {
 type WhitepaperSection = {
   heading: string;
   body: string;
+  level: 2 | 3;
   segments: ContentSegment[];
 };
 
 function buildWhitepaperSections(blocks: string[]): WhitepaperSection[] {
-  const sections: Array<{ heading: string; bodyLines: string[] }> = [];
-  let current: { heading: string; bodyLines: string[] } | null = null;
+  const sections: Array<{ heading: string; level: 2 | 3; bodyLines: string[] }> = [];
+  let current: { heading: string; level: 2 | 3; bodyLines: string[] } | null = null;
 
   const pushCurrent = () => {
     if (!current) return;
@@ -181,6 +218,7 @@ function buildWhitepaperSections(blocks: string[]): WhitepaperSection[] {
 
     sections.push({
       heading: current.heading,
+      level: current.level,
       bodyLines: current.bodyLines,
     });
     current = null;
@@ -199,8 +237,10 @@ function buildWhitepaperSections(blocks: string[]): WhitepaperSection[] {
 
       if (isHeadingLine(line)) {
         pushCurrent();
+        const level: 2 | 3 = isMajorHeadingLine(line) ? 2 : 3;
         current = {
           heading: line,
+          level,
           bodyLines: [],
         };
         continue;
@@ -209,6 +249,7 @@ function buildWhitepaperSections(blocks: string[]): WhitepaperSection[] {
       if (!current) {
         current = {
           heading: 'The Continuity Gap',
+          level: 2,
           bodyLines: [],
         };
       }
@@ -228,6 +269,7 @@ function buildWhitepaperSections(blocks: string[]): WhitepaperSection[] {
     return {
       heading: section.heading,
       body,
+      level: section.level,
       segments: parseContentSegments(body),
     };
   });
@@ -257,7 +299,9 @@ export default async function LocaleWhitepaperPage({
   const copy = WHITEPAPER_COPY[locale as keyof typeof WHITEPAPER_COPY] ?? WHITEPAPER_COPY['en-CA'];
   const whitepaperBlocks = CONTINUITY_GAP_BLOCKS.map(normalizeBlock).filter((block) => block.length > 0);
   const sections = buildWhitepaperSections(whitepaperBlocks);
-  const tocHeadings = sections.map((section) => section.heading);
+  const tocHeadings = sections
+    .filter((section) => section.level === 2 && !/^The Continuity Gap$/i.test(section.heading))
+    .map((section) => section.heading);
 
   return (
     <div className="min-h-screen bg-white">
@@ -328,21 +372,27 @@ export default async function LocaleWhitepaperPage({
             {sections.map((section, index) => {
               const heading = section.heading;
               const body = index === 0 ? OPENING_PARAGRAPH : section.body;
+              const isMajorSection = section.level === 2;
+              const sectionImage = isMajorSection ? getSectionImage(heading) : null;
 
               return (
                 <div key={`wb-${index}`} className="space-y-4">
-                  {heading ? (
-                    <h2 id={slugify(heading)} className="scroll-mt-28 text-3xl font-semibold text-navy tracking-tight">
+                  {heading ? isMajorSection ? (
+                    <h2 id={slugify(heading)} className="scroll-mt-28 border-b border-slate-200 pb-3 text-3xl font-semibold text-navy tracking-tight sm:text-4xl">
                       {heading}
                     </h2>
+                  ) : (
+                    <h3 id={slugify(heading)} className="scroll-mt-28 text-2xl font-semibold text-slate-800 tracking-tight">
+                      {heading}
+                    </h3>
                   ) : null}
 
-                  {heading && index > 0 && index % 3 === 0 ? (
+                  {sectionImage ? (
                     <div className="overflow-hidden rounded-xl border border-slate-200">
                       <div className="relative h-52 w-full">
                         <Image
-                          src={SECTION_IMAGE_URLS[index % SECTION_IMAGE_URLS.length]}
-                          alt={heading}
+                          src={sectionImage.imageUrl}
+                          alt={sectionImage.alt}
                           fill
                           className="object-cover"
                         />
