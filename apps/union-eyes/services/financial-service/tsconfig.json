@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "../../../../",
     "module": "commonjs",
     "moduleResolution": "node10",
     "target": "ES2020",
@@ -13,6 +13,7 @@
     "strict": true,
     "ignoreDeprecations": "6.0"
   },
+  "references": [],
   "include": ["src/**/*"],
   "files": [],
   "exclude": ["node_modules", "dist"]
