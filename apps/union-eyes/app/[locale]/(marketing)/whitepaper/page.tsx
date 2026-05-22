@@ -82,6 +82,9 @@ const SECTION_IMAGE_URLS = [
   heroImagery.trust,
 ];
 
+const OPENING_PARAGRAPH =
+  'Modern institutions are losing continuity faster than they preserve it. The organizations that endure the next decade will not simply digitize faster; they will preserve institutional memory, governance lineage, operational trust, and continuity intelligence more deliberately. "Continuity is not nostalgia for how organizations used to work. It is the discipline of ensuring that what matters can survive the people who carried it."';
+
 function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -203,28 +206,11 @@ export default async function LocaleWhitepaperPage({
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative overflow-hidden border-b border-slate-200 bg-[#10263a]">
-        <Image
-          src={heroImagery.institutionalContinuity}
-          alt="Institutional continuity"
-          fill
-          className="object-cover opacity-30"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0f2133]/95 via-[#123451]/80 to-[#0f2133]/95" />
-
+      <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-[#0f2133] via-[#123451] to-[#0f2133]">
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-          <div className="mx-auto max-w-4xl">
-            <div className="overflow-hidden rounded-2xl border border-white/20 shadow-2xl shadow-black/30">
-              <div className="relative h-56 w-full sm:h-72">
-                <Image src={heroImagery.insights} alt="Whitepaper cover" fill className="object-cover" priority />
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#0f2133]/85 via-[#123451]/55 to-[#1f5b84]/35" />
-                <div className="relative z-10 p-6 text-white sm:p-7">
-                  <h1 className="mt-2 text-3xl font-semibold text-yellow-300 sm:text-4xl">The Continuity Gap</h1>
-                  <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">Organizational Memory, Institutional Resilience, and the Future of Operational Trust</p>
-                </div>
-              </div>
-            </div>
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="text-4xl font-semibold text-white sm:text-5xl">The Continuity Gap</h1>
+            <p className="mt-3 text-base text-white/90 sm:text-lg">Organizational Memory, Institutional Resilience, and the Future of Operational Trust</p>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <a
@@ -249,11 +235,6 @@ export default async function LocaleWhitepaperPage({
       <main className="mx-auto w-full max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
         <section className="grid gap-8 xl:grid-cols-12">
           <aside className="xl:col-span-3 xl:sticky xl:top-24 xl:self-start space-y-4">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-sm text-slate-600">
-                {copy.sourceLabel}: <span className="font-medium text-slate-800">{copy.sourceValue}</span>
-              </p>
-            </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">{copy.tocLabel}</h3>
               <p className="mt-2 text-xs text-slate-500">{tocHeadings.length} major sections</p>
@@ -291,7 +272,7 @@ export default async function LocaleWhitepaperPage({
           <article className="xl:col-span-9 rounded-2xl border border-slate-200 bg-white p-7 sm:p-10 space-y-10">
             {sections.map((section, index) => {
               const heading = section.heading;
-              const body = section.body;
+              const body = index === 0 ? OPENING_PARAGRAPH : section.body;
 
               return (
                 <div key={`wb-${index}`} className="space-y-4">
