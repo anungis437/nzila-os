@@ -124,8 +124,12 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 py-12">
-      <div className="space-y-3">
+    <div
+      className="mx-auto max-w-2xl space-y-8 py-12"
+      data-testid="icra-assessment-flow"
+      data-step="consent"
+    >
+      <div className="space-y-3" data-testid="icra-consent-step">
         <h1 className="text-3xl font-bold tracking-tight text-stone-900">
           {copy.title}
         </h1>
