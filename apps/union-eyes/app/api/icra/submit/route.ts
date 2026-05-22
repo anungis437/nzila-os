@@ -103,7 +103,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         throw new Error('Assessment insert returned no id')
       }
 
-      const { profile } = scoreAssessment(assessmentId, answers)
+      const { profile } = scoreAssessment(assessmentId, answers, orgContext ?? null)
 
       // Run all dependent inserts in parallel — they each only depend on
       // assessmentId, so this collapses ~5 sequential round-trips into one.

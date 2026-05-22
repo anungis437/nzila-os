@@ -411,9 +411,32 @@ function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
                 className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600"
               >
                 <option value="">{copy.selectPlaceholder}</option>
-                {q.options.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
+                {(() => {
+                  const hasGroups = q.options.some((o) => Boolean(o.group));
+                  if (!hasGroups) {
+                    return q.options.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ));
+                  }
+                  // Preserve option order while grouping by `group`.
+                  const groupsInOrder: string[] = [];
+                  const byGroup = new Map<string, typeof q.options>();
+                  for (const o of q.options) {
+                    const g = o.group ?? 'Other';
+                    if (!byGroup.has(g)) {
+                      groupsInOrder.push(g);
+                      byGroup.set(g, []);
+                    }
+                    byGroup.get(g)!.push(o);
+                  }
+                  return groupsInOrder.map((g) => (
+                    <optgroup key={g} label={g}>
+                      {(byGroup.get(g) ?? []).map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </optgroup>
+                  ));
+                })()}
               </select>
             ) : (
               <textarea

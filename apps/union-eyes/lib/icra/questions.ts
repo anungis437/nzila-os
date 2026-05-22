@@ -115,7 +115,7 @@ export interface MetadataQuestion {
   helpText?: string;
   type: 'select' | 'text';
   required: boolean;
-  options?: Array<{ value: string; label: string }>;
+  options?: Array<{ value: string; label: string; group?: string }>;
 }
 
 export const METADATA_QUESTIONS: MetadataQuestion[] = [
@@ -127,12 +127,32 @@ export const METADATA_QUESTIONS: MetadataQuestion[] = [
     type: 'select',
     required: true,
     options: [
-      { value: 'local_union',   label: 'Local union' },
-      { value: 'national_union',label: 'National or international union' },
-      { value: 'federation',    label: 'Labour federation or council' },
-      { value: 'guild',         label: 'Professional guild or association' },
-      { value: 'clc_affiliate', label: 'CLC affiliate or department' },
-      { value: 'other',         label: 'Other labour organization' },
+      // Labour & member associations
+      { value: 'local_union',          label: 'Local union',                              group: 'Labour & member associations' },
+      { value: 'national_union',       label: 'National or international union',          group: 'Labour & member associations' },
+      { value: 'federation',           label: 'Labour federation or council',             group: 'Labour & member associations' },
+      { value: 'guild',                label: 'Professional guild or association',        group: 'Labour & member associations' },
+      { value: 'clc_affiliate',        label: 'CLC affiliate or department',              group: 'Labour & member associations' },
+      { value: 'industry_association', label: 'Industry association or chamber',          group: 'Labour & member associations' },
+      // Public-sector & civic
+      { value: 'government_agency',    label: 'Government agency or department',          group: 'Public-sector & civic' },
+      { value: 'crown_corp',           label: 'Crown corporation',                        group: 'Public-sector & civic' },
+      { value: 'municipality',         label: 'Municipality or regional authority',       group: 'Public-sector & civic' },
+      { value: 'school_board',         label: 'School board or public education body',    group: 'Public-sector & civic' },
+      { value: 'health_authority',     label: 'Public health authority',                  group: 'Public-sector & civic' },
+      { value: 'indigenous_gov',       label: 'Indigenous government or band council',    group: 'Public-sector & civic' },
+      // Mission-driven & community
+      { value: 'nonprofit',            label: 'Non-profit or charity',                    group: 'Mission-driven & community' },
+      { value: 'foundation',           label: 'Community foundation',                     group: 'Mission-driven & community' },
+      { value: 'faith_based',          label: 'Faith-based organization',                 group: 'Mission-driven & community' },
+      { value: 'cooperative',          label: 'Co-operative or mutual',                   group: 'Mission-driven & community' },
+      // Private & professional
+      { value: 'family_business',      label: 'Family-owned business',                    group: 'Private & professional' },
+      { value: 'professional_firm',    label: 'Professional services firm',               group: 'Private & professional' },
+      { value: 'owner_operated_sme',   label: 'Owner-operated SME',                       group: 'Private & professional' },
+      { value: 'private_enterprise',   label: 'Other private enterprise',                 group: 'Private & professional' },
+      // Other
+      { value: 'other',                label: 'Other institution',                        group: 'Other' },
     ],
   },
   {

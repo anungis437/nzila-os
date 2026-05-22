@@ -27,6 +27,49 @@ import type {
   StewardshipSignal,
 } from './types';
 
+/**
+ * Raw organizational context as captured by the assessment form. Used only to
+ * sharpen editorial framing in burden interpretation and the institutional
+ * forgetting body — never to influence scoring or thresholds.
+ */
+export type InsightOrgContext = Record<string, string> | null | undefined;
+
+function sizeFrame(membershipSize: string | undefined, burdenScore: number): string | null {
+  if (!membershipSize) return null;
+  // Only annotate when the burden is meaningful enough to be worth situating.
+  if (burdenScore < 40) return null;
+  switch (membershipSize) {
+    case 'under_100':
+    case '100_499':
+      return ' At this institutional scale, the stewardship layer is rarely large enough to absorb the simultaneous departure of even one or two of the people currently carrying it.';
+    case '500_1999':
+      return ' At this institutional scale, the labour is typically held by a recognizable handful of long-tenured people whose contribution is visible inside the organization but rarely reflected in formal reporting.';
+    case '2000_9999':
+      return ' At this institutional scale, the burden tends to be distributed across regions or functions in ways that make it hard to see as a single pattern — until simultaneous transitions force the picture into view.';
+    case '10000_49999':
+    case '50000_plus':
+      return ' At this institutional scale, the stewardship load is rarely concentrated in named individuals — it sits inside informal coordination networks whose composition the organization cannot fully describe.';
+    default:
+      return null;
+  }
+}
+
+function ageFrame(yearsOperating: string | undefined): string | null {
+  if (!yearsOperating) return null;
+  switch (yearsOperating) {
+    case 'under_5':
+      return ' For an institution at this stage of life, the pattern reads less as erosion and more as continuity infrastructure that has not yet been built — a meaningfully different problem, and one that is easier to address now than it will be later.';
+    case '5_14':
+      return ' For an institution at this stage of life, this is the window in which informal practice typically begins to outlive the founders — and the window in which deliberate institutionalization yields the most durable returns.';
+    case '15_29':
+      return ' For an institution at this stage of life, what reads here as forgetting is often the slow accumulation of practice that was once obvious to everyone in the room and is now obvious only to the people who were in the room then.';
+    case '30_plus':
+      return ' For an institution at this stage of life, the pattern is most often the quiet erosion of accumulated precedent — visible only at the next transition, when the next generation discovers what was never written down.';
+    default:
+      return null;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Thresholds — tuned for institutional sensitivity, not false-positive alarms
 // ─────────────────────────────────────────────────────────────────────────────
@@ -223,6 +266,7 @@ function detectReconstructionBurden(
  */
 function detectInstitutionalForgetting(
   scores: DimensionScore[],
+  orgContext?: InsightOrgContext,
 ): ContinuityInsight | null {
   const weakDimensions = scores.filter((d) => d.score < T.NOTABLE_LOW);
   if (weakDimensions.length < 3) return null;
@@ -230,13 +274,16 @@ function detectInstitutionalForgetting(
   const ic = dim(scores, 'institutional_continuity');
   const om = dim(scores, 'operational_memory');
 
+  const baseBody =
+    'Several continuity dimensions are weakening together. This is the signature of quiet institutional forgetting — not a single broken system, but the slow, parallel erosion of operational memory, governance coherence, and transition readiness, each making the others harder to sustain. Institutions in this pattern rarely notice the trajectory until a transition forces the ledger open.';
+  const ageSuffix = ageFrame(orgContext?.ctx_years_operating) ?? '';
+
   return {
     id: 'insight_institutional_forgetting',
     category: 'institutional_forgetting',
     headline:
       'Institutional memory fragmentation appears to be increasing operational fragility.',
-    body:
-      'Several continuity dimensions are weakening together. This is the signature of quiet institutional forgetting — not a single broken system, but the slow, parallel erosion of operational memory, governance coherence, and transition readiness, each making the others harder to sustain. Institutions in this pattern rarely notice the trajectory until a transition forces the ledger open.',
+    body: baseBody + ageSuffix,
     dimensionsInvolved: weakDimensions.map((d) => d.dimension) as DimensionId[],
     severity: ic < T.MATERIAL_LOW && om < T.MATERIAL_LOW ? 'material' : 'notable',
     affectedSections: ['institutional_memory', 'governance_visibility', 'transition_readiness'],
@@ -437,6 +484,7 @@ function generateStewardshipSignals(scores: DimensionScore[]): StewardshipSignal
 function computeBurdenIndex(
   scores: DimensionScore[],
   sections: SectionScore[],
+  orgContext?: InsightOrgContext,
 ): ContinuityBurdenIndex {
   const ic = dim(scores, 'institutional_continuity');
   const om = dim(scores, 'operational_memory');
@@ -460,6 +508,9 @@ function computeBurdenIndex(
   else
     interpretation =
       'Continuity burden is low. Institutional systems are absorbing the majority of continuity work, and the organization’s coherence is not unduly dependent on the continued presence of specific individuals.';
+
+  const sizeSuffix = sizeFrame(orgContext?.ctx_membership_size, score);
+  if (sizeSuffix) interpretation += sizeSuffix;
 
   // These are gated in Executive Continuity Brief
   const humanCompensationIndicators: string[] = [];
@@ -512,17 +563,18 @@ export function generateInsights(
   dimensionScores: DimensionScore[],
   sectionScores: SectionScore[],
   persona?: ExecutivePersonaId,
+  orgContext?: InsightOrgContext,
 ): InsightEngineOutput {
   const continuitySignals = generateContinuitySignals(dimensionScores, sectionScores);
   const stewardshipSignals = generateStewardshipSignals(dimensionScores);
-  const burdenIndex = computeBurdenIndex(dimensionScores, sectionScores);
+  const burdenIndex = computeBurdenIndex(dimensionScores, sectionScores, orgContext);
 
   const rawInsights: Array<ContinuityInsight | null> = [
     detectInvisibleLabour(dimensionScores, persona),
     detectGovernanceDrift(dimensionScores, persona),
     detectReconstructionBurden(dimensionScores, sectionScores, persona),
     detectModernizationContinuityGap(dimensionScores, persona),
-    detectInstitutionalForgetting(dimensionScores),
+    detectInstitutionalForgetting(dimensionScores, orgContext),
     detectEvidenceGovernanceGap(dimensionScores, persona),
     detectStewardshipConcentration(dimensionScores, burdenIndex.score, persona),
   ];

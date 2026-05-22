@@ -110,9 +110,18 @@ export interface ScoringTrace {
   maturityBand: MaturityBand
 }
 
+/**
+ * Raw organizational context as captured by the assessment form.
+ * Keys correspond to METADATA_QUESTIONS ids (ctx_org_type, ctx_sector,
+ * ctx_membership_size, ctx_years_operating, ctx_primary_challenge).
+ * Used only to sharpen editorial framing — never to influence scoring.
+ */
+export type ScoringOrgContext = Record<string, string> | null | undefined
+
 export function scoreAssessment(
   assessmentId: string,
   answers: Answer[],
+  orgContext?: ScoringOrgContext,
 ): {
   profile: InstitutionalContinuityProfile
   trace: ScoringTrace
@@ -211,9 +220,9 @@ export function scoreAssessment(
     })
     .sort((a, b) => a.section.localeCompare(b.section))
 
-  const observations = generateObservations(dimensionScores, sections, questionTraces)
+  const observations = generateObservations(dimensionScores, sections, questionTraces, orgContext)
   const recommendations = generateRecommendations(composite, dimensionScores)
-  const insightOutput = generateInsights(dimensionScores, sections)
+  const insightOutput = generateInsights(dimensionScores, sections, undefined, orgContext)
 
   const trace: ScoringTrace = {
     assessmentId,
@@ -342,9 +351,24 @@ function generateObservations(
   dimensions: DimensionScore[],
   sections: SectionScore[],
   traces: QuestionTrace[],
+  orgContext?: ScoringOrgContext,
 ): ContinuityObservation[] {
   const observations: ContinuityObservation[] = []
   let counter = 0
+
+  // Sector-aware peer framing — prepended only when sector is provided and at least
+  // one dimension is below mid-scale. Does not affect scoring or thresholds.
+  const sectorFrame = orgContext ? sectorPeerStatement(orgContext.ctx_sector) : null
+  const anyBelowMid = dimensions.some((d) => d.score < 60)
+  if (sectorFrame && anyBelowMid) {
+    observations.push({
+      id: `obs_${++counter}`,
+      severity: 'attention',
+      category: 'governance',
+      statement: sectorFrame,
+      evidence: [`Organizational context: sector = ${orgContext!.ctx_sector}`],
+    })
+  }
 
   const dimMap = new Map(dimensions.map((d) => [d.dimension, d]))
   const ic = dimMap.get('institutional_continuity')?.score ?? 100
@@ -502,6 +526,39 @@ function sectionLabel(section: SectionId): string {
     sovereignty_governance: 'Sovereignty & Data Governance',
   }
   return labels[section]
+}
+
+/**
+ * Sector-aware peer framing. Maps the metadata sector code to an editorial
+ * line that situates the institution among comparable organizations. Returns
+ * null for unknown or unspecified sectors, so the caller can fall back to
+ * sector-agnostic copy.
+ */
+function sectorPeerStatement(sector?: string): string | null {
+  if (!sector) return null
+  const lines: Record<string, string> = {
+    public_sector:
+      'Public-sector institutions of this type typically carry their continuity risk in two places: in the discretion held by long-tenured staff who interpret policy day to day, and in the documentary trail required to defend decisions through ministerial, AG, or oversight review. Both surfaces appear in this profile.',
+    private_sector:
+      'Private-sector organizations of this scale most often experience continuity risk through the unrecognized dependence on a small group of senior operators \u2014 the people who hold customer history, vendor relationships, and informal authority in roles that have never been formally documented.',
+    healthcare:
+      'Healthcare and social-services organizations typically absorb their continuity load through clinical and administrative staff doing informal coordination work that the formal structure does not name. This profile is consistent with that pattern.',
+    education:
+      'Education institutions typically experience continuity risk most acutely at the seams between governance bodies, administration, and instructional staff \u2014 where decisions are made in one structure and implemented in another, often without a shared record of how the two were reconciled.',
+    construction:
+      'Skilled-trades and construction organizations carry continuity primarily in the experiential judgement of senior tradespeople and field leadership \u2014 a form of institutional memory that is rarely captured in formal systems and rarely transferred deliberately.',
+    transportation:
+      'Transportation and logistics organizations typically depend on operational coordination that has been refined informally over years \u2014 routing decisions, vendor relationships, and exception handling that exist in the heads of dispatchers and operations leads rather than in formal procedure.',
+    retail_hospitality:
+      'Retail and hospitality organizations typically carry continuity through long-tenured store and venue managers whose operational judgement is rarely formalized \u2014 visible only when one of them leaves and the gap appears in service, throughput, or staff retention.',
+    media_communications:
+      'Media and communications organizations typically experience continuity risk through the editorial judgement, source relationships, and brand interpretation that travel with specific people rather than being captured in institutional process.',
+    financial_services:
+      'Financial-services organizations of this scale typically carry continuity risk most consequentially in the audit and decision-evidence layer \u2014 where regulatory exposure depends on the institution being able to reconstruct why a decision was made, by whom, and against what record.',
+    other:
+      'For organizations of this composition, the most consequential continuity risk usually sits in the informal stewardship layer \u2014 the people who carry institutional understanding that has not yet been named, measured, or distributed.',
+  }
+  return lines[sector] ?? null
 }
 
 function generateRecommendations(
