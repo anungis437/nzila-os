@@ -1,5 +1,5 @@
 /**
- * POST /api/icra/[id]/claim — Bind a pseudonymous, paid ICRA assessment to a Nzila identity.
+ * POST /api/icra/[assessmentId]/claim — Bind a pseudonymous, paid ICRA assessment to a Nzila identity.
  *
  * Mirrors POST /api/workbook/[id]/claim. Self-serve ICRA Brief and
  * Diagnostic tiers use the same opaque claim-token mechanism.
@@ -28,9 +28,9 @@ const bodySchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ assessmentId: string }> },
 ) {
-  const { id: assessmentId } = await params;
+  const { assessmentId } = await params;
 
   const { userId } = await auth();
   if (!userId) {

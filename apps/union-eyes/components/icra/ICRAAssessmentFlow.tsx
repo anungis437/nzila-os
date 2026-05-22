@@ -133,16 +133,30 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     for (const q of questions) {
       const rawValue = currentSectionAnswers.get(q.id);
       if (!rawValue) continue;
-      if (!('options' in q)) continue;
 
-      const selectedOption = q.options.find((o) => o.value === rawValue);
-      if (!selectedOption) continue;
+      let normalizedScore: number | null = null;
+
+      if (q.type === 'likert_5') {
+        // Likert: rawValue is "1".."5". Normalize to 0..1.
+        // Confidence-sensing questions: higher = better → (raw-1)/4.
+        // Risk-inverted: higher raw = worse → (5-raw)/4.
+        const numeric = Number.parseInt(rawValue, 10);
+        if (!Number.isFinite(numeric) || numeric < q.scale.min || numeric > q.scale.max) continue;
+        const linear = (numeric - q.scale.min) / (q.scale.max - q.scale.min);
+        normalizedScore = q.riskInverted ? 1 - linear : linear;
+      } else if ('options' in q) {
+        const selectedOption = q.options.find((o) => o.value === rawValue);
+        if (!selectedOption) continue;
+        normalizedScore = selectedOption.score;
+      }
+
+      if (normalizedScore === null) continue;
 
       const answer: Answer = {
         questionId: q.id,
         questionVersion: QUESTION_BANK_VERSION,
         rawValue,
-        normalizedScore: selectedOption.score,
+        normalizedScore,
         weightsSnapshot: { ...q.weights },
         riskInverted: q.riskInverted ?? false,
         answeredAt: new Date().toISOString(),
@@ -262,8 +276,44 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         {currentQuestions
           .sort((a, b) => a.order - b.order)
           .map((q) => {
-            if (!('options' in q)) return null;
             const selected = currentSectionAnswers.get(q.id);
+
+            if (q.type === 'likert_5') {
+              const { min, max, minLabel, maxLabel } = q.scale;
+              const values: number[] = [];
+              for (let v = min; v <= max; v += 1) values.push(v);
+              return (
+                <div key={q.id} className="space-y-3">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-stone-900 leading-snug">{q.prompt}</p>
+                    {q.helpText && (
+                      <p className="text-xs text-stone-500 leading-relaxed">{q.helpText}</p>
+                    )}
+                  </div>
+                  <div className="flex items-stretch gap-2">
+                    {values.map((v) => (
+                      <button
+                        key={v}
+                        onClick={() => handleOptionSelect(q.id, String(v))}
+                        className={`flex-1 rounded-md border px-3 py-3 text-center text-sm font-medium transition-colors ${
+                          selected === String(v)
+                            ? 'border-stone-800 bg-stone-900 text-white'
+                            : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50'
+                        }`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-xs text-stone-500">
+                    <span>{minLabel}</span>
+                    <span className="text-right">{maxLabel}</span>
+                  </div>
+                </div>
+              );
+            }
+
+            if (!('options' in q)) return null;
             return (
               <div key={q.id} className="space-y-3">
                 <div className="space-y-1">

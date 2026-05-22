@@ -100,7 +100,7 @@ function InsightBlock({ insight }: { insight: ContinuityInsight }) {
           Material observation
         </p>
       )}
-      <p className="font-serif text-base font-semibold text-stone-900 leading-snug">
+      <p className="font-sans text-base font-semibold tracking-tight text-stone-900 leading-snug">
         {insight.headline}
       </p>
       <p className="text-sm text-stone-600 leading-relaxed">{insight.body}</p>
@@ -113,7 +113,7 @@ function ContinuitySignalList({ signals }: { signals: ContinuitySignal[] }) {
   if (observed.length === 0) return null;
   return (
     <div className="space-y-3">
-      <h2 className="font-serif text-xl font-bold text-stone-900">
+      <h2 className="font-sans text-xl font-semibold tracking-tight text-stone-900">
         {COPY.results.continuitySignalsTitle}
       </h2>
       <p className="text-sm text-stone-500">
@@ -137,7 +137,7 @@ function StewardshipSignalList({ signals }: { signals: StewardshipSignal[] }) {
     severity === 'elevated' ? 'bg-red-400' : severity === 'moderate' ? 'bg-amber-400' : 'bg-stone-300';
   return (
     <div className="space-y-3">
-      <h2 className="font-serif text-xl font-bold text-stone-900">
+      <h2 className="font-sans text-xl font-semibold tracking-tight text-stone-900">
         {COPY.results.stewardshipSignalsTitle}
       </h2>
       <p className="text-sm text-stone-500">
@@ -184,7 +184,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
         </p>
         <div className="text-7xl font-bold tabular-nums text-stone-900">{composite}</div>
         <div className="space-y-1">
-          <div className="text-xl font-serif font-semibold text-stone-800">
+          <div className="text-xl font-sans font-semibold tracking-tight text-stone-800">
             {maturityBand.ociBandName ?? maturityBand.name}
           </div>
           {maturityBand.operationalPattern && (
@@ -206,7 +206,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
       {/* ── Continuity Insights ── */}
       {insights.length > 0 && (
         <div className="space-y-4">
-          <h2 className="font-serif text-xl font-bold text-stone-900">
+          <h2 className="font-sans text-xl font-semibold tracking-tight text-stone-900">
             {COPY.results.insightsTitle}
           </h2>
           <p className="text-sm text-stone-500">
@@ -234,7 +234,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
       {burdenIndex && visible('burden_index_summary') && (
         <div className="space-y-4">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-serif text-xl font-bold text-stone-900">
+            <h2 className="font-sans text-xl font-semibold tracking-tight text-stone-900">
               {COPY.results.burdenIndexTitle}
             </h2>
             <span className="text-2xl font-bold tabular-nums text-stone-700">
@@ -308,7 +308,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
 
       {/* ── Dimension scores ── */}
       <div className="space-y-4">
-        <h2 className="font-serif text-xl font-bold text-stone-900">Continuity Dimensions</h2>
+        <h2 className="font-sans text-xl font-semibold tracking-tight text-stone-900">Continuity Dimensions</h2>
         <p className="text-sm text-stone-600">
           Each dimension score is computed directly from your answers using published weights.
           Risk dimensions (governance fragility, trust debt) are inverted: a higher score indicates
@@ -323,7 +323,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
 
       {/* ── Section scores ── */}
       <div className="space-y-4">
-        <h2 className="font-serif text-xl font-bold text-stone-900">Section Results</h2>
+        <h2 className="font-sans text-xl font-semibold tracking-tight text-stone-900">Section Results</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {scoredSections.map((sec) => (
             <div
@@ -384,7 +384,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
       {/* ── Observations ── */}
       {observations.length > 0 && (
         <div className="space-y-4">
-          <h2 className="font-serif text-xl font-bold text-stone-900">
+          <h2 className="font-sans text-xl font-semibold tracking-tight text-stone-900">
             {COPY.results.observationsTitle}
           </h2>
           <div className="space-y-3">
@@ -423,7 +423,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
       {/* ── Recommendations ── */}
       {visibleRecommendations.length > 0 && (
         <div className="space-y-4">
-          <h2 className="font-serif text-xl font-bold text-stone-900">
+          <h2 className="font-sans text-xl font-semibold tracking-tight text-stone-900">
             {COPY.results.recommendationsTitle}
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
@@ -456,7 +456,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
 
       {/* ── OCI Motif ── */}
       <div className="border-t border-stone-200 pt-10 text-center space-y-3">
-        <p className="mx-auto max-w-lg font-serif text-base italic text-stone-500 leading-relaxed">
+        <p className="mx-auto max-w-lg font-sans text-base italic text-stone-500 leading-relaxed">
           &ldquo;{COPY.ociMotif}&rdquo;
         </p>
       </div>
