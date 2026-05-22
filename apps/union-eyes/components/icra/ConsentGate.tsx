@@ -11,9 +11,10 @@
 
 import { useState } from 'react';
 import type { ConsentRecord } from '@/lib/icra/types';
+import { TurnstileWidget, isTurnstileConfigured } from './TurnstileWidget';
 
 interface ConsentGateProps {
-  onConsent: (record: ConsentRecord) => void;
+  onConsent: (record: ConsentRecord, turnstileToken: string | null) => void;
   doctrineVersion: string;
   locale?: string;
 }
@@ -89,9 +90,14 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
   const [antiSurveillance, setAntiSurveillance] = useState(false);
   const [dataHandling, setDataHandling] = useState(false);
   const [explainability, setExplainability] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(
+    isTurnstileConfigured() ? null : '',
+  );
   const copy = CONSENT_COPY[locale as keyof typeof CONSENT_COPY] ?? CONSENT_COPY['en-CA'];
 
-  const allAcknowledged = antiSurveillance && dataHandling && explainability;
+  const acksDone = antiSurveillance && dataHandling && explainability;
+  const botCheckSatisfied = turnstileToken !== null;
+  const allAcknowledged = acksDone && botCheckSatisfied;
 
   function handleProceed() {
     if (!allAcknowledged) return;
@@ -102,7 +108,7 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
       acknowledgedDataHandling: true,
       acknowledgedExplainability: true,
     };
-    onConsent(record);
+    onConsent(record, turnstileToken);
   }
 
   return (
@@ -173,6 +179,9 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
       </div>
 
       <div className="pt-2">
+        {isTurnstileConfigured() && (
+          <TurnstileWidget onVerified={setTurnstileToken} locale={locale} />
+        )}
         <button
           onClick={handleProceed}
           disabled={!allAcknowledged}

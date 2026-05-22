@@ -11,7 +11,7 @@
  * No auth required. Redirects to /continuity-assessment/results/[id].
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Answer, ConsentRecord, SectionId } from '@/lib/icra/types';
 import type { MetadataQuestion } from '@/lib/icra/questions';
@@ -25,6 +25,9 @@ import {
 import { ConsentGate } from './ConsentGate';
 
 const DOCTRINE_VERSION = '1.0.0';
+const PERSIST_KEY = 'icra.flow.v1';
+const PERSIST_TTL_MS = 1000 * 60 * 60 * 24; // 24h — abandoned drafts expire
+
 const SCORED_SECTIONS: SectionId[] = [
   'operational_dependency',
   'governance_visibility',
@@ -36,6 +39,43 @@ const SCORED_SECTIONS: SectionId[] = [
 ];
 
 type OrgContextAnswers = Record<string, string>;
+
+/** Persisted draft snapshot (sessionStorage). */
+interface PersistedDraft {
+  v: 1;
+  step: number;
+  consent: ConsentRecord | null;
+  orgContext: OrgContextAnswers;
+  answers: Answer[];
+  currentSectionAnswers: Array<[string, string]>;
+  savedAt: number;
+}
+
+/** Fire-and-forget client telemetry. Uses sendBeacon when possible so
+ *  abandonment signals survive page unload. */
+function emitTelemetry(
+  kind: string,
+  sectionId?: string,
+  metadata?: Record<string, string | number | boolean>,
+): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const payload = JSON.stringify({ kind, sectionId, metadata });
+    if (typeof navigator.sendBeacon === 'function') {
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon('/api/icra/telemetry', blob);
+      return;
+    }
+    void fetch('/api/icra/telemetry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload,
+      keepalive: true,
+    });
+  } catch {
+    // Telemetry must never break the flow.
+  }
+}
 
 const FLOW_COPY = {
   'en-CA': {
@@ -87,11 +127,101 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   // Step: 0=consent, 1=org context, 2-8=scored sections, 9=submitting
   const [step, setStep] = useState(0);
   const [consent, setConsent] = useState<ConsentRecord | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [orgContext, setOrgContext] = useState<OrgContextAnswers>({});
   const [answers, setAnswers] = useState<Map<string, Answer>>(new Map());
   const [currentSectionAnswers, setCurrentSectionAnswers] = useState<Map<string, string>>(new Map());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+  const lastReportedStepRef = useRef<number>(-1);
+
+  // ── Hydrate from sessionStorage on mount ─────────────────────────────────
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setHydrated(true);
+      return;
+    }
+    try {
+      const raw = window.sessionStorage.getItem(PERSIST_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<PersistedDraft>;
+        const fresh = typeof parsed.savedAt === 'number' && Date.now() - parsed.savedAt < PERSIST_TTL_MS;
+        if (
+          fresh &&
+          parsed.v === 1 &&
+          typeof parsed.step === 'number' &&
+          parsed.step > 0 &&
+          parsed.step < 9
+        ) {
+          setStep(parsed.step);
+          if (parsed.consent) setConsent(parsed.consent);
+          if (parsed.orgContext) setOrgContext(parsed.orgContext);
+          if (Array.isArray(parsed.answers)) {
+            setAnswers(new Map(parsed.answers.map((a) => [a.questionId, a])));
+          }
+          if (Array.isArray(parsed.currentSectionAnswers)) {
+            setCurrentSectionAnswers(new Map(parsed.currentSectionAnswers));
+          }
+          emitTelemetry('assessment_resumed', undefined, { step: parsed.step });
+        }
+      }
+    } catch {
+      // Corrupt draft — fall back to fresh state.
+    } finally {
+      setHydrated(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Persist on every meaningful change ────────────────────────────────────
+  useEffect(() => {
+    if (!hydrated || typeof window === 'undefined') return;
+    if (step === 0 || step >= 9) return; // Don't persist pre-consent or post-submit.
+    try {
+      const draft: PersistedDraft = {
+        v: 1,
+        step,
+        consent,
+        orgContext,
+        answers: Array.from(answers.values()),
+        currentSectionAnswers: Array.from(currentSectionAnswers.entries()),
+        savedAt: Date.now(),
+      };
+      window.sessionStorage.setItem(PERSIST_KEY, JSON.stringify(draft));
+    } catch {
+      // Quota exceeded / private mode — silent.
+    }
+  }, [hydrated, step, consent, orgContext, answers, currentSectionAnswers]);
+
+  // ── Abandonment telemetry on unload mid-flow ──────────────────────────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = () => {
+      if (step >= 1 && step <= 8) {
+        emitTelemetry('section_abandoned', currentSectionId ?? undefined, {
+          step,
+          answered: answers.size,
+        });
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, answers.size]);
+
+  // ── Per-step advance telemetry ────────────────────────────────────────────
+  useEffect(() => {
+    if (!hydrated) return;
+    if (lastReportedStepRef.current === step) return;
+    lastReportedStepRef.current = step;
+    if (step === 1) emitTelemetry('consent_accepted');
+    else if (step === 2) emitTelemetry('org_context_completed');
+    else if (step >= 3 && step <= 8) {
+      const advancedFrom = SCORED_SECTIONS[step - 3];
+      if (advancedFrom) emitTelemetry('section_advanced', advancedFrom, { step });
+    }
+  }, [step, hydrated]);
 
   // Scroll to top whenever the user advances to a new step (section transition,
   // consent → org context, org context → first section, etc.).
@@ -101,8 +231,9 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   }, [step]);
 
   // Step 0 → 1
-  function handleConsent(record: ConsentRecord) {
+  function handleConsent(record: ConsentRecord, token: string | null) {
     setConsent(record);
+    setTurnstileToken(token);
     setStep(1);
   }
 
@@ -120,6 +251,22 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   const currentQuestions = currentSectionId
     ? (QUESTIONS_BY_SECTION[currentSectionId] ?? [])
     : [];
+
+  // ── Back navigation: restore the prior section's selections from `answers`.
+  function handleSectionBack() {
+    if (step <= 2) return;
+    const targetSectionId = SCORED_SECTIONS[step - 3];
+    const targetQuestions = targetSectionId
+      ? (QUESTIONS_BY_SECTION[targetSectionId] ?? [])
+      : [];
+    const restored = new Map<string, string>();
+    for (const q of targetQuestions) {
+      const a = answers.get(q.id);
+      if (a) restored.set(q.id, String(a.rawValue));
+    }
+    setCurrentSectionAnswers(restored);
+    setStep(step - 1);
+  }
 
   function handleOptionSelect(questionId: string, value: string) {
     setCurrentSectionAnswers((prev) => new Map(prev).set(questionId, value));
@@ -188,6 +335,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
           orgContext,
           answers: Array.from(finalAnswers.values()),
           locale,
+          turnstileToken,
         };
 
         const res = await fetch('/api/icra/submit', {
@@ -202,6 +350,13 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         }
 
         const data = (await res.json()) as { assessmentId: string };
+        // Successful submission — clear any in-flight draft.
+        try {
+          if (typeof window !== 'undefined') window.sessionStorage.removeItem(PERSIST_KEY);
+        } catch {
+          // ignore
+        }
+        emitTelemetry('assessment_submitted', undefined, { answered: finalAnswers.size });
         router.push(`/${locale}/continuity-assessment/results/${data.assessmentId}`);
       } catch (err) {
         setError(err instanceof Error ? err.message : copy.submissionFailed);
@@ -209,7 +364,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         setStep(8);
       }
     },
-    [consent, copy.submissionFailed, locale, orgContext, router],
+    [consent, copy.submissionFailed, locale, orgContext, router, turnstileToken],
   );
 
   // Progress: 0=0%, 1=10%, 2-8=20-90%, 9=100%
@@ -346,7 +501,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
       {/* Navigation */}
       <div className="flex items-center justify-between border-t border-stone-200 pt-6">
         <button
-          onClick={() => setStep(Math.max(2, step - 1))}
+          onClick={handleSectionBack}
           disabled={step <= 2}
           className="text-sm text-stone-500 hover:text-stone-800 disabled:opacity-30"
         >

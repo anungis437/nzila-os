@@ -15,6 +15,7 @@ import type { Answer, ConsentRecord } from '@/lib/icra/types'
 import { scoreAssessment } from '@/lib/icra/scoring'
 import { rateLimit } from '@/lib/rate-limit'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
+import { verifyTurnstileToken } from '@/lib/icra/turnstile'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
 import { QUESTION_BANK_VERSION, CTX_PRIMARY_CHALLENGE_MAX_LENGTH, CTX_SELECT_VALUE_MAX_LENGTH } from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
@@ -33,6 +34,7 @@ interface SubmitBody {
   orgContext?: Record<string, string>
   answers: Answer[]
   locale?: string
+  turnstileToken?: string | null
 }
 
 function validateBody(body: unknown): body is SubmitBody {
@@ -77,7 +79,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const { consent, orgContext, answers, locale = 'en-CA' } = body
+  const { consent, orgContext, answers, locale = 'en-CA', turnstileToken } = body
+
+  // Turnstile verification — env-gated. Returns success=true when no secret
+  // is configured so dev/private envs work without keys.
+  const turnstile = await verifyTurnstileToken(turnstileToken ?? null, ip)
+  if (!turnstile.success) {
+    fireAndForgetEvent({
+      kind: 'turnstile_failed',
+      ipHash,
+      metadata: { codes: (turnstile.errorCodes ?? []).join(',').slice(0, 64) },
+    })
+    return NextResponse.json(
+      { error: 'Bot check failed. Please refresh and try again.' },
+      { status: 403 },
+    )
+  }
 
   if (answers.length < 1 || answers.length > 64) {
     return NextResponse.json({ error: 'Invalid answer count.' }, { status: 400 })
