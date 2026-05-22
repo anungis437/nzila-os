@@ -143,8 +143,7 @@ export function PrintPdfButton({
       }
 
       pdf.save(filename);
-    } catch (err) {
-      console.error('PDF generation failed', err);
+    } catch {
       // Fallback: use the browser's print dialog if capture fails entirely.
       window.print();
     } finally {
