@@ -27,6 +27,13 @@ Implementation:
 - `apps/union-eyes/lib/intelligence/observatory/sectorContinuityObservatory.ts`
 - `apps/union-eyes/lib/intelligence/__tests__/sectorContinuityObservatory.test.ts`
 
+## Deterministic Report AI
+
+ICRA adaptive report generation is deterministic and doctrine-governed.
+
+- Doctrine: [ICRA deterministic report AI doctrine](../../../docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-deterministic-report-ai-doctrine.md)
+- Trust notes: [ICRA trust center alignment notes](../../../docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-trust-center-alignment-notes.md)
+
 ## Navigation
 
 - Back to [Product Reports](../README.md)

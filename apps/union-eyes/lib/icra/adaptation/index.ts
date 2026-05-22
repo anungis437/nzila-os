@@ -23,3 +23,7 @@ export * from './routingExplainabilitySnapshot';
 export * from './routedSubmissionValidator';
 export * from './persistedAdaptiveContext';
 export * from './reconstructAdaptiveContext';
+export * from './deterministicReportContracts';
+export * from './deterministicReportGuardrails';
+export * from './deterministicReportValidator';
+export * from './deterministicReportEngine';
