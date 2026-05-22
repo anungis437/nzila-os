@@ -1,5 +1,6 @@
 packages:
   - "apps/*"
+  - "apps/*/services/*"
   - "packages/*"
   - "services/*"
   - "!packages/automation"

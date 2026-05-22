@@ -107,7 +107,7 @@ router.post('/', async (req: Request, res: Response) => {
         fundName: fund.fund_name,
       },
     });
-  } catch (_error) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -147,7 +147,7 @@ router.post(
         sig,
         process.env.STRIPE_WEBHOOK_SECRET || ''
       );
-    } catch (_err) {
+    } catch (err) {
       logger.error('Webhook signature verification failed', { error: err });
       return res.status(400).json({
         success: false,
@@ -181,7 +181,7 @@ router.post(
       }
 
       res.json({ received: true });
-    } catch (_error) {
+    } catch (error) {
       logger.error('Error processing webhook', { error });
       res.status(500).json({
         success: false,
@@ -268,7 +268,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
         recentDonations: recentDonations,
       },
     });
-  } catch (_error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -314,7 +314,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
       success: true,
       data: donations[0],
     });
-  } catch (_error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',

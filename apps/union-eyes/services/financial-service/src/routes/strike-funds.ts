@@ -108,7 +108,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
         message: 'Successfully checked in to picket line',
       },
     });
-  } catch (_error) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -173,7 +173,7 @@ router.post('/:fundId/check-out', async (req: Request, res: Response) => {
       success: true,
       data: result[0],
     });
-  } catch (_error) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -257,7 +257,7 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
         disbursements,
       },
     });
-  } catch (_error) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -292,7 +292,7 @@ router.get('/', async (req: Request, res: Response) => {
       success: true,
       data: result,
     });
-  } catch (_error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -345,7 +345,7 @@ router.post('/', async (req: Request, res: Response) => {
       success: true,
       data: result[0],
     });
-  } catch (_error) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,

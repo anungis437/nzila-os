@@ -7,7 +7,6 @@ import {
   getMemberPaymentPatterns,
   getFinancialDashboard,
 } from '../services/financial-reports';
-import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';
 
 const router = Router();

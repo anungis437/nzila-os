@@ -112,6 +112,12 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
 
+      - name: Financial Service Typecheck
+        run: pnpm --filter financial-service typecheck
+
+      - name: Financial Service Lint
+        run: pnpm --filter financial-service lint
+
   unit-tests:
     runs-on: ubuntu-latest
     name: Unit Tests
@@ -152,6 +158,31 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
+      - name: Financial Service Tests
+        run: pnpm --filter financial-service test
+
+  financial-service-health:
+    runs-on: ubuntu-latest
+    name: Financial Service Health Gate
+    needs: [lint-and-typecheck, unit-tests]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Financial Service Health
+        run: pnpm financial-service:health
+
   security-scans:
     runs-on: ubuntu-latest
     name: Security Scans
@@ -169,7 +200,7 @@ jobs:
   artifact-generation:
     runs-on: ubuntu-latest
     name: Generate Pilot Evidence Artifact
-    needs: [contract-tests, lint-and-typecheck, unit-tests]
+    needs: [contract-tests, lint-and-typecheck, unit-tests, financial-service-health]
     if: github.event_name == 'push' && github.ref == 'refs/heads/release/cupe-pilot-0.1'
     steps:
       - uses: actions/checkout@v5

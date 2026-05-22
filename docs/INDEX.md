@@ -47,6 +47,9 @@ Complete index of all documentation in Nzila OS, organized by audience.
 | SRE Dashboard | SRE reporting | [ops/sre/](ops/sre/) |
 | FinOps | Cost management | [ops/finops/](ops/finops/) |
 | Staging Drift Runbook | Drift detection & fix | [ops/staging-runtime-drift-runbook.md](ops/staging-runtime-drift-runbook.md) |
+| Financial Service Governance Recovery | Governance blind-spot closure policy | [ops/FINANCIAL_SERVICE_GOVERNANCE_RECOVERY.md](ops/FINANCIAL_SERVICE_GOVERNANCE_RECOVERY.md) |
+| Financial Runtime Release Policy | Required financial runtime release gates | [ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md](ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md) |
+| Financial Service Release Checklist | Release go/no-go checklist for financial-service | [ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) |
 
 ## Buyers (Sales, Diligence)
 
