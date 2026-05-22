@@ -91,6 +91,7 @@ function isPublicRoute(routeFile: string): boolean {
     || normalized.includes('/api/monday-reset/')  // Public weekly checklist (static content)
     || normalized.includes('/api/billing/checkout/')  // Public SaaS checkout (Stripe-hosted)
     || normalized.includes('/api/icra/')  // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated)
+    || normalized.includes('/api/workbook/')  // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential)
     || normalized.includes('/_perf/')  // Web vitals sendBeacon (anonymous, no org context)
 }
 

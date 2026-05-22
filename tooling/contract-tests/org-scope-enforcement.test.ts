@@ -76,6 +76,7 @@ const EXEMPT_ROUTES = new Set([
   'monday-reset',   // Public weekly checklist (static content)
   'billing/checkout', // Public SaaS checkout (Stripe-hosted)
   'icra',           // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated)
+  'workbook',       // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential)
   '_perf',          // Web vitals sendBeacon endpoint (anonymous, no org context)
 ])
 

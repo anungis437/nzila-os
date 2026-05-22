@@ -79,6 +79,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/billing\/webhook/,     // Stripe webhook (signature-verified, no user auth)
       /\/api\/leads(?:\/|$)/,         // Public lead capture (pre-onboarding, no auth required)
       /\/api\/icra(?:\/|$)/,          // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated)
+      /\/api\/workbook(?:\/|$)/,      // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential, claim route enforces auth() at runtime, Stripe webhook signature-verified)
       /\/_perf\//,                   // Web vitals beacon endpoint (anonymous sendBeacon, size-capped)
     ]
 

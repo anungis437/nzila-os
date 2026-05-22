@@ -467,7 +467,6 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
       {/* Progress bar */}
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-stone-500">
-          <span>
           <span>{copy.section} {sectionIndex + 1} {copy.of} {SCORED_SECTIONS.length} — {localizedSection.title}</span>
           <span aria-live="polite" aria-atomic="true">{Math.round(progressPercent)}% {copy.complete}</span>
         </div>

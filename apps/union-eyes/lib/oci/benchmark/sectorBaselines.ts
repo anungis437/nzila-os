@@ -116,7 +116,7 @@ export const SECTOR_BASELINES: readonly SectorBaseline[] = [
     displayName: { 'en-CA': 'Municipal government' },
     description: {
       'en-CA':
-        'Municipal councils, clerk offices, and standing committees whose continuity touches bylaw history, council precedent, and inter-departmental institutional memory.',
+        'Municipal councils, secretariat offices, and standing committees whose continuity touches bylaw history, council precedent, and inter-departmental institutional memory.',
     },
     governanceShape: 'representative-elected',
     typicalStewardshipDensityRange: { low: 3, median: 6, high: 11 },
