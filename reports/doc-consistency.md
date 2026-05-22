@@ -1,15 +1,15 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-22T01:49:50.130Z
+> Generated: 2026-05-22T07:34:59.660Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1767 |
-| Total Findings | 2538 |
+| Files Scanned | 1770 |
+| Total Findings | 2532 |
 | Errors | 0 |
-| Warnings | 1203 |
+| Warnings | 1197 |
 | Info | 1335 |
 
 ## Findings by Rule
@@ -17,13 +17,13 @@
 | Rule | Count |
 |------|-------|
 | naming-inconsistency | 1328 |
-| stale-reference | 1038 |
+| stale-reference | 1032 |
 | missing-package-readme | 105 |
 | stale-package-ref | 57 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1038)
+## stale-reference (1032)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -815,12 +815,6 @@
 - 🟡 `docs/INDEX.md:164` — Possible broken link: [platform/COVERAGE_REPORTING.md](platform/COVERAGE_REPORTING.md)
 - 🟡 `docs/INDEX.md:171` — Possible broken link: [proof-center/union-eyes-proof.md](proof-center/union-eyes-proof.md)
 - 🟡 `docs/INDEX.md:172` — Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)
-- 🟡 `docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md:35` — Possible broken link: [`governanceRecoveryEngine.ts`](../../apps/union-eyes/lib/workbook/engines/governanceRecoveryEngine.ts)
-- 🟡 `docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md:7` — Possible broken link: [OCI_REVERSIBILITY_PRINCIPLE.md](OCI_REVERSIBILITY_PRINCIPLE.md)
-- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md:116` — Possible broken link: [`stabilizationWorkflowEngine.ts`](../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts)
-- 🟡 `docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md:35` — Possible broken link: [`stewardshipRedistributionEngine.ts`](../../apps/union-eyes/lib/workbook/engines/stewardshipRedistributionEngine.ts)
-- 🟡 `docs/oci/stabilization/workflows/README.md:67` — Possible broken link: [`workflowSequencing.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/workflowSequencing.ts)
-- 🟡 `docs/oci/stabilization/workflows/README.md:91` — Possible broken link: [`stabilizationWorkflowEngine.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts)
 - 🟡 `docs/README.md:3` — Possible broken link: [archive/iterations](archive/iterations/)
 - 🟡 `docs/README.md:18` — Possible broken link: [Union Eyes](buyers/union-eyes-buyer-pack.md)
 - 🟡 `docs/README.md:18` — Possible broken link: [Flow](buyers/flow-buyer-pack.md)
@@ -2457,13 +2451,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 93 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 93 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 93 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 93 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 93 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 93 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 93 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 94 days old — may be stale
 
 ## missing-required-doc (3)
 

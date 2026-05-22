@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-22T01:49:50.130Z",
-  "filesScanned": 1767,
-  "totalFindings": 2538,
+  "generatedAt": "2026-05-22T07:34:59.660Z",
+  "filesScanned": 1770,
+  "totalFindings": 2532,
   "findingsByRule": {
-    "stale-reference": 1038,
+    "stale-reference": 1032,
     "stale-package-ref": 57,
     "naming-inconsistency": 1328,
     "stale-date": 7,
@@ -12,7 +12,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1203,
+    "warning": 1197,
     "info": 1335
   },
   "findings": [
@@ -5918,20 +5918,6 @@
       "message": "Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)"
     },
     {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md",
-      "line": 35,
-      "message": "Possible broken link: [`governanceRecoveryEngine.ts`](../../apps/union-eyes/lib/workbook/engines/governanceRecoveryEngine.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md",
-      "line": 7,
-      "message": "Possible broken link: [OCI_REVERSIBILITY_PRINCIPLE.md](OCI_REVERSIBILITY_PRINCIPLE.md)"
-    },
-    {
       "rule": "stale-package-ref",
       "severity": "warning",
       "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
@@ -5958,34 +5944,6 @@
       "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
       "line": 28,
       "message": "References @nzila/platform-doctrine but package does not exist"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md",
-      "line": 116,
-      "message": "Possible broken link: [`stabilizationWorkflowEngine.ts`](../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md",
-      "line": 35,
-      "message": "Possible broken link: [`stewardshipRedistributionEngine.ts`](../../apps/union-eyes/lib/workbook/engines/stewardshipRedistributionEngine.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/oci/stabilization/workflows/README.md",
-      "line": 67,
-      "message": "Possible broken link: [`workflowSequencing.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/workflowSequencing.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/oci/stabilization/workflows/README.md",
-      "line": 91,
-      "message": "Possible broken link: [`stabilizationWorkflowEngine.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts)"
     },
     {
       "rule": "stale-reference",
@@ -16982,49 +16940,49 @@
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"February 17, 2026\" is 93 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",

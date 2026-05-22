@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-22T01:49:53.720Z
+Generated: 2026-05-22T07:35:03.429Z
 
-Total documents indexed: 1117
+Total documents indexed: 1120
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -26,7 +26,7 @@ Stale documents (>90 days since repo validation): 0
 | nzila-runtime-integrity | 11 | 0 |
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
-| oci | 79 | 0 |
+| oci | 82 | 0 |
 | ops | 4 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
@@ -1033,8 +1033,11 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md](docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
+| [docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md](docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCI_MODALITY_DOCTRINE.md](docs/oci/assessment/OCI_MODALITY_DOCTRINE.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md](docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md](docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md](docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md](docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md](docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md](docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md) | oci | 2026-05-22 | current |
@@ -1071,10 +1074,10 @@ Stale documents (>90 days since repo validation): 0
 | [docs/oci/runtime/OCI_RUNTIME_READINESS.md](docs/oci/runtime/OCI_RUNTIME_READINESS.md) | oci | 2026-05-21 | current |
 | [docs/oci/runtime/OCI_RUNTIME_STEWARDSHIP.md](docs/oci/runtime/OCI_RUNTIME_STEWARDSHIP.md) | oci | 2026-05-21 | current |
 | [docs/oci/runtime/OCI_WORKFLOW_RUNTIME.md](docs/oci/runtime/OCI_WORKFLOW_RUNTIME.md) | oci | 2026-05-21 | current |
-| [docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md](docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md](docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md) | oci | 2026-05-22 | current |
 | [docs/oci/stabilization/OCI_ACTION_SYSTEM.md](docs/oci/stabilization/OCI_ACTION_SYSTEM.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/OCI_CONTINUITY_DEBT.md](docs/oci/stabilization/OCI_CONTINUITY_DEBT.md) | oci | 2026-05-21 | current |
-| [docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md](docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md](docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md) | oci | 2026-05-22 | current |
 | [docs/oci/stabilization/OCI_CONTINUITY_OPERATIONALIZATION.md](docs/oci/stabilization/OCI_CONTINUITY_OPERATIONALIZATION.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/OCI_EXECUTIVE_STABILIZATION_OPERATIONS.md](docs/oci/stabilization/OCI_EXECUTIVE_STABILIZATION_OPERATIONS.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/OCI_FACILITATOR_RUNTIME.md](docs/oci/stabilization/OCI_FACILITATOR_RUNTIME.md) | oci | 2026-05-21 | current |
@@ -1094,7 +1097,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/oci/stabilization/OCI_STABILIZATION_PROGRESSION.md](docs/oci/stabilization/OCI_STABILIZATION_PROGRESSION.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/OCI_STABILIZATION_READINESS.md](docs/oci/stabilization/OCI_STABILIZATION_READINESS.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/OCI_STABILIZATION_SEVERITY_MODEL.md](docs/oci/stabilization/OCI_STABILIZATION_SEVERITY_MODEL.md) | oci | 2026-05-21 | current |
-| [docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md](docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md](docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md) | oci | 2026-05-22 | current |
 | [docs/oci/stabilization/OCI_STABILIZATION_TRACKING.md](docs/oci/stabilization/OCI_STABILIZATION_TRACKING.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md](docs/oci/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md](docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md) | oci | 2026-05-21 | current |
@@ -1104,13 +1107,13 @@ Stale documents (>90 days since repo validation): 0
 | [docs/oci/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md](docs/oci/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/playbooks/README.md](docs/oci/stabilization/playbooks/README.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md](docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md) | oci | 2026-05-21 | current |
-| [docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md](docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md](docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md) | oci | 2026-05-22 | current |
 | [docs/oci/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md](docs/oci/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md](docs/oci/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md](docs/oci/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md](docs/oci/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md](docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md) | oci | 2026-05-21 | current |
-| [docs/oci/stabilization/workflows/README.md](docs/oci/stabilization/workflows/README.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/README.md](docs/oci/stabilization/workflows/README.md) | oci | 2026-05-22 | current |
 | [docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md](docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md) | oci | 2026-05-21 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
 | [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-22 | current |

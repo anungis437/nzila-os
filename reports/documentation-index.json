@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-22T01:49:53.720Z",
-  "totalDocuments": 1117,
+  "generatedAt": "2026-05-22T07:35:03.429Z",
+  "totalDocuments": 1120,
   "staleDocuments": 0,
   "categories": [
     {
@@ -90,7 +90,7 @@
     },
     {
       "category": "oci",
-      "count": 79,
+      "count": 82,
       "staleCount": 0
     },
     {
@@ -6095,6 +6095,12 @@
       "stale": false
     },
     {
+      "path": "docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
       "path": "docs/oci/assessment/OCI_MODALITY_DOCTRINE.md",
       "category": "oci",
       "lastValidated": "2026-05-22",
@@ -6102,6 +6108,18 @@
     },
     {
       "path": "docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md",
       "category": "oci",
       "lastValidated": "2026-05-22",
       "stale": false
@@ -6325,7 +6343,7 @@
     {
       "path": "docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6343,7 +6361,7 @@
     {
       "path": "docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6463,7 +6481,7 @@
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6523,7 +6541,7 @@
     {
       "path": "docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6559,7 +6577,7 @@
     {
       "path": "docs/oci/stabilization/workflows/README.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
