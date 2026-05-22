@@ -1,0 +1,10 @@
+/**
+ * Barrel export for the OCRA adaptation surface. Downstream code should
+ * import from `@/lib/icra/adaptation` (or relative equivalent) rather than
+ * reach into individual modules — this keeps the surface auditable.
+ */
+
+export * from './types';
+export * from './orgComplexityModel';
+export * from './orgContextClassifier';
+export * from './institutionalProfileLens';
