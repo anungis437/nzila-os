@@ -15,3 +15,6 @@ export * from './questionRoutingEngine';
 export * from './domainWeightingModel';
 export * from './contextualScoreNormalizer';
 export * from './adaptiveScoringModel';
+export * from './adaptivePassageLibrary';
+export * from './adaptiveNarrativeEngine';
+export * from './facilitatorAdaptationGuide';
