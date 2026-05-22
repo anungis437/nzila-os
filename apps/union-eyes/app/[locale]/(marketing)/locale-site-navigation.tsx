@@ -26,6 +26,7 @@ export default function LocaleSiteNavigation() {
   const locale = (params?.locale as string) || 'en-CA';
   const contextMode = parseInstitutionalMode(searchParams.get('context') ?? undefined);
   const pilotRequestHref = withInstitutionalContext(`/${locale}/pilot-request`, contextMode);
+  const whitepaperLabel = locale === 'fr-CA' ? 'Livre blanc' : 'Whitepaper';
 
   const solutionsLinks = [
     { name: t('solutionsItems.executive.name'), href: `/${locale}/solutions/executive-leadership`,  desc: t('solutionsItems.executive.desc') },
@@ -49,6 +50,7 @@ export default function LocaleSiteNavigation() {
 
   const primaryNav = [
     { name: t('insights'), href: `/${locale}/insights` },
+    { name: whitepaperLabel, href: `/${locale}/whitepaper` },
     { name: t('proof'), href: `/${locale}/proof` },
     { name: t('pricing'),  href: `/${locale}/pricing` },
     { name: t('contact'),  href: `/${locale}/contact` },
