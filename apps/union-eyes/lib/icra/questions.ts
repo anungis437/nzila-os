@@ -210,11 +210,17 @@ export const METADATA_QUESTIONS: MetadataQuestion[] = [
     section: 'organizational_context',
     order: 5,
     prompt: 'Is there a specific continuity or governance challenge that prompted this assessment? (Optional)',
-    helpText: 'This context is not required and does not affect your results. It helps us understand the range of situations organizations bring to this assessment.',
+    helpText:
+      'Please describe in general institutional terms — do not include names of individuals, employer names, member identifiers, or specific case facts. This field is stored alongside your assessment. 500 character limit.',
     type: 'text',
     required: false,
   },
 ];
+
+/** Server- and client-enforced maximum length for the optional free-text
+ *  context field. Keeps the PII surface bounded and signals intent. */
+export const CTX_PRIMARY_CHALLENGE_MAX_LENGTH = 500;
+export const CTX_SELECT_VALUE_MAX_LENGTH = 64;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Section: operational_dependency (5 questions)

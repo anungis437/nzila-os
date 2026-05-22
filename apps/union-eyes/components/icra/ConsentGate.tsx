@@ -45,7 +45,7 @@ const CONSENT_COPY = {
     acknowledgements: 'Acknowledgements Required to Proceed',
     checks: [
       'I understand this assessment is designed to evaluate organizational systems and practices — not to surveil, evaluate, or score individual people.',
-      'I understand that my responses will be stored pseudonymously. No account is required. Results are accessible via the link provided after submission.',
+      'I understand that my responses, the optional organizational context I provide, and a one-way hash of my IP address are stored pseudonymously for a minimum of twelve months. No account is required. Results are reachable only via the link provided after submission unless I choose to receive that link by email. The organizational context fields (type, sector, size, age) are also used to tailor how my results are framed.',
       'I understand that all scoring is deterministic and explainable. My results will include a full trace of how scores were computed from my responses.',
     ],
     proceed: 'Begin Assessment',
@@ -77,7 +77,7 @@ const CONSENT_COPY = {
     acknowledgements: 'Reconnaissances requises pour continuer',
     checks: [
       "Je comprends que cette évaluation vise les systèmes et pratiques organisationnels, et non la surveillance, l'évaluation ou la notation de personnes individuelles.",
-      'Je comprends que mes réponses seront stockées de façon pseudonyme. Aucun compte n’est requis. Les résultats sont accessibles par le lien fourni après la soumission.',
+      "Je comprends que mes réponses, le contexte organisationnel facultatif que je fournis et une empreinte unidirectionnelle de mon adresse IP sont conservés de façon pseudonyme pendant au moins douze mois. Aucun compte n'est requis. Les résultats ne sont accessibles que par le lien fourni après la soumission, à moins que je choisisse de recevoir ce lien par courriel. Les champs de contexte organisationnel (type, secteur, taille, ancienneté) servent aussi à adapter la formulation de mes résultats.",
       'Je comprends que tous les scores sont déterministes et explicables. Mes résultats incluront une trace complète du calcul des scores à partir de mes réponses.',
     ],
     proceed: "Commencer l'évaluation",

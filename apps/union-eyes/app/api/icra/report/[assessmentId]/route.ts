@@ -22,6 +22,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type { InstitutionalContinuityProfile, OrganizationContext } from '@/lib/icra/types';
+import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { mapToPdfReportData } from '@/lib/icra-pdf/reportDataMapper';
 import { generateExecutiveContinuityPdf } from '@/lib/icra-pdf/generateExecutiveContinuityPdf';
 import { logger } from '@/lib/logger';
@@ -92,7 +93,9 @@ export async function GET(_request: Request, { params }: RouteContext) {
     }
 
     const profile = profileRow.profilePayload as unknown as InstitutionalContinuityProfile;
-    const orgContext = assessment.organizationContext as OrganizationContext | null;
+    const orgContext = mapCtxToOrganizationContext(
+      assessment.organizationContext as Record<string, unknown> | OrganizationContext | null,
+    );
 
     // Defensive: profile must have minimum required shape to render safely
     if (!profile?.dimensions || !profile?.maturityBand) {

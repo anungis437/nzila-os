@@ -20,6 +20,7 @@ import {
   QUESTIONS_BY_SECTION,
   METADATA_QUESTIONS,
   QUESTION_BANK_VERSION,
+  CTX_PRIMARY_CHALLENGE_MAX_LENGTH,
 } from '@/lib/icra/questions';
 import { ConsentGate } from './ConsentGate';
 
@@ -439,13 +440,22 @@ function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
                 })()}
               </select>
             ) : (
-              <textarea
-                value={values[q.id] ?? ''}
-                onChange={(e) => setValues((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                rows={3}
-                placeholder={copy.optionalPlaceholder}
-                className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600 resize-none"
-              />
+              <div className="space-y-1">
+                <textarea
+                  value={values[q.id] ?? ''}
+                  onChange={(e) => {
+                    const next = e.target.value.slice(0, CTX_PRIMARY_CHALLENGE_MAX_LENGTH);
+                    setValues((prev) => ({ ...prev, [q.id]: next }));
+                  }}
+                  rows={3}
+                  maxLength={CTX_PRIMARY_CHALLENGE_MAX_LENGTH}
+                  placeholder={copy.optionalPlaceholder}
+                  className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600 resize-none"
+                />
+                <p className="text-right text-[11px] text-stone-400 tabular-nums">
+                  {(values[q.id] ?? '').length} / {CTX_PRIMARY_CHALLENGE_MAX_LENGTH}
+                </p>
+              </div>
             )}
           </div>
         ))}

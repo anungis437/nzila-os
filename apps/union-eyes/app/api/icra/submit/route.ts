@@ -16,7 +16,7 @@ import { scoreAssessment } from '@/lib/icra/scoring'
 import { rateLimit } from '@/lib/rate-limit'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
-import { QUESTION_BANK_VERSION } from '@/lib/icra/questions'
+import { QUESTION_BANK_VERSION, CTX_PRIMARY_CHALLENGE_MAX_LENGTH, CTX_SELECT_VALUE_MAX_LENGTH } from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import {
   icraAssessments,
@@ -83,6 +83,31 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid answer count.' }, { status: 400 })
   }
 
+  // Bound the orgContext payload: select values are short ids; the optional
+  // free-text challenge field is capped at CTX_PRIMARY_CHALLENGE_MAX_LENGTH.
+  // Trim, drop empty strings, and reject anything that exceeds the cap.
+  let normalizedOrgContext: Record<string, string> | null = null
+  if (orgContext && typeof orgContext === 'object') {
+    const entries: Array<[string, string]> = []
+    for (const [k, v] of Object.entries(orgContext)) {
+      if (typeof v !== 'string') continue
+      const trimmed = v.trim()
+      if (!trimmed) continue
+      const cap =
+        k === 'ctx_primary_challenge'
+          ? CTX_PRIMARY_CHALLENGE_MAX_LENGTH
+          : CTX_SELECT_VALUE_MAX_LENGTH
+      if (trimmed.length > cap) {
+        return NextResponse.json(
+          { error: `Field ${k} exceeds maximum length of ${cap} characters.` },
+          { status: 400 },
+        )
+      }
+      entries.push([k, trimmed])
+    }
+    normalizedOrgContext = entries.length > 0 ? Object.fromEntries(entries) : null
+  }
+
   try {
     return await withSystemContext(async (tx) => {
       const inserted = await tx
@@ -92,7 +117,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           questionBankVersion: QUESTION_BANK_VERSION,
           doctrineVersion: DOCTRINE_VERSION,
           consent,
-          organizationContext: orgContext ?? null,
+          organizationContext: normalizedOrgContext,
           locale,
           submittedAt: new Date(),
         })
@@ -103,7 +128,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         throw new Error('Assessment insert returned no id')
       }
 
-      const { profile } = scoreAssessment(assessmentId, answers, orgContext ?? null)
+      const { profile } = scoreAssessment(assessmentId, answers, normalizedOrgContext)
 
       // Run all dependent inserts in parallel — they each only depend on
       // assessmentId, so this collapses ~5 sequential round-trips into one.
