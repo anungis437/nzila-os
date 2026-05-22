@@ -24,6 +24,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 import type { PdfReportData } from './reportDataMapper';
+import { AI_DISCLOSURE_COPY } from '../icra-ai/aiDisclosureCopy';
 import {
   COLORS,
   FONTS,
@@ -964,6 +965,67 @@ function AdaptiveInterpretationContextPage({ data }: { data: PdfReportData }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AI-Assisted Narrative Page
+//
+// Renders only when data.aiAssistedNarrative is supplied AND its review
+// status is 'approved'. Carries the canonical bilingual disclosure verbatim
+// from docs/oci/ai/AI_DISCLOSURE_NOTICE.md so the reader knows the section
+// is AI-assisted and reviewer-approved. The narrative itself is reviewer-
+// verified text from the human review workflow — never raw model output.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function AiAssistedNarrativePage({ data }: { data: PdfReportData }) {
+  const ai = data.aiAssistedNarrative;
+  if (!ai || ai.reviewStatus !== 'approved') return null;
+  const locale: 'en-CA' | 'fr-CA' = ai.locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
+  const disclosure = AI_DISCLOSURE_COPY[locale];
+  const label =
+    locale === 'fr-CA' ? 'Synthèse narrative assistée' : 'AI-Assisted Narrative';
+  const heading =
+    locale === 'fr-CA'
+      ? 'Synthèse narrative assistée par IA'
+      : 'AI-Assisted Continuity Narrative';
+  const auditLabel = locale === 'fr-CA' ? 'Référence audit' : 'Audit record';
+  return (
+    <Page size={PAGE.size} style={S.page}>
+      <Text style={S.sectionLabel}>{label}</Text>
+      <Text style={S.sectionHeading}>{heading}</Text>
+      <View style={S.divider} />
+
+      <Text
+        style={[
+          S.bodySmall,
+          {
+            marginBottom: SPACE.lg,
+            color: COLORS.ink60,
+            fontStyle: 'italic',
+            lineHeight: 1.6,
+          },
+        ]}
+      >
+        {disclosure}
+      </Text>
+
+      <Text style={S.bodyPara}>{ai.narrative}</Text>
+
+      <Text
+        style={[
+          S.bodySmall,
+          { marginTop: SPACE.xl, color: COLORS.ink40, lineHeight: 1.6 },
+        ]}
+      >
+        {auditLabel}: {ai.auditRecordRef}
+      </Text>
+
+      <PageFooter
+        institutionName={data.institutionName}
+        generatedAt={data.generatedAt}
+      />
+    </Page>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Assessment Metadata Page (back matter)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1085,6 +1147,7 @@ export function ExecutiveContinuityBriefTemplate({
       <ExecutiveReflectionPage data={data} />
       {data.stabilizationMovement ? <StabilizationMovementAppendixPage data={data} /> : null}
       {data.adaptiveContext ? <AdaptiveInterpretationContextPage data={data} /> : null}
+      {data.aiAssistedNarrative ? <AiAssistedNarrativePage data={data} /> : null}
       <AssessmentMetadataPage data={data} />
     </Document>
   );

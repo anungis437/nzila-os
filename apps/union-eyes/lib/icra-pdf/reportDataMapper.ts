@@ -102,6 +102,17 @@ export interface PdfReportData {
   // renders an "Adaptive Interpretation Context" page so report readers can
   // see the calibration applied to interpretation.
   adaptiveContext?: PersistedAdaptiveContext;
+
+  // Optional AI-assisted narrative slot (doctrine: docs/oci/ai/).
+  // Rendered as a clearly separated, disclosure-stamped section. Only
+  // populated when an approved AI-assisted narrative exists. Renders as
+  // null when absent. See docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md.
+  aiAssistedNarrative?: {
+    readonly narrative: string;
+    readonly auditRecordRef: string;
+    readonly reviewStatus: 'approved';
+    readonly locale: 'en-CA' | 'fr-CA';
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

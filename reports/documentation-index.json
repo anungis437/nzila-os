@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-22T07:35:03.429Z",
-  "totalDocuments": 1120,
+  "generatedAt": "2026-05-22T13:34:44.026Z",
+  "totalDocuments": 1126,
   "staleDocuments": 0,
   "categories": [
     {
@@ -90,7 +90,7 @@
     },
     {
       "category": "oci",
-      "count": 82,
+      "count": 88,
       "staleCount": 0
     },
     {
@@ -6095,6 +6095,36 @@
       "stale": false
     },
     {
+      "path": "docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/ai/AI_DISCLOSURE_NOTICE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/ai/OCRA_AI_BOUNDARY_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/ai/OCRA_AI_SYSTEM_ARCHITECTURE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
       "path": "docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md",
       "category": "oci",
       "lastValidated": "2026-05-22",
@@ -6108,6 +6138,12 @@
     },
     {
       "path": "docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md",
       "category": "oci",
       "lastValidated": "2026-05-22",
       "stale": false

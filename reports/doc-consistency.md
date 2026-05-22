@@ -1,12 +1,12 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-22T07:34:59.660Z
+> Generated: 2026-05-22T13:34:40.748Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1770 |
+| Files Scanned | 1776 |
 | Total Findings | 2532 |
 | Errors | 0 |
 | Warnings | 1197 |

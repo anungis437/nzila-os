@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-22T07:35:03.429Z
+Generated: 2026-05-22T13:34:44.026Z
 
-Total documents indexed: 1120
+Total documents indexed: 1126
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -26,7 +26,7 @@ Stale documents (>90 days since repo validation): 0
 | nzila-runtime-integrity | 11 | 0 |
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
-| oci | 82 | 0 |
+| oci | 88 | 0 |
 | ops | 4 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
@@ -1033,9 +1033,15 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md](docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
+| [docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md](docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md) | oci | 2026-05-22 | current |
+| [docs/oci/ai/AI_DISCLOSURE_NOTICE.md](docs/oci/ai/AI_DISCLOSURE_NOTICE.md) | oci | 2026-05-22 | current |
+| [docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md](docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md) | oci | 2026-05-22 | current |
+| [docs/oci/ai/OCRA_AI_BOUNDARY_MODEL.md](docs/oci/ai/OCRA_AI_BOUNDARY_MODEL.md) | oci | 2026-05-22 | current |
+| [docs/oci/ai/OCRA_AI_SYSTEM_ARCHITECTURE.md](docs/oci/ai/OCRA_AI_SYSTEM_ARCHITECTURE.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md](docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCI_MODALITY_DOCTRINE.md](docs/oci/assessment/OCI_MODALITY_DOCTRINE.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md](docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md](docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md](docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md](docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md](docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md) | oci | 2026-05-22 | current |
