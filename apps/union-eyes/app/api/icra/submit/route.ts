@@ -105,67 +105,83 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
       const { profile } = scoreAssessment(assessmentId, answers)
 
+      // Run all dependent inserts in parallel — they each only depend on
+      // assessmentId, so this collapses ~5 sequential round-trips into one.
+      const inserts: Array<Promise<unknown>> = []
+
       if (answers.length > 0) {
-        await tx.insert(icraAssessmentAnswers).values(
-          answers.map((a) => ({
-            assessmentId,
-            questionId: a.questionId,
-            questionVersion: a.questionVersion,
-            rawValue: String(a.rawValue),
-            normalizedScore: a.normalizedScore.toFixed(4),
-            weightsSnapshot: a.weightsSnapshot,
-            riskInverted: a.riskInverted,
-            note: a.note ?? null,
-            answeredAt: new Date(a.answeredAt),
-          })),
+        inserts.push(
+          tx.insert(icraAssessmentAnswers).values(
+            answers.map((a) => ({
+              assessmentId,
+              questionId: a.questionId,
+              questionVersion: a.questionVersion,
+              rawValue: String(a.rawValue),
+              normalizedScore: a.normalizedScore.toFixed(4),
+              weightsSnapshot: a.weightsSnapshot,
+              riskInverted: a.riskInverted,
+              note: a.note ?? null,
+              answeredAt: new Date(a.answeredAt),
+            })),
+          ),
         )
       }
 
-      await tx.insert(icraMaturityProfiles).values({
-        assessmentId,
-        maturityBandId: profile.maturityBand.id,
-        composite: profile.composite.toFixed(2),
-        profilePayload: profile,
-      })
+      inserts.push(
+        tx.insert(icraMaturityProfiles).values({
+          assessmentId,
+          maturityBandId: profile.maturityBand.id,
+          composite: profile.composite.toFixed(2),
+          profilePayload: profile,
+        }),
+      )
 
       if (profile.dimensions.length > 0) {
-        await tx.insert(icraContinuityScores).values(
-          profile.dimensions.map((d) => ({
-            assessmentId,
-            dimensionId: d.dimension,
-            score: d.score.toFixed(2),
-            contributingQuestions: d.contributingQuestions,
-            weightTotal: d.weightTotal.toFixed(3),
-          })),
+        inserts.push(
+          tx.insert(icraContinuityScores).values(
+            profile.dimensions.map((d) => ({
+              assessmentId,
+              dimensionId: d.dimension,
+              score: d.score.toFixed(2),
+              contributingQuestions: d.contributingQuestions,
+              weightTotal: d.weightTotal.toFixed(3),
+            })),
+          ),
         )
       }
 
       if (profile.observations.length > 0) {
-        await tx.insert(icraGovernanceFlags).values(
-          profile.observations.map((o) => ({
-            assessmentId,
-            flagId: o.id,
-            severity: o.severity,
-            category: o.category,
-            statement: o.statement,
-            evidence: o.evidence ?? null,
-          })),
+        inserts.push(
+          tx.insert(icraGovernanceFlags).values(
+            profile.observations.map((o) => ({
+              assessmentId,
+              flagId: o.id,
+              severity: o.severity,
+              category: o.category,
+              statement: o.statement,
+              evidence: o.evidence ?? null,
+            })),
+          ),
         )
       }
 
       if (profile.recommendations.length > 0) {
-        await tx.insert(icraFollowupRecommendations).values(
-          profile.recommendations.map((r) => ({
-            assessmentId,
-            recommendationId: r.id,
-            kind: r.kind,
-            title: r.title,
-            description: r.description,
-            ctaLabel: r.ctaLabel,
-            ctaHref: r.ctaHref,
-          })),
+        inserts.push(
+          tx.insert(icraFollowupRecommendations).values(
+            profile.recommendations.map((r) => ({
+              assessmentId,
+              recommendationId: r.id,
+              kind: r.kind,
+              title: r.title,
+              description: r.description,
+              ctaLabel: r.ctaLabel,
+              ctaHref: r.ctaHref,
+            })),
+          ),
         )
       }
+
+      await Promise.all(inserts)
 
       fireAndForgetEvent({
         kind: 'assessment_submitted',
