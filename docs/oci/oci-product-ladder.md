@@ -18,7 +18,7 @@ converge to this doctrine.
 
 | Layer | Product family | Method phase (see [OCI Method](./oci-method.md)) | Posture |
 |---|---|---|---|
-| **P1** | ICRA — Institutional Continuity Risk Assessment | Recognition | Awakening |
+| **P1** | OCRA — OCI Continuity Risk Assessment | Recognition | Awakening |
 | **P2** | Governance Entropy Workbook™ | Mapping | Operational cartography |
 | **P3** | OCI Diagnostic | Stabilization | Facilitated reduction of continuity burden |
 | **P4** | OCI Runtime Infrastructure | Infrastructure | Embedded continuity systems |
@@ -33,7 +33,7 @@ forward-compatible.
 
 All prices are flat — no ranges, no "from" pricing, no contextual midpoints.
 
-### P1 — ICRA
+### P1 — OCRA
 
 | Tier | Price (CAD) | Delivery |
 |---|---|---|
@@ -57,7 +57,7 @@ separately when each layer becomes a shipping product.
 ## P5 architectural reservation — Institutional benchmarking
 
 P5 is the OCI Intelligence Network. Once a sufficient number of institutions
-complete ICRA and Workbook engagements, the network produces:
+complete OCRA and Workbook engagements, the network produces:
 
 - anonymized maturity comparisons across sectors and jurisdictions,
 - continuity survivability baselines,

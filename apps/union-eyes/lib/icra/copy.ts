@@ -1,5 +1,5 @@
 /**
- * ICRA — Canonical Copy
+ * OCRA — Canonical Copy
  *
  * One source of truth for institutional, calm, anti-surveillance language.
  * No marketing claims. No hype. No urgency. No surveillance vocabulary.
@@ -10,13 +10,13 @@ export const DOCTRINE_VERSION = '1.0.0';
 
 export const COPY = {
   brand: {
-    productName: 'Institutional Continuity Risk Assessment',
+    productName: 'OCI Continuity Risk Assessment',
     shortName: 'Continuity Assessment',
-    trademark: 'Institutional Continuity Risk Assessment™',
+    trademark: 'OCI Continuity Risk Assessment™',
     categoryName: 'Organizational Continuity Infrastructure',
   },
   hero: {
-    eyebrow: 'Institutional Continuity Risk Assessment™',
+    eyebrow: 'OCI Continuity Risk Assessment™',
     headline:
       'Most Institutions Are Carrying More Continuity Risk Than They Realize.',
     humanContinuityLine:

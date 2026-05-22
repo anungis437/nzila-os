@@ -58,7 +58,7 @@ export default function StarterKitPage() {
         <div className="mt-12 rounded-2xl border border-electric/20 bg-electric/5 p-8">
           <h2 className="text-2xl font-bold text-navy mb-3">Recommended next step</h2>
           <p className="text-gray-700 mb-6">
-            Use the starter kit before the Institutional Continuity Risk Assessment or a governance review workshop.
+            Use the starter kit before the OCI Continuity Risk Assessment or a governance review workshop.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/continuity-assessment" className="px-6 py-3 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition">

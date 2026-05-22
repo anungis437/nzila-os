@@ -14,7 +14,7 @@ and any single engagement.
 
 | Phase | Name | What happens | OCI product layer |
 |---|---|---|---|
-| 1 | **Recognition** | The institution sees the shape of its continuity for the first time. Continuity becomes visible, named, and discussable. | P1 — ICRA |
+| 1 | **Recognition** | The institution sees the shape of its continuity for the first time. Continuity becomes visible, named, and discussable. | P1 — OCRA |
 | 2 | **Mapping** | The institution maps its continuity terrain — its memory holders, its governance lineage, its breakpoints, its modernization alignment. | P2 — Governance Entropy Workbook™ |
 | 3 | **Stabilization** | The institution reduces continuity burden where it is most fragile. Stewardship density is broadened. Lineage is recorded. | P3 — OCI Diagnostic |
 | 4 | **Infrastructure** | Continuity becomes embedded in the institution's operational systems. It is no longer a project; it is the platform. | P4 — OCI Runtime Infrastructure |

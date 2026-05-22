@@ -23,7 +23,7 @@ const investorCtaCopy: Record<Locale, {
   'en-CA': {
     investorsBadge: 'For Institutions',
     investorsTitle: 'Assess continuity risk before transition exposes it',
-    investorsBody: 'Use the Institutional Continuity Risk Assessment to identify governance fragility, operational memory loss, trust debt, and sovereignty exposure.',
+    investorsBody: 'Use the OCI Continuity Risk Assessment to identify governance fragility, operational memory loss, trust debt, and sovereignty exposure.',
     investorsCta: 'Begin Assessment',
     partnersBadge: 'For Labor Organizations',
     partnersTitle: 'Union Eyes is the flagship validation path',

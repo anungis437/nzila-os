@@ -69,7 +69,7 @@ The authoritative map of who owns which schema in a Union Eyes database.
 
 **Delegated read-model projections** (per [drizzle-scope-reconstruction.md](./drizzle-scope-reconstruction.md) §2):
 
-- `public.icra_*` — Institutional Continuity Risk Assessment (continuity
+- `public.icra_*` — OCI Continuity Risk Assessment (continuity
   observability scope). Pseudonymous, no PII required, no Django model
   owns this surface. Tables: `icra_organizations`,
   `icra_assessments`, `icra_assessment_answers`, `icra_maturity_profiles`,

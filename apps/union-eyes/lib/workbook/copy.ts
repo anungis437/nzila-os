@@ -50,7 +50,7 @@ export const WORKBOOK_COPY = {
     },
     body: {
       'en-CA':
-        'The Governance Entropy Workbook is the second layer of Organizational Continuity Infrastructure. Where the Institutional Continuity Risk Assessment helps you recognise what your institution is carrying, this Workbook helps you map it: the carriers, the lineage, the breakpoints, and the moves required to keep continuity intact across the next transition arc.',
+        'The Governance Entropy Workbook is the second layer of Organizational Continuity Infrastructure. Where the OCI Continuity Risk Assessment helps you recognise what your institution is carrying, this Workbook helps you map it: the carriers, the lineage, the breakpoints, and the moves required to keep continuity intact across the next transition arc.',
       'fr-CA':
         'Le Cahier d\u2019entropie de gouvernance constitue la deuxi\u00e8me couche de l\u2019Infrastructure de continuit\u00e9 organisationnelle. L\u00e0 o\u00f9 l\u2019\u00c9valuation du risque de continuit\u00e9 institutionnelle vous aide \u00e0 reconna\u00eetre ce que votre institution porte, ce cahier vous aide \u00e0 le cartographier : les porteurs, la filiation, les points de rupture et les mouvements requis pour pr\u00e9server la continuit\u00e9 \u00e0 travers le prochain arc de transition.',
     },

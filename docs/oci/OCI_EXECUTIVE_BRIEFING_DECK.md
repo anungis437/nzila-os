@@ -21,7 +21,7 @@ to an executive sponsor and at most three other institutional
 leaders. It runs thirty minutes including questions.
 
 The deck is not circulated in advance. It is not left behind. A
-written Executive Continuity Brief — produced from the ICRA, not
+written Executive Continuity Brief — produced from the OCRA, not
 from this deck — is the artifact the institution keeps.
 
 The briefing is a conversation. The deck is the scaffolding for
@@ -235,7 +235,7 @@ The room receives:
 
 - **Nothing during the briefing.** The facilitator opens with
   empty hands.
-- **The Executive Continuity Brief, after the ICRA.** Delivered
+- **The Executive Continuity Brief, after the OCRA.** Delivered
   printed, bound, numbered, to the sponsor and the readers the
   sponsor names.
 - **A one-page summary of the briefing slides**, on request, no

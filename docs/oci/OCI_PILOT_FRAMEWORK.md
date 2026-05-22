@@ -44,7 +44,7 @@ has never named this").
 
 **Instruments.**
 
-- [Institutional Continuity Risk Assessment (ICRA)](../../apps/union-eyes/lib/icra/) —
+- [OCI Continuity Risk Assessment (OCRA)](../../apps/union-eyes/lib/icra/) —
   the entry instrument; produces an Executive Continuity Brief.
 - Executive interpretation session — a facilitator walks the institution
   through the Brief without diagnosis.

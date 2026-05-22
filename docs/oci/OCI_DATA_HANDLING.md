@@ -119,7 +119,7 @@ handling addendum for the institution.
 
 | Phase | Inbound to OCI | Internal processing | Outbound from OCI |
 |---|---|---|---|
-| Recognition | ICRA inputs supplied by sponsor | ICRA computation | Executive Continuity Brief (printed and digital to sponsor) |
+| Recognition | OCRA inputs supplied by sponsor | OCRA computation | Executive Continuity Brief (printed and digital to sponsor) |
 | Mapping | Steward observations; role data | Workbook engines (stewardship density, governance entropy) | Workbook PDF to sponsor; cartography to governance liaison |
 | Stabilization | Stabilisation moves; succession notes | Governance continuity planning | Governance continuity plan to governance body |
 | Embedding | Engagement state | Runtime continuity systems | Aggregate sector contribution (if opted in, reviewed per publication) |

@@ -92,8 +92,8 @@ export default async function Portfolio() {
     {
       title: isFr ? 'J explore le risque de continuité' : 'I am Exploring Continuity Risk',
       description: isFr
-        ? 'Consultez le diagnostic ICRA et les symptômes de fragilité institutionnelle.'
-        : 'Review the ICRA diagnostic and the symptoms of institutional fragility.',
+        ? 'Consultez le diagnostic OCRA et les symptômes de fragilité institutionnelle.'
+        : 'Review the OCRA diagnostic and the symptoms of institutional fragility.',
       href: '/continuity-assessment',
       eventName: 'portfolio_start_here_assessment',
       cta: isFr ? 'Commencer l évaluation' : 'Begin Assessment',

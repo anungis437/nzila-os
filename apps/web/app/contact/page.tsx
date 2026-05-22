@@ -86,7 +86,7 @@ const contactCopy: Record<Locale, {
       { icon: '📞', title: 'Phone', value: 'Schedule on request', href: '', sub: 'Phone support by arranged discovery call' },
       { icon: '🌍', title: 'Office', value: 'Remote-First · Global Opérations', href: '', sub: 'Teams across multiple time zones' },
     ],
-    inquiriesList: ['Institutional Continuity Risk Assessment', 'Union Eyes pilot scoping', 'Governance and trust review', 'Procurement-safe doctrine materials'],
+    inquiriesList: ['OCI Continuity Risk Assessment', 'Union Eyes pilot scoping', 'Governance and trust review', 'Procurement-safe doctrine materials'],
     features: [
       { icon: '📊', title: 'Continuity Baseline', description: 'Structured review of key-person dependency, transition exposure, governance visibility, and operational memory risk.' },
       { icon: '🔧', title: 'Pilot Scoping', description: 'Define a bounded pilot function, success criteria, role authority, consent expectations, and review cadence.' },

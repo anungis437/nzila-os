@@ -67,7 +67,7 @@ purpose, a posture, and an artifact the institution receives.
 
 **Phase 1 — Recognition.** The institution looks at the shape of
 its own continuity, with the support of a single instrument (the
-Institutional Continuity Risk Assessment) and a facilitator.
+OCI Continuity Risk Assessment) and a facilitator.
 The phase closes with an Executive Continuity Brief, read by
 the sponsor.
 

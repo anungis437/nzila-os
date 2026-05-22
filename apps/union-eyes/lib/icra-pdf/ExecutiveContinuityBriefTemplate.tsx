@@ -419,7 +419,7 @@ function CoverPage({ data }: { data: PdfReportData }) {
 
       {/* Main title block */}
       <Text style={S.coverTitle}>Executive{'\n'}Continuity{'\n'}Brief</Text>
-      <Text style={S.coverSubtitle}>Institutional Continuity Risk Assessment</Text>
+      <Text style={S.coverSubtitle}>OCI Continuity Risk Assessment</Text>
 
       {/* Institution name */}
       {data.institutionName && (
@@ -874,7 +874,7 @@ function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
       <View style={S.divider} />
 
       <Text style={S.bodyPara}>
-        This Executive Continuity Brief was generated from the Institutional Continuity Risk Assessment (ICRA), a structured self-assessment instrument designed to surface institutional continuity posture across five core dimensions: institutional continuity, governance fragility, evidence and traceability, operational memory, and transition readiness.
+        This Executive Continuity Brief was generated from the OCI Continuity Risk Assessment (ICRA), a structured self-assessment instrument designed to surface institutional continuity posture across five core dimensions: institutional continuity, governance fragility, evidence and traceability, operational memory, and transition readiness.
       </Text>
 
       <Text style={S.bodyPara}>
@@ -936,7 +936,7 @@ function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
         ))}
 
       <Text style={[S.bodySmall, { marginTop: SPACE.xl, color: COLORS.ink40, lineHeight: 1.6 }]}>
-        This report was prepared by Union Eyes, a Nzila OS programme. The Institutional Continuity Risk Assessment and the Organizational Continuity Infrastructure framework are proprietary analytical instruments. Results are intended for internal governance use. Union Eyes does not retain personally identifiable information beyond the pseudonymous assessment record.
+        This report was prepared by Union Eyes, a Nzila OS programme. The OCI Continuity Risk Assessment and the Organizational Continuity Infrastructure framework are proprietary analytical instruments. Results are intended for internal governance use. Union Eyes does not retain personally identifiable information beyond the pseudonymous assessment record.
       </Text>
 
       <PageFooter
@@ -962,7 +962,7 @@ export function ExecutiveContinuityBriefTemplate({
     <Document
       title={`Executive Continuity Brief${data.institutionName ? ` — ${data.institutionName}` : ''}`}
       author="Union Eyes / Nzila OS"
-      subject="Institutional Continuity Risk Assessment — Executive Continuity Brief"
+      subject="OCI Continuity Risk Assessment — Executive Continuity Brief"
       keywords="OCI, institutional continuity, governance, continuity risk"
       creator="Union Eyes ICRA Platform"
       producer="Union Eyes / Nzila OS"

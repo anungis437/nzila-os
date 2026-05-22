@@ -97,7 +97,7 @@ the median; an unhurried pilot may take sixteen.
 | Week | Phase | Session | Duration |
 |---|---|---|---|
 | 1 | Recognition | Sponsor intake | 60 min |
-| 2 | Recognition | ICRA delivery | self-paced |
+| 2 | Recognition | OCRA delivery | self-paced |
 | 3 | Recognition | Executive interpretation | 90 min |
 | 4 | Mapping | Workbook orientation | 60 min |
 | 5–7 | Mapping | Working sessions (steward + facilitator) | 90 min each |
@@ -121,7 +121,7 @@ institution's property thereafter.
 
 ### Phase 1 artifacts
 
-- **Executive Continuity Brief** — produced from the ICRA. Bound,
+- **Executive Continuity Brief** — produced from the OCRA. Bound,
   numbered, distributed in printed form to the sponsor and a small
   number of named institutional readers.
 
@@ -176,7 +176,7 @@ These exclusions are intentional and constitutive.
 
 | Deliverable | Produced by | Delivered to |
 |---|---|---|
-| Executive Continuity Brief | Facilitator (from ICRA) | Executive sponsor |
+| Executive Continuity Brief | Facilitator (from OCRA) | Executive sponsor |
 | Stewardship cartography | Steward + facilitator | Sponsor + governance liaison |
 | Governance Entropy Workbook PDF | Workbook engine | Sponsor (printed and digital) |
 | Operational survivability priorities | Steward + facilitator | Sponsor |

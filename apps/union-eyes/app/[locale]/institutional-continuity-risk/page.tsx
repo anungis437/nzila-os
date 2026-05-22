@@ -263,7 +263,7 @@ export default async function InstitutionalContinuityRiskPage({
 
         <div className="relative z-10 mx-auto w-full max-w-5xl px-6 pt-36 pb-28 text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-stone-300">
-            {isFr ? 'Évaluation de la continuité institutionnelle' : 'Institutional Continuity Risk Assessment'}
+            {isFr ? 'Évaluation de la continuité institutionnelle' : 'OCI Continuity Risk Assessment'}
           </p>
           <h1 className="mx-auto mt-7 max-w-4xl text-balance text-4xl font-light leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
             {isFr

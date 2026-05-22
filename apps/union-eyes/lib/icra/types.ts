@@ -1,5 +1,5 @@
 /**
- * Institutional Continuity Risk Assessment (ICRA) — Types
+ * OCI Continuity Risk Assessment (ICRA) — Types
  *
  * Doctrine-aligned. Continuity intelligence infrastructure, not a quiz.
  * Every type is shaped for: explainability, replayability, auditability,

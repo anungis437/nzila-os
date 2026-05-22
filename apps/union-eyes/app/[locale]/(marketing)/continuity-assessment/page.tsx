@@ -2,7 +2,7 @@
  * ARTIFACT TYPE: Next.js Page
  * DOCTRINE_VERSION: 1.0.0
  *
- * Public landing page for the ICRA — Institutional Continuity Risk Assessment.
+ * Public landing page for the ICRA — OCI Continuity Risk Assessment.
  * No auth. Fully public. Institutional tone.
  */
 
@@ -19,11 +19,11 @@ interface PageProps {
 
 const PAGE_COPY = {
   'en-CA': {
-    metadataTitle: 'Institutional Continuity Risk Assessment | Union Eyes',
+    metadataTitle: 'OCI Continuity Risk Assessment | Union Eyes',
     metadataDescription:
       "Assess your labour organization's institutional continuity maturity. Identify governance fragility, operational dependencies, and transition readiness with a fully explainable, no-AI assessment.",
     badge: 'Institutional Assessment',
-    heading: 'Institutional Continuity Risk Assessment',
+    heading: 'OCI Continuity Risk Assessment',
     description:
       "A structured, explainable assessment of your labour organization's institutional continuity maturity. No AI scoring. No surveillance. Full transparency.",
     begin: 'Begin Assessment',

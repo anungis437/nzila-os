@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale, id } = await params;
   return {
     title: 'Your Continuity Profile | Union Eyes',
-    description: 'Your Institutional Continuity Risk Assessment results.',
+    description: 'Your OCI Continuity Risk Assessment results.',
     alternates: buildLocaleAlternates(locale, `/continuity-assessment/results/${id}`),
     robots: { index: false },
   };
