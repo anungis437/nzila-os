@@ -184,4 +184,24 @@ describe('OCI ↔ OCRA legacy compatibility', () => {
       expect(ROUTE_ALIASES.length).toBeGreaterThan(0);
     });
   });
+
+  describe('Stripe Price ID env vars (Phase 4 wiring)', () => {
+    it('exposes STRIPE_PRICE_OCRA_BRIEF as a canonical alias of STRIPE_PRICE_ICRA_BRIEF', () => {
+      const env = { STRIPE_PRICE_ICRA_BRIEF: 'price_legacy_brief' };
+      expect(resolveLegacyEnv('STRIPE_PRICE_OCRA_BRIEF', env)).toBe('price_legacy_brief');
+    });
+
+    it('exposes STRIPE_PRICE_OCRA_DIAGNOSTIC as a canonical alias of STRIPE_PRICE_ICRA_DIAGNOSTIC', () => {
+      const env = { STRIPE_PRICE_ICRA_DIAGNOSTIC: 'price_legacy_diag' };
+      expect(resolveLegacyEnv('STRIPE_PRICE_OCRA_DIAGNOSTIC', env)).toBe('price_legacy_diag');
+    });
+
+    it('prefers the canonical Stripe price env when both are set', () => {
+      const env = {
+        STRIPE_PRICE_OCRA_BRIEF: 'price_new',
+        STRIPE_PRICE_ICRA_BRIEF: 'price_old',
+      };
+      expect(resolveLegacyEnv('STRIPE_PRICE_OCRA_BRIEF', env)).toBe('price_new');
+    });
+  });
 });
