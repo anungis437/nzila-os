@@ -8,6 +8,7 @@ This archive contains high-confidence diagnostic artifacts moved from the reposi
 - Root-level temporary logs and output dumps
 - Root-level hidden temporary/copilot/codex logs
 - Root-level coverage artifact
+- Root-level temporary output directories (second conservative pass)
 
 ## Buckets
 
@@ -16,6 +17,18 @@ This archive contains high-confidence diagnostic artifacts moved from the reposi
 - outputs/ (9 files)
 - hidden-temp/ (14 files)
 - coverage/ (1 file)
+
+## Directory Relocation (Second Pass)
+
+The following root directories were relocated to `directories/` because they are generated output with no tracked files:
+
+- coverage_html/
+- demo-output/
+- logs/
+- test-results/
+- tmp-art/
+- tmp-e2e-report/
+- tmp-gov-report/
 
 ## Safety Rules Used
 
