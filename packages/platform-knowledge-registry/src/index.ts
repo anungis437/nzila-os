@@ -34,3 +34,11 @@ export { createInMemoryKnowledgeStore } from './store'
 
 // Schema (Drizzle)
 export { knowledgeAssets, knowledgeVersions } from './schema'
+
+// Doctrine seeds — canonized research whitepapers
+export type { DoctrineWhitepaperSeed } from './doctrine-whitepapers'
+export {
+  DOCTRINE_WHITEPAPERS,
+  seedDoctrineWhitepapers,
+  getDoctrineWhitepaper,
+} from './doctrine-whitepapers'

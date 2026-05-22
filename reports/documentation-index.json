@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-22T01:49:53.720Z",
-  "totalDocuments": 1117,
+  "generatedAt": "2026-05-22T06:08:04.721Z",
+  "totalDocuments": 1119,
   "staleDocuments": 0,
   "categories": [
     {
@@ -40,7 +40,7 @@
     },
     {
       "category": "doctrine",
-      "count": 15,
+      "count": 17,
       "staleCount": 0
     },
     {
@@ -5795,6 +5795,18 @@
       "stale": false
     },
     {
+      "path": "docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md",
+      "category": "doctrine",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/whitepapers/README.md",
+      "category": "doctrine",
+      "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
       "lastValidated": "2026-05-22",
@@ -6325,7 +6337,7 @@
     {
       "path": "docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6343,7 +6355,7 @@
     {
       "path": "docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6463,7 +6475,7 @@
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6523,7 +6535,7 @@
     {
       "path": "docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6559,7 +6571,7 @@
     {
       "path": "docs/oci/stabilization/workflows/README.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {

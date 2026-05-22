@@ -1,0 +1,48 @@
+{
+  "$schema": "./whitepapers.registry.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2026-05-22",
+  "whitepapers": [
+    {
+      "id": "wp.continuity-gap.v3",
+      "title": "The Continuity Gap — Master Whitepaper",
+      "edition": "Evidence-Enhanced Canadian Edition v3.0",
+      "publisher": "Nzila Ventures / Nzila OS Research Initiative",
+      "publishedDate": "2026-05-21",
+      "ingestedDate": "2026-05-22",
+      "doctrineVersion": "1.0.0",
+      "status": "active",
+      "knowledgeType": "policy",
+      "domainScope": "doctrine.continuity",
+      "tenantScope": "platform",
+      "binaryMaster": "infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf",
+      "extractedText": "infotech/_continuity_gap.txt",
+      "canonicalMarkdown": "docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md",
+      "tags": [
+        "continuity",
+        "oci",
+        "ocra",
+        "governance",
+        "institutional-memory",
+        "canada",
+        "research"
+      ],
+      "relatedDoctrine": [
+        "docs/doctrine/DOCTRINE.md",
+        "docs/doctrine/frameworks.md",
+        "docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md",
+        "docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md"
+      ],
+      "introduces": [
+        "Organizational Continuity Infrastructure (OCI)",
+        "OCRA multi-dimensional continuity sensing",
+        "Continuity Debt",
+        "Governance Entropy",
+        "Operational Trust",
+        "Runtime Truth",
+        "Continuity-Aware AI",
+        "Continuity Transformation"
+      ]
+    }
+  ]
+}
