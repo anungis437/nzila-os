@@ -44,7 +44,8 @@ export const FIXTURE_OBSERVED_AT = '2026-01-01T00:00:00.000Z';
 export function buildUniformAnswers(uniformScore: 0 | 1 | 2 | 3 | 4): Answer[] {
   return ALL_QUESTIONS.map((question) => {
     if (question.type === 'likert_5') {
-      return buildAnswer(question, String(uniformScore));
+      // uniformScore is a 0..4 maturity band; likert scale is 1..5.
+      return buildAnswer(question, String(uniformScore + 1));
     }
     // For non-likert, take the option whose score is closest to uniformScore/4.
     const target = uniformScore / 4;
@@ -62,7 +63,7 @@ export function buildGradedAnswers(
   return ALL_QUESTIONS.map((question, index) => {
     const score = bandFor(index);
     if (question.type === 'likert_5') {
-      return buildAnswer(question, String(score));
+      return buildAnswer(question, String(score + 1));
     }
     const target = score / 4;
     const closest = question.options.reduce((best, option) =>

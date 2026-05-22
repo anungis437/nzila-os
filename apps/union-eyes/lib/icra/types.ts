@@ -53,6 +53,78 @@ export interface QuestionOption {
   observation?: string;
 }
 
+/**
+ * Modality role — the *reason* a question uses its modality.
+ * Governed by docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md §3.
+ */
+export type ModalityRole =
+  | 'maturity_ladder'
+  | 'confidence_sensing'
+  | 'ambiguity_sensing'
+  | 'structural_pattern'
+  | 'inheritance_pattern'
+  | 'topology_pattern';
+
+/**
+ * Intelligence contribution — what kind of institutional intelligence
+ * this question contributes. A question declares at most two.
+ */
+export type IntelligenceContribution =
+  | 'continuity_maturity'
+  | 'governance_sophistication'
+  | 'survivability_perception'
+  | 'operational_clarity'
+  | 'reconstruction_confidence'
+  | 'onboarding_confidence'
+  | 'modernization_continuity'
+  | 'structural_topology'
+  | 'inheritance_topology'
+  | 'stewardship_distribution'
+  | 'recoverability_confidence';
+
+export type LongitudinalValue = 'high' | 'medium' | 'low';
+
+export type StabilizationRelevance =
+  | 'runtime_reliability'
+  | 'governance_replay'
+  | 'fail_closed_posture'
+  | 'not_applicable';
+
+export type RuntimeRelevance =
+  | 'incident_continuity'
+  | 'replay_continuity'
+  | 'runtime_observability'
+  | 'not_applicable';
+
+/**
+ * Recognized continuity archetypes — see continuityArchetypeSignals.ts.
+ */
+export type ContinuityArchetypeId =
+  | 'stewardship_concentration'
+  | 'governance_fragmentation'
+  | 'onboarding_survivability'
+  | 'operational_continuity'
+  | 'modernization_fragility'
+  | 'institutional_memory_dependency';
+
+/**
+ * Intelligence-aware question metadata. Read-only. Does not influence
+ * scoring numerics; governs interpretation, longitudinal aggregation,
+ * archetype detection, and reporting.
+ */
+export interface QuestionIntelligenceMetadata {
+  modalityRole: ModalityRole;
+  intelligenceContribution: IntelligenceContribution[];
+  longitudinalValue: LongitudinalValue;
+  stabilizationRelevance: StabilizationRelevance;
+  runtimeRelevance: RuntimeRelevance;
+  intelligenceNetworkRelevance: 'high' | 'medium' | 'low';
+  confidenceSensitivity: boolean;
+  governanceSensitivity: boolean;
+  /** Optional — multiple_choice questions may contribute to archetype detection. */
+  archetypeContribution?: ContinuityArchetypeId[];
+}
+
 export interface BaseQuestion {
   id: string;
   section: SectionId;
@@ -64,6 +136,11 @@ export interface BaseQuestion {
   riskInverted?: boolean;
   allowNote?: boolean;
   rationale?: string;
+  /**
+   * Intelligence metadata. Required for all questions in bank version >= 3.
+   * Optional in the type signature for back-compat with replayed v2 answers.
+   */
+  intelligence?: QuestionIntelligenceMetadata;
 }
 
 export interface LikertQuestion extends BaseQuestion {
