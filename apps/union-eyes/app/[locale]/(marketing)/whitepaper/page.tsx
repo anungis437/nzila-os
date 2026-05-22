@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { CONTINUITY_GAP_BLOCKS } from '@/lib/whitepaper/continuity-gap';
-import { PrintPdfButton } from './PrintPdfButton';
+// PDF download temporarily hidden; keep PrintPdfButton import path available for re-enable.
+// import { PrintPdfButton } from './PrintPdfButton';
 
 const WHITEPAPER_COPY = {
   'en-CA': {
@@ -1094,10 +1095,7 @@ export default async function LocaleWhitepaperPage({
             <p className="mt-4 text-base text-white/90 drop-shadow sm:text-lg lg:text-xl">Organizational Memory, Institutional Resilience, and the Future of Operational Trust</p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center print:hidden">
-              <PrintPdfButton
-                label={copy.downloadLabel}
-                documentTitle="The Continuity Gap — Union Eyes Whitepaper"
-              />
+              {/* PDF download temporarily hidden — see PrintPdfButton */}
               <Link
                 href={`/${locale}${copy.ctaHref}`}
                 className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100"
@@ -1128,11 +1126,7 @@ export default async function LocaleWhitepaperPage({
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Quick actions</h3>
               <div className="mt-3 space-y-2">
-                <PrintPdfButton
-                  label={copy.downloadLabel}
-                  documentTitle="The Continuity Gap — Union Eyes Whitepaper"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-700"
-                />
+                {/* PDF download temporarily hidden — see PrintPdfButton */}
                 {tocHeadings[0] ? (
                   <a href={`#${slugify(tocHeadings[0])}`} className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100">
                     Start reading
