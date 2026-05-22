@@ -16,6 +16,9 @@
  *   - data-testid="icra-adaptive-continue"
  *   - data-testid="icra-section-step"
  *   - data-testid="icra-assessment-flow"
+ *   - data-testid="icra-question-${id}"    (per-question wrapper inside a section)
+ *   - data-testid="icra-org-question-${id}" (per-question wrapper in org context step)
+ *   - data-testid="adaptive-interpretation-block" (results page)
  *
  * RUN: `pnpm --filter @nzila/union-eyes test:e2e` (Playwright)
  */
@@ -78,6 +81,23 @@ test.describe('OCRA adaptive live flow — telemetry privacy (network)', () => {
 // can enable these incrementally.
 
 test.describe('OCRA adaptive live flow — full traversal', () => {
+  test('per-question testid attributes are wired in the assessment flow source', async () => {
+    // Doctrine guard: the data-testid="icra-question-${id}" hook is the
+    // anchor every full-traversal test will rely on. If this drifts away
+    // from the source, every traversal test will silently break. We keep
+    // the deep traversal tests scaffolded (skipped) below, but lock the
+    // selector contract here.
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    const here = path
+      .dirname(new URL(import.meta.url).pathname)
+      .replace(/^\/([A-Za-z]:)/, '$1');
+    const file = path.resolve(here, '../components/icra/ICRAAssessmentFlow.tsx');
+    const src = await fs.readFile(file, 'utf8');
+    expect(src).toMatch(/data-testid=\{`icra-question-\$\{q\.id\}`\}/);
+    expect(src).toMatch(/data-testid=\{`icra-org-question-\$\{q\.id\}`\}/);
+  });
+
   test.skip('small local union: consent → org context → adaptive card → submit', async () => {
     // Pending: data-testids on each question/radio in the bank.
   });

@@ -26,6 +26,8 @@ import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { mapToPdfReportData } from '@/lib/icra-pdf/reportDataMapper';
 import { generateExecutiveContinuityPdf } from '@/lib/icra-pdf/generateExecutiveContinuityPdf';
 import { logger } from '@/lib/logger';
+import { resolveAdaptiveContext, type RoutableQuestion } from '@/lib/icra/adaptation';
+import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from '@/lib/icra/questions';
 
 const PDF_ELIGIBLE_TIERS = new Set([
   'executive_continuity_brief',
@@ -105,7 +107,19 @@ export async function GET(_request: Request, { params }: RouteContext) {
       );
     }
 
-    const reportData = mapToPdfReportData(profile, orgContext);
+    const reportData = mapToPdfReportData(profile, orgContext, undefined, {
+      adaptiveContext: (() => {
+        try {
+          return resolveAdaptiveContext({
+            organizationContext: assessment.organizationContext,
+            questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
+            currentQuestionBankVersion: QUESTION_BANK_VERSION,
+          }).adaptiveContext;
+        } catch {
+          return undefined;
+        }
+      })(),
+    });
     const pdfBuffer = await generateExecutiveContinuityPdf(reportData);
 
     const date = reportData.generatedAt.toISOString().slice(0, 10);

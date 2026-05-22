@@ -856,6 +856,114 @@ function StabilizationMovementAppendixPage({ data }: { data: PdfReportData }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Adaptive Interpretation Context Page
+//
+// Renders only when data.adaptiveContext is supplied. Exposes the calm,
+// audit-safe interpretation shape (bands + counts) so report readers
+// understand the calibration applied. Bilingual EN/FR. No routing internals,
+// no question IDs, no scoring weights.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const ADAPTIVE_COPY = {
+  'en-CA': {
+    label: 'Interpretation Context',
+    heading: 'Adaptive Interpretation Context',
+    intro:
+      'This report was interpreted using the organizational context declared during the assessment process. Core continuity questions remained included to preserve comparability across institutions, while continuity interpretation reflected institutional scale, governance structure, and operational continuity exposure.',
+    fields: {
+      institutionalScale: 'Institutional scale',
+      governanceComplexity: 'Governance structure',
+      continuityExposure: 'Continuity exposure',
+      respondentLens: 'Respondent lens',
+      routedQuestions: 'Questions interpreted in context',
+      totalQuestions: 'Total questions in adapted set',
+    },
+    fallback:
+      'Limited organizational context was provided. A calibrated default interpretation was applied so this report remains comparable with peer institutions.',
+    closing:
+      'The adapted question set preserves core continuity coverage in every interpretation. Adaptation reflects calibration, not exclusion.',
+  },
+  'fr-CA': {
+    label: "Contexte d'interprétation",
+    heading: "Contexte d'interprétation adaptatif",
+    intro:
+      "Ce rapport a été interprété en fonction du contexte organisationnel déclaré lors du processus d'évaluation. Les questions essentielles de continuité ont été maintenues afin de préserver la comparabilité entre institutions, tandis que l'interprétation de la continuité reflétait l'échelle institutionnelle, la structure de gouvernance et l'exposition opérationnelle à la continuité.",
+    fields: {
+      institutionalScale: 'Échelle institutionnelle',
+      governanceComplexity: 'Structure de gouvernance',
+      continuityExposure: 'Exposition à la continuité',
+      respondentLens: 'Optique du répondant',
+      routedQuestions: 'Questions interprétées en contexte',
+      totalQuestions: "Total de questions dans l'ensemble adapté",
+    },
+    fallback:
+      "Le contexte organisationnel fourni étant limité, une interprétation par défaut calibrée a été appliquée afin que ce rapport demeure comparable aux institutions pairs.",
+    closing:
+      "L'ensemble adapté de questions conserve la couverture essentielle de continuité dans chaque interprétation. L'adaptation reflète un étalonnage, et non une exclusion.",
+  },
+} as const;
+
+function AdaptiveInterpretationContextPage({ data }: { data: PdfReportData }) {
+  const a = data.adaptiveContext;
+  if (!a) return null;
+  const locale: 'en-CA' | 'fr-CA' =
+    data.locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
+  const t = ADAPTIVE_COPY[locale];
+  const total = a.includedQuestionIds.length + a.deferredQuestionIds.length;
+
+  const rows: Array<[string, string]> = [
+    [t.fields.institutionalScale, a.profileBands.institutionalScale],
+    [t.fields.governanceComplexity, a.profileBands.governanceComplexity],
+    [t.fields.continuityExposure, a.profileBands.continuityExposure],
+    [t.fields.respondentLens, a.profileBands.respondentLens],
+    [t.fields.routedQuestions, String(a.includedQuestionIds.length)],
+    [t.fields.totalQuestions, String(total)],
+  ];
+
+  return (
+    <Page size={PAGE.size} style={S.page}>
+      <Text style={S.sectionLabel}>{t.label}</Text>
+      <Text style={S.sectionHeading}>{t.heading}</Text>
+      <View style={S.divider} />
+
+      <Text style={S.bodyPara}>{t.intro}</Text>
+
+      {rows.map(([label, value], idx) => (
+        <View
+          key={`adaptive-${idx}`}
+          style={[
+            S.twoCol,
+            {
+              paddingVertical: 5,
+              borderBottomWidth: 0.5,
+              borderBottomColor: COLORS.borderLight,
+            },
+          ]}
+        >
+          <Text style={[S.bodySmall, { flex: 1, color: COLORS.ink40 }]}>{label}</Text>
+          <Text style={[S.bodySmall, { flex: 2, color: COLORS.ink }]}>{value}</Text>
+        </View>
+      ))}
+
+      {a.fallbackUsed && (
+        <Text style={[S.bodyPara, { marginTop: SPACE.lg, color: COLORS.ink60 }]}>
+          {t.fallback}
+        </Text>
+      )}
+
+      <Text style={[S.bodySmall, { marginTop: SPACE.xl, color: COLORS.ink40, lineHeight: 1.6 }]}>
+        {t.closing}
+      </Text>
+
+      <PageFooter
+        institutionName={data.institutionName}
+        generatedAt={data.generatedAt}
+      />
+    </Page>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Assessment Metadata Page (back matter)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -976,6 +1084,7 @@ export function ExecutiveContinuityBriefTemplate({
       <RecommendationsPage data={data} />
       <ExecutiveReflectionPage data={data} />
       {data.stabilizationMovement ? <StabilizationMovementAppendixPage data={data} /> : null}
+      {data.adaptiveContext ? <AdaptiveInterpretationContextPage data={data} /> : null}
       <AssessmentMetadataPage data={data} />
     </Document>
   );

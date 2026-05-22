@@ -740,7 +740,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
               const localizedMin = localizeLikertScaleLabel('minLabel', minLabel, supportedLocale);
               const localizedMax = localizeLikertScaleLabel('maxLabel', maxLabel, supportedLocale);
               return (
-                <div key={q.id} className="space-y-3">
+                <div key={q.id} data-testid={`icra-question-${q.id}`} className="space-y-3">
                   <div className="space-y-1">
                     <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{lq.prompt}</p>
                     {lq.helpText && (
@@ -789,7 +789,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
             const labelId = `${q.id}-label`;
             const lq = localizeQuestion(q, supportedLocale);
             return (
-              <div key={q.id} className="space-y-3">
+              <div key={q.id} data-testid={`icra-question-${q.id}`} className="space-y-3">
                 <div className="space-y-1">
                   <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{lq.prompt}</p>
                   {lq.helpText && (
@@ -884,7 +884,7 @@ function OrgContextForm({ questions, onSubmit, copy, locale }: OrgContextFormPro
         {questions.sort((a, b) => a.order - b.order).map((q) => {
           const lq = localizeQuestion(q, locale);
           return (
-          <div key={q.id} className="space-y-1.5">
+          <div key={q.id} data-testid={`icra-org-question-${q.id}`} className="space-y-1.5">
             <label className="block text-sm font-medium text-stone-900">
               {lq.prompt}
               {q.required && <span className="ml-1 text-stone-400">*</span>}

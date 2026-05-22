@@ -178,10 +178,10 @@ describe('telemetry route ALLOWED_KINDS', () => {
     // event kind enum without a failing test.
     const fs = await import('node:fs/promises');
     const path = await import('node:path');
-    const file = path.resolve(
-      process.cwd(),
-      'apps/union-eyes/app/api/icra/telemetry/route.ts',
-    );
+    // Resolve relative to this test file so the test works whether vitest
+    // is invoked from the repo root or from the package directory.
+    const here = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]:)/, '$1');
+    const file = path.resolve(here, '../../../../app/api/icra/telemetry/route.ts');
     const src = await fs.readFile(file, 'utf8');
     expect(src).toMatch(/'adaptive_profile_created'/);
     expect(src).toMatch(/'assessment_routed'/);

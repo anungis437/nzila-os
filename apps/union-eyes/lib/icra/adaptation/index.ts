@@ -21,3 +21,5 @@ export * from './facilitatorAdaptationGuide';
 export * from './adaptiveTelemetry';
 export * from './routingExplainabilitySnapshot';
 export * from './routedSubmissionValidator';
+export * from './persistedAdaptiveContext';
+export * from './reconstructAdaptiveContext';

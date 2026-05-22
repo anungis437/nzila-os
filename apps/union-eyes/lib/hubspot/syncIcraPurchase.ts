@@ -40,6 +40,10 @@ import {
   type IcraContactAttribution,
   type IcraDealStageKey,
 } from './icraPropertyMapper';
+import { deriveOcraAdaptivePropertiesFromPersisted } from './icraAdaptiveProperties';
+import { resolveAdaptiveContext } from '@/lib/icra/adaptation';
+import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from '@/lib/icra/questions';
+import type { RoutableQuestion } from '@/lib/icra/adaptation';
 
 export type SyncSkipReason =
   | 'no_email'
@@ -98,7 +102,11 @@ export async function syncIcraPurchase(
 
     // Load assessment + profile (read-only)
     const [assessment] = await db
-      .select({ id: icraAssessments.id, reportTierId: icraAssessments.reportTierId })
+      .select({
+        id: icraAssessments.id,
+        reportTierId: icraAssessments.reportTierId,
+        organizationContext: icraAssessments.organizationContext,
+      })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, input.assessmentId))
       .limit(1);
@@ -125,6 +133,30 @@ export async function syncIcraPurchase(
 
     const profile = profileRow.profilePayload as InstitutionalContinuityProfile;
 
+    // Resolve adaptive context — persisted blob, or reconstructed deterministically
+    // from declared org form. Failure is non-fatal: HubSpot sync proceeds with
+    // legacy properties only.
+    let adaptiveProperties: Record<string, string> = {};
+    try {
+      const resolution = resolveAdaptiveContext({
+        organizationContext: assessment.organizationContext,
+        questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
+        currentQuestionBankVersion: QUESTION_BANK_VERSION,
+      });
+      const raw = deriveOcraAdaptivePropertiesFromPersisted(
+        resolution.adaptiveContext,
+      ) as Record<string, string | number | boolean>;
+      adaptiveProperties = Object.fromEntries(
+        Object.entries(raw).map(([k, v]) => [k, String(v)]),
+      );
+    } catch (adaptiveErr) {
+      logger.warn('[hubspot-icra] adaptive property derivation skipped', {
+        assessmentId: input.assessmentId,
+        message:
+          adaptiveErr instanceof Error ? adaptiveErr.message : String(adaptiveErr),
+      });
+    }
+
     const contactProperties = {
       ...buildContactProperties(profile, {
         persona: input.persona,
@@ -132,6 +164,8 @@ export async function syncIcraPurchase(
       }),
       // Company-grade properties also useful on the contact when no company exists
       ...buildCompanyProperties(profile),
+      // OCRA adaptive bands + counts (low-cardinality, audit-safe)
+      ...adaptiveProperties,
     };
 
     const contactId = await upsertContact({

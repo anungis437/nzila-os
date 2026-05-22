@@ -18,6 +18,7 @@
 import type {
   InstitutionalAssessmentProfile,
   RoutedQuestionBank,
+  PersistedAdaptiveContext,
 } from '@/lib/icra/adaptation';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -83,5 +84,37 @@ export function deriveOcraAdaptiveContactProperties(
     [OCRA_ADAPTIVE_CONTACT_PROPERTIES.deferredQuestionCount]:
       bank.deferredQuestions.length,
     [OCRA_ADAPTIVE_CONTACT_PROPERTIES.safeDefaultUsed]: bank.usedSafeDefault,
+  };
+}
+
+/**
+ * Derive HubSpot contact properties from a PERSISTED adaptive context.
+ *
+ * Source of truth for "what was the adaptive shape of this assessment" once
+ * the assessment is submitted. Emits the same allow-listed property set as
+ * `deriveOcraAdaptiveContactProperties` so the CRM-side schema is identical
+ * whether properties are emitted live or from the persisted blob.
+ */
+export function deriveOcraAdaptivePropertiesFromPersisted(
+  persisted: PersistedAdaptiveContext,
+): OcraAdaptiveContactProperties {
+  return {
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.institutionalScale]:
+      persisted.profileBands.institutionalScale,
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.continuityComplexity]:
+      persisted.profileBands.continuityComplexity,
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.governanceComplexity]:
+      persisted.profileBands.governanceComplexity,
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.continuityExposure]:
+      persisted.profileBands.continuityExposure,
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.respondentLens]:
+      persisted.profileBands.respondentLens,
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.routingEngineVersion]:
+      persisted.routeVersion,
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.routedQuestionCount]:
+      persisted.includedQuestionIds.length,
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.deferredQuestionCount]:
+      persisted.deferredQuestionIds.length,
+    [OCRA_ADAPTIVE_CONTACT_PROPERTIES.safeDefaultUsed]: persisted.fallbackUsed,
   };
 }

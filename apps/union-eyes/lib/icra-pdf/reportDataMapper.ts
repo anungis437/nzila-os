@@ -41,6 +41,7 @@ import {
   type StabilizationAppendixParagraph,
 } from './reportNarrativeEngine';
 import type { ExecutiveStabilizationResult } from '../workbook/engines/executive/executiveStabilizationModel';
+import type { PersistedAdaptiveContext } from '../icra/adaptation';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PdfReportData — the fully-assembled data structure for the template
@@ -96,16 +97,27 @@ export interface PdfReportData {
   stabilizationMovement?: {
     paragraphs: readonly StabilizationAppendixParagraph[];
   };
+
+  // Optional adaptive interpretation context. When supplied, the template
+  // renders an "Adaptive Interpretation Context" page so report readers can
+  // see the calibration applied to interpretation.
+  adaptiveContext?: PersistedAdaptiveContext;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mapper
 // ─────────────────────────────────────────────────────────────────────────────
 
+export interface MapToPdfReportDataOptions {
+  readonly adaptiveContext?: PersistedAdaptiveContext | null;
+  readonly locale?: string;
+}
+
 export function mapToPdfReportData(
   profile: InstitutionalContinuityProfile,
   orgContext?: OrganizationContext | null,
   executiveStabilization?: ExecutiveStabilizationResult | null,
+  options?: MapToPdfReportDataOptions,
 ): PdfReportData {
   const persona = orgContext ? detectPersona(orgContext) : undefined;
 
@@ -161,7 +173,7 @@ export function mapToPdfReportData(
   return {
     assessmentId: profile.assessmentId,
     generatedAt: new Date(profile.generatedAt),
-    locale: 'en-CA',
+    locale: options?.locale ?? 'en-CA',
 
     institutionName: orgContext?.name,
     sector: orgContext?.sector,
@@ -197,5 +209,7 @@ export function mapToPdfReportData(
           ],
         }
       : undefined,
+
+    adaptiveContext: options?.adaptiveContext ?? undefined,
   };
 }

@@ -17,7 +17,7 @@ import { rateLimit } from '@/lib/rate-limit'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { verifyTurnstileToken } from '@/lib/icra/turnstile'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
-import { QUESTION_BANK_VERSION, CTX_PRIMARY_CHALLENGE_MAX_LENGTH, CTX_SELECT_VALUE_MAX_LENGTH } from '@/lib/icra/questions'
+import { QUESTION_BANK_VERSION, CTX_PRIMARY_CHALLENGE_MAX_LENGTH, CTX_SELECT_VALUE_MAX_LENGTH, ALL_QUESTIONS } from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import {
   icraAssessments,
@@ -28,6 +28,13 @@ import {
   icraFollowupRecommendations,
 } from '@/db/schema/icra-schema'
 import { logger } from '@/lib/logger'
+import {
+  classifyOrgContext,
+  routeQuestionBank,
+  buildPersistedAdaptiveContext,
+  embedPersistedAdaptiveContext,
+  type RoutableQuestion,
+} from '@/lib/icra/adaptation'
 
 interface SubmitBody {
   consent: ConsentRecord
@@ -127,6 +134,37 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     return await withSystemContext(async (tx) => {
+      // Derive adaptive context from declared org context (pure, deterministic).
+      // Persisted under the reserved `_adaptive` namespace inside the existing
+      // organizationContext jsonb so the result page + PDF can read it back
+      // without a schema migration. Never includes raw answers / PII.
+      let organizationContextForInsert: Record<string, unknown> | null =
+        normalizedOrgContext
+      try {
+        const profileForRouting = classifyOrgContext({
+          rawForm: normalizedOrgContext ?? {},
+        })
+        const routedBank = routeQuestionBank(
+          ALL_QUESTIONS as unknown as RoutableQuestion[],
+          profileForRouting,
+        )
+        const adaptive = buildPersistedAdaptiveContext(
+          profileForRouting,
+          routedBank,
+          QUESTION_BANK_VERSION,
+        )
+        organizationContextForInsert = embedPersistedAdaptiveContext(
+          normalizedOrgContext,
+          adaptive,
+        )
+      } catch (adaptiveErr) {
+        // Adaptive persistence is best-effort. Submission MUST succeed even if
+        // the routing engine errors. Result page falls back to reconstruction.
+        logger.warn('icra.assessment.adaptive_persist_skipped', {
+          error: adaptiveErr instanceof Error ? adaptiveErr.message : 'unknown',
+        })
+      }
+
       const inserted = await tx
         .insert(icraAssessments)
         .values({
@@ -134,7 +172,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           questionBankVersion: QUESTION_BANK_VERSION,
           doctrineVersion: DOCTRINE_VERSION,
           consent,
-          organizationContext: normalizedOrgContext,
+          organizationContext: organizationContextForInsert,
           locale,
           submittedAt: new Date(),
         })
