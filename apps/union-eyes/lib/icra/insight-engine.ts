@@ -236,7 +236,7 @@ function detectInstitutionalForgetting(
     headline:
       'Institutional memory fragmentation appears to be increasing operational fragility.',
     body:
-      'Multiple continuity dimensions show results consistent with a pattern of quiet institutional forgetting — where operational memory, governance coherence, and transition readiness erode together, each making the others harder to sustain.',
+      'Several continuity dimensions are weakening together. This is the signature of quiet institutional forgetting — not a single broken system, but the slow, parallel erosion of operational memory, governance coherence, and transition readiness, each making the others harder to sustain. Institutions in this pattern rarely notice the trajectory until a transition forces the ledger open.',
     dimensionsInvolved: weakDimensions.map((d) => d.dimension) as DimensionId[],
     severity: ic < T.MATERIAL_LOW && om < T.MATERIAL_LOW ? 'material' : 'notable',
     affectedSections: ['institutional_memory', 'governance_visibility', 'transition_readiness'],
@@ -450,41 +450,41 @@ function computeBurdenIndex(
   let interpretation: string;
   if (score >= 75)
     interpretation =
-      'Institutional continuity currently depends heavily on human compensation. The operational burden carried informally is material.';
+      'Continuity in this institution is currently held together largely by people, not by systems. The operational labour absorbed informally — to keep precedent intact, to translate between fragmented tools, to onboard newcomers, to remember why things are done — is material, and it is being paid quietly by a small group whose contribution does not appear in any formal report.';
   else if (score >= 55)
     interpretation =
-      'A significant portion of continuity appears to be maintained through informal human effort rather than institutional systems.';
+      'A meaningful share of continuity is sustained through informal human effort rather than institutional infrastructure. Operations remain coherent, but coherence depends on stewardship that the organization has not yet named, measured, or distributed.';
   else if (score >= 40)
     interpretation =
-      'Some continuity burden is present, concentrated in specific areas. Targeted investment could reduce informal dependency.';
+      'Continuity burden is present and concentrated in specific areas. The institution is mostly carrying its own weight, but a few load-bearing dependencies on individuals remain — visible mainly during vacations, sick leave, and role transitions.';
   else
     interpretation =
-      'Continuity burden appears moderate to low. Institutional systems appear to be absorbing the majority of continuity work.';
+      'Continuity burden is low. Institutional systems are absorbing the majority of continuity work, and the organization’s coherence is not unduly dependent on the continued presence of specific individuals.';
 
   // These are gated in Executive Continuity Brief
   const humanCompensationIndicators: string[] = [];
 
   if (ic < T.NOTABLE_LOW)
     humanCompensationIndicators.push(
-      'Operational continuity maintained through individual knowledge and informal authority',
+      'Operational continuity is held in place by individual knowledge and informal authority rather than institutional procedure',
     );
   if (om < T.NOTABLE_LOW)
     humanCompensationIndicators.push(
-      'Institutional memory preserved through personal recall rather than documented systems',
+      'Institutional memory lives in personal recall — precedent, exceptions, and rationale travel with people, not with the institution',
     );
   if (tr < T.NOTABLE_LOW)
     humanCompensationIndicators.push(
-      'Leadership transitions managed through informal apprenticeship and knowledge transfer',
+      'Leadership and role transitions rely on informal apprenticeship — the successor learns what the institution actually does by watching, not by inheriting',
     );
 
   const sectionMap = new Map(sections.map((s) => [s.section, s.score]));
   if ((sectionMap.get('operational_coordination') ?? 100) < T.NOTABLE_LOW)
     humanCompensationIndicators.push(
-      'Cross-team coordination sustained through relationship networks rather than documented mechanisms',
+      'Cross-team coordination is sustained by relationship networks; when the relationships shift, the coordination shifts with them',
     );
   if ((sectionMap.get('governance_visibility') ?? 100) < T.NOTABLE_LOW)
     humanCompensationIndicators.push(
-      'Governance oversight maintained through trusted individual reporting rather than independent visibility',
+      'Governance bodies see the operation through trusted individual reporting rather than through independent, structurally-traceable visibility',
     );
 
   return { score, interpretation, humanCompensationIndicators };

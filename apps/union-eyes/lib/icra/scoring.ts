@@ -516,7 +516,7 @@ function generateRecommendations(
       kind: 'continuity_review',
       title: 'Structured Continuity Review',
       description:
-        'Given the assessment results, a structured continuity review with an experienced ICRA facilitator can help your organization develop a prioritized intervention plan.',
+        'At this band, the most productive next step is rarely another initiative — it is a calm, structured continuity review that names what the institution is already carrying invisibly, and sequences a short list of interventions that will hold across the next transition.',
       ctaLabel: 'Request a Continuity Review',
       ctaHref: '/continuity-assessment#contact',
     })
@@ -524,9 +524,9 @@ function generateRecommendations(
     recs.push({
       id: 'rec_starter_kit',
       kind: 'starter_kit',
-      title: 'ICRA Institutional Continuity Starter Kit',
+      title: 'Continuity Starter Kit',
       description:
-        'Access practical templates, documentation frameworks, and guidance developed specifically for labour organizations at this maturity stage.',
+        'A short, plain-language reference for institutions beginning to formalize operational memory: templates for governance lineage, transition handover, and the documentation patterns that survive turnover rather than decay with it.',
       ctaLabel: 'Access the Starter Kit',
       ctaHref: '/resources/continuity-starter-kit',
     })
@@ -538,7 +538,7 @@ function generateRecommendations(
       kind: 'governance_workshop',
       title: 'Governance Documentation Workshop',
       description:
-        'A focused workshop on governance documentation practices, decision traceability, and oversight infrastructure for your leadership team.',
+        'A facilitated working session for leadership and governance bodies focused on decision traceability, precedent capture, and the practical question of how policy is actually interpreted between meetings. Designed to leave the room with artifacts, not a deck.',
       ctaLabel: 'Explore Workshop Options',
       ctaHref: '/services/governance-workshops',
     })
@@ -546,9 +546,9 @@ function generateRecommendations(
     recs.push({
       id: 'rec_pilot_conversation',
       kind: 'pilot_conversation',
-      title: 'Schedule an Assessment Walkthrough',
+      title: 'Assessment Walkthrough',
       description:
-        'Your organization shows meaningful continuity maturity. A walkthrough conversation can help identify the highest-leverage next steps given your specific profile.',
+        'The institution already holds meaningful continuity maturity. A short walkthrough conversation translates this profile into the two or three highest-leverage moves available to you this quarter — without commitment, sales pressure, or a vendor pitch.',
       ctaLabel: 'Schedule a Conversation',
       ctaHref: '/continuity-assessment#contact',
     })
