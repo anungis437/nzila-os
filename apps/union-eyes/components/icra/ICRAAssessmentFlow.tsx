@@ -11,13 +11,15 @@
  * No auth required. Redirects to /continuity-assessment/results/[id].
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Answer, ConsentRecord, SectionId } from '@/lib/icra/types';
+import type { Answer, ConsentRecord, Question, SectionId } from '@/lib/icra/types';
 import type { MetadataQuestion } from '@/lib/icra/questions';
 import {
   SECTIONS,
   QUESTIONS_BY_SECTION,
+  ALL_QUESTIONS,
+  TOTAL_SCORED_QUESTIONS,
   METADATA_QUESTIONS,
   QUESTION_BANK_VERSION,
   CTX_PRIMARY_CHALLENGE_MAX_LENGTH,
@@ -31,10 +33,23 @@ import {
   localizeOptionGroup,
   type SupportedLocale,
 } from '@/lib/icra/questions.i18n';
+import {
+  classifyOrgContext,
+  routeQuestionBank,
+  ROUTING_ENGINE_VERSION,
+  type InstitutionalAssessmentProfile,
+  type RoutableQuestion,
+  type RoutedQuestionBank,
+  type RoutingRationale,
+} from '@/lib/icra/adaptation';
+import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { ConsentGate } from './ConsentGate';
 
 const DOCTRINE_VERSION = '1.0.0';
-const PERSIST_KEY = 'icra.flow.v1';
+// Bumped to v2 when adaptive routing state was added to the persisted draft.
+// v1 drafts are intentionally discarded on hydration so they cannot poison
+// the routed bank with stale assumptions.
+const PERSIST_KEY = 'icra.flow.v2';
 const PERSIST_TTL_MS = 1000 * 60 * 60 * 24; // 24h — abandoned drafts expire
 
 const SCORED_SECTIONS: SectionId[] = [
@@ -51,13 +66,20 @@ type OrgContextAnswers = Record<string, string>;
 
 /** Persisted draft snapshot (sessionStorage). */
 interface PersistedDraft {
-  v: 1;
+  v: 2;
   step: number;
   consent: ConsentRecord | null;
   orgContext: OrgContextAnswers;
   answers: Answer[];
   currentSectionAnswers: Array<[string, string]>;
   savedAt: number;
+  // ── OCRA adaptive routing state (doctrine 1.0.0) ────────────────────────
+  adaptiveProfile?: InstitutionalAssessmentProfile;
+  routedBankVersion?: string;
+  routedQuestionIds?: string[];
+  routingFingerprint?: string;
+  routingRationale?: RoutingRationale[];
+  adaptiveExplanationAcknowledged?: boolean;
 }
 
 /** Fire-and-forget client telemetry. Uses sendBeacon when possible so
@@ -106,6 +128,20 @@ const FLOW_COPY = {
     selectPlaceholder: 'Select…',
     optionalPlaceholder: 'Optional',
     begin: 'Begin Assessment →',
+    // ── OCRA adaptive explanation card (doctrine 1.0.0) ─────────────────────────────
+    adaptiveTitle: 'How this assessment will be adapted',
+    adaptiveBody:
+      'Based on the organizational context you provided, this assessment will emphasize the continuity areas most relevant to your institution. Core continuity questions remain included so the result stays comparable and complete.',
+    adaptiveBasisNote:
+      'Adaptation is based only on the organizational context you declared. Your free-text answers are never used to adapt this assessment.',
+    adaptiveIncludedLabel: 'Questions included',
+    adaptiveDeferredLabel: 'Questions set aside as not applicable',
+    adaptiveSafeDefaultNote:
+      'Because some organizational context fields were left unspecified, the full question bank has been preserved.',
+    adaptiveProfileScale: 'Institutional scale',
+    adaptiveProfileGovernance: 'Governance model',
+    adaptiveProfileExposure: 'Continuity exposure',
+    adaptiveContinue: 'Continue →',
   },
   'fr-CA': {
     generatingTitle: 'Génération de votre profil de continuité...',
@@ -126,6 +162,20 @@ const FLOW_COPY = {
     selectPlaceholder: 'Sélectionner...',
     optionalPlaceholder: 'Facultatif',
     begin: "Commencer l'évaluation →",
+    // ── OCRA adaptive explanation card (doctrine 1.0.0) ─────────────────────────────
+    adaptiveTitle: 'Adaptation de cette évaluation',
+    adaptiveBody:
+      "Selon le contexte organisationnel fourni, cette évaluation mettra l'accent sur les dimensions de continuité les plus pertinentes pour votre institution. Les questions fondamentales de continuité demeurent incluses afin que le résultat reste comparable et complet.",
+    adaptiveBasisNote:
+      "L'adaptation s'appuie uniquement sur le contexte organisationnel déclaré. Vos réponses en texte libre ne servent jamais à adapter cette évaluation.",
+    adaptiveIncludedLabel: 'Questions incluses',
+    adaptiveDeferredLabel: 'Questions écartées comme non applicables',
+    adaptiveSafeDefaultNote:
+      "Comme certains champs du contexte organisationnel n'ont pas été précisés, la banque complète de questions a été conservée.",
+    adaptiveProfileScale: 'Taille institutionnelle',
+    adaptiveProfileGovernance: 'Modèle de gouvernance',
+    adaptiveProfileExposure: 'Exposition à la continuité',
+    adaptiveContinue: 'Continuer →',
   },
 };
 
@@ -143,6 +193,10 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  // ── OCRA adaptive routing state (doctrine 1.0.0) ───────────────────────────
+  const [adaptiveProfile, setAdaptiveProfile] = useState<InstitutionalAssessmentProfile | null>(null);
+  const [routedBank, setRoutedBank] = useState<RoutedQuestionBank | null>(null);
+  const [explanationAcknowledged, setExplanationAcknowledged] = useState(false);
   const lastReportedStepRef = useRef<number>(-1);
 
   // ── Hydrate from sessionStorage on mount ─────────────────────────────────
@@ -158,7 +212,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         const fresh = typeof parsed.savedAt === 'number' && Date.now() - parsed.savedAt < PERSIST_TTL_MS;
         if (
           fresh &&
-          parsed.v === 1 &&
+          parsed.v === 2 &&
           typeof parsed.step === 'number' &&
           parsed.step > 0 &&
           parsed.step < 9
@@ -171,6 +225,58 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
           }
           if (Array.isArray(parsed.currentSectionAnswers)) {
             setCurrentSectionAnswers(new Map(parsed.currentSectionAnswers));
+          }
+          // ── Restore adaptive routing state, re-routing on version mismatch ──
+          if (parsed.adaptiveProfile) {
+            setAdaptiveProfile(parsed.adaptiveProfile);
+            const versionMatches =
+              parsed.routedBankVersion === ROUTING_ENGINE_VERSION &&
+              Array.isArray(parsed.routedQuestionIds) &&
+              parsed.routedQuestionIds.length > 0;
+            if (versionMatches) {
+              // Same engine version → reconstruct the routed bank from the
+              // stored ids. Safe because question bank version is also pinned.
+              const includedSet = new Set(parsed.routedQuestionIds);
+              const restored: RoutedQuestionBank = Object.freeze({
+                doctrineVersion: '1.0.0' as const,
+                routeVersion: ROUTING_ENGINE_VERSION,
+                includedQuestions: (ALL_QUESTIONS as unknown as RoutableQuestion[]).filter((q) =>
+                  includedSet.has(q.id),
+                ),
+                deferredQuestions: (ALL_QUESTIONS as unknown as RoutableQuestion[]).filter(
+                  (q) => !includedSet.has(q.id),
+                ),
+                requiredQuestions: [],
+                optionalContextQuestions: [],
+                routingRationale: parsed.routingRationale ?? [],
+                usedSafeDefault: false,
+                selectionFingerprint: parsed.routingFingerprint ?? '',
+              });
+              setRoutedBank(restored);
+            } else {
+              // Route engine drift OR missing ids → reroute deterministically
+              // from the restored profile. Emit a fresh `assessment_routed`.
+              try {
+                const fresh = routeQuestionBank(
+                  ALL_QUESTIONS as unknown as RoutableQuestion[],
+                  parsed.adaptiveProfile,
+                );
+                setRoutedBank(fresh);
+                emitTelemetry('assessment_routed', undefined, {
+                  routeVersion: fresh.routeVersion,
+                  included: fresh.includedQuestions.length,
+                  deferred: fresh.deferredQuestions.length,
+                  safeDefault: fresh.usedSafeDefault,
+                  selection: fresh.selectionFingerprint.slice(0, 60),
+                  reroute: true,
+                });
+              } catch {
+                // Recovery must never break the flow — fall through to static bank.
+              }
+            }
+          }
+          if (typeof parsed.adaptiveExplanationAcknowledged === 'boolean') {
+            setExplanationAcknowledged(parsed.adaptiveExplanationAcknowledged);
           }
           emitTelemetry('assessment_resumed', undefined, { step: parsed.step });
         }
@@ -189,19 +295,35 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     if (step === 0 || step >= 9) return; // Don't persist pre-consent or post-submit.
     try {
       const draft: PersistedDraft = {
-        v: 1,
+        v: 2,
         step,
         consent,
         orgContext,
         answers: Array.from(answers.values()),
         currentSectionAnswers: Array.from(currentSectionAnswers.entries()),
         savedAt: Date.now(),
+        adaptiveProfile: adaptiveProfile ?? undefined,
+        routedBankVersion: routedBank?.routeVersion,
+        routedQuestionIds: routedBank ? routedBank.includedQuestions.map((q) => q.id) : undefined,
+        routingFingerprint: routedBank?.selectionFingerprint,
+        routingRationale: routedBank ? [...routedBank.routingRationale] : undefined,
+        adaptiveExplanationAcknowledged: explanationAcknowledged,
       };
       window.sessionStorage.setItem(PERSIST_KEY, JSON.stringify(draft));
     } catch {
       // Quota exceeded / private mode — silent.
     }
-  }, [hydrated, step, consent, orgContext, answers, currentSectionAnswers]);
+  }, [
+    hydrated,
+    step,
+    consent,
+    orgContext,
+    answers,
+    currentSectionAnswers,
+    adaptiveProfile,
+    routedBank,
+    explanationAcknowledged,
+  ]);
 
   // ── Abandonment telemetry on unload mid-flow ──────────────────────────────
   useEffect(() => {
@@ -249,6 +371,56 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   // Step 1 → 2
   function handleOrgContext(ctx: OrgContextAnswers) {
     setOrgContext(ctx);
+
+    // ── OCRA Dynamic Questionnaire Adaptation (doctrine 1.0.0) ─────────────────
+    // Deterministically classify the declared org context and route the
+    // question bank. Routing is purely a function of the declared inputs;
+    // free-text answers and behavioural signals are never consulted.
+    try {
+      const canonical = mapCtxToOrganizationContext(ctx) ?? undefined;
+      const profile = classifyOrgContext({ rawForm: ctx, canonicalContext: canonical });
+      setAdaptiveProfile(profile);
+      emitTelemetry('adaptive_profile_created', undefined, {
+        doctrineVersion: profile.doctrineVersion,
+        scale: profile.institutionalScale,
+        continuity: profile.continuityComplexity,
+        governance: profile.governanceComplexity,
+        exposure: profile.continuityExposure,
+        lens: profile.respondentLens,
+        safeDefault: profile.usedConservativeDefault,
+      });
+
+      const bank = routeQuestionBank(
+        ALL_QUESTIONS as unknown as RoutableQuestion[],
+        profile,
+      );
+      setRoutedBank(bank);
+      setExplanationAcknowledged(false);
+      emitTelemetry('assessment_routed', undefined, {
+        routeVersion: bank.routeVersion,
+        included: bank.includedQuestions.length,
+        deferred: bank.deferredQuestions.length,
+        required: bank.requiredQuestions.length,
+        optional: bank.optionalContextQuestions.length,
+        safeDefault: bank.usedSafeDefault,
+        selection: bank.selectionFingerprint.slice(0, 60),
+      });
+      for (const r of bank.routingRationale) {
+        if (r.decision.startsWith('defer_')) {
+          emitTelemetry('adaptive_question_deferred', undefined, {
+            questionId: r.questionId.slice(0, 60),
+            decision: r.decision,
+            ruleId: r.ruleId.slice(0, 60),
+          });
+        }
+      }
+    } catch {
+      // Adaptive routing must never break the flow — fall back to static bank.
+      setAdaptiveProfile(null);
+      setRoutedBank(null);
+      setExplanationAcknowledged(true);
+    }
+
     setStep(2);
   }
 
@@ -257,16 +429,49 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   const currentSectionDef = currentSectionId
     ? SECTIONS.find((s) => s.id === currentSectionId)
     : null;
+
+  // ── Routed questions, derived from the routed bank when present ───────────
+  // When `routedBank` is null (no adaptive profile yet, or fallback after a
+  // routing failure), we transparently use the full static bank so the flow
+  // never breaks. Every section is also guaranteed non-empty via a defensive
+  // fallback: if routing somehow drops every question in a section, the
+  // static bank for that section is restored.
+  const routedQuestionsBySection = useMemo<Record<SectionId, Question[]>>(() => {
+    if (!routedBank) return QUESTIONS_BY_SECTION;
+    const includedIds = new Set(routedBank.includedQuestions.map((q) => q.id));
+    const out: Record<SectionId, Question[]> = {
+      organizational_context: [],
+      operational_dependency: [],
+      governance_visibility: [],
+      institutional_memory: [],
+      transition_readiness: [],
+      operational_coordination: [],
+      explainability_trust: [],
+      sovereignty_governance: [],
+    };
+    for (const sec of SCORED_SECTIONS) {
+      const filtered = (QUESTIONS_BY_SECTION[sec] ?? []).filter((q) => includedIds.has(q.id));
+      out[sec] = filtered.length > 0 ? filtered : (QUESTIONS_BY_SECTION[sec] ?? []);
+    }
+    return out;
+  }, [routedBank]);
+
   const currentQuestions = currentSectionId
-    ? (QUESTIONS_BY_SECTION[currentSectionId] ?? [])
+    ? (routedQuestionsBySection[currentSectionId] ?? [])
     : [];
+
+  // Total scored questions for accurate progress — routed count when adapted,
+  // otherwise the static bank total.
+  const totalRoutedScored = routedBank
+    ? routedBank.includedQuestions.length
+    : TOTAL_SCORED_QUESTIONS;
 
   // ── Back navigation: restore the prior section's selections from `answers`.
   function handleSectionBack() {
     if (step <= 2) return;
     const targetSectionId = SCORED_SECTIONS[step - 3];
     const targetQuestions = targetSectionId
-      ? (QUESTIONS_BY_SECTION[targetSectionId] ?? [])
+      ? (routedQuestionsBySection[targetSectionId] ?? QUESTIONS_BY_SECTION[targetSectionId] ?? [])
       : [];
     const restored = new Map<string, string>();
     for (const q of targetQuestions) {
@@ -326,7 +531,9 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   function handleSectionNext() {
     if (!currentSectionId) return;
 
-    const questions = QUESTIONS_BY_SECTION[currentSectionId] ?? [];
+    const questions = routedQuestionsBySection[currentSectionId]
+      ?? QUESTIONS_BY_SECTION[currentSectionId]
+      ?? [];
     const newAnswers = new Map(answers);
 
     for (const q of questions) {
@@ -418,8 +625,19 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     [consent, copy.submissionFailed, locale, orgContext, router, turnstileToken],
   );
 
-  // Progress: 0=0%, 1=10%, 2-8=20-90%, 9=100%
-  const progressPercent = step === 0 ? 0 : step === 1 ? 10 : step === 9 ? 100 : 10 + (step - 1) * 12.85;
+  // Progress: pre-scored phases 0–15%, scored phase 15–95%, submitting 100%.
+  // Within the scored phase, progress is anchored to ANSWERED routed questions
+  // (not step index) so it remains accurate even after adaptive routing
+  // shortens or lengthens a section.
+  const answeredScoredCount = answers.size;
+  const progressPercent =
+    step === 0
+      ? 0
+      : step === 1
+        ? 8
+        : step === 9
+          ? 100
+          : Math.min(95, 15 + (answeredScoredCount / Math.max(1, totalRoutedScored)) * 80);
 
   if (step === 0) {
     return <ConsentGate onConsent={handleConsent} doctrineVersion={DOCTRINE_VERSION} locale={locale} />;
@@ -432,6 +650,21 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         onSubmit={handleOrgContext}
         copy={copy}
         locale={locale === 'fr-CA' ? 'fr-CA' : 'en-CA'}
+      />
+    );
+  }
+
+  // ── OCRA adaptive explanation card (doctrine 1.0.0) ─────────────────────
+  // Shown once between the org-context step and the first scored section
+  // whenever an adaptive profile + routed bank have been produced. Renders
+  // a calm, transparent summary; never alarming, never manipulative.
+  if (step === 2 && routedBank && adaptiveProfile && !explanationAcknowledged) {
+    return (
+      <AdaptiveExplanationCard
+        profile={adaptiveProfile}
+        routedBank={routedBank}
+        copy={copy}
+        onAcknowledge={() => setExplanationAcknowledged(true)}
       />
     );
   }
@@ -729,5 +962,108 @@ function OrgContextForm({ questions, onSubmit, copy, locale }: OrgContextFormPro
         {copy.begin}
       </button>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OCRA adaptive explanation card (doctrine 1.0.0)
+//
+// Shown after the org-context step whenever a routed bank was produced. The
+// card explains, in calm institutional language, that the assessment will
+// emphasize the continuity dimensions most relevant to the declared
+// organizational reality, and that adaptation is based ONLY on the
+// declared organizational context (never free text, never behavioural).
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface AdaptiveExplanationCardProps {
+  profile: InstitutionalAssessmentProfile;
+  routedBank: RoutedQuestionBank;
+  copy: typeof FLOW_COPY['en-CA'];
+  onAcknowledge: () => void;
+}
+
+function AdaptiveExplanationCard({
+  profile,
+  routedBank,
+  copy,
+  onAcknowledge,
+}: AdaptiveExplanationCardProps) {
+  // Auto-focus the heading on mount so screen-reader users hear the
+  // explanation before the continue button receives keyboard focus.
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
+
+  const included = routedBank.includedQuestions.length;
+  const deferred = routedBank.deferredQuestions.length;
+
+  return (
+    <section
+      className="mx-auto max-w-2xl space-y-8 py-10"
+      aria-labelledby="ocra-adaptive-heading"
+    >
+      <div className="space-y-2">
+        <h2
+          id="ocra-adaptive-heading"
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-2xl font-bold tracking-tight text-stone-900 focus:outline-none"
+        >
+          {copy.adaptiveTitle}
+        </h2>
+        <p className="text-sm leading-relaxed text-stone-700">{copy.adaptiveBody}</p>
+      </div>
+
+      <dl className="grid grid-cols-1 gap-3 rounded-md border border-stone-200 bg-stone-50 p-4 text-sm sm:grid-cols-3">
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-stone-500">
+            {copy.adaptiveProfileScale}
+          </dt>
+          <dd className="font-medium text-stone-900">{profile.institutionalScale}</dd>
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-stone-500">
+            {copy.adaptiveProfileGovernance}
+          </dt>
+          <dd className="font-medium text-stone-900">{profile.governanceComplexity}</dd>
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-stone-500">
+            {copy.adaptiveProfileExposure}
+          </dt>
+          <dd className="font-medium text-stone-900">{profile.continuityExposure}</dd>
+        </div>
+      </dl>
+
+      <ul className="space-y-1.5 text-sm text-stone-700">
+        <li>
+          <span className="font-medium text-stone-900">{copy.adaptiveIncludedLabel}:</span>{' '}
+          <span className="tabular-nums">{included}</span>
+        </li>
+        {deferred > 0 && (
+          <li>
+            <span className="font-medium text-stone-900">{copy.adaptiveDeferredLabel}:</span>{' '}
+            <span className="tabular-nums">{deferred}</span>
+          </li>
+        )}
+      </ul>
+
+      {routedBank.usedSafeDefault && (
+        <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+          {copy.adaptiveSafeDefaultNote}
+        </p>
+      )}
+
+      <p className="text-xs italic text-stone-500">{copy.adaptiveBasisNote}</p>
+
+      <button
+        type="button"
+        onClick={onAcknowledge}
+        className="inline-flex items-center justify-center rounded-md bg-stone-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-600 focus-visible:ring-offset-1"
+      >
+        {copy.adaptiveContinue}
+      </button>
+    </section>
   );
 }
