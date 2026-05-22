@@ -97,6 +97,7 @@ describe('adaptive privacy invariants', () => {
       [
         'continuityComplexity',
         'continuityExposure',
+        'declaredInputs',
         'doctrineVersion',
         'governanceComplexity',
         'institutionalScale',

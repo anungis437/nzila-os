@@ -71,6 +71,28 @@ export interface ProfileRationale {
 }
 
 /**
+ * Declared inputs preserved on the profile so adaptive rules can target the
+ * original form selections (sector, size, governance model) without
+ * recomputing. These are the SAME enum values the respondent selected on
+ * the org-context form — no free text, no inferred data, no PII.
+ */
+export interface DeclaredProfileInputs {
+  readonly sector?: string;
+  readonly workforceBand?:
+    | 'under_50'
+    | '50_249'
+    | '250_999'
+    | '1000_4999'
+    | '5000_plus';
+  readonly governanceModel?:
+    | 'elected_board'
+    | 'appointed_board'
+    | 'hybrid'
+    | 'other';
+  readonly hasFederationAffiliation: boolean;
+}
+
+/**
  * Deterministic institutional profile. Produced by `orgContextClassifier`
  * from form-declared inputs only. Never carries org name, free text, IP,
  * geolocation, device, or any inferred personal data.
@@ -82,6 +104,8 @@ export interface InstitutionalAssessmentProfile {
   readonly governanceComplexity: GovernanceComplexity;
   readonly continuityExposure: ContinuityExposure;
   readonly respondentLens: RespondentLens;
+  /** Verbatim declared inputs the classifier consumed. Never PII. */
+  readonly declaredInputs: DeclaredProfileInputs;
   readonly rationale: readonly ProfileRationale[];
   /** True iff every profile dimension was resolved from explicit inputs. */
   readonly isComplete: boolean;

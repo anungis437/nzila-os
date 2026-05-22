@@ -300,6 +300,12 @@ export function classifyOrgContext(
     governanceComplexity: governanceResolved ?? SAFE_DEFAULT_GOVERNANCE,
     continuityExposure: exposureResolved ?? SAFE_DEFAULT_EXPOSURE,
     respondentLens: lensResolved ?? SAFE_DEFAULT_LENS,
+    declaredInputs: Object.freeze({
+      sector,
+      workforceBand,
+      governanceModel,
+      hasFederationAffiliation,
+    }),
     rationale,
     isComplete: !usedConservativeDefault,
     usedConservativeDefault,

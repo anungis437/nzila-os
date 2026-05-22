@@ -8,3 +8,7 @@ export * from './types';
 export * from './orgComplexityModel';
 export * from './orgContextClassifier';
 export * from './institutionalProfileLens';
+export * from './routingTypes';
+export * from './questionEligibilityRules';
+export * from './questionPriorityModel';
+export * from './questionRoutingEngine';
