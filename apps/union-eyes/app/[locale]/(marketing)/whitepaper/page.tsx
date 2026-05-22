@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Download, FileText } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
@@ -220,8 +220,7 @@ export default async function LocaleWhitepaperPage({
                 <Image src={heroImagery.insights} alt="Whitepaper cover" fill className="object-cover" priority />
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#0f2133]/85 via-[#123451]/55 to-[#1f5b84]/35" />
                 <div className="relative z-10 p-6 text-white sm:p-7">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/80">Evidence-Enhanced Canadian Edition</p>
-                  <p className="mt-2 text-3xl font-semibold text-yellow-300 sm:text-4xl">The Continuity Gap</p>
+                  <h1 className="mt-2 text-3xl font-semibold text-yellow-300 sm:text-4xl">The Continuity Gap</h1>
                   <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">Organizational Memory, Institutional Resilience, and the Future of Operational Trust</p>
                 </div>
               </div>
@@ -243,39 +242,17 @@ export default async function LocaleWhitepaperPage({
                 {copy.ctaLabel}
               </Link>
             </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-4">
-              <div className="rounded-lg border border-slate-200 bg-white/90 p-3">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Format</p>
-                <p className="mt-1 text-sm font-medium text-slate-800">{copy.articleMeta.format}</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white/90 p-3">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Version</p>
-                <p className="mt-1 text-sm font-medium text-slate-800">{copy.articleMeta.version}</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white/90 p-3">
-                <p className="text-xs uppercase tracking-wide text-slate-500">Author</p>
-                <p className="mt-1 text-sm font-medium text-slate-800">{copy.articleMeta.author}</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white/90 p-3">
-                <p className="text-xs uppercase tracking-wide text-slate-500">{copy.articleMeta.source}</p>
-                <p className="mt-1 text-sm font-medium text-slate-800">{copy.sourceValue}</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
       <main className="mx-auto w-full max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
         <section className="grid gap-8 xl:grid-cols-12">
-          <aside className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start space-y-4">
+          <aside className="xl:col-span-3 xl:sticky xl:top-24 xl:self-start space-y-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                <FileText className="h-3.5 w-3.5" />
-                Whitepaper
-              </div>
-              <h2 className="mt-4 text-xl font-semibold text-slate-900">{copy.subtitle}</h2>
-              <p className="text-sm leading-6 text-slate-700">{copy.articleNotice}</p>
+              <p className="text-sm text-slate-600">
+                {copy.sourceLabel}: <span className="font-medium text-slate-800">{copy.sourceValue}</span>
+              </p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">{copy.tocLabel}</h3>
