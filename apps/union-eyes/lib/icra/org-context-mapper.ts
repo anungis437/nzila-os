@@ -100,11 +100,24 @@ export function mapCtxToOrganizationContext(
   const federationAffiliation =
     orgType && FEDERATION_ORG_TYPES.has(orgType) ? orgType : undefined;
 
+  const ALLOWED_ROLES: ReadonlyArray<NonNullable<OrganizationContext['respondentRole']>> = [
+    'self_senior_leader',
+    'self_board_member',
+    'self_staff',
+    'on_behalf_consultant',
+    'on_behalf_counsel',
+    'on_behalf_other',
+  ];
+  const rawRole =
+    typeof r.ctx_respondent_role === 'string' ? r.ctx_respondent_role : undefined;
+  const respondentRole = ALLOWED_ROLES.find((v) => v === rawRole);
+
   return {
     sector,
     workforceBand: mapMembershipSizeToWorkforceBand(size),
     governanceModel,
     federationAffiliation,
+    respondentRole,
     // name / jurisdiction are intentionally left unset — the intake form is
     // pseudonymous by design and does not collect either field.
   };

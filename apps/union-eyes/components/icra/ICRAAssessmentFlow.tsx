@@ -272,6 +272,48 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     setCurrentSectionAnswers((prev) => new Map(prev).set(questionId, value));
   }
 
+  /**
+   * Keyboard handler for radiogroup arrow-key navigation. Moves focus to the
+   * next / previous radio option in the same group and selects it, matching
+   * the WAI-ARIA Authoring Practices radio pattern.
+   */
+  function handleRadioKeyDown(
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    questionId: string,
+    values: string[],
+    currentIndex: number,
+  ) {
+    const last = values.length - 1;
+    let nextIndex: number | null = null;
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextIndex = currentIndex >= last ? 0 : currentIndex + 1;
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextIndex = currentIndex <= 0 ? last : currentIndex - 1;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = last;
+        break;
+      default:
+        return;
+    }
+    if (nextIndex === null) return;
+    event.preventDefault();
+    const nextValue = values[nextIndex];
+    handleOptionSelect(questionId, nextValue);
+    const container = event.currentTarget.closest('[role="radiogroup"]');
+    if (container) {
+      const nextEl = container.querySelectorAll<HTMLButtonElement>('[role="radio"]')[nextIndex];
+      nextEl?.focus();
+    }
+  }
+
   function handleSectionNext() {
     if (!currentSectionId) return;
 
@@ -407,9 +449,8 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-stone-500">
           <span>
-            {copy.section} {sectionIndex + 1} {copy.of} {SCORED_SECTIONS.length} — {currentSectionDef.title}
-          </span>
-          <span>{Math.round(progressPercent)}% {copy.complete}</span>
+          <span>{copy.section} {sectionIndex + 1} {copy.of} {SCORED_SECTIONS.length} — {currentSectionDef.title}</span>
+          <span aria-live="polite" aria-atomic="true">{Math.round(progressPercent)}% {copy.complete}</span>
         </div>
         <div className="h-1.5 w-full rounded-full bg-stone-200">
           <div
@@ -438,28 +479,44 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
               const { min, max, minLabel, maxLabel } = q.scale;
               const values: number[] = [];
               for (let v = min; v <= max; v += 1) values.push(v);
+              const stringValues = values.map(String);
+              const selectedIndex = stringValues.indexOf(selected ?? '');
+              const labelId = `${q.id}-label`;
               return (
                 <div key={q.id} className="space-y-3">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-stone-900 leading-snug">{q.prompt}</p>
+                    <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{q.prompt}</p>
                     {q.helpText && (
                       <p className="text-xs text-stone-500 leading-relaxed">{q.helpText}</p>
                     )}
                   </div>
-                  <div className="flex items-stretch gap-2">
-                    {values.map((v) => (
-                      <button
-                        key={v}
-                        onClick={() => handleOptionSelect(q.id, String(v))}
-                        className={`flex-1 rounded-md border px-3 py-3 text-center text-sm font-medium transition-colors ${
-                          selected === String(v)
-                            ? 'border-stone-800 bg-stone-900 text-white'
-                            : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50'
-                        }`}
-                      >
-                        {v}
-                      </button>
-                    ))}
+                  <div
+                    role="radiogroup"
+                    aria-labelledby={labelId}
+                    className="flex items-stretch gap-2"
+                  >
+                    {values.map((v, idx) => {
+                      const isSelected = selected === String(v);
+                      const isTabStop = selectedIndex === -1 ? idx === 0 : isSelected;
+                      return (
+                        <button
+                          key={v}
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          tabIndex={isTabStop ? 0 : -1}
+                          onClick={() => handleOptionSelect(q.id, String(v))}
+                          onKeyDown={(e) => handleRadioKeyDown(e, q.id, stringValues, idx)}
+                          className={`flex-1 rounded-md border px-3 py-3 text-center text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-600 focus-visible:ring-offset-1 ${
+                            isSelected
+                              ? 'border-stone-800 bg-stone-900 text-white'
+                              : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50'
+                          }`}
+                        >
+                          {v}
+                        </button>
+                      );
+                    })}
                   </div>
                   <div className="flex justify-between text-xs text-stone-500">
                     <span>{minLabel}</span>
@@ -470,28 +527,40 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
             }
 
             if (!('options' in q)) return null;
+            const optionValues = q.options.map((o) => o.value);
+            const selectedIdx = optionValues.indexOf(selected ?? '');
+            const labelId = `${q.id}-label`;
             return (
               <div key={q.id} className="space-y-3">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-stone-900 leading-snug">{q.prompt}</p>
+                  <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{q.prompt}</p>
                   {q.helpText && (
                     <p className="text-xs text-stone-500 leading-relaxed">{q.helpText}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  {q.options.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => handleOptionSelect(q.id, opt.value)}
-                      className={`w-full rounded-md border px-4 py-3 text-left text-sm transition-colors ${
-                        selected === opt.value
-                          ? 'border-stone-800 bg-stone-900 text-white'
-                          : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+                <div role="radiogroup" aria-labelledby={labelId} className="space-y-2">
+                  {q.options.map((opt, idx) => {
+                    const isSelected = selected === opt.value;
+                    const isTabStop = selectedIdx === -1 ? idx === 0 : isSelected;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        tabIndex={isTabStop ? 0 : -1}
+                        onClick={() => handleOptionSelect(q.id, opt.value)}
+                        onKeyDown={(e) => handleRadioKeyDown(e, q.id, optionValues, idx)}
+                        className={`w-full rounded-md border px-4 py-3 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-600 focus-visible:ring-offset-1 ${
+                          isSelected
+                            ? 'border-stone-800 bg-stone-900 text-white'
+                            : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );

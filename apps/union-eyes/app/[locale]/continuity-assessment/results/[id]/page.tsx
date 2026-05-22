@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { getIcraProfile } from '@/actions/icra/get-profile';
 import { ICRAProfile } from '@/components/icra/ICRAProfile';
 import PrintReportButton from '@/components/icra/PrintReportButton';
+import { EmailResultsCard } from '@/components/icra/EmailResultsCard';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 interface PageProps {
@@ -189,7 +190,10 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
           </div>
         </div>
       )}
-
+      {/* ── Email me my results link ──────────────────────────────────────── */}
+      <div className="mx-auto mt-8 max-w-5xl px-6">
+        <EmailResultsCard assessmentId={id} locale={locale} />
+      </div>
       {/* ── Report body ─────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
         <ICRAProfile profile={profile} tierId={profile.reportTierId} />

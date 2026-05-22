@@ -277,6 +277,18 @@ export interface OrganizationContext {
     | '5000_plus';
   governanceModel?: 'elected_board' | 'appointed_board' | 'hybrid' | 'other';
   federationAffiliation?: string;
+  /**
+   * Capacity in which the assessment was completed. Drives report framing —
+   * narratives addressed to an internal senior leader read differently from
+   * a brief prepared by an external advisor for a client.
+   */
+  respondentRole?:
+    | 'self_senior_leader'
+    | 'self_board_member'
+    | 'self_staff'
+    | 'on_behalf_consultant'
+    | 'on_behalf_counsel'
+    | 'on_behalf_other';
 }
 
 export interface ConsentRecord {

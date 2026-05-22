@@ -206,9 +206,27 @@ export const METADATA_QUESTIONS: MetadataQuestion[] = [
     ],
   },
   {
-    id: 'ctx_primary_challenge',
+    id: 'ctx_respondent_role',
     section: 'organizational_context',
     order: 5,
+    prompt: 'In what capacity are you completing this assessment?',
+    helpText:
+      'This tunes the framing of your report — for example, narratives are addressed differently to a senior leader, a board member, or an external advisor preparing a brief on behalf of a client.',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'self_senior_leader',    label: 'I am a senior leader at this organization' },
+      { value: 'self_board_member',     label: 'I am a board or executive committee member' },
+      { value: 'self_staff',            label: 'I am a staff member of this organization' },
+      { value: 'on_behalf_consultant',  label: 'I am an external advisor or consultant preparing this for a client' },
+      { value: 'on_behalf_counsel',     label: 'I am legal counsel preparing this on behalf of a client' },
+      { value: 'on_behalf_other',       label: 'I am completing this on behalf of the organization in another capacity' },
+    ],
+  },
+  {
+    id: 'ctx_primary_challenge',
+    section: 'organizational_context',
+    order: 6,
     prompt: 'Is there a specific continuity or governance challenge that prompted this assessment? (Optional)',
     helpText:
       'Please describe in general institutional terms — do not include names of individuals, employer names, member identifiers, or specific case facts. This field is stored alongside your assessment. 500 character limit.',
