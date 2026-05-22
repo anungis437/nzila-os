@@ -65,6 +65,7 @@ const HEADING_PATTERNS = [
   /^A Note on Stewardship and Memory$/i,
   /^Executive Summary$/i,
   /^Section\s+\d+/i,
+  /^\d+(?:\.\d+)?\s+[A-Z]/,
   /^Objections and Counterarguments$/i,
   /^Legal and Regulatory Alignment$/i,
   /^Category Declaration$/i,
@@ -99,10 +100,10 @@ function normalizeBlock(block: string): string {
     .trim();
 }
 
-function getHeadingLine(block: string): string | null {
-  const firstLine = block.split('\n')[0]?.trim() ?? '';
-  if (!firstLine) return null;
-  return HEADING_PATTERNS.some((pattern) => pattern.test(firstLine)) ? firstLine : null;
+function isHeadingLine(line: string): boolean {
+  const candidate = line.trim();
+  if (!candidate) return false;
+  return HEADING_PATTERNS.some((pattern) => pattern.test(candidate));
 }
 
 type ContentSegment =
@@ -160,6 +161,78 @@ function parseContentSegments(body: string): ContentSegment[] {
   return segments;
 }
 
+type WhitepaperSection = {
+  heading: string;
+  body: string;
+  segments: ContentSegment[];
+};
+
+function buildWhitepaperSections(blocks: string[]): WhitepaperSection[] {
+  const sections: Array<{ heading: string; bodyLines: string[] }> = [];
+  let current: { heading: string; bodyLines: string[] } | null = null;
+
+  const pushCurrent = () => {
+    if (!current) return;
+    const body = current.bodyLines.join('\n').trim();
+    if (body.length === 0 && sections.length > 0) {
+      current = null;
+      return;
+    }
+
+    sections.push({
+      heading: current.heading,
+      bodyLines: current.bodyLines,
+    });
+    current = null;
+  };
+
+  for (const block of blocks) {
+    const lines = block.split('\n').map((line) => line.trim());
+
+    for (const line of lines) {
+      if (!line) {
+        if (current) {
+          current.bodyLines.push('');
+        }
+        continue;
+      }
+
+      if (isHeadingLine(line)) {
+        pushCurrent();
+        current = {
+          heading: line,
+          bodyLines: [],
+        };
+        continue;
+      }
+
+      if (!current) {
+        current = {
+          heading: 'The Continuity Gap',
+          bodyLines: [],
+        };
+      }
+
+      current.bodyLines.push(line);
+    }
+
+    if (current) {
+      current.bodyLines.push('');
+    }
+  }
+
+  pushCurrent();
+
+  return sections.map((section) => {
+    const body = section.bodyLines.join('\n').trim();
+    return {
+      heading: section.heading,
+      body,
+      segments: parseContentSegments(body),
+    };
+  });
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -183,26 +256,8 @@ export default async function LocaleWhitepaperPage({
   const { locale } = await params;
   const copy = WHITEPAPER_COPY[locale as keyof typeof WHITEPAPER_COPY] ?? WHITEPAPER_COPY['en-CA'];
   const whitepaperBlocks = CONTINUITY_GAP_BLOCKS.map(normalizeBlock).filter((block) => block.length > 0);
-  const sections = whitepaperBlocks.map((block) => {
-    const heading = getHeadingLine(block);
-    const body = heading
-      ? block
-          .split('\n')
-          .slice(1)
-          .join('\n')
-          .trim()
-      : block;
-
-    return {
-      heading,
-      body,
-      segments: body ? parseContentSegments(body) : [],
-    };
-  });
-
-  const tocHeadings = sections
-    .map((section) => section.heading)
-    .filter((heading): heading is string => heading !== null);
+  const sections = buildWhitepaperSections(whitepaperBlocks);
+  const tocHeadings = sections.map((section) => section.heading);
 
   return (
     <div className="min-h-screen bg-white">
