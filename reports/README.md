@@ -18,6 +18,7 @@ Reports are organized by domain for easy discovery:
 Existing folders:
 
 - `archive/` — Legacy reports and historical artifacts
+- `archive/repo-root-cleanup-2026-05-22/` — Root diagnostics and temporary artifacts relocated during repository-wide cleaning pass
 - `commercial/` — Commercial strategy and positioning
 - `compliance/` — Compliance and regulatory reports
 - `coverage/` — Test coverage and quality metrics
