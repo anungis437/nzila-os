@@ -25,15 +25,15 @@ import { resolve } from 'node:path'
 const ROOT = resolve(__dirname, '..')
 
 type ReportPath =
-  | '../../reports/zonga-admin-gap-audit.md'
-  | '../../reports/zonga-auth-rbac-audit.md'
-  | '../../reports/zonga-backup-ir-plan.md'
-  | '../../reports/zonga-billing-payouts-readiness.md'
-  | '../../reports/zonga-client-onboarding-script.md'
-  | '../../reports/zonga-go-live-decision.md'
-  | '../../reports/zonga-launch-readiness.md'
-  | '../../reports/zonga-legal-launch-pack.md'
-  | '../../reports/zonga-streaming-readiness.md'
+  | '../../reports/product-reports/zonga/zonga-admin-gap-audit.md'
+  | '../../reports/product-reports/zonga/zonga-auth-rbac-audit.md'
+  | '../../reports/product-reports/zonga/zonga-backup-ir-plan.md'
+  | '../../reports/product-reports/zonga/zonga-billing-payouts-readiness.md'
+  | '../../reports/product-reports/zonga/zonga-client-onboarding-script.md'
+  | '../../reports/product-reports/zonga/zonga-go-live-decision.md'
+  | '../../reports/product-reports/zonga/zonga-launch-readiness.md'
+  | '../../reports/product-reports/zonga/zonga-legal-launch-pack.md'
+  | '../../reports/product-reports/zonga/zonga-streaming-readiness.md'
 
 type ReadSourcePath =
   | 'app/api/payouts/route.ts'
@@ -66,24 +66,24 @@ function readSource(relPath: ReadSourcePath): string {
 
 function fileExists(relPath: ReportPath | 'maturity.json'): boolean {
   switch (relPath) {
-    case '../../reports/zonga-admin-gap-audit.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-admin-gap-audit.md'))
-    case '../../reports/zonga-auth-rbac-audit.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-auth-rbac-audit.md'))
-    case '../../reports/zonga-backup-ir-plan.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-backup-ir-plan.md'))
-    case '../../reports/zonga-billing-payouts-readiness.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-billing-payouts-readiness.md'))
-    case '../../reports/zonga-client-onboarding-script.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-client-onboarding-script.md'))
-    case '../../reports/zonga-go-live-decision.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-go-live-decision.md'))
-    case '../../reports/zonga-launch-readiness.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-launch-readiness.md'))
-    case '../../reports/zonga-legal-launch-pack.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-legal-launch-pack.md'))
-    case '../../reports/zonga-streaming-readiness.md':
-      return existsSync(resolve(ROOT, '../../reports/zonga-streaming-readiness.md'))
+    case '../../reports/product-reports/zonga/zonga-admin-gap-audit.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-admin-gap-audit.md'))
+    case '../../reports/product-reports/zonga/zonga-auth-rbac-audit.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-auth-rbac-audit.md'))
+    case '../../reports/product-reports/zonga/zonga-backup-ir-plan.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-backup-ir-plan.md'))
+    case '../../reports/product-reports/zonga/zonga-billing-payouts-readiness.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-billing-payouts-readiness.md'))
+    case '../../reports/product-reports/zonga/zonga-client-onboarding-script.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-client-onboarding-script.md'))
+    case '../../reports/product-reports/zonga/zonga-go-live-decision.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-go-live-decision.md'))
+    case '../../reports/product-reports/zonga/zonga-launch-readiness.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-launch-readiness.md'))
+    case '../../reports/product-reports/zonga/zonga-legal-launch-pack.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-legal-launch-pack.md'))
+    case '../../reports/product-reports/zonga/zonga-streaming-readiness.md':
+      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-streaming-readiness.md'))
     case 'maturity.json':
       return existsSync(resolve(ROOT, 'maturity.json'))
     default:
@@ -267,15 +267,15 @@ describe('Platform Maturity Tracking', () => {
 
   it('launch readiness reports have been generated', () => {
     const reports: ReportPath[] = [
-      '../../reports/zonga-auth-rbac-audit.md',
-      '../../reports/zonga-billing-payouts-readiness.md',
-      '../../reports/zonga-streaming-readiness.md',
-      '../../reports/zonga-admin-gap-audit.md',
-      '../../reports/zonga-legal-launch-pack.md',
-      '../../reports/zonga-backup-ir-plan.md',
-      '../../reports/zonga-client-onboarding-script.md',
-      '../../reports/zonga-go-live-decision.md',
-      '../../reports/zonga-launch-readiness.md',
+      '../../reports/product-reports/zonga/zonga-auth-rbac-audit.md',
+      '../../reports/product-reports/zonga/zonga-billing-payouts-readiness.md',
+      '../../reports/product-reports/zonga/zonga-streaming-readiness.md',
+      '../../reports/product-reports/zonga/zonga-admin-gap-audit.md',
+      '../../reports/product-reports/zonga/zonga-legal-launch-pack.md',
+      '../../reports/product-reports/zonga/zonga-backup-ir-plan.md',
+      '../../reports/product-reports/zonga/zonga-client-onboarding-script.md',
+      '../../reports/product-reports/zonga/zonga-go-live-decision.md',
+      '../../reports/product-reports/zonga/zonga-launch-readiness.md',
     ]
 
     for (const report of reports) {
