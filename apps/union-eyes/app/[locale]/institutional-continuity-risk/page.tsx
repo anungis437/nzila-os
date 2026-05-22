@@ -190,8 +190,8 @@ export default async function InstitutionalContinuityRiskPage({
       includes: isFr
         ? ['Tout dans Réflexion', 'Analyse de l\'entropie de gouvernance', 'Analyse de la dette de continuité', 'Examen des dépendances institutionnelles', 'Couche de risque de modernisation', 'Recommandations complètes']
         : ['Everything in Reflection', 'Governance entropy analysis', 'Continuity debt analysis', 'Institutional dependency review', 'Modernization risk layer', 'Full recommendations'],
-      cta: isFr ? 'Demander ce rapport' : 'Request this report',
-      ctaHref: '/contact?topic=executive-continuity-brief',
+      cta: isFr ? 'Commencer l\'évaluation' : 'Start the assessment',
+      ctaHref: '/continuity-assessment/start?intendedTier=executive_continuity_brief',
       featured: true,
     },
     {
