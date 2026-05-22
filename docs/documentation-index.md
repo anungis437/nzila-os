@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-20T23:43:25.172Z
+Generated: 2026-05-22T16:37:00.976Z
 
-Total documents indexed: 1025
+Total documents indexed: 1132
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -14,7 +14,7 @@ Stale documents (>90 days since repo validation): 0
 | README.md | 1 | 0 |
 | architecture | 3 | 0 |
 | backlog | 1 | 0 |
-| categories | 919 | 0 |
+| categories | 921 | 0 |
 | compliance | 4 | 0 |
 | doctrine | 15 | 0 |
 | documentation-index.md | 1 | 0 |
@@ -26,12 +26,13 @@ Stale documents (>90 days since repo validation): 0
 | nzila-runtime-integrity | 11 | 0 |
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
-| ops | 4 | 0 |
+| oci | 88 | 0 |
+| ops | 8 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
 | public | 1 | 0 |
 | root | 4 | 0 |
-| union-eyes | 15 | 0 |
+| union-eyes | 28 | 0 |
 | zonga | 2 | 0 |
 
 ## Documents
@@ -344,7 +345,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/platform-and-operations/architecture/ORG_SCOPED_TABLES.md](docs/categories/platform-and-operations/architecture/ORG_SCOPED_TABLES.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/ORM_BOUNDARY.md](docs/categories/platform-and-operations/architecture/ORM_BOUNDARY.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-boundary.md](docs/categories/platform-and-operations/architecture/orm-boundary.md) | categories | 2026-05-11 | current |
-| [docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md](docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md) | categories | 2026-05-11 | current |
+| [docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md](docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md) | categories | 2026-05-22 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/deployment-legitimacy-reconciliation.md](docs/categories/platform-and-operations/architecture/orm-governance/deployment-legitimacy-reconciliation.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md](docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/drizzle-scope-reconstruction.md](docs/categories/platform-and-operations/architecture/orm-governance/drizzle-scope-reconstruction.md) | categories | 2026-05-11 | current |
@@ -771,6 +772,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/final-labor-continuity-readiness-review.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/final-labor-continuity-readiness-review.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/governance-safe-labor-intelligence-model.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/governance-safe-labor-intelligence-model.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/grievance-continuity-intelligence.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/grievance-continuity-intelligence.md) | categories | 2026-05-11 | current |
+| [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-deterministic-report-ai-doctrine.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-deterministic-report-ai-doctrine.md) | categories | 2026-05-22 | current |
+| [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-trust-center-alignment-notes.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-trust-center-alignment-notes.md) | categories | 2026-05-22 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/labor-continuity-ux-refactor.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/labor-continuity-ux-refactor.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/onboarding-continuity-intelligence.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/onboarding-continuity-intelligence.md) | categories | 2026-05-11 | current |
@@ -965,7 +968,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/tutorials/README.md](docs/categories/stakeholders/tutorials/README.md) | categories | 2026-05-11 | current |
 | [docs/compliance/soc2/control-mapping.md](docs/compliance/soc2/control-mapping.md) | compliance | 2026-05-20 | current |
 | [docs/compliance/soc2/evidence-inventory.md](docs/compliance/soc2/evidence-inventory.md) | compliance | 2026-05-20 | current |
-| [docs/compliance/soc2/gap-log.md](docs/compliance/soc2/gap-log.md) | compliance | 2026-05-20 | current |
+| [docs/compliance/soc2/gap-log.md](docs/compliance/soc2/gap-log.md) | compliance | 2026-05-21 | current |
 | [docs/compliance/soc2/README.md](docs/compliance/soc2/README.md) | compliance | 2026-05-20 | current |
 | [docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md](docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/constitution.md](docs/doctrine/constitution.md) | doctrine | 2026-05-20 | current |
@@ -978,16 +981,16 @@ Stale documents (>90 days since repo validation): 0
 | [docs/doctrine/narrative-playbooks.md](docs/doctrine/narrative-playbooks.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/positioning.md](docs/doctrine/positioning.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/principles.md](docs/doctrine/principles.md) | doctrine | 2026-05-20 | current |
-| [docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md](docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md) | doctrine | 2026-05-20 | current |
-| [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md](docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md) | doctrine | 2026-05-22 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-22 | current |
 | [docs/doctrine/SCORING_MODELS.md](docs/doctrine/SCORING_MODELS.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/vocabulary.md](docs/doctrine/vocabulary.md) | doctrine | 2026-05-20 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-20 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-22 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
 | [docs/healthcare/discovery-surveys.md](docs/healthcare/discovery-surveys.md) | healthcare | 2026-05-17 | current |
-| [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-05-10 | current |
+| [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-05-22 | current |
 | [docs/migration/trade/canonical-domain-map.md](docs/migration/trade/canonical-domain-map.md) | migration | 2026-05-11 | current |
 | [docs/migration/trade/cars-vertical-scope.md](docs/migration/trade/cars-vertical-scope.md) | migration | 2026-05-11 | current |
 | [docs/nzila-residual-closure/full-residual-elimination-review.md](docs/nzila-residual-closure/full-residual-elimination-review.md) | nzila-residual-closure | 2026-05-11 | current |
@@ -1032,9 +1035,101 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md](docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
+| [docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md](docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md) | oci | 2026-05-22 | current |
+| [docs/oci/ai/AI_DISCLOSURE_NOTICE.md](docs/oci/ai/AI_DISCLOSURE_NOTICE.md) | oci | 2026-05-22 | current |
+| [docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md](docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md) | oci | 2026-05-22 | current |
+| [docs/oci/ai/OCRA_AI_BOUNDARY_MODEL.md](docs/oci/ai/OCRA_AI_BOUNDARY_MODEL.md) | oci | 2026-05-22 | current |
+| [docs/oci/ai/OCRA_AI_SYSTEM_ARCHITECTURE.md](docs/oci/ai/OCRA_AI_SYSTEM_ARCHITECTURE.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md](docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCI_MODALITY_DOCTRINE.md](docs/oci/assessment/OCI_MODALITY_DOCTRINE.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md](docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md](docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md](docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md) | oci | 2026-05-22 | current |
+| [docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md](docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md](docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md](docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md](docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md](docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_OBSERVATORY_FOUNDATIONS.md](docs/oci/intelligence/OCI_OBSERVATORY_FOUNDATIONS.md) | oci | 2026-05-22 | current |
+| [docs/oci/migration/OCI_OCRA_CONVERGENCE_PLAN.md](docs/oci/migration/OCI_OCRA_CONVERGENCE_PLAN.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_AI_BOUNDARY.md](docs/oci/OCI_AI_BOUNDARY.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md](docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_BOARD_OVERVIEW.md](docs/oci/OCI_BOARD_OVERVIEW.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_DATA_HANDLING.md](docs/oci/OCI_DATA_HANDLING.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_DELIVERY_MODEL.md](docs/oci/OCI_DELIVERY_MODEL.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_EXECUTIVE_BRIEFING_DECK.md](docs/oci/OCI_EXECUTIVE_BRIEFING_DECK.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_EXECUTIVE_EMAIL_SEQUENCE.md](docs/oci/OCI_EXECUTIVE_EMAIL_SEQUENCE.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_FACILITATOR_CERTIFICATION_RUBRIC.md](docs/oci/OCI_FACILITATOR_CERTIFICATION_RUBRIC.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_FACILITATOR_TRAINING_CURRICULUM.md](docs/oci/OCI_FACILITATOR_TRAINING_CURRICULUM.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_INSTITUTIONAL_ACTIVATION.md](docs/oci/OCI_INSTITUTIONAL_ACTIVATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_METHOD.md](docs/oci/OCI_METHOD.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_PILOT_FRAMEWORK.md](docs/oci/OCI_PILOT_FRAMEWORK.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_PILOT_INTRODUCTION_GUIDE.md](docs/oci/OCI_PILOT_INTRODUCTION_GUIDE.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_PILOT_SCOPE_TEMPLATE.md](docs/oci/OCI_PILOT_SCOPE_TEMPLATE.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_PRIVACY_POSITION.md](docs/oci/OCI_PRIVACY_POSITION.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_SECURITY_OVERVIEW.md](docs/oci/OCI_SECURITY_OVERVIEW.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md](docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md) | oci | 2026-05-21 | current |
+| [docs/oci/oci-method.md](docs/oci/oci-method.md) | oci | 2026-05-22 | current |
+| [docs/oci/oci-product-ladder.md](docs/oci/oci-product-ladder.md) | oci | 2026-05-22 | current |
+| [docs/oci/runtime/OCI_CONTINUITY_LEDGER.md](docs/oci/runtime/OCI_CONTINUITY_LEDGER.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_EVENT_RUNTIME.md](docs/oci/runtime/OCI_EVENT_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_GOVERNANCE_MEMORY_RUNTIME.md](docs/oci/runtime/OCI_GOVERNANCE_MEMORY_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_GOVERNANCE_TRACEABILITY.md](docs/oci/runtime/OCI_GOVERNANCE_TRACEABILITY.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_ONBOARDING_RUNTIME.md](docs/oci/runtime/OCI_ONBOARDING_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_OPERATING_PRIMITIVES.md](docs/oci/runtime/OCI_OPERATING_PRIMITIVES.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_PLATFORM_RUNTIME_ALIGNMENT.md](docs/oci/runtime/OCI_PLATFORM_RUNTIME_ALIGNMENT.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_RUNTIME_CONTRACTS.md](docs/oci/runtime/OCI_RUNTIME_CONTRACTS.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_RUNTIME_READINESS.md](docs/oci/runtime/OCI_RUNTIME_READINESS.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_RUNTIME_STEWARDSHIP.md](docs/oci/runtime/OCI_RUNTIME_STEWARDSHIP.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_WORKFLOW_RUNTIME.md](docs/oci/runtime/OCI_WORKFLOW_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md](docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md) | oci | 2026-05-22 | current |
+| [docs/oci/stabilization/OCI_ACTION_SYSTEM.md](docs/oci/stabilization/OCI_ACTION_SYSTEM.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_CONTINUITY_DEBT.md](docs/oci/stabilization/OCI_CONTINUITY_DEBT.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md](docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md) | oci | 2026-05-22 | current |
+| [docs/oci/stabilization/OCI_CONTINUITY_OPERATIONALIZATION.md](docs/oci/stabilization/OCI_CONTINUITY_OPERATIONALIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_EXECUTIVE_STABILIZATION_OPERATIONS.md](docs/oci/stabilization/OCI_EXECUTIVE_STABILIZATION_OPERATIONS.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_FACILITATOR_RUNTIME.md](docs/oci/stabilization/OCI_FACILITATOR_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_INTERVENTION_ETHICS.md](docs/oci/stabilization/OCI_INTERVENTION_ETHICS.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_INTERVENTION_MODEL.md](docs/oci/stabilization/OCI_INTERVENTION_MODEL.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_LONGITUDINAL_STABILIZATION.md](docs/oci/stabilization/OCI_LONGITUDINAL_STABILIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_ONBOARDING_STABILIZATION.md](docs/oci/stabilization/OCI_ONBOARDING_STABILIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_RUNTIME_ALIGNMENT.md](docs/oci/stabilization/OCI_RUNTIME_ALIGNMENT.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_RUNTIME_TRANSITION_MODEL.md](docs/oci/stabilization/OCI_RUNTIME_TRANSITION_MODEL.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_COMMERCIALIZATION.md](docs/oci/stabilization/OCI_STABILIZATION_COMMERCIALIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_EVOLUTION.md](docs/oci/stabilization/OCI_STABILIZATION_EVOLUTION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_FRAMEWORK.md](docs/oci/stabilization/OCI_STABILIZATION_FRAMEWORK.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_LIFECYCLE.md](docs/oci/stabilization/OCI_STABILIZATION_LIFECYCLE.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_PERSONAS.md](docs/oci/stabilization/OCI_STABILIZATION_PERSONAS.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md](docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_PRINCIPLES.md](docs/oci/stabilization/OCI_STABILIZATION_PRINCIPLES.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_PROGRESSION.md](docs/oci/stabilization/OCI_STABILIZATION_PROGRESSION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_READINESS.md](docs/oci/stabilization/OCI_STABILIZATION_READINESS.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_SEVERITY_MODEL.md](docs/oci/stabilization/OCI_STABILIZATION_SEVERITY_MODEL.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md](docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md) | oci | 2026-05-22 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_TRACKING.md](docs/oci/stabilization/OCI_STABILIZATION_TRACKING.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md](docs/oci/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md](docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/LEADERSHIP_TRANSITION_STABILIZATION.md](docs/oci/stabilization/playbooks/LEADERSHIP_TRANSITION_STABILIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/MODERNIZATION_CONTINUITY_REMEDIATION.md](docs/oci/stabilization/playbooks/MODERNIZATION_CONTINUITY_REMEDIATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/ONBOARDING_SURVIVABILITY_RECOVERY.md](docs/oci/stabilization/playbooks/ONBOARDING_SURVIVABILITY_RECOVERY.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md](docs/oci/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/README.md](docs/oci/stabilization/playbooks/README.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md](docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md](docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md) | oci | 2026-05-22 | current |
+| [docs/oci/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md](docs/oci/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md](docs/oci/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md](docs/oci/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md](docs/oci/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md](docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/README.md](docs/oci/stabilization/workflows/README.md) | oci | 2026-05-22 | current |
+| [docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md](docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md](docs/ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md) | ops | 2026-05-22 | current |
+| [docs/ops/FINANCIAL_SERVICE_GOVERNANCE_RECOVERY.md](docs/ops/FINANCIAL_SERVICE_GOVERNANCE_RECOVERY.md) | ops | 2026-05-22 | current |
+| [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-05-22 | current |
+| [docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md](docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md) | ops | 2026-05-22 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-20 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-20 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-22 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-22 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-20 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-20 | current |
@@ -1045,6 +1140,19 @@ Stale documents (>90 days since repo validation): 0
 | [docs/public/restore-readiness-summary.md](docs/public/restore-readiness-summary.md) | public | 2026-05-11 | current |
 | [docs/README.md](docs/README.md) | README.md | 2026-05-10 | current |
 | [docs/union-eyes/dr/restore-drill-runbook.md](docs/union-eyes/dr/restore-drill-runbook.md) | union-eyes | 2026-05-11 | current |
+| [docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md](docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md](docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md](docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md](docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md](docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md](docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md](docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/PILOT_SCOPE_LOCK.md](docs/union-eyes/pilot-evidence-pack/PILOT_SCOPE_LOCK.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md](docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/READINESS_COMMANDS.md](docs/union-eyes/pilot-evidence-pack/READINESS_COMMANDS.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/README.md](docs/union-eyes/pilot-evidence-pack/README.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md](docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md) | union-eyes | 2026-05-21 | current |
+| [docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md](docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md) | union-eyes | 2026-05-21 | current |
 | [docs/union-eyes/qa/rbac-reality-map.md](docs/union-eyes/qa/rbac-reality-map.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/qa/user-story-coverage-matrix.md](docs/union-eyes/qa/user-story-coverage-matrix.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md](docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md) | union-eyes | 2026-05-11 | current |

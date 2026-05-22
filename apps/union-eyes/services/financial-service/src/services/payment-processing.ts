@@ -314,7 +314,7 @@ export interface BatchPayoutResult {
 export async function batchProcessStipendPayouts(
   request: BatchStipendPayoutRequest
 ): Promise<BatchPayoutResult> {
-  const { organizationId, _strikeFundId, disbursementIds } = request;
+  const { organizationId, disbursementIds } = request;
 
   const results: BatchPayoutResult['results'] = [];
   let successful = 0;
@@ -606,7 +606,7 @@ export async function processStripeWebhook(
 
     // Mark as processed
     await db.update(schema.stripeWebhookEvents)
-      .set({ processed: true, processedAt: new Date() })
+      .set({ processed: true, processedAt: new Date().toISOString() })
       .where(eq(schema.stripeWebhookEvents.stripeEventId, event.id));
 
   } catch (error) {

@@ -57,7 +57,7 @@ The validation engine sits between the operational platform and the doctrine lay
 
 ```
 +----------------------+
-|   Operational        |  pilot deployments, ICRA results
+|   Operational        |  pilot deployments, OCRA results
 |   Platform           |  (consent-bound, sovereignty-preserved)
 +----------+-----------+
            |
@@ -94,7 +94,7 @@ The pilot lifecycle has six structured phases. Each phase has explicit entry cri
 
 ### Phase 1 — Pre-Pilot Diagnostic
 **Purpose:** Establish institutional baseline before any platform deployment.
-**Activities:** Institutional Continuity Risk Assessment (ICRA); steward and coordinator interviews; documentation review.
+**Activities:** OCI Continuity Risk Assessment (OCRA); steward and coordinator interviews; documentation review.
 **Outputs:** Baseline continuity score; governance fragility findings; identified risk concentrations; pilot scope recommendation.
 **Exit criteria:** Documented baseline, scoped pilot agreement, governance review completed.
 
@@ -125,7 +125,7 @@ The pilot lifecycle has six structured phases. Each phase has explicit entry cri
 
 ### Phase 6 — Pilot Closure & Validation
 **Purpose:** Formally close the pilot, generate validation findings, and decide on full deployment.
-**Activities:** Final re-measurement; ICRA re-administration; institutional outcomes assessment; case study extraction (with consent); decision review.
+**Activities:** Final re-measurement; OCRA re-administration; institutional outcomes assessment; case study extraction (with consent); decision review.
 **Outputs:** Pilot closure report; validated outcome data; case study material (if consented); deployment recommendation.
 **Exit criteria:** Closure report delivered to institution; institution makes documented decision on full deployment; validation engine receives anonymized cohort data (if consented).
 
@@ -150,9 +150,9 @@ Measurement of continuity exposure reduction.
 | Metric | Definition | Measurement Method |
 |--------|-----------|-------------------|
 | Operational dependency concentration | % of operational functions dependent on a single individual | Functional mapping |
-| Transition readiness score | Composite measure of how prepared the institution is for senior transition | Re-administration of ICRA Transition Readiness section |
+| Transition readiness score | Composite measure of how prepared the institution is for senior transition | Re-administration of OCRA Transition Readiness section |
 | Onboarding time to operational independence | Median days from new operator start to functional independence | Operational log analysis |
-| Continuity exposure index | Composite continuity risk score | ICRA re-administration |
+| Continuity exposure index | Composite continuity risk score | OCRA re-administration |
 | Knowledge transfer completeness | % of role-critical knowledge documented as institutional asset | Sample audit |
 
 ### C. Operational Improvement Metrics
@@ -193,7 +193,7 @@ Every pilot is anchored by a written charter signed by institutional leadership 
 1. Institutional context and scope.
 2. Pilot scope (function, department, committee, or federation working group).
 3. Governance structure and decision authority during pilot.
-4. Baseline measurements (from Phase 1 ICRA).
+4. Baseline measurements (from Phase 1 OCRA).
 5. Success criteria across the five categories above, with specific thresholds.
 6. Consent architecture and notification scope.
 7. Duration and milestone schedule.
@@ -217,7 +217,7 @@ Evidence capture is scoped to institutional posture, never individual behavior. 
 - Federation coordination patterns (where applicable).
 
 ### Continuity Indicators
-- Continuity exposure scores (from ICRA administrations).
+- Continuity exposure scores (from OCRA administrations).
 - Transition readiness scores.
 - Onboarding time medians.
 - Operational dependency concentrations (aggregate).
@@ -291,7 +291,7 @@ The validation engine maintains the following benchmark structures:
 - Enterprise (25,000+).
 
 ### Maturity Bands
-(From ICRA framework — `programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md`)
+(From OCRA framework — `programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md`)
 - Band 1: Personality Dependent (0–20).
 - Band 2: Operationally Aware (21–40).
 - Band 3: Structurally Documented (41–60).
@@ -330,7 +330,7 @@ The Institutional Continuity Index is the canonical public benchmark for institu
 
 ## 4.2 — Scoring Methodology
 
-ICI scoring is derived from the ICRA scoring model (`programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md`) with one adaptation: ICI scores are always cohort-level, never individual institution-level in public reporting.
+ICI scoring is derived from the OCRA scoring model (`programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md`) with one adaptation: ICI scores are always cohort-level, never individual institution-level in public reporting.
 
 ### Component Scores
 The ICI integrates four component scores:
@@ -587,7 +587,7 @@ The annual **Institutional Continuity Report** is the canonical public publicati
 - Open questions for the next reporting period.
 
 ### Section 10 — Methodological Appendix
-- Full ICRA methodology.
+- Full OCRA methodology.
 - ICI calculation methodology.
 - Anonymization methodology.
 - k-anonymity floors and enforcement.

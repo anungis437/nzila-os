@@ -12,6 +12,8 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     id: 'personality_dependent',
     ordinal: 1,
     name: 'Personality Dependent',
+    ociBandName: 'Tribal Continuity',
+    operationalPattern: 'Personality Dependent',
     summary:
       'The organization functions through the operational memory and personal authority of a small number of individuals. Continuity is implicit, not institutional.',
     operationalCharacteristics: [
@@ -36,6 +38,8 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     id: 'fragmented_coordination',
     ordinal: 2,
     name: 'Fragmented Coordination',
+    ociBandName: 'Documented Continuity',
+    operationalPattern: 'Fragmented Coordination',
     summary:
       'Several teams maintain their own practices, tools, and records. Coordination happens, but the institution does not see itself as a single operational entity.',
     operationalCharacteristics: [
@@ -60,6 +64,8 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     id: 'structured_governance',
     ordinal: 3,
     name: 'Structured Governance',
+    ociBandName: 'Structured Continuity',
+    operationalPattern: 'Structured Governance',
     summary:
       'Governance procedures, policies, and decision logs are formalized. Operational practice is documented and broadly followed.',
     operationalCharacteristics: [
@@ -84,6 +90,8 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     id: 'continuity_aware',
     ordinal: 4,
     name: 'Continuity-Aware',
+    ociBandName: 'Evidence-Backed Continuity',
+    operationalPattern: 'Continuity-Aware',
     summary:
       'The organization treats continuity as a governance discipline. Institutional memory, succession, and operational coherence are actively maintained.',
     operationalCharacteristics: [
@@ -108,6 +116,8 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     id: 'continuity_intelligence',
     ordinal: 5,
     name: 'Continuity Intelligence',
+    ociBandName: 'Continuity-Native',
+    operationalPattern: 'Continuity Intelligence',
     summary:
       'Continuity is instrumented. The institution can see its own operational coherence, governance posture, and memory over time, and uses that visibility to inform stewardship.',
     operationalCharacteristics: [

@@ -58,6 +58,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/features/member-portal', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/features/priorities', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/insights', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/whitepaper', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/insights/categories', changeFrequency: 'weekly', priority: 0.7 },
     { path: '/insights/doctrine', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/insights/methodology', changeFrequency: 'monthly', priority: 0.7 },

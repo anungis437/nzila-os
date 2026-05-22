@@ -57,6 +57,7 @@ const ALLOWLIST = [
   'app/admin/',             // Admin pages — server components with direct DB access
   'app/[locale]/admin/',    // Locale-prefixed admin pages — server components with direct DB access
   'app/[locale]/dashboard/', // Dashboard RSC pages — server components querying DB directly
+  'app/[locale]/workbook/', // Workbook RSC pages — server components querying DB directly
   'app/layout.tsx',         // Root layout may use server-side providers
   'components/providers/',  // Provider wrappers
   'components/admin/',      // Admin components — server-side with direct DB access

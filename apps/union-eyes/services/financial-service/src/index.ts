@@ -16,8 +16,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
-import winston from 'winston';
-import { verifyToken } from '@nzila/platform-auth/entra/verify';
 
 // Route imports
 import duesRulesRouter from './routes/dues-rules';
@@ -48,27 +46,6 @@ import { runReconciliation } from './services/reconciliation-engine';
 import { logger } from '@/lib/logger';
 
 dotenv.config();
-
-// ============================================================================
-// LOGGER SETUP
-// ============================================================================
-
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      ),
-    }),
-  ],
-});
 
 // ============================================================================
 // EXPRESS APP SETUP
@@ -191,6 +168,7 @@ const authenticate = async (
     
     if (process.env.AUTH_SECRET) {
       try {
+        const { verifyToken } = await import('@nzila/platform-auth/entra/verify');
         const { payload } = await verifyToken(token, {
           secretKey: process.env.AUTH_SECRET,
         });

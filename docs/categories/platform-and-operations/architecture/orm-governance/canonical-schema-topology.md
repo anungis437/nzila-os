@@ -67,6 +67,35 @@ The authoritative map of who owns which schema in a Union Eyes database.
 - `ue_attestation.*` — release evidence support tables.
 - `ue_telemetry.*` — non-canonical telemetry buffers.
 
+**Delegated read-model projections** (per [drizzle-scope-reconstruction.md](./drizzle-scope-reconstruction.md) §2):
+
+- `public.icra_*` — OCI Continuity Risk Assessment (continuity
+  observability scope). Pseudonymous, no PII required, no Django model
+  owns this surface. Tables: `icra_organizations`,
+  `icra_assessments`, `icra_assessment_answers`, `icra_maturity_profiles`,
+  `icra_continuity_scores`, `icra_governance_flags`,
+  `icra_operational_indicators`, `icra_followup_recommendations`,
+  `icra_benchmark_groups`, `icra_anonymized_metrics`.
+  Registered via `apps/union-eyes/db/schema-cache/cache.ts` on
+  2026-05-21. Fresh-DB bootstrap creates these via the scoped Drizzle
+  migration lineage in `db/migrations-cache/`.
+
+- `public.workbook*` — Governance Entropy Workbook™ (OCI P2). Continuity
+  observability scope: pseudonymous continuity mapping artifacts with a
+  hybrid claim model (pseudonymous draft → email-claim on purchase →
+  account-scoped thereafter). No Django model owns this surface.
+  Tables: `workbooks`, `workbook_modules`, `workbook_memory_holders`,
+  `workbook_stewardship_signals`, `workbook_governance_lineage_entries`,
+  `workbook_continuity_breakpoints`, `workbook_modernization_alignment`,
+  `workbook_transformation_roadmap`, `workbook_purchases`.
+  Registered via `apps/union-eyes/db/schema-cache/cache.ts` on
+  2026-05-21. Anti-surveillance constraint: holder names and free-text
+  notes never leave the database row; only deterministic aggregates may
+  flow to CRM or future P5 (OCI Intelligence Network) benchmarking. The
+  `workbooks.sectorBand` and `workbooks.institutionSizeBand` columns are
+  voluntarily-provided forward-compatibility hooks for P5 — all OCI
+  tables must remain aggregable without re-identification.
+
 ### 2.3 Bootstrap-owned (extensions only)
 
 - `CREATE EXTENSION` statements for:

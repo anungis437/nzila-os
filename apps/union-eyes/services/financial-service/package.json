@@ -6,12 +6,14 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "lint": "eslint --config ../../eslint.config.mjs --rule \"@next/next/no-html-link-for-pages: off\" \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
     "start": "node dist/index.js",
-    "test": "jest --runInBand",
-    "test:workflows": "jest src/tests/workflows.test.ts --runInBand",
-    "test:analytics": "jest src/tests/analytics.test.ts --runInBand",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test": "vitest run src/tests",
+    "test:workflows": "vitest run src/tests/workflows.test.ts",
+    "test:analytics": "vitest run src/tests/analytics.test.ts",
+    "test:watch": "vitest watch src/tests",
+    "test:coverage": "vitest run --coverage src/tests"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

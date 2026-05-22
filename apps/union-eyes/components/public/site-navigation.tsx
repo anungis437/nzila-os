@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 /** Primary navigation items (non-dropdown) */
 const primaryNav = [
   { name: 'Insights', href: '/insights' },
+  { name: 'Whitepaper', href: '/whitepaper' },
   { name: 'Pricing',  href: '/pricing' },
   { name: 'Contact',  href: '/contact' },
 ];

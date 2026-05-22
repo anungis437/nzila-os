@@ -56,6 +56,11 @@ router.post("/", async (req: Request, res: Response) => {
             strategy: "hourly",
             amount: body.baseRate,
             sourceRuleId: "service-inline",
+            ruleCode: "base_rate_inline",
+            precedence: 10,
+            compositionMode: "replace",
+            scope: {},
+            action: { amount: body.baseRate },
             path: ["request", "baseRate"],
           },
           {
@@ -63,6 +68,11 @@ router.post("/", async (req: Request, res: Response) => {
             strategy: "percent_gross",
             amount: body.duesRate,
             sourceRuleId: "service-inline",
+            ruleCode: "dues_inline",
+            precedence: 20,
+            compositionMode: "replace",
+            scope: {},
+            action: { amount: body.duesRate },
             path: ["request", "duesRate"],
           },
           {
@@ -70,6 +80,11 @@ router.post("/", async (req: Request, res: Response) => {
             strategy: "percent_gross",
             amount: body.benefitRate,
             sourceRuleId: "service-inline",
+            ruleCode: "benefits_inline",
+            precedence: 30,
+            compositionMode: "replace",
+            scope: {},
+            action: { amount: body.benefitRate },
             path: ["request", "benefitRate"],
           },
           {
@@ -77,6 +92,11 @@ router.post("/", async (req: Request, res: Response) => {
             strategy: "percent_gross",
             amount: body.pensionRate,
             sourceRuleId: "service-inline",
+            ruleCode: "pension_inline",
+            precedence: 40,
+            compositionMode: "replace",
+            scope: {},
+            action: { amount: body.pensionRate },
             path: ["request", "pensionRate"],
           },
           {
@@ -85,6 +105,11 @@ router.post("/", async (req: Request, res: Response) => {
             thresholdHours: 8,
             multiplier: 1.5,
             sourceRuleId: "service-inline",
+            ruleCode: "overtime_inline",
+            precedence: 50,
+            compositionMode: "replace",
+            scope: {},
+            action: { thresholdHours: 8, multiplier: 1.5 },
             path: ["request", "defaults"],
           },
           {
@@ -93,6 +118,11 @@ router.post("/", async (req: Request, res: Response) => {
             thresholdHours: 12,
             multiplier: 2,
             sourceRuleId: "service-inline",
+            ruleCode: "double_time_inline",
+            precedence: 60,
+            compositionMode: "replace",
+            scope: {},
+            action: { thresholdHours: 12, multiplier: 2 },
             path: ["request", "defaults"],
           },
         ],
@@ -130,7 +160,7 @@ router.post("/", async (req: Request, res: Response) => {
       ) returning id
     `);
 
-    const payrollRunId = (insertRun as Array<{ id: string }>)[0]?.id;
+    const payrollRunId = (insertRun as unknown as Array<{ id: string }>)[0]?.id;
 
     for (const item of run.items) {
       await db.execute(sql`

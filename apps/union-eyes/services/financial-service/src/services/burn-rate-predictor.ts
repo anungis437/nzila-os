@@ -18,7 +18,6 @@ import {
 } from '../db/schema';
 import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import { queueNotification } from './notification-service';
-import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';
 
 // ============================================================================

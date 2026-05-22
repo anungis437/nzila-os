@@ -90,7 +90,7 @@ export default async function ResourcesPage() {
       label: isFr ? 'Évaluation continuité' : 'Continuity Assessment',
       href: '/continuity-assessment',
       icon: '📈',
-      description: isFr ? 'Diagnostic ICRA et risque institutionnel' : 'ICRA diagnostic and institutional risk',
+      description: isFr ? 'Diagnostic OCRA et risque institutionnel' : 'OCRA diagnostic and institutional risk',
     },
     {
       label: isFr ? 'Union Eyes' : 'Union Eyes',

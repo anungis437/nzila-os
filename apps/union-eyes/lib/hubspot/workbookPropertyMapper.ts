@@ -1,0 +1,218 @@
+/**
+ * Workbook \u2192 HubSpot property mapper.
+ *
+ * ANTI-SURVEILLANCE CONTRACT
+ * ---------------------------
+ * Only deterministic, aggregated continuity intelligence flows to CRM.
+ * Holder names, responsibilities, and notes NEVER leave the workbook DB.
+ * Every property below is a count, band, score, or stage identifier.
+ *
+ * If you find yourself wanting to add `oci_holder_*` fields, stop. That
+ * would breach Product 2\u2019s positioning and the network-tier consent model.
+ */
+
+import type { CartographyResult } from '@/lib/workbook/engines/stewardshipCartography';
+import type { ContinuityLandscapeResult } from '@/lib/workbook/engines/continuityMappingEngine';
+import type { ContinuityLineageResult } from '@/lib/workbook/engines/continuityLineageEngine';
+import type { GovernanceEntropyResult } from '@/lib/workbook/engines/governanceEntropyEngine';
+import type { ContinuityBreakpointResult } from '@/lib/workbook/engines/continuityBreakpointEngine';
+import type { ModernizationAlignmentResult } from '@/lib/workbook/engines/modernizationAlignmentEngine';
+import type { TransformationRoadmapResult } from '@/lib/workbook/engines/transformationRoadmapEngine';
+import type { WorkbookSynthesisResult } from '@/lib/workbook/engines/workbookSynthesisEngine';
+
+/**
+ * K-anonymity floor for CRM-bound counts. Any aggregate below this
+ * threshold is suppressed (reported as the literal "<5") to avoid
+ * re-identifying small carrier populations through compounded fields.
+ */
+export const K_ANONYMITY_THRESHOLD = 5;
+
+export const WORKBOOK_TIER_LABELS = {
+  workbook_self_guided: 'Self-Guided Workbook',
+  workbook_facilitated: 'Facilitated Workbook',
+  workbook_enterprise: 'Enterprise Continuity Engagement',
+} as const;
+
+export type WorkbookTierKey = keyof typeof WORKBOOK_TIER_LABELS;
+
+/** Internal deal-stage keys. Map to env-driven HubSpot stage ids in syncWorkbookPurchase. */
+export const WORKBOOK_DEAL_STAGE_LABELS = {
+  workbook_self_guided_purchased: 'Self-Guided Workbook \u2014 Purchased',
+  workbook_facilitated_interest: 'Facilitated Workbook \u2014 Interest',
+  workbook_enterprise_inquiry: 'Enterprise Continuity \u2014 Inquiry',
+} as const;
+
+export type WorkbookDealStageKey = keyof typeof WORKBOOK_DEAL_STAGE_LABELS;
+
+/** Resolve HubSpot stage ids from env, with safe fallback identifiers. */
+export const WORKBOOK_DEAL_STAGES: Record<WorkbookDealStageKey, string> = {
+  workbook_self_guided_purchased:
+    process.env.HUBSPOT_PIPELINE_STAGE_WORKBOOK_SELF_GUIDED_PURCHASED ??
+    'workbook_self_guided_purchased',
+  workbook_facilitated_interest:
+    process.env.HUBSPOT_PIPELINE_STAGE_WORKBOOK_FACILITATED_INTEREST ??
+    'workbook_facilitated_interest',
+  workbook_enterprise_inquiry:
+    process.env.HUBSPOT_PIPELINE_STAGE_WORKBOOK_ENTERPRISE_INQUIRY ??
+    'workbook_enterprise_inquiry',
+};
+
+export interface WorkbookAttribution {
+  source?: string | null;
+  medium?: string | null;
+  campaign?: string | null;
+}
+
+/**
+ * Build CONTACT-level properties for a workbook buyer.
+ * All values are strings (HubSpot custom property convention).
+ */
+export function buildWorkbookContactProperties(input: {
+  tier: WorkbookTierKey;
+  attribution?: WorkbookAttribution;
+}): Record<string, string> {
+  const props: Record<string, string> = {
+    oci_workbook_tier: WORKBOOK_TIER_LABELS[input.tier],
+  };
+  if (input.attribution?.source) props.oci_utm_source = input.attribution.source;
+  if (input.attribution?.medium) props.oci_utm_medium = input.attribution.medium;
+  if (input.attribution?.campaign) props.oci_utm_campaign = input.attribution.campaign;
+  return props;
+}
+
+/**
+ * Build COMPANY-level properties from cartography aggregates.
+ * Called once a workbook has been claimed AND has cartography results.
+ */
+export function buildWorkbookCompanyProperties(input: {
+  cartography: CartographyResult;
+  modulesComplete: number;
+  totalModules: number;
+  lastActivityAt?: Date | null;
+}): Record<string, string> {
+  const { density } = input.cartography;
+  const props: Record<string, string> = {
+    oci_stewardship_concentration_index: density.index.toFixed(2),
+    oci_stewardship_concentration_band: density.band.id,
+    oci_continuity_carrier_count: String(density.totalCarriers),
+    oci_load_bearing_carriers: String(density.loadBearingCount),
+    oci_load_bearing_without_successor: String(density.unsuccessedLoadBearingCount),
+    oci_institution_critical_carriers: String(density.institutionCriticalCount),
+    oci_institution_critical_without_successor: String(density.unsuccessedInstitutionCriticalCount),
+    oci_workbook_modules_complete: `${input.modulesComplete} / ${input.totalModules}`,
+  };
+  if (input.lastActivityAt) {
+    props.oci_workbook_last_activity_at = input.lastActivityAt.toISOString();
+  }
+  return props;
+}
+
+/** Resolve the deal-stage for a workbook tier purchase. */
+export function workbookTierToStage(tier: WorkbookTierKey): WorkbookDealStageKey {
+  switch (tier) {
+    case 'workbook_self_guided':
+      return 'workbook_self_guided_purchased';
+    case 'workbook_facilitated':
+      return 'workbook_facilitated_interest';
+    case 'workbook_enterprise':
+    default:
+      return 'workbook_enterprise_inquiry';
+  }
+}
+
+/**
+ * Suppress counts below the k-anonymity floor. Returns the literal "<K"
+ * for sub-threshold positive integers so HubSpot views don\u2019t accidentally
+ * profile small carrier populations. Zero passes through as "0".
+ */
+export function kAnonCount(n: number): string {
+  if (!Number.isFinite(n) || n < 0) return '0';
+  if (n === 0) return '0';
+  if (n < K_ANONYMITY_THRESHOLD) return `<${K_ANONYMITY_THRESHOLD}`;
+  return String(Math.trunc(n));
+}
+
+export interface ContinuityIntelligenceInput {
+  landscape?: ContinuityLandscapeResult;
+  lineage?: ContinuityLineageResult;
+  entropy?: GovernanceEntropyResult;
+  breakpoint?: ContinuityBreakpointResult;
+  modernization?: ModernizationAlignmentResult;
+  roadmap?: TransformationRoadmapResult;
+  synthesis?: WorkbookSynthesisResult;
+}
+
+/**
+ * Build COMPANY-level continuity intelligence properties.
+ *
+ * Every value is an aggregate (band id, count, mean, ordinal, posture).
+ * No carrier names, no responsibility text, no notes. Counts below the
+ * k-anonymity threshold are suppressed via kAnonCount().
+ */
+export function buildContinuityIntelligenceProperties(
+  input: ContinuityIntelligenceInput,
+): Record<string, string> {
+  const props: Record<string, string> = {};
+
+  if (input.landscape) {
+    props.oci_continuity_overall_posture = input.landscape.overallPosture;
+    props.oci_continuity_signal_count = kAnonCount(input.landscape.signals.length);
+  }
+
+  if (input.lineage) {
+    const s = input.lineage.survivability;
+    props.oci_lineage_total = kAnonCount(s.total);
+    props.oci_lineage_living = kAnonCount(s.living);
+    props.oci_lineage_observed = kAnonCount(s.observed);
+    props.oci_lineage_fading = kAnonCount(s.fading);
+    props.oci_lineage_lapsed_count = kAnonCount(s.lapsed);
+    props.oci_lineage_interpretation_drift = input.lineage.aggregateInterpretationDrift.toFixed(2);
+  }
+
+  if (input.entropy) {
+    props.oci_governance_entropy_aggregate = input.entropy.aggregateDrift.toFixed(2);
+    props.oci_governance_entropy_level = input.entropy.level.id;
+    props.oci_governance_entropy_ordinal = String(input.entropy.level.ordinal);
+  }
+
+  if (input.breakpoint) {
+    props.oci_reconstruction_burden_mean = input.breakpoint.reconstructionAggregate.meanScore.toFixed(2);
+    props.oci_breakpoint_severe_count = kAnonCount(
+      input.breakpoint.reconstructionAggregate.severeCount,
+    );
+    props.oci_onboarding_critical_count = kAnonCount(input.breakpoint.onboarding.criticalCount);
+    props.oci_onboarding_fragile_count = kAnonCount(input.breakpoint.onboarding.fragileCount);
+  }
+
+  if (input.modernization) {
+    const aligned = input.modernization.modernizationMatrix.filter(
+      (c) => c.posture === 'continuity_safe',
+    ).length;
+    const eroding = input.modernization.modernizationMatrix.filter(
+      (c) => c.posture === 'continuity_eroding',
+    ).length;
+    props.oci_modernization_initiative_count = kAnonCount(
+      input.modernization.modernizationMatrix.length,
+    );
+    props.oci_modernization_aligned_count = kAnonCount(aligned);
+    props.oci_modernization_eroding_count = kAnonCount(eroding);
+    props.oci_modernization_continuity_gap_count = kAnonCount(input.modernization.continuityGaps.length);
+  }
+
+  if (input.roadmap) {
+    props.oci_stabilization_candidate_count = kAnonCount(input.roadmap.stabilization.length);
+    props.oci_redistribution_target_count = kAnonCount(input.roadmap.redistribution.targets.length);
+    if (input.roadmap.pathway?.currentStage) {
+      props.oci_maturity_stage = input.roadmap.pathway.currentStage;
+    }
+  }
+
+  if (input.synthesis) {
+    props.oci_continuity_posture = input.synthesis.profile.posture;
+    props.oci_continuity_composite_index = input.synthesis.profile.compositeIndex.toFixed(2);
+    props.oci_cross_module_signal_count = kAnonCount(input.synthesis.crossModuleSignals.length);
+  }
+
+  return props;
+}
+

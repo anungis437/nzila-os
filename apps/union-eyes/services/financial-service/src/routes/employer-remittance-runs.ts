@@ -58,6 +58,7 @@ router.post("/", async (req: Request, res: Response) => {
         duesAmount: Number(item.dues_amount),
         benefitAmount: Number(item.benefit_amount),
         pensionAmount: Number(item.pension_amount),
+        traceHash: "derived",
         trace: {},
       })),
       trace: {},
@@ -82,7 +83,7 @@ router.post("/", async (req: Request, res: Response) => {
       ) returning id
     `);
 
-    const remittanceRunId = (insertRun as Array<{ id: string }>)[0]?.id;
+    const remittanceRunId = (insertRun as unknown as Array<{ id: string }>)[0]?.id;
 
     await db.execute(sql`
       insert into employer_execution_artifacts (

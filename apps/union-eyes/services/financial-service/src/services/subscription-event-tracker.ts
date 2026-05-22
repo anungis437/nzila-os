@@ -174,7 +174,7 @@ async function upsertCustomerAcquisition(
       .set({
         currentMrr: data.monthlyAmount?.toString() || '0',
         totalRevenue: (parseFloat(existing.totalRevenue || '0') + (data.monthlyAmount || 0)).toString(),
-        monthsActive: existing.monthsActive + 1,
+        monthsActive: (existing.monthsActive ?? 0) + 1,
         updatedAt: now.toISOString(),
       })
       .where(eq(customerAcquisition.id, existing.id));

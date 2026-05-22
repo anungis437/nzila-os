@@ -2,17 +2,18 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "module": "commonjs",
-    "moduleResolution": "node10",
+    "rootDir": "../../../../",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "target": "ES2020",
     "esModuleInterop": true,
     "declaration": true,
     "skipLibCheck": true,
     "noEmit": false,
-    "strict": true,
-    "ignoreDeprecations": "6.0"
+    "strict": true
   },
+  "references": [],
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "files": [],
+  "exclude": ["node_modules", "dist", "src/tests/**"]
 }

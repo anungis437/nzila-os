@@ -11,9 +11,10 @@
 
 import { useState } from 'react';
 import type { ConsentRecord } from '@/lib/icra/types';
+import { TurnstileWidget, isTurnstileConfigured } from './TurnstileWidget';
 
 interface ConsentGateProps {
-  onConsent: (record: ConsentRecord) => void;
+  onConsent: (record: ConsentRecord, turnstileToken: string | null) => void;
   doctrineVersion: string;
   locale?: string;
 }
@@ -45,8 +46,14 @@ const CONSENT_COPY = {
     acknowledgements: 'Acknowledgements Required to Proceed',
     checks: [
       'I understand this assessment is designed to evaluate organizational systems and practices — not to surveil, evaluate, or score individual people.',
-      'I understand that my responses will be stored pseudonymously. No account is required. Results are accessible via the link provided after submission.',
+      'I understand that my responses, the optional organizational context I provide, and a one-way hash of my IP address are stored pseudonymously for a minimum of twelve months. No account is required. Results are reachable only via the link provided after submission unless I choose to receive that link by email. The organizational context fields (type, sector, size, age) are also used to tailor how my results are framed.',
       'I understand that all scoring is deterministic and explainable. My results will include a full trace of how scores were computed from my responses.',
+    ],
+    preview: 'What you\u2019ll receive',
+    previewItems: [
+      'A continuity profile across five maturity dimensions, with explicit scoring weights.',
+      'A printable institutional report you can share with your board or executive team.',
+      'Three recommended next steps tailored to your governance model and workforce band.',
     ],
     proceed: 'Begin Assessment',
     required: 'All three acknowledgements are required to proceed.',
@@ -77,8 +84,14 @@ const CONSENT_COPY = {
     acknowledgements: 'Reconnaissances requises pour continuer',
     checks: [
       "Je comprends que cette évaluation vise les systèmes et pratiques organisationnels, et non la surveillance, l'évaluation ou la notation de personnes individuelles.",
-      'Je comprends que mes réponses seront stockées de façon pseudonyme. Aucun compte n’est requis. Les résultats sont accessibles par le lien fourni après la soumission.',
+      "Je comprends que mes réponses, le contexte organisationnel facultatif que je fournis et une empreinte unidirectionnelle de mon adresse IP sont conservés de façon pseudonyme pendant au moins douze mois. Aucun compte n'est requis. Les résultats ne sont accessibles que par le lien fourni après la soumission, à moins que je choisisse de recevoir ce lien par courriel. Les champs de contexte organisationnel (type, secteur, taille, ancienneté) servent aussi à adapter la formulation de mes résultats.",
       'Je comprends que tous les scores sont déterministes et explicables. Mes résultats incluront une trace complète du calcul des scores à partir de mes réponses.',
+    ],
+    preview: 'Ce que vous recevrez',
+    previewItems: [
+      'Un profil de continuité selon cinq dimensions de maturité, avec pondérations explicites.',
+      'Un rapport institutionnel imprimable que vous pouvez partager avec votre conseil ou direction.',
+      'Trois prochaines étapes recommandées, adaptées à votre modèle de gouvernance et à votre taille.',
     ],
     proceed: "Commencer l'évaluation",
     required: 'Les trois reconnaissances sont requises pour continuer.',
@@ -89,9 +102,14 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
   const [antiSurveillance, setAntiSurveillance] = useState(false);
   const [dataHandling, setDataHandling] = useState(false);
   const [explainability, setExplainability] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(
+    isTurnstileConfigured() ? null : '',
+  );
   const copy = CONSENT_COPY[locale as keyof typeof CONSENT_COPY] ?? CONSENT_COPY['en-CA'];
 
-  const allAcknowledged = antiSurveillance && dataHandling && explainability;
+  const acksDone = antiSurveillance && dataHandling && explainability;
+  const botCheckSatisfied = turnstileToken !== null;
+  const allAcknowledged = acksDone && botCheckSatisfied;
 
   function handleProceed() {
     if (!allAcknowledged) return;
@@ -102,13 +120,17 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
       acknowledgedDataHandling: true,
       acknowledgedExplainability: true,
     };
-    onConsent(record);
+    onConsent(record, turnstileToken);
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 py-12">
-      <div className="space-y-3">
-        <h1 className="font-serif text-3xl font-bold text-stone-900">
+    <div
+      className="mx-auto max-w-2xl space-y-8 py-12"
+      data-testid="icra-assessment-flow"
+      data-step="consent"
+    >
+      <div className="space-y-3" data-testid="icra-consent-step">
+        <h1 className="text-3xl font-bold tracking-tight text-stone-900">
           {copy.title}
         </h1>
         <p className="text-base leading-relaxed text-stone-600">
@@ -128,6 +150,23 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
             </p>
           ))}
         </div>
+      </div>
+
+      <div className="rounded-lg border border-stone-200 bg-white p-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">
+          {copy.preview}
+        </h2>
+        <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-stone-700">
+          {copy.previewItems.map((item) => (
+            <li key={item} className="flex gap-3">
+              <span
+                aria-hidden
+                className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500"
+              />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="space-y-4">
@@ -173,6 +212,9 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
       </div>
 
       <div className="pt-2">
+        {isTurnstileConfigured() && (
+          <TurnstileWidget onVerified={setTurnstileToken} locale={locale} />
+        )}
         <button
           onClick={handleProceed}
           disabled={!allAcknowledged}

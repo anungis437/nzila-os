@@ -1,25 +1,7 @@
 import cron from 'node-cron';
-import winston from 'winston';
 import { processAutomatedAlerts } from '../services/burn-rate-predictor';
 import { generateWeeklyForecastReport } from '../services/burn-rate-predictor';
 import { logger } from '@/lib/logger';
-
-// Logger setup
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
-});
 
 /**
  * Analytics Processor - Scheduled Jobs
@@ -49,7 +31,6 @@ export const hourlyAlertsJob = cron.schedule('0 * * * *', async () => {
     logger.error('Error in hourly alerts job', { error });
   }
 }, {
-  scheduled: false, // Don't start immediately, will be started manually
   timezone: 'America/Toronto', // Adjust to your timezone
 });
 
@@ -75,7 +56,6 @@ export const weeklyForecastJob = cron.schedule('0 9 * * 1', async () => {
     logger.error('Error in weekly forecast job', { error });
   }
 }, {
-  scheduled: false, // Don't start immediately, will be started manually
   timezone: 'America/Toronto', // Adjust to your timezone
 });
 

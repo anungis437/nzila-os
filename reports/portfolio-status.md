@@ -1,6 +1,6 @@
 # Portfolio Status
 
-Generated: 2026-05-14
+Generated: 2026-05-22
 Authority: governance/portfolio/product-catalog.json
 
 ## Executive Matrix

@@ -1,33 +1,34 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-20T23:43:23.053Z
+> Generated: 2026-05-22T16:36:56.576Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1675 |
-| Total Findings | 2467 |
+| Files Scanned | 1782 |
+| Total Findings | 2534 |
 | Errors | 0 |
-| Warnings | 1193 |
-| Info | 1274 |
+| Warnings | 1199 |
+| Info | 1335 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1267 |
-| stale-reference | 1032 |
+| naming-inconsistency | 1328 |
+| stale-reference | 1034 |
 | missing-package-readme | 105 |
-| stale-package-ref | 53 |
+| stale-package-ref | 57 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1032)
+## stale-reference (1034)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
 - 🟡 `ARCHITECTURE.md:128` — Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
+- 🟡 `AWS_ZONGA_SETUP.md:428` — Possible broken link: [Zonga Launch Readiness Report](reports/zonga-launch-readiness.md)
 - 🟡 `CONTRIBUTING.md:12` — Possible broken link: [docs/repo-contract/README.md](docs/repo-contract/README.md)
 - 🟡 `CONTRIBUTING.md:82` — Possible broken link: [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
 - 🟡 `CONTRIBUTING.md:83` — Possible broken link: [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
@@ -36,6 +37,7 @@
 - 🟡 `CONTRIBUTING.md:87` — Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)
 - 🟡 `CONTRIBUTING.md:88` — Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:89` — Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
+- 🟡 `README.md:136` — Possible broken link: [reports/portfolio-status.md](reports/portfolio-status.md)
 - 🟡 `README.md:151` — Possible broken link: [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md)
 - 🟡 `README.md:151` — Possible broken link: [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md)
 - 🟡 `README.md:171` — Possible broken link: [docs/builders/](docs/builders/)
@@ -315,7 +317,7 @@
 - 🟡 `docs/categories/platform-and-operations/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md:74` — Possible broken link: [route.meta.json](../../apps/console/route.meta.json)
 - 🟡 `docs/categories/platform-and-operations/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md:75` — Possible broken link: [route.meta.json](../../apps/platform-admin/route.meta.json)
 - 🟡 `docs/categories/platform-and-operations/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md:81` — Possible broken link: [platform-surface-migrations/README.md](../platform-surface-migrations/README.md)
-- 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md:142` — Possible broken link: [TSOSA](../../union-eyes/release/transitional-shared-secret-topology.md)
+- 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md:171` — Possible broken link: [TSOSA](../../union-eyes/release/transitional-shared-secret-topology.md)
 - 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/deployment-legitimacy-reconciliation.md:35` — Possible broken link: [`demo-environment-validation-report.md`](../../union-eyes/release/demo-environment-validation-report.md)
 - 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/orm-authority-runtime-governance-attachment.md:79` — Possible broken link: [`transitional-shared-secret-topology.md`](../../union-eyes/release/transitional-shared-secret-topology.md)
 - 🟡 `docs/categories/platform-and-operations/architecture/orm-governance/orm-governance-readiness-review.md:144` — Possible broken link: [TSOSA §4](../../union-eyes/release/transitional-shared-secret-topology.md)
@@ -750,71 +752,71 @@
 - 🟡 `docs/INDEX.md:44` — Possible broken link: [ops/ENVIRONMENT_OPERATIONS.md](ops/ENVIRONMENT_OPERATIONS.md)
 - 🟡 `docs/INDEX.md:46` — Possible broken link: [ops/REPO_OPERATOR_RUNBOOK.md](ops/REPO_OPERATOR_RUNBOOK.md)
 - 🟡 `docs/INDEX.md:49` — Possible broken link: [ops/staging-runtime-drift-runbook.md](ops/staging-runtime-drift-runbook.md)
-- 🟡 `docs/INDEX.md:55` — Possible broken link: [buyers/PORTFOLIO_OVERVIEW.md](buyers/PORTFOLIO_OVERVIEW.md)
-- 🟡 `docs/INDEX.md:56` — Possible broken link: [buyers/SECURITY_SUMMARY.md](buyers/SECURITY_SUMMARY.md)
-- 🟡 `docs/INDEX.md:57` — Possible broken link: [buyers/RELIABILITY_SUMMARY.md](buyers/RELIABILITY_SUMMARY.md)
-- 🟡 `docs/INDEX.md:58` — Possible broken link: [buyers/OPERATING_MODEL.md](buyers/OPERATING_MODEL.md)
-- 🟡 `docs/INDEX.md:59` — Possible broken link: [buyers/buyer-faq.md](buyers/buyer-faq.md)
-- 🟡 `docs/INDEX.md:60` — Possible broken link: [buyers/sla-support-model.md](buyers/sla-support-model.md)
-- 🟡 `docs/INDEX.md:61` — Possible broken link: [buyers/deployment-models.md](buyers/deployment-models.md)
-- 🟡 `docs/INDEX.md:62` — Possible broken link: [buyers/integration-readiness-matrix.md](buyers/integration-readiness-matrix.md)
-- 🟡 `docs/INDEX.md:63` — Possible broken link: [buyers/pilot-readiness-checklist.md](buyers/pilot-readiness-checklist.md)
-- 🟡 `docs/INDEX.md:64` — Possible broken link: [buyers/product-capability-matrix.md](buyers/product-capability-matrix.md)
-- 🟡 `docs/INDEX.md:65` — Possible broken link: [buyers/union-eyes-buyer-pack.md](buyers/union-eyes-buyer-pack.md)
-- 🟡 `docs/INDEX.md:66` — Possible broken link: [buyers/flow-buyer-pack.md](buyers/flow-buyer-pack.md)
-- 🟡 `docs/INDEX.md:67` — Possible broken link: [faircase/buyer-pack.md](faircase/buyer-pack.md)
-- 🟡 `docs/INDEX.md:74` — Possible broken link: [governance/GOVERNANCE_ARCHITECTURE.md](governance/GOVERNANCE_ARCHITECTURE.md)
-- 🟡 `docs/INDEX.md:75` — Possible broken link: [governance/security-overview.md](governance/security-overview.md)
-- 🟡 `docs/INDEX.md:78` — Possible broken link: [platform/DATA_RESIDENCY_POLICY.md](platform/DATA_RESIDENCY_POLICY.md)
-- 🟡 `docs/INDEX.md:79` — Possible broken link: [platform/THIRD_PARTY_RISK_REGISTER.md](platform/THIRD_PARTY_RISK_REGISTER.md)
-- 🟡 `docs/INDEX.md:80` — Possible broken link: [governance/secure-coding-training.md](governance/secure-coding-training.md)
-- 🟡 `docs/INDEX.md:81` — Possible broken link: [governance/audit-logging-model.md](governance/audit-logging-model.md)
-- 🟡 `docs/INDEX.md:82` — Possible broken link: [governance/CHANGE_POLICY.md](governance/CHANGE_POLICY.md)
-- 🟡 `docs/INDEX.md:83` — Possible broken link: [governance/incident-response-summary.md](governance/incident-response-summary.md)
-- 🟡 `docs/INDEX.md:84` — Possible broken link: [governance/vendor-questionnaire-starter-pack.md](governance/vendor-questionnaire-starter-pack.md)
-- 🟡 `docs/INDEX.md:85` — Possible broken link: [governance/procurement-pack.md](governance/procurement-pack.md)
-- 🟡 `docs/INDEX.md:86` — Possible broken link: [governance/enterprise-readiness.md](governance/enterprise-readiness.md)
-- 🟡 `docs/INDEX.md:92` — Possible broken link: [investor/final-investor-onepager.md](investor/final-investor-onepager.md)
-- 🟡 `docs/INDEX.md:93` — Possible broken link: [investor/three-year-growth-narrative.md](investor/three-year-growth-narrative.md)
-- 🟡 `docs/INDEX.md:94` — Possible broken link: [investor/revenue-scenarios.md](investor/revenue-scenarios.md)
-- 🟡 `docs/INDEX.md:95` — Possible broken link: [investor/defensible-moat-analysis.md](investor/defensible-moat-analysis.md)
-- 🟡 `docs/INDEX.md:96` — Possible broken link: [investor/risk-register-and-mitigations.md](investor/risk-register-and-mitigations.md)
-- 🟡 `docs/INDEX.md:97` — Possible broken link: [investor/shared-platform-leverage-model.md](investor/shared-platform-leverage-model.md)
-- 🟡 `docs/INDEX.md:98` — Possible broken link: [investor/product-expansion-strategy.md](investor/product-expansion-strategy.md)
-- 🟡 `docs/INDEX.md:99` — Possible broken link: [investor/why-nzila-os-wins.md](investor/why-nzila-os-wins.md)
-- 🟡 `docs/INDEX.md:107` — Possible broken link: [union-eyes/README.md](union-eyes/README.md)
-- 🟡 `docs/INDEX.md:108` — Possible broken link: [union-eyes/admin-guide.md](union-eyes/admin-guide.md)
-- 🟡 `docs/INDEX.md:109` — Possible broken link: [union-eyes/user-guide.md](union-eyes/user-guide.md)
-- 🟡 `docs/INDEX.md:110` — Possible broken link: [union-eyes/quick-start.md](union-eyes/quick-start.md)
-- 🟡 `docs/INDEX.md:111` — Possible broken link: [union-eyes/case-intelligence.md](union-eyes/case-intelligence.md)
-- 🟡 `docs/INDEX.md:112` — Possible broken link: [union-eyes/faq.md](union-eyes/faq.md)
-- 🟡 `docs/INDEX.md:113` — Possible broken link: [union-eyes/pilot-overview.md](union-eyes/pilot-overview.md)
-- 🟡 `docs/INDEX.md:114` — Possible broken link: [union-eyes/integration-playbook.md](union-eyes/integration-playbook.md)
-- 🟡 `docs/INDEX.md:120` — Possible broken link: [faircase/executive-summary.md](faircase/executive-summary.md)
-- 🟡 `docs/INDEX.md:121` — Possible broken link: [faircase/buyer-pack.md](faircase/buyer-pack.md)
-- 🟡 `docs/INDEX.md:122` — Possible broken link: [faircase/demo-script.md](faircase/demo-script.md)
-- 🟡 `docs/INDEX.md:123` — Possible broken link: [faircase/pilot-plan.md](faircase/pilot-plan.md)
-- 🟡 `docs/INDEX.md:124` — Possible broken link: [faircase/pricing-model.md](faircase/pricing-model.md)
-- 🟡 `docs/INDEX.md:125` — Possible broken link: [faircase/implementation-guide.md](faircase/implementation-guide.md)
-- 🟡 `docs/INDEX.md:126` — Possible broken link: [faircase/security-one-pager.md](faircase/security-one-pager.md)
-- 🟡 `docs/INDEX.md:127` — Possible broken link: [faircase/roi-calculator.md](faircase/roi-calculator.md)
-- 🟡 `docs/INDEX.md:133` — Possible broken link: [flow/revenue-profile.md](flow/revenue-profile.md)
-- 🟡 `docs/INDEX.md:134` — Possible broken link: [buyers/flow-buyer-pack.md](buyers/flow-buyer-pack.md)
-- 🟡 `docs/INDEX.md:140` — Possible broken link: [agri/00-overview.md](agri/00-overview.md)
-- 🟡 `docs/INDEX.md:141` — Possible broken link: [agri/02-architecture.md](agri/02-architecture.md)
-- 🟡 `docs/INDEX.md:142` — Possible broken link: [agri/03-data-model.md](agri/03-data-model.md)
-- 🟡 `docs/INDEX.md:143` — Possible broken link: [agri/05-security-and-isolation.md](agri/05-security-and-isolation.md)
-- 🟡 `docs/INDEX.md:144` — Possible broken link: [agri/06-evidence-and-traceability.md](agri/06-evidence-and-traceability.md)
-- 🟡 `docs/INDEX.md:156` — Possible broken link: [platform/what-is-nzila.md](platform/what-is-nzila.md)
-- 🟡 `docs/INDEX.md:158` — Possible broken link: [platform/PLATFORM_OPERATING_MODEL.md](platform/PLATFORM_OPERATING_MODEL.md)
-- 🟡 `docs/INDEX.md:159` — Possible broken link: [platform/SHARED_SERVICES.md](platform/SHARED_SERVICES.md)
-- 🟡 `docs/INDEX.md:160` — Possible broken link: [platform/APP_LIFECYCLE_PROCESS.md](platform/APP_LIFECYCLE_PROCESS.md)
-- 🟡 `docs/INDEX.md:161` — Possible broken link: [platform/ONBOARDING.md](platform/ONBOARDING.md)
-- 🟡 `docs/INDEX.md:162` — Possible broken link: [platform/PACKAGE_OWNERSHIP_MATRIX.md](platform/PACKAGE_OWNERSHIP_MATRIX.md)
-- 🟡 `docs/INDEX.md:163` — Possible broken link: [platform/COMMAND_CATALOG.md](platform/COMMAND_CATALOG.md)
-- 🟡 `docs/INDEX.md:164` — Possible broken link: [platform/COVERAGE_REPORTING.md](platform/COVERAGE_REPORTING.md)
-- 🟡 `docs/INDEX.md:171` — Possible broken link: [proof-center/union-eyes-proof.md](proof-center/union-eyes-proof.md)
-- 🟡 `docs/INDEX.md:172` — Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)
+- 🟡 `docs/INDEX.md:58` — Possible broken link: [buyers/PORTFOLIO_OVERVIEW.md](buyers/PORTFOLIO_OVERVIEW.md)
+- 🟡 `docs/INDEX.md:59` — Possible broken link: [buyers/SECURITY_SUMMARY.md](buyers/SECURITY_SUMMARY.md)
+- 🟡 `docs/INDEX.md:60` — Possible broken link: [buyers/RELIABILITY_SUMMARY.md](buyers/RELIABILITY_SUMMARY.md)
+- 🟡 `docs/INDEX.md:61` — Possible broken link: [buyers/OPERATING_MODEL.md](buyers/OPERATING_MODEL.md)
+- 🟡 `docs/INDEX.md:62` — Possible broken link: [buyers/buyer-faq.md](buyers/buyer-faq.md)
+- 🟡 `docs/INDEX.md:63` — Possible broken link: [buyers/sla-support-model.md](buyers/sla-support-model.md)
+- 🟡 `docs/INDEX.md:64` — Possible broken link: [buyers/deployment-models.md](buyers/deployment-models.md)
+- 🟡 `docs/INDEX.md:65` — Possible broken link: [buyers/integration-readiness-matrix.md](buyers/integration-readiness-matrix.md)
+- 🟡 `docs/INDEX.md:66` — Possible broken link: [buyers/pilot-readiness-checklist.md](buyers/pilot-readiness-checklist.md)
+- 🟡 `docs/INDEX.md:67` — Possible broken link: [buyers/product-capability-matrix.md](buyers/product-capability-matrix.md)
+- 🟡 `docs/INDEX.md:68` — Possible broken link: [buyers/union-eyes-buyer-pack.md](buyers/union-eyes-buyer-pack.md)
+- 🟡 `docs/INDEX.md:69` — Possible broken link: [buyers/flow-buyer-pack.md](buyers/flow-buyer-pack.md)
+- 🟡 `docs/INDEX.md:70` — Possible broken link: [faircase/buyer-pack.md](faircase/buyer-pack.md)
+- 🟡 `docs/INDEX.md:77` — Possible broken link: [governance/GOVERNANCE_ARCHITECTURE.md](governance/GOVERNANCE_ARCHITECTURE.md)
+- 🟡 `docs/INDEX.md:78` — Possible broken link: [governance/security-overview.md](governance/security-overview.md)
+- 🟡 `docs/INDEX.md:81` — Possible broken link: [platform/DATA_RESIDENCY_POLICY.md](platform/DATA_RESIDENCY_POLICY.md)
+- 🟡 `docs/INDEX.md:82` — Possible broken link: [platform/THIRD_PARTY_RISK_REGISTER.md](platform/THIRD_PARTY_RISK_REGISTER.md)
+- 🟡 `docs/INDEX.md:83` — Possible broken link: [governance/secure-coding-training.md](governance/secure-coding-training.md)
+- 🟡 `docs/INDEX.md:84` — Possible broken link: [governance/audit-logging-model.md](governance/audit-logging-model.md)
+- 🟡 `docs/INDEX.md:85` — Possible broken link: [governance/CHANGE_POLICY.md](governance/CHANGE_POLICY.md)
+- 🟡 `docs/INDEX.md:86` — Possible broken link: [governance/incident-response-summary.md](governance/incident-response-summary.md)
+- 🟡 `docs/INDEX.md:87` — Possible broken link: [governance/vendor-questionnaire-starter-pack.md](governance/vendor-questionnaire-starter-pack.md)
+- 🟡 `docs/INDEX.md:88` — Possible broken link: [governance/procurement-pack.md](governance/procurement-pack.md)
+- 🟡 `docs/INDEX.md:89` — Possible broken link: [governance/enterprise-readiness.md](governance/enterprise-readiness.md)
+- 🟡 `docs/INDEX.md:95` — Possible broken link: [investor/final-investor-onepager.md](investor/final-investor-onepager.md)
+- 🟡 `docs/INDEX.md:96` — Possible broken link: [investor/three-year-growth-narrative.md](investor/three-year-growth-narrative.md)
+- 🟡 `docs/INDEX.md:97` — Possible broken link: [investor/revenue-scenarios.md](investor/revenue-scenarios.md)
+- 🟡 `docs/INDEX.md:98` — Possible broken link: [investor/defensible-moat-analysis.md](investor/defensible-moat-analysis.md)
+- 🟡 `docs/INDEX.md:99` — Possible broken link: [investor/risk-register-and-mitigations.md](investor/risk-register-and-mitigations.md)
+- 🟡 `docs/INDEX.md:100` — Possible broken link: [investor/shared-platform-leverage-model.md](investor/shared-platform-leverage-model.md)
+- 🟡 `docs/INDEX.md:101` — Possible broken link: [investor/product-expansion-strategy.md](investor/product-expansion-strategy.md)
+- 🟡 `docs/INDEX.md:102` — Possible broken link: [investor/why-nzila-os-wins.md](investor/why-nzila-os-wins.md)
+- 🟡 `docs/INDEX.md:110` — Possible broken link: [union-eyes/README.md](union-eyes/README.md)
+- 🟡 `docs/INDEX.md:111` — Possible broken link: [union-eyes/admin-guide.md](union-eyes/admin-guide.md)
+- 🟡 `docs/INDEX.md:112` — Possible broken link: [union-eyes/user-guide.md](union-eyes/user-guide.md)
+- 🟡 `docs/INDEX.md:113` — Possible broken link: [union-eyes/quick-start.md](union-eyes/quick-start.md)
+- 🟡 `docs/INDEX.md:114` — Possible broken link: [union-eyes/case-intelligence.md](union-eyes/case-intelligence.md)
+- 🟡 `docs/INDEX.md:115` — Possible broken link: [union-eyes/faq.md](union-eyes/faq.md)
+- 🟡 `docs/INDEX.md:116` — Possible broken link: [union-eyes/pilot-overview.md](union-eyes/pilot-overview.md)
+- 🟡 `docs/INDEX.md:117` — Possible broken link: [union-eyes/integration-playbook.md](union-eyes/integration-playbook.md)
+- 🟡 `docs/INDEX.md:123` — Possible broken link: [faircase/executive-summary.md](faircase/executive-summary.md)
+- 🟡 `docs/INDEX.md:124` — Possible broken link: [faircase/buyer-pack.md](faircase/buyer-pack.md)
+- 🟡 `docs/INDEX.md:125` — Possible broken link: [faircase/demo-script.md](faircase/demo-script.md)
+- 🟡 `docs/INDEX.md:126` — Possible broken link: [faircase/pilot-plan.md](faircase/pilot-plan.md)
+- 🟡 `docs/INDEX.md:127` — Possible broken link: [faircase/pricing-model.md](faircase/pricing-model.md)
+- 🟡 `docs/INDEX.md:128` — Possible broken link: [faircase/implementation-guide.md](faircase/implementation-guide.md)
+- 🟡 `docs/INDEX.md:129` — Possible broken link: [faircase/security-one-pager.md](faircase/security-one-pager.md)
+- 🟡 `docs/INDEX.md:130` — Possible broken link: [faircase/roi-calculator.md](faircase/roi-calculator.md)
+- 🟡 `docs/INDEX.md:136` — Possible broken link: [flow/revenue-profile.md](flow/revenue-profile.md)
+- 🟡 `docs/INDEX.md:137` — Possible broken link: [buyers/flow-buyer-pack.md](buyers/flow-buyer-pack.md)
+- 🟡 `docs/INDEX.md:143` — Possible broken link: [agri/00-overview.md](agri/00-overview.md)
+- 🟡 `docs/INDEX.md:144` — Possible broken link: [agri/02-architecture.md](agri/02-architecture.md)
+- 🟡 `docs/INDEX.md:145` — Possible broken link: [agri/03-data-model.md](agri/03-data-model.md)
+- 🟡 `docs/INDEX.md:146` — Possible broken link: [agri/05-security-and-isolation.md](agri/05-security-and-isolation.md)
+- 🟡 `docs/INDEX.md:147` — Possible broken link: [agri/06-evidence-and-traceability.md](agri/06-evidence-and-traceability.md)
+- 🟡 `docs/INDEX.md:159` — Possible broken link: [platform/what-is-nzila.md](platform/what-is-nzila.md)
+- 🟡 `docs/INDEX.md:161` — Possible broken link: [platform/PLATFORM_OPERATING_MODEL.md](platform/PLATFORM_OPERATING_MODEL.md)
+- 🟡 `docs/INDEX.md:162` — Possible broken link: [platform/SHARED_SERVICES.md](platform/SHARED_SERVICES.md)
+- 🟡 `docs/INDEX.md:163` — Possible broken link: [platform/APP_LIFECYCLE_PROCESS.md](platform/APP_LIFECYCLE_PROCESS.md)
+- 🟡 `docs/INDEX.md:164` — Possible broken link: [platform/ONBOARDING.md](platform/ONBOARDING.md)
+- 🟡 `docs/INDEX.md:165` — Possible broken link: [platform/PACKAGE_OWNERSHIP_MATRIX.md](platform/PACKAGE_OWNERSHIP_MATRIX.md)
+- 🟡 `docs/INDEX.md:166` — Possible broken link: [platform/COMMAND_CATALOG.md](platform/COMMAND_CATALOG.md)
+- 🟡 `docs/INDEX.md:167` — Possible broken link: [platform/COVERAGE_REPORTING.md](platform/COVERAGE_REPORTING.md)
+- 🟡 `docs/INDEX.md:174` — Possible broken link: [proof-center/union-eyes-proof.md](proof-center/union-eyes-proof.md)
+- 🟡 `docs/INDEX.md:175` — Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)
 - 🟡 `docs/README.md:3` — Possible broken link: [archive/iterations](archive/iterations/)
 - 🟡 `docs/README.md:18` — Possible broken link: [Union Eyes](buyers/union-eyes-buyer-pack.md)
 - 🟡 `docs/README.md:18` — Possible broken link: [Flow](buyers/flow-buyer-pack.md)
@@ -1058,7 +1060,7 @@
 - 🟡 `governance/foundations/content/README.md:73` — Possible broken link: [`governance/privacy/ai-pia/surfaces/`](../privacy/ai-pia/surfaces/)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 
-## stale-package-ref (53)
+## stale-package-ref (57)
 
 - 🟡 `docs/categories/historical-archive/archive/iterations/nzila-hq/ROADMAP.md:42` — References @nzila/cognition but package does not exist
 - 🟡 `docs/categories/historical-archive/archive/iterations/plans/studio-maturity-10-of-10.md:50` — References @nzila/shop-quoter but package does not exist
@@ -1113,8 +1115,12 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:103` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:24` — References @nzila/platform-audit but package does not exist
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:25` — References @nzila/platform-consent but package does not exist
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1267)
+## naming-inconsistency (1328)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2208,18 +2214,18 @@
 - ℹ️ `docs/doctrine/SCORING_MODELS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/vocabulary.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/vocabulary.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:952` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:954` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:73` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/INDEX.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/INDEX.md:99` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/INDEX.md:65` — "Buyer Pack" should be "procurement pack" (procurement artifact)
-- ℹ️ `docs/INDEX.md:66` — "Buyer Pack" should be "procurement pack" (procurement artifact)
-- ℹ️ `docs/INDEX.md:67` — "Buyer Pack" should be "procurement pack" (procurement artifact)
-- ℹ️ `docs/INDEX.md:121` — "Buyer Pack" should be "procurement pack" (procurement artifact)
-- ℹ️ `docs/INDEX.md:134` — "Buyer Pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/INDEX.md:102` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/INDEX.md:68` — "Buyer Pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/INDEX.md:69` — "Buyer Pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/INDEX.md:70` — "Buyer Pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/INDEX.md:124` — "Buyer Pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/INDEX.md:137` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/nzila-residual-closure/full-residual-elimination-review.md:36` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-closure.md:39` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-closure.md:47` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2321,6 +2327,12 @@
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:126` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:127` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/OCI_METHOD.md:321` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:21` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/AUDIT_ENFORCEMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/EVIDENCE_LIFECYCLE_POLICY.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2328,6 +2340,61 @@
 - ℹ️ `docs/platform/portfolio-matrix.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/proof-center/portfolio-proof-index.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md:43` — "Buyer Pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:63` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:67` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:85` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:90` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:33` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:105` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:107` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:23` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:142` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:179` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:153` — "buyer pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:270` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:280` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:300` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:17` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:19` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:31` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:60` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:66` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:75` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:88` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:89` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:144` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:147` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md:144` — "Evidence Package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md:174` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:34` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:35` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:74` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md:112` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md:125` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/README.md:8` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:38` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:39` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:40` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:41` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:42` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:43` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:44` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:45` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:46` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:47` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:48` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:49` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:50` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:51` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:79` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:81` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:27` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:34` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:37` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:1` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/qa/rbac-reality-map.md:29` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md:11` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/runtime-convergence/full-live-runtime-experience-certification.md:28` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2386,13 +2453,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 92 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 92 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 94 days old — may be stale
 
 ## missing-required-doc (3)
 

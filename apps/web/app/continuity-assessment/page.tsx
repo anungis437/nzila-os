@@ -35,7 +35,7 @@ export default function ContinuityAssessmentPage() {
       <section className="bg-navy text-white py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-electric text-sm font-semibold tracking-widest uppercase mb-4">
-            Institutional Continuity Risk Assessment
+            OCI Continuity Risk Assessment
           </p>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             A structured diagnostic for organizations that take continuity seriously.

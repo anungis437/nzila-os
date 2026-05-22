@@ -23,6 +23,21 @@
  * docs/architecture/orm-governance/canonical-schema-topology.md.
  */
 
-// Intentionally empty barrel. Cache schemas are added incrementally and
+// Intentionally narrow barrel. Cache schemas are added incrementally and
 // reviewed against the canonical topology before inclusion.
-export {};
+//
+// Delegated read-model projection — see canonical-schema-topology.md §2.2:
+// "operational read-model projections that are explicitly delegated per a PR
+// that updates the canonical topology". The ICRA (Institutional Continuity
+// Risk Assessment) tables capture pseudonymous continuity scoring results
+// and are continuity-observability scope, not canonical operational entities.
+export * from "../schema/icra-schema";
+
+// Delegated read-model projection — see canonical-schema-topology.md §2.2.
+// The Governance Entropy Workbook™ (OCI P2) tables capture pseudonymous
+// continuity mapping artifacts: memory holders, stewardship signals,
+// governance lineage, breakpoints, modernization alignment, and a
+// transformation roadmap. Continuity-observability scope, not canonical
+// operational entities. Hybrid claim model (pseudonymous → account-claim
+// on purchase) is documented in docs/oci/oci-product-ladder.md.
+export * from "../schema/workbook-schema";

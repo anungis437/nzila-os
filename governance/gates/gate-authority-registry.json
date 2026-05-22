@@ -328,10 +328,19 @@
       "classification": "blocking",
       "rationale": "Composite of blocking validators; stays blocking.",
       "owner": "platform-governance"
+    },
+    {
+      "id": "financial-service-health",
+      "command": "pnpm financial-service:health",
+      "path": "scripts/financial-service-health.ts",
+      "purpose": "Blocking health gate for Union Eyes financial-service compile, lint, and test signals.",
+      "classification": "blocking",
+      "rationale": "Financial runtime is strategic infrastructure and must be explicitly visible to governance and release gates.",
+      "owner": "union-eyes"
     }
   ],
   "summary": {
-    "blocking": 16,
+    "blocking": 17,
     "advisory": 9,
     "deprecated": 3,
     "future_doctrine": 5

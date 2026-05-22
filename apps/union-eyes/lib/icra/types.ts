@@ -1,5 +1,5 @@
 /**
- * Institutional Continuity Risk Assessment (ICRA) — Types
+ * OCI Continuity Risk Assessment (ICRA) — Types
  *
  * Doctrine-aligned. Continuity intelligence infrastructure, not a quiz.
  * Every type is shaped for: explainability, replayability, auditability,
@@ -53,6 +53,78 @@ export interface QuestionOption {
   observation?: string;
 }
 
+/**
+ * Modality role — the *reason* a question uses its modality.
+ * Governed by docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md §3.
+ */
+export type ModalityRole =
+  | 'maturity_ladder'
+  | 'confidence_sensing'
+  | 'ambiguity_sensing'
+  | 'structural_pattern'
+  | 'inheritance_pattern'
+  | 'topology_pattern';
+
+/**
+ * Intelligence contribution — what kind of institutional intelligence
+ * this question contributes. A question declares at most two.
+ */
+export type IntelligenceContribution =
+  | 'continuity_maturity'
+  | 'governance_sophistication'
+  | 'survivability_perception'
+  | 'operational_clarity'
+  | 'reconstruction_confidence'
+  | 'onboarding_confidence'
+  | 'modernization_continuity'
+  | 'structural_topology'
+  | 'inheritance_topology'
+  | 'stewardship_distribution'
+  | 'recoverability_confidence';
+
+export type LongitudinalValue = 'high' | 'medium' | 'low';
+
+export type StabilizationRelevance =
+  | 'runtime_reliability'
+  | 'governance_replay'
+  | 'fail_closed_posture'
+  | 'not_applicable';
+
+export type RuntimeRelevance =
+  | 'incident_continuity'
+  | 'replay_continuity'
+  | 'runtime_observability'
+  | 'not_applicable';
+
+/**
+ * Recognized continuity archetypes — see continuityArchetypeSignals.ts.
+ */
+export type ContinuityArchetypeId =
+  | 'stewardship_concentration'
+  | 'governance_fragmentation'
+  | 'onboarding_survivability'
+  | 'operational_continuity'
+  | 'modernization_fragility'
+  | 'institutional_memory_dependency';
+
+/**
+ * Intelligence-aware question metadata. Read-only. Does not influence
+ * scoring numerics; governs interpretation, longitudinal aggregation,
+ * archetype detection, and reporting.
+ */
+export interface QuestionIntelligenceMetadata {
+  modalityRole: ModalityRole;
+  intelligenceContribution: IntelligenceContribution[];
+  longitudinalValue: LongitudinalValue;
+  stabilizationRelevance: StabilizationRelevance;
+  runtimeRelevance: RuntimeRelevance;
+  intelligenceNetworkRelevance: 'high' | 'medium' | 'low';
+  confidenceSensitivity: boolean;
+  governanceSensitivity: boolean;
+  /** Optional — multiple_choice questions may contribute to archetype detection. */
+  archetypeContribution?: ContinuityArchetypeId[];
+}
+
 export interface BaseQuestion {
   id: string;
   section: SectionId;
@@ -64,6 +136,11 @@ export interface BaseQuestion {
   riskInverted?: boolean;
   allowNote?: boolean;
   rationale?: string;
+  /**
+   * Intelligence metadata. Required for all questions in bank version >= 3.
+   * Optional in the type signature for back-compat with replayed v2 answers.
+   */
+  intelligence?: QuestionIntelligenceMetadata;
 }
 
 export interface LikertQuestion extends BaseQuestion {
@@ -116,10 +193,26 @@ export interface SectionScore {
   questionsAnswered: number;
 }
 
+/**
+ * Canonical OCI band names — the public-facing, institution-grade vocabulary.
+ * operationalPattern is the internal/sublabel description.
+ */
+export type OciBandId =
+  | 'tribal_continuity'
+  | 'documented_continuity'
+  | 'structured_continuity'
+  | 'evidence_backed_continuity'
+  | 'continuity_native';
+
 export interface MaturityBand {
   id: MaturityBandId;
   ordinal: 1 | 2 | 3 | 4 | 5;
+  /** @deprecated Use ociBandName for display. Kept for serialization compat. */
   name: string;
+  /** Canonical OCI category name — the primary display label. e.g. "Tribal Continuity" */
+  ociBandName: string;
+  /** Operational pattern sublabel — describes the structural reality. e.g. "Personality Dependent" */
+  operationalPattern: string;
   summary: string;
   operationalCharacteristics: string[];
   governanceImplications: string[];
@@ -160,6 +253,16 @@ export interface InstitutionalContinuityProfile {
   recommendations: FollowupRecommendation[];
   answeredQuestionCount: number;
   questionBankVersion: number;
+  /** Cross-dimensional emotional insights from the insight engine. */
+  insights?: ContinuityInsight[];
+  /** Recognizable institutional pattern signals. */
+  continuitySignals?: ContinuitySignal[];
+  /** Stewardship-layer signals with severity. */
+  stewardshipSignals?: StewardshipSignal[];
+  /** Continuity Burden Index — how much continuity depends on human compensation. */
+  burdenIndex?: ContinuityBurdenIndex;
+  /** Revenue tier for this profile's output display. Defaults to free tier. */
+  reportTierId?: ReportTierId;
 }
 
 export interface OrganizationContext {
@@ -174,6 +277,18 @@ export interface OrganizationContext {
     | '5000_plus';
   governanceModel?: 'elected_board' | 'appointed_board' | 'hybrid' | 'other';
   federationAffiliation?: string;
+  /**
+   * Capacity in which the assessment was completed. Drives report framing —
+   * narratives addressed to an internal senior leader read differently from
+   * a brief prepared by an external advisor for a client.
+   */
+  respondentRole?:
+    | 'self_senior_leader'
+    | 'self_board_member'
+    | 'self_staff'
+    | 'on_behalf_consultant'
+    | 'on_behalf_counsel'
+    | 'on_behalf_other';
 }
 
 export interface ConsentRecord {
@@ -182,4 +297,104 @@ export interface ConsentRecord {
   acknowledgedAntiSurveillance: boolean;
   acknowledgedDataHandling: boolean;
   acknowledgedExplainability: boolean;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OCI Commercialization Layer — Insight Engine, Tiers, Personas
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Category of cross-dimensional insight detected by the insight engine.
+ * Each represents a recognizable institutional tension or continuity contradiction.
+ */
+export type InsightCategory =
+  | 'modernization_continuity_gap'
+  | 'invisible_labour'
+  | 'governance_drift'
+  | 'reconstruction_burden'
+  | 'institutional_forgetting'
+  | 'evidence_governance_gap'
+  | 'stewardship_concentration';
+
+/**
+ * A cross-dimensional emotional observation generated by the insight engine.
+ * These are what people remember. Written in a calm, "quietly devastating" register.
+ *
+ * `evidenceBasis` carries auditability: the dimensions and signals that triggered
+ * the insight, plus the report sections it most directly informs. Optional for
+ * back-compat; populated by the insight engine for v2+ insights.
+ */
+export interface ContinuityInsight {
+  id: string;
+  category: InsightCategory;
+  headline: string;
+  body: string;
+  dimensionsInvolved: DimensionId[];
+  severity: 'observed' | 'notable' | 'material';
+  /** Auditability hint — sections of the report this insight most directly informs. */
+  affectedSections?: SectionId[];
+  /** Auditability hint — short evidence phrase (e.g. "institutional_continuity 28; operational_memory 31"). */
+  evidenceBasis?: string;
+}
+
+/**
+ * A recognizable institutional pattern derived from dimension scores.
+ * Rendered as a forensic signal list — not alarming, factual and institutional.
+ */
+export interface ContinuitySignal {
+  id: string;
+  label: string;
+  observed: boolean;
+}
+
+/**
+ * A stewardship-layer signal — elevates the category beyond software
+ * into institutional care and obligation.
+ */
+export interface StewardshipSignal {
+  id: string;
+  label: string;
+  severity: 'low' | 'moderate' | 'elevated';
+}
+
+/**
+ * Continuity Burden Index™ — measures how much continuity depends on
+ * humans compensating manually. Higher score = more human-compensated continuity.
+ * Score (0–100) and interpretation are free; full humanCompensationIndicators
+ * are gated behind the Executive Continuity Brief.
+ */
+export interface ContinuityBurdenIndex {
+  score: number; // 0–100, higher = more burden concentrated in people
+  interpretation: string; // single-line calm observation
+  humanCompensationIndicators: string[]; // gated in Executive Continuity Brief
+}
+
+/**
+ * Revenue tier identifiers — institutional naming, not SaaS vocabulary.
+ */
+export type ReportTierId =
+  | 'continuity_reflection'
+  | 'executive_continuity_brief'
+  | 'institutional_continuity_diagnostic';
+
+/**
+ * Executive persona — used by insight engine for copy variant selection.
+ */
+export type ExecutivePersonaId =
+  | 'executive_director'
+  | 'union_leadership'
+  | 'healthcare_ops'
+  | 'cio_coo'
+  | 'governance_board'
+  | 'federated_org';
+
+/**
+ * UTM attribution parameters — captured consent-aware, no PII.
+ */
+export interface UtmParams {
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  content?: string;
+  term?: string;
 }

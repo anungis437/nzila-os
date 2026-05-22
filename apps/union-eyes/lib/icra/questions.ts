@@ -15,13 +15,15 @@
  * if the bank evolves.
  */
 import type {
+  LikertQuestion,
   MaturitySelectQuestion,
+  MultipleChoiceQuestion,
   Question,
   QuestionOption,
   SectionId,
 } from './types';
 
-export const QUESTION_BANK_VERSION = 1;
+export const QUESTION_BANK_VERSION = 3;
 
 /** Section display metadata for the assessment UI */
 export interface SectionDefinition {
@@ -113,7 +115,7 @@ export interface MetadataQuestion {
   helpText?: string;
   type: 'select' | 'text';
   required: boolean;
-  options?: Array<{ value: string; label: string }>;
+  options?: Array<{ value: string; label: string; group?: string }>;
 }
 
 export const METADATA_QUESTIONS: MetadataQuestion[] = [
@@ -125,12 +127,32 @@ export const METADATA_QUESTIONS: MetadataQuestion[] = [
     type: 'select',
     required: true,
     options: [
-      { value: 'local_union',   label: 'Local union' },
-      { value: 'national_union',label: 'National or international union' },
-      { value: 'federation',    label: 'Labour federation or council' },
-      { value: 'guild',         label: 'Professional guild or association' },
-      { value: 'clc_affiliate', label: 'CLC affiliate or department' },
-      { value: 'other',         label: 'Other labour organization' },
+      // Labour & member associations
+      { value: 'local_union',          label: 'Local union',                              group: 'Labour & member associations' },
+      { value: 'national_union',       label: 'National or international union',          group: 'Labour & member associations' },
+      { value: 'federation',           label: 'Labour federation or council',             group: 'Labour & member associations' },
+      { value: 'guild',                label: 'Professional guild or association',        group: 'Labour & member associations' },
+      { value: 'clc_affiliate',        label: 'CLC affiliate or department',              group: 'Labour & member associations' },
+      { value: 'industry_association', label: 'Industry association or chamber',          group: 'Labour & member associations' },
+      // Public-sector & civic
+      { value: 'government_agency',    label: 'Government agency or department',          group: 'Public-sector & civic' },
+      { value: 'crown_corp',           label: 'Crown corporation',                        group: 'Public-sector & civic' },
+      { value: 'municipality',         label: 'Municipality or regional authority',       group: 'Public-sector & civic' },
+      { value: 'school_board',         label: 'School board or public education body',    group: 'Public-sector & civic' },
+      { value: 'health_authority',     label: 'Public health authority',                  group: 'Public-sector & civic' },
+      { value: 'indigenous_gov',       label: 'Indigenous government or band council',    group: 'Public-sector & civic' },
+      // Mission-driven & community
+      { value: 'nonprofit',            label: 'Non-profit or charity',                    group: 'Mission-driven & community' },
+      { value: 'foundation',           label: 'Community foundation',                     group: 'Mission-driven & community' },
+      { value: 'faith_based',          label: 'Faith-based organization',                 group: 'Mission-driven & community' },
+      { value: 'cooperative',          label: 'Co-operative or mutual',                   group: 'Mission-driven & community' },
+      // Private & professional
+      { value: 'family_business',      label: 'Family-owned business',                    group: 'Private & professional' },
+      { value: 'professional_firm',    label: 'Professional services firm',               group: 'Private & professional' },
+      { value: 'owner_operated_sme',   label: 'Owner-operated SME',                       group: 'Private & professional' },
+      { value: 'private_enterprise',   label: 'Other private enterprise',                 group: 'Private & professional' },
+      // Other
+      { value: 'other',                label: 'Other institution',                        group: 'Other' },
     ],
   },
   {
@@ -184,15 +206,39 @@ export const METADATA_QUESTIONS: MetadataQuestion[] = [
     ],
   },
   {
-    id: 'ctx_primary_challenge',
+    id: 'ctx_respondent_role',
     section: 'organizational_context',
     order: 5,
+    prompt: 'In what capacity are you completing this assessment?',
+    helpText:
+      'This tunes the framing of your report — for example, narratives are addressed differently to a senior leader, a board member, or an external advisor preparing a brief on behalf of a client.',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'self_senior_leader',    label: 'I am a senior leader at this organization' },
+      { value: 'self_board_member',     label: 'I am a board or executive committee member' },
+      { value: 'self_staff',            label: 'I am a staff member of this organization' },
+      { value: 'on_behalf_consultant',  label: 'I am an external advisor or consultant preparing this for a client' },
+      { value: 'on_behalf_counsel',     label: 'I am legal counsel preparing this on behalf of a client' },
+      { value: 'on_behalf_other',       label: 'I am completing this on behalf of the organization in another capacity' },
+    ],
+  },
+  {
+    id: 'ctx_primary_challenge',
+    section: 'organizational_context',
+    order: 6,
     prompt: 'Is there a specific continuity or governance challenge that prompted this assessment? (Optional)',
-    helpText: 'This context is not required and does not affect your results. It helps us understand the range of situations organizations bring to this assessment.',
+    helpText:
+      'Please describe in general institutional terms — do not include names of individuals, employer names, member identifiers, or specific case facts. This field is stored alongside your assessment. 500 character limit.',
     type: 'text',
     required: false,
   },
 ];
+
+/** Server- and client-enforced maximum length for the optional free-text
+ *  context field. Keeps the PII surface bounded and signals intent. */
+export const CTX_PRIMARY_CHALLENGE_MAX_LENGTH = 500;
+export const CTX_SELECT_VALUE_MAX_LENGTH = 64;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Section: operational_dependency (5 questions)
@@ -239,6 +285,23 @@ const OPERATIONAL_DEPENDENCY: MaturitySelectQuestion[] = [
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Onboarding readiness reflects the depth of externalized institutional memory.',
   },
+  // ── New v2 questions: invisible continuity burden ──
+  {
+    id: 'icb_01', section: 'operational_dependency', order: 6, type: 'maturity_select',
+    prompt: 'To what extent does your organization recognize and account for the informal continuity work that certain staff or leaders carry on behalf of the institution?',
+    helpText: 'Consider whether the time spent compensating for absent institutional memory — translating context, explaining history, maintaining relationships — is visible to leadership or absorbed silently into individual roles.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Invisible continuity labour is the primary precursor of burnout and sudden institutional knowledge loss.',
+  },
+  {
+    id: 'icb_02', section: 'operational_dependency', order: 7, type: 'maturity_select',
+    prompt: 'How deliberately does your organization distribute continuity responsibilities — so that institutional knowledge is not quietly concentrated in a small number of people?',
+    helpText: 'As opposed to allowing continuity knowledge to accumulate with whoever happens to have been around the longest or is most engaged.',
+    weights: { institutional_continuity: 1.0, operational_memory: 0.8 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Continuity equity prevents single points of knowledge failure and protects institutional memory holders from unsustainable burden.',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -278,6 +341,15 @@ const GOVERNANCE_VISIBILITY: MaturitySelectQuestion[] = [
     riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Divergence between written and practiced governance is a leading fragility indicator.',
   },
+  // ── New v2 question: governance interpretation survivability ──
+  {
+    id: 'gis_01', section: 'governance_visibility', order: 5, type: 'maturity_select',
+    prompt: 'How consistently do governance interpretations — how policies are applied, how disputes are resolved, how discretion is exercised — survive leadership transitions?',
+    helpText: 'Consider whether incoming leaders typically inherit documented interpretive guidance, or whether they develop their own interpretations independently, sometimes reversing what came before.',
+    weights: { institutional_continuity: 0.8, governance_fragility: 1.0 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Governance interpretation survivability is the quiet test of whether governance continuity is real or nominal.',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -316,6 +388,32 @@ const INSTITUTIONAL_MEMORY: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 1, operational_memory: 1.0 },
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Whether memory is treated as infrastructure determines whether it compounds or decays.',
+  },
+  // ── New v2 questions: operational reconstruction labour, institutional forgetting ──
+  {
+    id: 'orl_01', section: 'institutional_memory', order: 5, type: 'maturity_select',
+    prompt: 'How often does your organization find itself solving the same operational problems that were previously solved — because the earlier solution was not preserved?',
+    helpText: 'This includes re-establishing vendor relationships, re-negotiating terms that were previously settled, re-developing procedures that once existed, or re-learning institutional context already known to former staff.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    riskInverted: true,
+    rationale: 'Repeated operational reconstruction is the direct cost of institutional forgetting.',
+  },
+  {
+    id: 'orl_02', section: 'institutional_memory', order: 6, type: 'maturity_select',
+    prompt: 'How well does your organization preserve the context behind decisions — not just what was decided, but why, what was considered, and what was rejected?',
+    helpText: 'Decision context allows successors to understand the reasoning behind current practices, rather than inheriting outcomes without explanation.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Preserved decision context is what allows institutions to learn from their own history.',
+  },
+  {
+    id: 'if_01', section: 'institutional_memory', order: 7, type: 'maturity_select',
+    prompt: 'To what extent does your organization retain the operational knowledge gained during challenging periods — restructurings, disputes, crises, or significant transitions?',
+    helpText: 'Consider whether the institutional learning from difficult periods is preserved and accessible, or whether it is absorbed into the informal memory of those who were present and lost when they leave.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Institutional learning from adversity is among the most valuable and most frequently lost forms of organizational memory.',
   },
 ];
 
@@ -364,6 +462,15 @@ const TRANSITION_READINESS: MaturitySelectQuestion[] = [
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Strategic continuity during transitions preserves institutional legitimacy.',
   },
+  // ── New v2 question: onboarding continuity ──
+  {
+    id: 'onb_01', section: 'transition_readiness', order: 6, type: 'maturity_select',
+    prompt: 'How effectively does your onboarding process transfer institutional intelligence — not just role responsibilities, but the operational context, relational history, and governance understanding that allow a new person to act effectively?',
+    helpText: 'As opposed to onboarding that covers formal procedures and tools, but leaves new staff to absorb institutional context through observation and informal conversation over months or years.',
+    weights: { institutional_continuity: 0.8, transition_readiness: 1.0, operational_memory: 0.6 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Onboarding quality determines how much institutional intelligence survives each transition.',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -410,6 +517,15 @@ const OPERATIONAL_COORDINATION: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 1, operational_memory: 0.6 },
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Evidence-based reporting indicates institutional operational discipline.',
+  },
+  // ── New v2 question: continuity fairness ──
+  {
+    id: 'cf_01', section: 'operational_coordination', order: 6, type: 'maturity_select',
+    prompt: 'How equitably is continuity responsibility distributed across your organization — rather than concentrated in a small number of individuals who quietly carry disproportionate institutional burden?',
+    helpText: 'Consider whether the work of maintaining institutional continuity — keeping context, translating between teams, preserving relationships — is recognized and shared, or whether it falls to the same people repeatedly.',
+    weights: { institutional_continuity: 0.8, operational_memory: 0.6 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Continuity fairness is both an equity concern and an institutional resilience indicator.',
   },
 ];
 
@@ -497,6 +613,363 @@ const SOVEREIGNTY_GOVERNANCE: MaturitySelectQuestion[] = [
     riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Technology governance is an increasingly significant source of sovereignty risk.',
   },
+  // ── New v2 questions: modernization trauma ──
+  {
+    id: 'mt_01', section: 'sovereignty_governance', order: 5, type: 'maturity_select',
+    prompt: 'How well does your organization preserve institutional context and operational memory when transitioning between systems, platforms, or technology approaches?',
+    helpText: 'Consider whether past transitions — moving between case management systems, financial platforms, communication tools — resulted in institutional memory loss or whether context was preserved and transferred.',
+    weights: { institutional_continuity: 0.8, operational_memory: 0.8, trust_debt: 0.4 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Technology transitions are one of the primary pathways through which institutional memory is silently lost.',
+  },
+  {
+    id: 'mt_02', section: 'sovereignty_governance', order: 6, type: 'maturity_select',
+    prompt: 'How deliberately does your organization evaluate whether modernization efforts preserve — rather than replace — institutional continuity?',
+    helpText: 'Consider whether modernization decisions account for the institutional knowledge embedded in current practices, relationships, and systems — or whether they prioritize capability gains without assessing continuity risk.',
+    weights: { institutional_continuity: 0.8, operational_memory: 0.6, trust_debt: 0.4 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Modernization without continuity assessment is among the most common causes of institutional forgetting.',
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Consolidated exports
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Continuity Confidence Signals — likert_5 modality (v3)
+// Doctrine: docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §4
+// These questions sense perceived continuity confidence and ambiguity.
+// They are statements; respondents indicate the degree to which each is true.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CONFIDENCE_SCALE = {
+  min: 1 as const,
+  max: 5 as const,
+  minLabel: 'Not at all true of our organization',
+  maxLabel: 'Consistently true of our organization',
+};
+
+const CONTINUITY_CONFIDENCE: LikertQuestion[] = [
+  {
+    id: 'ccs_01',
+    section: 'operational_dependency',
+    order: 10,
+    type: 'likert_5',
+    prompt:
+      'Operational knowledge is consistently recoverable when key individuals are unavailable.',
+    helpText:
+      'Consider both planned absences and unplanned departures. Recoverability means the institution can continue functioning without that person present.',
+    weights: { institutional_continuity: 0.6, operational_memory: 0.6 },
+    scale: CONFIDENCE_SCALE,
+    allowNote: true,
+    rationale: 'Senses perceived recoverability — the institution\'s own read of its survivability.',
+    intelligence: {
+      modalityRole: 'confidence_sensing',
+      intelligenceContribution: ['recoverability_confidence', 'survivability_perception'],
+      longitudinalValue: 'high',
+      stabilizationRelevance: 'runtime_reliability',
+      runtimeRelevance: 'incident_continuity',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: false,
+    },
+  },
+  {
+    id: 'ccs_02',
+    section: 'governance_visibility',
+    order: 10,
+    type: 'likert_5',
+    prompt:
+      'Governance decisions can be traced from current outcomes back to documented rationale.',
+    weights: { institutional_continuity: 0.6, governance_fragility: 0.4 },
+    scale: CONFIDENCE_SCALE,
+    allowNote: true,
+    rationale: 'Senses perceived governance traceability without requiring named decision audits.',
+    intelligence: {
+      modalityRole: 'confidence_sensing',
+      intelligenceContribution: ['governance_sophistication'],
+      longitudinalValue: 'high',
+      stabilizationRelevance: 'governance_replay',
+      runtimeRelevance: 'replay_continuity',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: true,
+    },
+  },
+  {
+    id: 'ccs_03',
+    section: 'institutional_memory',
+    order: 10,
+    type: 'likert_5',
+    prompt:
+      'The institution can reconstruct the reasoning behind past significant decisions without relying on long-tenured individuals.',
+    weights: { institutional_continuity: 0.6, operational_memory: 0.6 },
+    scale: CONFIDENCE_SCALE,
+    allowNote: true,
+    rationale: 'Senses the institution\'s confidence in reconstruction without memory holders.',
+    intelligence: {
+      modalityRole: 'confidence_sensing',
+      intelligenceContribution: ['reconstruction_confidence'],
+      longitudinalValue: 'high',
+      stabilizationRelevance: 'governance_replay',
+      runtimeRelevance: 'replay_continuity',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: false,
+    },
+  },
+  {
+    id: 'ccs_04',
+    section: 'transition_readiness',
+    order: 10,
+    type: 'likert_5',
+    prompt:
+      'A newly onboarded senior leader could act on real institutional context within their first quarter, not after a year of informal learning.',
+    weights: { institutional_continuity: 0.6, transition_readiness: 0.8 },
+    scale: CONFIDENCE_SCALE,
+    allowNote: true,
+    rationale: 'Senses onboarding confidence as a leading indicator of transition resilience.',
+    intelligence: {
+      modalityRole: 'confidence_sensing',
+      intelligenceContribution: ['onboarding_confidence'],
+      longitudinalValue: 'high',
+      stabilizationRelevance: 'not_applicable',
+      runtimeRelevance: 'not_applicable',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: false,
+    },
+  },
+  {
+    id: 'ccs_05',
+    section: 'sovereignty_governance',
+    order: 10,
+    type: 'likert_5',
+    prompt:
+      'Past technology and platform transitions preserved institutional context rather than discarding it.',
+    weights: { institutional_continuity: 0.6, operational_memory: 0.4 },
+    scale: CONFIDENCE_SCALE,
+    allowNote: true,
+    rationale: 'Senses modernization-continuity confidence — whether change typically preserves memory.',
+    intelligence: {
+      modalityRole: 'confidence_sensing',
+      intelligenceContribution: ['modernization_continuity'],
+      longitudinalValue: 'high',
+      stabilizationRelevance: 'not_applicable',
+      runtimeRelevance: 'not_applicable',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: false,
+    },
+  },
+  {
+    id: 'ccs_06',
+    section: 'operational_dependency',
+    order: 11,
+    type: 'likert_5',
+    prompt:
+      'Critical operational functions could continue for at least 30 days without the people most associated with them.',
+    weights: { institutional_continuity: 0.6, operational_memory: 0.6 },
+    scale: CONFIDENCE_SCALE,
+    allowNote: true,
+    rationale: 'Senses the institution\'s recoverability confidence under sustained absence.',
+    intelligence: {
+      modalityRole: 'confidence_sensing',
+      intelligenceContribution: ['recoverability_confidence'],
+      longitudinalValue: 'high',
+      stabilizationRelevance: 'runtime_reliability',
+      runtimeRelevance: 'incident_continuity',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: false,
+    },
+  },
+  {
+    id: 'ccs_07',
+    section: 'operational_coordination',
+    order: 10,
+    type: 'likert_5',
+    prompt:
+      'Operational coordination across teams happens through shared mechanisms rather than through specific individuals knowing both sides.',
+    weights: { institutional_continuity: 0.6, operational_memory: 0.4 },
+    scale: CONFIDENCE_SCALE,
+    allowNote: true,
+    rationale: 'Senses operational clarity — whether coordination is structural or relational.',
+    intelligence: {
+      modalityRole: 'confidence_sensing',
+      intelligenceContribution: ['operational_clarity'],
+      longitudinalValue: 'high',
+      stabilizationRelevance: 'not_applicable',
+      runtimeRelevance: 'not_applicable',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: false,
+    },
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Structural Continuity Signals — multiple_choice modality (v3)
+// Doctrine: docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §5
+// Each option represents a recognizable structural continuity pattern.
+// No "correct" answer — selection surfaces the topology, not a rank.
+// Option values are aligned with QUESTION_OPTION_PATTERNS in
+// structuralContinuitySignals.ts.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STRUCTURAL_CONTINUITY: MultipleChoiceQuestion[] = [
+  {
+    id: 'scs_01',
+    section: 'operational_dependency',
+    order: 20,
+    type: 'multiple_choice',
+    prompt:
+      'How does operational continuity most commonly transfer in your organization today?',
+    helpText:
+      'Choose the pattern that most closely reflects current practice, not the one your organization aspires to.',
+    weights: { institutional_continuity: 0.3, operational_memory: 0.4 },
+    rationale: 'Surfaces the dominant operational transfer topology for archetype detection.',
+    options: [
+      { value: 'documented',     label: 'Documented procedures and reference materials', score: 1.0 },
+      { value: 'committee',      label: 'Committee or team-based inheritance',            score: 0.85 },
+      { value: 'shadowing',      label: 'Structured shadowing or apprenticeship',         score: 0.7 },
+      { value: 'mentorship',     label: 'Informal mentorship',                            score: 0.45 },
+      { value: 'escalation',     label: 'Escalation to a small number of individuals',    score: 0.2 },
+      { value: 'undocumented',   label: 'Undocumented knowledge held by long-tenured staff', score: 0.1 },
+      { value: 'reconstructed',  label: 'Reconstructed from scratch at each transition',  score: 0.05 },
+    ],
+    allowNote: true,
+    intelligence: {
+      modalityRole: 'inheritance_pattern',
+      intelligenceContribution: ['inheritance_topology', 'stewardship_distribution'],
+      longitudinalValue: 'medium',
+      stabilizationRelevance: 'not_applicable',
+      runtimeRelevance: 'not_applicable',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: false,
+      governanceSensitivity: false,
+      archetypeContribution: [
+        'operational_continuity',
+        'stewardship_concentration',
+        'institutional_memory_dependency',
+        'onboarding_survivability',
+      ],
+    },
+  },
+  {
+    id: 'scs_02',
+    section: 'governance_visibility',
+    order: 20,
+    type: 'multiple_choice',
+    prompt: 'How does escalation of significant governance decisions most commonly work?',
+    weights: { institutional_continuity: 0.3, governance_fragility: 0.4 },
+    rationale: 'Surfaces governance escalation topology.',
+    options: [
+      { value: 'documented', label: 'Documented escalation procedures applied consistently', score: 1.0 },
+      { value: 'committee',  label: 'Standing committee with defined authority',              score: 0.8 },
+      { value: 'individual', label: 'Routed to one or two senior individuals',                score: 0.3 },
+      { value: 'ambiguous',  label: 'Escalation paths are situationally negotiated',          score: 0.1 },
+    ],
+    allowNote: true,
+    intelligence: {
+      modalityRole: 'topology_pattern',
+      intelligenceContribution: ['structural_topology', 'governance_sophistication'],
+      longitudinalValue: 'medium',
+      stabilizationRelevance: 'governance_replay',
+      runtimeRelevance: 'not_applicable',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: false,
+      governanceSensitivity: true,
+      archetypeContribution: ['governance_fragmentation', 'stewardship_concentration'],
+    },
+  },
+  {
+    id: 'scs_03',
+    section: 'institutional_memory',
+    order: 20,
+    type: 'multiple_choice',
+    prompt: 'How is continuity ownership distributed in your organization?',
+    helpText:
+      'Continuity ownership is the responsibility for maintaining institutional memory and ensuring it survives transitions.',
+    weights: { institutional_continuity: 0.3, operational_memory: 0.4 },
+    rationale: 'Surfaces continuity ownership topology.',
+    options: [
+      { value: 'distributed',  label: 'Distributed across multiple roles with documented responsibilities', score: 1.0 },
+      { value: 'rotational',   label: 'Rotational — periodically reassigned by design',                     score: 0.85 },
+      { value: 'concentrated', label: 'Concentrated in a small number of long-tenured people',              score: 0.25 },
+      { value: 'unassigned',   label: 'No explicit ownership — it happens or doesn\'t',                     score: 0.05 },
+    ],
+    allowNote: true,
+    intelligence: {
+      modalityRole: 'structural_pattern',
+      intelligenceContribution: ['stewardship_distribution', 'structural_topology'],
+      longitudinalValue: 'medium',
+      stabilizationRelevance: 'not_applicable',
+      runtimeRelevance: 'not_applicable',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: false,
+      governanceSensitivity: false,
+      archetypeContribution: [
+        'operational_continuity',
+        'stewardship_concentration',
+        'institutional_memory_dependency',
+        'governance_fragmentation',
+      ],
+    },
+  },
+  {
+    id: 'scs_04',
+    section: 'sovereignty_governance',
+    order: 20,
+    type: 'multiple_choice',
+    prompt: 'When the organization adopts new systems or modernizes infrastructure, which pathway most commonly applies?',
+    weights: { institutional_continuity: 0.3, operational_memory: 0.3 },
+    rationale: 'Surfaces modernization continuity topology.',
+    options: [
+      { value: 'continuity_preserving', label: 'Continuity is explicitly preserved as part of the transition', score: 1.0 },
+      { value: 'capability_first',      label: 'Capability gains drive the transition; continuity is addressed if there is time', score: 0.35 },
+      { value: 'reactive',              label: 'Transitions happen reactively, often under pressure',           score: 0.1 },
+    ],
+    allowNote: true,
+    intelligence: {
+      modalityRole: 'structural_pattern',
+      intelligenceContribution: ['modernization_continuity', 'structural_topology'],
+      longitudinalValue: 'medium',
+      stabilizationRelevance: 'not_applicable',
+      runtimeRelevance: 'not_applicable',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: false,
+      governanceSensitivity: false,
+      archetypeContribution: ['operational_continuity', 'modernization_fragility', 'institutional_memory_dependency'],
+    },
+  },
+  {
+    id: 'scs_05',
+    section: 'transition_readiness',
+    order: 20,
+    type: 'multiple_choice',
+    prompt: 'When a new person inherits a role, how do they typically acquire the institutional context required to do it well?',
+    weights: { institutional_continuity: 0.3, transition_readiness: 0.4 },
+    rationale: 'Surfaces onboarding inheritance topology.',
+    options: [
+      { value: 'structured',    label: 'Through a structured inheritance process with documented context', score: 1.0 },
+      { value: 'observational', label: 'Through observation, informal conversation, and time',             score: 0.4 },
+      { value: 'self_directed', label: 'Largely self-directed; context is acquired as it becomes necessary', score: 0.15 },
+    ],
+    allowNote: true,
+    intelligence: {
+      modalityRole: 'inheritance_pattern',
+      intelligenceContribution: ['onboarding_confidence', 'inheritance_topology'],
+      longitudinalValue: 'medium',
+      stabilizationRelevance: 'not_applicable',
+      runtimeRelevance: 'not_applicable',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: false,
+      governanceSensitivity: false,
+      archetypeContribution: ['onboarding_survivability', 'operational_continuity', 'institutional_memory_dependency'],
+    },
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -505,13 +978,41 @@ const SOVEREIGNTY_GOVERNANCE: MaturitySelectQuestion[] = [
 
 export const QUESTIONS_BY_SECTION: Record<SectionId, Question[]> = {
   organizational_context: [],
-  operational_dependency: OPERATIONAL_DEPENDENCY,
-  governance_visibility: GOVERNANCE_VISIBILITY,
-  institutional_memory: INSTITUTIONAL_MEMORY,
-  transition_readiness: TRANSITION_READINESS,
-  operational_coordination: OPERATIONAL_COORDINATION,
-  explainability_trust: EXPLAINABILITY_TRUST,
-  sovereignty_governance: SOVEREIGNTY_GOVERNANCE,
+  operational_dependency: [
+    ...OPERATIONAL_DEPENDENCY,
+    ...CONTINUITY_CONFIDENCE.filter((q) => q.section === 'operational_dependency'),
+    ...STRUCTURAL_CONTINUITY.filter((q) => q.section === 'operational_dependency'),
+  ],
+  governance_visibility: [
+    ...GOVERNANCE_VISIBILITY,
+    ...CONTINUITY_CONFIDENCE.filter((q) => q.section === 'governance_visibility'),
+    ...STRUCTURAL_CONTINUITY.filter((q) => q.section === 'governance_visibility'),
+  ],
+  institutional_memory: [
+    ...INSTITUTIONAL_MEMORY,
+    ...CONTINUITY_CONFIDENCE.filter((q) => q.section === 'institutional_memory'),
+    ...STRUCTURAL_CONTINUITY.filter((q) => q.section === 'institutional_memory'),
+  ],
+  transition_readiness: [
+    ...TRANSITION_READINESS,
+    ...CONTINUITY_CONFIDENCE.filter((q) => q.section === 'transition_readiness'),
+    ...STRUCTURAL_CONTINUITY.filter((q) => q.section === 'transition_readiness'),
+  ],
+  operational_coordination: [
+    ...OPERATIONAL_COORDINATION,
+    ...CONTINUITY_CONFIDENCE.filter((q) => q.section === 'operational_coordination'),
+    ...STRUCTURAL_CONTINUITY.filter((q) => q.section === 'operational_coordination'),
+  ],
+  explainability_trust: [
+    ...EXPLAINABILITY_TRUST,
+    ...CONTINUITY_CONFIDENCE.filter((q) => q.section === 'explainability_trust'),
+    ...STRUCTURAL_CONTINUITY.filter((q) => q.section === 'explainability_trust'),
+  ],
+  sovereignty_governance: [
+    ...SOVEREIGNTY_GOVERNANCE,
+    ...CONTINUITY_CONFIDENCE.filter((q) => q.section === 'sovereignty_governance'),
+    ...STRUCTURAL_CONTINUITY.filter((q) => q.section === 'sovereignty_governance'),
+  ],
 };
 
 export const ALL_QUESTIONS: Question[] = [
@@ -522,9 +1023,11 @@ export const ALL_QUESTIONS: Question[] = [
   ...OPERATIONAL_COORDINATION,
   ...EXPLAINABILITY_TRUST,
   ...SOVEREIGNTY_GOVERNANCE,
+  ...CONTINUITY_CONFIDENCE,
+  ...STRUCTURAL_CONTINUITY,
 ];
 
-export const TOTAL_SCORED_QUESTIONS = ALL_QUESTIONS.length; // 32
+export const TOTAL_SCORED_QUESTIONS = ALL_QUESTIONS.length;
 
 /** @deprecated Use ALL_QUESTIONS. Kept for backwards compatibility. */
 export const QUESTIONS: readonly Question[] = ALL_QUESTIONS;

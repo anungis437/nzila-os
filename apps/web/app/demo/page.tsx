@@ -39,7 +39,7 @@ export default async function DemoPage() {
           </li>
           <li className="flex gap-4">
             <span className="shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">3</span>
-            <p>{isFr ? 'Si pertinent, nous cadrons un pilote Union Eyes ou une évaluation ICRA.' : 'If it fits, we scope a Union Eyes pilot or ICRA assessment.'}</p>
+            <p>{isFr ? 'Si pertinent, nous cadrons un pilote Union Eyes ou une évaluation OCRA.' : 'If it fits, we scope a Union Eyes pilot or OCRA assessment.'}</p>
           </li>
         </ol>
 

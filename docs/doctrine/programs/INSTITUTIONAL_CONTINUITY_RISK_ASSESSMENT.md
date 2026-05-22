@@ -1,4 +1,4 @@
-# Institutional Continuity Risk Assessment (ICRA)
+# OCI Continuity Risk Assessment (OCRA)
 
 <!--
   ARTIFACT TYPE: Operational Program — Diagnostic Instrument
@@ -10,7 +10,7 @@
            and Trust Debt Score (TDS) as a single accessible diagnostic.
 -->
 
-> The Institutional Continuity Risk Assessment is the operational front door of the Nzila doctrine.
+> The OCI Continuity Risk Assessment is the operational front door of the Nzila doctrine.
 > It is a diagnostic instrument, not a marketing funnel.
 > It is administered with the seriousness of a procurement assessment,
 > the calm of an audit interview, and the institutional discipline of a governance review.
@@ -36,9 +36,9 @@
 
 # 1. Purpose and Positioning
 
-## What the ICRA Is
+## What the OCRA Is
 
-The ICRA is a structured institutional diagnostic that produces a defensible measurement of an organization's exposure to continuity failure, governance fragility, operational memory loss, and trust debt.
+The OCRA is a structured institutional diagnostic that produces a defensible measurement of an organization's exposure to continuity failure, governance fragility, operational memory loss, and trust debt.
 
 It is designed to be administered:
 
@@ -47,7 +47,7 @@ It is designed to be administered:
 - as a procurement-readiness review,
 - or as a governance committee instrument.
 
-## What the ICRA Is Not
+## What the OCRA Is Not
 
 - It is not a lead capture quiz.
 - It is not a productivity benchmark.
@@ -57,7 +57,7 @@ It is designed to be administered:
 
 ## Functional Roles
 
-The ICRA serves five concurrent purposes:
+The OCRA serves five concurrent purposes:
 
 1. **Operational diagnostic** — gives leadership a real measurement of continuity exposure.
 2. **Institutional intelligence capture** — over time, generates anonymized benchmark data.
@@ -125,7 +125,7 @@ Section Score = (Sum of question scores / Maximum possible) × 100
 
 ## Composite Score
 
-The composite ICRA score is the weighted average of all section scores using the weights above.
+The composite OCRA score is the weighted average of all section scores using the weights above.
 
 ## Maturity Band Assignment
 
@@ -275,7 +275,7 @@ Each section produces a finding statement that combines:
 The landing page is structured as institutional content, not marketing copy.
 
 ### Above-the-Fold Elements
-- Title: *Institutional Continuity Risk Assessment*
+- Title: *OCI Continuity Risk Assessment*
 - Subtitle: *A structured diagnostic for organizations that take governance, continuity, and operational trust seriously.*
 - Three-line description: what it measures, who it is for, what the output is.
 - Single call to action: *Begin Assessment*.
@@ -390,11 +390,11 @@ Reads like a governance review document. Avoids exclamation, urgency, and emotio
 
 ---
 
-**Institutional Continuity Risk Assessment — Executive Summary**
+**OCI Continuity Risk Assessment — Executive Summary**
 
 **Organization Type:** Labor Organization
 **Approximate Size:** 5,000–25,000 members
-**Composite ICRA Score:** 47 / 100
+**Composite OCRA Score:** 47 / 100
 **Maturity Band:** Fragmented Documentation
 **Continuity Risk Level:** High
 
@@ -442,7 +442,7 @@ Reassessment in 12 months. Organizations in the *Fragmented Documentation* band 
 
 ## Benchmark Architecture
 
-All anonymized ICRA submissions contribute to an evolving institutional continuity benchmark, structured by:
+All anonymized OCRA submissions contribute to an evolving institutional continuity benchmark, structured by:
 
 - organization type,
 - organization size band,
@@ -467,14 +467,14 @@ All anonymized ICRA submissions contribute to an evolving institutional continui
 
 # 10. Governance Constraints
 
-The ICRA itself operates under the Nzila doctrine.
+The OCRA itself operates under the Nzila doctrine.
 
 - **Sovereignty.** Participants own their responses and their report. They may request full deletion at any time, with deletion completed within 30 days.
-- **Anti-surveillance.** The ICRA captures organizational posture, never individual behavior. It is not a workforce analytics tool.
+- **Anti-surveillance.** The OCRA captures organizational posture, never individual behavior. It is not a workforce analytics tool.
 - **Explainability.** Every score is traceable to specific responses through specific weights. Nothing is computed opaquely.
 - **Anti-bureaucratic discipline.** The assessment is designed to take 15–25 minutes. It is not a 200-question survey.
 - **Proportionality.** Recommendations scale to the institutional context — a 200-person nonprofit and a 50,000-member union receive recommendations calibrated to their reality.
-- **Humility.** The ICRA produces a finding, not a verdict. Institutional context that the score cannot capture is acknowledged in every report.
+- **Humility.** The OCRA produces a finding, not a verdict. Institutional context that the score cannot capture is acknowledged in every report.
 
 ---
 

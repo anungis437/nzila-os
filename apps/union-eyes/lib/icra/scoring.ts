@@ -29,6 +29,7 @@ import type {
 } from './types'
 import { resolveMaturityBand } from './maturity'
 import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from './questions'
+import { generateInsights } from './insight-engine'
 
 export const SCORING_VERSION = '1.0.0'
 
@@ -109,9 +110,18 @@ export interface ScoringTrace {
   maturityBand: MaturityBand
 }
 
+/**
+ * Raw organizational context as captured by the assessment form.
+ * Keys correspond to METADATA_QUESTIONS ids (ctx_org_type, ctx_sector,
+ * ctx_membership_size, ctx_years_operating, ctx_primary_challenge).
+ * Used only to sharpen editorial framing — never to influence scoring.
+ */
+export type ScoringOrgContext = Record<string, string> | null | undefined
+
 export function scoreAssessment(
   assessmentId: string,
   answers: Answer[],
+  orgContext?: ScoringOrgContext,
 ): {
   profile: InstitutionalContinuityProfile
   trace: ScoringTrace
@@ -210,8 +220,9 @@ export function scoreAssessment(
     })
     .sort((a, b) => a.section.localeCompare(b.section))
 
-  const observations = generateObservations(dimensionScores, sections, questionTraces)
+  const observations = generateObservations(dimensionScores, sections, questionTraces, orgContext)
   const recommendations = generateRecommendations(composite, dimensionScores)
+  const insightOutput = generateInsights(dimensionScores, sections, undefined, orgContext)
 
   const trace: ScoringTrace = {
     assessmentId,
@@ -234,18 +245,130 @@ export function scoreAssessment(
     recommendations,
     answeredQuestionCount: answers.length,
     questionBankVersion: QUESTION_BANK_VERSION,
+    insights: insightOutput.insights,
+    continuitySignals: insightOutput.continuitySignals,
+    stewardshipSignals: insightOutput.stewardshipSignals,
+    burdenIndex: insightOutput.burdenIndex,
   }
 
   return { profile, trace }
+}
+
+type SectionBand = 'critical' | 'material' | 'attention'
+
+/**
+ * Bespoke per-section, per-band editorial copy for continuity observations.
+ *
+ * Grounded in the OCI/OCRA framing developed in
+ * `The Continuity Gap` (Nzila OS Research Initiative, v3.0):
+ * institutional memory erosion, governance entropy, continuity debt,
+ * stewardship concentration, runtime truth, and the invisible labour
+ * of continuity. Each entry is intentionally narrative — not a score
+ * restated as prose — so that a reader recognizes the institutional
+ * pattern in their own organization.
+ */
+const SECTION_OBSERVATION_COPY: Record<SectionId, Record<SectionBand, string>> = {
+  organizational_context: {
+    critical:
+      'This organization does not yet hold a coherent operational picture of itself. Mission, governance scope, stakeholder map, and operational footprint are interpreted differently across roles, leaving the institution dependent on whoever happens to be in the room to define what it is.',
+    material:
+      'Institutional self-understanding is partial. The organization can describe what it does, but not consistently why, for whom, or under what governance posture — and that gap quietly widens every time leadership, membership, or scope changes.',
+    attention:
+      'Organizational context is established but not yet operationally embedded. Newcomers, transitioning leaders, and external counterparts are likely receiving subtly different versions of the same institution.',
+  },
+  operational_dependency: {
+    critical:
+      'Core operations are held together by specific individuals rather than institutional systems. If one or two people stopped showing up next week, the organization would not so much slow down as lose the ability to explain how it functions.',
+    material:
+      'Operational continuity is concentrated in a small number of long-tenured people. The institution still works — but the cost of that working is paid privately, in invisible stewardship the organization does not formally recognize.',
+    attention:
+      'Operational dependency on key individuals is visible at the edges. Vacations, sick leave, and turnover surface seams that would otherwise be invisible, and reveal which workflows have not yet been institutionalized.',
+  },
+  governance_visibility: {
+    critical:
+      'Governance is happening, but it cannot reliably be reconstructed. Decisions, exceptions, and rationale live in inboxes, side conversations, and individual memory, which means the institution cannot defend its own past to itself.',
+    material:
+      'Governance lineage is partial. The organization can usually answer what was decided, but rarely why, under what conditions, or by what authority — and this is exactly the gap that compounds into governance entropy over time.',
+    attention:
+      'Governance is visible in formal artifacts but inconsistently traceable in practice. The distance between the documented institution and the operational institution is small today, but tends to widen silently.',
+  },
+  institutional_memory: {
+    critical:
+      'Institutional memory exists almost entirely inside people, not inside the institution. Precedent, context, and operational rationale are being held by individuals whose departure would force the organization to reconstruct itself from fragments.',
+    material:
+      'A meaningful portion of what this institution knows is unique to specific employees. When they are unavailable, work slows or restarts — not because of incompetence elsewhere, but because the memory itself never left their head.',
+    attention:
+      'Institutional memory is being captured, but unevenly. Some domains are well-documented; others rely on lived experience that has not yet been transferred, and the boundary between the two is rarely mapped.',
+  },
+  transition_readiness: {
+    critical:
+      'This organization is not currently prepared to transfer leadership, key roles, or governance authority without significant operational disruption. Succession is treated as a personnel event rather than a continuity event.',
+    material:
+      'Transition planning exists in name but not in operational depth. The institution knows who might come next, but has not yet preserved the judgment, relationships, and historical context the successor would need to actually carry the role.',
+    attention:
+      'Transition readiness is forming, but uneven across roles. Some positions could change hands cleanly; others would surface dependencies the organization has not yet been forced to confront.',
+  },
+  operational_coordination: {
+    critical:
+      'Coordination across teams, committees, or units is improvised. Handoffs depend on personal relationships and informal channels, which means the institution operates well only when the same people stay in the same rooms.',
+    material:
+      'Operational coordination works, but quietly absorbs significant friction. Information moves through people rather than through institutional structure, and that friction is paid for in time, duplication, and slow erosion of trust.',
+    attention:
+      'Coordination is largely intact but not yet structurally guaranteed. The organization is one reorganization, secondment, or membership shift away from rediscovering where coordination really lives.',
+  },
+  explainability_trust: {
+    critical:
+      'When stakeholders ask how a decision was made, why an exception was granted, or what authority underlies a position, this organization cannot consistently answer. Trust here is sustained by the goodwill of those still present, not by the institution itself.',
+    material:
+      'Operational trust is largely intact, but it leans on people rather than on infrastructure. Repeated moments of institutional forgetting — duplicated requests, inconsistent answers, unexplained reversals — are the early signals that trust is being slowly spent down.',
+    attention:
+      'Decisions and operational positions are usually explainable, but the explanation often requires finding the right person. The institution has not yet made explainability a property of the system itself.',
+  },
+  sovereignty_governance: {
+    critical:
+      'The organization does not yet exercise meaningful sovereignty over its own operational evidence, records, and digital infrastructure. Critical continuity material is dispersed across third-party systems whose lifecycle the institution does not control.',
+    material:
+      'Data, evidence, and operational records are partially under institutional control, but the boundaries are unclear. In a dispute, a transition, or a vendor failure, the organization would discover gaps in what it can actually retrieve and defend.',
+    attention:
+      'Sovereignty and data governance are taking shape, but operational lineage and evidence integrity are not yet uniformly enforceable across systems.',
+  },
+}
+
+function sectionBand(score: number): SectionBand | null {
+  if (score < 35) return 'critical'
+  if (score < 55) return 'material'
+  if (score < 70) return 'attention'
+  return null
+}
+
+function bandSeverity(band: SectionBand): ContinuityObservation['severity'] {
+  if (band === 'critical') return 'material'
+  if (band === 'material') return 'material'
+  return 'attention'
 }
 
 function generateObservations(
   dimensions: DimensionScore[],
   sections: SectionScore[],
   traces: QuestionTrace[],
+  orgContext?: ScoringOrgContext,
 ): ContinuityObservation[] {
   const observations: ContinuityObservation[] = []
   let counter = 0
+
+  // Sector-aware peer framing — prepended only when sector is provided and at least
+  // one dimension is below mid-scale. Does not affect scoring or thresholds.
+  const sectorFrame = orgContext ? sectorPeerStatement(orgContext.ctx_sector) : null
+  const anyBelowMid = dimensions.some((d) => d.score < 60)
+  if (sectorFrame && anyBelowMid) {
+    observations.push({
+      id: `obs_${++counter}`,
+      severity: 'attention',
+      category: 'governance',
+      statement: sectorFrame,
+      evidence: [`Organizational context: sector = ${orgContext!.ctx_sector}`],
+    })
+  }
 
   const dimMap = new Map(dimensions.map((d) => [d.dimension, d]))
   const ic = dimMap.get('institutional_continuity')?.score ?? 100
@@ -260,8 +383,17 @@ function generateObservations(
       severity: 'material',
       category: 'governance',
       statement:
-        'This organization shows characteristics of personality-dependent continuity — institutional operations are significantly reliant on specific individuals rather than documented processes.',
+        'Institutional continuity in this organization is presently carried by individuals rather than by the institution itself. Operations remain coherent only as long as specific people remain present, available, and willing to absorb the continuity work no one has been asked to formalize.',
       evidence: ['institutional_continuity dimension score below 40'],
+    })
+  else if (ic < 60)
+    observations.push({
+      id: `obs_${++counter}`,
+      severity: 'attention',
+      category: 'governance',
+      statement:
+        'Institutional continuity is partially structured, but still leans on a narrow base of veterans. The organization can describe its operations more cleanly than it can transfer them — and that gap is exactly where continuity debt accumulates over time.',
+      evidence: [`institutional_continuity dimension score: ${ic}/100`],
     })
   if (gf < 40)
     observations.push({
@@ -269,8 +401,17 @@ function generateObservations(
       severity: 'material',
       category: 'governance',
       statement:
-        'Governance fragility indicators are elevated. Decisions may not be traceable, oversight may rely on individual gatekeeping, or governance procedures are inconsistently applied.',
+        'Governance entropy is materially advanced. Decisions cannot be reliably reconstructed, oversight depends on individual gatekeeping, and policy application has drifted enough that the institution would struggle to defend its own past consistency under structured review.',
       evidence: ['governance_fragility dimension score indicates significant structural risk'],
+    })
+  else if (gf < 60)
+    observations.push({
+      id: `obs_${++counter}`,
+      severity: 'attention',
+      category: 'governance',
+      statement:
+        'Early governance entropy signals are present. Policy is largely followed, but rationale, precedent, and authority are not yet preserved with enough rigour to prevent inconsistent application as people and roles change.',
+      evidence: [`governance_fragility dimension score: ${gf}/100`],
     })
   if (td < 40)
     observations.push({
@@ -278,8 +419,17 @@ function generateObservations(
       severity: 'material',
       category: 'trust',
       statement:
-        'Institutional trust debt is a material concern. Accumulated unresolved decisions, unexplained conduct, or informal authority patterns represent ongoing risk to governance legitimacy.',
+        'Institutional trust debt is a material concern. Accumulated unresolved decisions, unexplained conduct, and informal authority patterns represent a continuing draw on legitimacy — one the organization is unlikely to fully see until a transition or external review forces the ledger open.',
       evidence: ['trust_debt dimension score indicates elevated accumulated risk'],
+    })
+  else if (td < 60)
+    observations.push({
+      id: `obs_${++counter}`,
+      severity: 'attention',
+      category: 'trust',
+      statement:
+        'Trust debt is accumulating quietly. Most decisions still hold, but a growing number cannot be cleanly explained to those who were not in the room when they were made, and that gap is what stakeholders eventually experience as inconsistency.',
+      evidence: [`trust_debt dimension score: ${td}/100`],
     })
   if (om < 40)
     observations.push({
@@ -287,8 +437,17 @@ function generateObservations(
       severity: 'material',
       category: 'memory',
       statement:
-        'Operational memory is critically low. Critical institutional knowledge exists primarily in individuals rather than organizational systems, creating acute vulnerability to personnel changes.',
+        'Operational memory is critically thin. The most consequential institutional knowledge — judgment, precedent, escalation patterns, relational context — exists almost entirely inside specific people, which means a planned or unplanned departure forces the organization to reconstruct itself rather than continue.',
       evidence: ['operational_memory dimension score below 40'],
+    })
+  else if (om < 60)
+    observations.push({
+      id: `obs_${++counter}`,
+      severity: 'attention',
+      category: 'memory',
+      statement:
+        'Operational memory is partially preserved but unevenly held. Documentation captures what happens; the why, the exceptions, and the institutional context still travel mostly through conversation with long-tenured staff.',
+      evidence: [`operational_memory dimension score: ${om}/100`],
     })
   if (tr < 40)
     observations.push({
@@ -296,24 +455,35 @@ function generateObservations(
       severity: 'material',
       category: 'transition',
       statement:
-        'Transition readiness is severely underdeveloped. This organization is likely to experience significant operational disruption from planned or unplanned leadership changes.',
+        'Transition readiness is severely underdeveloped. Succession is treated here as a personnel question rather than a continuity question, and the institution would absorb significant operational degradation through any meaningful leadership or role change.',
       evidence: ['transition_readiness dimension score below 40'],
     })
+  else if (tr < 60)
+    observations.push({
+      id: `obs_${++counter}`,
+      severity: 'attention',
+      category: 'transition',
+      statement:
+        'Transition planning exists but has not yet been operationalized. The institution can identify who might come next; it has not yet preserved the judgment, relationships, and historical interpretation those successors would actually need to carry the role intact.',
+      evidence: [`transition_readiness dimension score: ${tr}/100`],
+    })
 
-  const lowSections = sections.filter((s) => s.score < 50)
-  for (const sec of lowSections) {
+  for (const sec of sections) {
+    const band = sectionBand(sec.score)
+    if (!band) continue
     const alreadyMaterial = observations.some((o) =>
-      o.statement.toLowerCase().includes(sec.section.replace(/_/g, ' ')),
+      o.statement.toLowerCase().includes(sectionLabel(sec.section).toLowerCase()),
     )
-    if (!alreadyMaterial) {
-      observations.push({
-        id: `obs_${++counter}`,
-        severity: 'attention',
-        category: sectionToCategory(sec.section),
-        statement: `The ${sectionLabel(sec.section)} dimension shows results warranting structured review. Average maturity is below mid-scale, indicating underdeveloped institutional practices in this area.`,
-        evidence: [`Section score: ${sec.score}/100`],
-      })
-    }
+    if (alreadyMaterial) continue
+    observations.push({
+      id: `obs_${++counter}`,
+      severity: bandSeverity(band),
+      category: sectionToCategory(sec.section),
+      statement: SECTION_OBSERVATION_COPY[sec.section][band],
+      evidence: [
+        `${sectionLabel(sec.section)} section score: ${sec.score}/100 (${band} band)`,
+      ],
+    })
   }
 
   const criticalLow = traces.filter((t) => t.effectiveScore === 0)
@@ -322,7 +492,7 @@ function generateObservations(
       id: `obs_${++counter}`,
       severity: 'material',
       category: 'operational',
-      statement: `${criticalLow.length} assessment dimensions were rated as entirely absent. This pattern indicates systemic underdevelopment across institutional continuity infrastructure.`,
+      statement: `Across ${criticalLow.length} assessment items, the institution reports the practice as entirely absent. Taken together, this is not a series of isolated gaps — it is the signature of an organization whose continuity infrastructure has not yet been built, and which is currently sustained by individual effort alone.`,
       evidence: criticalLow.slice(0, 3).map((t) => `Question ${t.questionId} rated absent`),
     })
   }
@@ -358,6 +528,39 @@ function sectionLabel(section: SectionId): string {
   return labels[section]
 }
 
+/**
+ * Sector-aware peer framing. Maps the metadata sector code to an editorial
+ * line that situates the institution among comparable organizations. Returns
+ * null for unknown or unspecified sectors, so the caller can fall back to
+ * sector-agnostic copy.
+ */
+function sectorPeerStatement(sector?: string): string | null {
+  if (!sector) return null
+  const lines: Record<string, string> = {
+    public_sector:
+      'Public-sector institutions of this type typically carry their continuity risk in two places: in the discretion held by long-tenured staff who interpret policy day to day, and in the documentary trail required to defend decisions through ministerial, AG, or oversight review. Both surfaces appear in this profile.',
+    private_sector:
+      'Private-sector organizations of this scale most often experience continuity risk through the unrecognized dependence on a small group of senior operators \u2014 the people who hold customer history, vendor relationships, and informal authority in roles that have never been formally documented.',
+    healthcare:
+      'Healthcare and social-services organizations typically absorb their continuity load through clinical and administrative staff doing informal coordination work that the formal structure does not name. This profile is consistent with that pattern.',
+    education:
+      'Education institutions typically experience continuity risk most acutely at the seams between governance bodies, administration, and instructional staff \u2014 where decisions are made in one structure and implemented in another, often without a shared record of how the two were reconciled.',
+    construction:
+      'Skilled-trades and construction organizations carry continuity primarily in the experiential judgement of senior tradespeople and field leadership \u2014 a form of institutional memory that is rarely captured in formal systems and rarely transferred deliberately.',
+    transportation:
+      'Transportation and logistics organizations typically depend on operational coordination that has been refined informally over years \u2014 routing decisions, vendor relationships, and exception handling that exist in the heads of dispatchers and operations leads rather than in formal procedure.',
+    retail_hospitality:
+      'Retail and hospitality organizations typically carry continuity through long-tenured store and venue managers whose operational judgement is rarely formalized \u2014 visible only when one of them leaves and the gap appears in service, throughput, or staff retention.',
+    media_communications:
+      'Media and communications organizations typically experience continuity risk through the editorial judgement, source relationships, and brand interpretation that travel with specific people rather than being captured in institutional process.',
+    financial_services:
+      'Financial-services organizations of this scale typically carry continuity risk most consequentially in the audit and decision-evidence layer \u2014 where regulatory exposure depends on the institution being able to reconstruct why a decision was made, by whom, and against what record.',
+    other:
+      'For organizations of this composition, the most consequential continuity risk usually sits in the informal stewardship layer \u2014 the people who carry institutional understanding that has not yet been named, measured, or distributed.',
+  }
+  return lines[sector] ?? null
+}
+
 function generateRecommendations(
   composite: number,
   dimensions: DimensionScore[],
@@ -370,7 +573,7 @@ function generateRecommendations(
       kind: 'continuity_review',
       title: 'Structured Continuity Review',
       description:
-        'Given the assessment results, a structured continuity review with an experienced ICRA facilitator can help your organization develop a prioritized intervention plan.',
+        'At this band, the most productive next step is rarely another initiative — it is a calm, structured continuity review that names what the institution is already carrying invisibly, and sequences a short list of interventions that will hold across the next transition.',
       ctaLabel: 'Request a Continuity Review',
       ctaHref: '/continuity-assessment#contact',
     })
@@ -378,9 +581,9 @@ function generateRecommendations(
     recs.push({
       id: 'rec_starter_kit',
       kind: 'starter_kit',
-      title: 'ICRA Institutional Continuity Starter Kit',
+      title: 'Continuity Starter Kit',
       description:
-        'Access practical templates, documentation frameworks, and guidance developed specifically for labour organizations at this maturity stage.',
+        'A short, plain-language reference for institutions beginning to formalize operational memory: templates for governance lineage, transition handover, and the documentation patterns that survive turnover rather than decay with it.',
       ctaLabel: 'Access the Starter Kit',
       ctaHref: '/resources/continuity-starter-kit',
     })
@@ -392,7 +595,7 @@ function generateRecommendations(
       kind: 'governance_workshop',
       title: 'Governance Documentation Workshop',
       description:
-        'A focused workshop on governance documentation practices, decision traceability, and oversight infrastructure for your leadership team.',
+        'A facilitated working session for leadership and governance bodies focused on decision traceability, precedent capture, and the practical question of how policy is actually interpreted between meetings. Designed to leave the room with artifacts, not a deck.',
       ctaLabel: 'Explore Workshop Options',
       ctaHref: '/services/governance-workshops',
     })
@@ -400,9 +603,9 @@ function generateRecommendations(
     recs.push({
       id: 'rec_pilot_conversation',
       kind: 'pilot_conversation',
-      title: 'Schedule an Assessment Walkthrough',
+      title: 'Assessment Walkthrough',
       description:
-        'Your organization shows meaningful continuity maturity. A walkthrough conversation can help identify the highest-leverage next steps given your specific profile.',
+        'The institution already holds meaningful continuity maturity. A short walkthrough conversation translates this profile into the two or three highest-leverage moves available to you this quarter — without commitment, sales pressure, or a vendor pitch.',
       ctaLabel: 'Schedule a Conversation',
       ctaHref: '/continuity-assessment#contact',
     })

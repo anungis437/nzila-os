@@ -7,7 +7,6 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { db, schema } from '../db';
 import { eq, and, desc, isNull } from 'drizzle-orm';
-import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';
 
 const router = Router();

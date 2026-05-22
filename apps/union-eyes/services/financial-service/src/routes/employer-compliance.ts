@@ -10,9 +10,13 @@ const runSchema = z.object({
   missingClassificationCount: z.number().int().nonnegative().default(0),
   missingEmploymentLinkageCount: z.number().int().nonnegative().default(0),
   hasActiveRuleVersion: z.boolean().default(true),
+  ruleVersionExpired: z.boolean().default(false),
   remittanceGenerated: z.boolean().default(false),
   officialApprovalAttempted: z.boolean().default(false),
+  payrollRunApproved: z.boolean().default(false),
+  adjustmentWithoutApprovalCount: z.number().int().nonnegative().default(0),
   replayMismatchCount: z.number().int().nonnegative().default(0),
+  suspiciousVarianceCount: z.number().int().nonnegative().default(0),
   payrollRunId: z.string().uuid().optional(),
   remittanceRunId: z.string().uuid().optional(),
 });

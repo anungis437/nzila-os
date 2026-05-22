@@ -144,7 +144,7 @@ export function validateQRCodeData(qrData: string): {
       fundId: decoded.fundId,
       memberId: decoded.memberId,
     };
-  } catch (_error) {
+  } catch (error) {
     return { valid: false, error: 'Invalid QR code format' };
   }
 }
@@ -247,7 +247,7 @@ export async function checkIn(
       attendanceId: attendance.id,
       distance,
     };
-  } catch (_error) {
+  } catch (error) {
 return {
       success: false,
       error: 'Failed to check in',
@@ -310,7 +310,7 @@ export async function checkOut(
       success: true,
       hoursWorked,
     };
-  } catch (_error) {
+  } catch (error) {
 return {
       success: false,
       error: 'Failed to check out',
@@ -343,7 +343,7 @@ export async function getActiveCheckIns(
     checkInTime: new Date(r.checkInTime),
     checkOutTime: r.checkOutTime ? new Date(r.checkOutTime) : undefined,
     hoursWorked: r.hoursWorked ? parseFloat(r.hoursWorked) : undefined,
-    method: r.checkInMethod,
+    method: r.checkInMethod || 'unknown',
     locationVerified: r.locationVerified || false,
   }));
 }
@@ -380,7 +380,7 @@ export async function getAttendanceHistory(
     checkInTime: new Date(r.checkInTime),
     checkOutTime: r.checkOutTime ? new Date(r.checkOutTime) : undefined,
     hoursWorked: r.hoursWorked ? parseFloat(r.hoursWorked) : undefined,
-    method: r.checkInMethod,
+    method: r.checkInMethod || 'unknown',
     locationVerified: r.locationVerified || false,
   }));
 }
@@ -466,7 +466,7 @@ export async function coordinatorOverride(
       success: true,
       attendanceId: attendance.id,
     };
-  } catch (_error) {
+  } catch (error) {
     return {
       success: false,
       error: 'Failed to create manual attendance record',

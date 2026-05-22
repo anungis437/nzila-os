@@ -7,7 +7,6 @@
  */
 
 import cron from 'node-cron';
-import winston from 'winston';
 import { db } from '../db';
 import { 
   members, 
@@ -17,23 +16,6 @@ import {
 } from '../db/schema';
 import { eq, and, lte, gte, isNull, or, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
-
-// Logger setup
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
-});
 
 /**
  * Calculate dues for all active members based on their assignments
@@ -215,7 +197,6 @@ export const monthlyDuesCalculationJob = cron.schedule('0 2 1 * *', async () => 
     logger.error('Error in monthly dues calculation job', { error });
   }
 }, {
-  scheduled: false,
   timezone: 'America/Toronto',
 });
 

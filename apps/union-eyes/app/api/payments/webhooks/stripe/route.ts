@@ -10,10 +10,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { platformPayments, billingAccounts, transactionFeeEvents } from '@/db/schema';
+import { icraAssessments } from '@/db/schema/icra-schema';
+import { icraMaturityProfiles } from '@/db/schema/icra-schema';
+import { workbooks, workbookPurchases } from '@/db/schema/workbook-schema';
+import { generateClaimToken, computeClaimExpiry } from '@/lib/icra/claim-tokens';
 import { eq } from 'drizzle-orm';
+import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { evaluateFee, captureTransactionFee, reverseTransactionFee, reconcileExternalInvoicePayment } from '@/services/platform-economics';
 import { logger } from '@/lib/logger';
+import { syncIcraPurchase } from '@/lib/hubspot/syncIcraPurchase';
+import { syncWorkbookPurchase } from '@/lib/hubspot/syncWorkbookPurchase';
+import type { ExecutivePersonaId, ReportTierId } from '@/lib/icra/types';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -293,6 +301,236 @@ export async function POST(request: NextRequest) {
       default:
         // Unhandled event type — acknowledge receipt
         break;
+
+      case 'checkout.session.completed': {
+        const session = event.data?.object;
+        const icraAssessmentId = session?.metadata?.icra_assessment_id as string | undefined;
+        const icraTierId = session?.metadata?.icra_tier_id as string | undefined;
+        const isIcraReport = session?.metadata?.product === 'icra_report';
+
+        if (isIcraReport && icraAssessmentId && icraTierId) {
+          // ── ICRA report tier fulfillment ──
+          try {
+            const [existing] = await db
+              .select({ reportTierId: icraAssessments.reportTierId })
+              .from(icraAssessments)
+              .where(eq(icraAssessments.id, icraAssessmentId))
+              .limit(1);
+
+            if (!existing) {
+              logger.warn('[stripe-webhook] ICRA assessment not found', { icraAssessmentId });
+              break;
+            }
+
+            const tierRank: Record<string, number> = {
+              continuity_reflection: 0,
+              executive_continuity_brief: 1,
+              institutional_continuity_diagnostic: 2,
+            };
+            const currentRank = tierRank[existing.reportTierId ?? 'continuity_reflection'] ?? 0;
+            const requestedRank = tierRank[icraTierId] ?? 0;
+
+            if (currentRank >= requestedRank) {
+              // Already fulfilled — idempotent
+              logger.info('[stripe-webhook] ICRA tier already fulfilled', {
+                icraAssessmentId,
+                existingTier: existing.reportTierId,
+                requestedTier: icraTierId,
+              });
+              break;
+            }
+
+            // Upgrade the assessment tier
+            await db
+              .update(icraAssessments)
+              .set({ reportTierId: icraTierId })
+              .where(eq(icraAssessments.id, icraAssessmentId));
+
+            // Patch the stored profile payload so the results page reflects the new tier
+            const [profileRow] = await db
+              .select({ profilePayload: icraMaturityProfiles.profilePayload })
+              .from(icraMaturityProfiles)
+              .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId))
+              .limit(1);
+
+            if (profileRow?.profilePayload) {
+              const updated: InstitutionalContinuityProfile = {
+                ...(profileRow.profilePayload as InstitutionalContinuityProfile),
+                reportTierId: icraTierId as InstitutionalContinuityProfile['reportTierId'],
+              };
+              await db
+                .update(icraMaturityProfiles)
+                .set({ profilePayload: updated })
+                .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId));
+            }
+
+            logger.info('[stripe-webhook] ICRA tier upgraded', {
+              icraAssessmentId,
+              tierId: icraTierId,
+              sessionId: session.id,
+            });
+
+            // ── Institutional continuity stewardship: HubSpot CRM sync ──
+            // Fire-and-forget. CRM unavailability MUST NOT block Stripe
+            // fulfilment, the PDF flow, or the assessment lifecycle.
+            // Only runs when the institution voluntarily provided an email
+            // (no enrichment, no scraping, no behavioural scoring).
+            const customerEmail =
+              (session?.customer_details?.email as string | undefined) ??
+              (session?.customer_email as string | undefined) ??
+              (session?.metadata?.email as string | undefined);
+            if (customerEmail) {
+              void syncIcraPurchase({
+                assessmentId: icraAssessmentId,
+                tierId: icraTierId as ReportTierId,
+                paymentReference:
+                  (session?.payment_intent as string | undefined) ?? session?.id,
+                amount:
+                  typeof session?.amount_total === 'number'
+                    ? session.amount_total / 100
+                    : undefined,
+                email: customerEmail,
+                firstName: session?.customer_details?.name as string | undefined,
+                organizationName: session?.metadata?.organization_name as string | undefined,
+                persona: session?.metadata?.icra_persona as ExecutivePersonaId | undefined,
+                attribution: {
+                  utmSource: session?.metadata?.utm_source as string | undefined,
+                  utmMedium: session?.metadata?.utm_medium as string | undefined,
+                  utmCampaign: session?.metadata?.utm_campaign as string | undefined,
+                },
+              }).catch((hsErr) => {
+                logger.error('[stripe-webhook] HubSpot ICRA sync failed (non-blocking)', {
+                  icraAssessmentId,
+                  tierId: icraTierId,
+                  message: hsErr instanceof Error ? hsErr.message : String(hsErr),
+                });
+              });
+            }
+          } catch (icraErr) {
+            logger.error('[stripe-webhook] ICRA fulfillment error', {
+              icraAssessmentId,
+              icraTierId,
+              err: icraErr,
+            });
+            // Fall through — return 200 to prevent Stripe retries, issue is logged
+          }
+        } else if (session?.metadata?.product === 'workbook') {
+          // ── Workbook (Self-Guided) tier fulfillment ──
+          const workbookId = session?.metadata?.workbook_id as string | undefined;
+          const workbookTierId = session?.metadata?.workbook_tier_id as string | undefined;
+
+          if (!workbookId || !workbookTierId) {
+            logger.warn('[stripe-webhook] Workbook session missing required metadata', {
+              sessionId: session?.id,
+            });
+            break;
+          }
+
+          try {
+            const [existing] = await db
+              .select({ reportTierId: workbooks.reportTierId, claimToken: workbooks.claimToken })
+              .from(workbooks)
+              .where(eq(workbooks.id, workbookId))
+              .limit(1);
+
+            if (!existing) {
+              logger.warn('[stripe-webhook] Workbook not found', { workbookId });
+              break;
+            }
+
+            // Idempotency: tier already upgraded with a token issued
+            if (existing.reportTierId === workbookTierId && existing.claimToken) {
+              logger.info('[stripe-webhook] Workbook tier already fulfilled', {
+                workbookId,
+                tierId: existing.reportTierId,
+              });
+              break;
+            }
+
+            const claimToken = generateClaimToken();
+            const claimExpiry = computeClaimExpiry();
+            const customerEmail =
+              (session?.customer_details?.email as string | undefined) ??
+              (session?.customer_email as string | undefined) ??
+              null;
+            const paymentRef =
+              (session?.payment_intent as string | undefined) ?? (session?.id as string);
+
+            await db
+              .update(workbooks)
+              .set({
+                reportTierId: workbookTierId,
+                stripePaymentRef: paymentRef,
+                claimEmail: customerEmail,
+                claimToken,
+                claimTokenExpiresAt: claimExpiry,
+                status: 'awaiting_claim',
+                updatedAt: new Date(),
+              })
+              .where(eq(workbooks.id, workbookId));
+
+            // Audit-grade purchase record (uniq on stripePaymentRef \u2014 idempotent)
+            await db
+              .insert(workbookPurchases)
+              .values({
+                workbookId,
+                stripePaymentRef: paymentRef,
+                tierId: workbookTierId,
+                amountCents:
+                  typeof session?.amount_total === 'number' ? session.amount_total : 0,
+                currency: (session?.currency as string | undefined)?.toUpperCase() ?? 'CAD',
+                customerEmail,
+              })
+              .onConflictDoNothing();
+
+            logger.info('[stripe-webhook] Workbook tier upgraded & claim token issued', {
+              workbookId,
+              tierId: workbookTierId,
+              sessionId: session.id,
+              claimEmailPresent: Boolean(customerEmail),
+            });
+
+            // CRM sync (anti-surveillance). Non-blocking and never throws.
+            try {
+              await syncWorkbookPurchase({
+                workbookId,
+                tier: 'workbook_self_guided',
+                paymentReference: paymentRef,
+                amount:
+                  typeof session?.amount_total === 'number'
+                    ? session.amount_total / 100
+                    : undefined,
+                email: customerEmail ?? undefined,
+                organizationName:
+                  (session?.metadata?.organization_name as string | undefined) ?? undefined,
+                attribution: {
+                  source: (session?.metadata?.utm_source as string | undefined) ?? null,
+                  medium: (session?.metadata?.utm_medium as string | undefined) ?? null,
+                  campaign: (session?.metadata?.utm_campaign as string | undefined) ?? null,
+                },
+              });
+            } catch (crmErr) {
+              logger.warn('[stripe-webhook] workbook CRM sync failed (non-blocking)', {
+                workbookId,
+                err: crmErr instanceof Error ? crmErr.message : String(crmErr),
+              });
+            }
+          } catch (wbErr) {
+            logger.error('[stripe-webhook] Workbook fulfillment error', {
+              workbookId,
+              workbookTierId,
+              err: wbErr,
+            });
+            // Fall through \u2014 return 200 to prevent Stripe retries
+          }
+        } else if (!isIcraReport) {
+          // Non-ICRA checkout.session.completed — log for visibility
+          logger.info('[stripe-webhook] checkout.session.completed (non-ICRA)', {
+            sessionId: session?.id,
+          });
+        }
+        break;
+      }
     }
 
     await auditLog({

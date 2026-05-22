@@ -7,7 +7,6 @@
  */
 
 import cron from 'node-cron';
-import winston from 'winston';
 import { db } from '../db';
 import { 
   duesTransactions,
@@ -17,23 +16,6 @@ import {
 import { eq, and, lt, sql } from 'drizzle-orm';
 import { queueNotification } from '../services/notification-service';
 import { logger } from '@/lib/logger';
-
-// Logger setup
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
-});
 
 /**
  * Scan for overdue dues and create/update arrears records
@@ -248,7 +230,6 @@ export const weeklyArrearsManagementJob = cron.schedule('0 3 * * 0', async () =>
     logger.error('Error in arrears management job', { error });
   }
 }, {
-  scheduled: false,
   timezone: 'America/Toronto',
 });
 

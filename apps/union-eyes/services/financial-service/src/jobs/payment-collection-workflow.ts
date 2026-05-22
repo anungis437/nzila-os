@@ -12,7 +12,6 @@
  */
 
 import cron from 'node-cron';
-import winston from 'winston';
 import { db } from '../db';
 import { 
   duesTransactions, 
@@ -21,17 +20,8 @@ import {
   payments,
 } from '../db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
-import { NotificationService } from '../services/notification-service';
+import { queueNotification } from '../services/notification-service';
 import { logger } from '@/lib/logger';
-
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [new winston.transports.Console()],
-});
 
 /**
  * Process payment collection for a tenant
@@ -107,6 +97,15 @@ export async function processPaymentCollection(params: {
     // Process each payment
     for (const payment of pendingPayments) {
       try {
+        if (!payment.memberId) {
+          errors.push({
+            paymentId: payment.id,
+            error: 'Payment has no memberId',
+          });
+          continue;
+        }
+        const memberId = payment.memberId;
+
         // Find matching dues transactions for this member
         // Priority: overdue > pending, oldest first
         const matchingTransactions = await db
@@ -115,7 +114,7 @@ export async function processPaymentCollection(params: {
           .where(
             and(
               eq(duesTransactions.organizationId, tenantId),
-              eq(duesTransactions.memberId, payment.memberId),
+              eq(duesTransactions.memberId, memberId),
               inArray(duesTransactions.status, ['pending', 'overdue'])
             )
           )
@@ -179,7 +178,7 @@ export async function processPaymentCollection(params: {
               .where(
                 and(
                   eq(arrears.tenantId, tenantId),
-                  eq(arrears.memberId, payment.memberId)
+                  eq(arrears.memberId, memberId)
                 )
               )
               .limit(1);
@@ -229,14 +228,17 @@ export async function processPaymentCollection(params: {
         const [member] = await db
           .select({ organizationId: members.organizationId })
           .from(members)
-          .where(eq(members.id, payment.memberId))
+          .where(eq(members.id, memberId))
           .limit(1);
 
         // Send payment receipt notification
         try {
+          const paidAt = payment.paidDate ?? payment.createdAt;
+          const paymentDate = new Date(String(paidAt));
+
           await sendPaymentReceipt({
             organizationId: member?.organizationId || process.env.DEFAULT_ORGANIZATION_ID || 'default-org',
-            memberId: payment.memberId,
+            memberId,
             memberName: `${payment.memberFirstName || ''} ${payment.memberLastName || ''}`.trim() || 'Member',
             memberEmail: payment.memberEmail || '',
             memberPhone: '', // Phone not available in members table
@@ -244,14 +246,14 @@ export async function processPaymentCollection(params: {
             amount: parseFloat(payment.amount),
             paymentMethod: payment.paymentMethod || 'unknown',
             referenceNumber: payment.processorPaymentId || payment.id,
-            paymentDate: new Date(payment.paidDate || payment.createdAt),
+            paymentDate,
             transactionsUpdated: updatedTransactionIds.length,
           });
           receiptsIssued++;
         } catch (receiptError) {
           logger.error('Failed to send payment receipt', {
             paymentId: payment.id,
-            memberId: payment.memberId,
+            memberId,
             error: receiptError,
           });
           // Don't fail the entire payment process if receipt fails
@@ -328,6 +330,7 @@ async function sendPaymentReceipt(params: {
 }): Promise<void> {
   const {
     organizationId,
+    userId,
     memberName,
     memberEmail,
     memberPhone,
@@ -356,9 +359,9 @@ Your dues account has been updated. If you have any questions, please contact yo
   // Send notification via notification service
   try {
     if (memberEmail) {
-      await NotificationService.queue({
+      await queueNotification({
         organizationId,
-        userId: memberEmail.split('@')[0] || 'unknown',
+        userId: userId || memberEmail.split('@')[0] || 'unknown',
         type: 'payment_confirmation',
         channels: ['email'],
         priority: 'normal',
@@ -376,9 +379,9 @@ Your dues account has been updated. If you have any questions, please contact yo
     }
 
     if (memberPhone) {
-      await NotificationService.queue({
+      await queueNotification({
         organizationId,
-        userId: memberPhone || 'unknown',
+        userId: userId || memberPhone || 'unknown',
         type: 'payment_confirmation',
         channels: ['sms'],
         priority: 'normal',
@@ -429,7 +432,6 @@ export const dailyPaymentCollectionJob = cron.schedule(
     }
   },
   {
-    scheduled: false,
     timezone: 'America/Toronto',
   }
 );

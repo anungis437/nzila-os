@@ -20,7 +20,6 @@ import {
   stipendDisbursements,
 } from '../db/schema';
 import { eq, and, gte, sql, desc } from 'drizzle-orm';
-import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';
 
 const router = Router();
@@ -493,7 +492,7 @@ router.get('/fund-health', async (req: Request, res: Response) => {
                 : 'healthy',
             alerts: forecast.alerts,
           };
-        } catch (_error) {
+        } catch (error) {
           // Fallback for funds without forecasts - calculate balance
           const [balanceData] = await db
             .select({

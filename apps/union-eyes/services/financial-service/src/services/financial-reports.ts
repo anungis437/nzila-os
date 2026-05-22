@@ -1,6 +1,5 @@
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
-import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';
 
 export interface DateRange {
