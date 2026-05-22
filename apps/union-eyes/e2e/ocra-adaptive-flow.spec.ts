@@ -25,8 +25,11 @@
 
 import { expect, test } from '@playwright/test';
 
-const ASSESSMENT_PATH_EN = '/en-CA/continuity-assessment';
-const ASSESSMENT_PATH_FR = '/fr-CA/continuity-assessment';
+// The assessment flow lives at `/[locale]/continuity-assessment/start`.
+// `/[locale]/continuity-assessment` (no `/start`) is the marketing landing
+// page and does NOT mount ICRAAssessmentFlow.
+const ASSESSMENT_PATH_EN = '/en-CA/continuity-assessment/start';
+const ASSESSMENT_PATH_FR = '/fr-CA/continuity-assessment/start';
 
 test.describe('OCRA adaptive live flow — smoke', () => {
   test('renders the consent step and exposes the assessment flow root', async ({
