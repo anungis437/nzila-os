@@ -696,7 +696,10 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   const sectionComplete = answeredInSection === currentQuestions.length;
 
   return (
-    <div className="mx-auto max-w-3xl py-8 space-y-8">
+    <div className="mx-auto max-w-3xl py-8 space-y-8" data-testid="icra-assessment-flow" data-step="section">
+      <div data-testid="icra-section-step" data-section-id={currentSectionDef.id} className="sr-only">
+        {localizedSection.title}
+      </div>
       {/* Progress bar */}
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-stone-500">
@@ -982,7 +985,7 @@ interface AdaptiveExplanationCardProps {
   onAcknowledge: () => void;
 }
 
-function AdaptiveExplanationCard({
+export function AdaptiveExplanationCard({
   profile,
   routedBank,
   copy,
@@ -1002,6 +1005,9 @@ function AdaptiveExplanationCard({
     <section
       className="mx-auto max-w-2xl space-y-8 py-10"
       aria-labelledby="ocra-adaptive-heading"
+      data-testid="icra-adaptive-explanation-card"
+      data-routing-engine-version={routedBank.routeVersion}
+      data-institutional-scale={profile.institutionalScale}
     >
       <div className="space-y-2">
         <h2
@@ -1060,6 +1066,7 @@ function AdaptiveExplanationCard({
       <button
         type="button"
         onClick={onAcknowledge}
+        data-testid="icra-adaptive-continue"
         className="inline-flex items-center justify-center rounded-md bg-stone-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-600 focus-visible:ring-offset-1"
       >
         {copy.adaptiveContinue}
