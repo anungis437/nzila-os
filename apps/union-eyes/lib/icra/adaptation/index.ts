@@ -12,3 +12,6 @@ export * from './routingTypes';
 export * from './questionEligibilityRules';
 export * from './questionPriorityModel';
 export * from './questionRoutingEngine';
+export * from './domainWeightingModel';
+export * from './contextualScoreNormalizer';
+export * from './adaptiveScoringModel';
