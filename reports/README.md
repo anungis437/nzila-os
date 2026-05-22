@@ -30,8 +30,8 @@ Existing folders:
 - `runtime/` — Runtime performance and metrics
 - `security/` — Security assessments and hardening
 - `strategy/` — Strategic planning and positioning
-- `union-eyes/` — Union Eyes product reports
-- `veridian/` — Veridian product reports
+
+Product-specific reports are consolidated under `product-reports/`.
 
 ## Canonical Truth
 

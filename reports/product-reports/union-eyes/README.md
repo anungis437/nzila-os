@@ -7,6 +7,7 @@ Product-specific readiness assessments and deployment guidance.
 - `ue-defensibility-pack.md` — Defensibility analysis and competitive positioning
 - `ue-procurement-pack-cupe.md` — CUPE pilot procurement materials
 - `ue-roi-case-cupe.md` — ROI case study for CUPE pilot
+- `claims-ledger.md` — Claims evidence ledger and verification references
 
 ## Institutional Longitudinal Intelligence
 
