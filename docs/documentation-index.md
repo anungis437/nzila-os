@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-21T18:40:01.852Z
+Generated: 2026-05-22T01:28:13.410Z
 
-Total documents indexed: 1057
+Total documents indexed: 1115
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -26,7 +26,7 @@ Stale documents (>90 days since repo validation): 0
 | nzila-runtime-integrity | 11 | 0 |
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
-| oci | 19 | 0 |
+| oci | 77 | 0 |
 | ops | 4 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
@@ -345,7 +345,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/platform-and-operations/architecture/ORG_SCOPED_TABLES.md](docs/categories/platform-and-operations/architecture/ORG_SCOPED_TABLES.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/ORM_BOUNDARY.md](docs/categories/platform-and-operations/architecture/ORM_BOUNDARY.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-boundary.md](docs/categories/platform-and-operations/architecture/orm-boundary.md) | categories | 2026-05-11 | current |
-| [docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md](docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md) | categories | 2026-05-21 | current |
+| [docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md](docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md) | categories | 2026-05-22 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/deployment-legitimacy-reconciliation.md](docs/categories/platform-and-operations/architecture/orm-governance/deployment-legitimacy-reconciliation.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md](docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md) | categories | 2026-05-11 | current |
 | [docs/categories/platform-and-operations/architecture/orm-governance/drizzle-scope-reconstruction.md](docs/categories/platform-and-operations/architecture/orm-governance/drizzle-scope-reconstruction.md) | categories | 2026-05-11 | current |
@@ -979,11 +979,11 @@ Stale documents (>90 days since repo validation): 0
 | [docs/doctrine/narrative-playbooks.md](docs/doctrine/narrative-playbooks.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/positioning.md](docs/doctrine/positioning.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/principles.md](docs/doctrine/principles.md) | doctrine | 2026-05-20 | current |
-| [docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md](docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md) | doctrine | 2026-05-20 | current |
-| [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md](docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md) | doctrine | 2026-05-22 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-22 | current |
 | [docs/doctrine/SCORING_MODELS.md](docs/doctrine/SCORING_MODELS.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/vocabulary.md](docs/doctrine/vocabulary.md) | doctrine | 2026-05-20 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-21 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-22 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
@@ -1033,28 +1033,86 @@ Stale documents (>90 days since repo validation): 0
 | [docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md](docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md](docs/nzila-tier2-hardening/full-workspace-substrate-sovereignty.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
+| [docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md](docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md](docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md](docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md](docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md) | oci | 2026-05-22 | current |
+| [docs/oci/intelligence/OCI_OBSERVATORY_FOUNDATIONS.md](docs/oci/intelligence/OCI_OBSERVATORY_FOUNDATIONS.md) | oci | 2026-05-22 | current |
+| [docs/oci/migration/OCI_OCRA_CONVERGENCE_PLAN.md](docs/oci/migration/OCI_OCRA_CONVERGENCE_PLAN.md) | oci | 2026-05-22 | current |
 | [docs/oci/OCI_AI_BOUNDARY.md](docs/oci/OCI_AI_BOUNDARY.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md](docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md) | oci | 2026-05-21 | current |
-| [docs/oci/OCI_BOARD_OVERVIEW.md](docs/oci/OCI_BOARD_OVERVIEW.md) | oci | 2026-05-21 | current |
-| [docs/oci/OCI_DATA_HANDLING.md](docs/oci/OCI_DATA_HANDLING.md) | oci | 2026-05-21 | current |
-| [docs/oci/OCI_DELIVERY_MODEL.md](docs/oci/OCI_DELIVERY_MODEL.md) | oci | 2026-05-21 | current |
-| [docs/oci/OCI_EXECUTIVE_BRIEFING_DECK.md](docs/oci/OCI_EXECUTIVE_BRIEFING_DECK.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_BOARD_OVERVIEW.md](docs/oci/OCI_BOARD_OVERVIEW.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_DATA_HANDLING.md](docs/oci/OCI_DATA_HANDLING.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_DELIVERY_MODEL.md](docs/oci/OCI_DELIVERY_MODEL.md) | oci | 2026-05-22 | current |
+| [docs/oci/OCI_EXECUTIVE_BRIEFING_DECK.md](docs/oci/OCI_EXECUTIVE_BRIEFING_DECK.md) | oci | 2026-05-22 | current |
 | [docs/oci/OCI_EXECUTIVE_EMAIL_SEQUENCE.md](docs/oci/OCI_EXECUTIVE_EMAIL_SEQUENCE.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_FACILITATOR_CERTIFICATION_RUBRIC.md](docs/oci/OCI_FACILITATOR_CERTIFICATION_RUBRIC.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_FACILITATOR_TRAINING_CURRICULUM.md](docs/oci/OCI_FACILITATOR_TRAINING_CURRICULUM.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_INSTITUTIONAL_ACTIVATION.md](docs/oci/OCI_INSTITUTIONAL_ACTIVATION.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_METHOD.md](docs/oci/OCI_METHOD.md) | oci | 2026-05-21 | current |
-| [docs/oci/OCI_PILOT_FRAMEWORK.md](docs/oci/OCI_PILOT_FRAMEWORK.md) | oci | 2026-05-21 | current |
+| [docs/oci/OCI_PILOT_FRAMEWORK.md](docs/oci/OCI_PILOT_FRAMEWORK.md) | oci | 2026-05-22 | current |
 | [docs/oci/OCI_PILOT_INTRODUCTION_GUIDE.md](docs/oci/OCI_PILOT_INTRODUCTION_GUIDE.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_PILOT_SCOPE_TEMPLATE.md](docs/oci/OCI_PILOT_SCOPE_TEMPLATE.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_PRIVACY_POSITION.md](docs/oci/OCI_PRIVACY_POSITION.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_SECURITY_OVERVIEW.md](docs/oci/OCI_SECURITY_OVERVIEW.md) | oci | 2026-05-21 | current |
 | [docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md](docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md) | oci | 2026-05-21 | current |
-| [docs/oci/oci-method.md](docs/oci/oci-method.md) | oci | 2026-05-21 | current |
-| [docs/oci/oci-product-ladder.md](docs/oci/oci-product-ladder.md) | oci | 2026-05-21 | current |
+| [docs/oci/oci-method.md](docs/oci/oci-method.md) | oci | 2026-05-22 | current |
+| [docs/oci/oci-product-ladder.md](docs/oci/oci-product-ladder.md) | oci | 2026-05-22 | current |
+| [docs/oci/runtime/OCI_CONTINUITY_LEDGER.md](docs/oci/runtime/OCI_CONTINUITY_LEDGER.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_EVENT_RUNTIME.md](docs/oci/runtime/OCI_EVENT_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_GOVERNANCE_MEMORY_RUNTIME.md](docs/oci/runtime/OCI_GOVERNANCE_MEMORY_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_GOVERNANCE_TRACEABILITY.md](docs/oci/runtime/OCI_GOVERNANCE_TRACEABILITY.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_ONBOARDING_RUNTIME.md](docs/oci/runtime/OCI_ONBOARDING_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_OPERATING_PRIMITIVES.md](docs/oci/runtime/OCI_OPERATING_PRIMITIVES.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_PLATFORM_RUNTIME_ALIGNMENT.md](docs/oci/runtime/OCI_PLATFORM_RUNTIME_ALIGNMENT.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_RUNTIME_CONTRACTS.md](docs/oci/runtime/OCI_RUNTIME_CONTRACTS.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_RUNTIME_READINESS.md](docs/oci/runtime/OCI_RUNTIME_READINESS.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_RUNTIME_STEWARDSHIP.md](docs/oci/runtime/OCI_RUNTIME_STEWARDSHIP.md) | oci | 2026-05-21 | current |
+| [docs/oci/runtime/OCI_WORKFLOW_RUNTIME.md](docs/oci/runtime/OCI_WORKFLOW_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md](docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_ACTION_SYSTEM.md](docs/oci/stabilization/OCI_ACTION_SYSTEM.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_CONTINUITY_DEBT.md](docs/oci/stabilization/OCI_CONTINUITY_DEBT.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md](docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_CONTINUITY_OPERATIONALIZATION.md](docs/oci/stabilization/OCI_CONTINUITY_OPERATIONALIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_EXECUTIVE_STABILIZATION_OPERATIONS.md](docs/oci/stabilization/OCI_EXECUTIVE_STABILIZATION_OPERATIONS.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_FACILITATOR_RUNTIME.md](docs/oci/stabilization/OCI_FACILITATOR_RUNTIME.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_INTERVENTION_ETHICS.md](docs/oci/stabilization/OCI_INTERVENTION_ETHICS.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_INTERVENTION_MODEL.md](docs/oci/stabilization/OCI_INTERVENTION_MODEL.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_LONGITUDINAL_STABILIZATION.md](docs/oci/stabilization/OCI_LONGITUDINAL_STABILIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_ONBOARDING_STABILIZATION.md](docs/oci/stabilization/OCI_ONBOARDING_STABILIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_RUNTIME_ALIGNMENT.md](docs/oci/stabilization/OCI_RUNTIME_ALIGNMENT.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_RUNTIME_TRANSITION_MODEL.md](docs/oci/stabilization/OCI_RUNTIME_TRANSITION_MODEL.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_COMMERCIALIZATION.md](docs/oci/stabilization/OCI_STABILIZATION_COMMERCIALIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_EVOLUTION.md](docs/oci/stabilization/OCI_STABILIZATION_EVOLUTION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_FRAMEWORK.md](docs/oci/stabilization/OCI_STABILIZATION_FRAMEWORK.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_LIFECYCLE.md](docs/oci/stabilization/OCI_STABILIZATION_LIFECYCLE.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_PERSONAS.md](docs/oci/stabilization/OCI_STABILIZATION_PERSONAS.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md](docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_PRINCIPLES.md](docs/oci/stabilization/OCI_STABILIZATION_PRINCIPLES.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_PROGRESSION.md](docs/oci/stabilization/OCI_STABILIZATION_PROGRESSION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_READINESS.md](docs/oci/stabilization/OCI_STABILIZATION_READINESS.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_SEVERITY_MODEL.md](docs/oci/stabilization/OCI_STABILIZATION_SEVERITY_MODEL.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md](docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/OCI_STABILIZATION_TRACKING.md](docs/oci/stabilization/OCI_STABILIZATION_TRACKING.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md](docs/oci/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md](docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/LEADERSHIP_TRANSITION_STABILIZATION.md](docs/oci/stabilization/playbooks/LEADERSHIP_TRANSITION_STABILIZATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/MODERNIZATION_CONTINUITY_REMEDIATION.md](docs/oci/stabilization/playbooks/MODERNIZATION_CONTINUITY_REMEDIATION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/ONBOARDING_SURVIVABILITY_RECOVERY.md](docs/oci/stabilization/playbooks/ONBOARDING_SURVIVABILITY_RECOVERY.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md](docs/oci/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/README.md](docs/oci/stabilization/playbooks/README.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md](docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md](docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md](docs/oci/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md](docs/oci/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md](docs/oci/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md](docs/oci/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md](docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/README.md](docs/oci/stabilization/workflows/README.md) | oci | 2026-05-21 | current |
+| [docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md](docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md) | oci | 2026-05-21 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-21 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-21 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-22 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-22 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-20 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-20 | current |

@@ -1,29 +1,29 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-21T18:39:58.097Z
+> Generated: 2026-05-22T01:28:09.884Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1707 |
-| Total Findings | 2522 |
+| Files Scanned | 1765 |
+| Total Findings | 2538 |
 | Errors | 0 |
-| Warnings | 1193 |
-| Info | 1329 |
+| Warnings | 1203 |
+| Info | 1335 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1322 |
-| stale-reference | 1032 |
+| naming-inconsistency | 1328 |
+| stale-reference | 1038 |
 | missing-package-readme | 105 |
-| stale-package-ref | 53 |
+| stale-package-ref | 57 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1032)
+## stale-reference (1038)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -815,6 +815,12 @@
 - 🟡 `docs/INDEX.md:164` — Possible broken link: [platform/COVERAGE_REPORTING.md](platform/COVERAGE_REPORTING.md)
 - 🟡 `docs/INDEX.md:171` — Possible broken link: [proof-center/union-eyes-proof.md](proof-center/union-eyes-proof.md)
 - 🟡 `docs/INDEX.md:172` — Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)
+- 🟡 `docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md:35` — Possible broken link: [`governanceRecoveryEngine.ts`](../../apps/union-eyes/lib/workbook/engines/governanceRecoveryEngine.ts)
+- 🟡 `docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md:7` — Possible broken link: [OCI_REVERSIBILITY_PRINCIPLE.md](OCI_REVERSIBILITY_PRINCIPLE.md)
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md:116` — Possible broken link: [`stabilizationWorkflowEngine.ts`](../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts)
+- 🟡 `docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md:35` — Possible broken link: [`stewardshipRedistributionEngine.ts`](../../apps/union-eyes/lib/workbook/engines/stewardshipRedistributionEngine.ts)
+- 🟡 `docs/oci/stabilization/workflows/README.md:67` — Possible broken link: [`workflowSequencing.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/workflowSequencing.ts)
+- 🟡 `docs/oci/stabilization/workflows/README.md:91` — Possible broken link: [`stabilizationWorkflowEngine.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts)
 - 🟡 `docs/README.md:3` — Possible broken link: [archive/iterations](archive/iterations/)
 - 🟡 `docs/README.md:18` — Possible broken link: [Union Eyes](buyers/union-eyes-buyer-pack.md)
 - 🟡 `docs/README.md:18` — Possible broken link: [Flow](buyers/flow-buyer-pack.md)
@@ -1058,7 +1064,7 @@
 - 🟡 `governance/foundations/content/README.md:73` — Possible broken link: [`governance/privacy/ai-pia/surfaces/`](../privacy/ai-pia/surfaces/)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 
-## stale-package-ref (53)
+## stale-package-ref (57)
 
 - 🟡 `docs/categories/historical-archive/archive/iterations/nzila-hq/ROADMAP.md:42` — References @nzila/cognition but package does not exist
 - 🟡 `docs/categories/historical-archive/archive/iterations/plans/studio-maturity-10-of-10.md:50` — References @nzila/shop-quoter but package does not exist
@@ -1113,8 +1119,12 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:103` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:152` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:24` — References @nzila/platform-audit but package does not exist
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:25` — References @nzila/platform-consent but package does not exist
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
+- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1322)
+## naming-inconsistency (1328)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2321,6 +2331,12 @@
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:126` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:127` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/OCI_METHOD.md:321` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:21` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/AUDIT_ENFORCEMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/EVIDENCE_LIFECYCLE_POLICY.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:3` — "Nzila OS" should be "NzilaOS" (platform name)

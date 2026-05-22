@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-05-21T18:39:58.097Z",
-  "filesScanned": 1707,
-  "totalFindings": 2522,
+  "generatedAt": "2026-05-22T01:28:09.884Z",
+  "filesScanned": 1765,
+  "totalFindings": 2538,
   "findingsByRule": {
-    "stale-reference": 1032,
-    "stale-package-ref": 53,
-    "naming-inconsistency": 1322,
+    "stale-reference": 1038,
+    "stale-package-ref": 57,
+    "naming-inconsistency": 1328,
     "stale-date": 7,
     "missing-required-doc": 3,
     "missing-package-readme": 105
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1193,
-    "info": 1329
+    "warning": 1203,
+    "info": 1335
   },
   "findings": [
     {
@@ -5916,6 +5916,76 @@
       "file": "docs/INDEX.md",
       "line": 172,
       "message": "Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md",
+      "line": 35,
+      "message": "Possible broken link: [`governanceRecoveryEngine.ts`](../../apps/union-eyes/lib/workbook/engines/governanceRecoveryEngine.ts)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md",
+      "line": 7,
+      "message": "Possible broken link: [OCI_REVERSIBILITY_PRINCIPLE.md](OCI_REVERSIBILITY_PRINCIPLE.md)"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
+      "line": 24,
+      "message": "References @nzila/platform-audit but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
+      "line": 25,
+      "message": "References @nzila/platform-consent but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
+      "line": 26,
+      "message": "References @nzila/platform-cognition but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
+      "line": 28,
+      "message": "References @nzila/platform-doctrine but package does not exist"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md",
+      "line": 116,
+      "message": "Possible broken link: [`stabilizationWorkflowEngine.ts`](../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md",
+      "line": 35,
+      "message": "Possible broken link: [`stewardshipRedistributionEngine.ts`](../../apps/union-eyes/lib/workbook/engines/stewardshipRedistributionEngine.ts)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/workflows/README.md",
+      "line": 67,
+      "message": "Possible broken link: [`workflowSequencing.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/workflowSequencing.ts)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/stabilization/workflows/README.md",
+      "line": 91,
+      "message": "Possible broken link: [`stabilizationWorkflowEngine.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts)"
     },
     {
       "rule": "stale-reference",
@@ -16044,6 +16114,48 @@
       "severity": "info",
       "file": "docs/nzila-tier2-hardening/README.md",
       "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md",
+      "line": 10,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/OCI_METHOD.md",
+      "line": 321,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
+      "line": 21,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
