@@ -89,9 +89,10 @@ test.describe('OCRA adaptive live flow — full traversal', () => {
     // selector contract here.
     const fs = await import('node:fs/promises');
     const path = await import('node:path');
-    const here = path
-      .dirname(new URL(import.meta.url).pathname)
-      .replace(/^\/([A-Za-z]:)/, '$1');
+    // Use __dirname (Playwright transpiles specs as CJS). Using
+    // `import.meta.url` would force ESM and break `require` in the
+    // wider spec graph.
+    const here = __dirname;
     const file = path.resolve(here, '../components/icra/ICRAAssessmentFlow.tsx');
     const src = await fs.readFile(file, 'utf8');
     expect(src).toMatch(/data-testid=\{`icra-question-\$\{q\.id\}`\}/);
