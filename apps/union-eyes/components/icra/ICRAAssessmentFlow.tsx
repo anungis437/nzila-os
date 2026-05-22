@@ -22,6 +22,15 @@ import {
   QUESTION_BANK_VERSION,
   CTX_PRIMARY_CHALLENGE_MAX_LENGTH,
 } from '@/lib/icra/questions';
+import {
+  localizeSection,
+  localizeQuestion,
+  localizeMaturityLabel,
+  localizeLikertScaleLabel,
+  localizeOptionLabel,
+  localizeOptionGroup,
+  type SupportedLocale,
+} from '@/lib/icra/questions.i18n';
 import { ConsentGate } from './ConsentGate';
 
 const DOCTRINE_VERSION = '1.0.0';
@@ -417,7 +426,14 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   }
 
   if (step === 1) {
-    return <OrgContextForm questions={METADATA_QUESTIONS} onSubmit={handleOrgContext} copy={copy} />;
+    return (
+      <OrgContextForm
+        questions={METADATA_QUESTIONS}
+        onSubmit={handleOrgContext}
+        copy={copy}
+        locale={locale === 'fr-CA' ? 'fr-CA' : 'en-CA'}
+      />
+    );
   }
 
   if (step === 9 || submitting) {
@@ -439,6 +455,9 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
 
   if (!currentSectionDef || currentQuestions.length === 0) return null;
 
+  const supportedLocale: SupportedLocale = locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
+  const localizedSection = localizeSection(currentSectionDef.id, currentSectionDef, supportedLocale);
+
   const sectionIndex = step - 2;
   const answeredInSection = currentQuestions.filter((q) => currentSectionAnswers.has(q.id)).length;
   const sectionComplete = answeredInSection === currentQuestions.length;
@@ -449,7 +468,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-stone-500">
           <span>
-          <span>{copy.section} {sectionIndex + 1} {copy.of} {SCORED_SECTIONS.length} — {currentSectionDef.title}</span>
+          <span>{copy.section} {sectionIndex + 1} {copy.of} {SCORED_SECTIONS.length} — {localizedSection.title}</span>
           <span aria-live="polite" aria-atomic="true">{Math.round(progressPercent)}% {copy.complete}</span>
         </div>
         <div className="h-1.5 w-full rounded-full bg-stone-200">
@@ -462,9 +481,9 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
 
       {/* Section header */}
       <div className="space-y-2 border-b border-stone-200 pb-6">
-        <h2 className="text-2xl font-bold tracking-tight text-stone-900">{currentSectionDef.title}</h2>
-        {currentSectionDef.intro && (
-          <p className="text-stone-600 text-sm leading-relaxed">{currentSectionDef.intro}</p>
+        <h2 className="text-2xl font-bold tracking-tight text-stone-900">{localizedSection.title}</h2>
+        {localizedSection.intro && (
+          <p className="text-stone-600 text-sm leading-relaxed">{localizedSection.intro}</p>
         )}
       </div>
 
@@ -482,12 +501,15 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
               const stringValues = values.map(String);
               const selectedIndex = stringValues.indexOf(selected ?? '');
               const labelId = `${q.id}-label`;
+              const lq = localizeQuestion(q, supportedLocale);
+              const localizedMin = localizeLikertScaleLabel('minLabel', minLabel, supportedLocale);
+              const localizedMax = localizeLikertScaleLabel('maxLabel', maxLabel, supportedLocale);
               return (
                 <div key={q.id} className="space-y-3">
                   <div className="space-y-1">
-                    <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{q.prompt}</p>
-                    {q.helpText && (
-                      <p className="text-xs text-stone-500 leading-relaxed">{q.helpText}</p>
+                    <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{lq.prompt}</p>
+                    {lq.helpText && (
+                      <p className="text-xs text-stone-500 leading-relaxed">{lq.helpText}</p>
                     )}
                   </div>
                   <div
@@ -519,8 +541,8 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
                     })}
                   </div>
                   <div className="flex justify-between text-xs text-stone-500">
-                    <span>{minLabel}</span>
-                    <span className="text-right">{maxLabel}</span>
+                    <span>{localizedMin}</span>
+                    <span className="text-right">{localizedMax}</span>
                   </div>
                 </div>
               );
@@ -530,18 +552,20 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
             const optionValues = q.options.map((o) => o.value);
             const selectedIdx = optionValues.indexOf(selected ?? '');
             const labelId = `${q.id}-label`;
+            const lq = localizeQuestion(q, supportedLocale);
             return (
               <div key={q.id} className="space-y-3">
                 <div className="space-y-1">
-                  <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{q.prompt}</p>
-                  {q.helpText && (
-                    <p className="text-xs text-stone-500 leading-relaxed">{q.helpText}</p>
+                  <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{lq.prompt}</p>
+                  {lq.helpText && (
+                    <p className="text-xs text-stone-500 leading-relaxed">{lq.helpText}</p>
                   )}
                 </div>
                 <div role="radiogroup" aria-labelledby={labelId} className="space-y-2">
                   {q.options.map((opt, idx) => {
                     const isSelected = selected === opt.value;
                     const isTabStop = selectedIdx === -1 ? idx === 0 : isSelected;
+                    const localizedLabel = localizeMaturityLabel(opt.value, opt.label, supportedLocale);
                     return (
                       <button
                         key={opt.value}
@@ -557,7 +581,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
                             : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50'
                         }`}
                       >
-                        {opt.label}
+                        {localizedLabel}
                       </button>
                     );
                   })}
@@ -603,9 +627,10 @@ interface OrgContextFormProps {
   questions: MetadataQuestion[];
   onSubmit: (ctx: OrgContextAnswers) => void;
   copy: typeof FLOW_COPY['en-CA'];
+  locale: SupportedLocale;
 }
 
-function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
+function OrgContextForm({ questions, onSubmit, copy, locale }: OrgContextFormProps) {
   const [values, setValues] = useState<OrgContextAnswers>({});
 
   const requiredIds = questions.filter((q) => q.required).map((q) => q.id);
@@ -621,13 +646,15 @@ function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
       </div>
 
       <div className="space-y-6">
-        {questions.sort((a, b) => a.order - b.order).map((q) => (
+        {questions.sort((a, b) => a.order - b.order).map((q) => {
+          const lq = localizeQuestion(q, locale);
+          return (
           <div key={q.id} className="space-y-1.5">
             <label className="block text-sm font-medium text-stone-900">
-              {q.prompt}
+              {lq.prompt}
               {q.required && <span className="ml-1 text-stone-400">*</span>}
             </label>
-            {q.helpText && <p className="text-xs text-stone-500">{q.helpText}</p>}
+            {lq.helpText && <p className="text-xs text-stone-500">{lq.helpText}</p>}
 
             {q.type === 'select' && q.options ? (
               <select
@@ -640,7 +667,9 @@ function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
                   const hasGroups = q.options.some((o) => Boolean(o.group));
                   if (!hasGroups) {
                     return q.options.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
+                      <option key={o.value} value={o.value}>
+                        {localizeOptionLabel(q.id, o.value, o.label, locale)}
+                      </option>
                     ));
                   }
                   // Preserve option order while grouping by `group`.
@@ -654,13 +683,20 @@ function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
                     }
                     byGroup.get(g)!.push(o);
                   }
-                  return groupsInOrder.map((g) => (
-                    <optgroup key={g} label={g}>
-                      {(byGroup.get(g) ?? []).map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                      ))}
-                    </optgroup>
-                  ));
+                  return groupsInOrder.map((g) => {
+                    const groupOptions = byGroup.get(g) ?? [];
+                    const localizedGroupLabel =
+                      (groupOptions[0] && localizeOptionGroup(q.id, groupOptions[0].value, g, locale)) ?? g;
+                    return (
+                      <optgroup key={g} label={localizedGroupLabel}>
+                        {groupOptions.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {localizeOptionLabel(q.id, o.value, o.label, locale)}
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  });
                 })()}
               </select>
             ) : (
@@ -682,7 +718,8 @@ function OrgContextForm({ questions, onSubmit, copy }: OrgContextFormProps) {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <button
