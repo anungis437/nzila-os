@@ -42,7 +42,7 @@ router.post("/upload", async (req: Request, res: Response) => {
       returning id
     `);
 
-    const batchId = (insertBatch as Array<{ id: string }>)[0]?.id;
+    const batchId = (insertBatch as unknown as Array<{ id: string }>)[0]?.id;
 
     for (const entry of normalized.entries) {
       await db.execute(sql`

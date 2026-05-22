@@ -1491,6 +1491,29 @@ export const donations = pgTable("donations", {
 	}
 });
 
+export const stripeWebhookEvents = pgTable("stripe_webhook_events", {
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	stripeEventId: text("stripe_event_id").notNull(),
+	eventType: text("event_type").notNull(),
+	organizationId: uuid("organization_id").notNull(),
+	stripePaymentIntentId: text("stripe_payment_intent_id"),
+	stripeCustomerId: text("stripe_customer_id"),
+	eventData: jsonb("event_data").default(sql`'{}'::jsonb`).notNull(),
+	processed: boolean("processed").default(false).notNull(),
+	processedAt: timestamp("processed_at", { withTimezone: true, mode: 'string' }),
+	processingError: text("processing_error"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+},
+(table) => {
+	return {
+		eventIdUniqueIdx: uniqueIndex("stripe_webhook_events_event_id_unique_idx").using("btree", table.stripeEventId.asc().nullsLast()),
+		paymentIntentIdx: index("stripe_webhook_events_payment_intent_idx").using("btree", table.stripePaymentIntentId.asc().nullsLast()),
+		processedIdx: index("stripe_webhook_events_processed_idx").using("btree", table.processed.asc().nullsLast()),
+		createdAtIdx: index("stripe_webhook_events_created_at_idx").using("btree", table.createdAt.asc().nullsLast()),
+	}
+});
+
 export const picketTracking = pgTable("picket_tracking", {
 	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	tenantId: uuid("tenant_id").notNull(),

@@ -57,7 +57,7 @@ router.post("/", async (req: Request, res: Response) => {
       ) returning id
     `);
 
-    const replayId = (insertReplay as Array<{ id: string }>)[0]?.id;
+    const replayId = (insertReplay as unknown as Array<{ id: string }>)[0]?.id;
 
     return res.status(201).json({ success: true, data: { replayId, diff, diffHash } });
   } catch (error) {

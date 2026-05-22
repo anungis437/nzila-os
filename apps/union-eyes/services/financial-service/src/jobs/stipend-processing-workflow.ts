@@ -13,13 +13,13 @@
  */
 
 import cron from 'node-cron';
-import winston from 'winston';
 import { db } from '../db';
 import { 
   stipendDisbursements,
   picketAttendance,
   members,
-  strikeFunds
+  strikeFunds,
+  organizationMembers,
 } from '../db/schema';
 import { eq, and, gte, lte, sql, inArray } from 'drizzle-orm';
 // Platform Stripe integration via @nzila/payments-stripe
@@ -29,15 +29,6 @@ import { logger } from '@/lib/logger';
 
 // Initialize Stripe via platform wrapper
 const stripe = getStripeClient();
-
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [new winston.transports.Console()],
-});
 
 /**
  * Stipend calculation rules (configurable per tenant)
@@ -539,10 +530,11 @@ export const weeklyStipendProcessingJob = cron.schedule(
         // Send notification to officers/admins
         try {
           // Query for officers and admins (users with elevated privileges)
-          const trustees = await db.query.organizationMembers.findMany({
-            where: (members, { eq }) => eq(members.role, 'officer'),
-            limit: 100,
-          });
+          const trustees = await db
+            .select()
+            .from(organizationMembers)
+            .where(eq(organizationMembers.role, 'officer'))
+            .limit(100);
 
           if (trustees.length > 0) {
             const summaryMessage = `Stipend Processing Summary (${new Date().toLocaleDateString()})
@@ -576,7 +568,6 @@ Please log in to review and approve pending stipend disbursements.`;
     }
   },
   {
-    scheduled: false,
     timezone: 'America/Toronto',
   }
 );

@@ -261,7 +261,7 @@ function determineSuggestedEscalation(
     level4Days: 120,
   };
 
-  const t = thresholds || defaultThresholds;
+  const t = { ...defaultThresholds, ...(thresholds || {}) };
 
   if (daysOverdue >= t.level4Days) {
     return 'legal_action';

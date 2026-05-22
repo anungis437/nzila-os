@@ -55,8 +55,8 @@ export async function runReconciliation(
   const runId = crypto.randomUUID();
   const mismatches: ReconciliationMismatch[] = [];
   const now = new Date().toISOString();
-  const startDate = new Date(periodStart);
-  const endDate = new Date(periodEnd);
+  const startDate = periodStart;
+  const endDate = periodEnd;
 
   logger.info('Reconciliation started', { runId, periodStart, periodEnd });
 

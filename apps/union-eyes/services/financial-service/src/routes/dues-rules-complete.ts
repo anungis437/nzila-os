@@ -296,7 +296,7 @@ router.post('/:id/duplicate', async (req: Request, res: Response) => {
     }
 
     // Create duplicate with new code and name
-    const { id: _, _createdAt, _updatedAt, _createdBy, ...ruleData } = originalRule;
+    const { id: _, ...ruleData } = originalRule;
     
     const [duplicatedRule] = await db
       .insert(schema.duesRules)

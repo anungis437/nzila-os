@@ -13,6 +13,19 @@ import { logger } from '@/lib/logger';
 
 const router = Router();
 
+type StripePaymentIntentLike = {
+  id: string;
+  amount: number;
+  metadata: Record<string, string>;
+};
+
+type StripeWebhookEventLike = {
+  type: string;
+  data: {
+    object: unknown;
+  };
+};
+
 // Initialize Stripe via platform wrapper
 const stripe = getStripeClient();
 
@@ -139,19 +152,29 @@ router.post(
       });
     }
 
-    let event: Stripe.Event;
+    let event: StripeWebhookEventLike;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      logger.error('Stripe webhook secret missing');
+      return res.status(503).json({
+        success: false,
+        error: 'Webhook processing unavailable',
+      });
+    }
 
     try {
       event = stripe.webhooks.constructEvent(
         req.body,
         sig,
-        process.env.STRIPE_WEBHOOK_SECRET || ''
-      );
+        webhookSecret
+      ) as unknown as StripeWebhookEventLike;
     } catch (err) {
+      const errMessage = err instanceof Error ? err.message : 'unknown webhook verification error';
       logger.error('Webhook signature verification failed', { error: err });
       return res.status(400).json({
         success: false,
-        error: `Webhook Error: ${err.message}`,
+        error: `Webhook Error: ${errMessage}`,
       });
     }
 
@@ -159,19 +182,19 @@ router.post(
     try {
       switch (event.type) {
         case 'payment_intent.succeeded': {
-          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          const paymentIntent = event.data.object as StripePaymentIntentLike;
           await handlePaymentSuccess(paymentIntent);
           break;
         }
 
         case 'payment_intent.payment_failed': {
-          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          const paymentIntent = event.data.object as StripePaymentIntentLike;
           await handlePaymentFailure(paymentIntent);
           break;
         }
 
         case 'payment_intent.canceled': {
-          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          const paymentIntent = event.data.object as StripePaymentIntentLike;
           await handlePaymentCancellation(paymentIntent);
           break;
         }
@@ -324,7 +347,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
 
 // Helper functions for webhook event handling
 
-async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentSuccess(paymentIntent: StripePaymentIntentLike) {
   const metadata = paymentIntent.metadata;
 
   // Update donation record
@@ -351,7 +374,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   logger.info('Payment succeeded for donation', { fundId: metadata.fundId, amount });
 }
 
-async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentFailure(paymentIntent: StripePaymentIntentLike) {
   await db.execute(sql`
     UPDATE public_donations
     SET 
@@ -363,7 +386,7 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
   logger.warn('Payment failed for intent', { paymentIntentId: paymentIntent.id });
 }
 
-async function handlePaymentCancellation(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentCancellation(paymentIntent: StripePaymentIntentLike) {
   await db.execute(sql`
     UPDATE public_donations
     SET 

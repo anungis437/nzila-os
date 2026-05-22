@@ -554,7 +554,6 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
     // Run reconciliation
     const reconciliationEngine = new ReconciliationEngine();
     const reconciliationResult = await reconciliationEngine.reconcile({
-      remittanceId: id,
       remittanceRecords,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       existingTransactions: transactions.map((t: any) => ({
@@ -565,7 +564,6 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         periodEnd: t.periodEnd,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       })) as any[],
-      tenantId: organizationId,
     });
 
     // If auto-apply is enabled, update matched transactions
