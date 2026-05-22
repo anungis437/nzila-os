@@ -33,15 +33,18 @@ import {
   localizeOptionGroup,
   type SupportedLocale,
 } from '@/lib/icra/questions.i18n';
+// Import directly from submodules — NOT the barrel — so we don't pull
+// server-only siblings (adaptiveTelemetry → observability → db → pg)
+// into the client bundle. Turbopack traces the whole barrel surface.
+import { classifyOrgContext } from '@/lib/icra/adaptation/orgContextClassifier';
+import { routeQuestionBank } from '@/lib/icra/adaptation/questionRoutingEngine';
 import {
-  classifyOrgContext,
-  routeQuestionBank,
   ROUTING_ENGINE_VERSION,
-  type InstitutionalAssessmentProfile,
   type RoutableQuestion,
   type RoutedQuestionBank,
   type RoutingRationale,
-} from '@/lib/icra/adaptation';
+} from '@/lib/icra/adaptation/routingTypes';
+import type { InstitutionalAssessmentProfile } from '@/lib/icra/adaptation/types';
 import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { ConsentGate } from './ConsentGate';
 
