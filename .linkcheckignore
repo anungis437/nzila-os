@@ -154,3 +154,8 @@ scripts/migrations/
 artifacts/README.md
 proof-artifacts/README.md
 
+# Temp directories — generated artifacts not committed (governance report dumps)
+tmp-gov-report/
+tmp-art/
+tmp-e2e-report/
+

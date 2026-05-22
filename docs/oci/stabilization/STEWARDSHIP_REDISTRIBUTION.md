@@ -32,7 +32,7 @@ The framework reads its institutional state by composing the following workbook 
 | `onboardingFragilityAnalysis` | Successor-readiness conditions for each role. |
 | `governanceInterpretationMatrix` | Governance interpretation carried by the institution's stewards. |
 
-The composition is performed by [`stewardshipRedistributionEngine.ts`](../../apps/union-eyes/lib/workbook/engines/stewardshipRedistributionEngine.ts) (composition only — no new analytics).
+The composition is performed by [`stewardshipRedistributionEngine.ts`](../../../apps/union-eyes/lib/workbook/engines/stewardshipRedistributionEngine.ts) (composition only — no new analytics).
 
 ## 4. Signal envelope
 

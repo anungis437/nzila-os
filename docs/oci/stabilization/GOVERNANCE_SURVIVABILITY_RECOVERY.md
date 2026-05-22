@@ -32,7 +32,7 @@ The framework reads its institutional state by composing the following workbook 
 | `governanceModernizationReview` | Modernization moves affecting governance practice. |
 | `institutionalEvolutionTracker` | Institutional posture toward governance evolution. |
 
-The composition is performed by [`governanceRecoveryEngine.ts`](../../apps/union-eyes/lib/workbook/engines/governanceRecoveryEngine.ts) (composition only — no new analytics).
+The composition is performed by [`governanceRecoveryEngine.ts`](../../../apps/union-eyes/lib/workbook/engines/governanceRecoveryEngine.ts) (composition only — no new analytics).
 
 ## 4. Signal envelope
 

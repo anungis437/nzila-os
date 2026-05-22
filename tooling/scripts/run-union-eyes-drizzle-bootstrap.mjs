@@ -247,7 +247,7 @@ async function applySqlFile(client, sqlFilePath, label) {
 }
 
 async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
-  if (restoreSnapshotUrl || scopedEntriesCount > 0) {
+  if (restoreSnapshotUrl) {
     return { applied: false };
   }
 
@@ -257,24 +257,41 @@ async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
   const organizationsRegclass = await client.query(
     `select to_regclass('public.organizations') as regclass`,
   );
-  const hasCanonicalBaseline =
-    Boolean(authUsersRegclass.rows?.[0]?.regclass) ||
-    Boolean(organizationsRegclass.rows?.[0]?.regclass);
+  const hasUserManagement = Boolean(authUsersRegclass.rows?.[0]?.regclass);
+  const hasOrganizations = Boolean(organizationsRegclass.rows?.[0]?.regclass);
+  const hasCanonicalBaseline = hasUserManagement || hasOrganizations;
 
-  if (hasCanonicalBaseline) {
+  // Scoped migrations cover ICRA/workbook surface only. The QA/CI baseline
+  // materialises the canonical user_management schema (auth, sessions,
+  // organizations) that seed:test-env and E2E flows require. When scoped
+  // migrations applied but user_management is still missing, we must still
+  // run the (idempotent) baseline — otherwise E2E seed blows up with
+  // "relation user_management.user_sessions does not exist".
+  if (scopedEntriesCount > 0 && hasUserManagement) {
+    return { applied: false };
+  }
+
+  if (scopedEntriesCount === 0 && hasCanonicalBaseline) {
     info('Snapshot/migrations absent but canonical baseline tables already exist; skipping QA baseline SQL set.');
     return { applied: false };
   }
 
   if (!isQaOrCiBootstrap) {
-    fail(
-      'Fresh bootstrap has neither UE_DB_RESTORE_SNAPSHOT_URL nor scoped migrations. ' +
-        'Refusing to materialize an empty database outside QA/CI mode.',
-    );
+    if (scopedEntriesCount === 0) {
+      fail(
+        'Fresh bootstrap has neither UE_DB_RESTORE_SNAPSHOT_URL nor scoped migrations. ' +
+          'Refusing to materialize an empty database outside QA/CI mode.',
+      );
+    }
+    // Non-CI mode with scoped migrations but no user_management — let
+    // operator decide; do not force baseline.
+    return { applied: false };
   }
 
   info(
-    'No snapshot and zero scoped migrations in QA/CI mode; applying canonical QA baseline SQL to prevent missing-table bootstraps.',
+    scopedEntriesCount > 0
+      ? 'Scoped migrations applied but user_management schema is missing in QA/CI mode; applying canonical QA baseline SQL (idempotent).'
+      : 'No snapshot and zero scoped migrations in QA/CI mode; applying canonical QA baseline SQL to prevent missing-table bootstraps.',
   );
   await applySqlFile(client, QA_BASELINE_SQL, 'qa-baseline');
   return { applied: true };

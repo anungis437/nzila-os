@@ -129,9 +129,15 @@ async function seed(): Promise<void> {
       })
     }
 
-    await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
-    await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))
-    await tx.delete(authOrgPolicies).where(inArray(authOrgPolicies.organizationId, orgIds))
+    await safeCleanup('auth_user_sessions', async () => {
+      await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
+    })
+    await safeCleanup('auth_organization_users', async () => {
+      await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))
+    })
+    await safeCleanup('auth_org_policies', async () => {
+      await tx.delete(authOrgPolicies).where(inArray(authOrgPolicies.organizationId, orgIds))
+    })
 
     await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
     await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))

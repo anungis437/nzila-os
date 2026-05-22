@@ -113,4 +113,4 @@ Schema is illustrative. No tables are created in the current sprint. See [OCI_AC
 
 ## 10. Relation to workflows
 
-The state engine and the workflow engine are siblings. The state engine names institutional position. The workflow engine names which workflows are appropriate at that position. See [docs/oci/stabilization/workflows/README.md](workflows/README.md) and [`stabilizationWorkflowEngine.ts`](../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts).
+The state engine and the workflow engine are siblings. The state engine names institutional position. The workflow engine names which workflows are appropriate at that position. See [docs/oci/stabilization/workflows/README.md](workflows/README.md) and [`stabilizationWorkflowEngine.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts).

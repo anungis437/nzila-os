@@ -64,7 +64,7 @@ Every workflow document follows the same nine-section template:
 
 ## 4. Sequencing rules
 
-When multiple workflows are eligible for an institution, the sequencing engine ([`workflowSequencing.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/workflowSequencing.ts)) applies the following rules in order:
+When multiple workflows are eligible for an institution, the sequencing engine ([`workflowSequencing.ts`](../../../../apps/union-eyes/lib/workbook/engines/workflows/workflowSequencing.ts)) applies the following rules in order:
 
 1. **Recognition precedes intervention.** Workflows are offered only after the Recognition phase exit condition is met.
 2. **Reduction precedes addition.** Continuity Capture and Stewardship Redistribution precede Modernization Remediation when both are eligible.
@@ -88,7 +88,7 @@ A workflow returned by the composition engine is an **offer** the facilitator re
 
 ## 6. Composition engine surface
 
-The composition engine for the workflow layer is [`stabilizationWorkflowEngine.ts`](../../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts). It composes:
+The composition engine for the workflow layer is [`stabilizationWorkflowEngine.ts`](../../../../apps/union-eyes/lib/workbook/engines/workflows/stabilizationWorkflowEngine.ts). It composes:
 
 - Severity readings from `stabilizationPriorityEngine`,
 - Redistribution readings from `continuityRedistributionPlanner` via `stewardshipRedistributionEngine`,
