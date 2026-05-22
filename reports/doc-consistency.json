@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-22T13:34:40.748Z",
-  "filesScanned": 1776,
-  "totalFindings": 2532,
+  "generatedAt": "2026-05-22T16:36:56.576Z",
+  "filesScanned": 1782,
+  "totalFindings": 2534,
   "findingsByRule": {
-    "stale-reference": 1032,
+    "stale-reference": 1034,
     "stale-package-ref": 57,
     "naming-inconsistency": 1328,
     "stale-date": 7,
@@ -12,7 +12,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1197,
+    "warning": 1199,
     "info": 1335
   },
   "findings": [
@@ -36,6 +36,13 @@
       "file": "ARCHITECTURE.md",
       "line": 128,
       "message": "Possible broken link: [docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "AWS_ZONGA_SETUP.md",
+      "line": 428,
+      "message": "Possible broken link: [Zonga Launch Readiness Report](reports/zonga-launch-readiness.md)"
     },
     {
       "rule": "stale-reference",
@@ -92,6 +99,13 @@
       "file": "CONTRIBUTING.md",
       "line": 89,
       "message": "Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "README.md",
+      "line": 136,
+      "message": "Possible broken link: [reports/portfolio-status.md](reports/portfolio-status.md)"
     },
     {
       "rule": "stale-reference",
@@ -5466,455 +5480,455 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 55,
+      "line": 58,
       "message": "Possible broken link: [buyers/PORTFOLIO_OVERVIEW.md](buyers/PORTFOLIO_OVERVIEW.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 56,
+      "line": 59,
       "message": "Possible broken link: [buyers/SECURITY_SUMMARY.md](buyers/SECURITY_SUMMARY.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 57,
+      "line": 60,
       "message": "Possible broken link: [buyers/RELIABILITY_SUMMARY.md](buyers/RELIABILITY_SUMMARY.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 58,
+      "line": 61,
       "message": "Possible broken link: [buyers/OPERATING_MODEL.md](buyers/OPERATING_MODEL.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 59,
+      "line": 62,
       "message": "Possible broken link: [buyers/buyer-faq.md](buyers/buyer-faq.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 60,
+      "line": 63,
       "message": "Possible broken link: [buyers/sla-support-model.md](buyers/sla-support-model.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 61,
+      "line": 64,
       "message": "Possible broken link: [buyers/deployment-models.md](buyers/deployment-models.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 62,
+      "line": 65,
       "message": "Possible broken link: [buyers/integration-readiness-matrix.md](buyers/integration-readiness-matrix.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 63,
+      "line": 66,
       "message": "Possible broken link: [buyers/pilot-readiness-checklist.md](buyers/pilot-readiness-checklist.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 64,
+      "line": 67,
       "message": "Possible broken link: [buyers/product-capability-matrix.md](buyers/product-capability-matrix.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 65,
+      "line": 68,
       "message": "Possible broken link: [buyers/union-eyes-buyer-pack.md](buyers/union-eyes-buyer-pack.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 66,
+      "line": 69,
       "message": "Possible broken link: [buyers/flow-buyer-pack.md](buyers/flow-buyer-pack.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 67,
+      "line": 70,
       "message": "Possible broken link: [faircase/buyer-pack.md](faircase/buyer-pack.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 74,
+      "line": 77,
       "message": "Possible broken link: [governance/GOVERNANCE_ARCHITECTURE.md](governance/GOVERNANCE_ARCHITECTURE.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 75,
+      "line": 78,
       "message": "Possible broken link: [governance/security-overview.md](governance/security-overview.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 78,
+      "line": 81,
       "message": "Possible broken link: [platform/DATA_RESIDENCY_POLICY.md](platform/DATA_RESIDENCY_POLICY.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 79,
+      "line": 82,
       "message": "Possible broken link: [platform/THIRD_PARTY_RISK_REGISTER.md](platform/THIRD_PARTY_RISK_REGISTER.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 80,
+      "line": 83,
       "message": "Possible broken link: [governance/secure-coding-training.md](governance/secure-coding-training.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 81,
+      "line": 84,
       "message": "Possible broken link: [governance/audit-logging-model.md](governance/audit-logging-model.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 82,
+      "line": 85,
       "message": "Possible broken link: [governance/CHANGE_POLICY.md](governance/CHANGE_POLICY.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 83,
+      "line": 86,
       "message": "Possible broken link: [governance/incident-response-summary.md](governance/incident-response-summary.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 84,
+      "line": 87,
       "message": "Possible broken link: [governance/vendor-questionnaire-starter-pack.md](governance/vendor-questionnaire-starter-pack.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 85,
+      "line": 88,
       "message": "Possible broken link: [governance/procurement-pack.md](governance/procurement-pack.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 86,
+      "line": 89,
       "message": "Possible broken link: [governance/enterprise-readiness.md](governance/enterprise-readiness.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 92,
+      "line": 95,
       "message": "Possible broken link: [investor/final-investor-onepager.md](investor/final-investor-onepager.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 93,
+      "line": 96,
       "message": "Possible broken link: [investor/three-year-growth-narrative.md](investor/three-year-growth-narrative.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 94,
+      "line": 97,
       "message": "Possible broken link: [investor/revenue-scenarios.md](investor/revenue-scenarios.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 95,
+      "line": 98,
       "message": "Possible broken link: [investor/defensible-moat-analysis.md](investor/defensible-moat-analysis.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 96,
+      "line": 99,
       "message": "Possible broken link: [investor/risk-register-and-mitigations.md](investor/risk-register-and-mitigations.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 97,
+      "line": 100,
       "message": "Possible broken link: [investor/shared-platform-leverage-model.md](investor/shared-platform-leverage-model.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 98,
+      "line": 101,
       "message": "Possible broken link: [investor/product-expansion-strategy.md](investor/product-expansion-strategy.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 99,
+      "line": 102,
       "message": "Possible broken link: [investor/why-nzila-os-wins.md](investor/why-nzila-os-wins.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 107,
+      "line": 110,
       "message": "Possible broken link: [union-eyes/README.md](union-eyes/README.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 108,
+      "line": 111,
       "message": "Possible broken link: [union-eyes/admin-guide.md](union-eyes/admin-guide.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 109,
+      "line": 112,
       "message": "Possible broken link: [union-eyes/user-guide.md](union-eyes/user-guide.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 110,
+      "line": 113,
       "message": "Possible broken link: [union-eyes/quick-start.md](union-eyes/quick-start.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 111,
+      "line": 114,
       "message": "Possible broken link: [union-eyes/case-intelligence.md](union-eyes/case-intelligence.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 112,
+      "line": 115,
       "message": "Possible broken link: [union-eyes/faq.md](union-eyes/faq.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 113,
+      "line": 116,
       "message": "Possible broken link: [union-eyes/pilot-overview.md](union-eyes/pilot-overview.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 114,
+      "line": 117,
       "message": "Possible broken link: [union-eyes/integration-playbook.md](union-eyes/integration-playbook.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 120,
+      "line": 123,
       "message": "Possible broken link: [faircase/executive-summary.md](faircase/executive-summary.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 121,
+      "line": 124,
       "message": "Possible broken link: [faircase/buyer-pack.md](faircase/buyer-pack.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 122,
+      "line": 125,
       "message": "Possible broken link: [faircase/demo-script.md](faircase/demo-script.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 123,
+      "line": 126,
       "message": "Possible broken link: [faircase/pilot-plan.md](faircase/pilot-plan.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 124,
+      "line": 127,
       "message": "Possible broken link: [faircase/pricing-model.md](faircase/pricing-model.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 125,
+      "line": 128,
       "message": "Possible broken link: [faircase/implementation-guide.md](faircase/implementation-guide.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 126,
+      "line": 129,
       "message": "Possible broken link: [faircase/security-one-pager.md](faircase/security-one-pager.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 127,
+      "line": 130,
       "message": "Possible broken link: [faircase/roi-calculator.md](faircase/roi-calculator.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 133,
+      "line": 136,
       "message": "Possible broken link: [flow/revenue-profile.md](flow/revenue-profile.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 134,
+      "line": 137,
       "message": "Possible broken link: [buyers/flow-buyer-pack.md](buyers/flow-buyer-pack.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 140,
+      "line": 143,
       "message": "Possible broken link: [agri/00-overview.md](agri/00-overview.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 141,
+      "line": 144,
       "message": "Possible broken link: [agri/02-architecture.md](agri/02-architecture.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 142,
+      "line": 145,
       "message": "Possible broken link: [agri/03-data-model.md](agri/03-data-model.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 143,
+      "line": 146,
       "message": "Possible broken link: [agri/05-security-and-isolation.md](agri/05-security-and-isolation.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 144,
+      "line": 147,
       "message": "Possible broken link: [agri/06-evidence-and-traceability.md](agri/06-evidence-and-traceability.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 156,
+      "line": 159,
       "message": "Possible broken link: [platform/what-is-nzila.md](platform/what-is-nzila.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 158,
+      "line": 161,
       "message": "Possible broken link: [platform/PLATFORM_OPERATING_MODEL.md](platform/PLATFORM_OPERATING_MODEL.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 159,
+      "line": 162,
       "message": "Possible broken link: [platform/SHARED_SERVICES.md](platform/SHARED_SERVICES.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 160,
+      "line": 163,
       "message": "Possible broken link: [platform/APP_LIFECYCLE_PROCESS.md](platform/APP_LIFECYCLE_PROCESS.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 161,
+      "line": 164,
       "message": "Possible broken link: [platform/ONBOARDING.md](platform/ONBOARDING.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 162,
+      "line": 165,
       "message": "Possible broken link: [platform/PACKAGE_OWNERSHIP_MATRIX.md](platform/PACKAGE_OWNERSHIP_MATRIX.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 163,
+      "line": 166,
       "message": "Possible broken link: [platform/COMMAND_CATALOG.md](platform/COMMAND_CATALOG.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 164,
+      "line": 167,
       "message": "Possible broken link: [platform/COVERAGE_REPORTING.md](platform/COVERAGE_REPORTING.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 171,
+      "line": 174,
       "message": "Possible broken link: [proof-center/union-eyes-proof.md](proof-center/union-eyes-proof.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/INDEX.md",
-      "line": 172,
+      "line": 175,
       "message": "Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)"
     },
     {
@@ -15329,42 +15343,42 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/INDEX.md",
-      "line": 99,
+      "line": 102,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/INDEX.md",
-      "line": 65,
+      "line": 68,
       "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/INDEX.md",
-      "line": 66,
+      "line": 69,
       "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/INDEX.md",
-      "line": 67,
+      "line": 70,
       "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/INDEX.md",
-      "line": 121,
+      "line": 124,
       "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/INDEX.md",
-      "line": 134,
+      "line": 137,
       "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
     },
     {

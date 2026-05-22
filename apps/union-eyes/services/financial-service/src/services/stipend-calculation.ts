@@ -11,7 +11,6 @@
 
 import { db, schema } from '../db';
 import { eq, and, between, desc, sql } from 'drizzle-orm';
-import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';
 
 // Configuration constants
@@ -123,7 +122,7 @@ export async function calculateWeeklyStipends(
     });
 
     return eligibilityResults;
-  } catch (_error) {
+  } catch (error) {
     logger.error('Stipend calculation error', { error, organizationId: request.organizationId, strikeFundId: request.strikeFundId });
     throw new Error(`Failed to calculate stipends: ${error.message}`);
   }
@@ -157,7 +156,7 @@ export async function createDisbursement(
       success: true,
       disbursementId: disbursement.id,
     };
-  } catch (_error) {
+  } catch (error) {
     return {
       success: false,
       error: 'Failed to create disbursement',
@@ -205,7 +204,7 @@ export async function approveDisbursement(
       .where(eq(schema.stipendDisbursements.id, approval.disbursementId));
 
     return { success: true };
-  } catch (_error) {
+  } catch (error) {
     return {
       success: false,
       error: 'Failed to approve disbursement',
@@ -253,7 +252,7 @@ export async function markDisbursementPaid(
       .where(eq(schema.stipendDisbursements.id, disbursementId));
 
     return { success: true };
-  } catch (_error) {
+  } catch (error) {
     return {
       success: false,
       error: 'Failed to mark disbursement as paid',
@@ -290,7 +289,7 @@ export async function getMemberDisbursements(
       ...d,
       amount: parseFloat(d.totalAmount),
     }));
-  } catch (_error) {
+  } catch (error) {
     logger.error('Get disbursements error', { error, organizationId, memberId, strikeFundId });
     return [];
   }
@@ -321,7 +320,7 @@ export async function getPendingDisbursements(
       ...d,
       amount: parseFloat(d.totalAmount),
     }));
-  } catch (_error) {
+  } catch (error) {
     logger.error('Get pending disbursements error', { error, organizationId, strikeFundId });
     return [];
   }
@@ -371,7 +370,7 @@ export async function getStrikeFundDisbursementSummary(
     });
 
     return summary;
-  } catch (_error) {
+  } catch (error) {
     logger.error('Get disbursement summary error', { error, organizationId, strikeFundId });
     return {
       totalPending: 0,
@@ -429,7 +428,7 @@ export async function batchCreateDisbursements(
       disbursementIds,
       errors,
     };
-  } catch (_error) {
+  } catch (error) {
     return {
       success: false,
       created: 0,

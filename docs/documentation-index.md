@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-22T13:34:44.026Z
+Generated: 2026-05-22T16:37:00.976Z
 
-Total documents indexed: 1126
+Total documents indexed: 1132
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -14,7 +14,7 @@ Stale documents (>90 days since repo validation): 0
 | README.md | 1 | 0 |
 | architecture | 3 | 0 |
 | backlog | 1 | 0 |
-| categories | 919 | 0 |
+| categories | 921 | 0 |
 | compliance | 4 | 0 |
 | doctrine | 15 | 0 |
 | documentation-index.md | 1 | 0 |
@@ -27,7 +27,7 @@ Stale documents (>90 days since repo validation): 0
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
 | oci | 88 | 0 |
-| ops | 4 | 0 |
+| ops | 8 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
 | public | 1 | 0 |
@@ -772,6 +772,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/final-labor-continuity-readiness-review.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/final-labor-continuity-readiness-review.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/governance-safe-labor-intelligence-model.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/governance-safe-labor-intelligence-model.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/grievance-continuity-intelligence.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/grievance-continuity-intelligence.md) | categories | 2026-05-11 | current |
+| [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-deterministic-report-ai-doctrine.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-deterministic-report-ai-doctrine.md) | categories | 2026-05-22 | current |
+| [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-trust-center-alignment-notes.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/icra-trust-center-alignment-notes.md) | categories | 2026-05-22 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/labor-continuity-ux-refactor.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/labor-continuity-ux-refactor.md) | categories | 2026-05-11 | current |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/onboarding-continuity-intelligence.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/onboarding-continuity-intelligence.md) | categories | 2026-05-11 | current |
@@ -988,7 +990,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-11 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-11 | current |
 | [docs/healthcare/discovery-surveys.md](docs/healthcare/discovery-surveys.md) | healthcare | 2026-05-17 | current |
-| [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-05-10 | current |
+| [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-05-22 | current |
 | [docs/migration/trade/canonical-domain-map.md](docs/migration/trade/canonical-domain-map.md) | migration | 2026-05-11 | current |
 | [docs/migration/trade/cars-vertical-scope.md](docs/migration/trade/cars-vertical-scope.md) | migration | 2026-05-11 | current |
 | [docs/nzila-residual-closure/full-residual-elimination-review.md](docs/nzila-residual-closure/full-residual-elimination-review.md) | nzila-residual-closure | 2026-05-11 | current |
@@ -1121,6 +1123,10 @@ Stale documents (>90 days since repo validation): 0
 | [docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md](docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md) | oci | 2026-05-21 | current |
 | [docs/oci/stabilization/workflows/README.md](docs/oci/stabilization/workflows/README.md) | oci | 2026-05-22 | current |
 | [docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md](docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md) | oci | 2026-05-21 | current |
+| [docs/ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md](docs/ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md) | ops | 2026-05-22 | current |
+| [docs/ops/FINANCIAL_SERVICE_GOVERNANCE_RECOVERY.md](docs/ops/FINANCIAL_SERVICE_GOVERNANCE_RECOVERY.md) | ops | 2026-05-22 | current |
+| [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-05-22 | current |
+| [docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md](docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md) | ops | 2026-05-22 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-11 | current |
 | [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-22 | current |
 | [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-22 | current |
