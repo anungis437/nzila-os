@@ -269,7 +269,7 @@
     "tailwindcss": "^4",
     "ts-morph": "^27.0.2",
     "tsx": "^4.21.0",
-    "turbo": "2.9.3",
+    "turbo": "2.9.14",
     "typescript": "^6",
     "vitest": "^4.1.2",
     "zod-to-json-schema": "^3.25.1"
