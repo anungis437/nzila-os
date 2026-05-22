@@ -75,7 +75,8 @@ const EXEMPT_ROUTES = new Set([
   'analytics',      // Public marketing analytics events (anonymous)
   'monday-reset',   // Public weekly checklist (static content)
   'billing/checkout', // Public SaaS checkout (Stripe-hosted)
-  'icra',           // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated)
+  'icra',           // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated) [legacy alias]
+  'ocra',           // OCRA — canonical alias of icra (OCI↔OCRA convergence Phase 2)
   'workbook',       // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential)
   '_perf',          // Web vitals sendBeacon endpoint (anonymous, no org context)
 ])

@@ -119,7 +119,8 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/billing/checkout',           // Public SaaS checkout (Stripe-hosted)
   '/api/billing/webhook',            // Stripe billing webhook (Stripe-verified, not user-auth)
   '/api/leads',                      // Public lead capture (pre-onboarding soft gate, no user-auth)
-  '/api/icra',                       // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated)
+  '/api/icra',                       // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated) [legacy alias]
+  '/api/ocra',                       // OCRA — canonical alias of /api/icra (OCI↔OCRA convergence Phase 2)
   '/api/workbook',                   // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential, claim route enforces auth() at runtime)
   '/_perf/',                         // Web vitals sendBeacon (anonymous, no org context)
 ]
