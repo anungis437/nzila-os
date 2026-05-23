@@ -53,10 +53,32 @@ export async function getMemberVisibleTimeline(
 
   const claimData = claim[0];
 
-  // Basic access check (simplified - in production, verify organization membership)
+  // Authorization: a member may view this claim's member-scope timeline ONLY if they own
+  // the claim or they are an active member of the claim's organization. Previously this
+  // check was a no-op ("For now, allow all for demonstration"), which leaked claim-existence
+  // and member-scope updates across tenants. Fail-closed.
   if (claimData.memberId !== memberId) {
-    // Allow viewing if member is in same organization (would check org membership in production)
-    // For now, allow all for demonstration
+    const sameOrg = await db
+      .select({ id: organizationMembers.id })
+      .from(organizationMembers)
+      .where(
+        and(
+          eq(organizationMembers.organizationId, claimData.organizationId),
+          eq(organizationMembers.userId, memberId),
+          eq(organizationMembers.status, 'active')
+        )
+      )
+      .limit(1);
+
+    if (sameOrg.length === 0) {
+      logger.warn('getMemberVisibleTimeline: access denied', {
+        claimId,
+        requestingMemberId: memberId,
+        claimOwnerMemberId: claimData.memberId,
+        claimOrganizationId: claimData.organizationId,
+      });
+      throw new Error('Access denied: member is not authorized to view this claim');
+    }
   }
 
   // Fetch only 'member' scope events
