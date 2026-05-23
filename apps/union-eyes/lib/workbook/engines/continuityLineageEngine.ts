@@ -26,9 +26,9 @@ import {
   type InterpretationCell,
 } from './governanceInterpretationMatrix';
 import {
-  trackInstitutionalEvolution,
-  type InstitutionalEvolutionResult,
-} from './institutionalEvolutionTracker';
+  trackOrganizationalEvolution,
+  type OrganizationalEvolutionResult,
+} from './organizationalEvolutionTracker';
 
 export interface ContinuityLineageInput {
   readonly workbookId: string;
@@ -66,7 +66,7 @@ export interface ContinuityLineageResult {
   readonly status: 'facilitated' | 'self-guided';
   readonly precedents: readonly PrecedentMapping[];
   readonly interpretationMatrix: readonly InterpretationCell[];
-  readonly evolution: InstitutionalEvolutionResult;
+  readonly evolution: OrganizationalEvolutionResult;
   readonly survivability: PrecedentSurvivabilityLayer;
   readonly aggregateInterpretationDrift: number;
   readonly signals: readonly LineageSignal[];
@@ -80,7 +80,7 @@ export function runContinuityLineage(
 ): ContinuityLineageResult {
   const precedents = mapPrecedentContinuity(input.precedents);
   const interpretationMatrix = buildInterpretationMatrix(input.governanceDomains);
-  const evolution = trackInstitutionalEvolution(precedents, interpretationMatrix);
+  const evolution = trackOrganizationalEvolution(precedents, interpretationMatrix);
   const survivability = aggregateLineageHealth(precedents);
   const aggregateDrift = aggregateInterpretationDrift(interpretationMatrix);
 
@@ -174,7 +174,7 @@ function synthesizeSignals(
 
 function buildPreview(
   survivability: PrecedentSurvivabilityLayer,
-  evolution: InstitutionalEvolutionResult,
+  evolution: OrganizationalEvolutionResult,
 ): string {
   if (survivability.total === 0) {
     return 'No governance precedents have been named yet — the lineage module will populate as precedents are surfaced.';

@@ -64,7 +64,7 @@ export interface RepresentationEvolutionView {
   readonly entries: readonly InstitutionalTimelineEntry[]
 }
 
-export interface InstitutionalEvolutionView {
+export interface OrganizationalEvolutionView {
   readonly organizations: readonly OrganizationEvolutionView[]
   readonly affiliations: readonly AffiliationEvolutionView[]
   readonly representations: readonly RepresentationEvolutionView[]
@@ -94,7 +94,7 @@ export interface InstitutionalChronologyView {
     readonly decisions: number
   }
   readonly proceduralTimeline: ProceduralTimelineView
-  readonly evolution: InstitutionalEvolutionView
+  readonly evolution: OrganizationalEvolutionView
   readonly lineage: readonly DecisionLineageView[]
   readonly continuity: readonly ContinuityProgressionView[]
   readonly epochs: readonly InstitutionalTimelineEntry[]
@@ -174,7 +174,7 @@ export async function getInstitutionalChronologyView(): Promise<InstitutionalChr
         entries: timelineForRepresentation(safe, representationEdgeId),
       }))
 
-  const evolution: InstitutionalEvolutionView = {
+  const evolution: OrganizationalEvolutionView = {
     organizations,
     affiliations,
     representations,

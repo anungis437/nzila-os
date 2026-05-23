@@ -26,7 +26,7 @@ export interface EvolutionEraSummary {
   readonly continuityRate: number;
 }
 
-export interface InstitutionalEvolutionResult {
+export interface OrganizationalEvolutionResult {
   readonly posture: EvolutionPosture;
   readonly continuityRate: number;
   readonly interpretationDrift: number;
@@ -36,10 +36,10 @@ export interface InstitutionalEvolutionResult {
 
 const ERA_ORDER: readonly PrecedentEra[] = ['founding', 'long_term', 'mid_term', 'recent'];
 
-export function trackInstitutionalEvolution(
+export function trackOrganizationalEvolution(
   precedents: readonly PrecedentMapping[],
   interpretation: readonly InterpretationCell[],
-): InstitutionalEvolutionResult {
+): OrganizationalEvolutionResult {
   const byEra = new Map<PrecedentEra, { carried: number; lapsed: number }>();
   for (const era of ERA_ORDER) byEra.set(era, { carried: 0, lapsed: 0 });
 

@@ -3,13 +3,13 @@
  * MODULE: OCI Stabilization Progression
  * DOCTRINE_VERSION: 2.0.0
  *
- * Composes institutionalEvolutionTracker into a stabilization-facing
+ * Composes organizationalEvolutionTracker into a stabilization-facing
  * evolution model. Reads only — no scoring, no analytics.
  *
  * Pure, deterministic.
  */
 
-import type { InstitutionalEvolutionResult, EvolutionPosture } from '../institutionalEvolutionTracker';
+import type { OrganizationalEvolutionResult, EvolutionPosture } from '../organizationalEvolutionTracker';
 
 export const ENGINE_VERSION = '2.0.0';
 
@@ -28,7 +28,7 @@ export interface StabilizationEvolutionReading {
 }
 
 export function readStabilizationEvolution(
-  evolution: InstitutionalEvolutionResult | null,
+  evolution: OrganizationalEvolutionResult | null,
 ): StabilizationEvolutionReading {
   if (!evolution) {
     return {
