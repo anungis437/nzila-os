@@ -1044,7 +1044,7 @@ export default async function ProofPage({
         description={copy.heroDescription}
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.pilotCta}
             </Link>
             <Link href={withInstitutionalContext(`/${locale}/trust`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all">
@@ -1551,7 +1551,7 @@ export default async function ProofPage({
                   {copy.proofPackDesc}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-electric text-white font-semibold rounded-xl hover:bg-blue-700 transition-all">
+                  <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-electric text-white font-semibold rounded-xl hover:bg-blue-700 transition-all">
                     {copy.pilotCta} <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link href={`/${locale}/trust`} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-navy font-semibold rounded-xl border border-gray-200 hover:border-gray-300 transition-all">

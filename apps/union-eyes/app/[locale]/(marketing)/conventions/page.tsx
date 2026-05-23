@@ -368,7 +368,7 @@ export default async function ConventionsPage({
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/institutional-continuity-risk`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
             >
               {copy.ctaPrimary}
@@ -623,7 +623,7 @@ export default async function ConventionsPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/institutional-continuity-risk`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
               {copy.ctaPrimary}

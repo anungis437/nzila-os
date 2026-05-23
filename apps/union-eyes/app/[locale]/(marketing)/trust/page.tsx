@@ -164,7 +164,7 @@ const TRUST_COPY = {
   'fr-CA': {
     contextLabel: 'contexte',
     reviewProof: 'Examiner le registre de preuve',
-    beginBriefing: 'Commencer un breffage de continuité',
+    beginBriefing: 'Commencer la réflexion de continuité (gratuite)',
     tabs: {
       foundations: 'Fondations',
       governance: 'Gouvernance',
@@ -313,7 +313,7 @@ export default async function TrustPage({
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)}
+              href={withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode)}
               className="border-electric/40 bg-electric inline-flex items-center gap-2 rounded-xl border px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
             >
               {copy.beginBriefing}
@@ -641,7 +641,7 @@ export default async function TrustPage({
           </p>
           <div className="flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)}
+              href={withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode)}
               className="bg-navy hover:bg-navy/90 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition-colors"
             >
               {copy.startPilot} <ArrowRight className="h-4 w-4" />

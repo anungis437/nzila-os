@@ -25,7 +25,7 @@ export default function LocaleSiteNavigation() {
   const searchParams = useSearchParams();
   const locale = (params?.locale as string) || 'en-CA';
   const contextMode = parseInstitutionalMode(searchParams.get('context') ?? undefined);
-  const pilotRequestHref = withInstitutionalContext(`/${locale}/pilot-request`, contextMode);
+  const pilotRequestHref = withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode);
   const whitepaperLabel = locale === 'fr-CA' ? 'Livre blanc' : 'Whitepaper';
 
   const solutionsLinks = [
