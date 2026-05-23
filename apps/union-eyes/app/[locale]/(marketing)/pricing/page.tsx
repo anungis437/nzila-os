@@ -18,22 +18,18 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import {
-  ArrowRight,
-  CheckCircle2,
   Compass,
   Network,
-  Map,
   Layers,
   Infinity as InfinityIcon,
   Sparkles,
-  ShieldCheck,
   Users,
 } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
-import ScrollReveal from '@/components/public/scroll-reveal';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
+import PricingTabs from './_components/pricing-tabs';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -456,6 +452,11 @@ const pricingCopy = {
     section3Body: 'A maturity-oriented engagement pathway. Five sequential stages, each one earning the next. Platform activation appears at stage four — never stage one.',
     stageLabel: 'Stage',
     outcomeLabel: 'Outcome',
+    tabStartHere: 'Start here',
+    tabEngagementLayers: 'Engagement layers',
+    tabJourney: 'The journey',
+    tabWhy: 'Why this exists',
+    tabProcurement: 'Procurement',
     sectionLadderEyebrow: 'Start here',
     sectionLadderHeading: 'The assessment ladder',
     sectionLadderBody: 'Every UnionEyes relationship begins with an assessment, not a procurement form. The first three steps are scoped, named, and priced — so an executive director or board chair can begin the continuity conversation without waiting for a sales cycle.',
@@ -501,6 +502,11 @@ const pricingCopy = {
     section3Body: 'Un parcours d’engagement orienté maturité. Cinq étapes séquentielles, chacune méritant la suivante. L’activation de plateforme apparaît à l’étape quatre — jamais à l’étape un.',
     stageLabel: 'Étape',
     outcomeLabel: 'Résultat',
+    tabStartHere: 'Commencer ici',
+    tabEngagementLayers: 'Couches d’engagement',
+    tabJourney: 'Le parcours',
+    tabWhy: 'Pourquoi nous existons',
+    tabProcurement: 'Approvisionnement',
     sectionLadderEyebrow: 'Commencer ici',
     sectionLadderHeading: 'L’échelle d’évaluation',
     sectionLadderBody: 'Chaque relation avec UnionEyes commence par une évaluation, pas par un formulaire d’approvisionnement. Les trois premières étapes sont délimitées, nommées et tarifées — afin qu’un directeur général ou un président de conseil puisse amorcer la conversation de continuité sans attendre un cycle de vente.',
@@ -586,296 +592,8 @@ export default async function LocalePricingPage({
         </div>
       </section>
 
-      {/* ── SECTION 1 — Continuity starts before software ── */}
-      <section className="py-16 bg-white border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.section1Heading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.section1Body}
-            </p>
-          </ScrollReveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">
-            {copy.continuityFragility.map((item) => (
-              <article key={item.title} className="institution-panel calm-elevation p-5">
-                <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 2 — When organizations typically engage us ── */}
-      <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.section2Heading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.section2Body}
-            </p>
-          </ScrollReveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">
-            {copy.engagementMoments.map((item) => (
-              <article key={item.title} className="institution-panel calm-elevation p-5">
-                <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 3 — The Continuity Journey ── */}
-      <section className="py-16 bg-white border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-slate-100 text-navy text-xs font-semibold tracking-wide uppercase mb-4">
-              <Map className="h-3.5 w-3.5" />
-              {copy.stageLabel} 1 → 5
-            </div>
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.section3Heading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.section3Body}
-            </p>
-          </ScrollReveal>
-
-          <ol className="space-y-4 narrative-sequence">
-            {copy.continuityJourney.map((step) => (
-              <li
-                key={step.stage}
-                className="institution-panel calm-elevation p-5 flex flex-col md:flex-row md:items-start gap-4"
-              >
-                <div className="flex items-center gap-3 md:w-56 shrink-0">
-                  <div
-                    aria-hidden="true"
-                    className="w-10 h-10 rounded-full bg-navy text-white text-base font-bold flex items-center justify-center shrink-0"
-                  >
-                    {step.stage}
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
-                      {copy.stageLabel} {step.stage}
-                    </div>
-                    <div className="text-sm font-semibold text-navy leading-tight">{step.name}</div>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-xs uppercase tracking-wider text-[#1f5b84] font-semibold mb-1">
-                    {copy.outcomeLabel} — {step.outcome}
-                  </div>
-                  <p className="text-sm text-slate-700 leading-relaxed">{step.summary}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* ── SECTION 3.5 — Assessment Ladder (GTM entry funnel) ── */}
-      <section className="py-16 bg-[#fbf9f4] border-b border-slate-200/70">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-navy text-white text-xs font-semibold tracking-wide uppercase mb-4">
-              <Compass className="h-3.5 w-3.5" />
-              {copy.sectionLadderEyebrow}
-            </div>
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.sectionLadderHeading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.sectionLadderBody}
-            </p>
-          </ScrollReveal>
-
-          <div className="grid md:grid-cols-3 gap-5 narrative-sequence">
-            {copy.assessmentLadder.map((tier) => (
-              <article
-                key={tier.key}
-                className={
-                  tier.featured
-                    ? 'institution-panel calm-elevation p-6 flex flex-col ring-2 ring-navy/80 relative'
-                    : 'institution-panel calm-elevation p-6 flex flex-col'
-                }
-              >
-                {tier.featured && (
-                  <div className="absolute -top-3 left-6 inline-flex items-center gap-1.5 px-3 py-1 bg-navy text-white text-[10px] font-bold uppercase tracking-wider rounded-full">
-                    <Sparkles className="h-3 w-3" />
-                    {copy.ladderFeaturedBadge}
-                  </div>
-                )}
-                <h3 className="text-lg font-semibold text-navy leading-tight mb-2">{tier.name}</h3>
-                <div className="mb-1">
-                  <span className="text-2xl font-bold text-navy">{tier.price}</span>
-                </div>
-                <p className="text-xs text-slate-500 italic mb-4">{tier.pricePosture}</p>
-                <p className="text-sm text-slate-700 leading-relaxed mb-5">{tier.summary}</p>
-
-                <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
-                  {copy.ladderIncludesLabel}
-                </div>
-                <ul className="space-y-2 mb-5">
-                  {tier.includes.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
-                      <CheckCircle2 className="h-4 w-4 text-[#1f5b84] mt-0.5 shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href={`/${locale}${tier.ctaHref}`}
-                  className={
-                    tier.featured
-                      ? 'mt-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-navy text-white text-sm font-semibold rounded-xl hover:bg-[#1f5b84] transition-colors'
-                      : 'mt-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-white border border-navy text-navy text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors'
-                  }
-                >
-                  {tier.cta} <ArrowRight className="h-4 w-4" />
-                </Link>
-              </article>
-            ))}
-          </div>
-
-          <p className="text-xs text-slate-500 mt-6 max-w-3xl leading-relaxed italic">
-            {copy.sectionLadderFooter}
-          </p>
-        </div>
-      </section>
-
-      {/* ── SECTION 4 — Engagement layers ── */}
-      <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.section4Heading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.section4Body}
-            </p>
-          </ScrollReveal>
-
-          <div className="grid md:grid-cols-2 gap-5 narrative-sequence">
-            {copy.engagementLayers.map((tier) => {
-              const Icon = tier.icon;
-              return (
-                <article key={tier.key} className="institution-panel calm-elevation p-6 flex flex-col">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-                      <Icon className="h-5 w-5 text-navy" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">
-                        {tier.layer}
-                      </div>
-                      <h3 className="text-lg font-semibold text-navy leading-tight">{tier.name}</h3>
-                      <p className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-wider">{tier.posture}</p>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-slate-500 italic mb-4">{tier.feels}</p>
-
-                  <p className="text-sm text-slate-700 leading-relaxed mb-5">
-                    <span className="font-semibold text-navy">{copy.fitPrefix}</span>{tier.fit}
-                  </p>
-
-                  <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
-                    {copy.deliverablesLabel}
-                  </div>
-                  <ul className="space-y-2 mb-5">
-                    {tier.deliverables.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
-                        <CheckCircle2 className="h-4 w-4 text-[#1f5b84] mt-0.5 shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-auto pt-4 border-t border-slate-200/70">
-                    <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">
-                      {copy.investmentLabel}
-                    </div>
-                    <p className="text-sm font-semibold text-navy">{tier.range}</p>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      {copy.rangeNote}
-                    </p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          {/* Friendly fit-finder — OCI-first */}
-          <div className="institution-panel calm-elevation mt-8 p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5">
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-navy mb-1">{copy.unsureTitle}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                {copy.unsureBody}
-              </p>
-            </div>
-            <Link
-              href={`/${locale}/contact`}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-navy text-white text-sm font-semibold rounded-xl hover:bg-[#1f5b84] transition-colors whitespace-nowrap"
-            >
-              {copy.unsureCta} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 5 — Procurement-safe institutional commitments ── */}
-      <section className="py-16 bg-white border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-slate-100 text-navy text-xs font-semibold tracking-wide uppercase mb-4">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              {copy.procurementLabel}
-            </div>
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.commitmentsHeading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.commitmentsBody}
-            </p>
-          </ScrollReveal>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 narrative-sequence">
-            {copy.procurementCommitments.map((item) => (
-              <article key={item.title} className="institution-panel calm-elevation p-5">
-                <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-5">
-            <Link
-              href={`/${locale}/trust`}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
-            >
-              {copy.trustCenter} <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href={`/${locale}/governance`}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
-            >
-              {copy.governanceStructure} <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href={`/${locale}/proof`}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
-            >
-              {copy.institutionalProof} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* -- Tabbed pricing surface (replaces six long-scroll sections) -- */}
+      <PricingTabs locale={locale} copy={copy} />
 
       {/* ── Executive briefing CTA ── */}
       <section className="py-16 bg-navy text-white">
