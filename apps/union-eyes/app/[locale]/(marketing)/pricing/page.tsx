@@ -22,6 +22,7 @@ import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSectio
 import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
+import { getUnionEyesSiteTopology } from '@/lib/site-topology';
 import PricingTabs from './_components/pricing-tabs';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
@@ -549,9 +550,103 @@ export default async function LocalePricingPage({
   const { locale } = await params;
   const tNote = await getTranslations({ locale, namespace: 'continuityNotes.procurement' });
   const copy = pricingCopy[locale as keyof typeof pricingCopy] ?? pricingCopy['en-CA'];
+  const { marketingUrl } = getUnionEyesSiteTopology();
+
+  // Schema.org Service + Offer surface aligned to the GTM funnel on
+  // /institutional-continuity-risk. Three concrete tiers (Continuity
+  // Reflection / Executive Continuity Brief / Institutional Continuity
+  // Diagnostic) plus four engagement layers (priced as ranges) get exposed
+  // as a Service with an AggregateOffer so search engines and procurement
+  // crawlers see the real entry funnel — not a generic SaaS price band.
+  const pricingServiceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'UnionEyes Institutional Continuity Engagement',
+    serviceType: 'Institutional continuity assessment and infrastructure',
+    provider: {
+      '@type': 'Organization',
+      name: 'UnionEyes',
+      url: marketingUrl,
+    },
+    areaServed: { '@type': 'Country', name: 'Canada' },
+    availableLanguage: ['en-CA', 'fr-CA'],
+    url: `${marketingUrl}/${locale}/pricing`,
+    description:
+      'Institutional continuity engagement architecture for unions, federations, and democratic organizations — Continuity Reflection, Executive Continuity Brief, Institutional Continuity Diagnostic, then layered platform activation and longitudinal support.',
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Continuity Reflection',
+        description:
+          'Pseudonymous institutional continuity assessment (ICRA). OCI band, quiet-risk signal observations, continuity burden index, one starter recommendation. No login required.',
+        price: '0',
+        priceCurrency: 'CAD',
+        availability: 'https://schema.org/InStock',
+        url: `${marketingUrl}/${locale}/continuity-assessment/start`,
+      },
+      {
+        '@type': 'Offer',
+        name: 'Executive Continuity Brief',
+        description:
+          'Governance-readable deepening of the continuity assessment: governance entropy, continuity debt, institutional dependency review, modernization risk, prioritized recommendations.',
+        price: '1200',
+        priceCurrency: 'CAD',
+        availability: 'https://schema.org/InStock',
+        url: `${marketingUrl}/${locale}/continuity-assessment/start?intendedTier=executive_continuity_brief`,
+      },
+      {
+        '@type': 'Offer',
+        name: 'Institutional Continuity Diagnostic',
+        description:
+          'Facilitated diagnostic engagement: institutional continuity workshop, memory lineage mapping, and executive briefing note your board can act on.',
+        price: '6500',
+        priceCurrency: 'CAD',
+        availability: 'https://schema.org/InStock',
+        url: `${marketingUrl}/${locale}/contact?topic=institutional-continuity-diagnostic`,
+      },
+      {
+        '@type': 'AggregateOffer',
+        name: 'OCI — Continuity Assessment engagement layer',
+        description:
+          'Layered institutional diagnostic engagement: OCI Snapshot, Executive Continuity Brief, Governance Entropy Review, Institutional Continuity Workshop.',
+        priceCurrency: 'CAD',
+        lowPrice: '18000',
+        highPrice: '45000',
+        offerCount: 1,
+        url: `${marketingUrl}/${locale}/pricing#engagement-layers`,
+      },
+      {
+        '@type': 'AggregateOffer',
+        name: 'OCRA — Adaptive Continuity Intelligence engagement layer',
+        description:
+          'Structural continuity analysis, continuity topology mapping, modernization pathway evaluation, confidence-aware operational interpretation.',
+        priceCurrency: 'CAD',
+        lowPrice: '35000',
+        highPrice: '90000',
+        offerCount: 1,
+        url: `${marketingUrl}/${locale}/pricing#engagement-layers`,
+      },
+      {
+        '@type': 'AggregateOffer',
+        name: 'Platform Activation engagement layer',
+        description:
+          'Operational continuity tooling activation atop an assessed baseline — governance infrastructure alignment, decisions-of-record systems, continuity-safe workflows.',
+        priceCurrency: 'CAD',
+        lowPrice: '40000',
+        highPrice: '140000',
+        offerCount: 1,
+        url: `${marketingUrl}/${locale}/pricing#engagement-layers`,
+      },
+    ],
+  };
 
   return (
     <div className="institution-shell min-h-screen">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger -- structured data; values are static literals
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingServiceSchema) }}
+      />
       <MarketingHeroSection
         imageUrl={heroImagery.pricing}
         tone="dark"

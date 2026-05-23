@@ -38,7 +38,7 @@ export default async function SignInPage({ params }: PageProps) {
       ]
 
   const tagline = isCupeDemo
-    ? 'Operational Continuity for Organized Labour'
+    ? 'Organizational Continuity for Organized Labour'
     : t('tagline')
 
   const subtitle = isCupeDemo
