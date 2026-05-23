@@ -970,7 +970,11 @@ async function aggregateStatCanMembershipData(
   const goodStandingMembers = remittances.reduce((sum, r) => sum + r.goodStandingMembers, 0);
   const remittableMembers = remittances.reduce((sum, r) => sum + r.remittableMembers, 0);
 
-  // For other metrics, would need additional tables
+  // For other metrics, would need additional tables. Returning 0 for these
+  // fields means the StatCan submission claims zero new members, zero
+  // turnover, and zero average tenure — a false return. Surface loudly until
+  // enrollment/termination tracking lands.
+  logger.error('aggregateStatCanMembershipData: newMembersThisYear / membersTurnover / averageMembershipDuration are NOT measured — returning 0 produces a false StatCan filing.', undefined, { fiscalYear: _fiscalYear });
   return {
     totalMembers,
     goodStandingMembers,

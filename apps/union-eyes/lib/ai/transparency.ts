@@ -516,12 +516,17 @@ export class AIAppealManager {
     };
     
     appealsStore.set(appeal.id, appeal);
-    
-    logger.info('AI appeal filed', { 
-      appealId: appeal.id, 
-      requestId: params.requestId 
+
+    // Appeals are kept in a process-local Map. In a multi-replica ACA
+    // deployment another instance will not see this appeal, and any restart
+    // erases all filed appeals. Users see a successful filing but have no
+    // durable recourse. Surface every filing loudly until a DB table exists.
+    logger.error('AIAppealManager.fileAppeal: appeal stored in process-local Map only — NOT persisted, NOT visible across replicas, lost on restart', undefined, {
+      appealId: appeal.id,
+      requestId: params.requestId,
+      filedBy: params.filedBy,
     });
-    
+
     return appeal;
   }
 

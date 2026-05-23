@@ -22,8 +22,11 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // In production these would come from the database.
-    // For the pilot scaffold, we demonstrate the shape with defaults.
+    // PILOT SCAFFOLD: these flags are hardcoded — they are NOT measured from
+    // the database. An admin hitting this endpoint sees a green health report
+    // regardless of actual pilot state. Surface loudly until each flag is
+    // backed by a real query.
+    logger.warn('admin/pilot-status: returning hardcoded pilot configuration flags; values are NOT measured from the database', {});
     const config: PilotConfiguration = {
       vocabularyLoaded: true,
       orgConfigured: true,

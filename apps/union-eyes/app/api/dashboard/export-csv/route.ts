@@ -51,11 +51,17 @@ export const GET = withApiAuth(async (request: NextRequest) => {
       );
     }
 
-    // In production this would query the database.
-    // For the pilot, we use the same pure-computation approach:
-    // the caller would supply cases via a shared service layer.
-    // Here we demonstrate the export pipeline with an empty set
-    // that the route handler will replace once wired to the DB.
+    // The export pipeline is wired but the data source is not — returning
+    // an empty CSV would mislead admins into thinking they have a complete
+    // export of zero rows. Refuse in production; warn loudly elsewhere.
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('dashboard/export-csv: refusing to emit empty CSV in production — data source is not wired', { report });
+      return NextResponse.json(
+        { error: 'CSV export is not yet wired to a data source. Refusing to return an empty export in production.' },
+        { status: 501 },
+      );
+    }
+    logger.warn('dashboard/export-csv: data source not wired; returning empty CSV (dev/test only)', { report });
     const cases: CaseRow[] = [];
 
     // Apply filters from query params
