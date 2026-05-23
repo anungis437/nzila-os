@@ -136,6 +136,14 @@ export default async function LocaleRootPage({
                   {t('ctaSecondary')}
                 </Link>
               </div>
+              {/* Tertiary low-friction CTA — audit recommendation: give cold visitors a no-commitment entry point. */}
+              <Link
+                href={`/${locale}/whitepaper`}
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white underline underline-offset-4 decoration-white/40 hover:decoration-white transition-colors"
+              >
+                {t('ctaTertiary')}
+                <span aria-hidden="true">→</span>
+              </Link>
             </ScrollReveal>
           </div>
         </section>

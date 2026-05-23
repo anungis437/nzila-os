@@ -7216,8 +7216,9 @@
       "badge": "Um Sistema Operacional Governado para Sindicatos",
       "heroHeading": "Comande todas as dimensões do seu sindicato.",
       "heroDescription": "Reclamações. Finanças. Filiação. Conformidade. Uma camada de continuidade governada — total transparência, total responsabilidade, zero suposições.",
-      "ctaPrimary": "Iniciar um Piloto Controlado",
+      "ctaPrimary": "Ingressar no Programa Parceiros Fundadores",
       "ctaSecondary": "Ver arquitetura de governança",
+      "ctaTertiary": "Ler o white paper sobre continuidade",
       "statsLabel": {
         "unionEntities": "Módulos Disponíveis",
         "timeSaved": "Idiomas Suportados",
@@ -7313,9 +7314,18 @@
       "principle4Title": "Governança democrática incorporada",
       "principle4Description": "UnionEyes tem uma estrutura de governança com matérias reservadas. Os representantes eleitos pelos membros detêm assentos de supervisão reservados e exercem o consentimento dos trabalhadores em caso de mudança de controle ou de missão. Isso não é marketing — está em nosso acordo de acionistas.",
       "ctaHeading": "Pronto para ver se somos a escolha certa?",
-      "ctaBody": "Não fazemos demonstrações. Fazemos conversas. Conte-nos sobre seus desafios. Seremos honestos sobre se o UnionEyes pode ajudar — ou se outra coisa serviria melhor.",
+      "ctaBody": "Não realizamos demonstrações genéricas. Realizamos sessões estruturadas adaptadas ao perfil de continuidade da sua organização. Conte-nos sobre seus desafios. Seremos honestos sobre se o UnionEyes pode ajudar — ou se outra coisa serviria melhor.",
       "ctaPilot": "Solicitar um programa piloto",
-      "ctaContact": "Iniciar uma conversa"
+      "ctaContact": "Iniciar uma conversa",
+      "foundersHeading": "Quem está construindo isto",
+      "foundersIntro": "UnionEyes não foi montado por uma equipe de software generalista que descobriu o setor sindical. Foi construído por duas pessoas nomeadas, com experiência setorial complementar e atestável.",
+      "founderMikeName": "Mike Nungisa",
+      "founderMikeRole": "Cofundador · Domínio e doutrina",
+      "founderMikeBio": "Ex-Oficial de Relações Trabalhistas de um sindicato nacional. Depois, advogado conduzindo investigações e avaliações em local de trabalho. Mike trabalhou dentro de sindicatos, com sindicatos, e através da superfície procedural que o UnionEyes foi projetado para apoiar.",
+      "founderObyName": "Oby Nungisa",
+      "founderObyRole": "Cofundador · Arquitetura e operações",
+      "founderObyBio": "Tecnólogo de carreira focado em plataformas operacionais que as pessoas realmente usam. Responsável pela postura arquitetônica, superfície de implantação e substrato operacional hospedado no Canadá do UnionEyes.",
+      "foundersNote": "Ambos os cofundadores podem ser contatados pelo canal de Apresentação Executiva — e permanecem operacionalmente envolvidos em cada implantação piloto."
     },
     "pricing": {
       "heroHeading": "Implantação Baseada em Contrato",

@@ -234,7 +234,7 @@ export default function LocaleSiteNavigation() {
             </a>
 
             <Link
-              href="/sign-in"
+              href={`/${locale}/sign-in`}
               className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors whitespace-nowrap ${
                 scrolled ? 'text-gray-600 hover:text-navy' : 'text-white/80 hover:text-white'
               }`}
@@ -323,7 +323,7 @@ export default function LocaleSiteNavigation() {
                   className="block w-full text-center px-4 py-3 bg-electric text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
                   {t('requestPilot')}
                 </a>
-                <Link href="/sign-in"
+                <Link href={`/${locale}/sign-in`}
                   className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 hover:text-navy">
                   <LogIn className="h-4 w-4" />
                   {t('signIn')}

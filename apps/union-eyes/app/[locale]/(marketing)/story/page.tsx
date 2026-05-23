@@ -113,6 +113,28 @@ export default async function LocaleStoryPage({
           </div>
         </section>
 
+        {/* Founders — named, attestable, no fabricated photos.
+            Initials avatars used until real headshots are added. */}
+        <section id="founders" className="mb-16 scroll-mt-24">
+          <h2 className="text-3xl font-bold text-slate-900 mb-3">{t('foundersHeading')}</h2>
+          <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-3xl">{t('foundersIntro')}</p>
+          <div className="grid gap-6 md:grid-cols-2">
+            <FounderCard
+              initials="MN"
+              name={t('founderMikeName')}
+              role={t('founderMikeRole')}
+              bio={t('founderMikeBio')}
+            />
+            <FounderCard
+              initials="ON"
+              name={t('founderObyName')}
+              role={t('founderObyRole')}
+              bio={t('founderObyBio')}
+            />
+          </div>
+          <p className="mt-6 text-sm text-slate-500 italic">{t('foundersNote')}</p>
+        </section>
+
         {/* CTA */}
         <section className="mb-16 text-center">
           <h2 className="text-3xl font-bold text-slate-900 mb-6">{t('ctaHeading')}</h2>
@@ -139,6 +161,26 @@ function PrincipleCard({ icon, title, description }: { icon: React.ReactNode; ti
         <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
         <p className="text-slate-700">{description}</p>
       </div>
+    </div>
+  );
+}
+
+function FounderCard({ initials, name, role, bio }: { initials: string; name: string; role: string; bio: string }) {
+  return (
+    <div className="flex flex-col gap-4 p-6 bg-white border border-slate-200 rounded-lg">
+      <div className="flex items-center gap-4">
+        <div
+          aria-hidden="true"
+          className="shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-navy to-electric text-white text-xl font-bold flex items-center justify-center"
+        >
+          {initials}
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">{name}</h3>
+          <p className="text-sm text-electric font-medium">{role}</p>
+        </div>
+      </div>
+      <p className="text-slate-700 leading-relaxed">{bio}</p>
     </div>
   );
 }

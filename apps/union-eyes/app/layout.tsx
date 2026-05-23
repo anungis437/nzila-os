@@ -121,6 +121,40 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     },
   };
 
+  const softwareApplicationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'UnionEyes',
+    applicationCategory: 'BusinessApplication',
+    applicationSubCategory: 'Institutional Governance & Continuity Infrastructure',
+    operatingSystem: 'Web',
+    url: site.marketingUrl,
+    description:
+      'Operational infrastructure for institutional governance, continuity, and representational coordination — explainable, auditable, Canadian-hosted, bilingual-first.',
+    inLanguage: ['en-CA', 'fr-CA'],
+    featureList: [
+      'Procedural cadence aligned to bylaws',
+      'Institutional memory preservation across leadership transitions',
+      'Explainable assistive intelligence with full audit trails',
+      'Anti-surveillance posture — no individual worker monitoring',
+      'Canadian data residency — no cross-border egress',
+      'Bilingual-by-architecture (English + French)',
+    ],
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'CAD',
+      lowPrice: '12000',
+      highPrice: '120000',
+      offerCount: 4,
+      url: `${site.marketingUrl}/${locale}/pricing`,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'UnionEyes',
+      url: site.marketingUrl,
+    },
+  };
+
   return (
     <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth" data-product="union-eyes">
       <body className={poppins.className} suppressHydrationWarning>
@@ -131,6 +165,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
         {site.isStaging ? (
           <div className="sticky top-0 z-100 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">

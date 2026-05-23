@@ -7281,6 +7281,7 @@
       "heroDescription": "Grievances. Finances. Membership. Compliance. One governed continuity layer — total transparency, total accountability, zero guesswork.",
       "ctaPrimary": "Join the Founding Partner Program",
       "ctaSecondary": "View Governance Architecture",
+      "ctaTertiary": "Read the Continuity Gap Whitepaper",
       "statsLabel": {
         "unionEntities": "Capabilities",
         "timeSaved": "Languages Supported",
@@ -7376,9 +7377,18 @@
       "principle4Title": "Democratic governance baked in",
       "principle4Description": "UnionEyes has a reserved-matter governance structure. Union-elected representatives hold reserved oversight seats and exercise worker consent on change of control or mission change. This isn't marketing — it's in our shareholder agreement.",
       "ctaHeading": "Ready to see if we're the right fit?",
-      "ctaBody": "We don't do demos. We do conversations. Tell us about your challenges. We'll be honest about whether UnionEyes can help — or if something else would serve you better.",
+      "ctaBody": "We don't run generic demos. We run structured briefings tailored to your organization's continuity profile. Tell us about your challenges. We'll be honest about whether UnionEyes can help — or if something else would serve you better.",
       "ctaPilot": "Request a pilot program",
-      "ctaContact": "Start a conversation"
+      "ctaContact": "Start a conversation",
+      "foundersHeading": "Who is building this",
+      "foundersIntro": "UnionEyes was not assembled by a generalist software team that discovered the labour market. It was built by two named individuals with complementary, attestable domain experience.",
+      "founderMikeName": "Mike Nungisa",
+      "founderMikeRole": "Co-Founder · Domain & Doctrine",
+      "founderMikeBio": "Former Labour Relations Officer at a national union. Later, a lawyer conducting workplace investigations and assessments. Mike has worked inside unions, with unions, and across the procedural surface that UnionEyes is designed to support.",
+      "founderObyName": "Oby Nungisa",
+      "founderObyRole": "Co-Founder · Architecture & Operations",
+      "founderObyBio": "Career technologist focused on operational platforms that people actually use. Responsible for the architectural posture, deployment surface, and Canadian-hosted operational substrate of UnionEyes.",
+      "foundersNote": "Both founders are reachable through the Executive Briefing channel — and remain operationally involved in every pilot deployment."
     },
     "pricing": {
       "heroHeading": "Institutional Modernization Programs",
