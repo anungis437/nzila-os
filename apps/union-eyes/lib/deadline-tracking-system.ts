@@ -15,6 +15,9 @@ import {
   type GrievanceDeadline,
 } from "@/db/schema";
 import { addDays, addBusinessDays, differenceInDays } from "date-fns";
+import { createLogger } from "@nzila/os-core";
+
+const logger = createLogger("deadline-tracking-system");
 
 // ============================================================================
 // TYPES
