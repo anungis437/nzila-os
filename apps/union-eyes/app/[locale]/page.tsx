@@ -93,6 +93,7 @@ export default async function LocaleRootPage({
           <Image
             src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920"
             alt=""
+            aria-hidden="true"
             fill
             priority
             className="object-cover"
