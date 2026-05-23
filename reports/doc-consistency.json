@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-23T19:19:15.101Z",
-  "filesScanned": 1797,
+  "generatedAt": "2026-05-23T19:58:54.083Z",
+  "filesScanned": 1809,
   "totalFindings": 2534,
   "findingsByRule": {
     "stale-reference": 1033,

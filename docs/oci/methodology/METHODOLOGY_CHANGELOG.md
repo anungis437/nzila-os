@@ -140,6 +140,57 @@ entries:
       - 'docs/oci/procurement/OCI_PROCUREMENT_FAQ.md'
       - 'docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md'
 
+  - version: '1.1.1'
+    date: '2026-05-24'
+    change_class: 'standard'
+    category: 'doctrine'
+    summary: >
+      Question Architecture Audit™. Adds a methodology-grade signal-extraction
+      validation of the OCRA/OCI question pool covering inventory, signal
+      depth, signal diversity, entropy coverage, confidence generation,
+      longitudinal survivability, statistical interpretability, adaptive
+      routing sophistication, evidence extraction discipline, procurement
+      defensibility, Human Continuity Theory operationalisation, redesign
+      roadmap (v1.2.0 / v1.3.0), and a seven-stage question-change
+      governance process. Adds seven Vitest signal-integrity suites that
+      enforce the audit findings against the real question bank.
+    rationale: >
+      OCI v1.1.0 established the runtime-confidence and standards-traceability
+      surface. v1.1.1 audits the question pool itself — the signal-extraction
+      substrate that feeds every downstream envelope — to ensure continuity
+      intelligence is derived from a rigorously audited institutional signal
+      extraction architecture aligned with doctrine, confidence model,
+      statistical framework, and human continuity methodology. Surfaces
+      Finding M-1 (maturity_select share 77.8 % breaches doctrine 65–75 %
+      band; tracked by Roadmap R-H1), Finding R-1 (adaptive routing engine
+      functionally inert; tracked by R-C2), Finding E-1 (GES level 5 lacks
+      direct probe; tracked by R-C1), Finding C-3 (trust_debt lacks likert
+      input; tracked by R-C3). No coefficient changes; no maturity-
+      classification advancement; question bank itself unchanged in this
+      entry — the audit deliverables and enforcement tests are the change.
+    authority: 'OCI doctrine maintainers'
+    breaking_change_yn: false
+    affected_artifacts:
+      - 'docs/oci/audit/QUESTION_ARCHITECTURE_INVENTORY.md'
+      - 'docs/oci/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md'
+      - 'docs/oci/audit/ENTROPY_SIGNAL_GAP_REPORT.md'
+      - 'docs/oci/audit/CONFIDENCE_GENERATION_AUDIT.md'
+      - 'docs/oci/audit/LONGITUDINAL_SURVIVABILITY_AUDIT.md'
+      - 'docs/oci/audit/STATISTICAL_INTERPRETABILITY_AUDIT.md'
+      - 'docs/oci/audit/ADAPTIVE_ROUTING_AUDIT.md'
+      - 'docs/oci/audit/EVIDENCE_EXTRACTION_AUDIT.md'
+      - 'docs/oci/audit/QUESTION_ARCHITECTURE_PROCUREMENT_REVIEW.md'
+      - 'docs/oci/audit/HUMAN_CONTINUITY_THEORY_ALIGNMENT.md'
+      - 'docs/oci/audit/QUESTION_REDESIGN_ROADMAP.md'
+      - 'docs/oci/audit/QUESTION_ARCHITECTURE_GOVERNANCE.md'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/questionSignalIntegrity.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/adaptiveRouteDepth.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/entropyCoverage.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/confidenceGenerationCoverage.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/longitudinalSignalStability.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/statisticalInterpretability.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/maturitySelectCeiling.test.ts'
+
 # Future-entry template (delete this comment block when adding entries):
 #
 #  - version: 'X.Y.Z'
