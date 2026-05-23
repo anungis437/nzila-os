@@ -1,0 +1,82 @@
+# Governance Entropy Scale™ — Observable Criteria (Level 3: Patterned Drift)
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Observable indicators for ordinal 3 (drift score 0.4 <= x < 0.6).
+# Recurring divergence in identifiable domains. Recognition is the
+# prerequisite for stabilization.
+
+level: 3
+id: 'patterned_drift'
+label: 'Patterned drift'
+lowerBound: 0.4
+upperBound: 0.6
+
+posture: >
+  Recurring divergence in identifiable domains. Recognition is the
+  prerequisite for stabilization.
+
+observable_indicators:
+
+  - id: 'L3-OBS-01-recurring-precedent-gaps'
+    requirement: >
+      Governance stewards can name at least three precedents that are no
+      longer followed, and the pattern is identifiable (e.g., concentrated
+      in a particular domain).
+    evidence_examples:
+      - 'Governance liaison names three or more drifts clustered in one domain (e.g., procurement, hiring authority, contract approval).'
+    auditor_check: >
+      In sponsor interpretation, ask for examples of drift; classify the
+      examples by domain. Pass if clustering is visible.
+
+  - id: 'L3-OBS-02-decision-register-lagging'
+    requirement: 'Decision register lags actual decisions by 90–180 days.'
+    auditor_check: 'Compare most recent register entry date against most recent known decision date.'
+
+governance_evidence:
+
+  - id: 'L3-GOV-01-cadence-slipping'
+    requirement: 'Two or three meeting cycles missed in the past twelve months.'
+    auditor_check: 'Count missed cycles.'
+
+  - id: 'L3-GOV-02-quorum-marginal'
+    requirement: 'Quorum met at 60–74% of meetings.'
+    auditor_check: 'Compute quorum-met percentage.'
+
+  - id: 'L3-GOV-03-emergency-resolutions-rising'
+    requirement: 'Frequency of emergency or out-of-cycle resolutions is materially higher than five years ago.'
+    auditor_check: 'Compare emergency-resolution counts year-over-year for five years.'
+
+process_visibility:
+
+  - id: 'L3-PV-01-decisions-undocumented'
+    requirement: '15–30% of recent governance decisions are not entered into the decision register and are difficult to reconstruct without interviewing the steward who took them.'
+    auditor_check: 'Sample ten decisions; classify documentation status.'
+
+documentation_maturity:
+
+  - id: 'L3-DOC-01-charter-contradicted-in-one-domain'
+    requirement: 'Charter language contradicts current practice in one identifiable domain.'
+    auditor_check: 'Identify the contradicting domain; document the gap.'
+
+  - id: 'L3-DOC-02-policy-shadow-versions'
+    requirement: 'Some policies have unofficial "shadow" versions circulating that differ from the published version.'
+    auditor_check: 'Ask three stewards which policy version they reference; compare against published.'
+
+decision_continuity:
+
+  - id: 'L3-DC-01-briefing-uneven'
+    requirement: 'Governance transitions sometimes occur without a briefing; the institution relies on the incoming steward to ask.'
+    auditor_check: 'Ask governance liaison about briefing practice; verify "depends on the situation" answer.'
+
+institutional_dependency_indicators:
+
+  - id: 'L3-IDI-01-two-or-three-single-stewards'
+    requirement: 'Two or three load-bearing governance domains held by a single steward each.'
+    auditor_check: 'Count single-steward domains.'
+
+onboarding_survivability_indicators:
+
+  - id: 'L3-OSI-01-onboarding-checklist-stale'
+    requirement: 'Onboarding checklist exists but is more than two years out of date.'
+    auditor_check: 'Examine last-revised date.'

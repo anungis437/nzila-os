@@ -1,0 +1,79 @@
+# Governance Entropy Scale™ — Observable Criteria (Level 2: Recognised Drift)
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Observable indicators for ordinal 2 (drift score 0.2 <= x < 0.4).
+# Drift exists and is named by institutional stewards. Continuity is
+# intact; vigilance is warranted.
+
+level: 2
+id: 'recognised_drift'
+label: 'Recognised drift'
+lowerBound: 0.2
+upperBound: 0.4
+
+posture: >
+  Drift is named and known to institutional stewards. Continuity is intact
+  but vigilance is warranted.
+
+observable_indicators:
+
+  - id: 'L2-OBS-01-acknowledged-precedent-gaps'
+    requirement: >
+      Governance stewards can name at least one precedent that is no longer
+      followed in practice, and can articulate why.
+    evidence_examples:
+      - 'Conversation with governance liaison surfaces at least one acknowledged drift.'
+      - 'Annual governance review minutes record the drift.'
+    auditor_check: >
+      In a sponsor interpretation conversation, ask: "Are there any
+      precedents you observe but no longer apply as written?" Pass if a
+      substantive answer is given.
+
+  - id: 'L2-OBS-02-decision-register-mostly-current'
+    requirement: 'Decision register is current to within ninety days.'
+    auditor_check: 'Verify most recent entry date.'
+
+governance_evidence:
+
+  - id: 'L2-GOV-01-cadence-adhered-with-occasional-slippage'
+    requirement: 'Governance meeting cadence is adhered to with no more than one missed cycle in twelve months.'
+    auditor_check: 'Count missed cycles in last twelve months.'
+
+  - id: 'L2-GOV-02-quorum-mostly-met'
+    requirement: 'Quorum met at 75–89% of meetings.'
+    auditor_check: 'Compute quorum-met percentage.'
+
+process_visibility:
+
+  - id: 'L2-PV-01-some-undocumented-decisions'
+    requirement: 'Up to 15% of recent governance decisions are not entered into the decision register but can be reconstructed from emails or minutes.'
+    auditor_check: 'Sample ten decisions; verify reconstructability rate >= 85%.'
+
+documentation_maturity:
+
+  - id: 'L2-DOC-01-charter-stale-but-not-contradicted'
+    requirement: 'Charter is older than five years but not contradicted by current practice.'
+    auditor_check: 'Compare charter language against three current operational practices.'
+
+  - id: 'L2-DOC-02-policy-versioning-uneven'
+    requirement: 'Policy versioning present on >= 60% of policies; remainder are reconstructable from the wiki or shared drive.'
+    auditor_check: 'Sample ten policies; classify versioning status.'
+
+decision_continuity:
+
+  - id: 'L2-DC-01-briefing-informal'
+    requirement: 'Governance-body transitions are accompanied by informal briefings (conversation, not document).'
+    auditor_check: 'Ask governance liaison about most recent transition; verify a briefing occurred.'
+
+institutional_dependency_indicators:
+
+  - id: 'L2-IDI-01-occasional-single-points-of-context'
+    requirement: 'No more than one load-bearing governance domain is held by a single steward.'
+    auditor_check: 'Inspect stewardship register; count single-steward domains.'
+
+onboarding_survivability_indicators:
+
+  - id: 'L2-OSI-01-onboarding-checklist-exists'
+    requirement: 'An onboarding checklist exists but may be incomplete.'
+    auditor_check: 'Request checklist; verify it exists even if items are out of date.'

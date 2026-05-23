@@ -1,0 +1,320 @@
+# OCI Method™ — Sensitivity Scenarios
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Structured sensitivity scenarios per framework. Each scenario describes
+# inputs, the expected band/score, an interpretive note, and the result of
+# perturbing the most-load-bearing coefficient by ±20%. These scenarios are
+# the basis for the regression-style claims in whitepaper §10 (Sensitivity
+# Analysis) and for code-level invariant tests in
+# apps/union-eyes/lib/oci/frameworks/__tests__/.
+#
+# Convention: "expected_band" is the canonical classification at the
+# documented coefficient values; "coefficient_perturbation_results"
+# document what happens when a single coefficient is moved by ±20%. The
+# scenarios are designed to expose any classification that "tips" under
+# small coefficient perturbation, since such tipping would indicate that
+# the v1 coefficients are doing more work than the maturity classification
+# (Theoretical / Practitioner-Informed) can support.
+
+doctrine_version: '1.0.0'
+
+scenarios:
+
+  # ───────────────────────────── Stewardship Density Index™
+
+  - framework: 'Stewardship Density Index™'
+    id: 'sdi-01-healthy-mid-size'
+    inputs:
+      holders:
+        - { criticality: 'institution_critical', tenureBand: '7_15y', successorIdentified: true }
+        - { criticality: 'load_bearing',         tenureBand: '7_15y', successorIdentified: true }
+        - { criticality: 'load_bearing',         tenureBand: '3_7y',  successorIdentified: true }
+        - { criticality: 'important',            tenureBand: '3_7y',  successorIdentified: true }
+        - { criticality: 'important',            tenureBand: '0_3y',  successorIdentified: false }
+        - { criticality: 'routine',              tenureBand: '0_3y',  successorIdentified: false }
+    expected_index: 0.13
+    expected_band: 'distributed'
+    interpretation_note: >
+      Six-carrier institution with successors named for all load-bearing and
+      institution-critical roles. Exposure sits with junior important/routine
+      carriers; reading is "distributed".
+    coefficient_perturbation_results:
+      - perturb: 'CRITICALITY_WEIGHT.institution_critical'
+        delta_pct: '+20'
+        new_band: 'distributed'
+        new_index_approx: 0.12
+      - perturb: 'TENURE_AMPLIFIER.15y_plus'
+        delta_pct: '+20'
+        new_band: 'distributed'
+        new_index_approx: 0.13
+
+  - framework: 'Stewardship Density Index™'
+    id: 'sdi-02-concentration-emerging'
+    inputs:
+      holders:
+        - { criticality: 'institution_critical', tenureBand: '15y_plus', successorIdentified: false }
+        - { criticality: 'load_bearing',         tenureBand: '7_15y',    successorIdentified: false }
+        - { criticality: 'load_bearing',         tenureBand: '7_15y',    successorIdentified: true }
+        - { criticality: 'important',            tenureBand: '3_7y',     successorIdentified: true }
+        - { criticality: 'routine',              tenureBand: '0_3y',     successorIdentified: true }
+    expected_index: 0.66
+    expected_band: 'fragile'
+    interpretation_note: >
+      Institution-critical and one load-bearing carrier unsuccessed. Reading
+      sits in the fragile band; stabilization is appropriate before the next
+      transition.
+    coefficient_perturbation_results:
+      - perturb: 'DENSITY_BANDS.fragile.lowerBound'
+        delta_pct: '+20'  # 0.5 -> 0.6
+        new_band: 'fragile'
+        note: 'Band classification stable under +20% threshold shift (0.66 > 0.60).'
+      - perturb: 'DENSITY_BANDS.critical.lowerBound'
+        delta_pct: '-20'  # 0.7 -> 0.56
+        new_band: 'critical'
+        note: 'Band tips to critical at threshold 0.56; documents that the fragile/critical boundary is the most sensitive surface in this scenario.'
+
+  - framework: 'Stewardship Density Index™'
+    id: 'sdi-03-critical-concentration'
+    inputs:
+      holders:
+        - { criticality: 'institution_critical', tenureBand: '15y_plus', successorIdentified: false }
+        - { criticality: 'institution_critical', tenureBand: '15y_plus', successorIdentified: false }
+        - { criticality: 'load_bearing',         tenureBand: '7_15y',    successorIdentified: false }
+        - { criticality: 'routine',              tenureBand: '0_3y',     successorIdentified: true }
+    expected_index: 0.96
+    expected_band: 'critical'
+    interpretation_note: 'Worst-case configuration; classification is robust under any small coefficient perturbation.'
+    coefficient_perturbation_results:
+      - perturb: 'any single coefficient'
+        delta_pct: '±20'
+        new_band: 'critical'
+        note: 'No coefficient perturbation in ±20% moves the band.'
+
+  - framework: 'Stewardship Density Index™'
+    id: 'sdi-04-empty-institution'
+    inputs:
+      holders: []
+    expected_index: 0.0
+    expected_band: 'distributed'
+    interpretation_note: >
+      No carriers recorded. Index returns 0.0 by emptyResult() factory
+      contract. Confidence policy MUST surface low_confidence_density.
+
+  - framework: 'Stewardship Density Index™'
+    id: 'sdi-05-junior-cohort'
+    inputs:
+      holders:
+        - { criticality: 'institution_critical', tenureBand: '0_3y', successorIdentified: false }
+        - { criticality: 'load_bearing',         tenureBand: '0_3y', successorIdentified: false }
+        - { criticality: 'load_bearing',         tenureBand: '0_3y', successorIdentified: false }
+    expected_index: 1.0
+    expected_band: 'critical'
+    interpretation_note: >
+      All three carriers exposed; ratio is structurally 1.0. Documents that
+      tenure amplifier does NOT change the ratio when all carriers share the
+      same tenure band — a desirable invariant.
+
+  # ───────────────────────────── Governance Entropy Scale™
+
+  - framework: 'Governance Entropy Scale™'
+    id: 'ges-01-coherent'
+    inputs: { drift: 0.05 }
+    expected_ordinal: 1
+    expected_band: 'coherent'
+    interpretation_note: 'Governance design and practice in close alignment.'
+    coefficient_perturbation_results:
+      - perturb: 'ENTROPY_LEVELS.recognised_drift.lowerBound'
+        delta_pct: '-20' # 0.2 -> 0.16
+        new_band: 'coherent'
+
+  - framework: 'Governance Entropy Scale™'
+    id: 'ges-02-recognised-drift'
+    inputs: { drift: 0.25 }
+    expected_ordinal: 2
+    expected_band: 'recognised_drift'
+    interpretation_note: 'Drift named and known to institutional stewards.'
+
+  - framework: 'Governance Entropy Scale™'
+    id: 'ges-03-patterned-drift'
+    inputs: { drift: 0.5 }
+    expected_ordinal: 3
+    expected_band: 'patterned_drift'
+    interpretation_note: 'Recurring divergence in identifiable domains.'
+
+  - framework: 'Governance Entropy Scale™'
+    id: 'ges-04-institutional-drift'
+    inputs: { drift: 0.7 }
+    expected_ordinal: 4
+    expected_band: 'institutional_drift'
+    interpretation_note: 'Multi-domain divergence. Stabilization appropriate.'
+
+  - framework: 'Governance Entropy Scale™'
+    id: 'ges-05-systemic-entropy'
+    inputs: { drift: 0.95 }
+    expected_ordinal: 5
+    expected_band: 'systemic_entropy'
+    interpretation_note: 'Governance practice no longer traces to design.'
+
+  # ───────────────────────────── Continuity Burden Map™
+
+  - framework: 'Continuity Burden Map™'
+    id: 'cbm-01-all-three-components-low'
+    inputs:
+      density: { index: 0.1 }
+      icraBurdenIndex: 0.1
+      reconstructionRisk: 0.1
+    expected_composite: 0.1
+    expected_posture_threshold: 'below_moderate' # composite < 0.3
+    interpretation_note: 'Distributed burden; periodic review.'
+
+  - framework: 'Continuity Burden Map™'
+    id: 'cbm-02-density-dominant'
+    inputs:
+      density: { index: 0.8 }
+      icraBurdenIndex: 0.1
+      reconstructionRisk: 0.1
+    expected_composite: 0.52
+    expected_posture_threshold: 'substantial' # >=0.5
+    interpretation_note: 'Density carries the composite into substantial territory even with low secondary inputs.'
+
+  - framework: 'Continuity Burden Map™'
+    id: 'cbm-03-all-three-components-high'
+    inputs:
+      density: { index: 0.9 }
+      icraBurdenIndex: 0.9
+      reconstructionRisk: 0.9
+    expected_composite: 0.9
+    expected_posture_threshold: 'severe' # >=0.7
+    interpretation_note: 'Three independent signals converging; severe posture.'
+
+  - framework: 'Continuity Burden Map™'
+    id: 'cbm-04-missing-secondary-inputs'
+    inputs:
+      density: { index: 0.5 }
+    expected_composite: 0.3
+    expected_posture_threshold: 'moderate' # >=0.3
+    interpretation_note: >
+      Missing inputs default to 0 (per safe01 contract). Composite collapses
+      toward the density floor; consumer MUST see low_confidence_burden_composite.
+
+  - framework: 'Continuity Burden Map™'
+    id: 'cbm-05-perturbation-sensitivity'
+    inputs:
+      density: { index: 0.6 }
+      icraBurdenIndex: 0.4
+      reconstructionRisk: 0.3
+    expected_composite: 0.51
+    expected_posture_threshold: 'substantial'
+    coefficient_perturbation_results:
+      - perturb: 'DENSITY_WEIGHT'
+        delta_pct: '-20' # 0.6 -> 0.48
+        new_composite_approx: 0.44
+        new_posture_threshold: 'moderate'
+        note: 'Posture tips from substantial to moderate; documents DENSITY_WEIGHT as the most load-bearing coefficient in the composite.'
+
+  # ───────────────────────────── Continuity Survivability Matrix™
+
+  - framework: 'Continuity Survivability Matrix™'
+    id: 'csm-01-singular-absent'
+    inputs: { dependency: 'singular', successor: 'absent' }
+    expected_cell_id: 'singular_absent'
+    interpretation_note: 'Continuity break imminent on transition.'
+
+  - framework: 'Continuity Survivability Matrix™'
+    id: 'csm-02-distributed-identified'
+    inputs: { dependency: 'distributed', successor: 'identified' }
+    expected_cell_id: 'distributed_identified'
+    interpretation_note: 'Healthy posture; periodic review.'
+
+  - framework: 'Continuity Survivability Matrix™'
+    id: 'csm-03-concentrated-in-progress'
+    inputs: { dependency: 'concentrated', successor: 'in_progress' }
+    expected_cell_id: 'concentrated_in_progress'
+    interpretation_note: 'Stabilizing; continue broadening stewardship.'
+
+  - framework: 'Continuity Survivability Matrix™'
+    id: 'csm-04-unknown-enum-falls-back-to-worst-case'
+    inputs: { dependency: 'malformed', successor: 'absent' }
+    expected_cell_id: 'singular_absent'
+    interpretation_note: >
+      Hardening invariant: unknown enum input does NOT silently return the
+      healthy distributed_identified cell. The matrix returns the worst-case
+      cell so that operators investigate the unmodelled configuration.
+
+  - framework: 'Continuity Survivability Matrix™'
+    id: 'csm-05-distributed-absent'
+    inputs: { dependency: 'distributed', successor: 'absent' }
+    expected_cell_id: 'distributed_absent'
+    interpretation_note: 'Distributed without lineage; lineage capture is the next step.'
+
+  # ───────────────────────────── Reconstruction Burden Index™
+
+  - framework: 'Reconstruction Burden Index™'
+    id: 'rbi-01-minimal-burden'
+    inputs:
+      exposedCarriers: 0
+      institutionCriticalCarriers: 0
+      densityIndex: 0.1
+      governanceEntropyOrdinal: 1
+    expected_score: 0.2
+    expected_band: 'minimal'
+    interpretation_note: 'Reconstruction burden modest; periodic review.'
+
+  - framework: 'Reconstruction Burden Index™'
+    id: 'rbi-02-moderate-burden'
+    inputs:
+      exposedCarriers: 2
+      institutionCriticalCarriers: 1
+      densityIndex: 0.3
+      governanceEntropyOrdinal: 2
+    expected_score: 3.5
+    expected_band: 'moderate'
+    interpretation_note: 'Reconstruction feasible with planning.'
+
+  - framework: 'Reconstruction Burden Index™'
+    id: 'rbi-03-substantial-burden'
+    inputs:
+      exposedCarriers: 4
+      institutionCriticalCarriers: 2
+      densityIndex: 0.6
+      governanceEntropyOrdinal: 3
+    expected_score: 7.4
+    expected_band: 'severe'
+    interpretation_note: >
+      All carrier components saturating against caps; density and entropy
+      pushing the score past the severe threshold. Documents that the caps
+      (EXPOSED_CAP=4, CRITICAL_CAP=3) prevent runaway carrier-count effects.
+
+  - framework: 'Reconstruction Burden Index™'
+    id: 'rbi-04-severe-burden'
+    inputs:
+      exposedCarriers: 8
+      institutionCriticalCarriers: 5
+      densityIndex: 0.9
+      governanceEntropyOrdinal: 5
+    expected_score: 9.8
+    expected_band: 'severe'
+    interpretation_note: >
+      Worst-case bounded by MAX_SCORE=10. Documents that the cap structure
+      prevents the index from misleadingly suggesting infinite reconstruction
+      effort.
+
+  - framework: 'Reconstruction Burden Index™'
+    id: 'rbi-05-missing-entropy-default'
+    inputs:
+      exposedCarriers: 2
+      institutionCriticalCarriers: 1
+      densityIndex: 0.4
+    expected_score: 4.05
+    expected_band: 'moderate'
+    interpretation_note: >
+      Entropy ordinal omitted; defaults to 2 (recognised drift) per
+      DEFAULT_ENTROPY_ORDINAL. Documents that the default does NOT bias the
+      result toward a more pessimistic posture.
+    coefficient_perturbation_results:
+      - perturb: 'density_multiplier'
+        delta_pct: '+20' # 2.0 -> 2.4
+        new_score_approx: 4.21
+        new_band: 'moderate'
+        note: 'Band stable under +20% density-multiplier perturbation.'
