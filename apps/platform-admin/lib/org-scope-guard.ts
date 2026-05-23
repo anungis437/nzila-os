@@ -22,6 +22,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { createLogger } from '@nzila/os-core'
+import { platformDb } from '@nzila/db/platform'
+import { orgMembers } from '@nzila/db/schema'
+import { and, eq } from 'drizzle-orm'
 
 const logger = createLogger('platform-admin:org-scope-guard')
 
@@ -40,6 +43,40 @@ export class OrgScopeError extends Error {
     this.code = code
     this.status = status
   }
+}
+
+/**
+ * Resolve the actor's role within the given org, or null if the actor is
+ * not an active member. Platform-admin override is honoured for users in
+ * `PLATFORM_ADMIN_USER_IDS` (comma-separated env var) — they are treated
+ * as 'admin' for every org so the platform-admin app remains operable
+ * during onboarding/incident response.
+ */
+async function resolveOrgRole(
+  actorId: string,
+  orgId: string,
+): Promise<string | null> {
+  const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (platformAdminIds.includes(actorId)) {
+    return 'admin'
+  }
+
+  const [row] = await platformDb
+    .select({ role: orgMembers.role })
+    .from(orgMembers)
+    .where(
+      and(
+        eq(orgMembers.orgId, orgId),
+        eq(orgMembers.userId, actorId),
+        eq(orgMembers.status, 'active'),
+      ),
+    )
+    .limit(1)
+
+  return row?.role ?? null
 }
 
 /**
@@ -77,21 +114,36 @@ export async function requireOrgScope(
     throw new OrgScopeError('Invalid orgId format', 'INVALID_ORG_ID', 400)
   }
 
-  // 4. Verify actor has access to this org
-  // In production: query org_members table to verify membership + role
-  // For now: session-based org check
+  // 4. Verify actor has an active membership in this org and resolve role.
+  //    We refuse to fabricate 'admin' — if no active membership exists the
+  //    request is forbidden. Platform-wide overrides go through
+  //    PLATFORM_ADMIN_USER_IDS (see resolveOrgRole).
   const actorId = session.userId
+  const orgRole = await resolveOrgRole(actorId, orgId)
+  if (!orgRole) {
+    logger.warn('Org scope denied: actor is not an active member', {
+      actorId,
+      orgId,
+      path: request.nextUrl.pathname,
+    })
+    throw new OrgScopeError(
+      'Actor is not an active member of the requested org',
+      'ORG_FORBIDDEN',
+      403,
+    )
+  }
 
   logger.info('Org scope verified', {
     actorId,
     orgId,
+    orgRole,
     path: request.nextUrl.pathname,
   })
 
   return {
     actorId,
     orgId,
-    orgRole: 'admin', // In production: resolve from org_members
+    orgRole,
   }
 }
 

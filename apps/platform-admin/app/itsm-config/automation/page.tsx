@@ -50,6 +50,13 @@ export default async function AutomationRulesPage() {
         ← ITSM Config
       </Link>
 
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+        Demo mode: custom automation rules are not yet loaded from the
+        database. The built-in platform templates below are real and usable,
+        but org-specific custom rules will not appear until the DB query is
+        wired.
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Automation Rules</h1>

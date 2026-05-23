@@ -50,6 +50,13 @@ export default async function SlaProfilesPage() {
         </Link>
       </div>
 
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+        Demo mode: org-level SLA profile overrides are not yet loaded from the
+        database. Only the built-in platform defaults are shown below —
+        custom profiles attached to this org will not appear until the DB
+        query is wired.
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">SLA Profiles</h1>

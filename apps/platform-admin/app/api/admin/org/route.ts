@@ -17,6 +17,9 @@ import { platformDb } from '@nzila/db/platform'
 import { auditRecords } from '@nzila/db/schema'
 import { desc, eq } from 'drizzle-orm'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 const narProofAdapter = createNarProofAdapter({
   keyId: process.env.NAR_SIGNING_KEY_ID,
   getPreviousHash: async (organizationId) => {

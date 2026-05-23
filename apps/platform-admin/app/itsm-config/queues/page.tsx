@@ -35,6 +35,12 @@ export default async function QueueManagerPage() {
         ← ITSM Config
       </Link>
 
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+        Demo mode: the queues DB query is not wired into platform-admin yet.
+        An empty list does not necessarily mean no queues are configured for
+        this org — it means we are not reading them from the database.
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Queue Manager</h1>

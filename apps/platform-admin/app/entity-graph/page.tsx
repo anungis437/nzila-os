@@ -72,10 +72,19 @@ export default function EntityGraphExplorer() {
   return (
     <div>
       <h1 className="mb-2 text-2xl font-bold">Entity Graph Explorer</h1>
-      <p className="mb-6 text-gray-500">
+      <p className="mb-4 text-gray-500">
         Explore entity relationships via BFS traversal.{' '}
         {SEED_NODES.length} entities, {SEED_EDGES.length} edges loaded.
       </p>
+
+      <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        <strong>Demo mode.</strong> This page operates on a deterministic
+        in-memory seed graph — the entities below (Nzila Corp, John Doe,
+        Onboarding Case #1, etc.) are illustrative placeholders, not real
+        records from <code>@nzila/platform-entity-graph</code>. Use it to
+        validate traversal behaviour; do not treat the IDs or counts as
+        production data.
+      </div>
 
       <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
         <h2 className="mb-4 text-sm font-semibold uppercase text-gray-400">

@@ -61,7 +61,11 @@ export default async function TicketTypesPage() {
                 </td>
                 <td className="px-4 py-3 text-gray-400 text-xs italic">No custom fields</td>
                 <td className="px-4 py-3">
-                  <button className="text-xs text-blue-600 hover:underline">
+                  <button
+                    className="text-xs text-gray-300 cursor-not-allowed"
+                    disabled
+                    title="Custom-field configuration is not yet implemented"
+                  >
                     Configure
                   </button>
                 </td>

@@ -28,6 +28,13 @@ export default async function ApprovalsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+        Demo mode: the approval-chain DB table is not yet wired into
+        platform-admin. The chains and summary stats below are deterministic
+        placeholders that ship with the app — they do not reflect real
+        approval activity for this org.
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Approval Workflows</h1>
