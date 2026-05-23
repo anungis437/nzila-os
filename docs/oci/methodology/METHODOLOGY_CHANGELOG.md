@@ -191,6 +191,57 @@ entries:
       - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/statisticalInterpretability.test.ts'
       - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/maturitySelectCeiling.test.ts'
 
+  - version: '1.2.0-foundation'
+    date: '2026-05-23'
+    change_class: 'standard'
+    category: 'doctrine'
+    summary: >
+      Signal Sophistication Recovery Sprint — foundation. Introduces an
+      isolated v2 modality registry (eight modalities: contradiction_pair,
+      evidence_strength, continuity_distribution, dependency_mapping,
+      confidence_marker, topology_mapping, stability_marker,
+      transition_exposure), a contradiction-detection engine with severity
+      and per-dimension confidence-penalty composition, a six-level
+      evidence-strength taxonomy with monotonic branching engine and
+      declared-vs-evidenced gap function, a GES Level 5 probe registry
+      addressing all eight L5 signals, and seven routing-v2 path types
+      that deepen extraction where fragility is detected. Adds six
+      signal-integrity test suites (31 passing assertions, 8 todos
+      tracking v1.3.0/v1.4.0 deliverables) and three doctrine documents
+      (GES_LEVEL_5_SIGNAL_MODEL, MODERNIZATION_INSTABILITY_SIGNAL_MODEL,
+      QUESTION_POOL_v2_0_ROADMAP).
+    rationale: >
+      Closes audit findings M-1, R-1, E-1, C-3 at the foundation layer.
+      Modalities are isolated in `modalities-v2/` to avoid breaking the
+      runtime scoring engine, narrative engine, and UI layer; integration
+      into the active OCRA flow proceeds through migration waves 1.3.0 →
+      1.6.0 per QUESTION_POOL_v2_0_ROADMAP.md. Doctrine guarantee:
+      contradictions REDUCE confidence; they are never silently averaged.
+      Anti-claims preserved: no individual mapping, no surveillance drift,
+      no behavioural inference.
+    authority: 'OCI doctrine maintainers'
+    breaking_change_yn: false
+    affected_artifacts:
+      - 'apps/union-eyes/lib/icra/modalities-v2/types.ts'
+      - 'apps/union-eyes/lib/icra/modalities-v2/registry.ts'
+      - 'apps/union-eyes/lib/icra/contradictions/contradictionSignalPairs.ts'
+      - 'apps/union-eyes/lib/icra/contradictions/contradictionSeverityModel.ts'
+      - 'apps/union-eyes/lib/icra/contradictions/contradictionConfidence.ts'
+      - 'apps/union-eyes/lib/icra/contradictions/contradictionDetectionEngine.ts'
+      - 'apps/union-eyes/lib/icra/evidence-strength/evidenceTaxonomy.ts'
+      - 'apps/union-eyes/lib/icra/evidence-strength/evidenceBranchingEngine.ts'
+      - 'apps/union-eyes/lib/icra/ges-level5/probes.ts'
+      - 'apps/union-eyes/lib/icra/routing-v2/pathTypes.ts'
+      - 'docs/oci/audit/GES_LEVEL_5_SIGNAL_MODEL.md'
+      - 'docs/oci/audit/MODERNIZATION_INSTABILITY_SIGNAL_MODEL.md'
+      - 'docs/oci/audit/QUESTION_POOL_v2_0_ROADMAP.md'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/contradictionCoverage.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/evidenceStrengthCoverage.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/confidenceSignalDensity.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/topologyExtractionIntegrity.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/modernizationFragilityCoverage.test.ts'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/adaptiveTopologyDepth.test.ts'
+
 # Future-entry template (delete this comment block when adding entries):
 #
 #  - version: 'X.Y.Z'
