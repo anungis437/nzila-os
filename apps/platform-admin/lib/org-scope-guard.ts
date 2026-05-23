@@ -182,3 +182,58 @@ export async function withOrgScope(
     return handleOrgScopeError(error)
   }
 }
+
+// ── Role helpers ──────────────────────────────────────────────────────────────
+
+/**
+ * Roles that may MUTATE platform-admin resources for an org.
+ * Read-only viewers are explicitly excluded from writes.
+ *
+ * 'admin' is the PLATFORM_ADMIN_USER_IDS override (see resolveOrgRole).
+ */
+const WRITE_ROLES = new Set(['admin', 'org_admin', 'org_secretary'])
+
+/**
+ * Roles that may READ platform-admin resources for an org.
+ * All authenticated org members can read.
+ */
+const READ_ROLES = new Set(['admin', 'org_admin', 'org_secretary', 'org_viewer'])
+
+export function canWrite(role: string): boolean {
+  return WRITE_ROLES.has(role)
+}
+
+export function canRead(role: string): boolean {
+  return READ_ROLES.has(role)
+}
+
+/**
+ * Wrap a handler and enforce that the caller has write authority. Returns
+ * 403 ORG_WRITE_FORBIDDEN when a viewer attempts a mutation.
+ */
+export async function withOrgWrite(
+  request: NextRequest,
+  handler: (context: OrgScopeContext) => Promise<NextResponse>,
+): Promise<NextResponse> {
+  return withOrgScope(request, async (context) => {
+    if (!canWrite(context.orgRole)) {
+      logger.warn('Org write denied: role lacks write authority', {
+        actorId: context.actorId,
+        orgId: context.orgId,
+        orgRole: context.orgRole,
+        path: request.nextUrl.pathname,
+      })
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: 'ORG_WRITE_FORBIDDEN',
+            message: `Role '${context.orgRole}' may not mutate platform-admin resources`,
+          },
+        },
+        { status: 403 },
+      )
+    }
+    return handler(context)
+  })
+}
