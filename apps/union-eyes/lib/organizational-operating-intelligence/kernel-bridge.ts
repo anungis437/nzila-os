@@ -37,7 +37,7 @@ import {
   type OperatingRhythmProfile,
   type OrganizationalResponseElasticityProfile,
   type GovernanceMomentumProfile,
-} from '../institutional-dynamics';
+} from '../organizational-dynamics';
 
 import {
   orchestrateMultiDomainCognition,

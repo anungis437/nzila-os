@@ -62,7 +62,7 @@ export * from './maturity-personalities';
 export * from './learning-trajectories';
 
 // TIER 8: Organizational Systems Dynamics Intelligence
-export * from '../institutional-dynamics';
+export * from '../organizational-dynamics';
 
 // TIER 9: Multi-Domain Organizational Operating Intelligence
 export * from '../multi-domain-cognition';

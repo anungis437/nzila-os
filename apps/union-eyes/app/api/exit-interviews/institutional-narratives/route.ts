@@ -2,8 +2,8 @@ import { withApi } from '@/lib/api/framework';
 import {
   composeExecutiveBriefing,
   narrateEnvelopes,
-} from '@/lib/institutional-narratives';
-import { runFullInstitutionalCognition } from '@/lib/institutional-operating-intelligence';
+} from '@/lib/organizational-narratives';
+import { runFullInstitutionalCognition } from '@/lib/organizational-operating-intelligence';
 
 export const dynamic = 'force-dynamic';
 

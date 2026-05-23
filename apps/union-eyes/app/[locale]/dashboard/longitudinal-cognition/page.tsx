@@ -12,8 +12,8 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { requireUser } from '@/lib/api-auth-guard';
-import { composeInstitutionalStorybook } from '@/lib/institutional-storytelling';
-import { runFullInstitutionalCognition } from '@/lib/institutional-operating-intelligence';
+import { composeInstitutionalStorybook } from '@/lib/organizational-storytelling';
+import { runFullInstitutionalCognition } from '@/lib/organizational-operating-intelligence';
 import { RuntimeHydrationFooter } from '@/components/runtime-hydration';
 import { CONTINUITY_COGNITION_VERSION } from '@nzila/institutional-governance-graph';
 
@@ -174,7 +174,7 @@ export default async function LongitudinalCognitionPage() {
         <RuntimeHydrationFooter
           surface="Longitudinal Institutional Context"
           provenance={{
-            sourceAdapter: 'institutional-operating-intelligence/runFullInstitutionalCognition',
+            sourceAdapter: 'organizational-operating-intelligence/runFullInstitutionalCognition',
             substrateVersion: CONTINUITY_COGNITION_VERSION,
             contractVersion: storybook.storyVersion,
           }}

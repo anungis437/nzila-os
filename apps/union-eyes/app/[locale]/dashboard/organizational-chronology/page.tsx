@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/api-auth-guard';
-import { getInstitutionalChronologyView } from '@/lib/institutional-chronology/source';
+import { getInstitutionalChronologyView } from '@/lib/organizational-chronology/source';
 
 export const dynamic = 'force-dynamic';
 

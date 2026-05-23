@@ -17,7 +17,7 @@ import {
   getInstitutionalTopologyView,
 } from '../source'
 
-describe('institutional-topology projection guard', () => {
+describe('organizational-topology projection guard', () => {
   it('placeholder graph is empty and well-typed', async () => {
     const raw = await getInstitutionalGraph()
     expect(raw.nodes).toEqual([])
@@ -31,14 +31,14 @@ describe('institutional-topology projection guard', () => {
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.continuityTopology,
-        'institutional-topology.continuityTopology',
+        'organizational-topology.continuityTopology',
       ),
     ).not.toThrow()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.hierarchy.map((h) => ({ kind: h.iggKind })),
-        'institutional-topology.hierarchy',
+        'organizational-topology.hierarchy',
       ),
     ).not.toThrow()
 
@@ -47,21 +47,21 @@ describe('institutional-topology projection guard', () => {
         view.affiliationRepresentation.edges.map((e) => ({
           kind: e.relationship,
         })),
-        'institutional-topology.affiliationEdges',
+        'organizational-topology.affiliationEdges',
       ),
     ).not.toThrow()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.delegation.map((d) => ({ kind: d.state })),
-        'institutional-topology.delegation',
+        'organizational-topology.delegation',
       ),
     ).not.toThrow()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.lineage.map((l) => ({ summary: l.chain.join(' ') })),
-        'institutional-topology.lineage',
+        'organizational-topology.lineage',
       ),
     ).not.toThrow()
   })

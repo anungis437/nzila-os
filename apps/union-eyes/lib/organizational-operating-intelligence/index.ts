@@ -7,7 +7,7 @@
  *     runFullInstitutionalCognition,
  *     runAdvancedInstitutionalCognition, // T8/T9 only
  *     runFoundationalInstitutionalCognition, // T1–T7 only
- *   } from '@/lib/institutional-operating-intelligence';
+ *   } from '@/lib/organizational-operating-intelligence';
  *
  * Application code does not import individual engines. Always go through
  * one of these orchestrated entrypoints — failures are isolated, every

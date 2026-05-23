@@ -1,5 +1,5 @@
 import { cognitionRoute } from '@/lib/api/cognition-route';
-import { learningArchetypeEngine } from '@/lib/institutional-operating-intelligence';
+import { learningArchetypeEngine } from '@/lib/organizational-operating-intelligence';
 
 export const dynamic = 'force-dynamic';
 

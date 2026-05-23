@@ -1,7 +1,7 @@
 /**
  * Executive Operating Intelligence — calm, strategic surface.
  *
- * Server component. Calls the institutional-narratives API to obtain a
+ * Server component. Calls the organizational-narratives API to obtain a
  * deterministic executive briefing composed from the full T1–T9 cognition
  * orchestration. NO new inference is performed in this page — it is a
  * projection of envelopes already produced by the cognition kernel.
@@ -15,8 +15,8 @@ import {
   narrateEnvelopes,
   type ExecutiveBriefing,
   type InstitutionalNarrative,
-} from '@/lib/institutional-narratives';
-import { runFullInstitutionalCognition } from '@/lib/institutional-operating-intelligence';
+} from '@/lib/organizational-narratives';
+import { runFullInstitutionalCognition } from '@/lib/organizational-operating-intelligence';
 
 export const dynamic = 'force-dynamic';
 

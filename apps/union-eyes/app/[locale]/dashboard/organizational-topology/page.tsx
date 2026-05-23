@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/api-auth-guard';
-import { getInstitutionalTopologyView } from '@/lib/institutional-topology/source';
+import { getInstitutionalTopologyView } from '@/lib/organizational-topology/source';
 
 export const dynamic = 'force-dynamic';
 

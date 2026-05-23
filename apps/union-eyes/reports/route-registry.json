@@ -11790,8 +11790,8 @@
       }
     },
     {
-      "file": "app/api/exit-interviews/institutional-narratives/route.ts",
-      "routePath": "/api/exit-interviews/institutional-narratives",
+      "file": "app/api/exit-interviews/organizational-narratives/route.ts",
+      "routePath": "/api/exit-interviews/organizational-narratives",
       "methods": [
         "GET"
       ],

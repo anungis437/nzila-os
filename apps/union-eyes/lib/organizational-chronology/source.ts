@@ -41,7 +41,7 @@ import {
   type SuccessionBreakpoint,
 } from '@nzila/institutional-governance-graph'
 
-import { getInstitutionalGraph } from '../institutional-topology/source'
+import { getInstitutionalGraph } from '../organizational-topology/source'
 
 // ── View shapes ─────────────────────────────────────────────────────────────
 

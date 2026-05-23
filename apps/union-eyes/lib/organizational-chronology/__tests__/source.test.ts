@@ -11,49 +11,49 @@ import { assertNoProtectedKindsInProjections } from '@nzila/institutional-govern
 
 import { getInstitutionalChronologyView } from '../source'
 
-describe('institutional-chronology projection guard', () => {
+describe('organizational-chronology projection guard', () => {
   it('every chronology projection passes assertNoProtectedKindsInProjections', async () => {
     const view = await getInstitutionalChronologyView()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.proceduralTimeline.entries,
-        'institutional-chronology.proceduralTimeline',
+        'organizational-chronology.proceduralTimeline',
       ),
     ).not.toThrow()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.epochs,
-        'institutional-chronology.epochs',
+        'organizational-chronology.epochs',
       ),
     ).not.toThrow()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.evolution.organizations.flatMap((o) => o.entries),
-        'institutional-chronology.evolution.organizations',
+        'organizational-chronology.evolution.organizations',
       ),
     ).not.toThrow()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.evolution.affiliations.flatMap((a) => a.entries),
-        'institutional-chronology.evolution.affiliations',
+        'organizational-chronology.evolution.affiliations',
       ),
     ).not.toThrow()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.evolution.representations.flatMap((r) => r.entries),
-        'institutional-chronology.evolution.representations',
+        'organizational-chronology.evolution.representations',
       ),
     ).not.toThrow()
 
     expect(() =>
       assertNoProtectedKindsInProjections(
         view.continuity.flatMap((c) => c.entries),
-        'institutional-chronology.continuity',
+        'organizational-chronology.continuity',
       ),
     ).not.toThrow()
 
@@ -62,7 +62,7 @@ describe('institutional-chronology projection guard', () => {
         view.lineage.flatMap((l) =>
           l.decisionTimelines.flatMap((timeline) => timeline.entries),
         ),
-        'institutional-chronology.lineage.decisionTimelines',
+        'organizational-chronology.lineage.decisionTimelines',
       ),
     ).not.toThrow()
 
@@ -72,7 +72,7 @@ describe('institutional-chronology projection guard', () => {
           category: record.category,
           summary: record.summary,
         })),
-        'institutional-chronology.explainability',
+        'organizational-chronology.explainability',
       ),
     ).not.toThrow()
   })

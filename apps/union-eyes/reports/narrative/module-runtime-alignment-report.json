@@ -193,7 +193,7 @@
   "alreadyAlignedRoutes": [
     "/dashboard/cognition",
     "/dashboard/institutional-intelligence",
-    "/dashboard/institutional-operating-intelligence",
+    "/dashboard/organizational-operating-intelligence",
     "/dashboard/longitudinal-cognition",
     "/dashboard/continuity-simulation",
     "/dashboard/movement-insights",

@@ -1,7 +1,7 @@
 /**
  * Institutional Storytelling
  *
- * Higher-order narrative composition layered on top of `institutional-narratives`.
+ * Higher-order narrative composition layered on top of `organizational-narratives`.
  * Where `narratives` projects a single envelope into a calm narrative, this
  * module composes MULTI-ENVELOPE longitudinal stories: governance evolution,
  * resilience progression, continuity maturity, organizational adaptation.
@@ -25,7 +25,7 @@ import {
   composeExecutiveBriefing,
   narrateEnvelopes,
   type InstitutionalNarrative,
-} from '../institutional-narratives/index';
+} from '../organizational-narratives/index';
 
 /* -------------------------------------------------------------------------- */
 /* Story shapes                                                                */
@@ -266,4 +266,4 @@ export function composeInstitutionalStorybook(
 /* Public surface                                                              */
 /* -------------------------------------------------------------------------- */
 
-export type { InstitutionalNarrative } from '../institutional-narratives/index';
+export type { InstitutionalNarrative } from '../organizational-narratives/index';

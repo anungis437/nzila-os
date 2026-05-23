@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/api-auth-guard';
-import { getInstitutionalObservabilityView } from '@/lib/institutional-observability/source';
+import { getInstitutionalObservabilityView } from '@/lib/organizational-observability/source';
 
 export const dynamic = 'force-dynamic';
 

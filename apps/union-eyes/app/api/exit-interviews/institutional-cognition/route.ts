@@ -1,5 +1,5 @@
 import { withApi } from '@/lib/api/framework';
-import { runFullInstitutionalCognition } from '@/lib/institutional-operating-intelligence';
+import { runFullInstitutionalCognition } from '@/lib/organizational-operating-intelligence';
 
 export const dynamic = 'force-dynamic';
 
