@@ -281,14 +281,25 @@ export class BiometricAuth {
         };
       }
 
-      // Verify signature (in production, verify on server)
+      // SECURITY: WebAuthn assertion signature MUST be verified server-side
+      // against the stored public key and the issued challenge. No such
+      // endpoint exists yet, so accepting this assertion would let any caller
+      // with a known credential ID authenticate as the user. Fail closed.
       const _response = credential.response as AuthenticatorAssertionResponse;
-      
+
+      if (process.env.NODE_ENV === 'production') {
+        logger.error('Biometric authenticate(): refusing to accept assertion — server-side signature verification endpoint is not implemented.', undefined, { userId });
+        return {
+          success: false,
+          error: 'Biometric authentication unavailable: server-side verification not configured',
+        };
+      }
+
+      logger.warn('Biometric authenticate(): assertion accepted WITHOUT server-side signature verification. Demo only — never enable in production.', { userId });
+
       // Update counter
       stored.counter += 1;
       await this.storeCredential(userId, stored);
-
-      logger.info('Biometric authentication successful', { userId });
 
       return {
         success: true,

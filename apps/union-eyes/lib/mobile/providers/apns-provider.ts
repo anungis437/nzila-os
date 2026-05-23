@@ -70,13 +70,12 @@ export class APNsProvider {
       iat: Math.floor(Date.now() / 1000)
     })).toString('base64');
 
-    // Sign with private key (using crypto in production)
-    const signature = 'SIGNATURE_PLACEHOLDER';
-
-    this.token = `${header}.${payload}.${signature}`;
-    this.tokenExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour
-
-    return this.token;
+    // APNs requires ES256 signatures over the JWT header/payload using the
+    // team's .p8 private key. We do not perform that signing here. Apple will
+    // reject every token with SIGNATURE_PLACEHOLDER, so any caller that
+    // proceeds is guaranteed silent push failure. Fail loudly instead.
+    logger.error('apns-provider: getToken() cannot sign JWT — ES256 signing with .p8 private key is not implemented. APNs will reject every push.', undefined, { keyId: this.config.keyId, teamId: this.config.teamId });
+    throw new Error('APNs JWT signing is not implemented — refusing to emit an unsignable token that Apple will reject');
   }
 
   /**

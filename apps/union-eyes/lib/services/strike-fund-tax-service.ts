@@ -285,7 +285,10 @@ export async function processYearEndTaxSlips(
     // Generate T4A for all provinces
     try {
       const _t4a = await generateT4A(memberId as string, taxYear);
-      // Store T4A in database (would need taxSlips table)
+      // NOTE: tax_slips table does not yet exist — the generated slip is
+      // discarded. The counter still increments so callers see a number, but
+      // nothing is persisted for CRA submission or member download.
+      logger.error('strike-fund-tax: generated T4A is not persisted (tax_slips table missing). Member will not receive a slip and CRA filing will be incomplete.', undefined, { memberId, taxYear });
       t4aCount++;
     } catch (error) {
       logger.error('Failed to generate T4A', { error, memberId, taxYear });
@@ -296,7 +299,7 @@ export async function processYearEndTaxSlips(
     if (payment.province === 'QC') {
       try {
         const _rl1 = await generateRL1(memberId as string, taxYear);
-        // Store RL-1 in database
+        logger.error('strike-fund-tax: generated RL-1 is not persisted (tax_slips table missing). Quebec member will not receive a slip and Revenu Québec filing will be incomplete.', undefined, { memberId, taxYear });
         rl1Count++;
       } catch (error) {
         logger.error('Failed to generate RL-1', { error, memberId, taxYear });
