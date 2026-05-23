@@ -1,5 +1,6 @@
 /**
- * Legacy slug redirect — moved to /[locale]/dashboard/organizational-operating-intelligence.
+ * /dashboard/organizational-operating-intelligence — Wave 5 collapse.
+ * Canonical surface: /dashboard/intelligence (executive-operating tab).
  */
 import { redirect } from 'next/navigation';
 
@@ -11,5 +12,5 @@ export default async function InstitutionalOperatingIntelligenceRedirect({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/dashboard/organizational-operating-intelligence`);
+  redirect(`/${locale}/dashboard/intelligence?tab=executive-operating`);
 }

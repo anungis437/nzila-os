@@ -220,7 +220,7 @@ export default async function GovernancePage({ params }: { params: Promise<{ loc
 
         <div className="border-t border-gray-100 pt-10 flex flex-col sm:flex-row items-center gap-4">
           <Link
-            href="../institutional-continuity"
+            href="../organizational-continuity"
             className="text-sm text-electric font-semibold hover:underline"
           >
             {copy.continuityLink}

@@ -22,7 +22,7 @@ const NZILA_URL = process.env.NEXT_PUBLIC_NZILA_URL ?? 'https://nzilaventures.co
 
 const footerLinks = {
   Platform: [
-    { name: 'Organizational Continuity',   href: '/en-CA/institutional-continuity' },
+    { name: 'Organizational Continuity',   href: '/en-CA/organizational-continuity' },
     { name: 'Governance Intelligence',     href: '/en-CA/platform/governance-intelligence' },
     { name: 'Organizational Memory',       href: '/en-CA/platform/organizational-memory' },
     { name: 'Executive Intelligence',      href: '/en-CA/executive-intelligence' },

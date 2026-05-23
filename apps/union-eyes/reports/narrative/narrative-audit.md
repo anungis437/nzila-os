@@ -1,10 +1,10 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-23T00:42:04.408Z
+Generated: 2026-05-23T00:53:32.964Z
 
 ## Summary
 
-- Files scanned: **98**
+- Files scanned: **99**
 - Hard-fail violations: **0**
 - Warning violations: **4**
 - Rule failures: **0**
@@ -195,14 +195,14 @@ Generated: 2026-05-23T00:42:04.408Z
 ### marketing/institutional-continuity
 
 - **Path:** `app/(marketing)/institutional-continuity/page.tsx`
-- **Organizational Maturity:** 89/100
+- **Organizational Maturity:** 61/100
 
 **Scores:**
-- narrative-balance: 57/100 (pass)
-- coexistence-positioning: 100/100 (pass)
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
-- canadian-positioning: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
 
 ### app/(marketing)/layout.tsx
 
@@ -211,6 +211,18 @@ Generated: 2026-05-23T00:42:04.408Z
 
 **Scores:**
 - narrative-balance: 47/100 (pass)
+- coexistence-positioning: 100/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 100/100 (pass)
+
+### marketing/organizational-continuity
+
+- **Path:** `app/(marketing)/organizational-continuity/page.tsx`
+- **Organizational Maturity:** 89/100
+
+**Scores:**
+- narrative-balance: 57/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -727,18 +739,6 @@ Generated: 2026-05-23T00:42:04.408Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-### marketing/institutional-continuity
-
-- **Path:** `app/[locale]/(marketing)/institutional-continuity/page.tsx`
-- **Organizational Maturity:** 92/100
-
-**Scores:**
-- narrative-balance: 69/100 (pass)
-- coexistence-positioning: 100/100 (pass)
-- procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 100/100 (pass)
-- canadian-positioning: 100/100 (pass)
-
 ### locale/(marketing)
 
 - **Path:** `app/[locale]/(marketing)/layout.tsx`
@@ -746,6 +746,18 @@ Generated: 2026-05-23T00:42:04.408Z
 
 **Scores:**
 - narrative-balance: 47/100 (pass)
+- coexistence-positioning: 100/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 100/100 (pass)
+
+### marketing/organizational-continuity
+
+- **Path:** `app/[locale]/(marketing)/organizational-continuity/page.tsx`
+- **Organizational Maturity:** 92/100
+
+**Scores:**
+- narrative-balance: 69/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1225,23 +1237,23 @@ Generated: 2026-05-23T00:42:04.408Z
 
 **Scores:**
 
-### internal/app/[locale]/dashboard/institutional-memory/page.tsx
-
-- **Path:** `app/[locale]/dashboard/institutional-memory/page.tsx`
-- **Organizational Maturity:** 0/100
-
-**Scores:**
-
-### internal/app/[locale]/dashboard/institutional-observability/page.tsx
-
-- **Path:** `app/[locale]/dashboard/institutional-observability/page.tsx`
-- **Organizational Maturity:** 0/100
-
-**Scores:**
-
 ### internal/app/[locale]/dashboard/longitudinal-cognition/page.tsx
 
 - **Path:** `app/[locale]/dashboard/longitudinal-cognition/page.tsx`
+- **Organizational Maturity:** 0/100
+
+**Scores:**
+
+### internal/app/[locale]/dashboard/organizational-memory/page.tsx
+
+- **Path:** `app/[locale]/dashboard/organizational-memory/page.tsx`
+- **Organizational Maturity:** 0/100
+
+**Scores:**
+
+### internal/app/[locale]/dashboard/organizational-observability/page.tsx
+
+- **Path:** `app/[locale]/dashboard/organizational-observability/page.tsx`
 - **Organizational Maturity:** 0/100
 
 **Scores:**

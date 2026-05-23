@@ -1,5 +1,6 @@
 /**
- * Legacy slug redirect — moved to /[locale]/dashboard/organizational-intelligence.
+ * /dashboard/organizational-intelligence — Wave 5 collapse.
+ * Canonical surface: /dashboard/intelligence (institutional tab).
  */
 import { redirect } from 'next/navigation';
 
@@ -11,5 +12,5 @@ export default async function InstitutionalIntelligenceRedirect({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/dashboard/organizational-intelligence`);
+  redirect(`/${locale}/dashboard/intelligence?tab=institutional`);
 }

@@ -229,7 +229,7 @@ export function ContinuityIntelligenceCockpit() {
             ← Knowledge Transfer
           </Link>
           <Link
-            href="../institutional-memory"
+            href="../organizational-memory"
             className="rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Explore Memory →

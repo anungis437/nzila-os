@@ -118,13 +118,13 @@ const PAGE_COPY = {
         runtime: 'dashboard/governance',
       },
       {
-        id: 'institutional-memory',
+        id: 'organizational-memory',
         icon: Library,
         name: 'Organizational Memory',
         posture: 'Continuity substrate',
         body:
           'Doctrine, precedents, prior decisions, and the continuity archive. Survives leadership transitions because it is held by the institution, not by individuals.',
-        runtime: 'dashboard/institutional-memory',
+        runtime: 'dashboard/organizational-memory',
       },
       {
         id: 'trust',
@@ -206,13 +206,13 @@ const PAGE_COPY = {
         runtime: 'dashboard/governance',
       },
       {
-        id: 'institutional-memory',
+        id: 'organizational-memory',
         icon: Library,
         name: 'Mémoire organisationnelle',
         posture: 'Substrat de continuité',
         body:
           'Doctrine, précédents, décisions antérieures et archive de continuité. Elle survit aux transitions parce qu’elle est détenue par l’institution, pas par des personnes.',
-        runtime: 'dashboard/institutional-memory',
+        runtime: 'dashboard/organizational-memory',
       },
       {
         id: 'trust',

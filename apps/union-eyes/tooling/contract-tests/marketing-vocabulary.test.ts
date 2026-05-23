@@ -26,7 +26,7 @@ const PUBLIC_MARKETING_ROUTES = [
   "features",
   "executive-intelligence",
   "insights",
-  "institutional-continuity",
+  "organizational-continuity",
   "for-clc",
   "for-federations",
   "for-leadership",

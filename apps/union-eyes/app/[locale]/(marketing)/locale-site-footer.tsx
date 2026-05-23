@@ -49,7 +49,7 @@ export default function LocaleSiteFooter() {
       { name: tNav('intelligence.name'), href: `/${locale}/platform#intelligence` },
       { name: tNav('cognition.name'),    href: `/${locale}/platform#cognition` },
       { name: tNav('governance.name'),   href: `/${locale}/platform#governance` },
-      { name: tNav('memory.name'),       href: `/${locale}/platform#institutional-memory` },
+      { name: tNav('memory.name'),       href: `/${locale}/platform#organizational-memory` },
       { name: tNav('trust.name'),        href: `/${locale}/platform#trust` },
     ],
     [t('solutions') as string]: [

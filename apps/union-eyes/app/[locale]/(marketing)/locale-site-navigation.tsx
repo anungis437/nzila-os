@@ -42,10 +42,10 @@ export default function LocaleSiteNavigation() {
   const pillarLinks = [
     { name: t('pillarItems.governance.name'),    href: `/${locale}/governance`,                 desc: t('pillarItems.governance.desc') },
     { name: t('pillarItems.conventions.name'),   href: `/${locale}/conventions`,                desc: t('pillarItems.conventions.desc') },
-    { name: t('pillarItems.continuity.name'),    href: `/${locale}/institutional-continuity`,   desc: t('pillarItems.continuity.desc') },
+    { name: t('pillarItems.continuity.name'),    href: `/${locale}/organizational-continuity`,   desc: t('pillarItems.continuity.desc') },
     { name: t('pillarItems.trust.name'),         href: `/${locale}/trust`,                      desc: t('pillarItems.trust.desc') },
   ];
-  const pillarPrefixes = [`/${locale}/governance`, `/${locale}/conventions`, `/${locale}/institutional-continuity`, `/${locale}/trust`];
+  const pillarPrefixes = [`/${locale}/governance`, `/${locale}/conventions`, `/${locale}/organizational-continuity`, `/${locale}/trust`];
   const isPillarActive = pillarPrefixes.some((p) => pathname?.startsWith(p));
 
   const primaryNav = [

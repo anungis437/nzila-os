@@ -1,6 +1,6 @@
 /**
  * /dashboard/knowledge — Wave 5 collapse.
- * Canonical surface: /dashboard/institutional-memory (knowledge tab).
+ * Canonical surface: /dashboard/organizational-memory (knowledge tab).
  */
 import { redirect } from 'next/navigation';
 
@@ -12,5 +12,5 @@ export default async function KnowledgeRedirect({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/dashboard/institutional-memory?tab=knowledge`);
+  redirect(`/${locale}/dashboard/organizational-memory?tab=knowledge`);
 }

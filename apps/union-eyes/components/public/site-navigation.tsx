@@ -38,7 +38,7 @@ const solutionsLinks = [
 const modulesLinks = [
   {
     name: 'Organizational Continuity',
-    href: '/institutional-continuity',
+    href: '/organizational-continuity',
     desc: 'Leadership transition resilience',
   },
   {
@@ -81,7 +81,7 @@ export default function SiteNavigation() {
   const modulesTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const isModulesPath =
-    pathname?.startsWith('/institutional-continuity') ||
+    pathname?.startsWith('/organizational-continuity') ||
     pathname?.startsWith('/platform/governance-intelligence') ||
     pathname?.startsWith('/platform/organizational-memory') ||
     pathname?.startsWith('/executive-intelligence') ||

@@ -31,7 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/status', changeFrequency: 'weekly', priority: 0.7 },
     { path: '/proof', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/governance', changeFrequency: 'monthly', priority: 0.8 },
-    { path: '/institutional-continuity', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/organizational-continuity', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/executive-intelligence', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/conventions', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/for-clc', changeFrequency: 'monthly', priority: 0.7 },

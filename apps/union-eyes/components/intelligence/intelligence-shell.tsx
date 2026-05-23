@@ -68,7 +68,7 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
           Research, analysis, and insights — understand trends and make informed decisions.
         </p>
         <Link
-          href={`/${locale}/dashboard/institutional-memory?tab=knowledge`}
+          href={`/${locale}/dashboard/organizational-memory?tab=knowledge`}
           className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-1"
         >
           <BookOpen size={12} /> Supporting references in Organizational Memory

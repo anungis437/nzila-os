@@ -13,7 +13,7 @@ const STARTER_KIT: FollowupRecommendation = {
   description:
     'A short, plain-language reference on continuity-aware governance practice. Designed for institutions beginning to formalize operational memory.',
   ctaLabel: 'Read the starter kit',
-  ctaHref: '/institutional-continuity',
+  ctaHref: '/organizational-continuity',
 };
 
 const ASSESSMENT_WALKTHROUGH: FollowupRecommendation = {

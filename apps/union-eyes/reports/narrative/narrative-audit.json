@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-23T00:42:04.408Z",
+  "generatedAt": "2026-05-23T00:53:32.964Z",
   "files": [
     {
       "ctx": {
@@ -1347,37 +1347,31 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 57,
+          "score": 0,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 7,
-              "coordination": 6,
-              "trust": 10
+              "governance": 0,
+              "continuity": 4,
+              "coordination": 0,
+              "trust": 0
             },
-            "total": 26,
+            "total": 4,
             "shares": {
-              "governance": 0.11538461538461539,
-              "continuity": 0.2692307692307692,
-              "coordination": 0.23076923076923078,
-              "trust": 0.38461538461538464
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
             }
           }
         },
         {
           "rule": "coexistence-positioning",
           "status": "pass",
-          "score": 100,
+          "score": 50,
           "flags": [],
           "detail": {
-            "matched": [
-              "overlay infrastructure",
-              "continuity layer",
-              "alongside existing systems",
-              "non-displacing",
-              "respects existing tools"
-            ]
+            "matched": []
           }
         },
         {
@@ -1390,40 +1384,20 @@
           "rule": "labour-safe-ai",
           "status": "pass",
           "score": 100,
-          "flags": [],
-          "detail": {
-            "mentionsAi": true,
-            "matchedRequired": [
-              "human oversight",
-              "explainability",
-              "reviewability",
-              "governance-safe AI",
-              "assistive intelligence",
-              "procedural transparency"
-            ]
-          }
+          "flags": []
         },
         {
           "rule": "canadian-positioning",
           "status": "pass",
-          "score": 100,
+          "score": 70,
           "flags": [],
           "detail": {
-            "matched": [
-              "Canadian-hosted",
-              "bilingual-first",
-              "sovereignty-conscious",
-              "organizational trust",
-              "democratic infrastructure"
-            ],
-            "generalCanadianHits": [
-              "canadian",
-              "bilingual"
-            ]
+            "matched": [],
+            "generalCanadianHits": []
           }
         }
       ],
-      "maturity": 89
+      "maturity": 61
     },
     {
       "ctx": {
@@ -1513,6 +1487,95 @@
         }
       ],
       "maturity": 87
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/organizational-continuity/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/organizational-continuity"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 57,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 3,
+              "continuity": 7,
+              "coordination": 6,
+              "trust": 10
+            },
+            "total": 26,
+            "shares": {
+              "governance": 0.11538461538461539,
+              "continuity": 0.2692307692307692,
+              "coordination": 0.23076923076923078,
+              "trust": 0.38461538461538464
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "overlay infrastructure",
+              "continuity layer",
+              "alongside existing systems",
+              "non-displacing",
+              "respects existing tools"
+            ]
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability",
+              "reviewability",
+              "governance-safe AI",
+              "assistive intelligence",
+              "procedural transparency"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "Canadian-hosted",
+              "bilingual-first",
+              "sovereignty-conscious",
+              "organizational trust",
+              "democratic infrastructure"
+            ],
+            "generalCanadianHits": [
+              "canadian",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 89
     },
     {
       "ctx": {
@@ -5088,96 +5151,6 @@
     },
     {
       "ctx": {
-        "path": "app/[locale]/(marketing)/institutional-continuity/page.tsx",
-        "isPublicSurface": true,
-        "label": "marketing/institutional-continuity"
-      },
-      "violations": [],
-      "ruleResults": [
-        {
-          "rule": "narrative-balance",
-          "status": "pass",
-          "score": 69,
-          "flags": [],
-          "detail": {
-            "counts": {
-              "governance": 20,
-              "continuity": 47,
-              "coordination": 22,
-              "trust": 32
-            },
-            "total": 121,
-            "shares": {
-              "governance": 0.1652892561983471,
-              "continuity": 0.3884297520661157,
-              "coordination": 0.18181818181818182,
-              "trust": 0.2644628099173554
-            }
-          }
-        },
-        {
-          "rule": "coexistence-positioning",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "matched": [
-              "overlay infrastructure",
-              "continuity layer",
-              "organizational evolution",
-              "alongside existing systems",
-              "non-displacing",
-              "respects existing tools"
-            ]
-          }
-        },
-        {
-          "rule": "procedural-neutrality",
-          "status": "pass",
-          "score": 100,
-          "flags": []
-        },
-        {
-          "rule": "labour-safe-ai",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "mentionsAi": true,
-            "matchedRequired": [
-              "human oversight",
-              "explainability",
-              "reviewability",
-              "governance-safe AI",
-              "assistive intelligence",
-              "procedural transparency"
-            ]
-          }
-        },
-        {
-          "rule": "canadian-positioning",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "matched": [
-              "Canadian-hosted",
-              "bilingual-first",
-              "sovereignty-conscious",
-              "organizational trust",
-              "democratic infrastructure"
-            ],
-            "generalCanadianHits": [
-              "canadian",
-              "bilingual"
-            ]
-          }
-        }
-      ],
-      "maturity": 92
-    },
-    {
-      "ctx": {
         "path": "app/[locale]/(marketing)/layout.tsx",
         "isPublicSurface": true,
         "label": "locale/(marketing)"
@@ -5264,6 +5237,96 @@
         }
       ],
       "maturity": 87
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/organizational-continuity/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/organizational-continuity"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 69,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 20,
+              "continuity": 47,
+              "coordination": 22,
+              "trust": 32
+            },
+            "total": 121,
+            "shares": {
+              "governance": 0.1652892561983471,
+              "continuity": 0.3884297520661157,
+              "coordination": 0.18181818181818182,
+              "trust": 0.2644628099173554
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "overlay infrastructure",
+              "continuity layer",
+              "organizational evolution",
+              "alongside existing systems",
+              "non-displacing",
+              "respects existing tools"
+            ]
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability",
+              "reviewability",
+              "governance-safe AI",
+              "assistive intelligence",
+              "procedural transparency"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "Canadian-hosted",
+              "bilingual-first",
+              "sovereignty-conscious",
+              "organizational trust",
+              "democratic infrastructure"
+            ],
+            "generalCanadianHits": [
+              "canadian",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 92
     },
     {
       "ctx": {
@@ -7888,29 +7951,29 @@
     },
     {
       "ctx": {
-        "path": "app/[locale]/dashboard/institutional-memory/page.tsx",
-        "isPublicSurface": false,
-        "label": "internal/app/[locale]/dashboard/institutional-memory/page.tsx"
-      },
-      "violations": [],
-      "ruleResults": [],
-      "maturity": 0
-    },
-    {
-      "ctx": {
-        "path": "app/[locale]/dashboard/institutional-observability/page.tsx",
-        "isPublicSurface": false,
-        "label": "internal/app/[locale]/dashboard/institutional-observability/page.tsx"
-      },
-      "violations": [],
-      "ruleResults": [],
-      "maturity": 0
-    },
-    {
-      "ctx": {
         "path": "app/[locale]/dashboard/longitudinal-cognition/page.tsx",
         "isPublicSurface": false,
         "label": "internal/app/[locale]/dashboard/longitudinal-cognition/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/dashboard/organizational-memory/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/organizational-memory/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/dashboard/organizational-observability/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/organizational-observability/page.tsx"
       },
       "violations": [],
       "ruleResults": [],
@@ -7938,8 +8001,8 @@
     }
   ],
   "summary": {
-    "totalFiles": 98,
-    "publicFiles": 87,
+    "totalFiles": 99,
+    "publicFiles": 88,
     "hardFails": 0,
     "warnings": 4,
     "ruleFailures": 0,
