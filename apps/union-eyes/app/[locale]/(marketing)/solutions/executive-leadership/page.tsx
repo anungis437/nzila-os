@@ -59,9 +59,9 @@ const PAGE_COPY = {
     quoteAttribution: 'UnionEyes Institutional Continuity Principle',
     relatedHeading: 'Explore related solutions',
     finalHeading: 'Ready to lead with institutional clarity?',
-    finalBody: 'Request an Executive Briefing tailored to your executive leadership context.',
-    primaryCta: 'Request an Institutional Briefing',
-    finalCta: 'Request an Executive Briefing',
+    finalBody: 'Start with a free Continuity Reflection scoped to executive leadership.',
+    primaryCta: 'Start the free Continuity Reflection',
+    finalCta: 'Start the free Continuity Reflection',
   },
   'fr-CA': {
     badge: 'Solutions · Direction exécutive syndicale',
@@ -88,9 +88,9 @@ const PAGE_COPY = {
     quoteAttribution: 'Principe de continuité institutionnelle UnionEyes',
     relatedHeading: 'Explorer les solutions connexes',
     finalHeading: 'Prêt à diriger avec clarté institutionnelle?',
-    finalBody: 'Demandez un breffage exécutif adapté à votre contexte de leadership.',
-    primaryCta: 'Demander un breffage institutionnel',
-    finalCta: 'Demander un breffage exécutif',
+    finalBody: 'Commencez par une réflexion de continuité gratuite adaptée à votre contexte de direction exécutive.',
+    primaryCta: 'Commencer la réflexion de continuité (gratuite)',
+    finalCta: 'Commencer la réflexion de continuité (gratuite)',
   },
 };
 
@@ -109,7 +109,7 @@ export default async function ExecutiveLeadershipPage({ params }: { params: Prom
         }
         heading={<>{copy.heading}</>}
         description={copy.description}
-        cta={<Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+        cta={<Link href={`/${locale}/continuity-assessment/start`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
             {copy.primaryCta}
           </Link>}
       />
@@ -177,7 +177,7 @@ export default async function ExecutiveLeadershipPage({ params }: { params: Prom
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/continuity-assessment/start`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.finalCta}
           </Link>
         </div>

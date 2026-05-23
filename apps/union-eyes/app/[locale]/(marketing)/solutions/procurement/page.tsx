@@ -50,7 +50,7 @@ const PAGE_COPY = {
     heading: 'Procurement clarity for institutional deployment.',
     description:
       'UnionEyes gives procurement teams a coexistence-oriented, sovereignty-conscious deployment path: clear scope, governance-safe deployment controls, federation-aware operations, and evidence provenance for leadership confidence.',
-    primaryCta: 'Request an Executive Briefing',
+    primaryCta: 'Start the free Continuity Reflection',
     secondaryCta: 'Review Trust Center',
     challengeHeading: 'The procurement challenge',
     challenges: [
@@ -107,7 +107,7 @@ const PAGE_COPY = {
     heading: 'Clarté d’approvisionnement pour un déploiement institutionnel.',
     description:
       'UnionEyes donne aux équipes d’approvisionnement une voie de déploiement orientée vers la coexistence et la souveraineté : portée claire, contrôles sûrs pour la gouvernance, opérations conscientes des fédérations et provenance des preuves pour la confiance du leadership.',
-    primaryCta: 'Demander un breffage exécutif',
+    primaryCta: 'Commencer la réflexion de continuité (gratuite)',
     secondaryCta: 'Examiner le centre de confiance',
     challengeHeading: 'Le défi d’approvisionnement',
     challenges: [
@@ -242,7 +242,7 @@ export default async function ProcurementPage({ params }: { params: Promise<{ lo
         description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={`/${locale}/continuity-assessment/start`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.primaryCta}
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
@@ -431,7 +431,7 @@ export default async function ProcurementPage({ params }: { params: Promise<{ lo
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/continuity-assessment/start`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.primaryCta}
           </Link>
         </div>

@@ -39,7 +39,7 @@ const PAGE_COPY = {
     heading: 'Governance modernization that earns democratic trust.',
     description:
       'UnionEyes Governance-of-Record Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic legitimacy.',
-    primaryCta: 'Request an Executive Briefing',
+    primaryCta: 'Start the free Continuity Reflection',
     secondaryCta: 'Governance-of-Record Intelligence Substrate',
     challengeHeading: 'The governance continuity problem',
     challenges: [
@@ -72,7 +72,7 @@ const PAGE_COPY = {
     heading: 'Une modernisation de la gouvernance qui mérite la confiance démocratique.',
     description:
       "L'intelligence de gouvernance officielle d’UnionEyes donne aux responsables de gouvernance l’explicabilité, les pistes d’audit et le contexte institutionnel nécessaires pour moderniser les opérations sans compromettre la légitimité démocratique.",
-    primaryCta: 'Demander un breffage exécutif',
+    primaryCta: 'Commencer la réflexion de continuité (gratuite)',
     secondaryCta: 'Substrat d’intelligence de gouvernance officielle',
     challengeHeading: 'Le problème de continuité de gouvernance',
     challenges: [
@@ -119,7 +119,7 @@ export default async function GovernanceLeadershipPage({ params }: { params: Pro
         description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={`/${locale}/continuity-assessment/start`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.primaryCta}
             </Link>
             <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
@@ -198,7 +198,7 @@ export default async function GovernanceLeadershipPage({ params }: { params: Pro
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/continuity-assessment/start`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.primaryCta}
           </Link>
         </div>

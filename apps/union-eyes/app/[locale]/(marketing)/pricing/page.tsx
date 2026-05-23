@@ -475,7 +475,7 @@ const pricingCopy = {
     ctaLabel: 'Begin with assessment, not procurement',
     ctaHeading: 'Start with a continuity conversation',
     ctaBody: 'Tell us where your institution is today. We will help you identify which layer fits, what an OCI engagement looks like in practice, and shape the journey with you — at the pace your governance can sustain.',
-    ctaPrimary: 'Request Executive Briefing',
+    ctaPrimary: 'Start the free Continuity Reflection',
     ctaSecondary: 'Discuss an OCI Engagement',
     ctaFinePrint: 'Engagement layers and ranges are positioning structure for institutional planning. Final scope is set jointly with executive and procurement leadership — never as self-serve subscription.',
     glossaryLabel: 'The two terms used throughout this page',
@@ -525,7 +525,7 @@ const pricingCopy = {
     ctaLabel: 'Commencer par l’évaluation, pas par l’approvisionnement',
     ctaHeading: 'Commencer par une conversation de continuité',
     ctaBody: 'Dites-nous où en est votre institution aujourd’hui. Nous vous aidons à identifier la bonne couche, à comprendre à quoi ressemble un engagement OCI en pratique, et à façonner le parcours avec vous.',
-    ctaPrimary: 'Demander une présentation exécutive',
+    ctaPrimary: 'Commencer la réflexion de continuité (gratuite)',
     ctaSecondary: 'Discuter d’un engagement OCI',
     ctaFinePrint: 'Les couches d’engagement et les fourchettes servent à planifier l’engagement institutionnel. La portée finale est définie avec la direction exécutive et l’approvisionnement — jamais en abonnement libre-service.',
     glossaryLabel: 'Les deux termes utilisés tout au long de cette page',
@@ -698,7 +698,7 @@ export default async function LocalePricingPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/continuity-assessment/start`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all"
             >
               {copy.ctaPrimary}

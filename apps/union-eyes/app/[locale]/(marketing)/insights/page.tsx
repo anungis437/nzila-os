@@ -44,7 +44,7 @@ const insightsCopy = {
     heroHeading: <>Institutional continuity and governance-of-record intelligence</>,
     heroDescription:
       'A doctrine publication movement for executive teams preserving institutional memory, reducing fragmentation risk, and operationalizing explainable modernization with continuity confidence.',
-    ctaPrimary: 'Request Executive Briefing',
+    ctaPrimary: 'Start the free Continuity Reflection',
     ctaSecondary: 'Receive Doctrine Updates',
     doctrineSpine: 'Doctrine spine',
     pillarsHeading: 'Four pillars organizing every publication',
@@ -93,7 +93,7 @@ const insightsCopy = {
     heroHeading: <>Intelligence de continuité institutionnelle et de gouvernance officielle</>,
     heroDescription:
       'Un espace de publication doctrinale pour les équipes exécutives qui préservent la mémoire institutionnelle, réduisent la fragmentation et modernisent avec explicabilité.',
-    ctaPrimary: 'Demander une présentation exécutive',
+    ctaPrimary: 'Commencer la réflexion de continuité (gratuite)',
     ctaSecondary: 'Recevoir les mises à jour doctrinales',
     doctrineSpine: 'Axe doctrinal',
     pillarsHeading: 'Quatre piliers organisent chaque publication',
@@ -222,7 +222,7 @@ export default async function InsightsPage({
         description={copy.heroDescription}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all">
+            <Link href={withInstitutionalContext(`/${locale}/continuity-assessment/start`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all">
               {copy.ctaPrimary}
             </Link>
             <Link href={withInstitutionalContext(`/${locale}/contact`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all">

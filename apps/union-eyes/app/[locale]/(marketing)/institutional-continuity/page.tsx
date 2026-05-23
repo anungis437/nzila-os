@@ -97,7 +97,7 @@ const pageCopy = {
     heading: <>Preserve what your organization<br />knows. Protect what it can do.</>,
     description:
       'Institutional Continuity is the UnionEyes capability that preserves organizational memory, strengthens resilience through transitions, and ensures governance structures survive beyond any individual leader.',
-    primaryCta: 'Request an Executive Briefing',
+    primaryCta: 'Start the free Continuity Reflection',
     secondaryCta: 'View Governance Structure',
     tabs: {
       challenge: 'Challenge',
@@ -131,7 +131,7 @@ const pageCopy = {
     heading: <>Préserver ce que votre organisation<br />sait. Protéger ce qu’elle peut faire.</>,
     description:
       'La continuité institutionnelle est la capacité UnionEyes qui préserve la mémoire organisationnelle, renforce la résilience pendant les transitions et aide les structures de gouvernance à survivre au-delà de toute personne.',
-    primaryCta: 'Demander une présentation exécutive',
+    primaryCta: 'Commencer la réflexion de continuité (gratuite)',
     secondaryCta: 'Voir la structure de gouvernance',
     tabs: {
       challenge: 'Défi',
@@ -207,7 +207,7 @@ export default async function InstitutionalContinuityPage({
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/continuity-assessment/start`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
             >
               {copy.primaryCta}
@@ -495,7 +495,7 @@ export default async function InstitutionalContinuityPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/continuity-assessment/start`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
               {copy.primaryCta}

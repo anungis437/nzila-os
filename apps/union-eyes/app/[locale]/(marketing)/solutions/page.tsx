@@ -53,7 +53,7 @@ const solutions = [
     href: 'solutions/executive-leadership',
     challenge: 'Strategic continuity is at risk when institutional knowledge lives in individuals, not in the organization.',
     scenario:
-      'A national union prepares for an upcoming presidential transition. Three decades of negotiated precedents, federation-level commitments, and operational doctrine live in one outgoing executive’s memory. OCI surfaces the dependency map; the platform turns it into an inheritable continuity record before the transition window closes.',
+      'A national union prepares for an upcoming presidential transition. Three decades of negotiated precedents, federation-level commitments, and operational doctrine live in one outgoing executive’s memory. OCI (Organizational Continuity Index) surfaces the dependency map; the platform turns it into an inheritable continuity record before the transition window closes.',
     outcomes: [
       'Organizational continuity visibility across leadership transitions',
       'Strategic coherence through succession and change',
@@ -141,8 +141,8 @@ const pageCopy = {
       'UnionEyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role.',
     ctaHeading: 'Ready to explore your stakeholder journey?',
     ctaDescription:
-      'Request an Executive Briefing tailored to your role and institutional context.',
-    cta: 'Request an Executive Briefing',
+      'Start with a free Continuity Reflection. No commitment, no sales call — just a scoped look at where institutional continuity sits for your organization today.',
+    cta: 'Start the free Continuity Reflection',
     solutions,
   },
   'fr-CA': {
@@ -152,8 +152,8 @@ const pageCopy = {
       'UnionEyes s’organise autour des parcours des parties prenantes institutionnelles, pas autour de systèmes techniques. Chaque capacité met en avant les résultats utiles à votre rôle.',
     ctaHeading: 'Prêt à explorer votre parcours institutionnel?',
     ctaDescription:
-      'Demandez une présentation exécutive adaptée à votre rôle et à votre contexte institutionnel.',
-    cta: 'Demander une présentation exécutive',
+      'Commencez par une réflexion de continuité gratuite. Sans engagement, sans appel commercial — simplement un regard ciblé sur l’état actuel de la continuité institutionnelle de votre organisation.',
+    cta: 'Commencer la réflexion de continuité (gratuite)',
     solutions: [
       {
         icon: Users,
@@ -162,7 +162,7 @@ const pageCopy = {
         challenge:
           'La continuité stratégique est fragilisée lorsque la connaissance institutionnelle vit chez des personnes plutôt que dans l’organisation.',
         scenario:
-          'Un syndicat national prépare une transition présidentielle. Trois décennies de précédents négociés, d’engagements fédéraux et de doctrine opérationnelle vivent dans la mémoire d’un seul dirigeant sortant. L’OCI révèle la carte des dépendances ; la plateforme la transforme en dossier de continuité transmissible avant la fermeture de la fenêtre de transition.',
+          'Un syndicat national prépare une transition présidentielle. Trois décennies de précédents négociés, d’engagements fédéraux et de doctrine opérationnelle vivent dans la mémoire d’un seul dirigeant sortant. L’OCI (Indice de continuité organisationnelle) révèle la carte des dépendances ; la plateforme la transforme en dossier de continuité transmissible avant la fermeture de la fenêtre de transition.',
         outcomes: [
           'Visibilité sur la continuité organisationnelle lors des transitions de leadership',
           'Cohérence stratégique pendant la succession et le changement',
@@ -319,7 +319,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
             {copy.ctaDescription}
           </p>
           <Link
-            href={`/${locale}/pilot-request`}
+            href={`/${locale}/continuity-assessment/start`}
             className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
             {copy.cta}

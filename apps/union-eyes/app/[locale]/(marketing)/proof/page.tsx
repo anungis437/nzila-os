@@ -508,7 +508,7 @@ const ANONYMIZED_PROOF_NARRATIVES: Record<
         situation:
           'Two long-serving officers exited within a six-month window. Successors inherited active grievance work, an in-flight bargaining file, and a board calendar that nobody had time to re-explain.',
         response:
-          'A continuity reflection was run before any new tooling was introduced. OCRA highlighted that the riskiest discontinuity was not the people change itself but the loss of in-flight decision rationale on three active files.',
+          'A continuity reflection was run before any new tooling was introduced. OCRA (Organizational Continuity Risk Analysis) highlighted that the riskiest discontinuity was not the people change itself but the loss of in-flight decision rationale on three active files.',
         observable:
           'Within the first sixty days, decision rationale on those three files was reconstructed from existing records and re-anchored against the new officers in a single reviewable briefing. No new committee was created to do this work.',
       },
@@ -545,7 +545,7 @@ const ANONYMIZED_PROOF_NARRATIVES: Record<
         situation:
           'Deux dirigeants de longue date sont partis en six mois. Les successeurs ont herite de griefs actifs, d un dossier de negociation en cours et d un calendrier de conseil que personne n avait le temps de leur reexpliquer.',
         response:
-          'Une reflexion de continuite a ete realisee avant tout nouvel outillage. L OCRA a montre que le plus grand risque n etait pas le changement de personnes, mais la perte du raisonnement decisionnel en cours sur trois dossiers actifs.',
+          'Une reflexion de continuite a ete realisee avant tout nouvel outillage. L OCRA (Analyse de risque de continuite organisationnelle) a montre que le plus grand risque n etait pas le changement de personnes, mais la perte du raisonnement decisionnel en cours sur trois dossiers actifs.',
         observable:
           'En soixante jours, le raisonnement decisionnel de ces trois dossiers a ete reconstitue a partir des dossiers existants et reancre aupres des nouveaux dirigeants dans un seul briefing revisable. Aucun nouveau comite n a ete cree.',
       },
