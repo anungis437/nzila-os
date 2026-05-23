@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 /**
  * Trust & Compliance page.
@@ -96,7 +96,7 @@ const TRUST_COPY = {
       'UnionEyes is designed from the ground up for deployment in labour environments. Our labour-safe posture is not a policy addendum — it is an architectural commitment enforced at every layer of the substrate.',
     labourSafeItems: [
       { label: 'Zero worker surveillance', desc: 'No worker conduct grading, monitoring, or performance tracking.' },
-      { label: 'No workforce analytics', desc: 'Intelligence is institutional, not individual. Workers are never the subject of analysis.' },
+      { label: 'No workforce analytics', desc: 'Intelligence is organizational, not individual. Workers are never the subject of analysis.' },
       { label: 'Human oversight required', desc: 'All intelligence recommendations require human review before any action.' },
       { label: 'Democratic governance controls', desc: 'AI systems operate within democratic governance structures, never replacing them.' },
       { label: 'Transparent data use', desc: 'What data is used, how it is used, and why — documented and available for review.' },
@@ -104,7 +104,7 @@ const TRUST_COPY = {
     ],
     explainabilityTitle: 'Explainability Standards',
     explainabilityBody:
-      'Every UnionEyes intelligence output is traceable to its source evidence and explainable in plain institutional language. Explainability is enforced — not aspirational.',
+      'Every UnionEyes intelligence output is traceable to its source evidence and explainable in plain organizational language. Explainability is enforced — not aspirational.',
     explainabilityItems: [
       'Every recommendation traces to specific source evidence',
       'Reasoning pathways are visible and auditable',
@@ -117,13 +117,13 @@ const TRUST_COPY = {
     trustOpsBody:
       'Trust in UnionEyes is operational, not symbolic. Institutions can review how explainability, governance checkpoints, and oversight pathways are executed in deployment practice.',
     trustOpsCards: [
-      { title: 'Explainability Philosophy', desc: 'Every recommendation remains grounded in evidence lineage, plain-language rationale, and institutional context.' },
+      { title: 'Explainability Philosophy', desc: 'Every recommendation remains grounded in evidence lineage, plain-language rationale, and organizational context.' },
       { title: 'Implementation Safeguards', desc: 'Human oversight, review gates, and auditable governance pathways remain active at every rollout stage.' },
       { title: 'Operational Transparency', desc: 'Leadership and procurement teams can verify boundaries, controls, and modernization posture before expansion.' },
     ],
     maturityTitle: 'Governance Maturity Scoring Model',
     maturityBody:
-      'Maturity scores are directional institutional signals used for deployment planning. They are never used for worker evaluation or productivity scoring.',
+      'Maturity scores are directional organizational signals used for deployment planning. They are never used for worker evaluation or productivity scoring.',
     maturityPathwayTitle: 'Operational Maturity Pathway',
     proofTitle: 'Trust-Center Operational Proof Layer',
     proofBody:
@@ -133,7 +133,7 @@ const TRUST_COPY = {
       { title: 'Governance review structure', desc: 'Oversight checkpoints and human validation layers stay explicit.' },
       { title: 'Continuity protection principles', desc: 'Transition safety, resilience, and memory retention remain central.' },
     ],
-    proofLink: 'Review the institutional proof page',
+    proofLink: 'Review the organizational proof page',
     walkthroughsTitle: 'Governance Operational Walkthroughs',
     walkthroughsBody:
       'Walkthroughs model how governance holds in real modernization situations: transitions, committee coordination, onboarding pressure, and procurement review.',
@@ -163,7 +163,7 @@ const TRUST_COPY = {
       'UnionEyes est conçu dès le départ pour les environnements syndicaux. Cette posture n’est pas un ajout de politique : c’est un engagement architectural appliqué à chaque couche.',
     labourSafeItems: [
       { label: 'Aucune surveillance des travailleuses et travailleurs', desc: 'Aucune notation, surveillance ou mesure de performance individuelle.' },
-      { label: 'Aucune analytique de main-d’œuvre', desc: 'L’intelligence est institutionnelle, pas individuelle. Les personnes ne sont jamais le sujet de l’analyse.' },
+      { label: 'Aucune analytique de main-d’œuvre', desc: 'L’intelligence est organisationnelle, pas individuelle. Les personnes ne sont jamais le sujet de l’analyse.' },
       { label: 'Surveillance humaine requise', desc: 'Toute recommandation d’intelligence exige une revue humaine avant toute action.' },
       { label: 'Contrôles de gouvernance démocratique', desc: 'Les systèmes IA opèrent dans les structures démocratiques, sans les remplacer.' },
       { label: 'Utilisation transparente des données', desc: 'Les données utilisées, leur usage et la raison de cet usage sont documentés et révisables.' },
@@ -171,7 +171,7 @@ const TRUST_COPY = {
     ],
     explainabilityTitle: 'Normes d’explicabilité',
     explainabilityBody:
-      'Chaque résultat d’intelligence UnionEyes est traçable à ses preuves sources et explicable en langage institutionnel clair. L’explicabilité est imposée, pas souhaitée.',
+      'Chaque résultat d’intelligence UnionEyes est traçable à ses preuves sources et explicable en langage organisationnel clair. L’explicabilité est imposée, pas souhaitée.',
     explainabilityItems: [
       'Chaque recommandation renvoie à des preuves sources précises',
       'Les voies de raisonnement sont visibles et vérifiables',
@@ -184,13 +184,13 @@ const TRUST_COPY = {
     trustOpsBody:
       'La confiance dans UnionEyes est opérationnelle, pas symbolique. Les institutions peuvent examiner comment l’explicabilité, les points de gouvernance et les voies de surveillance fonctionnent en déploiement.',
     trustOpsCards: [
-      { title: 'Philosophie d’explicabilité', desc: 'Chaque recommandation demeure ancrée dans la lignée des preuves, une justification claire et le contexte institutionnel.' },
+      { title: 'Philosophie d’explicabilité', desc: 'Chaque recommandation demeure ancrée dans la lignée des preuves, une justification claire et le contexte organisationnel.' },
       { title: 'Garde-fous de mise en œuvre', desc: 'Surveillance humaine, points de revue et voies de gouvernance vérifiables restent actifs à chaque étape.' },
       { title: 'Transparence opérationnelle', desc: 'Leadership et approvisionnement peuvent vérifier limites, contrôles et posture de modernisation avant l’expansion.' },
     ],
     maturityTitle: 'Modèle de maturité de gouvernance',
     maturityBody:
-      'Les scores de maturité sont des signaux institutionnels directionnels pour la planification du déploiement. Ils ne servent jamais à évaluer des personnes ou la productivité.',
+      'Les scores de maturité sont des signaux organisationnels directionnels pour la planification du déploiement. Ils ne servent jamais à évaluer des personnes ou la productivité.',
     maturityPathwayTitle: 'Parcours de maturité opérationnelle',
     proofTitle: 'Couche de preuve opérationnelle du centre de confiance',
     proofBody:
@@ -198,9 +198,9 @@ const TRUST_COPY = {
     proofCards: [
       { title: 'Garde-fous de mise en œuvre', desc: 'Activation par phases, portée bornée et fenêtres de revue restent visibles.' },
       { title: 'Structure de revue de gouvernance', desc: 'Les points de surveillance et les couches de validation humaine restent explicites.' },
-      { title: 'Principes de protection de la continuité', desc: 'Sécurité des transitions, résilience et mémoire institutionnelle restent centrales.' },
+      { title: 'Principes de protection de la continuité', desc: 'Sécurité des transitions, résilience et mémoire organisationnelle restent centrales.' },
     ],
-    proofLink: 'Examiner la page de preuve institutionnelle',
+    proofLink: 'Examiner la page de preuve organisationnelle',
     walkthroughsTitle: 'Parcours opérationnels de gouvernance',
     walkthroughsBody:
       'Les parcours modélisent comment la gouvernance tient dans des situations réelles de modernisation : transitions, coordination de comités, pression d’intégration et revue d’approvisionnement.',

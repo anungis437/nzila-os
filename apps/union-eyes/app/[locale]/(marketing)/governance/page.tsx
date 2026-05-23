@@ -2,7 +2,7 @@
  * Governance & Continuity (customer-institutional).
  *
  * Per realignment directive, "governance" on UnionEyes public surfaces refers
- * to the CUSTOMER's institutional governance ecosystem: constitutional
+ * to the CUSTOMER's organizational governance ecosystem: constitutional
  * operations, resolutions, committees, delegate coordination, and continuity
  * of mandate across leadership transitions.
  *
@@ -34,12 +34,12 @@ const PAGE_COPY = {
   'en-CA': {
     metadataTitle: 'Governance & Continuity | UnionEyes',
     metadataDescription:
-      'Constitutional operations infrastructure for federated democratic organizations — resolutions, committees, mandates, and continuity of institutional memory across leadership transitions.',
+      'Constitutional operations infrastructure for federated democratic organizations — resolutions, committees, mandates, and continuity of organizational memory across leadership transitions.',
     badge: 'Governance & Continuity',
     heading: 'Constitutional operations for federated organizations.',
     description:
-      'UnionEyes turns your constitution, resolutions, and mandates into operational infrastructure — so institutional reasoning survives every leadership transition.',
-    introHeading: 'Why institutional governance is operational infrastructure',
+      'UnionEyes turns your constitution, resolutions, and mandates into operational infrastructure — so organizational reasoning survives every leadership transition.',
+    introHeading: 'Why organizational governance is operational infrastructure',
     introBody1:
       "For federated democratic organizations, governance is not paperwork or quarterly ritual. It is the protocol that determines what the organization is allowed to decide, who is allowed to decide it, and what happens when an officer's term ends.",
     introBody2:
@@ -64,7 +64,7 @@ const PAGE_COPY = {
       {
         icon: InfinityIcon,
         title: 'Continuity beyond any individual',
-        body: 'Decisions, deliberation context, and institutional reasoning survive every leadership transition. New officers inherit the full body of work, not a blank desk and a pile of binders.',
+        body: 'Decisions, deliberation context, and organizational reasoning survive every leadership transition. New officers inherit the full body of work, not a blank desk and a pile of binders.',
       },
     ],
     faqHeading: 'Frequently asked',
@@ -88,18 +88,18 @@ const PAGE_COPY = {
     ],
     aiNote:
       'Where assistive intelligence surfaces governance patterns or drafts procedural summaries, it operates under human oversight and explainability constraints. Every automated suggestion is reviewable and requires explicit officer action before it affects any record of proceedings.',
-    continuityLink: 'Institutional Memory →',
+    continuityLink: 'Organizational Memory →',
     trustLink: 'Trust & Stewardship →',
   },
   'fr-CA': {
     metadataTitle: 'Gouvernance et continuité | UnionEyes',
     metadataDescription:
-      'Infrastructure d’opérations constitutionnelles pour les organisations démocratiques fédérées : résolutions, comités, mandats et continuité de la mémoire institutionnelle pendant les transitions.',
+      'Infrastructure d’opérations constitutionnelles pour les organisations démocratiques fédérées : résolutions, comités, mandats et continuité de la mémoire organisationnelle pendant les transitions.',
     badge: 'Gouvernance et continuité',
     heading: 'Des opérations constitutionnelles pour les organisations fédérées.',
     description:
-      'UnionEyes transforme votre constitution, vos résolutions et vos mandats en infrastructure opérationnelle afin que le raisonnement institutionnel survive à chaque transition.',
-    introHeading: 'Pourquoi la gouvernance institutionnelle est une infrastructure opérationnelle',
+      'UnionEyes transforme votre constitution, vos résolutions et vos mandats en infrastructure opérationnelle afin que le raisonnement organisationnel survive à chaque transition.',
+    introHeading: 'Pourquoi la gouvernance organisationnelle est une infrastructure opérationnelle',
     introBody1:
       'Pour les organisations démocratiques fédérées, la gouvernance n’est pas de la paperasse ni un rituel trimestriel. C’est le protocole qui détermine ce que l’organisation peut décider, qui peut le décider et ce qui se passe à la fin d’un mandat.',
     introBody2:
@@ -124,7 +124,7 @@ const PAGE_COPY = {
       {
         icon: InfinityIcon,
         title: 'Continuité au-delà des personnes',
-        body: 'Les décisions, le contexte de délibération et le raisonnement institutionnel survivent à chaque transition. Les nouveaux responsables héritent du travail complet, pas d’un bureau vide et de classeurs dispersés.',
+        body: 'Les décisions, le contexte de délibération et le raisonnement organisationnel survivent à chaque transition. Les nouveaux responsables héritent du travail complet, pas d’un bureau vide et de classeurs dispersés.',
       },
     ],
     faqHeading: 'Questions fréquentes',
@@ -148,7 +148,7 @@ const PAGE_COPY = {
     ],
     aiNote:
       'Lorsque l’intelligence assistive fait ressortir des tendances de gouvernance ou prépare des résumés procéduraux, elle fonctionne sous surveillance humaine et contraintes d’explicabilité. Chaque suggestion automatisée est révisable et exige une action explicite avant d’affecter un registre de procédures.',
-    continuityLink: 'Mémoire institutionnelle →',
+    continuityLink: 'Mémoire organisationnelle →',
     trustLink: 'Confiance et gérance →',
   },
 };

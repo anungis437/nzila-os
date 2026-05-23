@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -60,13 +60,13 @@ const PAGE_COPY = {
     ],
     relatedHeading: 'Explore related solutions',
     finalHeading: 'AI your institution can trust',
-    finalBody: 'Request a technical briefing or live institutional walkthrough.',
+    finalBody: 'Request a technical briefing or live organizational walkthrough.',
   },
   'fr-CA': {
     badge: 'Solutions · Direction technologique',
     heading: 'Une IA sûre pour l’institution, digne de confiance.',
     description:
-      'Les organisations syndicales ont besoin d’une IA explicable, gouvernée, sûre pour le travail et digne de confiance institutionnelle. UnionEyes est conçu pour respecter cette exigence à chaque couche architecturale.',
+      'Les organisations syndicales ont besoin d’une IA explicable, gouvernée, sûre pour le travail et digne de confiance organisationnelle. UnionEyes est conçu pour respecter cette exigence à chaque couche architecturale.',
     primaryCta: 'Demander un breffage exécutif',
     secondaryCta: 'Voir le centre de confiance',
     principlesHeading: 'Principes de gouvernance technique',
@@ -81,14 +81,14 @@ const PAGE_COPY = {
     outcomesHeading: 'Ce que les responsables technologiques gagnent avec UnionEyes',
     outcomes: [
       { icon: ShieldCheck, title: 'Architecture IA sûre pour la gouvernance', desc: 'Des systèmes IA qui fonctionnent dans des structures démocratiques avec résultats explicables et surveillance humaine imposée.' },
-      { icon: Lock, title: 'Sécurité institutionnelle et résidence des données', desc: 'Résidence canadienne, infrastructure alignée SOC 2 et capacités d’audit pour la conformité.' },
+      { icon: Lock, title: 'Sécurité organisationnelle et résidence des données', desc: 'Résidence canadienne, infrastructure alignée SOC 2 et capacités d’audit pour la conformité.' },
       { icon: Eye, title: 'Garanties d’explicabilité complètes', desc: 'Chaque résultat d’intelligence est traçable aux preuves sources. Aucun résultat opaque en milieu syndical.' },
       { icon: Cpu, title: 'Architecture modulaire et sûre', desc: 'Déployez les modules nécessaires dans une séquence adaptée à votre niveau de préparation.' },
       { icon: CheckCircle, title: 'Anti-surveillance par conception', desc: 'Aucun chemin de capacité ne peut être réutilisé pour surveiller des personnes ou noter leur conduite.' },
     ],
     relatedHeading: 'Explorer les solutions connexes',
     finalHeading: 'Une IA à laquelle votre institution peut faire confiance',
-    finalBody: 'Demandez un breffage technique ou une visite institutionnelle guidée.',
+    finalBody: 'Demandez un breffage technique ou une visite organisationnelle guidée.',
   },
 };
 

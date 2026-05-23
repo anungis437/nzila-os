@@ -79,7 +79,7 @@ export const narrativeBalanceRule: RuleModule = {
       status = status === "pass" ? "warn" : status;
       flags.push({
         message: `Continuity language under-represented: ${(shares.continuity * 100).toFixed(1)}% (target ${TARGETS.continuity * 100}%).`,
-        suggestion: "Add institutional-continuity framing.",
+        suggestion: "Add organizational-continuity framing.",
       });
     }
 

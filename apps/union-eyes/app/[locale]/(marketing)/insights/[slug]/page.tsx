@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
   if (slug === 'doctrine') {
     return {
       title: 'Doctrine | Insights | UnionEyes',
-      description: 'Editorial standards and narrative architecture for institutional continuity insights.',
+      description: 'Editorial standards and narrative architecture for organizational continuity insights.',
       alternates: buildLocaleAlternates(locale, '/insights/doctrine'),
     };
   }
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
   if (slug === 'methodology') {
     return {
       title: 'Methodology | Insights | UnionEyes',
-      description: 'Canonical frameworks and continuity visualization for institutional modernization.',
+      description: 'Canonical frameworks and continuity visualization for organizational modernization.',
       alternates: buildLocaleAlternates(locale, '/insights/methodology'),
     };
   }

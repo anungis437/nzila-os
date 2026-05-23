@@ -32,7 +32,7 @@ function renderFile(file: FileAuditResult): string {
   lines.push(`### ${file.ctx.label}`);
   lines.push("");
   lines.push(`- **Path:** \`${file.ctx.path}\``);
-  lines.push(`- **Institutional Maturity:** ${file.maturity}/100`);
+  lines.push(`- **Organizational Maturity:** ${file.maturity}/100`);
   lines.push("");
   lines.push("**Scores:**");
   for (const r of file.ruleResults) {
@@ -85,7 +85,7 @@ function renderMarkdown(report: AuditReport): string {
   out.push(`- Hard-fail violations: **${summary.hardFails}**`);
   out.push(`- Warning violations: **${summary.warnings}**`);
   out.push(`- Rule failures: **${summary.ruleFailures}**`);
-  out.push(`- Average Institutional Maturity: **${summary.averageMaturity}/100**`);
+  out.push(`- Average Organizational Maturity: **${summary.averageMaturity}/100**`);
   out.push("");
   out.push("## Per-Surface Detail");
   out.push("");

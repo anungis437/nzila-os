@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 /**
  * Executive Intelligence — Strategic summaries & leadership continuity
@@ -64,12 +64,12 @@ const surfaces = {
     {
       icon: ShieldCheck,
       title: 'Trust & Compliance Dashboards',
-      desc: 'Operational trust posture, governance compliance status, and institutional audit readiness — all in one executive surface.',
+      desc: 'Operational trust posture, governance compliance status, and organizational audit readiness — all in one executive surface.',
     },
     {
       icon: Layers,
       title: 'Organizational Memory Snapshots',
-      desc: 'Point-in-time views of organizational knowledge, historical precedents, and institutional context available for executive review.',
+      desc: 'Point-in-time views of organizational knowledge, historical precedents, and organizational context available for executive review.',
     },
   ],
   'fr-CA': [
@@ -96,12 +96,12 @@ const surfaces = {
     {
       icon: ShieldCheck,
       title: 'Tableaux de confiance et conformité',
-      desc: 'Posture de confiance opérationnelle, conformité de gouvernance et préparation à l’audit institutionnel — tout sur une surface direction.',
+      desc: 'Posture de confiance opérationnelle, conformité de gouvernance et préparation à l’audit organisationnel — tout sur une surface direction.',
     },
     {
       icon: Layers,
       title: 'Instantanés de mémoire organisationnelle',
-      desc: 'Vues ponctuelles des connaissances, précédents historiques et contexte institutionnel disponibles pour la direction.',
+      desc: 'Vues ponctuelles des connaissances, précédents historiques et contexte organisationnel disponibles pour la direction.',
     },
   ],
 };
@@ -113,7 +113,7 @@ const principles = {
     { label: 'Explainable',       desc: 'Every summary traces back to evidence' },
     { label: 'Governance-safe',   desc: 'Full human oversight at all decision points' },
     { label: 'Labour-safe',       desc: 'Zero individual monitoring or worker conduct grading' },
-    { label: 'Enterprise-grade',  desc: 'Built for institutional trust, not startup dashboards' },
+    { label: 'Enterprise-grade',  desc: 'Built for organizational trust, not startup dashboards' },
   ],
   'fr-CA': [
     { label: 'Calme',              desc: 'Aucune complexité technique exposée aux surfaces directionnelles' },
@@ -121,13 +121,13 @@ const principles = {
     { label: 'Explicable',         desc: 'Chaque résumé est traçable à ses preuves' },
     { label: 'Sûr pour la gouvernance', desc: 'Supervision humaine à chaque point de décision' },
     { label: 'Respectueux du travail',  desc: 'Aucune surveillance individuelle ni notation de conduite' },
-    { label: 'De niveau entreprise',    desc: 'Conçu pour la confiance institutionnelle, pas pour des dashboards de startup' },
+    { label: 'De niveau entreprise',    desc: 'Conçu pour la confiance organisationnelle, pas pour des dashboards de startup' },
   ],
 };
 
 export default async function ExecutiveIntelligencePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Demander un breffage institutionnel' : 'Request an Institutional Briefing';
+  const briefingCta = locale === 'fr-CA' ? 'Demander un breffage organisationnel' : 'Request an Organizational Briefing';
   const surfacesArr = surfaces[locale as keyof typeof surfaces] ?? surfaces['en-CA'];
   const principlesArr = principles[locale as keyof typeof principles] ?? principles['en-CA'];
   const stakeholderJourney = {
@@ -135,24 +135,24 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
       'See continuity risks before they become crises',
       'Lead governance modernization with explainable intelligence',
       'Maintain strategic coherence through succession and change',
-      'Communicate institutional health to boards with confidence',
+      'Communicate organizational health to boards with confidence',
     ],
     'fr-CA': [
       'Voir les risques de continuité avant qu’ils ne deviennent des crises',
       'Piloter la modernisation de la gouvernance avec une intelligence explicable',
       'Maintenir la cohérence stratégique lors des successions et des changements',
-      'Communiquer la santé institutionnelle aux conseils avec confiance',
+      'Communiquer la santé organisationnelle aux conseils avec confiance',
     ],
   };
   const stakeholderJourneyArr = stakeholderJourney[locale as keyof typeof stakeholderJourney] ?? stakeholderJourney['en-CA'];
   const faqs = {
     'en-CA': [
-      { q: 'Does this feel strategically trustworthy?',  a: 'Executive Intelligence is built to earn institutional trust through transparency and explainability.' },
+      { q: 'Does this feel strategically trustworthy?',  a: 'Executive Intelligence is built to earn organizational trust through transparency and explainability.' },
       { q: 'Does this feel operationally mature?',       a: 'Calm, modular, and enterprise-grade — not startup dashboards or AI admin panels.' },
       { q: 'Does this feel labour-safe?',                a: 'Zero worker surveillance. Human oversight built into every intelligence output.' },
     ],
     'fr-CA': [
-      { q: 'Est-ce stratégiquement digne de confiance ?', a: 'L’intelligence exécutive est conçue pour mériter la confiance institutionnelle par la transparence et l’explicabilité.' },
+      { q: 'Est-ce stratégiquement digne de confiance ?', a: 'L’intelligence exécutive est conçue pour mériter la confiance organisationnelle par la transparence et l’explicabilité.' },
       { q: 'Est-ce opérationnellement mature ?', a: 'Calme, modulaire et de niveau entreprise — pas des dashboards de startup ou des panneaux IA.' },
       { q: 'Est-ce respectueux du travail ?', a: 'Aucune surveillance des travailleurs. Supervision humaine intégrée à chaque sortie d’intelligence.' },
     ],
@@ -170,7 +170,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
           </span>
         }
         heading={<>Strategic clarity.<br />Without technical complexity.</>}
-        description="Executive Intelligence surfaces institutional continuity, governance modernization status, and organizational health — in calm, executive-readable formats designed for leadership decision-making."
+        description="Executive Intelligence surfaces organizational continuity, governance modernization status, and organizational health — in calm, executive-readable formats designed for leadership decision-making."
         cta={
           <Link
             href={`/${locale}/pilot-request`}
@@ -202,7 +202,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">            <h2 className="text-3xl font-bold text-navy mb-3">
-              Built for institutional leadership
+              Built for organizational leadership
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Not analytics dashboards. Not engineering tools. Executive Intelligence surfaces

@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,12 +12,12 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 /**
  * Conventions & Federated Governance — Category-defining surface
  *
- * Positions UE as institutional governance operations infrastructure for
+ * Positions UE as organizational governance operations infrastructure for
  * federated democratic institutions. Procedural continuity, constitutional
  * traceability, governance-safe coordination across locals, regions, nationals.
  */
@@ -46,9 +46,9 @@ const CONVENTIONS_COPY = {
     headingLine1: 'Federated democratic institutions,',
     headingLine2: 'operating with procedural continuity.',
     heroDescription:
-      'UnionEyes Conventions & Federated Governance is the continuity layer for institutional governance operations — preserving constitutional intent, delegate continuity, and resolution lifecycle integrity across locals, regions, and nationals.',
+      'UnionEyes Conventions & Federated Governance is the continuity layer for organizational governance operations — preserving constitutional intent, delegate continuity, and resolution lifecycle integrity across locals, regions, and nationals.',
     ctaPrimary: 'Explore Governance Coordination',
-    ctaSecondary: 'Book Institutional Discovery',
+    ctaSecondary: 'Book Organizational Discovery',
     tabChallenge: 'Challenge',
     tabPathways: 'Pathways',
     tabProof: 'Proof',
@@ -89,9 +89,9 @@ const CONVENTIONS_COPY = {
     headingLine1: 'Des institutions democratiques federées,',
     headingLine2: 'avec une continuite procedurale.',
     heroDescription:
-      'UnionEyes Congres et gouvernance federée est une couche de continuite pour les operations de gouvernance institutionnelle, preservant l intention constitutionnelle, la continuite des delegues et l integrite du cycle de vie des resolutions a travers les sections locales, regions et instances nationales.',
+      'UnionEyes Congres et gouvernance federée est une couche de continuite pour les operations de gouvernance organisationnelle, preservant l intention constitutionnelle, la continuite des delegues et l integrite du cycle de vie des resolutions a travers les sections locales, regions et instances nationales.',
     ctaPrimary: 'Explorer la coordination de gouvernance',
-    ctaSecondary: 'Planifier une decouverte institutionnelle',
+    ctaSecondary: 'Planifier une decouverte organisationnelle',
     tabChallenge: 'Defi',
     tabPathways: 'Parcours',
     tabProof: 'Preuve',
@@ -156,8 +156,8 @@ const CONVENTIONS_CONTENT = {
       },
       {
         icon: BookOpen,
-        title: 'Institutional Memory & Governance Continuity',
-        desc: 'Constitutional decisions, precedent rulings, and governance evolution remain accessible across leadership transitions — so institutional memory outlasts any single administration.',
+        title: 'Organizational Memory & Governance Continuity',
+        desc: 'Constitutional decisions, precedent rulings, and governance evolution remain accessible across leadership transitions — so organizational memory outlasts any single administration.',
       },
     ],
     journeySteps: [
@@ -166,7 +166,7 @@ const CONVENTIONS_CONTENT = {
       { step: '03', label: 'Delegate Continuity', desc: 'Credentials, mandates, and constituency context persist across conventions so representation remains coherent.' },
       { step: '04', label: 'Committee Coordination', desc: 'Committees coordinate procedural work alongside chairs and parliamentarians, without replacing constitutional authority.' },
       { step: '05', label: 'Constitutional Coherence', desc: 'Constitutional intent and precedent rulings remain reviewable across cycles, supporting governance-safe decision making.' },
-      { step: '06', label: 'Federated Resilience', desc: 'The federation operates as a coherent institution — locals, regions, and nationals aligned on procedural continuity and shared institutional memory.' },
+      { step: '06', label: 'Federated Resilience', desc: 'The federation operates as a coherent institution — locals, regions, and nationals aligned on procedural continuity and shared organizational memory.' },
     ],
     coexistenceDescription:
       'UnionEyes operates as overlay infrastructure — a continuity layer that runs alongside existing constitutional documents, resolution archives, delegate registration systems, and parliamentary practice. Non-disruptive implementation is the default operating posture.',
@@ -175,7 +175,7 @@ const CONVENTIONS_CONTENT = {
       { title: 'Alongside existing systems', desc: 'Resolution archives, delegate registries, and parliamentary tools continue to operate — UnionEyes adds traceability and continuity.' },
       { title: 'Non-disruptive implementation', desc: 'Phased adoption sequencing with explicit governance checkpoints — operational calm preserved throughout.' },
       { title: 'Coexistence with parliamentary practice', desc: 'Procedural authority remains with chairs, parliamentarians, and constitutional officers; UnionEyes provides supporting continuity.' },
-      { title: 'Canadian-hosted', desc: 'Institutional data residency aligned with Canadian governance and procurement expectations.' },
+      { title: 'Canadian-hosted', desc: 'Organizational data residency aligned with Canadian governance and procurement expectations.' },
       { title: 'Bilingual-first', desc: 'English and French as first-class procedural surfaces, reflecting how federated Canadian institutions actually operate.' },
     ],
     governanceAiDescription:
@@ -206,7 +206,7 @@ const CONVENTIONS_CONTENT = {
       { purpose: 'Resolution lifecycle', title: 'Amendment Lineage Records', note: 'Every amendment carries origin local, sponsoring committee, prior versions, and procedural disposition in a reviewable structure.' },
       { purpose: 'Delegate continuity', title: 'Credential & Mandate Registry', note: 'Delegate credentials, constituency mandates, and prior interventions persist across cycles for representational coherence.' },
       { purpose: 'Committee coordination', title: 'Committee Disposition Logs', note: 'Committee work — referrals, recommendations, and procedural dispositions — is traceable across the convention lifecycle.' },
-      { purpose: 'Constitutional memory', title: 'Precedent Ruling Archive', note: 'Chair rulings and constitutional interpretations persist as institutional memory available to future deliberations.' },
+      { purpose: 'Constitutional memory', title: 'Precedent Ruling Archive', note: 'Chair rulings and constitutional interpretations persist as organizational memory available to future deliberations.' },
       { purpose: 'Procedural trust', title: 'Recognition & Vote Trails', note: 'Recognition order, motion sequencing, and vote dispositions are traceable to source records for auditability.' },
       { purpose: 'Federated topology', title: 'Federation Structure Map', note: 'Locals, regions, and nationals are represented as a coherent constitutional topology rather than flattened lists.' },
     ],
@@ -256,7 +256,7 @@ const CONVENTIONS_CONTENT = {
       },
       {
         icon: BookOpen,
-        title: 'Memoire institutionnelle et continuite de gouvernance',
+        title: 'Memoire organisationnelle et continuite de gouvernance',
         desc: 'Les decisions constitutionnelles, precedents et evolutions de gouvernance restent accessibles a travers les transitions de leadership.',
       },
     ],
@@ -266,7 +266,7 @@ const CONVENTIONS_CONTENT = {
       { step: '03', label: 'Continuite des delegues', desc: 'Les accreditations, mandats et contextes de circonscription persistent entre les congres.' },
       { step: '04', label: 'Coordination des comites', desc: 'Les comites coordonnent le travail procedural avec les presidents et parlementaires, sans remplacer l autorite constitutionnelle.' },
       { step: '05', label: 'Coherence constitutionnelle', desc: 'L intention constitutionnelle et les precedents restent verifiables a travers les cycles.' },
-      { step: '06', label: 'Resilience federée', desc: 'La federation opere comme une institution coherente, alignee sur la continuite procedurale et la memoire institutionnelle partagee.' },
+      { step: '06', label: 'Resilience federée', desc: 'La federation opere comme une institution coherente, alignee sur la continuite procedurale et la memoire organisationnelle partagee.' },
     ],
     coexistenceDescription:
       'UnionEyes opere comme une infrastructure en surcouche : une couche de continuite qui fonctionne aux cotes des documents constitutionnels, archives de resolutions, systemes d inscription des delegues et pratiques parlementaires existantes.',

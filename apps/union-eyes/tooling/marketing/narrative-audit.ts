@@ -44,6 +44,9 @@ const PUBLIC_MARKETING_ROUTES = [
   "features",
   "executive-intelligence",
   "insights",
+  // TODO(oci-routes): rename route dir to `organizational-continuity` + add
+  // redirect from `/institutional-continuity`. Slug kept here to match the
+  // actual on-disk path until that follow-up lands.
   "institutional-continuity",
   "conventions",
   "for-clc",
@@ -83,22 +86,25 @@ const MESSAGES_GLOB = "messages/*.json";
 // marketing namespaces.
 
 // Workstream B4 — internal runtime-narrative surfaces. Vocabulary-only sweep
-// (no public-marketing rule modules). Keeps the institutional posture
+// (no public-marketing rule modules). Keeps the organizational posture
 // consistent inside dashboards, taxonomy files, and platform services.
 const INTERNAL_NARRATIVE_GLOBS = [
   "app/[[]locale[]]/[(]dashboard[)]/**/page.tsx",
   "app/[[]locale[]]/[(]dashboard[)]/**/layout.tsx",
   // Workstream F: priority dashboard routes live under the plain `dashboard/` segment
   // (not the `(dashboard)` route group). Sweep them explicitly so internal runtime
-  // copy stays aligned with the institutional continuity ontology.
+  // copy stays aligned with the organizational continuity ontology.
   "app/[[]locale[]]/dashboard/governance-center/**/page.tsx",
   "app/[[]locale[]]/dashboard/continuity-intelligence/**/page.tsx",
   "app/[[]locale[]]/dashboard/continuity-planning/**/page.tsx",
   "app/[[]locale[]]/dashboard/continuity-simulation/**/page.tsx",
   "app/[[]locale[]]/dashboard/longitudinal-cognition/**/page.tsx",
   "app/[[]locale[]]/dashboard/executive-operating-intelligence/**/page.tsx",
+  // TODO(oci-routes): rename dashboard dirs to organizational-* + add
+  // redirects. Globs kept on the actual on-disk paths so the internal
+  // narrative sweep continues to scan them.
   "app/[[]locale[]]/dashboard/institutional-memory/**/page.tsx",
-  // Workstream G: institutional observability surfaces.
+  // Workstream G: organizational observability surfaces.
   "app/[[]locale[]]/dashboard/institutional-observability/**/page.tsx",
   "app/[[]locale[]]/dashboard/institutional-observability/**/layout.tsx",
   "lib/dashboard/role-experience.ts",
@@ -301,7 +307,7 @@ function printSummary(report: AuditReport): void {
   // eslint-disable-next-line no-console
   console.log(`Rule failures        : ${summary.ruleFailures}`);
   // eslint-disable-next-line no-console
-  console.log(`Institutional Maturity (avg) : ${summary.averageMaturity}/100`);
+  console.log(`Organizational Maturity (avg) : ${summary.averageMaturity}/100`);
 
   if (summary.hardFails > 0) {
     // eslint-disable-next-line no-console
