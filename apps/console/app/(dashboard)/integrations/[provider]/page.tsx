@@ -15,6 +15,10 @@ import {
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
 import { notFound } from 'next/navigation'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { getIntegrationConnection } from '@/lib/integrations-connections'
+import type { ProviderKey } from '@/lib/integrations-provider-catalog'
+import { ProviderConnectionForm } from './provider-connection-form'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,6 +164,7 @@ export default async function ProviderDetailPage(props: Props) {
   const meta = providerMeta[provider]
   if (!meta) notFound()
 
+  const orgId = await getExecutiveOrgId()
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL
   let healthStatus: 'ok' | 'degraded' | 'down' | 'unknown' = 'unknown'
   if (baseUrl) {
@@ -171,6 +176,10 @@ export default async function ProviderDetailPage(props: Props) {
       : null
     healthStatus = healthJson?.health?.status ?? 'unknown'
   }
+
+  const existingConnection = orgId
+    ? await getIntegrationConnection(orgId, provider as ProviderKey).catch(() => null)
+    : null
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -208,26 +217,25 @@ export default async function ProviderDetailPage(props: Props) {
         <Card.Body>
           <h2 className="font-semibold text-gray-900 mb-3">Configuration</h2>
           <p className="text-sm text-gray-500 mb-4">
-            Credentials are stored in Azure Key Vault, referenced via integration config. Only org
-            admins can modify.
+            Credentials are encrypted at rest (AES-256-GCM) and a live probe is executed before
+            the connection is saved. Only org admins can modify.
           </p>
 
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-gray-700">Required credentials</h3>
-            <div className="flex flex-wrap gap-2">
-              {meta.secrets.map((s) => (
-                <span
-                  key={s}
-                  className="bg-gray-100 border border-gray-200 rounded px-2 py-1 text-xs font-mono text-gray-600"
-                >
-                  {s}
-                </span>
-              ))}
+          {existingConnection && (
+            <div className="mb-4 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
+              Connection already configured (status: <strong>{existingConnection.status}</strong>
+              {existingConnection.lastValidatedAt && (
+                <>
+                  , last validated{' '}
+                  {new Date(existingConnection.lastValidatedAt).toLocaleString()}
+                </>
+              )}
+              ). Re-submitting the form will rotate the stored credentials.
             </div>
-          </div>
+          )}
 
           {meta.configHints.length > 0 && (
-            <div className="mt-4 space-y-1">
+            <div className="mb-4 space-y-1">
               <h3 className="text-sm font-medium text-gray-700">Setup hints</h3>
               <ul className="list-disc list-inside text-sm text-gray-500">
                 {meta.configHints.map((hint, i) => (
@@ -237,28 +245,18 @@ export default async function ProviderDetailPage(props: Props) {
             </div>
           )}
 
-          <div className="mt-6 border-t border-gray-100 pt-4">
-            <p className="text-sm text-gray-500">
-              Configure this provider using <code className="bg-gray-100 px-1 rounded text-xs">POST /api/integrations/connect</code> or{' '}
-              <code className="bg-gray-100 px-1 rounded text-xs">POST /api/marketplace/install</code> with your org ID and provider credentials.
-            </p>
-          </div>
-        </Card.Body>
-      </Card>
-
-      {/* Health Check */}
-      <Card variant="bordered" className="mb-6">
-        <Card.Body>
-          <h2 className="font-semibold text-gray-900 mb-2">Health Check</h2>
-          <p className="text-sm text-gray-500 mb-4">
-            Live probe is executed during connect/install and reflected in this status.
-          </p>
-          <button
-            disabled
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Use /api/integrations/connect to re-validate
-          </button>
+          {orgId ? (
+            <ProviderConnectionForm
+              provider={provider}
+              orgId={orgId}
+              secrets={meta.secrets}
+            />
+          ) : (
+            <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-900">
+              No active organisation context. Sign in with an org-scoped account to configure this
+              provider.
+            </div>
+          )}
         </Card.Body>
       </Card>
 

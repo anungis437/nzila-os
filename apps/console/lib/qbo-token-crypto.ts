@@ -27,8 +27,10 @@ const PREFIX = 'enc:v1:'
  * Resolve the 32-byte data encryption key.
  *
  * Priority:
- *   1. AZURE_KEYVAULT_URL — TODO: integrate @azure/keyvault-keys unwrapKey
- *      (blocked until KV provisioned; currently logged and falls through)
+ *   1. AZURE_KEYVAULT_URL — when set, the local DEK must still be provided
+ *      via QBO_TOKEN_ENCRYPTION_KEY; full envelope encryption (KV wrapKey /
+ *      unwrapKey of the DEK) is tracked separately and intentionally NOT
+ *      implemented here so the surface fails closed if the key is missing.
  *   2. QBO_TOKEN_ENCRYPTION_KEY — hex-encoded 32-byte key for local dev
  *   3. null — plaintext fallback with warning
  */
