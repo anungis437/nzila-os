@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-23T02:50:59.320Z",
+  "generatedAt": "2026-05-23T02:55:32.194Z",
   "files": [
     {
       "ctx": {
@@ -4415,43 +4415,7 @@
         "isPublicSurface": true,
         "label": "marketing/governance"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "ecosystem",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 5,
-          "excerpt": "* to the CUSTOMER's organizational governance ecosystem: constitutional"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true,
-            "suggestion": "substrate | continuity layer | operating environment",
-            "exceptions": [
-              "unioneyes platform",
-              "platform module",
-              "platform overview",
-              "platform · ",
-              "canonical platform",
-              "the platform",
-              "our platform",
-              "platform services",
-              "platform billing",
-              "platform guarantees",
-              "platform designed",
-              "\"platform\": \"platform\""
-            ]
-          },
-          "line": 86,
-          "excerpt": "a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep platform neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -7039,62 +7003,26 @@
         "isPublicSurface": true,
         "label": "marketing/trust/stewardship-appendix"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "ecosystem",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true
-          },
-          "line": 83,
-          "excerpt": "customer&rsquo;s organizational governance ecosystem &mdash; not to corporate"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning",
-            "publicOnly": true,
-            "suggestion": "substrate | continuity layer | operating environment",
-            "exceptions": [
-              "unioneyes platform",
-              "platform module",
-              "platform overview",
-              "platform · ",
-              "canonical platform",
-              "the platform",
-              "our platform",
-              "platform services",
-              "platform billing",
-              "platform guarantees",
-              "platform designed",
-              "\"platform\": \"platform\""
-            ]
-          },
-          "line": 154,
-          "excerpt": "Platform tooling that surfaces structural stewardship data operates under"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 59,
+          "score": 57,
           "flags": [],
           "detail": {
             "counts": {
               "governance": 8,
-              "continuity": 15,
+              "continuity": 16,
               "coordination": 2,
               "trust": 9
             },
-            "total": 34,
+            "total": 35,
             "shares": {
-              "governance": 0.23529411764705882,
-              "continuity": 0.4411764705882353,
-              "coordination": 0.058823529411764705,
-              "trust": 0.2647058823529412
+              "governance": 0.22857142857142856,
+              "continuity": 0.45714285714285713,
+              "coordination": 0.05714285714285714,
+              "trust": 0.2571428571428571
             }
           }
         },
@@ -8004,7 +7932,7 @@
     "totalFiles": 99,
     "publicFiles": 88,
     "hardFails": 0,
-    "warnings": 4,
+    "warnings": 0,
     "ruleFailures": 0,
     "averageMaturity": 87
   }

@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-23T02:50:59.320Z
+Generated: 2026-05-23T02:55:32.194Z
 
 ## Summary
 
 - Files scanned: **99**
 - Hard-fail violations: **0**
-- Warning violations: **4**
+- Warning violations: **0**
 - Rule failures: **0**
 - Average Organizational Maturity: **87/100**
 
@@ -641,17 +641,11 @@ Generated: 2026-05-23T02:50:59.320Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 55/100 (warn)
 
-**Vocabulary violations:**
-- L5 [warning/warning] `ecosystem` — * to the CUSTOMER's organizational governance ecosystem: constitutional
-- L86 [warning/warning] `platform` — a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep platform neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find
-
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Remove or rephrase "ecosystem" (warning).
-- Replace "platform" → substrate | continuity layer | operating environment
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 
@@ -1035,23 +1029,17 @@ Generated: 2026-05-23T02:50:59.320Z
 - **Organizational Maturity:** 73/100
 
 **Scores:**
-- narrative-balance: 59/100 (pass)
+- narrative-balance: 57/100 (pass)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 55/100 (warn)
-
-**Vocabulary violations:**
-- L83 [warning/warning] `ecosystem` — customer&rsquo;s organizational governance ecosystem &mdash; not to corporate
-- L154 [warning/warning] `platform` — Platform tooling that surfaces structural stewardship data operates under
 
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Remove or rephrase "ecosystem" (warning).
-- Replace "platform" → substrate | continuity layer | operating environment
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 

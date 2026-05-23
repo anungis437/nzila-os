@@ -80,8 +80,8 @@ export default function StewardshipAppendixPage() {
           </p>
           <p className="text-sm text-gray-300 mt-4 max-w-2xl">
             The word &ldquo;governance&rdquo; on UnionEyes public surfaces refers to the
-            customer&rsquo;s organizational governance ecosystem &mdash; not to corporate
-            stewardship mechanics.
+            customer&rsquo;s organizational governance operating environment &mdash; not to
+            corporate stewardship mechanics.
           </p>
         </div>
       </header>
@@ -151,7 +151,7 @@ export default function StewardshipAppendixPage() {
         </div>
 
         <p className="text-sm text-gray-500 mb-10">
-          Platform tooling that surfaces structural stewardship data operates under
+          Continuity-layer tooling that surfaces structural stewardship data operates under
           human oversight, with full explainability available to any party conducting
           procurement review. No governance decision is automated; every output is
           reviewable by counsel, auditors, or labour-elected oversight bodies.

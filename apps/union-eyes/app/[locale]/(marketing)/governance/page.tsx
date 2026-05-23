@@ -2,9 +2,9 @@
  * Governance & Continuity (customer-institutional).
  *
  * Per realignment directive, "governance" on UnionEyes public surfaces refers
- * to the CUSTOMER's organizational governance ecosystem: constitutional
- * operations, resolutions, committees, delegate coordination, and continuity
- * of mandate across leadership transitions.
+ * to the CUSTOMER's organizational governance operating environment:
+ * constitutional operations, resolutions, committees, delegate coordination,
+ * and continuity of mandate across leadership transitions.
  *
  * Vendor-side corporate stewardship mechanics live exclusively at
  * /trust/stewardship-appendix and are not surfaced here.
@@ -83,7 +83,7 @@ const PAGE_COPY = {
       },
       {
         q: 'How is UnionEyes itself governed?',
-        a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep platform neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find structural details in the stewardship appendix.',
+        a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep operating-environment neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find structural details in the stewardship appendix.',
       },
     ],
     aiNote:
