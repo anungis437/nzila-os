@@ -2,8 +2,8 @@
  * Institutional Continuity Engagement Architecture
  *
  * This page is intentionally NOT a SaaS pricing matrix. UnionEyes is continuity
- * infrastructure — OCI (Operational Continuity Index) diagnostics, OCRA
- * (Operational Continuity Risk Analysis) deepening, governance mapping, then
+ * infrastructure — OCI (Organizational Continuity Index) diagnostics, OCRA
+ * (Organizational Continuity Risk Analysis) deepening, governance mapping, then
  * platform activation, then longitudinal support. Software is the *fourth*
  * stage of the engagement, not the entry point.
  *
@@ -17,14 +17,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import {
-  Compass,
-  Network,
-  Layers,
-  Infinity as InfinityIcon,
-  Sparkles,
-  Users,
-} from 'lucide-react';
+import { Users } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
@@ -251,7 +244,7 @@ const frAssessmentLadder = [
 const engagementLayers = [
   {
     key: 'oci',
-    icon: Compass,
+    icon: 'compass',
     name: 'OCI — Continuity Assessment',
     posture: 'Institutional diagnostics',
     layer: 'Layer 1 · Continuity intelligence',
@@ -267,7 +260,7 @@ const engagementLayers = [
   },
   {
     key: 'ocra',
-    icon: Network,
+    icon: 'network',
     name: 'OCRA — Adaptive Continuity Intelligence',
     posture: 'Structural risk deepening',
     layer: 'Layer 2 · Continuity topology',
@@ -283,7 +276,7 @@ const engagementLayers = [
   },
   {
     key: 'platform',
-    icon: Layers,
+    icon: 'layers',
     name: 'Platform Activation',
     posture: 'Continuity infrastructure',
     layer: 'Layer 3 · Operational continuity infrastructure',
@@ -299,7 +292,7 @@ const engagementLayers = [
   },
   {
     key: 'longitudinal',
-    icon: InfinityIcon,
+    icon: 'infinity',
     name: 'Longitudinal Continuity Support',
     posture: 'Continuity stewardship',
     layer: 'Layer 4 · Governance continuity layer',
@@ -315,7 +308,7 @@ const engagementLayers = [
   },
   {
     key: 'founding',
-    icon: Sparkles,
+    icon: 'sparkles',
     name: 'Founding Partner Cohort',
     posture: 'Strategic institutional collaboration',
     layer: 'Layer 5 · Cohort engagement',
@@ -378,7 +371,7 @@ const frContinuityJourney = [
 
 const frEngagementLayers = [
   {
-    key: 'oci', icon: Compass,
+    key: 'oci', icon: 'compass',
     name: 'OCI — Évaluation de continuité',
     posture: 'Diagnostics institutionnels',
     layer: 'Couche 1 · Intelligence de continuité',
@@ -388,7 +381,7 @@ const frEngagementLayers = [
     range: 'Engagement — généralement 18 k$ à 45 k$',
   },
   {
-    key: 'ocra', icon: Network,
+    key: 'ocra', icon: 'network',
     name: 'OCRA — Intelligence de continuité adaptative',
     posture: 'Approfondissement structurel des risques',
     layer: 'Couche 2 · Topologie de continuité',
@@ -398,7 +391,7 @@ const frEngagementLayers = [
     range: 'Engagement — généralement 35 k$ à 90 k$',
   },
   {
-    key: 'platform', icon: Layers,
+    key: 'platform', icon: 'layers',
     name: 'Activation de plateforme',
     posture: 'Infrastructure de continuité',
     layer: 'Couche 3 · Infrastructure opérationnelle de continuité',
@@ -408,7 +401,7 @@ const frEngagementLayers = [
     range: 'Programme annuel — généralement 40 k$ à 140 k$',
   },
   {
-    key: 'longitudinal', icon: InfinityIcon,
+    key: 'longitudinal', icon: 'infinity',
     name: 'Soutien longitudinal de continuité',
     posture: 'Intendance de continuité',
     layer: 'Couche 4 · Couche de continuité de gouvernance',
@@ -418,7 +411,7 @@ const frEngagementLayers = [
     range: 'Engagement stratégique — défini avec la direction exécutive',
   },
   {
-    key: 'founding', icon: Sparkles,
+    key: 'founding', icon: 'sparkles',
     name: 'Cohorte de partenaires fondateurs',
     posture: 'Collaboration institutionnelle stratégique',
     layer: 'Couche 5 · Engagement en cohorte',
@@ -443,7 +436,7 @@ const frProcurementCommitments = [
 const pricingCopy = {
   'en-CA': {
     heading: <>Institutional continuity engagement architecture,<br />not software pricing tiers.</>,
-    description: 'UnionEyes is continuity infrastructure — assessment, intelligence, then activation. Every engagement starts with the OCI (Operational Continuity Index), not with a procurement form. Software is the fourth stage of the journey, not the entry point.',
+    description: 'UnionEyes is continuity infrastructure — assessment, intelligence, then activation. Every engagement starts with the OCI (Organizational Continuity Index), not with a procurement form. Software is the fourth stage of the journey, not the entry point.',
     section1Heading: 'Continuity starts before software',
     section1Body: 'Most institutions discover that the platform decision was actually a continuity decision in disguise. We exist because continuity fragility is rarely measured before it is procured against.',
     section2Heading: 'When organizations typically engage us',
@@ -486,14 +479,14 @@ const pricingCopy = {
     ctaFinePrint: 'Engagement layers and ranges are positioning structure for institutional planning. Final scope is set jointly with executive and procurement leadership — never as self-serve subscription.',
     glossaryLabel: 'The two terms used throughout this page',
     glossary: [
-      { acronym: 'OCI', expansion: 'Operational Continuity Index', body: 'A scoped institutional diagnostic that measures continuity fragility — what would break if a key person, a leadership cycle, or a critical decision-of-record were lost tomorrow.' },
-      { acronym: 'OCRA', expansion: 'Operational Continuity Risk Analysis', body: 'A deeper, structural reading of continuity risk: dependency topology, modernization pathways, governance entropy, and confidence-aware operational interpretation.' },
+      { acronym: 'OCI', expansion: 'Organizational Continuity Index', body: 'A scoped organizational diagnostic that measures continuity fragility — what would break if a key person, a leadership cycle, or a critical decision-of-record were lost tomorrow.' },
+      { acronym: 'OCRA', expansion: 'Organizational Continuity Risk Analysis', body: 'A deeper, structural reading of continuity risk: dependency topology, modernization pathways, governance entropy, and confidence-aware operational interpretation.' },
     ],
     continuityFragility, engagementMoments, continuityJourney, assessmentLadder, engagementLayers, procurementCommitments,
   },
   'fr-CA': {
     heading: <>Architecture d’engagement de continuité institutionnelle,<br />pas une grille tarifaire logicielle.</>,
-    description: 'UnionEyes est une infrastructure de continuité — évaluation, intelligence, puis activation. Chaque engagement commence par l’OCI (Indice de continuité opérationnelle), pas par un formulaire d’approvisionnement. Le logiciel est la quatrième étape du parcours, jamais le point d’entrée.',
+    description: 'UnionEyes est une infrastructure de continuité — évaluation, intelligence, puis activation. Chaque engagement commence par l’OCI (Indice de continuité organisationnelle), pas par un formulaire d’approvisionnement. Le logiciel est la quatrième étape du parcours, jamais le point d’entrée.',
     section1Heading: 'La continuité commence avant le logiciel',
     section1Body: 'La plupart des institutions découvrent que la décision de plateforme était en réalité une décision de continuité déguisée. Nous existons parce que la fragilité de la continuité est rarement mesurée avant d’être contournée par un achat.',
     section2Heading: 'Quand les organisations nous engagent typiquement',
@@ -536,8 +529,8 @@ const pricingCopy = {
     ctaFinePrint: 'Les couches d’engagement et les fourchettes servent à planifier l’engagement institutionnel. La portée finale est définie avec la direction exécutive et l’approvisionnement — jamais en abonnement libre-service.',
     glossaryLabel: 'Les deux termes utilisés tout au long de cette page',
     glossary: [
-      { acronym: 'OCI', expansion: 'Indice de continuité opérationnelle', body: 'Un diagnostic institutionnel ciblé qui mesure la fragilité de la continuité — ce qui se romprait si une personne clé, un cycle de leadership ou une décision critique était perdue demain.' },
-      { acronym: 'OCRA', expansion: 'Analyse des risques de continuité opérationnelle', body: 'Une lecture structurelle approfondie du risque de continuité : topologie des dépendances, parcours de modernisation, entropie de gouvernance, et interprétation opérationnelle consciente du niveau de confiance.' },
+      { acronym: 'OCI', expansion: 'Indice de continuité organisationnelle', body: 'Un diagnostic organisationnel ciblé qui mesure la fragilité de la continuité — ce qui se romprait si une personne clé, un cycle de leadership ou une décision critique était perdue demain.' },
+      { acronym: 'OCRA', expansion: 'Analyse des risques de continuité organisationnelle', body: 'Une lecture structurelle approfondie du risque de continuité : topologie des dépendances, parcours de modernisation, entropie de gouvernance, et interprétation opérationnelle consciente du niveau de confiance.' },
     ],
     continuityFragility: frContinuityFragility,
     engagementMoments: frEngagementMoments,

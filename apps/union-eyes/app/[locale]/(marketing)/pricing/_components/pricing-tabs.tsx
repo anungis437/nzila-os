@@ -23,12 +23,30 @@ import {
   ArrowRight,
   CheckCircle2,
   Compass,
+  Infinity as InfinityIcon,
   Layers,
   Map,
+  Network,
   ShieldCheck,
   Sparkles,
   type LucideIcon,
 } from 'lucide-react';
+
+// Icon names safe to pass across the server→client boundary.
+export type EngagementLayerIconName =
+  | 'compass'
+  | 'network'
+  | 'layers'
+  | 'infinity'
+  | 'sparkles';
+
+const ENGAGEMENT_LAYER_ICONS: Record<EngagementLayerIconName, LucideIcon> = {
+  compass: Compass,
+  network: Network,
+  layers: Layers,
+  infinity: InfinityIcon,
+  sparkles: Sparkles,
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types — mirror the shapes built in page.tsx (kept local & lightweight so the
@@ -48,7 +66,7 @@ export type LadderTier = {
 
 export type EngagementLayer = {
   key: string;
-  icon: LucideIcon;
+  icon: EngagementLayerIconName;
   name: string;
   posture: string;
   layer: string;
@@ -375,7 +393,7 @@ function EngagementLayersPanel({ copy, locale }: { copy: PricingTabsCopy; locale
 
       <div className="grid md:grid-cols-2 gap-5">
         {copy.engagementLayers.map((tier) => {
-          const Icon = tier.icon;
+          const Icon = ENGAGEMENT_LAYER_ICONS[tier.icon] ?? Layers;
           return (
             <article key={tier.key} className="institution-panel calm-elevation p-6 flex flex-col">
               <div className="flex items-start gap-4 mb-4">
