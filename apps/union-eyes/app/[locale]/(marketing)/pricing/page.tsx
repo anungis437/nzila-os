@@ -356,6 +356,11 @@ const pricingCopy = {
     ctaPrimary: 'Request Executive Briefing',
     ctaSecondary: 'Discuss an OCI Engagement',
     ctaFinePrint: 'Engagement layers and ranges are positioning structure for institutional planning. Final scope is set jointly with executive and procurement leadership — never as self-serve subscription.',
+    glossaryLabel: 'The two terms used throughout this page',
+    glossary: [
+      { acronym: 'OCI', expansion: 'Operational Continuity Index', body: 'A scoped institutional diagnostic that measures continuity fragility — what would break if a key person, a leadership cycle, or a critical decision-of-record were lost tomorrow.' },
+      { acronym: 'OCRA', expansion: 'Operational Continuity Risk Analysis', body: 'A deeper, structural reading of continuity risk: dependency topology, modernization pathways, governance entropy, and confidence-aware operational interpretation.' },
+    ],
     continuityFragility, engagementMoments, continuityJourney, engagementLayers, procurementCommitments,
   },
   'fr-CA': {
@@ -390,6 +395,11 @@ const pricingCopy = {
     ctaPrimary: 'Demander une présentation exécutive',
     ctaSecondary: 'Discuter d’un engagement OCI',
     ctaFinePrint: 'Les couches d’engagement et les fourchettes servent à planifier l’engagement institutionnel. La portée finale est définie avec la direction exécutive et l’approvisionnement — jamais en abonnement libre-service.',
+    glossaryLabel: 'Les deux termes utilisés tout au long de cette page',
+    glossary: [
+      { acronym: 'OCI', expansion: 'Indice de continuité opérationnelle', body: 'Un diagnostic institutionnel ciblé qui mesure la fragilité de la continuité — ce qui se romprait si une personne clé, un cycle de leadership ou une décision critique était perdue demain.' },
+      { acronym: 'OCRA', expansion: 'Analyse des risques de continuité opérationnelle', body: 'Une lecture structurelle approfondie du risque de continuité : topologie des dépendances, parcours de modernisation, entropie de gouvernance, et interprétation opérationnelle consciente du niveau de confiance.' },
+    ],
     continuityFragility: frContinuityFragility,
     engagementMoments: frEngagementMoments,
     continuityJourney: frContinuityJourney,
@@ -421,6 +431,26 @@ export default async function LocalePricingPage({
         surface={tNote('label')}
         posture={tNote('posture')}
       />
+
+      {/* ── Inline glossary — OCI / OCRA definitions on first encounter ── */}
+      <section className="py-10 bg-white border-b border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-semibold mb-4">
+            {copy.glossaryLabel}
+          </p>
+          <dl className="grid sm:grid-cols-2 gap-4">
+            {copy.glossary.map((term) => (
+              <div key={term.acronym} className="institution-panel calm-elevation p-5">
+                <dt className="flex items-baseline gap-2 mb-1.5">
+                  <span className="text-base font-bold text-navy tracking-wide">{term.acronym}</span>
+                  <span className="text-xs text-slate-500 font-medium">{term.expansion}</span>
+                </dt>
+                <dd className="text-xs text-slate-600 leading-relaxed">{term.body}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
 
       {/* ── SECTION 1 — Continuity starts before software ── */}
       <section className="py-16 bg-white border-b border-slate-200/70">

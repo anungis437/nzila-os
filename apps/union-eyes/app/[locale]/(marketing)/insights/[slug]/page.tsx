@@ -117,13 +117,50 @@ export default async function InsightArticlePage({ params, searchParams }: Insig
 
   const related = getRelatedInsights(article.slug, 3);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unioneyes.app';
+  const articleUrl = `${siteUrl}/${locale}/insights/${article.slug}`;
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.excerpt,
+    author: {
+      '@type': 'Organization',
+      name: article.author || 'UnionEyes',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'UnionEyes',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteUrl}/images/brand/icon.png`,
+      },
+    },
+    datePublished: article.publishedOn,
+    dateModified: article.publishedOn,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': articleUrl,
+    },
+    articleSection: article.categoryName,
+    inLanguage: locale,
+    isAccessibleForFree: true,
+  };
+
   return (
-    <InsightArticleView
-      article={article}
-      related={related}
-      locale={locale}
-      contextMode={contextMode}
-      backHref={withInstitutionalContext(`/${locale}/insights`, contextMode)}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <InsightArticleView
+        article={article}
+        related={related}
+        locale={locale}
+        contextMode={contextMode}
+        backHref={withInstitutionalContext(`/${locale}/insights`, contextMode)}
+      />
+    </>
   );
 }
