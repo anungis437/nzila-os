@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/api-auth-guard';
 import { OrganizationalMemoryExplorer } from '@/components/knowledge-transfer/organizational-memory-explorer';
 import { RuntimeHydrationFooter } from '@/components/runtime-hydration';
-import { CONTINUITY_INTELLIGENCE_FOUNDATIONS_VERSION } from '@nzila/institutional-governance-graph';
+import { CONTINUITY_INTELLIGENCE_FOUNDATIONS_VERSION } from '@nzila/organizational-governance-graph';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,5 +1,5 @@
 /**
- * @nzila/institutional-governance-graph
+ * @nzila/organizational-governance-graph
  *
  * Read-side projection of Union Eyes institutional data into the canonical
  * `@nzila/platform-entity-graph` and `@nzila/platform-decision-graph`

@@ -39,7 +39,7 @@ import {
   type InstitutionalTimelineGraph,
   type ProvenanceCoverageSummary,
   type SuccessionBreakpoint,
-} from '@nzila/institutional-governance-graph'
+} from '@nzila/organizational-governance-graph'
 
 import { getInstitutionalGraph } from '../organizational-topology/source'
 

@@ -1,4 +1,4 @@
-# @nzila/institutional-cognition-core
+# @nzila/organizational-cognition-core
 
 The canonical institutional cognition substrate for Nzila OS / Union Eyes.
 
@@ -26,7 +26,7 @@ explainability protocol, and orchestration primitives defined here.
 ## Architectural Rules
 
 1. **No local cognition types.** All cognition consumers must import from
-   `@nzila/institutional-cognition-core/contracts`.
+   `@nzila/organizational-cognition-core/contracts`.
 2. **No parallel reasoning pipelines.** Use `reasoning/` lifecycle helpers.
 3. **Every engine returns an explainability envelope.** No opaque outputs.
 4. **Organizational scope only.** Never employee-level analysis.

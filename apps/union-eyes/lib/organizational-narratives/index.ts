@@ -14,7 +14,7 @@
 import {
   detectForbiddenVocabulary,
   type InstitutionalExplainabilityEnvelope,
-} from '@nzila/institutional-cognition-core';
+} from '@nzila/organizational-cognition-core';
 
 export interface InstitutionalNarrative {
   /** Engine that produced the source envelope. */

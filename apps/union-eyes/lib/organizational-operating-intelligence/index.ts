@@ -18,7 +18,7 @@
 import {
   orchestrateCognition,
   type OrchestrationResult,
-} from '@nzila/institutional-cognition-core';
+} from '@nzila/organizational-cognition-core';
 
 import {
   ADVANCED_ORCHESTRATION_STEPS,
@@ -29,12 +29,12 @@ import { FOUNDATIONAL_ORCHESTRATION_STEPS } from './kernel-bridge-foundational';
 export {
   buildExplainabilityEnvelope,
   confidenceBandFromScore,
-} from '@nzila/institutional-cognition-core';
+} from '@nzila/organizational-cognition-core';
 
 export type {
   InstitutionalExplainabilityEnvelope,
   OrchestrationResult,
-} from '@nzila/institutional-cognition-core';
+} from '@nzila/organizational-cognition-core';
 
 /** All canonical orchestratable engines (T1–T9). */
 export const ALL_ORCHESTRATION_STEPS = [

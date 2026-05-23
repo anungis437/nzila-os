@@ -253,7 +253,7 @@ The dashboard layout is the first line of defence for every page under `/dashboa
 | ✅ | ✅ | N/A | N/A | via error.tsx | ✅ | ✅ | ✅ |
 
 **Notes:**  
-- Reads from `@nzila/institutional-cognition-core` registry (synchronous package-level state projection — no DB, no async fetch needed)
+- Reads from `@nzila/organizational-cognition-core` registry (synchronous package-level state projection — no DB, no async fetch needed)
 - `requireUser()` enforced; no additional role gate (intentionally broad — all authenticated users can view institutional posture)
 - All copy is real institutional narrative, not stub
 - No loading state needed because there is no async data fetch at render time

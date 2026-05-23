@@ -4,7 +4,7 @@ import {
   INSTITUTIONAL_CONCEPTS,
   INSTITUTIONAL_ONTOLOGY_VERSION,
   COGNITION_CONTRACT_VERSION,
-} from '@nzila/institutional-cognition-core';
+} from '@nzila/organizational-cognition-core';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';

@@ -19,7 +19,7 @@ import {
   type CognitionDomain,
   type InstitutionalExplainabilityEnvelope,
   type SemanticTaxonomyNode,
-} from '@nzila/institutional-cognition-core';
+} from '@nzila/organizational-cognition-core';
 
 import {
   composeExecutiveBriefing,

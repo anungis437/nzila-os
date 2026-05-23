@@ -16,7 +16,7 @@ import {
   cognitionRegistry,
   defineCognitionEngine,
   type CognitionDomain,
-} from '@nzila/institutional-cognition-core';
+} from '@nzila/organizational-cognition-core';
 
 import { analyzeInstitutionalLearning } from '../knowledge-transfer/institutional-learning/learning-engine';
 import { buildResilienceRoadmap } from '../knowledge-transfer/resilience-strategies/strategy-modeler';

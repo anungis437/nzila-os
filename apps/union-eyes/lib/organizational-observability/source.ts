@@ -25,7 +25,7 @@ import {
   type InstitutionalTimelineEntry,
   type InstitutionalTimelineGraph,
   type ProvenanceCoverageSummary,
-} from '@nzila/institutional-governance-graph'
+} from '@nzila/organizational-governance-graph'
 
 export interface InstitutionalObservabilityView {
   readonly generatedAt: string

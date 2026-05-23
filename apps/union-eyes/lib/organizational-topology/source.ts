@@ -27,7 +27,7 @@ import {
   type ContinuityEntry,
   type DelegationResolution,
   type InstitutionalTimelineGraph,
-} from '@nzila/institutional-governance-graph'
+} from '@nzila/organizational-governance-graph'
 
 // ── View shapes ─────────────────────────────────────────────────────────────
 

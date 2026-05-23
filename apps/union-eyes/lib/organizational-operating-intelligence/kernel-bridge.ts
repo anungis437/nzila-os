@@ -2,7 +2,7 @@
  * Institutional Operating Intelligence — Kernel Convergence Layer
  *
  * Bridges the T8/T9 domain engines to the canonical
- * @nzila/institutional-cognition-core kernel. This is the **single
+ * @nzila/organizational-cognition-core kernel. This is the **single
  * cross-domain entrypoint** the application surface uses going forward.
  *
  * Rules:
@@ -22,7 +22,7 @@ import {
   type CognitionDomain,
   type InstitutionalExplainabilityEnvelope,
   type OrchestrationResult,
-} from '@nzila/institutional-cognition-core';
+} from '@nzila/organizational-cognition-core';
 
 import {
   analyzeSystemsDynamics,

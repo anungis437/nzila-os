@@ -1,5 +1,5 @@
 import { withApi } from '@/lib/api/framework';
-import type { InstitutionalExplainabilityEnvelope } from '@nzila/institutional-cognition-core';
+import type { InstitutionalExplainabilityEnvelope } from '@nzila/organizational-cognition-core';
 
 export type CognitionEngineFn<T> = (
   organizationId: string,

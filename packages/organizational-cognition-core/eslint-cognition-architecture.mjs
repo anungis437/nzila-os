@@ -4,14 +4,14 @@
  * Enforces the convergence rules for institutional cognition:
  *
  *  1. All cognition primitives must be imported from
- *     `@nzila/institutional-cognition-core` (or its subpaths).
+ *     `@nzila/organizational-cognition-core` (or its subpaths).
  *  2. Application code outside the cognition kernel must not define its
  *     own `*ExplainabilityEnvelope` or duplicate the canonical contracts.
  *  3. Engines must not import deprecated parallel cognition modules.
  *
  * Usage in eslint.config.mjs:
  *
- *   import cognitionArchitecture from '@nzila/institutional-cognition-core/eslint-cognition-architecture.mjs'
+ *   import cognitionArchitecture from '@nzila/organizational-cognition-core/eslint-cognition-architecture.mjs'
  *   export default [...other, cognitionArchitecture]
  */
 
@@ -26,14 +26,14 @@ const cognitionArchitectureConfig = {
         selector:
           "TSInterfaceDeclaration[id.name='InstitutionalExplainabilityEnvelope']",
         message:
-          'InstitutionalExplainabilityEnvelope is defined in @nzila/institutional-cognition-core. Import it; do not redeclare.',
+          'InstitutionalExplainabilityEnvelope is defined in @nzila/organizational-cognition-core. Import it; do not redeclare.',
       },
       {
         // Disallow re-declaring CognitionDomain outside the kernel.
         selector:
           "TSTypeAliasDeclaration[id.name='CognitionDomain'], TSEnumDeclaration[id.name='CognitionDomain']",
         message:
-          'CognitionDomain is defined in @nzila/institutional-cognition-core. Import it; do not redeclare.',
+          'CognitionDomain is defined in @nzila/organizational-cognition-core. Import it; do not redeclare.',
       },
     ],
     'no-restricted-imports': [
@@ -46,7 +46,7 @@ const cognitionArchitectureConfig = {
               '**/legacy-cognition/*',
             ],
             message:
-              'Legacy cognition modules are deprecated. Use @nzila/institutional-cognition-core.',
+              'Legacy cognition modules are deprecated. Use @nzila/organizational-cognition-core.',
           },
         ],
       },

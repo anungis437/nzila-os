@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { assertNoProtectedKindsInProjections } from '@nzila/institutional-governance-graph'
+import { assertNoProtectedKindsInProjections } from '@nzila/organizational-governance-graph'
 
 import { getInstitutionalChronologyView } from '../source'
 

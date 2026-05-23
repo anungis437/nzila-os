@@ -5,7 +5,7 @@
  * Domains: continuity, governance, procedural, operational, precedent, resilience, trust, memory.
  *
  * NOTE: `LegacyMultiDomainTaxonomy` is a module-internal taxonomy that predates the
- * canonical `CognitionDomain` exported by `@nzila/institutional-cognition-core`.
+ * canonical `CognitionDomain` exported by `@nzila/organizational-cognition-core`.
  * It is NOT the canonical organizational cognition domain set. Cognition routes,
  * envelopes, and orchestration must use the kernel's `CognitionDomain`.
  */

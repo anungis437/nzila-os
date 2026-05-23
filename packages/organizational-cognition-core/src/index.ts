@@ -1,5 +1,5 @@
 /**
- * @nzila/institutional-cognition-core
+ * @nzila/organizational-cognition-core
  *
  * Canonical institutional cognition substrate. See the per-module barrels
  * for the curated public surface.

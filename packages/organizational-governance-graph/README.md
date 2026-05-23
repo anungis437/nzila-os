@@ -1,4 +1,4 @@
-# @nzila/institutional-governance-graph
+# @nzila/organizational-governance-graph
 
 **Phase 2 — Safe Institutional Governance Graph (IGG) projection layer.**
 
