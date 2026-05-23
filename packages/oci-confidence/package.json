@@ -1,0 +1,25 @@
+{
+  "name": "@nzila/oci-confidence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OCI runtime confidence infrastructure: universal confidence model, stability engine, temporal decay, completeness, interpretive cautions. Deterministic, side-effect-free, no AI.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts": "./src/confidenceContracts.ts",
+    "./model": "./src/confidence-model.ts",
+    "./stability": "./src/stability-engine.ts",
+    "./decay": "./src/confidence-decay.ts",
+    "./completeness": "./src/data-completeness.ts",
+    "./cautions": "./src/interpretive-cautions.ts",
+    "./visual": "./src/confidenceVisualModel.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": { "zod": "^3.25.0" },
+  "devDependencies": { "vitest": "^4.1.2" }
+}

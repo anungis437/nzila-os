@@ -157,7 +157,8 @@ export function computeStewardshipDensity(
     if (!isKnownCriticality(crit)) continue;
 
     const critWeight = CRITICALITY_WEIGHT[crit];
-    const tenureWeight = isKnownTenure(h.tenureBand) ? TENURE_AMPLIFIER[h.tenureBand] : 1.0;
+    const tenureBandValue = h.tenureBand;
+    const tenureWeight = isKnownTenure(tenureBandValue) ? TENURE_AMPLIFIER[tenureBandValue] : 1.0;
     const weight = critWeight * tenureWeight;
     if (!Number.isFinite(weight)) continue;
 

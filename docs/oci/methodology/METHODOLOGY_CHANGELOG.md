@@ -71,6 +71,75 @@ entries:
       - 'docs/oci/methodology/coefficient-registry.yaml'
       - 'docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md'
 
+  - version: '1.1.0'
+    date: '2026-05-23'
+    change_class: 'standard'
+    category: 'doctrine'
+    summary: >
+      Enterprise Defensibility & Statistical Governance Sprint. Adds runtime
+      confidence infrastructure (@nzila/oci-confidence), Governance Entropy
+      audit reproducibility (Entropy Audit Packet™ with SHA-256
+      reproducibility hash), HHI/Gini statistical anchoring, ISO/COBIT
+      clause-level crosswalks, auditor & procurement positioning docs, and
+      whitepaper Appendices K–T operationalising the doctrine.
+    rationale: >
+      OCI v1.0.0 published the doctrine; v1.1.0 makes it standards-traceable,
+      confidence-aware, statistically contextualised, auditably reproducible,
+      and operationally defensible. Additive only — no v1 coefficient or
+      threshold changes, no maturity-classification advancements. Three-way
+      agreement preserved (no ranking, no AI inference, no individual
+      attribution). Crosswalks use only {FULL | PARTIAL | ADJACENT |
+      OUT_OF_SCOPE}; no row asserts equivalence with any cited standard
+      (enforced by crosswalkCoverageIntegrity.test.ts).
+    authority: 'OCI doctrine maintainers'
+    breaking_change_yn: false
+    affected_artifacts:
+      - 'packages/oci-confidence/package.json'
+      - 'packages/oci-confidence/src/confidenceContracts.ts'
+      - 'packages/oci-confidence/src/confidence-model.ts'
+      - 'packages/oci-confidence/src/confidence-decay.ts'
+      - 'packages/oci-confidence/src/stability-engine.ts'
+      - 'packages/oci-confidence/src/data-completeness.ts'
+      - 'packages/oci-confidence/src/interpretive-cautions.ts'
+      - 'packages/oci-confidence/src/confidenceVisualModel.ts'
+      - 'packages/oci-confidence/src/index.ts'
+      - 'packages/oci-confidence/src/confidence-model.test.ts'
+      - 'packages/oci-confidence/src/confidence-decay.test.ts'
+      - 'packages/oci-confidence/src/stability-engine.test.ts'
+      - 'apps/union-eyes/lib/oci/statistics/statisticalAnchorContracts.ts'
+      - 'apps/union-eyes/lib/oci/statistics/calculateHHI.ts'
+      - 'apps/union-eyes/lib/oci/statistics/calculateGini.ts'
+      - 'apps/union-eyes/lib/oci/statistics/stewardshipConcentrationModel.ts'
+      - 'apps/union-eyes/lib/oci/statistics/statisticalConfidenceModel.ts'
+      - 'apps/union-eyes/lib/oci/statistics/index.ts'
+      - 'apps/union-eyes/lib/oci/statistics/__tests__/calculateHHI.test.ts'
+      - 'apps/union-eyes/lib/oci/statistics/__tests__/calculateGini.test.ts'
+      - 'apps/union-eyes/lib/oci/audit/entropyAuditContracts.ts'
+      - 'apps/union-eyes/lib/oci/audit/observableEvidenceTaxonomy.ts'
+      - 'apps/union-eyes/lib/oci/audit/evidenceSufficiencyEngine.ts'
+      - 'apps/union-eyes/lib/oci/audit/confidenceEscalationRules.ts'
+      - 'apps/union-eyes/lib/oci/audit/entropyAuditPacketBuilder.ts'
+      - 'apps/union-eyes/lib/oci/audit/reviewerVarianceModel.ts'
+      - 'apps/union-eyes/lib/oci/audit/auditObservability.ts'
+      - 'apps/union-eyes/lib/oci/audit/index.ts'
+      - 'apps/union-eyes/lib/oci/audit/__tests__/evidenceSufficiencyEngine.test.ts'
+      - 'apps/union-eyes/lib/oci/audit/__tests__/entropyAuditPacketBuilder.test.ts'
+      - 'apps/union-eyes/lib/oci/audit/__tests__/reviewerVarianceModel.test.ts'
+      - 'apps/union-eyes/lib/oci/__tests__/crosswalkCoverageIntegrity.test.ts'
+      - 'docs/oci/compliance/OCI_ISO22301_CROSSWALK.md'
+      - 'docs/oci/compliance/OCI_ISO22317_CROSSWALK.md'
+      - 'docs/oci/compliance/OCI_ISO37000_CROSSWALK.md'
+      - 'docs/oci/compliance/OCI_ISO31000_CROSSWALK.md'
+      - 'docs/oci/compliance/OCI_COBIT2019_CROSSWALK.md'
+      - 'docs/oci/compliance/OCI_COVERAGE_MATRIX.md'
+      - 'docs/oci/compliance/OCI_AUDITOR_GUIDE.md'
+      - 'docs/oci/compliance/OCI_PROCUREMENT_POSITIONING.md'
+      - 'docs/oci/procurement/OCI_AUDITOR_QUICK_REFERENCE.md'
+      - 'docs/oci/procurement/OCI_CONFIDENCE_INTERPRETATION_GUIDE.md'
+      - 'docs/oci/procurement/OCI_GOVERNANCE_ENTROPY_REVIEW_GUIDE.md'
+      - 'docs/oci/procurement/OCI_PROCUREMENT_FAQ.md'
+      - 'docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md'
+
 # Future-entry template (delete this comment block when adding entries):
 #
 #  - version: 'X.Y.Z'

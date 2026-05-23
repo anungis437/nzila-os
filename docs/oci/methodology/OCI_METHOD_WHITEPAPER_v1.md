@@ -1162,3 +1162,142 @@ Read in this order:
 5. **§12 Standards positioning** — how OCI sits beside ISO 22301, ISO 37000, COBIT, etc.
 
 This reading path is sufficient to evaluate whether OCI belongs in your institution's procurement consideration set. The remaining sections supply the technical detail that supports the position.
+
+---
+
+# Operationalisation extensions (added under the Enterprise Defensibility & Statistical Governance Sprint)
+
+> The following appendices extend v1.0.0 with runtime infrastructure and statistical anchoring. They are normative for any OCI consumer that wishes to claim **standards-traceable, confidence-aware, statistically contextualised, auditably reproducible, and operationally defensible** posture.
+
+## Appendix K — Confidence Architecture (Universal Confidence Model™)
+
+OCI v1.0.0 §7 introduced confidence as a categorical posture. This appendix specifies the runtime contract.
+
+**Envelope.** Every framework output SHOULD be wrapped in a `ConfidenceEnvelope<TScore>` carrying:
+
+- `score` — the framework's primary value;
+- `confidence` — one of `HIGH | MODERATE | LOW | INSUFFICIENT`;
+- `sampleSize`, `dataCompleteness`, `stability`, `decay`, `assessmentAgeDays`;
+- `cautionStates` — drawn from the canonical caution vocabulary;
+- `confidenceRationale` — a deterministic, replayable list of strings explaining the band.
+
+**Composition rule.** Confidence is the minimum of: sample-size-based confidence, completeness-based confidence, stability-induced confidence, reviewer-variance-induced confidence, governance-evidence-induced confidence, after applying decay. Confidence is **never raised** by composition.
+
+**Hard rule.** A confidence state is a categorical posture, never a probability.
+
+Reference implementation: [`packages/oci-confidence/src/confidence-model.ts`](../../../packages/oci-confidence/src/confidence-model.ts).
+
+## Appendix L — Evidence Sufficiency Doctrine (Evidence Sufficiency Engine™)
+
+The Evidence Sufficiency Engine™ characterises whether observed evidence is sufficient for a Governance Entropy reading. Its outputs are:
+
+- `sufficiency ∈ { sufficient, partial, insufficient }`;
+- `confidence ∈ { high, moderate, low }`;
+- `escalationRequired ∈ { true, false }`;
+- `contradictionsDetected ∈ { true, false }`;
+- `rationale` — ordered, replayable strings.
+
+**Hard rule.** Governance Entropy MUST fail cautiously, NOT infer aggressively. Contradictions detected between strong observations downgrade the sufficiency from `sufficient` to `partial` even when the aggregate weight clears the sufficiency threshold.
+
+**Verbal-only observations are never sufficient on their own.** This is enforced by the base-weight assignment in the Observable Evidence Taxonomy™.
+
+Reference implementation: [`apps/union-eyes/lib/oci/audit/evidenceSufficiencyEngine.ts`](../../../apps/union-eyes/lib/oci/audit/evidenceSufficiencyEngine.ts).
+
+## Appendix M — Audit Reproducibility (Entropy Audit Packet™)
+
+Every Governance Entropy reading SHOULD be expressible as a content-addressed Entropy Audit Packet™:
+
+- `entropyOrdinal ∈ { 1, 2, 3, 4, 5 }`;
+- `observedEvidence`, `failedCriteria`, `uncertaintyStates`, `reviewerNotes`;
+- `confidence`, `contradictoryEvidence`, `escalationFlags`, `continuityCautionStates`;
+- `reproducibilityHash` — SHA-256 over the canonicalised inputs.
+
+**Hard rule.** Two reviewers replaying the same observations produce identical hashes. Hash inputs are canonicalised by sorting observations by `(evidenceSource, evidenceType)` and by rounding numeric reviewer fields to four decimals.
+
+Reference implementation: [`apps/union-eyes/lib/oci/audit/entropyAuditPacketBuilder.ts`](../../../apps/union-eyes/lib/oci/audit/entropyAuditPacketBuilder.ts).
+
+## Appendix N — Crosswalk Operationalisation
+
+OCI's standards positioning (whitepaper §12) is operationalised through the [`docs/oci/compliance/`](../compliance/) crosswalk set. Five clause-level crosswalks (ISO 22301, ISO/TS 22317, ISO 37000, ISO 31000, COBIT 2019) and a top-level [coverage matrix](../compliance/OCI_COVERAGE_MATRIX.md) classify each interaction as `FULL | PARTIAL | ADJACENT | OUT_OF_SCOPE`.
+
+**Hard rules (procurement-grade).**
+
+1. No crosswalk asserts equivalence with any cited standard.
+2. No crosswalk claims OCI replaces certification.
+3. Every PARTIAL row records (a) the OCI artefact produced, (b) the limitation, (c) the auditor validation logic, (d) the confidence implication.
+4. `OUT_OF_SCOPE` is documented explicitly per crosswalk so that absence of coverage is never inferred to be a gap in OCI.
+
+## Appendix O — Confidence Decay Schedule
+
+Per OCI doctrine the temporal decay band for an assessment is:
+
+| Age | Decay band | Confidence consequence |
+|---|---|---|
+| < 90 days | `NONE` | No reduction |
+| 90–179 days | `MILD` | `HIGH` → `MODERATE` |
+| 180–364 days | `MODERATE` | `HIGH`/`MODERATE` → `MODERATE`/`LOW` |
+| ≥ 365 days | `SEVERE` | Any band collapses to `INSUFFICIENT` |
+
+**Hard rule.** Decay never raises a confidence band; on `SEVERE` decay the envelope collapses to `INSUFFICIENT` regardless of all other inputs.
+
+Reference implementation: [`packages/oci-confidence/src/confidence-decay.ts`](../../../packages/oci-confidence/src/confidence-decay.ts).
+
+## Appendix P — Stability Modelling (Stability Engine™)
+
+The Stability Engine™ composes six explicit volatility signals — `modernizationVolatility`, `governanceVolatility`, `onboardingInstability`, `stewardshipTurnover`, `continuityVariance`, `transitionTurbulence` — into a categorical `stabilityState ∈ { STABLE, TRANSITIONAL, VOLATILE, UNKNOWN }` and a `temporalConfidence ∈ { HIGH, MODERATE, LOW, INSUFFICIENT }`.
+
+When no volatility signal is provided, `stabilityState = UNKNOWN` and `temporalConfidence = INSUFFICIENT`. The engine never infers stability from absence of evidence.
+
+Reference implementation: [`packages/oci-confidence/src/stability-engine.ts`](../../../packages/oci-confidence/src/stability-engine.ts).
+
+## Appendix Q — HHI Anchoring (Herfindahl-Hirschman Index)
+
+For a population of bearers with non-negative weights `w_i` and total `W = Σw_i`, HHI is the sum of squared market shares `Σ(w_i/W)²`. Bounds: `HHI ∈ [1/n, 1]`. Scaled HHI ∈ `[0, 10000]` is provided for standards-language compatibility.
+
+**Doctrine bands.**
+
+| Band | Threshold (normalised) | Posture |
+|---|---|---|
+| `DISTRIBUTED` | < 0.10 | Continuity-favourable structure |
+| `MODERATE` | 0.10 – 0.149 | Continuity readiness gap |
+| `CONCENTRATED` | 0.15 – 0.249 | Continuity risk surface |
+| `HIGHLY_CONCENTRATED` | ≥ 0.25 | Continuity fragility |
+
+**Hard rule.** HHI contextualises OCI; it does NOT replace OCI interpretation. The narrative produced by the Stewardship Concentration Model™ NEVER ranks institutions and NEVER asserts misconduct.
+
+Reference implementation: [`apps/union-eyes/lib/oci/statistics/calculateHHI.ts`](../../../apps/union-eyes/lib/oci/statistics/calculateHHI.ts).
+
+## Appendix R — Gini Anchoring (Gini coefficient)
+
+Computed on sorted weights `x_1 ≤ … ≤ x_n` as:
+
+$$G = \frac{\sum_{i=1}^{n}\,(2i - n - 1)\,x_i}{n \cdot \sum_{i=1}^{n} x_i}$$
+
+Bounds: `G ∈ [0, 1]`. Doctrine bands: `EVEN` (< 0.2), `UNEVEN` (0.2–0.39), `INEQUITABLE` (0.4–0.59), `EXTREME` (≥ 0.6).
+
+**Edge cases.** `n = 0` → `G = 0`, confidence `INSUFFICIENT`, caution `SMALL_SAMPLE`. `n = 1` → `G = 0` (undefined; returned as zero with `INSUFFICIENT`).
+
+**Hard rule.** Gini contextualises stewardship-burden asymmetry. It is never read as a misconduct finding or as an exploitation finding. Reviewer-led interpretation is required at `INEQUITABLE`+.
+
+Reference implementation: [`apps/union-eyes/lib/oci/statistics/calculateGini.ts`](../../../apps/union-eyes/lib/oci/statistics/calculateGini.ts).
+
+## Appendix S — Reviewer Variance Modelling (Reviewer Consistency Layer™)
+
+Tracks `reviewerAgreement`, `entropyVariance`, `escalationRate`, `calibrationConfidence ∈ { HIGH, MODERATE, LOW, INSUFFICIENT }` across a reviewer cohort, plus a list of human-readable `indicators`.
+
+**Hard rule.** Preserve reviewer-led interpretation while constraining methodological drift. The model never overrides a reviewer's classification; it only surfaces calibration signals for facilitators. Panels with fewer than three reviewers are reported as `INSUFFICIENT` calibration regardless of agreement.
+
+Reference implementation: [`apps/union-eyes/lib/oci/audit/reviewerVarianceModel.ts`](../../../apps/union-eyes/lib/oci/audit/reviewerVarianceModel.ts).
+
+## Appendix T — Sprint audit gates (additive to §13.4)
+
+The Enterprise Defensibility Sprint introduces the following additive audit gates (numbered continuing §13.4 series):
+
+12. **Confidence-envelope presence.** Every OCI framework output cited externally MUST be accompanied by a `ConfidenceEnvelope`.
+13. **No raised confidence on composition.** A composition layer MUST NOT raise a child confidence band.
+14. **Decay never raises confidence.** `applyDecay(band, decayBand)` MUST be monotonically non-increasing.
+15. **HHI/Gini bounds invariants.** HHI ∈ [1/n, 1]; Gini ∈ [0, 1]. Violations are bugs, never doctrine adjustments.
+16. **Verbal-only insufficiency.** Verbal-only evidence MUST NOT produce a `sufficient` verdict.
+17. **Packet reproducibility.** Identical canonical inputs MUST produce identical `reproducibilityHash` values.
+18. **No institutional ranking.** No statistical or audit output MAY emit an ordered ranking across institutions.
+19. **Crosswalk anti-equivalence.** No crosswalk row may assert equivalence with any cited standard.

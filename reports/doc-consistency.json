@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-05-22T16:36:56.576Z",
-  "filesScanned": 1782,
+  "generatedAt": "2026-05-23T19:19:15.101Z",
+  "filesScanned": 1797,
   "totalFindings": 2534,
   "findingsByRule": {
-    "stale-reference": 1034,
+    "stale-reference": 1033,
     "stale-package-ref": 57,
-    "naming-inconsistency": 1328,
+    "naming-inconsistency": 1329,
     "stale-date": 7,
     "missing-required-doc": 3,
     "missing-package-readme": 105
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1199,
-    "info": 1335
+    "warning": 1198,
+    "info": 1336
   },
   "findings": [
     {
@@ -99,13 +99,6 @@
       "file": "CONTRIBUTING.md",
       "line": 89,
       "message": "Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "README.md",
-      "line": 136,
-      "message": "Possible broken link: [reports/portfolio-status.md](reports/portfolio-status.md)"
     },
     {
       "rule": "stale-reference",
@@ -15301,7 +15294,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 954,
+      "line": 956,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16093,6 +16086,13 @@
       "severity": "info",
       "file": "docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md",
       "line": 10,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md",
+      "line": 107,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16954,49 +16954,49 @@
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",
