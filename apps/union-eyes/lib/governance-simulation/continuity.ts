@@ -1,5 +1,5 @@
 /**
- * Institutional continuity stress engine.
+ * Organizational continuity stress engine.
  *
  * Simulates governance chain disruptions caused by:
  *   - Leadership turnover (steward, executive role vacated)
@@ -64,7 +64,7 @@ const REMEDIATION_STEPS: Record<InstitutionalStressType, string[]> = {
 function getRemediationSteps(stressType: InstitutionalStressType): string[] {
   return REMEDIATION_STEPS[stressType] ?? [
     'Activate emergency governance protocol.',
-    'Notify institutional governance authority.',
+    'Notify organizational governance authority.',
   ];
 }
 

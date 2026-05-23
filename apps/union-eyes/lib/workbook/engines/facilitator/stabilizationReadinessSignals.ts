@@ -3,7 +3,7 @@
  * MODULE: OCI Facilitator Runtime
  * DOCTRINE_VERSION: 2.0.0
  *
- * Stabilization readiness signals. Composes the four institutional
+ * Stabilization readiness signals. Composes the four organizational
  * readiness conditions into a deterministic reading. Conditions are
  * institution-scoped only — never about a person.
  *
@@ -52,7 +52,7 @@ export function readStabilizationReadiness(input: ReadinessInput): ReadinessRead
     sufficient,
     unmet,
     statement: sufficient
-      ? 'All four institutional readiness conditions are present.'
+      ? 'All four organizational readiness conditions are present.'
       : `Readiness is insufficient; ${unmet.length} of 4 conditions are unmet.`,
   };
 }

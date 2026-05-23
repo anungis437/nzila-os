@@ -10,7 +10,7 @@
  *   4. Certainty moderation
  *   5. Reviewer-presence
  *   6. Anti-surveillance
- *   7. Institutional dignity
+ *   7. Organizational dignity
  */
 
 import {
@@ -139,13 +139,13 @@ export function validateNarrativeOutput(
     });
   }
 
-  // Gate 7 — institutional dignity (extra patterns beyond prohibited list)
+  // Gate 7 — organizational dignity (extra patterns beyond prohibited list)
   for (const re of DIGNITY_OFFENDERS) {
     const m = text.match(re);
     if (m) {
       failures.push({
         gate: 'institutional_dignity',
-        reason: 'institutional dignity offence',
+        reason: 'organizational dignity offence',
         evidence: m[0],
       });
     }

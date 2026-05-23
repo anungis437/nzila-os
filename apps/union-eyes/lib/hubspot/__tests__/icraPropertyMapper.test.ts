@@ -101,7 +101,7 @@ describe('icraPropertyMapper — enum tables', () => {
     expect(REPORT_TIER_LABELS.continuity_reflection).toBe('Continuity Reflection');
     expect(REPORT_TIER_LABELS.executive_continuity_brief).toBe('Executive Continuity Brief');
     expect(REPORT_TIER_LABELS.institutional_continuity_diagnostic).toBe(
-      'Institutional Continuity Diagnostic',
+      'Organizational Continuity Diagnostic',
     );
   });
 
@@ -110,7 +110,7 @@ describe('icraPropertyMapper — enum tables', () => {
   });
 });
 
-describe('mapBurdenLevel — institutional bucket boundaries', () => {
+describe('mapBurdenLevel — organizational bucket boundaries', () => {
   it.each([
     [0, 'Low'],
     [29, 'Low'],
@@ -144,7 +144,7 @@ describe('posture mappers — risk-band derivations', () => {
     expect(mapStewardshipConcentration(p)).toBe('Elevated');
   });
 
-  it('institutional dependency risk: weak memory + transition → Elevated', () => {
+  it('organizational dependency risk: weak memory + transition → Elevated', () => {
     const p = makeProfile({
       dimensions: [
         { dimension: 'operational_memory', score: 25, contributingQuestions: 1, weightTotal: 1 },

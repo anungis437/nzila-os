@@ -5,7 +5,7 @@
  * Purpose: Reinforce union-first values throughout the platform
  * Usage: Story pages, impact sections, ethical messaging
  * 
- * Design: Calm, trustworthy, institutional (not Silicon Valley)
+ * Design: Calm, trustworthy, organizational (not Silicon Valley)
  */
 
 import * as React from 'react';

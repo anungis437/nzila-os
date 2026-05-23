@@ -53,7 +53,7 @@ describe('OCI lifecycle integration — Recognition → Intelligence', () => {
     expect(profile.maturityBand.id).toBe(trace.maturityBand.id);
     // The band must be resolvable independently to the same id.
     expect(resolveMaturityBand(profile.composite).id).toBe(profile.maturityBand.id);
-    // Uniform institutional answers should resolve to the highest band.
+    // Uniform organizational answers should resolve to the highest band.
     expect(profile.maturityBand.id).toBe('continuity_intelligence');
   });
 

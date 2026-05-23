@@ -3,8 +3,8 @@
  * MODULE: Governance Lineage
  * DOCTRINE_VERSION: 2.0.0
  *
- * Institutional Evolution Tracker — composes precedent continuity and
- * interpretation drift into a longitudinal arc of how institutional
+ * Organizational Evolution Tracker — composes precedent continuity and
+ * interpretation drift into a longitudinal arc of how organizational
  * governance has evolved across eras.
  *
  * Pure, deterministic.
@@ -101,13 +101,13 @@ function posturalReading(
   const pct = (n: number) => `${Math.round(n * 100)}%`;
   switch (posture) {
     case 'continuous':
-      return `Institutional lineage is broadly continuous (${pct(continuityRate)} of precedents carried, ${pct(drift)} interpretation drift).`;
+      return `Organizational lineage is broadly continuous (${pct(continuityRate)} of precedents carried, ${pct(drift)} interpretation drift).`;
     case 'evolved':
-      return `Institutional lineage has evolved while retaining most precedents (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift).`;
+      return `Organizational lineage has evolved while retaining most precedents (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift).`;
     case 'reinterpreted':
-      return `Institutional lineage has been substantially reinterpreted (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift).`;
+      return `Organizational lineage has been substantially reinterpreted (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift).`;
     case 'fractured':
-      return `Institutional lineage shows fracture (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift); reconstruction would require external interpretation.`;
+      return `Organizational lineage shows fracture (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift); reconstruction would require external interpretation.`;
   }
 }
 

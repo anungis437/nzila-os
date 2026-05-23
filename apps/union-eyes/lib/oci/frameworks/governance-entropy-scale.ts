@@ -37,7 +37,7 @@ export const ENTROPY_LEVELS: readonly EntropyLevel[] = [
   {
     id: 'institutional_drift',
     ordinal: 4,
-    label: 'Institutional drift',
+    label: 'Organizational drift',
     posture:
       'Multiple domains show patterned divergence from designed governance. Stabilization is appropriate.',
     lowerBound: 0.6,
@@ -55,7 +55,7 @@ export const ENTROPY_LEVELS: readonly EntropyLevel[] = [
     ordinal: 2,
     label: 'Recognised drift',
     posture:
-      'Drift is named and known to institutional stewards. Continuity is intact but vigilance is warranted.',
+      'Drift is named and known to organizational stewards. Continuity is intact but vigilance is warranted.',
     lowerBound: 0.2,
   },
   {

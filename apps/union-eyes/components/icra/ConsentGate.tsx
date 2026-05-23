@@ -23,12 +23,12 @@ const CONSENT_COPY = {
   'en-CA': {
     title: 'Before You Begin',
     intro:
-      'This assessment is designed to produce an honest institutional continuity profile for your organization. Please review what this assessment does and does not do before proceeding.',
+      'This assessment is designed to produce an honest organizational continuity profile for your organization. Please review what this assessment does and does not do before proceeding.',
     principles: 'Assessment Design Principles',
     principleItems: [
       {
         lead: 'No surveillance.',
-        body: "This assessment does not ask about named individuals, personal performance, or individual behaviour. It asks about your organization's systems, processes, and institutional practices.",
+        body: "This assessment does not ask about named individuals, personal performance, or individual behaviour. It asks about your organization's systems, processes, and organizational practices.",
       },
       {
         lead: 'No opaque AI scoring.',
@@ -40,7 +40,7 @@ const CONSENT_COPY = {
       },
       {
         lead: 'Continuity intelligence, not a quiz.',
-        body: 'This is a structured institutional assessment. The results are intended for organizational use, not individual evaluation.',
+        body: 'This is a structured organizational assessment. The results are intended for organizational use, not individual evaluation.',
       },
     ],
     acknowledgements: 'Acknowledgements Required to Proceed',
@@ -52,7 +52,7 @@ const CONSENT_COPY = {
     preview: 'What you\u2019ll receive',
     previewItems: [
       'A continuity profile across five maturity dimensions, with explicit scoring weights.',
-      'A printable institutional report you can share with your board or executive team.',
+      'A printable organizational report you can share with your board or executive team.',
       'Three recommended next steps tailored to your governance model and workforce band.',
     ],
     proceed: 'Begin Assessment',
@@ -61,12 +61,12 @@ const CONSENT_COPY = {
   'fr-CA': {
     title: 'Avant de commencer',
     intro:
-      "Cette évaluation produit un profil honnête de continuité institutionnelle pour votre organisation. Veuillez examiner ce que l'évaluation fait et ne fait pas avant de poursuivre.",
+      "Cette évaluation produit un profil honnête de continuité organisationnelle pour votre organisation. Veuillez examiner ce que l'évaluation fait et ne fait pas avant de poursuivre.",
     principles: "Principes de conception de l'évaluation",
     principleItems: [
       {
         lead: 'Aucune surveillance.',
-        body: "Cette évaluation ne pose pas de questions sur des personnes nommées, la performance personnelle ou les comportements individuels. Elle porte sur les systèmes, processus et pratiques institutionnelles de votre organisation.",
+        body: "Cette évaluation ne pose pas de questions sur des personnes nommées, la performance personnelle ou les comportements individuels. Elle porte sur les systèmes, processus et pratiques organisationnelles de votre organisation.",
       },
       {
         lead: 'Aucune notation IA opaque.',
@@ -78,7 +78,7 @@ const CONSENT_COPY = {
       },
       {
         lead: "Intelligence de continuité, pas questionnaire d'évaluation personnelle.",
-        body: "Il s'agit d'une évaluation institutionnelle structurée. Les résultats servent à l'organisation, pas à l'évaluation individuelle.",
+        body: "Il s'agit d'une évaluation organisationnelle structurée. Les résultats servent à l'organisation, pas à l'évaluation individuelle.",
       },
     ],
     acknowledgements: 'Reconnaissances requises pour continuer',
@@ -90,7 +90,7 @@ const CONSENT_COPY = {
     preview: 'Ce que vous recevrez',
     previewItems: [
       'Un profil de continuité selon cinq dimensions de maturité, avec pondérations explicites.',
-      'Un rapport institutionnel imprimable que vous pouvez partager avec votre conseil ou direction.',
+      'Un rapport organisationnel imprimable que vous pouvez partager avec votre conseil ou direction.',
       'Trois prochaines étapes recommandées, adaptées à votre modèle de gouvernance et à votre taille.',
     ],
     proceed: "Commencer l'évaluation",

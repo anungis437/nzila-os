@@ -1,10 +1,10 @@
 /**
- * Institutional Learning Trajectory Models
+ * Organizational Learning Trajectory Models
  *
  * Data structures for longitudinal continuity evolution and maturity progression analysis.
  *
  * SCOPE: Organizational learning trajectories — NOT workforce analytics.
- * These characterize how institutional continuity governance evolves over time.
+ * These characterize how organizational continuity governance evolves over time.
  */
 
 /** A single point on the learning trajectory timeline. */
@@ -48,7 +48,7 @@ export interface MaturityMilestone {
   achievedAt: string | null;
 }
 
-/** Full institutional learning trajectory report. */
+/** Full organizational learning trajectory report. */
 export interface LearningTrajectoryReport {
   organizationId: string;
   analyzedAt: string;

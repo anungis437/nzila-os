@@ -2,15 +2,15 @@
  * ARTIFACT TYPE: React Component
  * DOCTRINE_VERSION: 1.0.0
  *
- * ICRAProfile — results display for the Institutional Continuity Profile.
+ * ICRAProfile — results display for the Organizational Continuity Profile.
  *
  * Implements tiered output:
  *   - Continuity Reflection (free): band + insights + signals + burden index
  *   - Executive Continuity Brief: unlocks governance entropy, continuity debt,
  *     dependency review, modernization risk, full recommendations
- *   - Institutional Continuity Diagnostic: full access
+ *   - Organizational Continuity Diagnostic: full access
  *
- * Tone: calm, institutional, emotionally intelligent.
+ * Tone: calm, organizational, emotionally intelligent.
  * No AI language anywhere in this component.
  *
  * Server component — receives profile and tier as props.
@@ -41,7 +41,7 @@ const INSIGHT_CATEGORY_META: Record<
   { label: string; framing: string }
 > = {
   institutional_forgetting: {
-    label: 'Institutional Forgetting',
+    label: 'Organizational Forgetting',
     framing:
       'When multiple continuity dimensions degrade together, the institution begins to forget itself in operational ways that rarely show up in formal reporting.',
   },
@@ -58,7 +58,7 @@ const INSIGHT_CATEGORY_META: Record<
   reconstruction_burden: {
     label: 'Reconstruction Burden',
     framing:
-      'When institutional understanding has to be rebuilt with each transition, the cost is borne by individuals and absorbed into roles — rarely accounted for as a continuity liability.',
+      'When organizational understanding has to be rebuilt with each transition, the cost is borne by individuals and absorbed into roles — rarely accounted for as a continuity liability.',
   },
   stewardship_concentration: {
     label: 'Stewardship Concentration',
@@ -87,10 +87,10 @@ const OBSERVATION_CATEGORY_META: Record<
   },
   operational: {
     label: 'Operational',
-    framing: 'How daily institutional work is sustained between transitions.',
+    framing: 'How daily organizational work is sustained between transitions.',
   },
   memory: {
-    label: 'Institutional Memory',
+    label: 'Organizational Memory',
     framing: 'How precedent, context, and operational understanding persist over time.',
   },
   transition: {
@@ -103,7 +103,7 @@ const OBSERVATION_CATEGORY_META: Record<
   },
   sovereignty: {
     label: 'Sovereignty & Data',
-    framing: 'How institutional information remains under institutional control.',
+    framing: 'How organizational information remains under organizational control.',
   },
 };
 
@@ -125,7 +125,7 @@ interface ICRAProfileProps {
 }
 
 const DIMENSION_LABELS: Record<string, string> = {
-  institutional_continuity: 'Institutional Continuity',
+  institutional_continuity: 'Organizational Continuity',
   governance_fragility: 'Governance Fragility',
   trust_debt: 'Trust Debt',
   operational_memory: 'Operational Memory',
@@ -138,7 +138,7 @@ const SECTION_LABELS: Record<SectionId, string> = {
   organizational_context: 'Organizational Context',
   operational_dependency: 'Operational Dependency',
   governance_visibility: 'Governance Visibility',
-  institutional_memory: 'Institutional Memory',
+  institutional_memory: 'Organizational Memory',
   transition_readiness: 'Transition Readiness',
   operational_coordination: 'Operational Coordination',
   explainability_trust: 'Explainability & Trust',
@@ -295,7 +295,7 @@ function ContinuitySignalList({ signals }: { signals: ContinuitySignal[] }) {
         {COPY.results.continuitySignalsTitle}
       </h2>
       <p className="text-sm text-stone-500">
-        Recognizable institutional patterns observed in this assessment.
+        Recognizable organizational patterns observed in this assessment.
       </p>
       <ul className="divide-y divide-stone-100 rounded-xl border border-stone-200 overflow-hidden">
         {observed.map((sig) => (
@@ -319,7 +319,7 @@ function StewardshipSignalList({ signals }: { signals: StewardshipSignal[] }) {
         {COPY.results.stewardshipSignalsTitle}
       </h2>
       <p className="text-sm text-stone-500">
-        Stewardship-layer signals — where institutional obligations may be at risk.
+        Stewardship-layer signals — where organizational obligations may be at risk.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {signals.map((sig) => (
@@ -358,7 +358,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
       {/* ── Composite + Band ── */}
       <div className="rounded-xl border border-stone-200 bg-stone-50 p-8 text-center space-y-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-stone-500">
-          Institutional Continuity Profile
+          Organizational Continuity Profile
         </p>
         <div className="text-7xl font-bold tabular-nums text-stone-900">{composite}</div>
         <div className="space-y-1">
@@ -392,7 +392,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
               {COPY.results.insightsTitle}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-stone-600">
-              These are the institutional patterns this assessment surfaces — derived not from
+              These are the organizational patterns this assessment surfaces — derived not from
               any single answer, but from the relationships between continuity dimensions.
               Each finding names a recognizable pattern, places it in doctrine, and points to
               where it shows up in operational life.
@@ -446,7 +446,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
           {!visible('burden_index_full') && burdenIndex.humanCompensationIndicators.length > 0 && (
             <ICRAReportGate
               sectionName="Continuity Burden — Human Compensation Topography"
-              teaser="The full analysis names the specific places where institutional continuity is currently being maintained through informal human effort rather than institutional systems."
+              teaser="The full analysis names the specific places where organizational continuity is currently being maintained through informal human effort rather than organizational systems."
               requiredTier="executive_continuity_brief"
               assessmentId={assessmentId}
               chapterNumber={5}
@@ -454,7 +454,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                 'A ranked list of the institution\u2019s active human-compensation indicators',
                 'The named operational areas where continuity is currently informal',
                 'A read of how concentrated that compensation is across roles',
-                'Where institutional infrastructure would most reduce the burden carried by individuals',
+                'Where organizational infrastructure would most reduce the burden carried by individuals',
               ]}
             />
           )}
@@ -534,7 +534,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
         <p className="text-sm text-stone-600">
           Each dimension score is computed directly from your answers using published weights.
           Risk dimensions (governance fragility, trust debt) are inverted: a higher score indicates
-          less institutional risk.
+          less organizational risk.
         </p>
         <div className="space-y-4">
           {dimensions.map((dim) => (
@@ -608,30 +608,30 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
             {!visible('continuity_debt') && (
               <ICRAReportGate
                 sectionName="Continuity Debt Topography"
-                teaser="A meaningful portion of institutional continuity appears to be carried informally — sustainable until the people carrying it change."
+                teaser="A meaningful portion of organizational continuity appears to be carried informally — sustainable until the people carrying it change."
                 requiredTier="executive_continuity_brief"
                 assessmentId={assessmentId}
                 chapterNumber={2}
                 chapters={[
-                  'Where continuity is currently held by individuals rather than institutional systems',
+                  'Where continuity is currently held by individuals rather than organizational systems',
                   'The hidden operational cost being absorbed into roles and transitions',
                   'A ranked map of which continuity debts compound fastest if left unaddressed',
-                  'Where targeted institutional investment would most reduce informal dependency',
+                  'Where targeted organizational investment would most reduce informal dependency',
                 ]}
               />
             )}
             {!visible('dependency_review') && (
               <ICRAReportGate
-                sectionName="Institutional Dependency Review"
+                sectionName="Organizational Dependency Review"
                 teaser="Operational coherence may currently depend on a smaller circle of people than the governance posture suggests."
                 requiredTier="executive_continuity_brief"
                 assessmentId={assessmentId}
                 chapterNumber={3}
                 chapters={[
-                  'A map of where critical institutional knowledge is currently concentrated',
+                  'A map of where critical organizational knowledge is currently concentrated',
                   'Roles, relationships, and undocumented stewardship the institution is leaning on',
                   'The exposure profile if a small number of departures occurred simultaneously',
-                  'Where dependency is healthy stewardship and where it has become institutional fragility',
+                  'Where dependency is healthy stewardship and where it has become organizational fragility',
                 ]}
               />
             )}
@@ -643,7 +643,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                 assessmentId={assessmentId}
                 chapterNumber={4}
                 chapters={[
-                  'Where current modernization plans may erode institutional memory if unaccompanied',
+                  'Where current modernization plans may erode organizational memory if unaccompanied',
                   'Continuity preconditions that should be met before each modernization step',
                   'Decisions that are reversible — and decisions that quietly are not',
                   'A sequencing principle for modernization that protects continuity rather than displacing it',
@@ -666,7 +666,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-stone-600">
               These observations are derived directly from the sections you answered. They are
-              grouped by severity and annotated with the institutional lens they belong to —
+              grouped by severity and annotated with the organizational lens they belong to —
               not as alerts, but as plain readings of what the responses reveal.
             </p>
           </header>
@@ -783,10 +783,10 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
         <p className="font-semibold text-stone-700">About this profile</p>
         <p>
           All scores are computed deterministically using published question weights. There is no
-          opaque model. The composite score reflects your institutional continuity dimension score,
+          opaque model. The composite score reflects your organizational continuity dimension score,
           which aggregates weighted responses across all scored sections. Risk dimensions
           (governance fragility, trust debt) are inverted so higher scores consistently indicate
-          stronger institutional position.
+          stronger organizational position.
         </p>
         <p>
           Assessment ID: <code className="font-mono">{profile.assessmentId}</code>

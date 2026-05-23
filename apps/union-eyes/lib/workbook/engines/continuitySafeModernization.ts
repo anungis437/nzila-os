@@ -4,11 +4,11 @@
  * DOCTRINE_VERSION: 2.0.0
  *
  * Continuity-Safe Modernization — classifies a modernization initiative
- * against the institutional continuity it touches. AI capability remains
+ * against the organizational continuity it touches. AI capability remains
  * restrained, governance-aware, and secondary; the category is OCI, NOT
  * AI transformation.
  *
- * Pure, deterministic. Vocabulary is institutional, not consulting.
+ * Pure, deterministic. Vocabulary is organizational, not consulting.
  */
 
 export type ModernizationArc =
@@ -35,7 +35,7 @@ export interface ModernizationInitiativeInput {
   readonly lineageCaptureInScope: boolean;
   /** True if successor identification is supported by the initiative. */
   readonly successorIdentificationSupported: boolean;
-  /** True if the initiative is expected to displace existing institutional practice. */
+  /** True if the initiative is expected to displace existing organizational practice. */
   readonly displacesExistingPractice: boolean;
 }
 
@@ -50,11 +50,11 @@ export interface ContinuitySafeModernizationCell {
 
 const POSTURE_READING: Record<ContinuityPosture, string> = {
   continuity_safe:
-    'The initiative is designed to carry institutional continuity forward — carriers are consulted, lineage capture is in scope, and successor identification is supported.',
+    'The initiative is designed to carry organizational continuity forward — carriers are consulted, lineage capture is in scope, and successor identification is supported.',
   continuity_aware:
-    'The initiative shows awareness of institutional continuity but does not yet hold all three carrier consultation, lineage capture, and successor support.',
+    'The initiative shows awareness of organizational continuity but does not yet hold all three carrier consultation, lineage capture, and successor support.',
   continuity_blind:
-    'The initiative does not explicitly engage with the institutional continuity it touches; continuity preservation is left to chance.',
+    'The initiative does not explicitly engage with the organizational continuity it touches; continuity preservation is left to chance.',
   continuity_eroding:
     'The initiative displaces existing practice without lineage capture or carrier consultation. Continuity is at risk of erosion.',
 };

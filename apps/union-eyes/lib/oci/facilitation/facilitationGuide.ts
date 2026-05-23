@@ -19,12 +19,12 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
     },
     purpose: {
       'en-CA':
-        'To read the Executive Continuity Brief with the sponsor and at most one other institutional reader, in editorial pace, without diagnosis.',
+        'To read the Executive Continuity Brief with the sponsor and at most one other organizational reader, in editorial pace, without diagnosis.',
     },
     audience: {
       'en-CA': [
         'Executive sponsor',
-        'At most one additional institutional reader of the Brief',
+        'At most one additional organizational reader of the Brief',
         'Facilitator',
       ],
     },
@@ -57,7 +57,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
         'The facilitator interprets findings rather than reading the Brief',
         'The session accelerates toward action items or remediation lists',
         'The sponsor is pressed for a decision before the Brief has settled',
-        'Specific individuals are characterised rather than institutional patterns',
+        'Specific individuals are characterised rather than organizational patterns',
       ],
     },
     materialsRequired: {
@@ -98,7 +98,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
       'en-CA': [
         'A short statement of what Mapping is, and what it is not',
         'A walk through the workbook\u2019s sections by name',
-        'A description of the Stewardship Density Index and its institutional, not personal, posture',
+        'A description of the Stewardship Density Index and its organizational, not personal, posture',
         'Agreement on the working cadence and the steward\u2019s available time',
       ],
     },
@@ -143,7 +143,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
     },
     purpose: {
       'en-CA':
-        'To read the Stewardship Density Index together as an institutional figure, in editorial voice, without comparative benchmarking and without characterisation of individuals.',
+        'To read the Stewardship Density Index together as an organizational figure, in editorial voice, without comparative benchmarking and without characterisation of individuals.',
     },
     audience: {
       'en-CA': [
@@ -163,7 +163,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
         'A reading of the Index figure and its interpretive paragraph',
         'A reading of the Memory Holders cartography alongside the Index',
         'A grounded conversation about which concentrations the institution wishes to address',
-        'A note of the conversation, kept in institutional records, for use in Stabilization',
+        'A note of the conversation, kept in organizational records, for use in Stabilization',
       ],
     },
     closingPosture: {
@@ -173,8 +173,8 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
     successSignals: {
       'en-CA': [
         'The institution accepts the Index as a description of its own situation',
-        'The conversation stays at the institutional level even when names of stewards come up',
-        'The session ends with a small number of institutional questions, not a list of personal interventions',
+        'The conversation stays at the organizational level even when names of stewards come up',
+        'The session ends with a small number of organizational questions, not a list of personal interventions',
       ],
     },
     failureSignals: {
@@ -189,7 +189,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
       'en-CA': [
         'The institution\u2019s Stewardship Density Index page (printed)',
         'The institution\u2019s Memory Holders cartography (printed)',
-        'A working note pad for the institutional note from the session',
+        'A working note pad for the organizational note from the session',
       ],
     },
     whatToAvoid: {
@@ -239,7 +239,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
       'en-CA': [
         'The list is short \u2014 typically three to five priorities',
         'No priority requires a named steward to absorb additional load',
-        'The sponsor recognises each priority as institutional, not personal',
+        'The sponsor recognises each priority as organizational, not personal',
       ],
     },
     failureSignals: {
@@ -293,7 +293,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
       'en-CA': [
         'A page-by-page reading of the plan',
         'A noting of language that could be sharpened before the governance body reads it',
-        'A confirmation that no individual is named as a single point of stewardship without an institutional response',
+        'A confirmation that no individual is named as a single point of stewardship without an organizational response',
         'Agreement on the date the plan is presented to the governance body for ratification',
       ],
     },
@@ -304,7 +304,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
     successSignals: {
       'en-CA': [
         'The sponsor recognises the plan as the institution\u2019s own',
-        'Every fragility named is paired with an institutional move',
+        'Every fragility named is paired with an organizational move',
         'The governance liaison is confident bringing the plan to the body',
         'A clear ratification date is on the governance body\u2019s calendar',
       ],
@@ -312,7 +312,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
     failureSignals: {
       'en-CA': [
         'The plan reads as the facilitator\u2019s recommendations rather than the institution\u2019s commitments',
-        'An individual is named as a single point of stewardship with no paired institutional move',
+        'An individual is named as a single point of stewardship with no paired organizational move',
         'The plan commits the governance body to actions outside its remit',
         'The session pressures the body for an immediate ratification',
       ],
@@ -327,7 +327,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
     whatToAvoid: {
       'en-CA': [
         'Presenting the plan as the facilitator\u2019s deliverable',
-        'Naming individuals as failure points without institutional response',
+        'Naming individuals as failure points without organizational response',
         'Asking the governance body to ratify on the day it first reads the plan',
         'Treating ratification as a marketing milestone',
       ],

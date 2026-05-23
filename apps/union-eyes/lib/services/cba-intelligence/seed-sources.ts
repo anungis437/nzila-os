@@ -157,7 +157,7 @@ export const SEED_SOURCES: SeedSource[] = [
     },
   },
 
-  // ─── Tier 2: Institutional Sources ────────────────────────────────────
+  // ─── Tier 2: Organizational Sources ────────────────────────────────────
   {
     name: "CanLII Labour Decisions",
     nameEn: "CanLII Labour Decisions",

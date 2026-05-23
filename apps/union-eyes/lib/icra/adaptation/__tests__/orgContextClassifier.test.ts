@@ -78,7 +78,7 @@ describe('orgContextClassifier — known profiles', () => {
   it('classifies a large federation as federated_complex', () => {
     const p = classifyOrgContext(RAW_FEDERATION);
     expect(p.institutionalScale).toBe('federated_complex');
-    expect(p.continuityComplexity).toBe('institutional');
+    expect(p.continuityComplexity).toBe('organizational');
     expect(p.governanceComplexity).toBe('federated');
     expect(p.respondentLens).toBe('board_governance');
   });

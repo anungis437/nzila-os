@@ -1,7 +1,7 @@
 /**
- * Institutional Systems Dynamics Engine
+ * Organizational Systems Dynamics Engine
  *
- * Derives systems-level institutional behavior from cognition memory.
+ * Derives systems-level organizational behavior from cognition memory.
  * Organizational analysis only — never employee-level.
  */
 
@@ -156,7 +156,7 @@ export async function analyzeSystemsDynamics(
     coherenceIndicators,
     stabilitySignals,
     overallSystemsHealth,
-    systemsNarrative: `Systems exhibit ${pattern} with ${overallSystemsHealth > 60 ? 'strong' : 'developing'} institutional coherence.`,
+    systemsNarrative: `Systems exhibit ${pattern} with ${overallSystemsHealth > 60 ? 'strong' : 'developing'} organizational coherence.`,
     criticalFrictions: frictions.filter((f) => f.severity === 'critical' || f.severity === 'high'),
     interpretationGuidance:
       overallSystemsHealth < 30
@@ -204,7 +204,7 @@ function buildEmptyProfile(organizationId: string): SystemsDynamicsProfile {
     overallSystemsHealth: 0,
     systemsNarrative: 'Insufficient organizational data to analyze systems dynamics.',
     criticalFrictions: [],
-    interpretationGuidance: 'Begin tracking institutional dynamics by establishing baseline cognition memory.',
+    interpretationGuidance: 'Begin tracking organizational dynamics by establishing baseline cognition memory.',
     entriesAnalyzed: 0,
   };
 }

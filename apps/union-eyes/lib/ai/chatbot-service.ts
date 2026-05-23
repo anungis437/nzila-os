@@ -1,12 +1,12 @@
 /**
- * Institutional Rights Cognition Service
+ * Organizational Rights Cognition Service
  *
- * Governance-safe Q&A and institutional memory retrieval for union rights,
+ * Governance-safe Q&A and organizational memory retrieval for union rights,
  * collective agreement interpretation, and stewardship continuity support.
  * Uses retrieval-augmented generation bounded to the organization knowledge base.
  *
  * Multi-provider substrate: OpenAI, Anthropic, Google — routed via @nzila/ai-sdk.
- * Vector search with pgvector for institutional memory proximity.
+ * Vector search with pgvector for organizational memory proximity.
  *
  * All outputs are interpretive and advisory. Human stewardship is preserved at all times.
  */

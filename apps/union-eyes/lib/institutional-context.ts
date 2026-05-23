@@ -19,7 +19,7 @@ export type InstitutionalModeProfile = {
   heroFraming: string;
   methodologyFocus: string;
   rhythmEntryPoint:
-    | 'Institutional Problem'
+    | 'Organizational Problem'
     | 'Governance Risk'
     | 'Continuity Impact'
     | 'Operational Visibility'
@@ -33,7 +33,7 @@ export const institutionalModeProfiles: Record<InstitutionalMode, InstitutionalM
     concern: 'Continuity and resilience',
     continuityCallout: 'Leadership transitions should not destabilize continuity.',
     heroFraming: 'Resilience-first continuity framing for strategic leadership confidence.',
-    methodologyFocus: 'Institutional Continuity Intelligence Framework',
+    methodologyFocus: 'Organizational Continuity Intelligence Framework',
     rhythmEntryPoint: 'Continuity Impact',
   },
   governance: {
@@ -50,7 +50,7 @@ export const institutionalModeProfiles: Record<InstitutionalMode, InstitutionalM
     continuityCallout: 'Fragmentation compounds operational fragility over time.',
     heroFraming: 'Coordination-first framing for workflow stabilization and coherence.',
     methodologyFocus: 'Anti-Fragmentation Governance Model',
-    rhythmEntryPoint: 'Institutional Problem',
+    rhythmEntryPoint: 'Organizational Problem',
   },
   procurement: {
     label: 'Procurement',

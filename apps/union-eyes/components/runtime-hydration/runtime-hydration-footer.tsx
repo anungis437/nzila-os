@@ -2,12 +2,12 @@
  * RuntimeHydrationFooter — Wave 2 depth-convergence overlay.
  *
  * Additive, read-only, governance-safe runtime overlay that sits at the
- * bottom of an institutional surface and tells the reviewer:
+ * bottom of an organizational surface and tells the reviewer:
  *
- *   - WHERE the institutional state on the surface came from (provenance)
+ *   - WHERE the organizational state on the surface came from (provenance)
  *   - WHEN it occurred / which governance epoch it belongs to (chronology)
  *   - WHAT continuity context it sits inside (continuity)
- *   - WHO it relates to in the institutional structure (topology)
+ *   - WHO it relates to in the organizational structure (topology)
  *   - WHY this state is visible at all (explainability)
  *
  * It performs NO data fetching. It performs NO mutation. It performs NO
@@ -101,7 +101,7 @@ export interface RuntimeCognitionOverlayProps {
 
 export interface RuntimeExplainabilityOverlayProps {
   /**
-   * A short, governance-safe answer to "why is this institutional state
+   * A short, governance-safe answer to "why is this organizational state
    * visible?" — e.g. "Projected from IGG entity graph via continuity
    * cohort lineage; redacted by protected-semantics fence."
    */
@@ -110,7 +110,7 @@ export interface RuntimeExplainabilityOverlayProps {
   readonly reviewPosture?:
     | 'assistive · human-reviewed · review-required'
     | 'inspectable · read-only · provenance-stamped'
-    | 'institutional context · not monitoring · not scoring';
+    | 'organizational context · not monitoring · not scoring';
 }
 
 export interface RuntimeHydrationFooterProps {
@@ -263,8 +263,8 @@ export function RuntimeContinuityOverlay(props: RuntimeContinuityOverlayProps) {
         />
       </div>
       <div className="mt-2">
-        <p className="text-[11px] text-slate-500">Institutional memory gaps</p>
-        <RefList refs={props.memoryGapRefs} empty="No institutional memory gaps recorded." />
+        <p className="text-[11px] text-slate-500">Organizational memory gaps</p>
+        <RefList refs={props.memoryGapRefs} empty="No organizational memory gaps recorded." />
       </div>
     </Section>
   );
@@ -352,7 +352,7 @@ export function RuntimeCognitionOverlay(props: RuntimeCognitionOverlayProps) {
           </p>
           <CountRow label="Total" value={props.breakpointSummary.totalCount} />
           <CountRow
-            label="Bracketed by institutional memory"
+            label="Bracketed by organizational memory"
             value={props.breakpointSummary.bracketedCount}
           />
           <CountRow
@@ -376,7 +376,7 @@ export function RuntimeCognitionOverlay(props: RuntimeCognitionOverlayProps) {
       {props.memoryGapSummary && (
         <div className="mb-2">
           <p className="text-[11px] uppercase tracking-wide text-slate-500">
-            Institutional memory gaps
+            Organizational memory gaps
           </p>
           <CountRow label="Entries with gaps" value={props.memoryGapSummary.totalCount} />
           <CountRow label="Missing evidence" value={props.memoryGapSummary.missingEvidenceCount} />
@@ -421,12 +421,12 @@ export function RuntimeHydrationFooter(props: RuntimeHydrationFooterProps) {
           Runtime hydration
         </p>
         <h2 className="mt-1 text-base font-semibold text-slate-900">
-          {props.surface} · institutional substrate provenance
+          {props.surface} · organizational substrate provenance
         </h2>
         <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-600">
           The panels below disclose the substrate, chronology, continuity, and
           topology references that compose this surface. They are read-only,
-          governance-safe, and stripped of any protected institutional
+          governance-safe, and stripped of any protected organizational
           semantics by the IGG protected-fence before being projected here.
         </p>
       </header>

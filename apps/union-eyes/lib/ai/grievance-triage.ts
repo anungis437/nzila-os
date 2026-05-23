@@ -6,7 +6,7 @@
  *  - Category contextualisation (contract / harassment / safety …)
  *  - Complexity signal (routine / moderate / complex / unprecedented)
  *  - Estimated resolution trajectory
- *  - Institutional precedent proximity (similar historical grievances)
+ *  - Organizational precedent proximity (similar historical grievances)
  *
  * CONSTRAINTS:
  * - Uses @nzila/ai-sdk via the singleton `getAiClient()`

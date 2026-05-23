@@ -66,7 +66,7 @@ export type ModalityRole =
   | 'topology_pattern';
 
 /**
- * Intelligence contribution — what kind of institutional intelligence
+ * Intelligence contribution — what kind of organizational intelligence
  * this question contributes. A question declares at most two.
  */
 export type IntelligenceContribution =
@@ -255,7 +255,7 @@ export interface InstitutionalContinuityProfile {
   questionBankVersion: number;
   /** Cross-dimensional emotional insights from the insight engine. */
   insights?: ContinuityInsight[];
-  /** Recognizable institutional pattern signals. */
+  /** Recognizable organizational pattern signals. */
   continuitySignals?: ContinuitySignal[];
   /** Stewardship-layer signals with severity. */
   stewardshipSignals?: StewardshipSignal[];
@@ -305,7 +305,7 @@ export interface ConsentRecord {
 
 /**
  * Category of cross-dimensional insight detected by the insight engine.
- * Each represents a recognizable institutional tension or continuity contradiction.
+ * Each represents a recognizable organizational tension or continuity contradiction.
  */
 export type InsightCategory =
   | 'modernization_continuity_gap'
@@ -338,8 +338,8 @@ export interface ContinuityInsight {
 }
 
 /**
- * A recognizable institutional pattern derived from dimension scores.
- * Rendered as a forensic signal list — not alarming, factual and institutional.
+ * A recognizable organizational pattern derived from dimension scores.
+ * Rendered as a forensic signal list — not alarming, factual and organizational.
  */
 export interface ContinuitySignal {
   id: string;
@@ -349,7 +349,7 @@ export interface ContinuitySignal {
 
 /**
  * A stewardship-layer signal — elevates the category beyond software
- * into institutional care and obligation.
+ * into organizational care and obligation.
  */
 export interface StewardshipSignal {
   id: string;
@@ -370,7 +370,7 @@ export interface ContinuityBurdenIndex {
 }
 
 /**
- * Revenue tier identifiers — institutional naming, not SaaS vocabulary.
+ * Revenue tier identifiers — organizational naming, not SaaS vocabulary.
  */
 export type ReportTierId =
   | 'continuity_reflection'

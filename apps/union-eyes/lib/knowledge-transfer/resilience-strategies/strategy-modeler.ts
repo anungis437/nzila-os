@@ -4,7 +4,7 @@
  * Models organizational continuity strengthening pathways.
  * Generates a prioritized resilience roadmap based on current state.
  *
- * This is institutional capacity planning — not workforce management.
+ * This is organizational capacity planning — not workforce management.
  */
 
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
@@ -23,14 +23,14 @@ const STRATEGY_CATALOG: Record<StrategyType, Omit<ResilienceStrategyModel,
   documentation_foundation: {
     strategyType: 'documentation_foundation',
     name: 'Documentation Foundation',
-    description: 'Systematically document all operational processes, governance procedures, and institutional knowledge. Create a living documentation repository that survives role transitions.',
+    description: 'Systematically document all operational processes, governance procedures, and organizational knowledge. Create a living documentation repository that survives role transitions.',
     targetMaturity: 'managed',
     estimatedDurationWeeks: 16,
-    maturityProgression: 'From undocumented tribal knowledge → structured institutional documentation',
+    maturityProgression: 'From undocumented tribal knowledge → structured organizational documentation',
     milestones: [
       { week: 2, description: 'Complete knowledge inventory audit', successCriteria: 'All operational domains listed with documentation status', dimensionImpacted: 'Documentation Maturity' },
       { week: 6, description: 'Document top 10 critical processes', successCriteria: 'Written procedures for highest-risk single-source processes', dimensionImpacted: 'Documentation Maturity' },
-      { week: 12, description: 'Documentation repository live', successCriteria: 'Searchable institutional knowledge base accessible to relevant roles', dimensionImpacted: 'Documentation Maturity' },
+      { week: 12, description: 'Documentation repository live', successCriteria: 'Searchable organizational knowledge base accessible to relevant roles', dimensionImpacted: 'Documentation Maturity' },
       { week: 16, description: 'Documentation review cycle established', successCriteria: 'Quarterly review process formalized for critical documentation', dimensionImpacted: 'Continuity Preparedness' },
     ],
     enablers: ['Leadership commitment to documentation time', 'Accessible documentation platform', 'Clear documentation standards'],
@@ -108,10 +108,10 @@ const STRATEGY_CATALOG: Record<StrategyType, Omit<ResilienceStrategyModel,
   continuity_mentorship_program: {
     strategyType: 'continuity_mentorship_program',
     name: 'Continuity Mentorship Program',
-    description: 'Establish structured mentorship connecting institutional knowledge holders with emerging successors. Create explicit knowledge transfer pathways.',
+    description: 'Establish structured mentorship connecting organizational knowledge holders with emerging successors. Create explicit knowledge transfer pathways.',
     targetMaturity: 'optimized',
     estimatedDurationWeeks: 20,
-    maturityProgression: 'From informal knowledge transfer → structured institutional mentorship',
+    maturityProgression: 'From informal knowledge transfer → structured organizational mentorship',
     milestones: [
       { week: 2, description: 'Identify knowledge holders and successors', successCriteria: 'Mentorship pairs identified for all critical knowledge areas', dimensionImpacted: 'Knowledge Redundancy' },
       { week: 6, description: 'Mentorship program launched', successCriteria: 'Structured sessions scheduled for all mentor pairs', dimensionImpacted: 'Knowledge Redundancy' },
@@ -124,20 +124,20 @@ const STRATEGY_CATALOG: Record<StrategyType, Omit<ResilienceStrategyModel,
   },
   institutional_transfer_initiative: {
     strategyType: 'institutional_transfer_initiative',
-    name: 'Institutional Transfer Initiative',
-    description: 'Comprehensive program to preserve and transfer institutional knowledge before critical transitions. Creates lasting organizational memory.',
+    name: 'Organizational Transfer Initiative',
+    description: 'Comprehensive program to preserve and transfer organizational knowledge before critical transitions. Creates lasting organizational memory.',
     targetMaturity: 'optimized',
     estimatedDurationWeeks: 24,
-    maturityProgression: 'From unplanned knowledge loss → systematic institutional memory preservation',
+    maturityProgression: 'From unplanned knowledge loss → systematic organizational memory preservation',
     milestones: [
-      { week: 2, description: 'Institutional knowledge inventory', successCriteria: 'Complete map of institutional knowledge with transfer priority', dimensionImpacted: 'Documentation Maturity' },
-      { week: 8, description: 'Priority transfer sessions', successCriteria: 'Critical institutional knowledge documented and transferred', dimensionImpacted: 'Documentation Maturity' },
-      { week: 16, description: 'Knowledge repository complete', successCriteria: 'Searchable institutional memory repository live', dimensionImpacted: 'Continuity Preparedness' },
+      { week: 2, description: 'Organizational knowledge inventory', successCriteria: 'Complete map of organizational knowledge with transfer priority', dimensionImpacted: 'Documentation Maturity' },
+      { week: 8, description: 'Priority transfer sessions', successCriteria: 'Critical organizational knowledge documented and transferred', dimensionImpacted: 'Documentation Maturity' },
+      { week: 16, description: 'Knowledge repository complete', successCriteria: 'Searchable organizational memory repository live', dimensionImpacted: 'Continuity Preparedness' },
       { week: 24, description: 'Ongoing transfer culture', successCriteria: 'Knowledge transfer embedded in organizational processes', dimensionImpacted: 'Continuity Preparedness' },
     ],
     enablers: ['Dedicated program resources', 'Leadership sponsorship', 'Technology platform for knowledge preservation'],
     potentialBlockers: ['Scope complexity', 'Sustained commitment over time', 'Knowledge capture quality'],
-    kpis: ['Institutional knowledge capture rate', 'Transfer completion rate', 'Knowledge retrieval usage'],
+    kpis: ['Organizational knowledge capture rate', 'Transfer completion rate', 'Knowledge retrieval usage'],
   },
 };
 

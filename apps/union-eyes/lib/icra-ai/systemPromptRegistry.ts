@@ -23,11 +23,11 @@ const RAW_PROMPTS: ReadonlyArray<Omit<RegisteredPrompt, 'systemPrompt'> & { body
     artifactKind: 'ExecutiveSummary',
     promptId: 'executive-summary',
     version: '1.0.0',
-    body: `Draft a calm, institutional executive summary of the continuity findings.
+    body: `Draft a calm, organizational executive summary of the continuity findings.
 Synthesize the maturity bands, archetypes, and breakpoints into a short
 narrative (3–5 paragraphs) that an executive can read in under three
 minutes. Reference signal identifiers in parentheses where helpful. Do
-not score or rank. Preserve institutional dignity.`,
+not score or rank. Preserve organizational dignity.`,
   },
   {
     artifactKind: 'ContinuityNarrative',

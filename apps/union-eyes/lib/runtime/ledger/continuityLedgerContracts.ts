@@ -5,7 +5,7 @@
  *
  * Contracts for the Runtime Continuity Ledger™.
  *
- * The ledger is institutional continuity persistence — NOT blockchain, NOT
+ * The ledger is organizational continuity persistence — NOT blockchain, NOT
  * immutable-hype architecture, NOT audit-theatre, NOT crypto logic.
  *
  * Entries are append-only in the composition surface. Superseding entries

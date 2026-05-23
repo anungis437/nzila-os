@@ -3,11 +3,11 @@
  * MODULE: Governance Lineage
  * DOCTRINE_VERSION: 2.0.0
  *
- * Continuity Lineage Engine — reconstructs the institutional governance
+ * Continuity Lineage Engine — reconstructs the organizational governance
  * lineage from named precedents and governance domains. Produces:
  *   - Precedent continuity mappings
  *   - Governance Interpretation Matrix™ cells
- *   - Institutional evolution arc
+ *   - Organizational evolution arc
  *   - Lineage signals consumable by the workbook narrative
  *
  * Pure, deterministic.

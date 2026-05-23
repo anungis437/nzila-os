@@ -15,7 +15,7 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     ociBandName: 'Tribal Continuity',
     operationalPattern: 'Personality Dependent',
     summary:
-      'The organization functions through the operational memory and personal authority of a small number of individuals. Continuity is implicit, not institutional.',
+      'The organization functions through the operational memory and personal authority of a small number of individuals. Continuity is implicit, not organizational.',
     operationalCharacteristics: [
       'Critical decisions rely on the judgement of one or two long-tenured people.',
       'Operational knowledge lives in personal email, notebooks, and informal conversation.',
@@ -29,7 +29,7 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     ],
     continuityImplications: [
       'Departure or absence of a single individual can disrupt operational coherence.',
-      'Institutional history is at risk of being reinterpreted rather than referenced.',
+      'Organizational history is at risk of being reinterpreted rather than referenced.',
       'External transitions (audits, regulator visits, leadership change) require heroic effort.',
     ],
     minComposite: 0,
@@ -55,7 +55,7 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     ],
     continuityImplications: [
       'Each transition (role change, vendor change, regulator change) creates avoidable rework.',
-      'Operational memory survives at the team level but is fragile at the institutional level.',
+      'Operational memory survives at the team level but is fragile at the organizational level.',
       'Strategic continuity depends on individuals translating between fragments.',
     ],
     minComposite: 30,
@@ -81,8 +81,8 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     ],
     continuityImplications: [
       'Individual transitions can be absorbed without operational disruption.',
-      'Institutional history is referenceable, though not yet actively analyzed.',
-      'Continuity is treated as a discipline, not yet as institutional intelligence.',
+      'Organizational history is referenceable, though not yet actively analyzed.',
+      'Continuity is treated as a discipline, not yet as organizational intelligence.',
     ],
     minComposite: 55,
   },
@@ -93,7 +93,7 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
     ociBandName: 'Evidence-Backed Continuity',
     operationalPattern: 'Continuity-Aware',
     summary:
-      'The organization treats continuity as a governance discipline. Institutional memory, succession, and operational coherence are actively maintained.',
+      'The organization treats continuity as a governance discipline. Organizational memory, succession, and operational coherence are actively maintained.',
     operationalCharacteristics: [
       'Operational knowledge is captured in shared systems and reviewed periodically.',
       'Succession plans exist for critical roles and are refreshed routinely.',
@@ -106,7 +106,7 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
       'Policy evolution is tracked and explainable across leadership generations.',
     ],
     continuityImplications: [
-      'Leadership transitions preserve institutional direction.',
+      'Leadership transitions preserve organizational direction.',
       'Operational memory is durable across role changes and reorganizations.',
       'External scrutiny (audits, regulators) finds a coherent, evidence-backed posture.',
     ],
@@ -122,7 +122,7 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
       'Continuity is instrumented. The institution can see its own operational coherence, governance posture, and memory over time, and uses that visibility to inform stewardship.',
     operationalCharacteristics: [
       'Operational and governance signals are continuously observable, not retrospectively reconstructed.',
-      'Institutional memory is treated as durable infrastructure and curated as such.',
+      'Organizational memory is treated as durable infrastructure and curated as such.',
       'Transitions are anticipated, simulated, and rehearsed.',
       'Cross-organization coordination is governed by explicit, auditable agreements.',
     ],
@@ -132,7 +132,7 @@ export const MATURITY_BANDS: Record<MaturityBandId, MaturityBand> = {
       'Strategic direction is continuous across leadership generations.',
     ],
     continuityImplications: [
-      'Leadership change does not interrupt institutional direction.',
+      'Leadership change does not interrupt organizational direction.',
       'Operational memory becomes an asset that compounds across time.',
       'The institution can engage external scrutiny with calm, evidenced confidence.',
     ],

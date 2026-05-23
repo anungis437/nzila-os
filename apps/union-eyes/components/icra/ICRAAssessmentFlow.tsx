@@ -141,7 +141,7 @@ const FLOW_COPY = {
     adaptiveDeferredLabel: 'Questions set aside as not applicable',
     adaptiveSafeDefaultNote:
       'Because some organizational context fields were left unspecified, the full question bank has been preserved.',
-    adaptiveProfileScale: 'Institutional scale',
+    adaptiveProfileScale: 'Organizational scale',
     adaptiveProfileGovernance: 'Governance model',
     adaptiveProfileExposure: 'Continuity exposure',
     adaptiveContinue: 'Continue →',
@@ -175,7 +175,7 @@ const FLOW_COPY = {
     adaptiveDeferredLabel: 'Questions écartées comme non applicables',
     adaptiveSafeDefaultNote:
       "Comme certains champs du contexte organisationnel n'ont pas été précisés, la banque complète de questions a été conservée.",
-    adaptiveProfileScale: 'Taille institutionnelle',
+    adaptiveProfileScale: 'Taille organisationnelle',
     adaptiveProfileGovernance: 'Modèle de gouvernance',
     adaptiveProfileExposure: 'Exposition à la continuité',
     adaptiveContinue: 'Continuer →',
@@ -975,7 +975,7 @@ function OrgContextForm({ questions, onSubmit, copy, locale }: OrgContextFormPro
 // OCRA adaptive explanation card (doctrine 1.0.0)
 //
 // Shown after the org-context step whenever a routed bank was produced. The
-// card explains, in calm institutional language, that the assessment will
+// card explains, in calm organizational language, that the assessment will
 // emphasize the continuity dimensions most relevant to the declared
 // organizational reality, and that adaptation is based ONLY on the
 // declared organizational context (never free text, never behavioural).

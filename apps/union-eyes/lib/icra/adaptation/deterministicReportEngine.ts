@@ -159,8 +159,8 @@ export function generateDisclosurePacket(
 ): DisclosurePacket {
   const copy =
     context.locale === 'fr-CA'
-      ? 'Ce rapport est genere par un moteur deterministe fonde sur des regles versionnees et un contexte institutionnel explicable. Aucune generation libre de texte n est utilisee; une validation humaine est obligatoire avant diffusion.'
-      : 'This report is produced by a deterministic engine using versioned rules and explainable institutional context. No free-form generation is used; human validation is mandatory before distribution.';
+      ? 'Ce rapport est genere par un moteur deterministe fonde sur des regles versionnees et un contexte organisationnel explicable. Aucune generation libre de texte n est utilisee; une validation humaine est obligatoire avant diffusion.'
+      : 'This report is produced by a deterministic engine using versioned rules and explainable organizational context. No free-form generation is used; human validation is mandatory before distribution.';
 
   assertSafeDeterministicText(copy, 'disclosure.copy');
 
@@ -192,7 +192,7 @@ export function initializeReviewWorkflow(
     status: 'pending_review' as const,
     disclosure,
     pendingChecklist: Object.freeze([
-      'Verify adaptive profile rationale matches declared institutional inputs',
+      'Verify adaptive profile rationale matches declared organizational inputs',
       'Verify executive summary uses doctrine-safe continuity language',
       'Verify no identifying details are present in generated packets',
       'Approve or reject with explicit governance rationale',

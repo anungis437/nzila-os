@@ -77,7 +77,7 @@ export async function modelResilienceScenario(
       'Cross-train across all critical roles',
       'Document all governance and compliance procedures',
       'Establish vendor relationships redundancy',
-      'Build comprehensive institutional memory',
+      'Build comprehensive organizational memory',
     ],
   };
 }

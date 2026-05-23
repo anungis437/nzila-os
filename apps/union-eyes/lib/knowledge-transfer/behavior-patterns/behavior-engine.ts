@@ -1,7 +1,7 @@
 /**
- * Institutional Behavior Pattern Engine
+ * Organizational Behavior Pattern Engine
  *
- * Identifies recurring organizational continuity behaviors from institutional memory.
+ * Identifies recurring organizational continuity behaviors from organizational memory.
  * Detects governance loops, mitigation patterns, resilience cycles, and learning behaviors.
  *
  * SCOPE: Organizational patterns — NOT individual employee behavior analysis.
@@ -38,7 +38,7 @@ function detectResilienceImprovementCycle(store: MemoryStore): InstitutionalBeha
     id: randomUUID(),
     patternType: 'resilience_improvement_cycle',
     label: 'Resilience Improvement Cycle',
-    description: `The organization has shown ${improveCycles} cycle(s) of resilience recovery — declining then rebounding — indicating adaptive institutional response.`,
+    description: `The organization has shown ${improveCycles} cycle(s) of resilience recovery — declining then rebounding — indicating adaptive organizational response.`,
     evidencePoints: [`${improveCycles} resilience recovery cycle(s) detected in the continuity timeline.`],
     occurrenceCount: improveCycles,
     evidenceStrength: improveCycles >= 2 ? 'strong' : 'moderate',
@@ -119,12 +119,12 @@ function detectGovernanceStagnation(store: MemoryStore, sessionCount: number): I
       id: randomUUID(),
       patternType: 'governance_stagnation',
       label: 'Governance Stagnation',
-      description: 'No continuity governance activity has been recorded. The organization lacks institutional cognition history.',
+      description: 'No continuity governance activity has been recorded. The organization lacks organizational cognition history.',
       evidencePoints: ['No cognition memory entries found.'],
       occurrenceCount: 1,
       evidenceStrength: 'strong',
       isCurrentlyActive: true,
-      governanceImplication: 'Initiating regular governance reasoning sessions and documenting continuity assessments is recommended to begin building institutional intelligence.',
+      governanceImplication: 'Initiating regular governance reasoning sessions and documenting continuity assessments is recommended to begin building organizational intelligence.',
       firstObservedAt: null,
       mostRecentAt: null,
     };
@@ -186,7 +186,7 @@ function detectDocumentationMomentum(store: MemoryStore): InstitutionalBehaviorP
     occurrenceCount: govEntries.length,
     evidenceStrength: govEntries.length >= 5 ? 'strong' : 'moderate',
     isCurrentlyActive: true,
-    governanceImplication: 'Documentation momentum is a leading indicator of institutional governance maturity. Continue building this habit.',
+    governanceImplication: 'Documentation momentum is a leading indicator of organizational governance maturity. Continue building this habit.',
     firstObservedAt: sorted[0]?.createdAt ?? null,
     mostRecentAt: sorted[sorted.length - 1]?.createdAt ?? null,
   };
@@ -224,13 +224,13 @@ function detectResilienceFragility(store: MemoryStore): InstitutionalBehaviorPat
 }
 
 function buildNarrative(patterns: InstitutionalBehaviorPattern[], total: number): string {
-  if (patterns.length === 0) return `Insufficient institutional history to identify behavioral patterns. ${total} entries analyzed.`;
+  if (patterns.length === 0) return `Insufficient organizational history to identify behavioral patterns. ${total} entries analyzed.`;
   const dominant = patterns[0];
   const others = patterns.slice(1, 3).map((p) => p.label.toLowerCase()).join(', ');
-  return `The organization's primary institutional behavior pattern is "${dominant.label}" — ${dominant.description.split('.')[0]}.${others ? ` Secondary patterns include: ${others}.` : ''}`;
+  return `The organization's primary organizational behavior pattern is "${dominant.label}" — ${dominant.description.split('.')[0]}.${others ? ` Secondary patterns include: ${others}.` : ''}`;
 }
 
-/** Identify recurring institutional operational behavior patterns. */
+/** Identify recurring organizational operational behavior patterns. */
 export async function detectBehaviorPatterns(orgId: string): Promise<BehaviorPatternReport> {
   const [store, sessions] = await Promise.all([
     loadCognitionMemory(orgId, { limit: 100 }),
@@ -272,6 +272,6 @@ export async function detectBehaviorPatterns(orgId: string): Promise<BehaviorPat
     behaviorNarrative: buildNarrative(patterns, totalEntries),
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
-      'These patterns characterize institutional governance behaviors — not individual performance or workforce productivity. All observations are derived from organizational continuity records.',
+      'These patterns characterize organizational governance behaviors — not individual performance or workforce productivity. All observations are derived from organizational continuity records.',
   };
 }

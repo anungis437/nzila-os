@@ -174,7 +174,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Members', href: '/dashboard/members' },
       { label: 'Documents', href: '/dashboard/documents' },
       { label: 'Communications', href: '/dashboard/correspondence' },
-      { label: 'Institutional Reports', href: '/dashboard/reports' },
+      { label: 'Organizational Reports', href: '/dashboard/reports' },
       { label: 'Notifications', href: '/dashboard/notifications' },
       { label: 'Profile & Settings', href: '/dashboard/settings' },
     ];

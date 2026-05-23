@@ -14,7 +14,7 @@
  *   6. Governance Dependency Alerts
  *   7. Topic Graph (knowledge relationships)
  *
- * Design: calm institutional intelligence. Not surveillance software.
+ * Design: calm organizational intelligence. Not surveillance software.
  * Framing: organizational continuity, not individual evaluation.
  */
 

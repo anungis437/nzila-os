@@ -4,7 +4,7 @@
  * Data structures for comparing continuity intervention effectiveness.
  * Enables organizational continuity planning — not workforce optimization.
  *
- * All interventions are organizationally scoped: improving institutional
+ * All interventions are organizationally scoped: improving organizational
  * resilience, not evaluating or managing individuals.
  */
 

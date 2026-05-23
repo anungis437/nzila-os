@@ -1,5 +1,5 @@
 /**
- * Institutional Operating Rhythm Engine
+ * Organizational Operating Rhythm Engine
  */
 
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory';

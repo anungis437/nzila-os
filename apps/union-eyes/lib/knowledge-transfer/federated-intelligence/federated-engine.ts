@@ -6,7 +6,7 @@
  * without exposing cross-org data.
  *
  * CRITICAL: No cross-org data leakage.
- * Reference distributions are based on static institutional governance research,
+ * Reference distributions are based on static organizational governance research,
  * not on other organizations' live data.
  *
  * All outputs are governance-safe and privacy-preserving.
@@ -24,17 +24,17 @@ import type {
 } from './federated-models';
 
 /**
- * Reference maturity distribution based on institutional governance research.
+ * Reference maturity distribution based on organizational governance research.
  * These are calibrated reference points — not derived from any specific organization.
  */
 const REFERENCE_DISTRIBUTION: BenchmarkPercentileRange[] = [
-  { percentile: 10, scoreAtPercentile: 15, cohortLabel: 'nascent', description: 'Minimal continuity governance — early-stage institutional awareness.' },
+  { percentile: 10, scoreAtPercentile: 15, cohortLabel: 'nascent', description: 'Minimal continuity governance — early-stage organizational awareness.' },
   { percentile: 25, scoreAtPercentile: 28, cohortLabel: 'emerging', description: 'Basic continuity practices — some documentation, limited resilience.' },
   { percentile: 40, scoreAtPercentile: 42, cohortLabel: 'developing', description: 'Active continuity governance — growing documentation and process redundancy.' },
   { percentile: 50, scoreAtPercentile: 52, cohortLabel: 'developing', description: 'Median organizational continuity posture — moderate resilience with known gaps.' },
   { percentile: 60, scoreAtPercentile: 60, cohortLabel: 'established', description: 'Established continuity governance — systematic documentation and risk mitigation.' },
   { percentile: 75, scoreAtPercentile: 70, cohortLabel: 'established', description: 'Strong continuity posture — proactive governance with measurable resilience.' },
-  { percentile: 85, scoreAtPercentile: 78, cohortLabel: 'advanced', description: 'Advanced institutional continuity — diversified knowledge and governance depth.' },
+  { percentile: 85, scoreAtPercentile: 78, cohortLabel: 'advanced', description: 'Advanced organizational continuity — diversified knowledge and governance depth.' },
   { percentile: 95, scoreAtPercentile: 88, cohortLabel: 'leading', description: 'Leading continuity intelligence — adaptive governance with continuous learning.' },
 ];
 
@@ -45,7 +45,7 @@ const COHORT_BANDS = [
   { cohort: 'developing' as MaturityCohort, minScore: 41, maxScore: 55, midpointScore: 48, description: 'Active continuity governance with growing depth' },
   { cohort: 'established' as MaturityCohort, minScore: 56, maxScore: 70, midpointScore: 63, description: 'Systematic continuity governance and risk management' },
   { cohort: 'advanced' as MaturityCohort, minScore: 71, maxScore: 85, midpointScore: 78, description: 'Advanced continuity intelligence and governance depth' },
-  { cohort: 'leading' as MaturityCohort, minScore: 86, maxScore: 100, midpointScore: 93, description: 'Adaptive institutional continuity intelligence' },
+  { cohort: 'leading' as MaturityCohort, minScore: 86, maxScore: 100, midpointScore: 93, description: 'Adaptive organizational continuity intelligence' },
 ];
 
 /** Cohort average scores for dimension comparisons */
@@ -104,10 +104,10 @@ export async function generateFederatedBenchmark(
   const positionDescriptions: Record<MaturityCohort, string> = {
     nascent: 'Continuity governance infrastructure is in its early stages. Foundation-building is the priority.',
     emerging: 'Basic continuity practices are being established. Systematic documentation would accelerate progression.',
-    developing: 'Active continuity governance with growing institutional depth. Targeting established governance practices is the logical next step.',
+    developing: 'Active continuity governance with growing organizational depth. Targeting established governance practices is the logical next step.',
     established: 'Strong continuity posture with systematic governance. Investing in resilience diversification would advance maturity.',
-    advanced: 'Advanced institutional continuity intelligence. Continuous learning and adaptive governance are hallmarks of this level.',
-    leading: 'Leading continuity intelligence posture. Adaptive, evidence-grounded governance with deep institutional memory.',
+    advanced: 'Advanced organizational continuity intelligence. Continuous learning and adaptive governance are hallmarks of this level.',
+    leading: 'Leading continuity intelligence posture. Adaptive, evidence-grounded governance with deep organizational memory.',
   };
 
   const orgPosition: OrgBenchmarkPosition = {
@@ -179,6 +179,6 @@ export async function generateFederatedBenchmark(
     percentileReference: REFERENCE_DISTRIBUTION,
     cohortInsights,
     disclaimer:
-      'Benchmarking uses reference distributions based on institutional governance research. No cross-organization data is used. This is privacy-safe positioning intelligence, not competitive comparison.',
+      'Benchmarking uses reference distributions based on organizational governance research. No cross-organization data is used. This is privacy-safe positioning intelligence, not competitive comparison.',
   };
 }

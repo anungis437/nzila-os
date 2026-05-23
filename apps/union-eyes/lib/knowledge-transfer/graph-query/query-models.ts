@@ -2,7 +2,7 @@
  * Organizational Graph Query Models
  *
  * Query interface for explainable organizational reasoning.
- * Enables natural questions about institutional dependencies, fragility, and risk.
+ * Enables natural questions about organizational dependencies, fragility, and risk.
  */
 
 export type QueryType =

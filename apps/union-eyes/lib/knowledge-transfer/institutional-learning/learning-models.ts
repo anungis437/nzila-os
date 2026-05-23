@@ -1,5 +1,5 @@
 /**
- * Institutional Learning Models
+ * Organizational Learning Models
  *
  * Data structures for organizational continuity learning intelligence.
  *

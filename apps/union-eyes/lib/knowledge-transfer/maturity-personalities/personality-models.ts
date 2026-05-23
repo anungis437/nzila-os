@@ -13,7 +13,7 @@ export type GovernancePersonalityType =
   | 'distributed_resilience'     // Resilience distributed across functions
   | 'continuity_reactive'        // Responds to challenges, less proactive
   | 'governance_maturing'        // On a growth trajectory
-  | 'resilience_fragile'         // Governance gaps risk institutional stability
+  | 'resilience_fragile'         // Governance gaps risk organizational stability
   | 'continuity_progressive';    // Leading-edge, adaptive governance culture
 
 /** Governance stability rating. */

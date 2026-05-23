@@ -5,14 +5,14 @@
  *
  * Executive Continuity Brief — PDF Document Template
  *
- * React-PDF document with full editorial institutional layout.
+ * React-PDF document with full editorial organizational layout.
  * Cover → Executive Summary → Continuity Profile →
  * Governance Entropy → Memory Holders → Modernization Review →
  * Recommendations → Executive Reflection.
  *
  * Visual target: governance briefing, not software artifact.
  * Typography: Times-Roman (serif) headings, Helvetica body.
- * Palette: institutional navy, warm grays, muted editorial tones.
+ * Palette: organizational navy, warm grays, muted editorial tones.
  */
 
 import React from 'react';
@@ -515,7 +515,7 @@ function ContinuityProfilePage({ data }: { data: PdfReportData }) {
   return (
     <Page size={PAGE.size} style={S.page}>
       <Text style={S.sectionLabel}>Section 2</Text>
-      <Text style={S.sectionHeading}>Institutional Continuity Profile</Text>
+      <Text style={S.sectionHeading}>Organizational Continuity Profile</Text>
 
       <View style={S.divider} />
 
@@ -618,19 +618,19 @@ function GovernanceEntropyPage({ data }: { data: PdfReportData }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Institutional Memory & Continuity Holders
+// Organizational Memory & Continuity Holders
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MemoryHoldersPage({ data }: { data: PdfReportData }) {
   return (
     <Page size={PAGE.size} style={S.page}>
       <Text style={S.sectionLabel}>Section 4</Text>
-      <Text style={S.sectionHeading}>Institutional Memory & Continuity Holders</Text>
+      <Text style={S.sectionHeading}>Organizational Memory & Continuity Holders</Text>
 
       <View style={S.divider} />
 
       <Text style={[S.bodySmall, { marginBottom: SPACE.lg, color: COLORS.ink40 }]}>
-        This section examines where institutional memory lives, how continuity labour is distributed, and what the concentration of operational knowledge in individuals means for transition resilience and governance sustainability.
+        This section examines where organizational memory lives, how continuity labour is distributed, and what the concentration of operational knowledge in individuals means for transition resilience and governance sustainability.
       </Text>
 
       {data.narrative.memoryHolders.map((para, idx) => (
@@ -677,7 +677,7 @@ function ModernizationReviewPage({ data }: { data: PdfReportData }) {
       <View style={S.divider} />
 
       <Text style={[S.bodySmall, { marginBottom: SPACE.lg, color: COLORS.ink40 }]}>
-        This section examines the intersection of technology modernization and institutional continuity — the risks of advancing operational capability without preserving the institutional context that makes that capability purposeful.
+        This section examines the intersection of technology modernization and organizational continuity — the risks of advancing operational capability without preserving the organizational context that makes that capability purposeful.
       </Text>
 
       {data.narrative.modernizationReview.map((para, idx) => (
@@ -722,7 +722,7 @@ function RecommendationsPage({ data }: { data: PdfReportData }) {
       <View style={S.divider} />
 
       <Text style={[S.bodySmall, { marginBottom: SPACE.lg, color: COLORS.ink40 }]}>
-        These recommendations are calibrated to the specific continuity posture of this institution. They are organized by planning horizon and represent a continuity-first approach to institutional development — not digital transformation hype, not consulting boilerplate.
+        These recommendations are calibrated to the specific continuity posture of this institution. They are organized by planning horizon and represent a continuity-first approach to organizational development — not digital transformation hype, not consulting boilerplate.
       </Text>
 
       {immediate.length > 0 && (
@@ -870,9 +870,9 @@ const ADAPTIVE_COPY = {
     label: 'Interpretation Context',
     heading: 'Adaptive Interpretation Context',
     intro:
-      'This report was interpreted using the organizational context declared during the assessment process. Core continuity questions remained included to preserve comparability across institutions, while continuity interpretation reflected institutional scale, governance structure, and operational continuity exposure.',
+      'This report was interpreted using the organizational context declared during the assessment process. Core continuity questions remained included to preserve comparability across institutions, while continuity interpretation reflected organizational scale, governance structure, and operational continuity exposure.',
     fields: {
-      institutionalScale: 'Institutional scale',
+      institutionalScale: 'Organizational scale',
       governanceComplexity: 'Governance structure',
       continuityExposure: 'Continuity exposure',
       respondentLens: 'Respondent lens',
@@ -888,9 +888,9 @@ const ADAPTIVE_COPY = {
     label: "Contexte d'interprétation",
     heading: "Contexte d'interprétation adaptatif",
     intro:
-      "Ce rapport a été interprété en fonction du contexte organisationnel déclaré lors du processus d'évaluation. Les questions essentielles de continuité ont été maintenues afin de préserver la comparabilité entre institutions, tandis que l'interprétation de la continuité reflétait l'échelle institutionnelle, la structure de gouvernance et l'exposition opérationnelle à la continuité.",
+      "Ce rapport a été interprété en fonction du contexte organisationnel déclaré lors du processus d'évaluation. Les questions essentielles de continuité ont été maintenues afin de préserver la comparabilité entre institutions, tandis que l'interprétation de la continuité reflétait l'échelle organisationnelle, la structure de gouvernance et l'exposition opérationnelle à la continuité.",
     fields: {
-      institutionalScale: 'Échelle institutionnelle',
+      institutionalScale: 'Échelle organisationnelle',
       governanceComplexity: 'Structure de gouvernance',
       continuityExposure: 'Exposition à la continuité',
       respondentLens: 'Optique du répondant',
@@ -1044,7 +1044,7 @@ function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
       <View style={S.divider} />
 
       <Text style={S.bodyPara}>
-        This Executive Continuity Brief was generated from the OCI Continuity Risk Assessment (ICRA), a structured self-assessment instrument designed to surface institutional continuity posture across five core dimensions: institutional continuity, governance fragility, evidence and traceability, operational memory, and transition readiness.
+        This Executive Continuity Brief was generated from the OCI Continuity Risk Assessment (ICRA), a structured self-assessment instrument designed to surface organizational continuity posture across five core dimensions: organizational continuity, governance fragility, evidence and traceability, operational memory, and transition readiness.
       </Text>
 
       <Text style={S.bodyPara}>
@@ -1133,7 +1133,7 @@ export function ExecutiveContinuityBriefTemplate({
       title={`Executive Continuity Brief${data.institutionName ? ` — ${data.institutionName}` : ''}`}
       author="Union Eyes / Nzila OS"
       subject="OCI Continuity Risk Assessment — Executive Continuity Brief"
-      keywords="OCI, institutional continuity, governance, continuity risk"
+      keywords="OCI, organizational continuity, governance, continuity risk"
       creator="Union Eyes ICRA Platform"
       producer="Union Eyes / Nzila OS"
     >

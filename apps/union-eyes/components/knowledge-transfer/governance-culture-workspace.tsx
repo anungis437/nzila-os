@@ -28,7 +28,7 @@ export function GovernanceCultureWorkspace() {
         <ContinuityCultureEvolution />
       </div>
 
-      {/* Institutional scope notice */}
+      {/* Organizational scope notice */}
       <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
         <div className="flex gap-3">
           <div className="w-5 h-5 mt-0.5 flex-shrink-0 text-slate-400">
@@ -38,10 +38,10 @@ export function GovernanceCultureWorkspace() {
             </svg>
           </div>
           <div>
-            <div className="text-xs font-semibold text-slate-600 mb-0.5">Institutional Scope</div>
+            <div className="text-xs font-semibold text-slate-600 mb-0.5">Organizational Scope</div>
             <p className="text-xs text-slate-500">
               All intelligence on this page characterizes organizational governance culture — not individual employees.
-              Insights are derived from institutional continuity records and are intended exclusively for governance strategy and continuity planning.
+              Insights are derived from organizational continuity records and are intended exclusively for governance strategy and continuity planning.
             </p>
           </div>
         </div>

@@ -15,7 +15,7 @@ const baseInput: LongitudinalRuntimeInput = {
     direction: 'advancing',
     posture: 'continuous',
     continuityRate: 0.95,
-    reading: 'Institutional evolution is continuous.',
+    reading: 'Organizational evolution is continuous.',
   },
   maturity: {
     engineVersion: '2.0.0',

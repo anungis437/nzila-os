@@ -1,9 +1,9 @@
 /**
- * Institutional Systems Dynamics Models
+ * Organizational Systems Dynamics Models
  * 
- * Models organizations as evolving institutional systems.
+ * Models organizations as evolving organizational systems.
  * Tracks governance flow, continuity momentum, coordination friction,
- * institutional inertia, adaptation resistance, and resilience acceleration.
+ * organizational inertia, adaptation resistance, and resilience acceleration.
  * 
  * Organizational systems cognition — NOT employee-level analytics.
  */

@@ -116,7 +116,7 @@ function buildIndicators(
   if (sessionCount >= 2) {
     indicators.push({
       dimension: 'Governance Reasoning',
-      observation: `${sessionCount} reasoning sessions initiated — institutional inquiry is active.`,
+      observation: `${sessionCount} reasoning sessions initiated — organizational inquiry is active.`,
       evidence: `${sessionCount} reasoning sessions in the analysis window.`,
       valence: 'positive',
       confidence: 80,
@@ -136,7 +136,7 @@ function buildIndicators(
   if (govCount >= 2) {
     indicators.push({
       dimension: 'Decision Documentation',
-      observation: `${govCount} governance decisions captured in institutional memory.`,
+      observation: `${govCount} governance decisions captured in organizational memory.`,
       evidence: `${govCount} governance_reasoning or decision_brief entries.`,
       valence: 'positive',
       confidence: 78,
@@ -231,10 +231,10 @@ function buildEvolutionPhases(
 
 function cultureSummary(posture: ContinuityCulturePosture, health: CultureHealthSignal, score: number): string {
   const postureDesc: Record<ContinuityCulturePosture, string> = {
-    proactive_governance: 'proactively governs institutional continuity',
+    proactive_governance: 'proactively governs organizational continuity',
     responsive_governance: 'responds to continuity challenges with governance action',
     procedural_governance: 'follows structured, process-oriented governance disciplines',
-    adaptive_governance: 'adapts governance practices iteratively as institutional knowledge grows',
+    adaptive_governance: 'adapts governance practices iteratively as organizational knowledge grows',
     fragmented_governance: 'shows fragmented continuity governance with irregular engagement',
     nascent_governance: 'is building foundational continuity governance practices',
   };
@@ -243,12 +243,12 @@ function cultureSummary(posture: ContinuityCulturePosture, health: CultureHealth
     stable: 'Culture is stable with consistent governance engagement.',
     weakening: 'Culture shows signs of weakening — governance reinforcement recommended.',
     recovering: 'Culture is recovering with volatile but engagement-positive signals.',
-    insufficient_history: 'Insufficient history to characterize culture evolution — continue building institutional memory.',
+    insufficient_history: 'Insufficient history to characterize culture evolution — continue building organizational memory.',
   };
   return `This organization ${postureDesc[posture]}. ${healthDesc[health]} Governance culture score: ${score}/100.`;
 }
 
-/** Analyze organizational governance culture from institutional cognition history. */
+/** Analyze organizational governance culture from organizational cognition history. */
 export async function analyzeGovernanceCulture(orgId: string): Promise<GovernanceCultureProfile> {
   const [store, sessions] = await Promise.all([
     loadCognitionMemory(orgId, { limit: 100 }),
@@ -313,6 +313,6 @@ export async function analyzeGovernanceCulture(orgId: string): Promise<Governanc
     cultureScore,
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
-      'This profile characterizes organizational governance culture — not individual employee behavior. All insights derive from institutional continuity records and are organizationally scoped.',
+      'This profile characterizes organizational governance culture — not individual employee behavior. All insights derive from organizational continuity records and are organizationally scoped.',
   };
 }

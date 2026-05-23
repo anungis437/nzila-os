@@ -2,7 +2,7 @@
  * OCI Stabilization State Machine — deterministic FSM over the ten
  * canonical stabilization states.
  *
- * Sibling to the workflow engine. Names institutional position; does
+ * Sibling to the workflow engine. Names organizational position; does
  * not act, advance, or score. All irreversible transitions require
  * governance ratification as an external precondition expressed via
  * gates.

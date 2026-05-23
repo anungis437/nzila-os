@@ -1,7 +1,7 @@
 /**
  * Steward Continuity Cognition Drawer
  *
- * A slide-out panel that lets stewards query the institutional cognition layer,
+ * A slide-out panel that lets stewards query the organizational cognition layer,
  * review bounded interpretive outputs, and provide accept/edit/reject feedback.
  *
  * All outputs are governance-safe and require human confirmation before any action.
@@ -66,7 +66,7 @@ const ACTION_LABELS: Record<ActionType, string> = {
   draft_response: "Draft Steward Response",
   explain_clause: "Interpret Clause",
   risk_brief: "Governance Risk Brief",
-  custom_query: "Institutional Query",
+  custom_query: "Organizational Query",
 };
 
 export function StewardCopilotDrawer({

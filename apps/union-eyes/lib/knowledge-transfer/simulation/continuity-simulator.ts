@@ -10,7 +10,7 @@
  * - Exposed/exacerbated resilience weaknesses
  * - Mitigation recommendations at 30/90 day horizons
  *
- * ORGANIZATIONALLY FRAMED — not about individuals, about institutional resilience.
+ * ORGANIZATIONALLY FRAMED — not about individuals, about organizational resilience.
  */
 
 import { and, eq } from 'drizzle-orm';
@@ -276,7 +276,7 @@ function generateRecommendations(
   remediation90Day.push('Formalize all governance processes currently held informally');
   remediation90Day.push('Diversify vendor relationships for critical external dependencies');
   remediation90Day.push('Establish automated system monitoring and failover procedures');
-  remediation90Day.push('Create knowledge management system for institutional memory');
+  remediation90Day.push('Create knowledge management system for organizational memory');
 
   return { immediateActions, mitigation30Day, remediation90Day };
 }

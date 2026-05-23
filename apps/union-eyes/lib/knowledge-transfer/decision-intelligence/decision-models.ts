@@ -4,7 +4,7 @@
  * Data structures for organizational continuity planning decisions.
  * Every recommendation must expose evidence, reasoning chain, and assumptions.
  *
- * FRAMING: This is institutional continuity planning support.
+ * FRAMING: This is organizational continuity planning support.
  * Never: workforce optimization, employee evaluation, or labor analytics.
  */
 

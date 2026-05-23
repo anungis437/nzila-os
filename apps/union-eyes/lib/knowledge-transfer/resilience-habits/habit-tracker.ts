@@ -4,8 +4,8 @@
  * Measures how consistently an organization engages in continuity-strengthening behaviors.
  * Tracks review cadence, mitigation follow-through, documentation discipline, and more.
  *
- * SCOPE: Institutional habits — NOT individual performance measurement.
- * Outputs are developmental and institutional, not disciplinary.
+ * SCOPE: Organizational habits — NOT individual performance measurement.
+ * Outputs are developmental and organizational, not disciplinary.
  */
 
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
@@ -53,7 +53,7 @@ function scoreReviewCadence(
     observation: obs,
     evidence: `Derived from ${totalInteractions} activity timestamps.`,
     recommendation: score < 55
-      ? 'Establish a regular continuity review schedule — bi-weekly or monthly governance check-ins build institutional resilience habits.'
+      ? 'Establish a regular continuity review schedule — bi-weekly or monthly governance check-ins build organizational resilience habits.'
       : 'Maintain current review cadence and consider formalizing governance review schedules.',
   };
 }
@@ -99,7 +99,7 @@ function scoreDocumentationDiscipline(govCount: number, totalEntries: number, se
     observation: `${totalEntries} memory entries and ${govCount} governance decisions documented. ${sessionCount} reasoning sessions in record.`,
     evidence: `${govCount} governance_reasoning/decision_brief entries, ${totalEntries} total cognition entries, ${sessionCount} sessions.`,
     recommendation: score < 60
-      ? 'Increase governance documentation — capture decisions, assessments, and reasoning sessions to build institutional knowledge.'
+      ? 'Increase governance documentation — capture decisions, assessments, and reasoning sessions to build organizational knowledge.'
       : 'Documentation discipline is a strength — ensure records are reviewed and acted upon regularly.',
   };
 }
@@ -237,7 +237,7 @@ function resilienceTrend(scores: number[]): string {
   return 'stable';
 }
 
-/** Track organizational resilience habit formation from institutional history. */
+/** Track organizational resilience habit formation from organizational history. */
 export async function trackResilienceHabits(orgId: string): Promise<ResilienceHabitProfile> {
   const [store, sessions] = await Promise.all([
     loadCognitionMemory(orgId, { limit: 100 }),
@@ -284,7 +284,7 @@ export async function trackResilienceHabits(orgId: string): Promise<ResilienceHa
   const overallTier = habitTier(overallHabitScore);
 
   const tierDesc: Record<HabitTier, string> = {
-    strong: 'strong institutional resilience habits',
+    strong: 'strong organizational resilience habits',
     developing: 'developing resilience habits with room to grow',
     emerging: 'emerging resilience habits in early formation',
     absent: 'limited resilience habit formation — governance investment is needed',
@@ -304,6 +304,6 @@ export async function trackResilienceHabits(orgId: string): Promise<ResilienceHa
     consistencyScore,
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
-      'Resilience habits are measured at the organizational level — these are institutional continuity practices, not individual performance metrics. All insights are intended to support institutional development.',
+      'Resilience habits are measured at the organizational level — these are organizational continuity practices, not individual performance metrics. All insights are intended to support organizational development.',
   };
 }

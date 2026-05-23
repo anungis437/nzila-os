@@ -190,7 +190,7 @@ export function classifyOrgContext(
         : 'scale.workforce_band_map',
       statement: hasFederationAffiliation && scaleResolved === 'federated_complex'
         ? 'Federation affiliation with mid-sized or larger workforce promotes scale to federated_complex.'
-        : `Workforce band ${workforceBand} maps to institutional scale ${scaleResolved}.`,
+        : `Workforce band ${workforceBand} maps to organizational scale ${scaleResolved}.`,
       inputs: [
         ...(workforceBand ? [{ key: 'workforceBand', value: workforceBand }] : []),
         ...(hasFederationAffiliation

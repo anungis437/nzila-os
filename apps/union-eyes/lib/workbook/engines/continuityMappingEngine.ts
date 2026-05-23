@@ -3,7 +3,7 @@
  * MODULE: Continuity Landscape
  * DOCTRINE_VERSION: 2.0.0
  *
- * Continuity Mapping Engine — produces the institutional continuity
+ * Continuity Mapping Engine — produces the organizational continuity
  * landscape as a single normalized topology: stewardship density,
  * successor readiness, governance coherence, operational surface, and
  * dependency concentration. Combines five-axis topology, operational
@@ -160,7 +160,7 @@ function synthesizeSignals(
       severity: dependencyAxis.value >= 0.7 ? 'critical' : 'warning',
       category: 'single_carrier_dependency_concentration',
       statement:
-        'A significant share of institutional dependencies concentrate on a small number of carriers.',
+        'A significant share of organizational dependencies concentrate on a small number of carriers.',
       evidence: { axisId: dependencyAxis.axisId, value: dependencyAxis.value },
     });
   }

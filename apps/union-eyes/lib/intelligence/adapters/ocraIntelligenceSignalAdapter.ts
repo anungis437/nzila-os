@@ -3,7 +3,7 @@
  * MODULE: intelligence/adapters/ocraIntelligenceSignalAdapter
  * DOCTRINE: OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md §7 + §8 (aggregate-safe)
  *
- * Emits an aggregation-safe signal envelope for Product 5 (Institutional
+ * Emits an aggregation-safe signal envelope for Product 5 (Organizational
  * Intelligence). The intelligence layer aggregates these across many
  * institutions, so the payload must be:
  *

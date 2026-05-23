@@ -39,9 +39,9 @@ const GOVERNANCE_WORKSHOP: FollowupRecommendation = {
 const CONTINUITY_REVIEW: FollowupRecommendation = {
   id: 'rec.continuity_review',
   kind: 'continuity_review',
-  title: 'Institutional Continuity Review',
+  title: 'Organizational Continuity Review',
   description:
-    'A structured review of institutional memory, governance visibility, and transition posture, producing a calm, evidenced briefing for leadership.',
+    'A structured review of organizational memory, governance visibility, and transition posture, producing a calm, evidenced briefing for leadership.',
   ctaLabel: 'Request a review',
   ctaHref: '/contact?topic=continuity-review',
 };

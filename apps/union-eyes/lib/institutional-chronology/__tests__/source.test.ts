@@ -1,5 +1,5 @@
 /**
- * Institutional Chronology — protected-kind projection guard.
+ * Organizational Chronology — protected-kind projection guard.
  *
  * Asserts that every projected chronology collection produced by
  * `getInstitutionalChronologyView` passes the IGG projection fence.

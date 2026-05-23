@@ -1,8 +1,8 @@
 /**
- * Institutional Rights Intelligence Interface
+ * Organizational Rights Intelligence Interface
  *
  * Governance-safe Q&A surface for union rights interpretation, continuity
- * guidance, and institutional memory support. Uses retrieval-augmented
+ * guidance, and organizational memory support. Uses retrieval-augmented
  * generation bounded to the organization's knowledge base.
  *
  * All outputs are interpretive and advisory — human stewardship is always preserved.

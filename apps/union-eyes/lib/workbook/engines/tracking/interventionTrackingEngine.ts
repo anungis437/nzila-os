@@ -186,7 +186,7 @@ export function runInterventionTrackingEngine(
       signalId: `tracking:regressed_no_recovery:${id}`,
       severity: severityFor('intervention_regressed_without_recovery'),
       category: 'intervention_regressed_without_recovery',
-      statement: `Intervention ${id} has regressed without a recorded recovery proposal. Recognition of this is a method outcome; it is not institutional fault.`,
+      statement: `Intervention ${id} has regressed without a recorded recovery proposal. Recognition of this is a method outcome; it is not organizational fault.`,
       evidence: { interventionId: id },
     });
   }
@@ -205,7 +205,7 @@ export function runInterventionTrackingEngine(
     signalId: 'tracking:terminal_distribution',
     severity: severityFor('terminal_intervention_distribution'),
     category: 'terminal_intervention_distribution',
-    statement: `Terminal intervention distribution surfaced for institutional record.`,
+    statement: `Terminal intervention distribution surfaced for organizational record.`,
     evidence: tc,
   });
 

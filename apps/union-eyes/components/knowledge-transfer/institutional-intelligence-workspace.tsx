@@ -29,7 +29,7 @@ export function InstitutionalIntelligenceWorkspace() {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-slate-900">Institutional Operating Intelligence</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Organizational Operating Intelligence</h1>
         <p className="text-slate-500 text-sm">
           Adaptive governance intelligence — how your organization learns, adapts, and evolves its
           continuity posture over time.

@@ -1,11 +1,11 @@
 /**
- * Institutional readiness scoring engine.
+ * Organizational readiness scoring engine.
  *
  * Aggregates simulation ledger data into dimensional readiness scores.
  * Shadow-mode only — scores are never exposed publicly in Wave 9.
  *
  * Scores are 0–100 per dimension and do not represent certifications.
- * They are institutional maturity telemetry for internal governance planning.
+ * They are organizational maturity telemetry for internal governance planning.
  *
  * @module lib/governance-simulation/scoring
  */

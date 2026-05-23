@@ -5,7 +5,7 @@
  * webhook has already upgraded the assessment in our DB). Responsibility:
  *
  * 1. Load the assessment + maturity profile from the DB.
- * 2. Upsert a HubSpot contact carrying the institutional posture (deterministic
+ * 2. Upsert a HubSpot contact carrying the organizational posture (deterministic
  *    custom properties — no behavioural enrichment).
  * 3. Create a deal in the OCI continuity pipeline at the appropriate stage
  *    so account stewards can engage with context, not cold outreach.

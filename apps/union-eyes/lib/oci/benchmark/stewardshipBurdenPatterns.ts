@@ -1,7 +1,7 @@
 /**
  * OCI Benchmark Intelligence — stewardship-burden pattern typology.
  *
- * Each pattern names an institutional condition (not a personal one).
+ * Each pattern names an organizational condition (not a personal one).
  * Patterns are observed and held in the institution's own language; the
  * descriptions below are method-register articulations the facilitator
  * may use as a starting point.
@@ -32,7 +32,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
       'en-CA': [
         'Decisions queued informally for the chair\u2019s return',
         'Vice-chair role exists in writing but is not routinely exercised',
-        'Past absences produced visible institutional drag',
+        'Past absences produced visible organizational drag',
       ],
     },
     mappingPrompts: {
@@ -43,7 +43,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     stabilizationOptions: {
       'en-CA': [
-        'Rotating chair-shadow practice with explicit institutional standing',
+        'Rotating chair-shadow practice with explicit organizational standing',
         'Documenting interpretive precedents the chair currently carries orally',
       ],
     },
@@ -77,7 +77,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     stabilizationOptions: {
       'en-CA': [
-        'Formal substitute roster with institutional standing',
+        'Formal substitute roster with organizational standing',
         'Adjusting committee membership to broaden the quorum surface',
       ],
     },
@@ -94,7 +94,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Officer role overlap' },
     description: {
       'en-CA':
-        'A single steward holds more governance roles than institutional convention would normally support, creating concentration that the institution has accepted without naming.',
+        'A single steward holds more governance roles than organizational convention would normally support, creating concentration that the institution has accepted without naming.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -127,7 +127,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Single interpreter' },
     description: {
       'en-CA':
-        'A specific governance provision is read consistently because one steward carries the institutional reading. The institution\u2019s reading would shift if that steward were unavailable.',
+        'A specific governance provision is read consistently because one steward carries the organizational reading. The institution\u2019s reading would shift if that steward were unavailable.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -159,7 +159,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Oral interpretation record' },
     description: {
       'en-CA':
-        'Interpretation decisions are carried in oral institutional memory rather than in records the governance body holds.',
+        'Interpretation decisions are carried in oral organizational memory rather than in records the governance body holds.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -221,7 +221,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Process held by one steward' },
     description: {
       'en-CA':
-        'A core operational process is operated end-to-end by a single steward whose departure would force institutional reconstruction.',
+        'A core operational process is operated end-to-end by a single steward whose departure would force organizational reconstruction.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -252,7 +252,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Undocumented decision points' },
     description: {
       'en-CA':
-        'A process is documented at the activity level but the decision points within it are carried in stewards\u2019 institutional reading.',
+        'A process is documented at the activity level but the decision points within it are carried in stewards\u2019 organizational reading.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -282,7 +282,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Process rationale loss' },
     description: {
       'en-CA':
-        'A process is maintained out of institutional habit; the original rationale is no longer accessible to anyone who operates it today.',
+        'A process is maintained out of organizational habit; the original rationale is no longer accessible to anyone who operates it today.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -302,7 +302,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     redLines: {
       'en-CA': [
-        'Do not retire a process before its current institutional function has been verified',
+        'Do not retire a process before its current organizational function has been verified',
       ],
     },
   },
@@ -330,12 +330,12 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     stabilizationOptions: {
       'en-CA': [
         'Pair-mentorship for the next orientation cycle',
-        'Capture the mentor\u2019s orientation arc in writing for institutional records',
+        'Capture the mentor\u2019s orientation arc in writing for organizational records',
       ],
     },
     redLines: {
       'en-CA': [
-        'Do not formalise mentorship in ways that strip its institutional character',
+        'Do not formalise mentorship in ways that strip its organizational character',
       ],
     },
   },
@@ -345,7 +345,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Orientation by presence' },
     description: {
       'en-CA':
-        'New stewards absorb institutional context through co-presence rather than through any defined orientation programme.',
+        'New stewards absorb organizational context through co-presence rather than through any defined orientation programme.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -360,7 +360,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     stabilizationOptions: {
       'en-CA': [
-        'Draft a minimal institutional orientation note that complements presence-based learning',
+        'Draft a minimal organizational orientation note that complements presence-based learning',
       ],
     },
     redLines: {
@@ -407,7 +407,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'External memory holder' },
     description: {
       'en-CA':
-        'An external counterpart \u2014 supplier, partner, regulator \u2014 functions as a memory holder for institutional context the institution has not preserved internally.',
+        'An external counterpart \u2014 supplier, partner, regulator \u2014 functions as a memory holder for organizational context the institution has not preserved internally.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -422,7 +422,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     stabilizationOptions: {
       'en-CA': [
-        'Repatriate the relevant institutional memory into the institution\u2019s records',
+        'Repatriate the relevant organizational memory into the institution\u2019s records',
       ],
     },
     redLines: {
@@ -437,7 +437,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Vendor rationale keeper' },
     description: {
       'en-CA':
-        'A vendor or implementation partner holds the rationale for institutional decisions the institution itself has not recorded.',
+        'A vendor or implementation partner holds the rationale for organizational decisions the institution itself has not recorded.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -447,12 +447,12 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     mappingPrompts: {
       'en-CA': [
-        'Which institutional decisions are currently held in vendor records the institution does not retain?',
+        'Which organizational decisions are currently held in vendor records the institution does not retain?',
       ],
     },
     stabilizationOptions: {
       'en-CA': [
-        'Internal decision register that captures rationale in institutional language',
+        'Internal decision register that captures rationale in organizational language',
       ],
     },
     redLines: {
@@ -519,7 +519,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     redLines: {
       'en-CA': [
-        'Do not pause the initiative without proper institutional process',
+        'Do not pause the initiative without proper organizational process',
       ],
     },
   },
@@ -544,7 +544,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     stabilizationOptions: {
       'en-CA': [
-        'Explicit institutional acknowledgement of the additional load with named reciprocity',
+        'Explicit organizational acknowledgement of the additional load with named reciprocity',
       ],
     },
     redLines: {
@@ -612,7 +612,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     redLines: {
       'en-CA': [
-        'Do not promise compensation adjustments outside normal institutional channels',
+        'Do not promise compensation adjustments outside normal organizational channels',
       ],
     },
   },
@@ -622,7 +622,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Load on quieter voice' },
     description: {
       'en-CA':
-        'Continuity load is disproportionately carried by stewards in groups whose institutional voice is quieter, in a pattern the institution may not have intended.',
+        'Continuity load is disproportionately carried by stewards in groups whose organizational voice is quieter, in a pattern the institution may not have intended.',
     },
     institutionalIndicators: {
       'en-CA': [
@@ -632,7 +632,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     mappingPrompts: {
       'en-CA': [
-        'Where is continuity load concentrated, and does that concentration correspond to quieter institutional voice?',
+        'Where is continuity load concentrated, and does that concentration correspond to quieter organizational voice?',
       ],
     },
     stabilizationOptions: {
@@ -699,7 +699,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     },
     stabilizationOptions: {
       'en-CA': [
-        'Name the role in institutional documents the steward consents to',
+        'Name the role in organizational documents the steward consents to',
       ],
     },
     redLines: {
@@ -744,7 +744,7 @@ export const STEWARDSHIP_BURDEN_PATTERNS: readonly StewardshipBurdenPattern[] = 
     name: { 'en-CA': 'Cohort load on one person' },
     description: {
       'en-CA':
-        'A load that institutional convention would normally distribute across a cohort is, in practice, concentrated on a single steward.',
+        'A load that organizational convention would normally distribute across a cohort is, in practice, concentrated on a single steward.',
     },
     institutionalIndicators: {
       'en-CA': [

@@ -75,24 +75,24 @@ export function MethodologyVisualizationSystem() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={18}>
-          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Institutional doctrine, operationalized visually</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Organizational doctrine, operationalized visually</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.14} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
             These diagrams are designed for governance committees and executive briefings. Each framework maps
-            continuity, explainability, and trust as institutional operating infrastructure.
+            continuity, explainability, and trust as organizational operating infrastructure.
           </p>
         </ScrollReveal>
 
         <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:95ms]">
           <ScrollReveal delay={0.06} duration={0.9} distance={16}>
             <VisualPanel
-              title="Institutional Continuity Reasoning Framework"
+              title="Organizational Continuity Reasoning Framework"
               subtitle="Canonical Continuity Map"
             >
               <PillarDiagram
                 nodes={[
-                  'Institutional Memory',
+                  'Organizational Memory',
                   'Governance Continuity',
                   'Operational Coherence',
                   'Explainable Governance Review',
@@ -159,7 +159,7 @@ export function MethodologyVisualizationSystem() {
 export function ContinuityFlowSignature() {
   const flowNodes = [
     {
-      title: 'Institutional Memory',
+      title: 'Organizational Memory',
       detail: 'Knowledge remains legible through leadership transitions and policy cycles.',
     },
     {
@@ -177,11 +177,11 @@ export function ContinuityFlowSignature() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Continuity Flow as institutional language</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Continuity Flow as organizational language</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            UnionEyes uses continuity flow to communicate a simple institutional truth: governance knowledge should move safely through time, never breaking at moments of transition.
+            UnionEyes uses continuity flow to communicate a simple organizational truth: governance knowledge should move safely through time, never breaking at moments of transition.
           </p>
         </ScrollReveal>
 
@@ -221,7 +221,7 @@ export function FragmentationToCoherenceSequence() {
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            The UnionEyes modernization rhythm is calm and stabilizing: create visibility, align governance, protect continuity, and reinforce institutional trust.
+            The UnionEyes modernization rhythm is calm and stabilizing: create visibility, align governance, protect continuity, and reinforce organizational trust.
           </p>
         </ScrollReveal>
 
@@ -277,7 +277,7 @@ export function ContinuityMappingLanguage() {
     {
       title: 'Organizational Memory Map',
       detail:
-        'Shows where governance context lives, how it is retained, and how institutional context stays coordinated.',
+        'Shows where governance context lives, how it is retained, and how organizational context stays coordinated.',
     },
     {
       title: 'Governance Coherence Map',
@@ -287,7 +287,7 @@ export function ContinuityMappingLanguage() {
     {
       title: 'Continuity Lifecycle Visual',
       detail:
-        'Shows maturity progression from reactive continuity handling to resilient institutional operating doctrine.',
+        'Shows maturity progression from reactive continuity handling to resilient organizational operating doctrine.',
     },
   ];
 
@@ -296,7 +296,7 @@ export function ContinuityMappingLanguage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">A recognizable visual language for institutional resilience</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">A recognizable visual language for organizational resilience</h2>
         </ScrollReveal>
         <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
           {maps.map((map) => (
@@ -314,13 +314,13 @@ export function ContinuityMappingLanguage() {
 
 export function ConferenceStoryFlow() {
   const stages = [
-    'Institutional Fragmentation',
+    'Organizational Fragmentation',
     'Hidden Continuity Risk',
     'Governance Complexity',
     'Organizational Memory Loss',
     'Explainable Visibility',
     'Operational Coherence',
-    'Institutional Resilience',
+    'Organizational Resilience',
   ];
 
   return (

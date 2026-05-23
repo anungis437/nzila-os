@@ -1,18 +1,18 @@
 /**
- * Institutional Chronology — read-only data adapter.
+ * Organizational Chronology — read-only data adapter.
  *
- * Composes chronological views (procedural timeline, institutional
+ * Composes chronological views (procedural timeline, organizational
  * evolution, decision lineage, continuity progression, governance
- * epochs, chronology explainability) over the institutional substrate
+ * epochs, chronology explainability) over the organizational substrate
  * using only the public IGG governance builders. Every collection passes
  * through `redactProtected` and the IGG protected-kind fences before it
  * reaches this surface.
  *
- * Doctrine: this module answers "When did this institutional state
+ * Doctrine: this module answers "When did this organizational state
  * emerge, and through which preserved procedural events?" — never
  * "What activity is happening now, what should we optimize, or which
  * outcomes do we predict?". No automation, no scoring, no behavioural
- * analytics. Protected institutional semantics are filtered at the
+ * analytics. Protected organizational semantics are filtered at the
  * graph layer.
  */
 
@@ -125,11 +125,11 @@ export async function getInstitutionalChronologyView(): Promise<InstitutionalChr
   const edges = safe.edges ?? []
   const decisions = safe.decisions ?? []
 
-  // Procedural timeline — unified institutional timeline across the
+  // Procedural timeline — unified organizational timeline across the
   // redacted graph (chronologically ascending).
   const proceduralEntries = buildInstitutionalTimeline(safe)
 
-  // Institutional evolution — per-organization timelines plus the
+  // Organizational evolution — per-organization timelines plus the
   // formation timelines for each affiliation / representation edge.
   const organizationIds = new Set<string>()
   const affiliationEdgeIds: string[] = []

@@ -1,5 +1,5 @@
 /**
- * Institutional Learning Trajectory Analyzer
+ * Organizational Learning Trajectory Analyzer
  *
  * Analyzes long-term organizational continuity evolution trajectories.
  * Provides resilience forecasting, maturity milestones, and learning momentum assessment.
@@ -23,7 +23,7 @@ const MATURITY_MILESTONES: Array<{ label: string; scoreThreshold: number }> = [
   { label: 'Developing Continuity Practice', scoreThreshold: 40 },
   { label: 'Established Governance Posture', scoreThreshold: 55 },
   { label: 'Advanced Continuity Intelligence', scoreThreshold: 70 },
-  { label: 'Leading Institutional Resilience', scoreThreshold: 85 },
+  { label: 'Leading Organizational Resilience', scoreThreshold: 85 },
 ];
 
 function buildTrajectoryPoints(
@@ -140,15 +140,15 @@ function estimateMonthsToNext(
 function momentumNarrative(momentum: LearningMomentum, score: number | null): string {
   const s = score !== null ? ` (current score: ${score})` : '';
   switch (momentum) {
-    case 'accelerating': return `Institutional learning is accelerating${s} — governance engagement is producing increasingly rapid resilience improvement.`;
-    case 'steady': return `Institutional learning is progressing at a steady pace${s} — consistent governance investment is yielding predictable improvement.`;
+    case 'accelerating': return `Organizational learning is accelerating${s} — governance engagement is producing increasingly rapid resilience improvement.`;
+    case 'steady': return `Organizational learning is progressing at a steady pace${s} — consistent governance investment is yielding predictable improvement.`;
     case 'decelerating': return `Learning momentum is decelerating${s} — resilience improvement is slowing. Consider governance investment to reinvigorate the trajectory.`;
     case 'stalled': return `Learning momentum has stalled${s} — governance activity has not translated into recent resilience improvement. Review current governance practices.`;
-    case 'insufficient_data': return `Insufficient history to assess learning momentum${s}. Continue building institutional memory to enable trajectory analysis.`;
+    case 'insufficient_data': return `Insufficient history to assess learning momentum${s}. Continue building organizational memory to enable trajectory analysis.`;
   }
 }
 
-/** Analyze institutional learning trajectory for an organization. */
+/** Analyze organizational learning trajectory for an organization. */
 export async function analyzeLearningTrajectory(orgId: string): Promise<LearningTrajectoryReport> {
   const [store, sessions] = await Promise.all([
     loadCognitionMemory(orgId, { limit: 100 }),
@@ -207,6 +207,6 @@ export async function analyzeLearningTrajectory(orgId: string): Promise<Learning
     estimatedMonthsToNextMilestone: estimatedMonths,
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
-      'Learning trajectories are organizational — not individual. Forecasts are probabilistic projections based on institutional history and are intended for governance planning purposes.',
+      'Learning trajectories are organizational — not individual. Forecasts are probabilistic projections based on organizational history and are intended for governance planning purposes.',
   };
 }

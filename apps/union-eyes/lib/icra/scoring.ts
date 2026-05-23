@@ -3,7 +3,7 @@
  * DOCTRINE_VERSION: 1.0.0
  * CHANGE CLASS: Operational
  *
- * ICRA Scoring Engine — fully explainable, dimension-weighted institutional
+ * ICRA Scoring Engine — fully explainable, dimension-weighted organizational
  * maturity scoring. No opaque model. Every number is traceable to a question
  * answer and a published weight.
  *
@@ -261,10 +261,10 @@ type SectionBand = 'critical' | 'material' | 'attention'
  *
  * Grounded in the OCI/OCRA framing developed in
  * `The Continuity Gap` (Nzila OS Research Initiative, v3.0):
- * institutional memory erosion, governance entropy, continuity debt,
+ * organizational memory erosion, governance entropy, continuity debt,
  * stewardship concentration, runtime truth, and the invisible labour
  * of continuity. Each entry is intentionally narrative — not a score
- * restated as prose — so that a reader recognizes the institutional
+ * restated as prose — so that a reader recognizes the organizational
  * pattern in their own organization.
  */
 const SECTION_OBSERVATION_COPY: Record<SectionId, Record<SectionBand, string>> = {
@@ -272,13 +272,13 @@ const SECTION_OBSERVATION_COPY: Record<SectionId, Record<SectionBand, string>> =
     critical:
       'This organization does not yet hold a coherent operational picture of itself. Mission, governance scope, stakeholder map, and operational footprint are interpreted differently across roles, leaving the institution dependent on whoever happens to be in the room to define what it is.',
     material:
-      'Institutional self-understanding is partial. The organization can describe what it does, but not consistently why, for whom, or under what governance posture — and that gap quietly widens every time leadership, membership, or scope changes.',
+      'Organizational self-understanding is partial. The organization can describe what it does, but not consistently why, for whom, or under what governance posture — and that gap quietly widens every time leadership, membership, or scope changes.',
     attention:
       'Organizational context is established but not yet operationally embedded. Newcomers, transitioning leaders, and external counterparts are likely receiving subtly different versions of the same institution.',
   },
   operational_dependency: {
     critical:
-      'Core operations are held together by specific individuals rather than institutional systems. If one or two people stopped showing up next week, the organization would not so much slow down as lose the ability to explain how it functions.',
+      'Core operations are held together by specific individuals rather than organizational systems. If one or two people stopped showing up next week, the organization would not so much slow down as lose the ability to explain how it functions.',
     material:
       'Operational continuity is concentrated in a small number of long-tenured people. The institution still works — but the cost of that working is paid privately, in invisible stewardship the organization does not formally recognize.',
     attention:
@@ -294,11 +294,11 @@ const SECTION_OBSERVATION_COPY: Record<SectionId, Record<SectionBand, string>> =
   },
   institutional_memory: {
     critical:
-      'Institutional memory exists almost entirely inside people, not inside the institution. Precedent, context, and operational rationale are being held by individuals whose departure would force the organization to reconstruct itself from fragments.',
+      'Organizational memory exists almost entirely inside people, not inside the institution. Precedent, context, and operational rationale are being held by individuals whose departure would force the organization to reconstruct itself from fragments.',
     material:
       'A meaningful portion of what this institution knows is unique to specific employees. When they are unavailable, work slows or restarts — not because of incompetence elsewhere, but because the memory itself never left their head.',
     attention:
-      'Institutional memory is being captured, but unevenly. Some domains are well-documented; others rely on lived experience that has not yet been transferred, and the boundary between the two is rarely mapped.',
+      'Organizational memory is being captured, but unevenly. Some domains are well-documented; others rely on lived experience that has not yet been transferred, and the boundary between the two is rarely mapped.',
   },
   transition_readiness: {
     critical:
@@ -312,7 +312,7 @@ const SECTION_OBSERVATION_COPY: Record<SectionId, Record<SectionBand, string>> =
     critical:
       'Coordination across teams, committees, or units is improvised. Handoffs depend on personal relationships and informal channels, which means the institution operates well only when the same people stay in the same rooms.',
     material:
-      'Operational coordination works, but quietly absorbs significant friction. Information moves through people rather than through institutional structure, and that friction is paid for in time, duplication, and slow erosion of trust.',
+      'Operational coordination works, but quietly absorbs significant friction. Information moves through people rather than through organizational structure, and that friction is paid for in time, duplication, and slow erosion of trust.',
     attention:
       'Coordination is largely intact but not yet structurally guaranteed. The organization is one reorganization, secondment, or membership shift away from rediscovering where coordination really lives.',
   },
@@ -320,7 +320,7 @@ const SECTION_OBSERVATION_COPY: Record<SectionId, Record<SectionBand, string>> =
     critical:
       'When stakeholders ask how a decision was made, why an exception was granted, or what authority underlies a position, this organization cannot consistently answer. Trust here is sustained by the goodwill of those still present, not by the institution itself.',
     material:
-      'Operational trust is largely intact, but it leans on people rather than on infrastructure. Repeated moments of institutional forgetting — duplicated requests, inconsistent answers, unexplained reversals — are the early signals that trust is being slowly spent down.',
+      'Operational trust is largely intact, but it leans on people rather than on infrastructure. Repeated moments of organizational forgetting — duplicated requests, inconsistent answers, unexplained reversals — are the early signals that trust is being slowly spent down.',
     attention:
       'Decisions and operational positions are usually explainable, but the explanation often requires finding the right person. The institution has not yet made explainability a property of the system itself.',
   },
@@ -328,7 +328,7 @@ const SECTION_OBSERVATION_COPY: Record<SectionId, Record<SectionBand, string>> =
     critical:
       'The organization does not yet exercise meaningful sovereignty over its own operational evidence, records, and digital infrastructure. Critical continuity material is dispersed across third-party systems whose lifecycle the institution does not control.',
     material:
-      'Data, evidence, and operational records are partially under institutional control, but the boundaries are unclear. In a dispute, a transition, or a vendor failure, the organization would discover gaps in what it can actually retrieve and defend.',
+      'Data, evidence, and operational records are partially under organizational control, but the boundaries are unclear. In a dispute, a transition, or a vendor failure, the organization would discover gaps in what it can actually retrieve and defend.',
     attention:
       'Sovereignty and data governance are taking shape, but operational lineage and evidence integrity are not yet uniformly enforceable across systems.',
   },
@@ -383,7 +383,7 @@ function generateObservations(
       severity: 'material',
       category: 'governance',
       statement:
-        'Institutional continuity in this organization is presently carried by individuals rather than by the institution itself. Operations remain coherent only as long as specific people remain present, available, and willing to absorb the continuity work no one has been asked to formalize.',
+        'Organizational continuity in this organization is presently carried by individuals rather than by the institution itself. Operations remain coherent only as long as specific people remain present, available, and willing to absorb the continuity work no one has been asked to formalize.',
       evidence: ['institutional_continuity dimension score below 40'],
     })
   else if (ic < 60)
@@ -392,7 +392,7 @@ function generateObservations(
       severity: 'attention',
       category: 'governance',
       statement:
-        'Institutional continuity is partially structured, but still leans on a narrow base of veterans. The organization can describe its operations more cleanly than it can transfer them — and that gap is exactly where continuity debt accumulates over time.',
+        'Organizational continuity is partially structured, but still leans on a narrow base of veterans. The organization can describe its operations more cleanly than it can transfer them — and that gap is exactly where continuity debt accumulates over time.',
       evidence: [`institutional_continuity dimension score: ${ic}/100`],
     })
   if (gf < 40)
@@ -419,7 +419,7 @@ function generateObservations(
       severity: 'material',
       category: 'trust',
       statement:
-        'Institutional trust debt is a material concern. Accumulated unresolved decisions, unexplained conduct, and informal authority patterns represent a continuing draw on legitimacy — one the organization is unlikely to fully see until a transition or external review forces the ledger open.',
+        'Organizational trust debt is a material concern. Accumulated unresolved decisions, unexplained conduct, and informal authority patterns represent a continuing draw on legitimacy — one the organization is unlikely to fully see until a transition or external review forces the ledger open.',
       evidence: ['trust_debt dimension score indicates elevated accumulated risk'],
     })
   else if (td < 60)
@@ -437,7 +437,7 @@ function generateObservations(
       severity: 'material',
       category: 'memory',
       statement:
-        'Operational memory is critically thin. The most consequential institutional knowledge — judgment, precedent, escalation patterns, relational context — exists almost entirely inside specific people, which means a planned or unplanned departure forces the organization to reconstruct itself rather than continue.',
+        'Operational memory is critically thin. The most consequential organizational knowledge — judgment, precedent, escalation patterns, relational context — exists almost entirely inside specific people, which means a planned or unplanned departure forces the organization to reconstruct itself rather than continue.',
       evidence: ['operational_memory dimension score below 40'],
     })
   else if (om < 60)
@@ -446,7 +446,7 @@ function generateObservations(
       severity: 'attention',
       category: 'memory',
       statement:
-        'Operational memory is partially preserved but unevenly held. Documentation captures what happens; the why, the exceptions, and the institutional context still travel mostly through conversation with long-tenured staff.',
+        'Operational memory is partially preserved but unevenly held. Documentation captures what happens; the why, the exceptions, and the organizational context still travel mostly through conversation with long-tenured staff.',
       evidence: [`operational_memory dimension score: ${om}/100`],
     })
   if (tr < 40)
@@ -519,7 +519,7 @@ function sectionLabel(section: SectionId): string {
     organizational_context: 'Organizational Context',
     operational_dependency: 'Operational Dependency',
     governance_visibility: 'Governance Visibility',
-    institutional_memory: 'Institutional Memory',
+    institutional_memory: 'Organizational Memory',
     transition_readiness: 'Transition Readiness',
     operational_coordination: 'Operational Coordination',
     explainability_trust: 'Explainability & Trust',
@@ -546,17 +546,17 @@ function sectorPeerStatement(sector?: string): string | null {
     education:
       'Education institutions typically experience continuity risk most acutely at the seams between governance bodies, administration, and instructional staff \u2014 where decisions are made in one structure and implemented in another, often without a shared record of how the two were reconciled.',
     construction:
-      'Skilled-trades and construction organizations carry continuity primarily in the experiential judgement of senior tradespeople and field leadership \u2014 a form of institutional memory that is rarely captured in formal systems and rarely transferred deliberately.',
+      'Skilled-trades and construction organizations carry continuity primarily in the experiential judgement of senior tradespeople and field leadership \u2014 a form of organizational memory that is rarely captured in formal systems and rarely transferred deliberately.',
     transportation:
       'Transportation and logistics organizations typically depend on operational coordination that has been refined informally over years \u2014 routing decisions, vendor relationships, and exception handling that exist in the heads of dispatchers and operations leads rather than in formal procedure.',
     retail_hospitality:
       'Retail and hospitality organizations typically carry continuity through long-tenured store and venue managers whose operational judgement is rarely formalized \u2014 visible only when one of them leaves and the gap appears in service, throughput, or staff retention.',
     media_communications:
-      'Media and communications organizations typically experience continuity risk through the editorial judgement, source relationships, and brand interpretation that travel with specific people rather than being captured in institutional process.',
+      'Media and communications organizations typically experience continuity risk through the editorial judgement, source relationships, and brand interpretation that travel with specific people rather than being captured in organizational process.',
     financial_services:
       'Financial-services organizations of this scale typically carry continuity risk most consequentially in the audit and decision-evidence layer \u2014 where regulatory exposure depends on the institution being able to reconstruct why a decision was made, by whom, and against what record.',
     other:
-      'For organizations of this composition, the most consequential continuity risk usually sits in the informal stewardship layer \u2014 the people who carry institutional understanding that has not yet been named, measured, or distributed.',
+      'For organizations of this composition, the most consequential continuity risk usually sits in the informal stewardship layer \u2014 the people who carry organizational understanding that has not yet been named, measured, or distributed.',
   }
   return lines[sector] ?? null
 }

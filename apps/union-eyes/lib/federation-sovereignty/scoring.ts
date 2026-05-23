@@ -1,7 +1,7 @@
 /**
  * Sovereignty readiness scoring engine.
  *
- * Computes a composite, shadow-mode-only institutional readiness assessment
+ * Computes a composite, shadow-mode-only organizational readiness assessment
  * across four dimensions:
  *
  *   - Autonomy       (30%) — sovereignty modes across federation units

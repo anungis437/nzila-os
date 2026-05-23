@@ -7,7 +7,7 @@
  * Planner, and OCI Maturity Pathway into a single, deterministic
  * roadmap result for the workbook.
  *
- * Pure, no I/O. Tone: institutional responsibility; not transformation
+ * Pure, no I/O. Tone: organizational responsibility; not transformation
  * theatre, not optimization, not consulting boilerplate.
  */
 
@@ -154,7 +154,7 @@ function buildSignals(
       severity: lapsed >= 3 ? 'warning' : 'observation',
       category: 'lineage_lapse_concentration',
       statement:
-        'Lapsed precedents are present; reconstruct interpretation while institutional memory remains accessible.',
+        'Lapsed precedents are present; reconstruct interpretation while organizational memory remains accessible.',
       evidence: { lapsedCount: lapsed, totalGaps: input.redistribution.lineageGaps.length },
     });
   }

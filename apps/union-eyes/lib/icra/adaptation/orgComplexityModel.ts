@@ -56,7 +56,7 @@ export function resolveContinuityComplexity(
   ageBand: OrganizationAgeBand | undefined,
 ): ContinuityComplexity | undefined {
   if (!scale) return undefined;
-  if (scale === 'federated_complex') return 'institutional';
+  if (scale === 'federated_complex') return 'organizational';
   if (scale === 'large' || scale === 'enterprise') return 'high';
   if (scale === 'mid_sized') return 'elevated';
 
@@ -147,7 +147,7 @@ const COMPLEXITY_ORDER: ReadonlyArray<ContinuityComplexity> = [
   'moderate',
   'elevated',
   'high',
-  'institutional',
+  'organizational',
 ];
 
 export function complexityRank(value: ContinuityComplexity): number {

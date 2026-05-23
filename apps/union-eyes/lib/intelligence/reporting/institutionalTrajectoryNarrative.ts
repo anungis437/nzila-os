@@ -3,7 +3,7 @@
  * MODULE: OCI Intelligence Network
  * DOCTRINE_VERSION: 1.0.0
  *
- * Institutional trajectory narrative.
+ * Organizational trajectory narrative.
  *
  * Composes a reviewer-readable narrative describing the longitudinal reading
  * for a single institution. The narrative is intentionally measured: it
@@ -81,7 +81,7 @@ export function composeInstitutionalTrajectoryNarrative(
   );
 
   paragraphs.push(
-    `Onboarding survivability ${bandPhrase(reading.onboardingSurvivability)}. This reading describes whether new participants can carry institutional continuity, not whether they perform efficiently.`,
+    `Onboarding survivability ${bandPhrase(reading.onboardingSurvivability)}. This reading describes whether new participants can carry organizational continuity, not whether they perform efficiently.`,
   );
 
   paragraphs.push(
@@ -89,11 +89,11 @@ export function composeInstitutionalTrajectoryNarrative(
   );
 
   paragraphs.push(
-    `Runtime stabilisation continuity ${bandPhrase(reading.runtimeStabilizationPersistence)}, and modernization survivability ${bandPhrase(reading.modernizationSurvivability)}. Read these together to understand whether modernization is preserving institutional continuity or quietly displacing it.`,
+    `Runtime stabilisation continuity ${bandPhrase(reading.runtimeStabilizationPersistence)}, and modernization survivability ${bandPhrase(reading.modernizationSurvivability)}. Read these together to understand whether modernization is preserving organizational continuity or quietly displacing it.`,
   );
 
   paragraphs.push(
-    `Institutional resilience reads as ${reading.resilienceTrajectory.band}, based on ${reading.resilienceTrajectory.basedOn} readable trajectory points. Where the reading is not yet readable, the appropriate response is to gather further readings — not to substitute inference.`,
+    `Organizational resilience reads as ${reading.resilienceTrajectory.band}, based on ${reading.resilienceTrajectory.basedOn} readable trajectory points. Where the reading is not yet readable, the appropriate response is to gather further readings — not to substitute inference.`,
   );
 
   paragraphs.push(

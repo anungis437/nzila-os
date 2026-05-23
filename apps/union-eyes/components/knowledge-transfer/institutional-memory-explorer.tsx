@@ -1,10 +1,10 @@
 'use client';
 
 /**
- * Institutional Memory Explorer
+ * Organizational Memory Explorer
  *
  * A navigable organizational memory surface for semantic exploration
- * of institutional knowledge across all published exit interviews.
+ * of organizational knowledge across all published exit interviews.
  *
  * Features:
  *   - Semantic + keyword hybrid search
@@ -15,7 +15,7 @@
  *   - AI traceability metadata
  *
  * Designed to feel like organizational cognition — not document storage.
- * This is institutional knowledge navigation, not surveillance.
+ * This is organizational knowledge navigation, not surveillance.
  */
 
 import Link from 'next/link';
@@ -262,7 +262,7 @@ export function InstitutionalMemoryExplorer() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Institutional Memory</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Organizational Memory</h1>
           <p className="text-muted-foreground mt-1">
             Navigate and explore your organization&apos;s documented operational knowledge.
           </p>
@@ -286,7 +286,7 @@ export function InstitutionalMemoryExplorer() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search procedures, systems, vendors, governance topics…"
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-primary/40"
-              aria-label="Search institutional memory"
+              aria-label="Search organizational memory"
             />
             {query && (
               <button

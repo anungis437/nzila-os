@@ -98,6 +98,6 @@ export function readLedgerSummary(
     statement:
       entries.length === 0
         ? 'The continuity ledger is not yet readable for this institution scope.'
-        : `The continuity ledger preserves ${entries.length} institutional entr${entries.length === 1 ? 'y' : 'ies'}.`,
+        : `The continuity ledger preserves ${entries.length} organizational entr${entries.length === 1 ? 'y' : 'ies'}.`,
   };
 }

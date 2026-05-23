@@ -5,7 +5,7 @@
  * procurement-facing marketing surfaces (trust, pricing, pilot-request,
  * platform overview). Its role is *not* to convert — it is to stabilize
  * the reading register of the page so a procurement reviewer encounters
- * an institutional posture before any feature framing.
+ * an organizational posture before any feature framing.
  *
  * No CTA, no marketing energy, no productivity language. One paragraph
  * of continuity-safe operational honesty.
@@ -16,7 +16,7 @@ type InstitutionalContinuityNoteProps = {
   /** One-line operational identity of the surface, e.g. "Trust posture". */
   surface: string;
   /**
-   * Continuity-safe paragraph describing the institutional reading of the
+   * Continuity-safe paragraph describing the organizational reading of the
    * surface. Should avoid SaaS / productivity / optimization framing and
    * instead speak to continuity, reviewer-of-record, and operational
    * resilience.
@@ -31,7 +31,7 @@ export function InstitutionalContinuityNote({
   return (
     <aside
       role="note"
-      aria-label={`${surface} institutional posture`}
+      aria-label={`${surface} organizational posture`}
       className="border-y border-slate-200 bg-slate-50/70"
     >
       <div className="mx-auto flex max-w-5xl items-start gap-4 px-6 py-5">

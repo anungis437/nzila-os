@@ -1,5 +1,5 @@
 /**
- * Institutional Continuity Signal Generator
+ * Organizational Continuity Signal Generator
  *
  * Produces natural-language continuity readings from operational analytics data.
  * Integrates with the governance intelligence substrate for contextualised interpretation.

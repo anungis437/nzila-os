@@ -4,7 +4,7 @@
  * DOCTRINE_VERSION: 1.0.0
  *
  * Estimates the cost (in operational disruption units) of reconstructing
- * institutional knowledge after a continuity break. Composes carrier
+ * organizational knowledge after a continuity break. Composes carrier
  * count, criticality distribution, and successor readiness into a single
  * deterministic scalar.
  *
@@ -59,7 +59,7 @@ function classifyBurden(score: number): ReconstructionBurdenResult['band'] {
 
 function posturalStatement(score: number): string {
   if (score >= 7) {
-    return 'Reconstruction would require sustained institutional effort and an external facilitator. Continuity break before then would have multi-year operational impact.';
+    return 'Reconstruction would require sustained organizational effort and an external facilitator. Continuity break before then would have multi-year operational impact.';
   }
   if (score >= 5) {
     return 'Reconstruction would require months of internal effort and may not fully recover prior practice. Stabilization is appropriate.';

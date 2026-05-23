@@ -98,7 +98,7 @@ function DimensionRadar({
   );
 }
 
-/** Organizational resilience identity card — human-readable institutional characterization. */
+/** Organizational resilience identity card — human-readable organizational characterization. */
 export function ResilienceIdentityCard() {
   const [personality, setPersonality] = useState<GovernancePersonalityProfile | null>(null);
   const [archetype, setArchetype] = useState<ArchetypeClassificationResult | null>(null);

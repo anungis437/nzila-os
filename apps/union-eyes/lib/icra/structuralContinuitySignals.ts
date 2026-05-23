@@ -2,7 +2,7 @@
  * Structural Continuity Signals — multiple_choice modality interpretation.
  *
  * These signals translate structural-pattern answers into recognizable
- * institutional continuity topologies. They are not scores; they surface
+ * organizational continuity topologies. They are not scores; they surface
  * the pattern an institution operates under for archetype detection.
  *
  * Doctrine source: docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §5

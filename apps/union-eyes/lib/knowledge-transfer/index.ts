@@ -53,7 +53,7 @@ export * from './governance-adaptation';
 export * from './mitigation-effectiveness';
 export * from './federated-intelligence';
 
-// TIER 6: Institutional Behavior Modeling & Governance Culture Intelligence
+// TIER 6: Organizational Behavior Modeling & Governance Culture Intelligence
 export * from './governance-culture';
 export * from './behavior-patterns';
 export * from './learning-archetypes';
@@ -61,8 +61,8 @@ export * from './resilience-habits';
 export * from './maturity-personalities';
 export * from './learning-trajectories';
 
-// TIER 8: Institutional Systems Dynamics Intelligence
+// TIER 8: Organizational Systems Dynamics Intelligence
 export * from '../institutional-dynamics';
 
-// TIER 9: Multi-Domain Institutional Operating Intelligence
+// TIER 9: Multi-Domain Organizational Operating Intelligence
 export * from '../multi-domain-cognition';

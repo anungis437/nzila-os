@@ -1,5 +1,5 @@
 /**
- * OCI Institutional Discovery Framework.
+ * OCI Organizational Discovery Framework.
  *
  * Five sections that, taken together, give the institution a
  * complete landscape view during Mapping. Each section carries
@@ -91,14 +91,14 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
     title: { 'en-CA': 'Stewardship Hotspots' },
     purpose: {
       'en-CA':
-        'To identify the institutional roles in which continuity-critical knowledge is most concentrated, recognising the stewards who carry that knowledge.',
+        'To identify the organizational roles in which continuity-critical knowledge is most concentrated, recognising the stewards who carry that knowledge.',
     },
     prompts: [
       {
         promptId: 'single-keeper-roles',
         prompt: {
           'en-CA':
-            'Which institutional roles, today, are held by a single person whose departure would change how the institution operates within a quarter?',
+            'Which organizational roles, today, are held by a single person whose departure would change how the institution operates within a quarter?',
         },
         rationale: {
           'en-CA':
@@ -113,7 +113,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         },
         rationale: {
           'en-CA':
-            'Names invisible stewardship that institutional documentation does not capture.',
+            'Names invisible stewardship that organizational documentation does not capture.',
         },
       },
       {
@@ -135,7 +135,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         },
         rationale: {
           'en-CA':
-            'Surfaces unrecognised stewardship as an institutional debt to be paid before continuity work begins.',
+            'Surfaces unrecognised stewardship as an organizational debt to be paid before continuity work begins.',
         },
       },
       {
@@ -167,7 +167,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         promptId: 'quarter-horizon-failures',
         prompt: {
           'en-CA':
-            'If the next quarter brought the unavailability of three specific institutional capacities, which three would the institution regret most?',
+            'If the next quarter brought the unavailability of three specific organizational capacities, which three would the institution regret most?',
         },
         rationale: {
           'en-CA':
@@ -178,7 +178,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         promptId: 'oral-only-knowledge',
         prompt: {
           'en-CA':
-            'Which institutional knowledge today exists only in conversation, with no written record the institution can fall back on?',
+            'Which organizational knowledge today exists only in conversation, with no written record the institution can fall back on?',
         },
         rationale: {
           'en-CA':
@@ -200,7 +200,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         promptId: 'irrecoverable-records',
         prompt: {
           'en-CA':
-            'Are there institutional records whose loss would be effectively irrecoverable, and where do those records live?',
+            'Are there organizational records whose loss would be effectively irrecoverable, and where do those records live?',
         },
         rationale: {
           'en-CA':
@@ -215,7 +215,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         },
         rationale: {
           'en-CA':
-            'Surfaces fragilities outside the institutional boundary that internal continuity work may otherwise miss.',
+            'Surfaces fragilities outside the organizational boundary that internal continuity work may otherwise miss.',
         },
       },
     ],
@@ -240,14 +240,14 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         },
         rationale: {
           'en-CA':
-            'Distinguishes voluntary from imposed modernization to avoid framing all modernization as institutional choice.',
+            'Distinguishes voluntary from imposed modernization to avoid framing all modernization as organizational choice.',
         },
       },
       {
         promptId: 'modernization-stewardship',
         prompt: {
           'en-CA':
-            'When the institution modernizes a process, who carries the institutional memory of the prior process, and for how long?',
+            'When the institution modernizes a process, who carries the organizational memory of the prior process, and for how long?',
         },
         rationale: {
           'en-CA':
@@ -284,7 +284,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         },
         rationale: {
           'en-CA':
-            'Names deferral as a legitimate institutional act and surfaces the conditions under which it might be revisited.',
+            'Names deferral as a legitimate organizational act and surfaces the conditions under which it might be revisited.',
         },
       },
     ],
@@ -305,7 +305,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         promptId: 'internal-political-context',
         prompt: {
           'en-CA':
-            'Are there internal institutional sensitivities \u2014 between leadership and stewardship, between departments, between governance bodies \u2014 that the engagement should hold quietly?',
+            'Are there internal organizational sensitivities \u2014 between leadership and stewardship, between departments, between governance bodies \u2014 that the engagement should hold quietly?',
         },
         rationale: {
           'en-CA':
@@ -353,7 +353,7 @@ export const INSTITUTIONAL_DISCOVERY_FRAMEWORK: readonly DiscoveryPromptSection[
         },
         rationale: {
           'en-CA':
-            'Honours institutional silence as a legitimate posture; records the choice to not record rather than recording the matter itself.',
+            'Honours organizational silence as a legitimate posture; records the choice to not record rather than recording the matter itself.',
         },
       },
     ],

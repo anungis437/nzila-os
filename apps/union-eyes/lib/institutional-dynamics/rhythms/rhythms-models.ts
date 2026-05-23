@@ -1,7 +1,7 @@
 /**
- * Institutional Operating Rhythm Analysis
+ * Organizational Operating Rhythm Analysis
  * 
- * Understands institutional operating cadence and temporal patterns.
+ * Understands organizational operating cadence and temporal patterns.
  */
 
 export interface GovernanceReviewRhythm {

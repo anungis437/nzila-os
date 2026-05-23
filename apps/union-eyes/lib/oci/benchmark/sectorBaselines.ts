@@ -1,7 +1,7 @@
 /**
  * OCI Benchmark Intelligence — sector baselines.
  *
- * Characteristic profiles for institutional sectors the method recognises.
+ * Characteristic profiles for organizational sectors the method recognises.
  * Baselines ground a pilot in sector-appropriate expectation. They are
  * never used to rank institutions against each other.
  *
@@ -20,7 +20,7 @@ export const SECTOR_BASELINES: readonly SectorBaseline[] = [
     displayName: { 'en-CA': 'Union — collective agreement administration' },
     description: {
       'en-CA':
-        'Locals and federations whose continuity depends on the institutional reading of collective agreements, grievance precedent, and bargaining history.',
+        'Locals and federations whose continuity depends on the organizational reading of collective agreements, grievance precedent, and bargaining history.',
     },
     governanceShape: 'representative-elected',
     typicalStewardshipDensityRange: { low: 2, median: 4, high: 8 },
@@ -36,7 +36,7 @@ export const SECTOR_BASELINES: readonly SectorBaseline[] = [
     regulatoryEnvironmentProfile: 'high',
     facilitationPostureNotes: {
       'en-CA':
-        'Approach grievance precedent and bargaining memory as institutional record. Avoid characterising past chief stewards or business agents personally. Respect the elected character of the governance body throughout.',
+        'Approach grievance precedent and bargaining memory as organizational record. Avoid characterising past chief stewards or business agents personally. Respect the elected character of the governance body throughout.',
     },
   },
   {
@@ -60,7 +60,7 @@ export const SECTOR_BASELINES: readonly SectorBaseline[] = [
     regulatoryEnvironmentProfile: 'multi-jurisdictional',
     facilitationPostureNotes: {
       'en-CA':
-        'Respect fiduciary discretion. Do not enter matters under regulator review. Treat actuarial and legal counsel as institutional counterparts rather than as facilitation participants.',
+        'Respect fiduciary discretion. Do not enter matters under regulator review. Treat actuarial and legal counsel as organizational counterparts rather than as facilitation participants.',
     },
   },
   {
@@ -84,7 +84,7 @@ export const SECTOR_BASELINES: readonly SectorBaseline[] = [
     regulatoryEnvironmentProfile: 'high',
     facilitationPostureNotes: {
       'en-CA':
-        'Hold clinical safety as the institutional priority. Treat clinical leaders\u2019 time as scarce. Avoid any framing that could be received as performance evaluation.',
+        'Hold clinical safety as the organizational priority. Treat clinical leaders\u2019 time as scarce. Avoid any framing that could be received as performance evaluation.',
     },
   },
   {
@@ -92,7 +92,7 @@ export const SECTOR_BASELINES: readonly SectorBaseline[] = [
     displayName: { 'en-CA': 'Healthcare — administrative governance' },
     description: {
       'en-CA':
-        'Administrative bodies whose continuity touches operating budgets, regulatory reporting, and the interface between clinical and non-clinical institutional memory.',
+        'Administrative bodies whose continuity touches operating budgets, regulatory reporting, and the interface between clinical and non-clinical organizational memory.',
     },
     governanceShape: 'hybrid-public-mandate',
     typicalStewardshipDensityRange: { low: 4, median: 8, high: 14 },
@@ -116,7 +116,7 @@ export const SECTOR_BASELINES: readonly SectorBaseline[] = [
     displayName: { 'en-CA': 'Municipal government' },
     description: {
       'en-CA':
-        'Municipal councils, secretariat offices, and standing committees whose continuity touches bylaw history, council precedent, and inter-departmental institutional memory.',
+        'Municipal councils, secretariat offices, and standing committees whose continuity touches bylaw history, council precedent, and inter-departmental organizational memory.',
     },
     governanceShape: 'representative-elected',
     typicalStewardshipDensityRange: { low: 3, median: 6, high: 11 },
@@ -276,7 +276,7 @@ export const SECTOR_BASELINES: readonly SectorBaseline[] = [
     regulatoryEnvironmentProfile: 'moderate',
     facilitationPostureNotes: {
       'en-CA':
-        'Recognise member-democracy as the institutional ground. Do not frame founding rationale as legacy to be modernised away.',
+        'Recognise member-democracy as the organizational ground. Do not frame founding rationale as legacy to be modernised away.',
     },
   },
   {

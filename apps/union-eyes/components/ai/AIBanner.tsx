@@ -32,12 +32,12 @@ export function AIBanner({
     context === "summary"
       ? "Continuity intelligence summary"
       : context === "recommendation"
-        ? "Institutional continuity guidance"
+        ? "Organizational continuity guidance"
         : context === "analysis"
           ? "Governance-safe analysis"
           : context === "prediction"
             ? "Continuity trend reading"
-            : "Institutional intelligence output";
+            : "Organizational intelligence output";
 
   const baseClasses =
     "flex items-start gap-3 rounded-md border px-4 py-3 text-sm";
@@ -48,7 +48,7 @@ export function AIBanner({
   return (
     <div
       role="note"
-      aria-label="Institutional intelligence disclosure"
+      aria-label="Organizational intelligence disclosure"
       className={[baseClasses, colorClasses, className].filter(Boolean).join(" ")}
     >
       {showIcon && (

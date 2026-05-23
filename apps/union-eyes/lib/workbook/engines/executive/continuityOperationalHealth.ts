@@ -5,7 +5,7 @@
  *
  * Continuity operational health — a categorical composite reading
  * over the executive domains. Returns the composite band, the
- * contributing domain bands, and a calm institutional statement.
+ * contributing domain bands, and a calm organizational statement.
  *
  * Pure, deterministic.
  */

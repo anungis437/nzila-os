@@ -5,7 +5,7 @@
  * Clusters institutions into governance learning archetypes.
  *
  * SCOPE: Organizational archetypes — NOT individual employee classifications.
- * These are institutional identity patterns derived from continuity governance history.
+ * These are organizational identity patterns derived from continuity governance history.
  */
 
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
@@ -22,7 +22,7 @@ const ARCHETYPES: Record<LearningArchetypeId, LearningArchetype> = {
     id: 'proactive_stabilizer',
     name: 'Proactive Stabilizer',
     description: 'Anticipates continuity risks and governs ahead of incidents. Invests in resilience before it is required.',
-    characteristics: ['Early intervention', 'Regular resilience assessment', 'Consistent mitigation follow-through', 'Growing institutional memory'],
+    characteristics: ['Early intervention', 'Regular resilience assessment', 'Consistent mitigation follow-through', 'Growing organizational memory'],
     developmentFocus: 'Sustain proactive cadence and begin federated knowledge sharing.',
     resilienceTrajectory: 'ascending',
   },
@@ -61,15 +61,15 @@ const ARCHETYPES: Record<LearningArchetypeId, LearningArchetype> = {
   operationally_adaptive: {
     id: 'operationally_adaptive',
     name: 'Operationally Adaptive',
-    description: 'Flexibly adjusts governance practices in response to institutional learning. Iterates on continuity approaches.',
+    description: 'Flexibly adjusts governance practices in response to organizational learning. Iterates on continuity approaches.',
     characteristics: ['Adaptive governance cycles', 'Evidence-based iteration', 'Session-driven learning', 'Responsive mitigation'],
-    developmentFocus: 'Codify adaptive practices into institutional governance standards.',
+    developmentFocus: 'Codify adaptive practices into organizational governance standards.',
     resilienceTrajectory: 'ascending',
   },
   documentation_builder: {
     id: 'documentation_builder',
     name: 'Documentation Builder',
-    description: 'Focused on building institutional memory and governance documentation. Knowledge capture is the primary strength.',
+    description: 'Focused on building organizational memory and governance documentation. Knowledge capture is the primary strength.',
     characteristics: ['High memory density', 'Documentation momentum', 'Growing knowledge base', 'Formalized records'],
     developmentFocus: 'Convert documentation discipline into active resilience practice and simulation.',
     resilienceTrajectory: 'building',
@@ -77,8 +77,8 @@ const ARCHETYPES: Record<LearningArchetypeId, LearningArchetype> = {
   governance_stagnant: {
     id: 'governance_stagnant',
     name: 'Governance-Stagnant',
-    description: 'Limited governance activity has created institutional memory gaps. Continuity resilience requires investment.',
-    characteristics: ['Minimal engagement history', 'No established governance cadence', 'Low institutional memory', 'Emerging risk exposure'],
+    description: 'Limited governance activity has created organizational memory gaps. Continuity resilience requires investment.',
+    characteristics: ['Minimal engagement history', 'No established governance cadence', 'Low organizational memory', 'Emerging risk exposure'],
     developmentFocus: 'Begin governance activation — establish a regular continuity review cadence.',
     resilienceTrajectory: 'flat',
   },
@@ -173,7 +173,7 @@ function resilienceTrend(scores: number[]): { trend: string; volatility: number 
   return { trend, volatility: Math.round(std) };
 }
 
-/** Classify organizational learning archetype from institutional history. */
+/** Classify organizational learning archetype from organizational history. */
 export async function classifyLearningArchetype(orgId: string): Promise<ArchetypeClassificationResult> {
   const [store, sessions] = await Promise.all([
     loadCognitionMemory(orgId, { limit: 100 }),
@@ -234,6 +234,6 @@ export async function classifyLearningArchetype(orgId: string): Promise<Archetyp
     classificationConfidence: primary.confidence,
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
-      'These archetypes characterize organizational governance style — not individual employees. Classifications are derived from institutional continuity records and are intended for governance strategy planning.',
+      'These archetypes characterize organizational governance style — not individual employees. Classifications are derived from organizational continuity records and are intended for governance strategy planning.',
   };
 }

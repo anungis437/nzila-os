@@ -3,7 +3,7 @@
  *
  * Data structures for persistent organizational cognition memory.
  * Preserves continuity reasoning, simulation states, and governance context
- * over time — creating institutional cognition history.
+ * over time — creating organizational cognition history.
  *
  * This is organizational continuity memory — not employee records.
  */
