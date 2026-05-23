@@ -9,6 +9,7 @@ import {
   getGovernanceStatusData,
   getGovernanceTimeline,
   getProcurementSummary,
+  getGovernanceDataMode,
 } from "@/server/data";
 
 export const dynamic = "force-dynamic";
@@ -19,14 +20,21 @@ export const metadata = {
 };
 
 async function GovernanceContent() {
-  const [status, timeline, procurement] = await Promise.all([
+  const [status, timeline, procurement, dataMode] = await Promise.all([
     getGovernanceStatusData(),
     getGovernanceTimeline(),
     getProcurementSummary(),
+    getGovernanceDataMode(),
   ]);
 
   return (
     <>
+      {dataMode === 'demo' && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+          Demo mode: no live governance audit timeline events yet, so deterministic seed values are displayed.
+        </div>
+      )}
+
       {/* Current state cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <SummaryCard

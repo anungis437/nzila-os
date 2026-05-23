@@ -236,6 +236,41 @@ export async function getProcurementSummary(): Promise<ProcurementSummary> {
   return procurementSummarySchema.parse(raw) as ProcurementSummary;
 }
 
+// ── Data-mode probes ────────────────────────────────────
+//
+// Pages should surface to operators whether they are looking at LIVE
+// platform telemetry or DETERMINISTIC SEED data (used in dev / first-boot
+// before real events have flowed). These probes don't re-run the heavy
+// fetches — they just check the same underlying sources for any signal
+// of live activity.
+
+export type DataMode = "live" | "demo";
+
+export async function getIntelligenceDataMode(): Promise<DataMode> {
+  try {
+    return getAggregatedEvents({}).length > 0 ? "live" : "demo";
+  } catch {
+    return "demo";
+  }
+}
+
+export async function getGovernanceDataMode(): Promise<DataMode> {
+  try {
+    return buildGovernanceAuditTimeline({}).length > 0 ? "live" : "demo";
+  } catch {
+    return "demo";
+  }
+}
+
+export async function getAnomaliesDataMode(): Promise<DataMode> {
+  try {
+    const live = await fetchLiveCostAnomalies();
+    return live && live.length > 0 ? "live" : "demo";
+  } catch {
+    return "demo";
+  }
+}
+
 // ── Overview ────────────────────────────────────────────
 
 export async function getOverviewSummary(): Promise<OverviewSummary> {
