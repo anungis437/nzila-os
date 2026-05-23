@@ -1,18 +1,31 @@
 /**
  * Platform Admin — Automation Rule Builder
  *
- * No-code automation rules for ITSM.
- * Built-in templates from itsm-core exposed here.
+ * Lists per-org persisted automation rules, alongside read-only built-in
+ * templates from `@nzila/itsm-core` that can be cloned with one click via
+ * `NewAutomationDialog`.
  */
-import { auth } from '@nzila/platform-auth/entra/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import {
   VIP_P1_ESCALATION_TEMPLATE,
   NO_RESPONSE_ESCALATION_TEMPLATE,
   RECURRING_INCIDENT_PROBLEM_TEMPLATE,
 } from '@nzila/itsm-core'
+import { getPageOrgContext } from '../../../lib/page-org-context'
+import { listAutomationRules } from '../../../lib/automation-queries'
+import {
+  ActiveOrgBadge,
+  ForbiddenPanel,
+  OrgPickerPanel,
+} from '../../../lib/org-page-fallbacks'
+import { canWrite } from '../../../lib/org-scope-guard'
+import {
+  NewAutomationDialog,
+  RuleActions,
+} from '../_components/automation-actions'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
@@ -25,36 +38,41 @@ const BUILT_IN_TEMPLATES = [
   RECURRING_INCIDENT_PROBLEM_TEMPLATE,
 ]
 
-export default async function AutomationRulesPage() {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+export default async function AutomationRulesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orgId?: string }>
+}) {
+  const sp = await searchParams
+  const result = await getPageOrgContext(sp)
 
-  // TODO: fetch custom automation rules from DB. Until then warn loudly on
-  // every render so an empty Custom Rules list is not silently mistaken for
-  // "no rules configured" by a platform admin.
-  console.warn(
-    '[platform-admin] itsm-config/automation: customRules DB query is not wired — rendering empty list',
-  )
-  const customRules: Array<{
-    id: string
-    name: string
-    enabled: boolean
-    conditionCount: number
-    actionCount: number
-    triggeredCount: number
-  }> = []
+  if (result.status === 'unauthenticated') redirect('/sign-in')
+  if (result.status === 'no-selection') {
+    return (
+      <OrgPickerPanel
+        candidates={result.candidates}
+        returnTo="/itsm-config/automation"
+      />
+    )
+  }
+  if (result.status === 'forbidden') {
+    return <ForbiddenPanel orgId={result.orgId} />
+  }
+
+  const { orgId, orgName, orgRole } = result.context
+  const customRules = await listAutomationRules(orgId)
+  const writable = canWrite(orgRole)
 
   return (
     <div className="p-6 space-y-6">
-      <Link href="/itsm-config" className="text-gray-400 hover:text-gray-600 text-sm">
-        ← ITSM Config
-      </Link>
-
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
-        Demo mode: custom automation rules are not yet loaded from the
-        database. The built-in platform templates below are real and usable,
-        but org-specific custom rules will not appear until the DB query is
-        wired.
+      <div className="flex items-center justify-between">
+        <Link
+          href="/itsm-config"
+          className="text-gray-400 hover:text-gray-600 text-sm"
+        >
+          ← ITSM Config
+        </Link>
+        <ActiveOrgBadge orgName={orgName} orgId={orgId} orgRole={orgRole} />
       </div>
 
       <div className="flex items-center justify-between">
@@ -64,14 +82,14 @@ export default async function AutomationRulesPage() {
             Auto-assign, escalate, notify, or link tickets based on conditions.
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-          + New Rule
-        </button>
+        {writable && <NewAutomationDialog orgId={orgId} />}
       </div>
 
       {/* Built-in templates */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Platform Templates</h2>
+        <h2 className="text-sm font-semibold text-gray-700 mb-3">
+          Platform Templates
+        </h2>
         <div className="space-y-2">
           {BUILT_IN_TEMPLATES.map((template, idx) => (
             <div
@@ -79,19 +97,30 @@ export default async function AutomationRulesPage() {
               className="rounded-lg border border-gray-200 bg-white p-4 flex items-center justify-between"
             >
               <div>
-                <p className="font-medium text-gray-900 text-sm">{template.name}</p>
+                <p className="font-medium text-gray-900 text-sm">
+                  {template.name}
+                </p>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {template.conditions.length} condition{template.conditions.length !== 1 ? 's' : ''} ·{' '}
-                  {template.actions.length} action{template.actions.length !== 1 ? 's' : ''}
+                  {template.conditions.length} condition
+                  {template.conditions.length !== 1 ? 's' : ''} ·{' '}
+                  {template.actions.length} action
+                  {template.actions.length !== 1 ? 's' : ''}
+                  {template.cooldownMinutes != null
+                    ? ` · ${template.cooldownMinutes}m cooldown`
+                    : ''}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
                   Template
                 </span>
-                <button className="text-xs text-blue-600 hover:underline">
-                  Use Template
-                </button>
+                {writable && (
+                  <NewAutomationDialog
+                    orgId={orgId}
+                    initial={template}
+                    label="Use Template"
+                  />
+                )}
               </div>
             </div>
           ))}
@@ -100,7 +129,9 @@ export default async function AutomationRulesPage() {
 
       {/* Custom rules */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Custom Rules</h2>
+        <h2 className="text-sm font-semibold text-gray-700 mb-3">
+          Custom Rules ({customRules.length})
+        </h2>
         {customRules.length === 0 ? (
           <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
             <p className="text-sm text-gray-400">
@@ -115,16 +146,38 @@ export default async function AutomationRulesPage() {
                 className="rounded-lg border border-gray-200 bg-white p-4 flex items-center justify-between"
               >
                 <div>
-                  <p className="font-medium text-gray-900 text-sm">{rule.name}</p>
+                  <p className="font-medium text-gray-900 text-sm">
+                    {rule.name}
+                  </p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {rule.conditionCount} conditions · {rule.actionCount} actions · triggered {rule.triggeredCount}×
+                    {rule.conditionCount} condition
+                    {rule.conditionCount !== 1 ? 's' : ''}{' '}
+                    ({rule.conditionLogic === 'all' ? 'AND' : 'OR'}) ·{' '}
+                    {rule.actionCount} action
+                    {rule.actionCount !== 1 ? 's' : ''} · triggered{' '}
+                    {rule.triggerCount}×
+                    {rule.cooldownMinutes != null
+                      ? ` · ${rule.cooldownMinutes}m cooldown`
+                      : ''}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${rule.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      rule.enabled
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-500'
+                    }`}
+                  >
                     {rule.enabled ? 'Active' : 'Disabled'}
                   </span>
-                  <button className="text-xs text-blue-600 hover:underline">Edit</button>
+                  {writable && (
+                    <RuleActions
+                      orgId={orgId}
+                      ruleId={rule.id}
+                      enabled={rule.enabled}
+                    />
+                  )}
                 </div>
               </div>
             ))}
