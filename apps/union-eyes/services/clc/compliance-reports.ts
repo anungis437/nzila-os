@@ -32,6 +32,7 @@
 import { db } from '@/db';
 import { organizations, perCapitaRemittances } from '@/db/schema';
 import { eq, and, sql, inArray } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 // Type alias for per capita remittance records
 type _PerCapitaRemittance = typeof perCapitaRemittances.$inferSelect;
@@ -924,20 +925,35 @@ async function aggregateStatCanFinancialData(
   remittances: any[],
   _fiscalYear: number
 ): Promise<StatCanFinancialSummary> {
-  // Aggregate per-capita revenue (category 020)
+  // Aggregate per-capita revenue (category 020) — this is the only StatCan financial
+  // category currently sourced from real data. The other categories require tables/feeds
+  // that are not yet wired (dues_transactions, donations, investment_income, payroll, etc.).
+  // Until those exist, we emit 0 for the unsourced categories AND log a visible warning so
+  // any consumer of this report knows the financial summary is partial.
   const category020_perCapitaRevenue = remittances.reduce((sum, r) => sum + parseFloat(r.totalAmount), 0);
 
-  // For other categories, we would need to query additional tables
-  // For now, using placeholder values
+  logger.warn('StatCan financial summary is partial: only category 020 (per-capita revenue) is sourced from real data; categories 010/030/040/050/060/070/080 are reported as 0 because their source tables are not yet wired.', {
+    sourcedCategories: ['category020_perCapitaRevenue'],
+    unsourcedCategories: [
+      'category010_duesRevenue',
+      'category030_donations',
+      'category040_investmentIncome',
+      'category050_otherRevenue',
+      'category060_salariesWages',
+      'category070_benefits',
+      'category080_operatingExpenses',
+    ],
+  });
+
   return {
-    category010_duesRevenue: 0, // Would come from dues_transactions table
+    category010_duesRevenue: 0, // NOT TRACKED — dues_transactions table not yet wired
     category020_perCapitaRevenue,
-    category030_donations: 0, // Would come from donations table
-    category040_investmentIncome: 0, // Would come from investment_income table
-    category050_otherRevenue: 0, // Would come from other_revenue table
-    category060_salariesWages: 0, // Would come from payroll table
-    category070_benefits: 0, // Would come from benefits table
-    category080_operatingExpenses: 0, // Would come from expenses table
+    category030_donations: 0, // NOT TRACKED — donations table not yet wired
+    category040_investmentIncome: 0, // NOT TRACKED — investment_income table not yet wired
+    category050_otherRevenue: 0, // NOT TRACKED — other_revenue table not yet wired
+    category060_salariesWages: 0, // NOT TRACKED — payroll table not yet wired
+    category070_benefits: 0, // NOT TRACKED — benefits table not yet wired
+    category080_operatingExpenses: 0, // NOT TRACKED — expenses table not yet wired
     totalRevenue: category020_perCapitaRevenue,
     totalExpenses: 0,
     netIncome: category020_perCapitaRevenue
@@ -971,7 +987,7 @@ function generateStatCanComplianceNotes(remittances: any[], fiscalYear: number):
   const paidCount = remittances.filter(r => r.status === 'paid').length;
   const complianceRate = totalRemittances > 0 ? (paidCount / totalRemittances) * 100 : 0;
 
-  return `Fiscal year ${fiscalYear}-${fiscalYear + 1} per-capita remittance data aggregated from ${totalRemittances} monthly submissions. Overall compliance rate: ${complianceRate.toFixed(1)}%. All amounts reported in Canadian dollars (CAD).`;
+  return `Fiscal year ${fiscalYear}-${fiscalYear + 1} per-capita remittance data aggregated from ${totalRemittances} monthly submissions. Overall compliance rate: ${complianceRate.toFixed(1)}%. All amounts reported in Canadian dollars (CAD). NOTE: Financial summary is PARTIAL — only StatCan category 020 (per-capita revenue) is sourced from real data; categories 010 and 030-080 are reported as 0 because their source tables (dues_transactions, donations, investment_income, payroll, benefits, expenses) are not yet wired and MUST NOT be interpreted as $0 actuals.`;
 }
 
 // ============================================================================

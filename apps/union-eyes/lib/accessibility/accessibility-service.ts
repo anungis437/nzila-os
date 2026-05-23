@@ -70,7 +70,7 @@ export class AccessibilityAuditManager {
     }
     
     try {
-      // Run axe-core scan (this is a placeholder - actual implementation would use Playwright/Puppeteer)
+      // Run axe-core scan via Playwright (see runAxeScan below).
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const scanResults = await this.runAxeScan(audit[0].targetUrl) as any;
       

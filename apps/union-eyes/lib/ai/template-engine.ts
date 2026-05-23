@@ -1284,13 +1284,16 @@ class AttentionMechanismEngine {
 
   /**
    * Retrieve relevant CBA clauses
+   *
+   * INTENTIONAL STUB — CBA-clause retrieval against the clauses table is not yet wired.
+   * Returns [] so the surrounding attention-scoring pipeline still functions, but logs a
+   * warning the first time a caller relies on it so the gap is visible rather than silent.
    */
   private async retrieveCBAClauses(
-    _cbaId: string,
+    cbaId: string,
     _query: string
   ): Promise<Array<{ content: string; relevanceScore: number }>> {
-    // This would query the CBA clauses table
-    // Simplified placeholder
+    logger.warn('retrieveCBAClauses: CBA-clause retrieval is not yet implemented; returning no clauses.', { cbaId });
     return [];
   }
 
@@ -1613,18 +1616,8 @@ export class UnionEyesAIController {
     this.templateRegistry = new TemplateRegistry();
     this.attentionEngine = new AttentionMechanismEngine(this.templateRegistry);
     this.governanceLayer = new GovernanceAuditLayer(this.templateRegistry);
+    // Providers are added to the pool lazily by callers; there is no static initialization.
     this.providerPool = new Map();
-    
-    // Initialize providers
-    this.initializeProviders();
-  }
-
-  /**
-   * Initialize AI providers
-   */
-  private initializeProviders() {
-    // This would load from existing chatbot-service providers
-    // Simplified placeholder
   }
 
   /**
