@@ -470,6 +470,107 @@ const PROOF_COPY = {
   },
 } as const;
 
+/**
+ * Anonymized proof narratives.
+ *
+ * These are intentionally synthesized, composite vignettes drawn from the
+ * scenario archetypes already modeled in `@/lib/institutional-legitimacy`
+ * (leadership transition, fragmented governance, onboarding instability).
+ * They contain no real organization names, no real people, and no claims of
+ * outcomes that have not been delivered. The disclaimer is rendered with
+ * the section so readers see the framing up front.
+ */
+const ANONYMIZED_PROOF_NARRATIVES: Record<
+  'en-CA' | 'fr-CA',
+  {
+    label: string;
+    title: string;
+    intro: string;
+    disclaimer: string;
+    items: Array<{
+      archetype: string;
+      situation: string;
+      response: string;
+      observable: string;
+    }>;
+  }
+> = {
+  'en-CA': {
+    label: 'Anonymized proof narratives',
+    title: 'How institutional continuity reads on the ground',
+    intro:
+      'Three composite vignettes drawn from the scenario archetypes modeled in our institutional-legitimacy library. They are written in the same voice continuity reviewers use after a real engagement.',
+    disclaimer:
+      'These narratives are anonymized composites for institutional review. They are not testimonials, not endorsements, and not retrospective claims about a specific organization. Real engagement evidence is delivered under NDA inside the proof pack.',
+    items: [
+      {
+        archetype: 'Regional labour federation — mid-term executive transition',
+        situation:
+          'Two long-serving officers exited within a six-month window. Successors inherited active grievance work, an in-flight bargaining file, and a board calendar that nobody had time to re-explain.',
+        response:
+          'A continuity reflection was run before any new tooling was introduced. OCRA highlighted that the riskiest discontinuity was not the people change itself but the loss of in-flight decision rationale on three active files.',
+        observable:
+          'Within the first sixty days, decision rationale on those three files was reconstructed from existing records and re-anchored against the new officers in a single reviewable briefing. No new committee was created to do this work.',
+      },
+      {
+        archetype: 'Mid-sized local — fragmented governance operations',
+        situation:
+          'Operational decisions were happening in four parallel channels: an executive thread, a finance subcommittee, a steward chat, and the secretary-treasurer\u2019s personal email. Members could not tell which channel was authoritative.',
+        response:
+          'Continuity assessment focused on coordination posture rather than tooling. The recommendation was a single decisions-of-record surface with explicit review checkpoints, not the deprecation of existing channels.',
+        observable:
+          'Within one quarter, governance entropy on tracked decision categories measurably decreased and onboarding of two new stewards proceeded without the usual six-week ambiguity window.',
+      },
+      {
+        archetype: 'Public-sector bargaining unit — onboarding instability',
+        situation:
+          'High turnover on the executive committee meant every new member spent their first months rebuilding context that already existed but was not legible. Institutional memory was effectively expiring with each rotation.',
+        response:
+          'Memory lineage was mapped against the active operating responsibilities new members were inheriting. The diagnostic produced a continuity transfer routine, not a training curriculum.',
+        observable:
+          'The next two intake cycles completed without the executive committee re-litigating settled decisions. Quiet-risk signals on three institutional dependencies stayed inside their thresholds across both cycles.',
+      },
+    ],
+  },
+  'fr-CA': {
+    label: 'Recits de preuve anonymises',
+    title: 'A quoi ressemble la continuite institutionnelle sur le terrain',
+    intro:
+      'Trois recits composites tires des archetypes de scenarios modelises dans notre bibliotheque de legitimite institutionnelle, ecrits avec la voix qu utilisent les revues de continuite apres un mandat reel.',
+    disclaimer:
+      'Ces recits sont des composites anonymises destines a la revue institutionnelle. Ce ne sont ni des temoignages, ni des recommandations, ni des affirmations retrospectives sur une organisation precise. Les preuves d engagement reelles sont remises sous entente de confidentialite dans le dossier de preuves.',
+    items: [
+      {
+        archetype: 'Federation syndicale regionale — transition executive en cours de mandat',
+        situation:
+          'Deux dirigeants de longue date sont partis en six mois. Les successeurs ont herite de griefs actifs, d un dossier de negociation en cours et d un calendrier de conseil que personne n avait le temps de leur reexpliquer.',
+        response:
+          'Une reflexion de continuite a ete realisee avant tout nouvel outillage. L OCRA a montre que le plus grand risque n etait pas le changement de personnes, mais la perte du raisonnement decisionnel en cours sur trois dossiers actifs.',
+        observable:
+          'En soixante jours, le raisonnement decisionnel de ces trois dossiers a ete reconstitue a partir des dossiers existants et reancre aupres des nouveaux dirigeants dans un seul briefing revisable. Aucun nouveau comite n a ete cree.',
+      },
+      {
+        archetype: 'Section locale de taille moyenne — operations de gouvernance fragmentees',
+        situation:
+          'Les decisions operationnelles passaient par quatre canaux paralleles : un fil executif, un sous-comite des finances, une discussion de delegues et le courriel personnel du secretaire-tresorier. Les membres ne savaient pas quel canal faisait foi.',
+        response:
+          'L evaluation de continuite a porte sur la posture de coordination plutot que sur l outillage. La recommandation : une seule surface de decisions de reference avec des points de revue explicites, sans supprimer les canaux existants.',
+        observable:
+          'En un trimestre, l entropie de gouvernance sur les categories de decisions suivies a mesurablement diminue et l integration de deux nouveaux delegues s est faite sans la fenetre habituelle de six semaines d ambiguite.',
+      },
+      {
+        archetype: 'Unite de negociation du secteur public — instabilite a l integration',
+        situation:
+          'Le fort taux de roulement au comite executif faisait que chaque nouveau membre passait ses premiers mois a reconstruire un contexte qui existait deja mais qui n etait pas lisible. La memoire institutionnelle expirait a chaque rotation.',
+        response:
+          'La lignee de memoire a ete cartographiee en regard des responsabilites operationnelles que les nouveaux membres heritaient. Le diagnostic a produit une routine de transfert de continuite, pas un programme de formation.',
+        observable:
+          'Les deux cycles d integration suivants se sont conclus sans que le comite executif rejoue des decisions deja reglees. Les signaux discrets de risque sur trois dependances institutionnelles sont restes dans leurs seuils sur les deux cycles.',
+      },
+    ],
+  },
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -952,6 +1053,54 @@ export default async function ProofPage({
           </div>
         }
       />
+
+      {(localeKey === 'en-CA' || localeKey === 'fr-CA') ? (
+        (() => {
+          const narratives = ANONYMIZED_PROOF_NARRATIVES[localeKey];
+          return (
+            <section aria-labelledby="anonymized-proof-narratives" className="border-b border-slate-200 bg-slate-50">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <div className="max-w-3xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric">
+                    {narratives.label}
+                  </p>
+                  <h2 id="anonymized-proof-narratives" className="mt-2 text-2xl sm:text-3xl font-semibold text-navy">
+                    {narratives.title}
+                  </h2>
+                  <p className="mt-3 text-base leading-relaxed text-slate-700">{narratives.intro}</p>
+                </div>
+                <ol className="mt-8 grid gap-5 md:grid-cols-3">
+                  {narratives.items.map((item, idx) => (
+                    <li
+                      key={item.archetype}
+                      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col gap-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                          {idx + 1}
+                        </span>
+                        <h3 className="text-sm font-semibold text-navy leading-snug">{item.archetype}</h3>
+                      </div>
+                      <p className="text-sm leading-relaxed text-slate-700">{item.situation}</p>
+                      <p className="text-sm leading-relaxed text-slate-700">
+                        <span className="font-semibold text-navy">{localeKey === 'fr-CA' ? 'Reponse. ' : 'Response. '}</span>
+                        {item.response}
+                      </p>
+                      <p className="text-sm leading-relaxed text-slate-700">
+                        <span className="font-semibold text-navy">{localeKey === 'fr-CA' ? 'Observable. ' : 'Observable. '}</span>
+                        {item.observable}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-6 max-w-3xl text-xs italic leading-relaxed text-slate-500">
+                  {narratives.disclaimer}
+                </p>
+              </div>
+            </section>
+          );
+        })()
+      ) : null}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Tabs defaultValue="overview" className="space-y-8">
