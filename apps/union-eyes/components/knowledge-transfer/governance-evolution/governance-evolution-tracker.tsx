@@ -125,7 +125,7 @@ export function GovernanceEvolutionTracker() {
       try {
         const [learningRes, adaptiveRes, adaptationRes, effectivenessRes, benchmarkRes] =
           await Promise.all([
-            fetch('/api/exit-interviews/institutional-learning'),
+            fetch('/api/exit-interviews/organizational-learning'),
             fetch('/api/exit-interviews/adaptive-resilience'),
             fetch('/api/exit-interviews/governance-adaptation'),
             fetch('/api/exit-interviews/mitigation-effectiveness'),

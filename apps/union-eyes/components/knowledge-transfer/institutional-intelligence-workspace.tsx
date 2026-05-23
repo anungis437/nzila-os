@@ -17,7 +17,7 @@ export function InstitutionalIntelligenceWorkspace() {
   const [learningReport, setLearningReport] = useState<InstitutionalLearningReport | null>(null);
 
   useEffect(() => {
-    fetch('/api/exit-interviews/institutional-learning')
+    fetch('/api/exit-interviews/organizational-learning')
       .then((r) => r.json())
       .then((r) => {
         if (r.data) setLearningReport(r.data as InstitutionalLearningReport);

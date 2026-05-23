@@ -31,7 +31,7 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
     const fetchData = async () => {
       try {
         // Single orchestrated call — replaces the previous 11 parallel fetches.
-        const res = await fetch('/api/exit-interviews/institutional-cognition').then((r) =>
+        const res = await fetch('/api/exit-interviews/organizational-cognition').then((r) =>
           r.json(),
         );
         const byEngine: Record<string, any> = res?.data?.byEngine ?? {};
