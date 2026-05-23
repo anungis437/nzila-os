@@ -11,12 +11,12 @@ import { CONTINUITY_GAP_BLOCKS } from '@/lib/whitepaper/continuity-gap';
 
 const WHITEPAPER_COPY = {
   'en-CA': {
-    title: 'UnionEyes Whitepaper | Institutional Continuity Infrastructure',
+    title: 'UnionEyes Whitepaper | Organizational Continuity Infrastructure',
     description:
-      'The UnionEyes whitepaper outlines the institutional continuity model, governance boundaries, deterministic AI doctrine, and deployment controls for labour organizations.',
+      'The UnionEyes whitepaper outlines the Organizational Continuity Infrastructure (OCI) model, governance boundaries, deterministic AI doctrine, and deployment controls for labour organizations.',
     heading: 'UnionEyes Whitepaper',
     heroDescription:
-      'An executive technical brief on institutional continuity architecture, governed AI boundaries, and operational safeguards for labour leadership.',
+      'An executive technical brief on Organizational Continuity Infrastructure, governed AI boundaries, and operational safeguards for labour leadership.',
     subtitle: 'Whitepaper article',
     ctaLabel: 'Read Insights Library',
     ctaHref: '/insights',
@@ -34,12 +34,12 @@ const WHITEPAPER_COPY = {
       'This page renders the full extracted whitepaper text and preserves section order for direct online reading.',
   },
   'fr-CA': {
-    title: 'Livre blanc UnionEyes | Infrastructure de continuite institutionnelle',
+    title: 'Livre blanc UnionEyes | Infrastructure de continuite organisationnelle',
     description:
-      'Le livre blanc UnionEyes presente le modele de continuite institutionnelle, les limites de gouvernance, la doctrine IA deterministe et les controles de deploiement pour les organisations syndicales.',
+      'Le livre blanc UnionEyes presente le modele d Infrastructure de continuite organisationnelle (OCI), les limites de gouvernance, la doctrine IA deterministe et les controles de deploiement pour les organisations syndicales.',
     heading: 'Livre blanc UnionEyes',
     heroDescription:
-      'Une note technique executive sur l architecture de continuite institutionnelle, les limites d IA gouvernee et les garanties operationnelles pour la direction syndicale.',
+      'Une note technique executive sur l Infrastructure de continuite organisationnelle, les limites d IA gouvernee et les garanties operationnelles pour la direction syndicale.',
     subtitle: 'Article livre blanc',
     ctaLabel: 'Consulter la bibliotheque Perspectives',
     ctaHref: '/insights',
@@ -107,7 +107,7 @@ const KNOWN_TABLES: TableSpec[] = [
     rows: [
       [
         '5.2 million boomers already left the labour force',
-        'A large portion of accumulated institutional experience has already exited organizations.',
+        'A large portion of accumulated organizational experience has already exited organizations.',
       ],
       [
         '2.7 million aged 60–64 expected to exit in five years',
@@ -115,7 +115,7 @@ const KNOWN_TABLES: TableSpec[] = [
       ],
       [
         'Labour-force participation projected to decline by more than two percentage points by 2030',
-        'Fewer workers must maintain or rebuild institutional capacity.',
+        'Fewer workers must maintain or rebuild organizational capacity.',
       ],
       [
         '8.1 million Canadians aged 65+ as of July 1, 2025',
@@ -130,10 +130,10 @@ const KNOWN_TABLES: TableSpec[] = [
     columns: ['Component', 'Purpose'],
     rows: [
       ['Operational Memory', 'Preserved understanding of how the organization actually functions over time.'],
-      ['Governance Continuity', 'Preservation of governance lineage, rationale, precedent, and institutional interpretation.'],
+      ['Governance Continuity', 'Preservation of governance lineage, rationale, precedent, and organizational interpretation.'],
       ['Evidence Infrastructure', 'Operational traceability, auditability, integrity verification, and defensibility.'],
       ['Runtime Truth', 'Continuously verifiable operational state reflecting actual governance and operational conditions.'],
-      ['Institutional Intelligence', 'Accumulated organizational understanding preserved independently of specific individuals.'],
+      ['Organizational Intelligence', 'Accumulated organizational understanding preserved independently of specific individuals.'],
       ['Operational Lineage', 'Traceable evolution of workflows, decisions, governance structures, and operational assumptions.'],
       ['Continuity-Aware AI', 'AI systems designed to strengthen continuity rather than weaken it.'],
     ],
@@ -161,7 +161,7 @@ const KNOWN_TABLES: TableSpec[] = [
         'Maturity sensing',
         'maturity_select',
         'How developed continuity practices are across governance, operations, onboarding, evidence, and intelligence.',
-        'Preserves the backbone of institutional readiness assessment.',
+        'Preserves the backbone of organizational readiness assessment.',
       ],
       [
         'Confidence sensing',
@@ -184,7 +184,7 @@ const KNOWN_TABLES: TableSpec[] = [
     columns: ['Phase', 'Purpose'],
     rows: [
       ['1. Recognition', 'Assess continuity exposure, maturity, confidence, and structural transfer patterns.'],
-      ['2. Mapping', 'Map operational lineage, governance structures, escalation pathways, and institutional precedent.'],
+      ['2. Mapping', 'Map operational lineage, governance structures, escalation pathways, and organizational precedent.'],
       ['3. Stabilization', 'Reduce continuity debt, clarify governance, redistribute stewardship burden, and strengthen onboarding survivability.'],
       ['4. Runtime Infrastructure', 'Embed governance memory, continuity events, runtime truth, and operational traceability.'],
       ['5. Intelligence Network', 'Develop longitudinal continuity intelligence, sector baselines, and ethical survivability insights.'],
@@ -209,7 +209,7 @@ const KNOWN_TABLES: TableSpec[] = [
       [
         'Public sector',
         'Policy memory, program rationale, turnover, political transitions, public accountability.',
-        'Governance memory runtime, defensible lineage, institutional knowledge preservation.',
+        'Governance memory runtime, defensible lineage, organizational knowledge preservation.',
       ],
       [
         'SMEs and family enterprises',
@@ -218,7 +218,7 @@ const KNOWN_TABLES: TableSpec[] = [
       ],
       [
         'Federated organizations',
-        'Distributed governance, regional inconsistency, institutional memory fragmentation.',
+        'Distributed governance, regional inconsistency, organizational memory fragmentation.',
         'Interoperable continuity infrastructure and sector-specific baselines.',
       ],
     ],
@@ -235,7 +235,7 @@ const KNOWN_TABLES: TableSpec[] = [
       ],
       [
         'Will continuity systems increase bureaucracy?',
-        'Poorly implemented systems can. Continuity-native systems should reduce duplicated reconstruction labour, fragmented governance effort, onboarding degradation, and dependency on institutional veterans.',
+        'Poorly implemented systems can. Continuity-native systems should reduce duplicated reconstruction labour, fragmented governance effort, onboarding degradation, and dependency on organizational veterans.',
       ],
       [
         'Can continuity become too rigid?',
@@ -247,7 +247,7 @@ const KNOWN_TABLES: TableSpec[] = [
       ],
       [
         'Is succession planning enough?',
-        'No. Succession planning identifies who follows. Institutional continuity preserves what must survive.',
+        'No. Succession planning identifies who follows. Organizational continuity preserves what must survive.',
       ],
     ],
   },
@@ -288,7 +288,7 @@ const MAJOR_HEADING_PATTERNS = [
 
 const CURATED_SECTION_IMAGERY: Array<{ match: RegExp; imageUrl: string; alt: string }> = [
   { match: /^Executive Summary$/i, imageUrl: heroImagery.insights, alt: 'Executive continuity summary' },
-  { match: /^Section\s+1\b/i, imageUrl: heroImagery.institutionalContinuity, alt: 'Institutional continuity risk landscape' },
+  { match: /^Section\s+1\b/i, imageUrl: heroImagery.institutionalContinuity, alt: 'Organizational continuity risk landscape' },
   { match: /^Section\s+2\b/i, imageUrl: 'https://images.unsplash.com/photo-1576765608866-5b51046452be?w=1920&q=80&auto=format', alt: 'Aging hands \u2014 Canada\u2019s demographic continuity shock' },
   { match: /^Section\s+3\b/i, imageUrl: heroImagery.organizationalMemoryModule, alt: 'Organizational memory and tacit knowledge transfer' },
   { match: /^Section\s+4\b/i, imageUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1920&q=80&auto=format', alt: 'Financial cost of organizational unpreparedness' },
@@ -300,15 +300,15 @@ const CURATED_SECTION_IMAGERY: Array<{ match: RegExp; imageUrl: string; alt: str
   { match: /^Section\s+10\b/i, imageUrl: heroImagery.explainableIntelligenceModule, alt: 'AI and continuity-aware governance' },
   { match: /^Section\s+11\b/i, imageUrl: heroImagery.conventions, alt: 'Adoption roadmap and operating frameworks' },
   { match: /^Section\s+12\b/i, imageUrl: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920&q=80&auto=format', alt: 'Skilled trades and cross-sector continuity implications' },
-  { match: /^Section\s+13\b/i, imageUrl: heroImagery.executiveIntelligenceModule, alt: 'Future-state continuity-native institution' },
+  { match: /^Section\s+13\b/i, imageUrl: heroImagery.executiveIntelligenceModule, alt: 'Future-state continuity-native organization' },
   { match: /^Objections and Counterarguments$/i, imageUrl: 'https://images.unsplash.com/photo-1548111150-1bd19bdc123f?w=1920&q=80&auto=format', alt: 'Objections and counterarguments \u2014 protest and labour strike' },
   { match: /^Legal and Regulatory Alignment$/i, imageUrl: 'https://images.unsplash.com/photo-1645570990200-2701a49d45ca?w=1920&q=80&auto=format', alt: 'Legal and regulatory alignment \u2014 gavel and judicial defensibility' },
   { match: /^Category Declaration$/i, imageUrl: 'https://images.unsplash.com/photo-1718118778991-e06559e62510?w=1920&q=80&auto=format', alt: 'Category declaration \u2014 Canadian flag planted at the summit' },
-  { match: /^Final Thesis$/i, imageUrl: 'https://images.unsplash.com/photo-1661967927841-6c96df5ead5e?w=1920&q=80&auto=format', alt: 'Final thesis \u2014 library of preserved institutional knowledge' },
+  { match: /^Final Thesis$/i, imageUrl: 'https://images.unsplash.com/photo-1661967927841-6c96df5ead5e?w=1920&q=80&auto=format', alt: 'Final thesis \u2014 library of preserved organizational knowledge' },
 ];
 
 const OPENING_PARAGRAPH =
-  'Modern institutions are losing continuity faster than they preserve it. The organizations that endure the next decade will not simply digitize faster; they will preserve institutional memory, governance lineage, operational trust, and continuity intelligence more deliberately. "Continuity is not nostalgia for how organizations used to work. It is the discipline of ensuring that what matters can survive the people who carried it."';
+  'Modern organizations are losing continuity faster than they preserve it. The organizations that endure the next decade will not simply digitize faster; they will preserve organizational memory, governance lineage, operational trust, and continuity intelligence more deliberately. "Continuity is not nostalgia for how organizations used to work. It is the discipline of ensuring that what matters can survive the people who carried it."';
 
 function slugify(value: string): string {
   return value
@@ -1092,7 +1092,7 @@ export default async function LocaleWhitepaperPage({
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-4xl font-semibold text-white drop-shadow-md sm:text-5xl lg:text-6xl">The Continuity Gap</h1>
-            <p className="mt-4 text-base text-white/90 drop-shadow sm:text-lg lg:text-xl">Organizational Memory, Institutional Resilience, and the Future of Operational Trust</p>
+            <p className="mt-4 text-base text-white/90 drop-shadow sm:text-lg lg:text-xl">Organizational Memory, Organizational Resilience, and the Future of Operational Trust</p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center print:hidden">
               {/* PDF download temporarily hidden — see PrintPdfButton */}

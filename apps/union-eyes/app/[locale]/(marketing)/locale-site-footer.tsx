@@ -7,8 +7,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, usePathname } from 'next/navigation';
-import { ArrowRight, Linkedin, Instagram, Mail } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { Linkedin, Instagram, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 const NZILA_URL = process.env.NEXT_PUBLIC_NZILA_URL ?? 'https://nzilaventures.com';
@@ -20,47 +20,15 @@ const socials = [
 ];
 
 const FOOTER_COPY: Record<string, {
-  ctaHeading: string;
-  ctaBody: string;
   pilotBadge: string;
   canadaBadge: string;
 }> = {
-  'en-CA': {
-    ctaHeading: 'Ready to lead with institutional clarity?',
-    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an Executive Briefing.',
-    pilotBadge: 'Pilot Active',
-    canadaBadge: 'Canadian Made',
-  },
-  en: {
-    ctaHeading: 'Ready to lead with institutional clarity?',
-    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an Executive Briefing.',
-    pilotBadge: 'Pilot Active',
-    canadaBadge: 'Canadian Made',
-  },
-  'fr-CA': {
-    ctaHeading: 'Prêt à diriger avec clarté institutionnelle?',
-    ctaBody: 'Découvrez comment UnionEyes transforme le travail syndical, la gouvernance et la continuité en un dossier institutionnel défendable. Demandez une séance d\'orientation institutionnelle.',
-    pilotBadge: 'Pilote actif',
-    canadaBadge: 'Fait au Canada',
-  },
-  fr: {
-    ctaHeading: 'Prêt à diriger avec clarté institutionnelle?',
-    ctaBody: 'Découvrez comment UnionEyes transforme le travail syndical, la gouvernance et la continuité en un dossier institutionnel défendable. Demandez une séance d\'orientation institutionnelle.',
-    pilotBadge: 'Pilote actif',
-    canadaBadge: 'Fait au Canada',
-  },
-  it: {
-    ctaHeading: 'Pronto a guidare con chiarezza istituzionale?',
-    ctaBody: 'Scopri come UnionEyes trasforma casework, governance e continuità in un registro istituzionale difendibile. Richiedi un Executive Briefing.',
-    pilotBadge: 'Pilota attivo',
-    canadaBadge: 'Creato in Canada',
-  },
-  pt: {
-    ctaHeading: 'Pronto para liderar com clareza institucional?',
-    ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical, a governança e a continuidade em um registro institucional defensável. Solicite um Executive Briefing.',
-    pilotBadge: 'Piloto ativo',
-    canadaBadge: 'Feito no Canadá',
-  },
+  'en-CA': { pilotBadge: 'Pilot Active', canadaBadge: 'Canadian Made' },
+  en: { pilotBadge: 'Pilot Active', canadaBadge: 'Canadian Made' },
+  'fr-CA': { pilotBadge: 'Pilote actif', canadaBadge: 'Fait au Canada' },
+  fr: { pilotBadge: 'Pilote actif', canadaBadge: 'Fait au Canada' },
+  it: { pilotBadge: 'Pilota attivo', canadaBadge: 'Creato in Canada' },
+  pt: { pilotBadge: 'Piloto ativo', canadaBadge: 'Feito no Canadá' },
 };
 
 
@@ -69,11 +37,9 @@ export default function LocaleSiteFooter() {
   const t  = useTranslations('marketing.footer');
   const tNav = useTranslations('marketing.nav.platformItems');
   const params = useParams();
-  const pathname = usePathname() ?? '';
   const locale = (params?.locale as string) || 'en-CA';
   const copy = FOOTER_COPY[locale] ?? FOOTER_COPY['en-CA'];
   const whitepaperLabel = locale === 'fr-CA' ? 'Livre blanc' : 'Whitepaper';
-  const hidePreFooterCta = /\/(pilot-request|contact)(\/|$)/.test(pathname);
 
   const footerLinks = {
     [t('platform') as string]: [
@@ -121,35 +87,8 @@ export default function LocaleSiteFooter() {
 
   return (
     <footer className="bg-navy text-gray-200">
-      {/* Pre-footer CTA — hidden on intake surfaces (pilot-request, contact) where it would bounce in place */}
-      {!hidePreFooterCta && (
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="text-center lg:text-left max-w-xl">
-            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              {copy.ctaHeading}
-            </h3>
-            <p className="text-gray-200 text-lg">
-              {copy.ctaBody}
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              href={`/${locale}/pilot-request`}
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-electric text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/25 btn-press text-sm"
-            >
-              {t('pilotRequest')} <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href={`/${locale}/contact`}
-              className="inline-flex items-center justify-center px-7 py-3.5 bg-white/10 text-white font-semibold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-sm btn-press"
-            >
-              {t('contact')}
-            </Link>
-          </div>
-        </div>
-      </div>
-      )}
+      {/* Pre-footer CTA removed — primary CTA above the footer covers this surface;
+          the duplicate "Ready to lead with…" banner was creating redundancy. */}
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

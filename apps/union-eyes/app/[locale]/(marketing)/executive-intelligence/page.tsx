@@ -261,7 +261,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Ready to lead with institutional clarity?
+            Ready to lead with organizational clarity?
           </h2>
           <p className="text-white/70 mb-8">
             {locale === 'fr-CA'

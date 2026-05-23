@@ -55,12 +55,12 @@ const PAGE_COPY = {
       { icon: ShieldCheck, title: 'Labour-safe intelligence, guaranteed', desc: 'All intelligence is explainable, human-reviewed, and built on anti-surveillance principles.' },
     ],
     quote:
-      '"The institutional knowledge that walks out the door when a president retires is irreplaceable — unless it was captured, governed, and made accessible. That\'s what continuity intelligence means."',
-    quoteAttribution: 'UnionEyes Institutional Continuity Principle',
+      '"The organizational knowledge that walks out the door when a president retires is irreplaceable — unless it was captured, governed, and made accessible. That\'s what continuity intelligence means."',
+    quoteAttribution: 'UnionEyes Organizational Continuity Principle',
     relatedHeading: 'Explore related solutions',
-    finalHeading: 'Ready to lead with institutional clarity?',
+    finalHeading: 'Ready to lead with organizational clarity?',
     finalBody: 'Request an Executive Briefing tailored to your executive leadership context.',
-    primaryCta: 'Request an Institutional Briefing',
+    primaryCta: 'Request an Organizational Briefing',
     finalCta: 'Request an Executive Briefing',
   },
   'fr-CA': {
