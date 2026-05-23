@@ -43,6 +43,27 @@ function badRequest(reply: FastifyReply, message: string, details?: unknown) {
 // ── Plugin ────────────────────────────────────────────────────────────────────
 
 export async function itsmRoutes(app: FastifyInstance) {
+  // The handlers below are placeholders for the eventual DB-backed service
+  // layer. They return shaped responses, but they DO NOT persist anything
+  // and DO NOT read real ticket state. Returning 202/200 in production would
+  // silently fool callers into believing tickets were created or transitioned.
+  // Fail loudly: 501 Not Implemented in production, warn in dev/staging.
+  app.addHook('onRequest', async (req, reply) => {
+    if (process.env.NODE_ENV === 'production') {
+      req.log.error(
+        { url: req.url, method: req.method },
+        'orchestrator-api/itsm: route invoked in production but DB layer is not wired',
+      )
+      return reply.status(501).send({
+        error: 'itsm routes are not implemented in production yet',
+        url: req.url,
+      })
+    }
+    req.log.warn(
+      { url: req.url, method: req.method },
+      'orchestrator-api/itsm: stub handler \u2014 no DB persistence',
+    )
+  })
 
   // ── POST /itsm/tickets ─────────────────────────────────────────────────────
   app.post<{ Body: z.infer<typeof createTicketInputSchema> }>(

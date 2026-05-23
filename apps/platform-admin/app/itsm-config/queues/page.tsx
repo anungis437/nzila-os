@@ -15,7 +15,11 @@ export default async function QueueManagerPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: fetch queues from DB
+  // TODO: fetch queues from DB. Warn loudly so an empty Queues list is not
+  // silently mistaken for "no queues configured" by an admin.
+  console.warn(
+    '[platform-admin] itsm-config/queues: queues DB query is not wired — rendering empty list',
+  )
   const queues: Array<{
     id: string
     name: string

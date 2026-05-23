@@ -57,7 +57,14 @@ function getDek(): Buffer | null {
   }
 
   if (process.env.NODE_ENV === 'production') {
-    logger.warn('QBO tokens stored WITHOUT encryption — set QBO_TOKEN_ENCRYPTION_KEY or AZURE_KEYVAULT_URL')
+    // Fail-closed: storing OAuth bearer tokens (QuickBooks access to customer
+    // financial data) without encryption at rest is unacceptable in production.
+    logger.error(
+      'QBO tokens cannot be stored without encryption in production — set QBO_TOKEN_ENCRYPTION_KEY or AZURE_KEYVAULT_URL',
+    )
+    throw new Error(
+      'QBO_TOKEN_ENCRYPTION_KEY (or AZURE_KEYVAULT_URL + key) is required in production to encrypt QBO OAuth tokens at rest',
+    )
   }
   return null
 }

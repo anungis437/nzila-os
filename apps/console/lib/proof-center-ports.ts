@@ -6,6 +6,11 @@
  * Currently uses in-memory stores that return real data structure
  * in the shape the collectors expect.
  *
+ * NOTE: This adapter returns empty evidence/snapshot maps and a synthetic
+ * "healthy" health report. It is suitable for local development and
+ * staging dry-runs only. In production it will throw — wire a real
+ * DB-backed RealPortsDeps before calling collectProcurementPack().
+ *
  * @module @nzila/console/lib/proof-center-ports
  */
 import type { RealPortsDeps } from '@nzila/platform-procurement-proof/real-ports'
@@ -23,8 +28,19 @@ const snapshotChains = new Map<string, SnapshotChainEntry[]>()
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
-export function createInMemoryPortDeps(): RealPortsDeps {
-  return {
+export function createInMemoryPortDeps(): RealPortsDeps {  if (process.env.NODE_ENV === 'production') {
+    // Fail-closed: emitting an always-empty / always-healthy procurement pack
+    // in production would falsify compliance, evidence, integration and
+    // sovereignty signals shown in the Proof Center.
+    throw new Error(
+      'createInMemoryPortDeps() called in production. Wire a real DB-backed RealPortsDeps before invoking procurement-proof collectors.',
+    )
+  }
+  if (typeof console !== 'undefined') {
+    console.warn(
+      '[proof-center-ports] using in-memory port deps — evidence packs, compliance snapshots, integrations and health checks are NOT real',
+    )
+  }  return {
     evidencePack: {
       async listPacks(orgId: string) {
         return evidencePacks.get(orgId) ?? []

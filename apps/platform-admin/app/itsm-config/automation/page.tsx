@@ -29,7 +29,12 @@ export default async function AutomationRulesPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: fetch custom automation rules from DB
+  // TODO: fetch custom automation rules from DB. Until then warn loudly on
+  // every render so an empty Custom Rules list is not silently mistaken for
+  // "no rules configured" by a platform admin.
+  console.warn(
+    '[platform-admin] itsm-config/automation: customRules DB query is not wired — rendering empty list',
+  )
   const customRules: Array<{
     id: string
     name: string

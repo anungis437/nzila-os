@@ -33,7 +33,12 @@ export default async function SlaProfilesPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: load org-level SLA profiles from DB
+  // TODO: load org-level SLA profiles from DB. Until that is wired warn so the
+  // "only platform defaults" rendering is visible in server logs and is not
+  // mistaken for an org without custom SLA overrides.
+  console.warn(
+    '[platform-admin] itsm-config/sla-profiles: org-level SLA profile DB query is not wired — showing platform defaults only',
+  )
   // For now, show the platform default
   const defaultProfile = DEFAULT_SLA_TARGETS
 
