@@ -242,6 +242,59 @@ entries:
       - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/modernizationFragilityCoverage.test.ts'
       - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/adaptiveTopologyDepth.test.ts'
 
+  - version: '1.2.1-integration'
+    date: '2026-05-23'
+    change_class: 'standard'
+    category: 'doctrine'
+    summary: >
+      Signal Sophistication Recovery Sprint — controlled live-flow
+      migration of the v1.2.0 foundation (P1 priorities). (1) Wires the
+      contradiction-detection engine into the v1 continuity confidence
+      surface via an additive, non-mutating bridge
+      (`contradictions/confidencePenaltyBridge.ts`) that re-projects v2
+      dimension penalties onto v1 confidence domains, preserves nulls
+      (refusal-respecting), and clamps cumulative per-domain drag at 0.7.
+      (2) Introduces a pure evidence-multiplier helper
+      (`evidence-strength/evidenceScoringBridge.ts`) ready for v1.3.0
+      Answer-type extension; undefined-passthrough makes the future
+      wiring backward-compatible by construction. (3) Makes routing-v2
+      paths executable via deterministic predicates
+      (`routing-v2/pathActivation.ts`) and adds an additive
+      `pathDeepens?` hint to `AdaptiveRules` that may only escalate
+      inclusion / raise confidence floors, never suppress. (4) Extends
+      the narrative engine with a contradiction-aware insight slot
+      (`contradictions/contradictionInsightAdapter.ts`) surfaced via a
+      new `contradiction_detected` insight category and an optional
+      `contradictionReport?` parameter on `generateInsights()`. Adds 29
+      new passing integration assertions across all four deliverables
+      (`__tests__/signal-integrity/v2/foundationIntegration.test.ts`).
+    rationale: >
+      v1.2.0 foundation was isolated by design to avoid breaking the
+      runtime scoring, narrative, and UI surfaces. v1.2.1 begins the
+      controlled migration into the live flow per
+      QUESTION_POOL_v2_0_ROADMAP.md while preserving every doctrinal
+      guarantee: contradictions REDUCE confidence (never average);
+      routing additions DEEPEN extraction (never suppress); evidence
+      grading reflects honesty over inflation (multipliers in
+      [0.5, 1.0]); no individual mapping, no behavioural inference, no
+      surveillance drift. Answer-type extension (which would unlock
+      live evidence-multiplier wiring) is intentionally DEFERRED to
+      v1.3.0 because it touches the question-pool runtime, fixtures,
+      persistence, and the scoring trace fingerprint — three orders of
+      magnitude more risk than a pure helper landing now.
+    authority: 'OCI doctrine maintainers'
+    breaking_change_yn: false
+    affected_artifacts:
+      - 'apps/union-eyes/lib/icra/contradictions/confidencePenaltyBridge.ts'
+      - 'apps/union-eyes/lib/icra/contradictions/contradictionInsightAdapter.ts'
+      - 'apps/union-eyes/lib/icra/evidence-strength/evidenceScoringBridge.ts'
+      - 'apps/union-eyes/lib/icra/routing-v2/pathActivation.ts'
+      - 'apps/union-eyes/lib/icra/adaptation/types.ts'
+      - 'apps/union-eyes/lib/icra/insight-engine.ts'
+      - 'apps/union-eyes/lib/icra/types.ts'
+      - 'apps/union-eyes/components/icra/ICRAProfile.tsx'
+      - 'apps/union-eyes/lib/icra/__tests__/signal-integrity/v2/foundationIntegration.test.ts'
+
 # Future-entry template (delete this comment block when adding entries):
 #
 #  - version: 'X.Y.Z'

@@ -199,6 +199,17 @@ export interface AdaptiveRules {
     'elected_board' | 'appointed_board' | 'hybrid' | 'other'
   >;
   readonly respondentRelevance?: readonly RespondentLens[];
+  /**
+   * Routing-v2 (additive): list of routing-path ids that should DEEPEN
+   * extraction on this question when activated. Strictly additive — the
+   * routing-v2 evaluator may use this hint to escalate inclusion or
+   * raise the confidence floor, but MUST NEVER suppress a question.
+   * See `routing-v2/pathActivation.ts`.
+   *
+   * Typed as `readonly string[]` here to avoid a circular import on
+   * `RoutingPathId`; the routing layer narrows it at consumption.
+   */
+  readonly pathDeepens?: ReadonlyArray<string>;
 }
 
 /**
