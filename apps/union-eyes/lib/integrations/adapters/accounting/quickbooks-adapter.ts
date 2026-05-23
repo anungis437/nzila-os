@@ -500,9 +500,12 @@ export class QuickBooksAdapter extends BaseIntegration {
   // ==========================================================================
 
   async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
-    // QuickBooks uses HMAC SHA256 for webhook verification
-    // Implementation would verify intuit-signature header
-    return true; // Simplified for now
+    // QuickBooks uses HMAC SHA256 for webhook verification (intuit-signature header).
+    // Not yet implemented — fail-closed to avoid accepting forged payloads.
+    this.logOperation('verifyWebhook', {
+      message: 'QuickBooks webhook signature verification (intuit-signature HMAC SHA256) is not yet implemented; rejecting payload (fail-closed).',
+    });
+    return false;
   }
 
   async processWebhook(event: WebhookEvent): Promise<void> {

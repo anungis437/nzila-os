@@ -490,8 +490,11 @@ export class FreshBooksAdapter extends BaseIntegration {
   // ==========================================================================
 
   async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
-    // FreshBooks webhook verification
-    return true; // Simplified
+    // FreshBooks webhook verification not yet implemented — fail-closed to avoid accepting forged payloads.
+    this.logOperation('verifyWebhook', {
+      message: 'FreshBooks webhook signature verification is not yet implemented; rejecting payload (fail-closed).',
+    });
+    return false;
   }
 
   async processWebhook(event: WebhookEvent): Promise<void> {
