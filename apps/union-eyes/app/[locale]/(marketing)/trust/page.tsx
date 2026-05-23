@@ -102,6 +102,19 @@ const TRUST_COPY = {
       { label: 'Transparent data use', desc: 'What data is used, how it is used, and why — documented and available for review.' },
       { label: 'Anti-monitoring by design', desc: 'No capability path in the substrate can be re-purposed for individual monitoring.' },
     ],
+    categoryComparisonTitle: 'Union Eyes is a different category from workplace surveillance',
+    categoryComparisonBody:
+      'Continuity infrastructure and employee-monitoring software live in different categories. Procurement teams comparing vendors should see the architectural separation directly.',
+    categoryComparisonColLeft: 'Workplace surveillance platforms',
+    categoryComparisonColRight: 'Union Eyes — continuity infrastructure',
+    categoryComparisonRows: [
+      { axis: 'Subject of analysis', left: 'Individual workers and their behaviour', right: 'Institutional decisions, governance, and case lifecycle' },
+      { axis: 'Data captured', left: 'Keystrokes, screen activity, productivity signals, location', right: 'Casework, financials, governance events, audit evidence' },
+      { axis: 'Output', left: 'Productivity scores, behavioural rankings, manager dashboards', right: 'Explainable recommendations reviewable by named operators' },
+      { axis: 'Default posture', left: 'Always-on monitoring, opt-out where permitted', right: 'Reviewer-of-record required; no autonomous action' },
+      { axis: 'Data residency', left: 'Often US-hosted or cross-border by default', right: 'Canadian-hosted; no cross-border egress' },
+      { axis: 'Re-purposing risk', left: 'Surveillance capabilities can be repointed at any individual', right: 'No capability path in the substrate can be re-purposed for individual monitoring' },
+    ],
     explainabilityTitle: 'Explainability Standards',
     explainabilityBody:
       'Every UnionEyes intelligence output is traceable to its source evidence and explainable in plain institutional language. Explainability is enforced — not aspirational.',
@@ -144,8 +157,8 @@ const TRUST_COPY = {
     statusTitle: 'System Status',
     statusBody: 'Real-time operational status of UnionEyes substrate services.',
     finalHeading: 'Ready to see governance in action?',
-    finalBody: "Start a controlled pilot scoped to your organization's governance requirements.",
-    startPilot: 'Start a Pilot',
+    finalBody: "Begin a Founding Partner Program engagement scoped to your organization's governance requirements.",
+    startPilot: 'Join the Founding Partner Program',
     viewPricing: 'View Pricing & Deployment',
   },
   'fr-CA': {
@@ -168,6 +181,19 @@ const TRUST_COPY = {
       { label: 'Contrôles de gouvernance démocratique', desc: 'Les systèmes IA opèrent dans les structures démocratiques, sans les remplacer.' },
       { label: 'Utilisation transparente des données', desc: 'Les données utilisées, leur usage et la raison de cet usage sont documentés et révisables.' },
       { label: 'Anti-surveillance par conception', desc: 'Aucun chemin de capacité ne peut être réutilisé pour surveiller des personnes.' },
+    ],
+    categoryComparisonTitle: 'Union Eyes appartient à une catégorie différente de la surveillance au travail',
+    categoryComparisonBody:
+      'L’infrastructure de continuité et les logiciels de surveillance des employés appartiennent à des catégories distinctes. Les équipes d’approvisionnement qui comparent des fournisseurs doivent voir cette séparation architecturale directement.',
+    categoryComparisonColLeft: 'Plateformes de surveillance au travail',
+    categoryComparisonColRight: 'Union Eyes — infrastructure de continuité',
+    categoryComparisonRows: [
+      { axis: 'Sujet de l’analyse', left: 'Travailleuses et travailleurs individuels et leur comportement', right: 'Décisions institutionnelles, gouvernance et cycle de vie des dossiers' },
+      { axis: 'Données capturées', left: 'Frappes au clavier, activité à l’écran, signaux de productivité, localisation', right: 'Dossiers, finances, événements de gouvernance, preuves d’audit' },
+      { axis: 'Résultat', left: 'Notes de productivité, classements comportementaux, tableaux de bord de gestionnaires', right: 'Recommandations explicables révisables par des opérateurs nommés' },
+      { axis: 'Posture par défaut', left: 'Surveillance continue, désinscription quand elle est permise', right: 'Opérateur de revue requis ; aucune action autonome' },
+      { axis: 'Résidence des données', left: 'Souvent hébergées aux É.-U. ou transfrontées par défaut', right: 'Hébergées au Canada ; aucune sortie transfrontière' },
+      { axis: 'Risque de réutilisation', left: 'Les capacités de surveillance peuvent être repointées vers toute personne', right: 'Aucun chemin de capacité ne peut être réutilisé pour surveiller des personnes' },
     ],
     explainabilityTitle: 'Normes d’explicabilité',
     explainabilityBody:
@@ -211,8 +237,8 @@ const TRUST_COPY = {
     statusTitle: 'Statut du système',
     statusBody: 'État opérationnel en temps réel des services de substrat UnionEyes.',
     finalHeading: 'Prêt à voir la gouvernance en action?',
-    finalBody: 'Démarrez un pilote contrôlé selon les exigences de gouvernance de votre organisation.',
-    startPilot: 'Démarrer un pilote',
+    finalBody: 'Commencez un engagement du Programme partenaires fondateurs aligne sur les exigences de gouvernance de votre organisation.',
+    startPilot: 'Rejoindre le Programme partenaires fondateurs',
     viewPricing: 'Voir tarification et déploiement',
   },
 };
@@ -352,6 +378,33 @@ export default async function TrustPage({
               <div key={item.label} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
                 <div className="mb-1 text-sm font-bold text-slate-900">{item.label}</div>
                 <div className="text-sm text-slate-600">{item.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Category Comparison — Continuity infrastructure vs workplace surveillance.
+            Procurement-stage differentiation: addresses category confusion for buyers
+            evaluating Union Eyes alongside employee-monitoring vendors. */}
+        <section id="category-comparison" className="mb-20 scroll-mt-24">
+          <h2 className="mb-3 text-2xl font-bold text-slate-900">{copy.categoryComparisonTitle}</h2>
+          <p className="mb-6 max-w-3xl leading-relaxed text-slate-600">
+            {copy.categoryComparisonBody}
+          </p>
+          <div className="overflow-hidden rounded-xl border border-slate-200">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr_1.2fr] bg-slate-100 text-xs font-bold uppercase tracking-wider text-slate-700">
+              <div className="px-4 py-3"> </div>
+              <div className="px-4 py-3 border-l border-slate-200">{copy.categoryComparisonColLeft}</div>
+              <div className="px-4 py-3 border-l border-slate-200 bg-emerald-50 text-emerald-900">{copy.categoryComparisonColRight}</div>
+            </div>
+            {copy.categoryComparisonRows.map((row, idx) => (
+              <div
+                key={row.axis}
+                className={`grid grid-cols-1 md:grid-cols-[1fr_1.2fr_1.2fr] text-sm ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
+              >
+                <div className="px-4 py-4 font-semibold text-slate-900">{row.axis}</div>
+                <div className="px-4 py-4 text-slate-600 border-l border-slate-200">{row.left}</div>
+                <div className="px-4 py-4 text-slate-800 border-l border-slate-200 bg-emerald-50/40">{row.right}</div>
               </div>
             ))}
           </div>

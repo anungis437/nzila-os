@@ -23,7 +23,7 @@ export default function AnimatedCTA() {
       </h3>
       <p className="text-white text-lg mb-8 max-w-xl mx-auto">
         See how UnionEyes turns day-to-day casework into
-        confident, data-backed decisions. Request an Executive Briefing or start a pilot.
+        confident, data-backed decisions. Request an Executive Briefing or join the Founding Partner Program.
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -44,7 +44,7 @@ export default function AnimatedCTA() {
             className="rounded-xl border-white/30 text-white hover:bg-white/10 px-8"
             asChild
           >
-            <Link href="/contact">Start a Pilot</Link>
+            <Link href="/contact">Founding Partner Program</Link>
           </Button>
         </motion.div>
       </div>
