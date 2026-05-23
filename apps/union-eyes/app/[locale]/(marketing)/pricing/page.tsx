@@ -127,6 +127,127 @@ const continuityJourney = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SECTION 3.5 — Assessment Ladder (GTM entry funnel)
+// Mirrors the three entry tiers on /institutional-continuity-risk so the
+// pricing page reflects the actual go-to-market motion: a free ICRA reflection,
+// a paid Executive Continuity Brief at $1,200, and a facilitated Institutional
+// Continuity Diagnostic at $6,500. These precede the larger engagement layers.
+// ─────────────────────────────────────────────────────────────────────────────
+const assessmentLadder = [
+  {
+    key: 'continuity_reflection',
+    name: 'Continuity Reflection',
+    price: 'Free',
+    pricePosture: 'Pseudonymous · no login required',
+    summary:
+      'A scoped institutional continuity assessment that surfaces fragility, signals, and burden — without commitment. The ICRA entry point.',
+    includes: [
+      'OCI band and continuity score',
+      'Quiet-risk signal observations',
+      'Continuity burden index',
+      'One recommendation to start a conversation',
+    ],
+    cta: 'Start the assessment',
+    ctaHref: '/continuity-assessment/start',
+    featured: false,
+  },
+  {
+    key: 'executive_continuity_brief',
+    name: 'Executive Continuity Brief',
+    price: '$1,200 CAD',
+    pricePosture: 'One-time · delivered as a governance-readable document',
+    summary:
+      'A deeper institutional reading of the same assessment — governance entropy, continuity debt, dependency review, and modernization risk surfaced for executive and board conversation.',
+    includes: [
+      'Everything in Continuity Reflection',
+      'Governance entropy analysis',
+      'Continuity debt analysis',
+      'Institutional dependency review',
+      'Modernization risk layer',
+      'Full prioritized recommendations',
+    ],
+    cta: 'Begin with the brief',
+    ctaHref: '/continuity-assessment/start?intendedTier=executive_continuity_brief',
+    featured: true,
+  },
+  {
+    key: 'institutional_continuity_diagnostic',
+    name: 'Institutional Continuity Diagnostic',
+    price: '$6,500 CAD',
+    pricePosture: 'Facilitated engagement · executive workshop included',
+    summary:
+      'A full diagnostic engagement: facilitated review, institutional continuity workshop, memory lineage mapping, and an executive briefing note your board can act on.',
+    includes: [
+      'Everything in the Executive Continuity Brief',
+      'Facilitated diagnostic review',
+      'Institutional continuity workshop',
+      'Memory lineage mapping',
+      'Executive briefing note',
+    ],
+    cta: 'Request this diagnostic',
+    ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+    featured: false,
+  },
+];
+
+const frAssessmentLadder = [
+  {
+    key: 'continuity_reflection',
+    name: 'Réflexion sur la continuité',
+    price: 'Gratuit',
+    pricePosture: 'Pseudonyme · aucune connexion requise',
+    summary:
+      "Une évaluation institutionnelle ciblée qui révèle la fragilité, les signaux et le fardeau — sans engagement. Le point d'entrée ICRA.",
+    includes: [
+      'Bande OCI et indice de continuité',
+      'Observations sur les signaux de risque silencieux',
+      'Indice de fardeau de continuité',
+      'Une recommandation pour amorcer la conversation',
+    ],
+    cta: "Commencer l'évaluation",
+    ctaHref: '/continuity-assessment/start',
+    featured: false,
+  },
+  {
+    key: 'executive_continuity_brief',
+    name: 'Note de continuité exécutive',
+    price: '1 200 $ CAD',
+    pricePosture: 'Ponctuel · livré sous forme de document lisible par la gouvernance',
+    summary:
+      "Une lecture institutionnelle approfondie de la même évaluation — entropie de gouvernance, dette de continuité, revue des dépendances et risque de modernisation, mis en forme pour la conversation exécutive.",
+    includes: [
+      'Tout ce qui est dans la Réflexion sur la continuité',
+      "Analyse de l'entropie de gouvernance",
+      'Analyse de la dette de continuité',
+      'Revue des dépendances institutionnelles',
+      'Couche de risque de modernisation',
+      'Recommandations priorisées complètes',
+    ],
+    cta: 'Commencer par la note',
+    ctaHref: '/continuity-assessment/start?intendedTier=executive_continuity_brief',
+    featured: true,
+  },
+  {
+    key: 'institutional_continuity_diagnostic',
+    name: 'Diagnostic institutionnel de continuité',
+    price: '6 500 $ CAD',
+    pricePosture: 'Engagement facilité · atelier exécutif inclus',
+    summary:
+      "Un engagement diagnostic complet : revue facilitée, atelier institutionnel de continuité, cartographie de la lignée mémorielle, et note de synthèse exécutive sur laquelle votre conseil peut agir.",
+    includes: [
+      'Tout ce qui est dans la Note exécutive',
+      'Revue diagnostique facilitée',
+      'Atelier institutionnel de continuité',
+      'Cartographie de la lignée mémorielle',
+      'Note de synthèse exécutive',
+    ],
+    cta: 'Demander ce diagnostic',
+    ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+    featured: false,
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SECTION 4 — Engagement Layers
 // Replaces "tiers". These are institutional continuity engagement layers —
 // not SaaS plans. Each one is a distinct posture and a distinct conversation.
@@ -335,8 +456,14 @@ const pricingCopy = {
     section3Body: 'A maturity-oriented engagement pathway. Five sequential stages, each one earning the next. Platform activation appears at stage four — never stage one.',
     stageLabel: 'Stage',
     outcomeLabel: 'Outcome',
+    sectionLadderEyebrow: 'Start here',
+    sectionLadderHeading: 'The assessment ladder',
+    sectionLadderBody: 'Every UnionEyes relationship begins with an assessment, not a procurement form. The first three steps are scoped, named, and priced — so an executive director or board chair can begin the continuity conversation without waiting for a sales cycle.',
+    sectionLadderFooter: 'These three steps are the entry funnel to the engagement layers below. Most institutions begin with the free Reflection and only escalate when the surfaced risk warrants it.',
+    ladderIncludesLabel: 'What you receive',
+    ladderFeaturedBadge: 'Most institutions start here',
     section4Heading: 'Engagement layers',
-    section4Body: 'Five institutional continuity engagement layers. Each is a coherent posture and a distinct conversation — not a feature bundle or a seat-licensing tier.',
+    section4Body: 'When an assessment surfaces structural continuity risk that cannot be resolved with a brief or a workshop, the relationship escalates into one of these institutional engagement layers. Each is a coherent posture and a distinct conversation — not a feature bundle or a seat-licensing tier.',
     fitPrefix: 'Best for: ',
     deliverablesLabel: 'What you receive',
     investmentLabel: 'Investment',
@@ -361,7 +488,7 @@ const pricingCopy = {
       { acronym: 'OCI', expansion: 'Operational Continuity Index', body: 'A scoped institutional diagnostic that measures continuity fragility — what would break if a key person, a leadership cycle, or a critical decision-of-record were lost tomorrow.' },
       { acronym: 'OCRA', expansion: 'Operational Continuity Risk Analysis', body: 'A deeper, structural reading of continuity risk: dependency topology, modernization pathways, governance entropy, and confidence-aware operational interpretation.' },
     ],
-    continuityFragility, engagementMoments, continuityJourney, engagementLayers, procurementCommitments,
+    continuityFragility, engagementMoments, continuityJourney, assessmentLadder, engagementLayers, procurementCommitments,
   },
   'fr-CA': {
     heading: <>Architecture d’engagement de continuité institutionnelle,<br />pas une grille tarifaire logicielle.</>,
@@ -374,8 +501,14 @@ const pricingCopy = {
     section3Body: 'Un parcours d’engagement orienté maturité. Cinq étapes séquentielles, chacune méritant la suivante. L’activation de plateforme apparaît à l’étape quatre — jamais à l’étape un.',
     stageLabel: 'Étape',
     outcomeLabel: 'Résultat',
+    sectionLadderEyebrow: 'Commencer ici',
+    sectionLadderHeading: 'L’échelle d’évaluation',
+    sectionLadderBody: 'Chaque relation avec UnionEyes commence par une évaluation, pas par un formulaire d’approvisionnement. Les trois premières étapes sont délimitées, nommées et tarifées — afin qu’un directeur général ou un président de conseil puisse amorcer la conversation de continuité sans attendre un cycle de vente.',
+    sectionLadderFooter: 'Ces trois étapes constituent l’entonnoir d’entrée vers les couches d’engagement ci-dessous. La plupart des institutions commencent par la Réflexion gratuite et n’augmentent l’engagement que lorsque le risque révélé le justifie.',
+    ladderIncludesLabel: 'Ce que vous recevez',
+    ladderFeaturedBadge: 'La plupart des institutions commencent ici',
     section4Heading: 'Couches d’engagement',
-    section4Body: 'Cinq couches d’engagement de continuité institutionnelle. Chacune est une posture cohérente et une conversation distincte — pas un ensemble de fonctionnalités ni un palier de licences par siège.',
+    section4Body: 'Lorsqu’une évaluation révèle un risque structurel de continuité qui ne peut être résolu par une note ou un atelier, la relation s’élève vers l’une de ces couches d’engagement institutionnel. Chacune est une posture cohérente et une conversation distincte — pas un ensemble de fonctionnalités ni un palier de licences par siège.',
     fitPrefix: 'Convient à : ',
     deliverablesLabel: 'Ce que vous recevez',
     investmentLabel: 'Investissement',
@@ -403,6 +536,7 @@ const pricingCopy = {
     continuityFragility: frContinuityFragility,
     engagementMoments: frEngagementMoments,
     continuityJourney: frContinuityJourney,
+    assessmentLadder: frAssessmentLadder,
     engagementLayers: frEngagementLayers,
     procurementCommitments: frProcurementCommitments,
   },
@@ -541,6 +675,77 @@ export default async function LocalePricingPage({
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      {/* ── SECTION 3.5 — Assessment Ladder (GTM entry funnel) ── */}
+      <section className="py-16 bg-[#fbf9f4] border-b border-slate-200/70">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
+            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-navy text-white text-xs font-semibold tracking-wide uppercase mb-4">
+              <Compass className="h-3.5 w-3.5" />
+              {copy.sectionLadderEyebrow}
+            </div>
+            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.sectionLadderHeading}</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
+              {copy.sectionLadderBody}
+            </p>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-3 gap-5 narrative-sequence">
+            {copy.assessmentLadder.map((tier) => (
+              <article
+                key={tier.key}
+                className={
+                  tier.featured
+                    ? 'institution-panel calm-elevation p-6 flex flex-col ring-2 ring-navy/80 relative'
+                    : 'institution-panel calm-elevation p-6 flex flex-col'
+                }
+              >
+                {tier.featured && (
+                  <div className="absolute -top-3 left-6 inline-flex items-center gap-1.5 px-3 py-1 bg-navy text-white text-[10px] font-bold uppercase tracking-wider rounded-full">
+                    <Sparkles className="h-3 w-3" />
+                    {copy.ladderFeaturedBadge}
+                  </div>
+                )}
+                <h3 className="text-lg font-semibold text-navy leading-tight mb-2">{tier.name}</h3>
+                <div className="mb-1">
+                  <span className="text-2xl font-bold text-navy">{tier.price}</span>
+                </div>
+                <p className="text-xs text-slate-500 italic mb-4">{tier.pricePosture}</p>
+                <p className="text-sm text-slate-700 leading-relaxed mb-5">{tier.summary}</p>
+
+                <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
+                  {copy.ladderIncludesLabel}
+                </div>
+                <ul className="space-y-2 mb-5">
+                  {tier.includes.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
+                      <CheckCircle2 className="h-4 w-4 text-[#1f5b84] mt-0.5 shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href={`/${locale}${tier.ctaHref}`}
+                  className={
+                    tier.featured
+                      ? 'mt-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-navy text-white text-sm font-semibold rounded-xl hover:bg-[#1f5b84] transition-colors'
+                      : 'mt-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-white border border-navy text-navy text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors'
+                  }
+                >
+                  {tier.cta} <ArrowRight className="h-4 w-4" />
+                </Link>
+              </article>
+            ))}
+          </div>
+
+          <p className="text-xs text-slate-500 mt-6 max-w-3xl leading-relaxed italic">
+            {copy.sectionLadderFooter}
+          </p>
         </div>
       </section>
 
