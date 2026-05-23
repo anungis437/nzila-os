@@ -113,4 +113,72 @@ describe('Reconstruction Burden Index', () => {
     });
     expect(omitted.score).toBe(explicit.score);
   });
+
+  describe('hardening', () => {
+    it('coerces negative carrier counts to 0', () => {
+      const r = computeReconstructionBurden({
+        exposedCarriers: -10,
+        institutionCriticalCarriers: -5,
+        densityIndex: 0,
+        governanceEntropyOrdinal: 1,
+      });
+      expect(r.score).toBe(0);
+      expect(r.band).toBe('minimal');
+    });
+
+    it('clamps densityIndex > 1 to 1', () => {
+      const r = computeReconstructionBurden({
+        exposedCarriers: 0,
+        institutionCriticalCarriers: 0,
+        densityIndex: 99,
+        governanceEntropyOrdinal: 1,
+      });
+      // density component 1.0 * 2.0 = 2.0
+      expect(r.score).toBe(2);
+    });
+
+    it('treats NaN/Infinity inputs as 0 / clamped values', () => {
+      const r = computeReconstructionBurden({
+        exposedCarriers: Number.NaN,
+        institutionCriticalCarriers: Number.POSITIVE_INFINITY,
+        densityIndex: Number.NaN,
+        governanceEntropyOrdinal: 1,
+      });
+      // exposed NaN -> 0; critical Infinity -> 0 (defensive); density NaN -> 0; entropy 0
+      expect(Number.isFinite(r.score)).toBe(true);
+      expect(r.score).toBe(0);
+    });
+
+    it('falls back to default ordinal=2 for out-of-range ordinal', () => {
+      const r = computeReconstructionBurden({
+        exposedCarriers: 0,
+        institutionCriticalCarriers: 0,
+        densityIndex: 0,
+        governanceEntropyOrdinal: 0 as unknown as 1,
+      });
+      // default entropy=2 -> (2-1)*0.25 = 0.25 -> round1 = 0.3
+      expect(r.score).toBe(0.3);
+    });
+
+    it('falls back to default ordinal=2 for non-integer ordinal', () => {
+      const r = computeReconstructionBurden({
+        exposedCarriers: 0,
+        institutionCriticalCarriers: 0,
+        densityIndex: 0,
+        governanceEntropyOrdinal: 2.5 as unknown as 2,
+      });
+      expect(r.score).toBe(0.3);
+    });
+
+    it('caps total at exactly 10 (no overshoot)', () => {
+      const r = computeReconstructionBurden({
+        exposedCarriers: Number.MAX_SAFE_INTEGER,
+        institutionCriticalCarriers: Number.MAX_SAFE_INTEGER,
+        densityIndex: 1,
+        governanceEntropyOrdinal: 5,
+      });
+      expect(r.score).toBe(10);
+      expect(r.band).toBe('severe');
+    });
+  });
 });

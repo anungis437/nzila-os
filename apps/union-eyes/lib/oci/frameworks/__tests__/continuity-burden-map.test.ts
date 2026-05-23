@@ -81,4 +81,44 @@ describe('Continuity Burden Map', () => {
     expect(result.composite).toBe(0.36);
     expect(result.posture).toMatch(/recognisable/i);
   });
+
+  describe('hardening', () => {
+    it('clamps out-of-range numeric inputs to [0,1]', () => {
+      const result = computeContinuityBurdenMap({
+        density: densityWith(2),       // > 1 -> clamped to 1
+        icraBurdenIndex: 5,            // > 1 -> clamped to 1
+        reconstructionRisk: -3,        // < 0 -> clamped to 0
+      });
+      // 0.6*1 + 0.25*1 + 0.15*0 = 0.85
+      expect(result.composite).toBe(0.85);
+    });
+
+    it('coerces NaN/Infinity inputs to 0', () => {
+      const result = computeContinuityBurdenMap({
+        density: densityWith(Number.NaN),
+        icraBurdenIndex: Number.POSITIVE_INFINITY,
+        reconstructionRisk: Number.NEGATIVE_INFINITY,
+      });
+      expect(result.composite).toBe(0);
+      expect(Number.isFinite(result.composite)).toBe(true);
+    });
+
+    it('contributingFactors array is frozen', () => {
+      const result = computeContinuityBurdenMap({
+        density: densityWith(0.5),
+        icraBurdenIndex: 0.5,
+      });
+      expect(Object.isFrozen(result.contributingFactors)).toBe(true);
+      for (const f of result.contributingFactors) {
+        expect(Object.isFrozen(f)).toBe(true);
+      }
+    });
+
+    it('tolerates a missing density block defensively (returns zero composite)', () => {
+      // Type-cheating: simulates a caller that passes a partial object.
+      const result = computeContinuityBurdenMap({} as Parameters<typeof computeContinuityBurdenMap>[0]);
+      expect(result.composite).toBe(0);
+      expect(result.posture).toMatch(/reasonably distributed/i);
+    });
+  });
 });

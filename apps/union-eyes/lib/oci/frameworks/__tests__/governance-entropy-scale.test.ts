@@ -43,4 +43,36 @@ describe('Governance Entropy Scale', () => {
   it('clamps drift > 1 to 1 (systemic_entropy)', () => {
     expect(classifyEntropy(99).id).toBe('systemic_entropy');
   });
+
+  describe('hardening', () => {
+    it('ENTROPY_LEVELS is deeply frozen', () => {
+      expect(Object.isFrozen(ENTROPY_LEVELS)).toBe(true);
+      for (const lvl of ENTROPY_LEVELS) {
+        expect(Object.isFrozen(lvl)).toBe(true);
+      }
+    });
+
+    it('treats NaN as 0 (coherent)', () => {
+      expect(classifyEntropy(Number.NaN).id).toBe('coherent');
+    });
+
+    it('treats Infinity as 0 (coherent) — Infinity is never a valid measurement, do not escalate alerts on bad data', () => {
+      expect(classifyEntropy(Number.POSITIVE_INFINITY).id).toBe('coherent');
+      expect(classifyEntropy(Number.NEGATIVE_INFINITY).id).toBe('coherent');
+    });
+
+    it('treats non-number inputs as 0 (coherent) — defensive', () => {
+      expect(classifyEntropy('0.9' as unknown as number).id).toBe('coherent');
+      expect(classifyEntropy(undefined as unknown as number).id).toBe('coherent');
+    });
+
+    it('ordinals are unique and in 1..5', () => {
+      const ords = ENTROPY_LEVELS.map((l) => l.ordinal);
+      expect(new Set(ords).size).toBe(5);
+      for (const o of ords) {
+        expect(o).toBeGreaterThanOrEqual(1);
+        expect(o).toBeLessThanOrEqual(5);
+      }
+    });
+  });
 });

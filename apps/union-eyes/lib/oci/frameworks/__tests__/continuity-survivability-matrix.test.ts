@@ -55,13 +55,30 @@ describe('Continuity Survivability Matrix', () => {
     }
   });
 
-  it('falls back to last cell for unknown combination (defensive default)', () => {
-    // Cast: this is the defensive default branch — exercised when an upstream
-    // caller produces a permutation the matrix does not enumerate.
+  it('falls back to worst-case cell (singular_absent) for unknown enum inputs', () => {
+    // Hardening: unknown inputs must NOT cheerfully produce a healthy
+    // posture. Falling back to the worst-case cell makes the
+    // misclassification loud in meaning.
     const result = classifySurvivability(
       'unknown' as DependencyConcentration,
       'unknown' as SuccessorReadiness,
     );
-    expect(result).toBe(SURVIVABILITY_MATRIX[SURVIVABILITY_MATRIX.length - 1]);
+    expect(result.id).toBe('singular_absent');
+  });
+
+  it('also falls back to worst-case for partial unknown inputs', () => {
+    expect(
+      classifySurvivability('distributed', 'bogus' as SuccessorReadiness).id,
+    ).toBe('singular_absent');
+    expect(
+      classifySurvivability('bogus' as DependencyConcentration, 'identified').id,
+    ).toBe('singular_absent');
+  });
+
+  it('SURVIVABILITY_MATRIX is deeply frozen (callers cannot mutate the IP shape)', () => {
+    expect(Object.isFrozen(SURVIVABILITY_MATRIX)).toBe(true);
+    for (const cell of SURVIVABILITY_MATRIX) {
+      expect(Object.isFrozen(cell)).toBe(true);
+    }
   });
 });

@@ -1,6 +1,6 @@
 /**
  * ARTIFACT TYPE: IP / Framework
- * FRAMEWORK: Continuity Survivability Matrix\u2122
+ * FRAMEWORK: Continuity Survivability Matrix™
  * DOCTRINE_VERSION: 1.0.0
  *
  * Plots institutional dependencies against successor identification to
@@ -10,6 +10,12 @@
  * Self-Guided Edition exposes a single derived classification (the
  * survivability cell of the most exposed carrier). Full plot lands in the
  * Facilitated Edition.
+ *
+ * Hardening invariants:
+ *   1. SURVIVABILITY_MATRIX is deeply frozen.
+ *   2. Matrix contains exactly one cell per (dependency, successor) permutation.
+ *   3. classifySurvivability falls back to the worst-case cell (singular_absent)
+ *      for unknown enum inputs — fail-loud-in-meaning, not fail-silent-cheerful.
  */
 
 export type DependencyConcentration = 'distributed' | 'concentrated' | 'singular';
@@ -23,20 +29,32 @@ export interface SurvivabilityCell {
   posture: string;
 }
 
+const DEPENDENCIES: readonly DependencyConcentration[] = Object.freeze([
+  'distributed',
+  'concentrated',
+  'singular',
+]);
+const SUCCESSORS: readonly SuccessorReadiness[] = Object.freeze([
+  'identified',
+  'in_progress',
+  'absent',
+]);
+
 const cell = (
   dependency: DependencyConcentration,
   successor: SuccessorReadiness,
   label: string,
   posture: string,
-): SurvivabilityCell => ({
-  id: `${dependency}_${successor}`,
-  dependency,
-  successor,
-  label,
-  posture,
-});
+): SurvivabilityCell =>
+  Object.freeze({
+    id: `${dependency}_${successor}`,
+    dependency,
+    successor,
+    label,
+    posture,
+  });
 
-export const SURVIVABILITY_MATRIX: readonly SurvivabilityCell[] = [
+export const SURVIVABILITY_MATRIX: readonly SurvivabilityCell[] = Object.freeze([
   cell(
     'singular',
     'absent',
@@ -91,14 +109,36 @@ export const SURVIVABILITY_MATRIX: readonly SurvivabilityCell[] = [
     'Distributed and covered',
     'Responsibility is distributed with identified successors. Periodic review is sufficient.',
   ),
-] as const;
+]);
+
+/**
+ * The worst-case cell, used as the fallback for unknown enum inputs.
+ *
+ * Rationale: when a caller supplies a permutation the matrix does not
+ * recognise, we must NOT cheerfully return "distributed_identified" — that
+ * would communicate a healthy posture for what is in fact an unmodelled
+ * configuration. Returning the worst-case cell makes the misclassification
+ * loud in meaning (operators will investigate).
+ */
+const WORST_CASE_CELL = SURVIVABILITY_MATRIX[0];
+
+function isKnownDependency(d: unknown): d is DependencyConcentration {
+  return typeof d === 'string' && (DEPENDENCIES as readonly string[]).includes(d);
+}
+
+function isKnownSuccessor(s: unknown): s is SuccessorReadiness {
+  return typeof s === 'string' && (SUCCESSORS as readonly string[]).includes(s);
+}
 
 export function classifySurvivability(
   dependency: DependencyConcentration,
   successor: SuccessorReadiness,
 ): SurvivabilityCell {
+  if (!isKnownDependency(dependency) || !isKnownSuccessor(successor)) {
+    return WORST_CASE_CELL;
+  }
   const found = SURVIVABILITY_MATRIX.find(
     (c) => c.dependency === dependency && c.successor === successor,
   );
-  return found ?? SURVIVABILITY_MATRIX[SURVIVABILITY_MATRIX.length - 1];
+  return found ?? WORST_CASE_CELL;
 }

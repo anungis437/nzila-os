@@ -129,5 +129,75 @@ describe('Stewardship Density Index', () => {
         expect(DENSITY_BANDS[i].lowerBound).toBeGreaterThan(DENSITY_BANDS[i + 1].lowerBound);
       }
     });
+
+    it('tolerates NaN/Infinity inputs (coerces to 0 -> distributed; Infinity is never a valid measurement)', () => {
+      expect(classifyDensity(Number.NaN).id).toBe('distributed');
+      expect(classifyDensity(Number.POSITIVE_INFINITY).id).toBe('distributed');
+      expect(classifyDensity(Number.NEGATIVE_INFINITY).id).toBe('distributed');
+    });
+
+    it('clamps out-of-range inputs to [0,1]', () => {
+      expect(classifyDensity(-99).id).toBe('distributed');
+      expect(classifyDensity(99).id).toBe('critical');
+    });
+  });
+
+  describe('hardening', () => {
+    it('DENSITY_BANDS is deeply frozen', () => {
+      expect(Object.isFrozen(DENSITY_BANDS)).toBe(true);
+      for (const band of DENSITY_BANDS) {
+        expect(Object.isFrozen(band)).toBe(true);
+      }
+    });
+
+    it('returns a fresh result object on every call (no shared mutable state)', () => {
+      const a = computeStewardshipDensity([]);
+      const b = computeStewardshipDensity([]);
+      expect(a).not.toBe(b);
+      // Caller mutation of `a` must not affect `b`
+      a.totalCarriers = 99;
+      expect(b.totalCarriers).toBe(0);
+    });
+
+    it('skips holders with unknown criticality (DB enum drift) without NaN leakage', () => {
+      const holders = [
+        { criticality: 'institution_critical' as const, tenureBand: '7_15y' as const, successorIdentified: false },
+        // Simulate a DB row whose criticality column has a new/unrecognised value.
+        { criticality: 'rogue_enum' as unknown as null, tenureBand: '7_15y' as const, successorIdentified: false },
+      ];
+      const result = computeStewardshipDensity(holders);
+      expect(Number.isFinite(result.index)).toBe(true);
+      expect(result.index).toBe(1);
+      // Both rows are counted as carriers; only the known-criticality row contributes weight.
+      expect(result.totalCarriers).toBe(2);
+    });
+
+    it('skips holders with unknown tenureBand (uses 1.0 amplifier)', () => {
+      const holders = [
+        { criticality: 'institution_critical' as const, tenureBand: 'rogue' as unknown as null, successorIdentified: false },
+      ];
+      const result = computeStewardshipDensity(holders);
+      // criticality 1.0 * tenure fallback 1.0 = 1.0
+      expect(result.totalWeight).toBe(1);
+      expect(result.exposedWeight).toBe(1);
+    });
+
+    it('skips null/undefined holder rows defensively', () => {
+      const holders = [
+        null as unknown as HolderForIndex,
+        undefined as unknown as HolderForIndex,
+        { criticality: 'institution_critical' as const, tenureBand: '7_15y' as const, successorIdentified: false },
+      ];
+      const result = computeStewardshipDensity(holders);
+      expect(result.totalCarriers).toBe(1);
+      expect(result.index).toBe(1);
+    });
+
+    it('returns the empty result when input is not an array', () => {
+      const result = computeStewardshipDensity(undefined as unknown as readonly HolderForIndex[]);
+      expect(result.index).toBe(0);
+      expect(result.band.id).toBe('distributed');
+      expect(result.totalCarriers).toBe(0);
+    });
   });
 });
