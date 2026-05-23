@@ -32,6 +32,17 @@ const WHITEPAPER_COPY = {
     sourceValue: 'infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf',
     articleNotice:
       'This page renders the full extracted whitepaper text and preserves section order for direct online reading.',
+    abstractLabel: 'Abstract',
+    abstractReadingTime: '~25 minute read',
+    abstractBody:
+      'Canadian labour organizations face a generational continuity gap: 5.2 million boomers have already left the workforce, another 2.7 million are projected to exit within five years, and labour-force participation is forecast to decline by more than two percentage points by 2030. Succession planning, headcount strategy, and document retention were designed for a different scale of loss and cannot, on their own, preserve the institutional memory, governance posture, and decision lineage that organized labour relies on.',
+    abstractBodyTwo:
+      'This whitepaper introduces organizational continuity infrastructure as a distinct discipline. It defines the Organizational Continuity Index (OCI) and Organizational Continuity Risk Analysis (OCRA), describes the deterministic-AI doctrine and governance boundaries used to keep continuity tooling safe under labour scrutiny, and outlines the deployment controls, evidence model, and legal alignment that allow unions, federations, and democratic organizations to operationalize continuity without surrendering authority over their own institutional memory.',
+    abstractCallouts: [
+      'Defines OCI and OCRA as institutional continuity primitives.',
+      'Articulates deterministic-AI doctrine and governance boundaries.',
+      'Maps deployment, evidence, and legal alignment for labour organizations.',
+    ],
   },
   'fr-CA': {
     title: 'Livre blanc UnionEyes | Infrastructure de continuite institutionnelle',
@@ -55,6 +66,17 @@ const WHITEPAPER_COPY = {
     sourceValue: 'infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf',
     articleNotice:
       'Cette page affiche le texte integral extrait du livre blanc et conserve l ordre original des sections.',
+    abstractLabel: 'Resume',
+    abstractReadingTime: 'Lecture d environ 25 minutes',
+    abstractBody:
+      'Les organisations syndicales canadiennes affrontent un ecart generationnel de continuite : 5,2 millions de baby-boomers ont deja quitte la population active, 2,7 millions supplementaires devraient partir d ici cinq ans, et le taux d activite devrait reculer de plus de deux points de pourcentage d ici 2030. La planification de la releve, la gestion des effectifs et la conservation documentaire ont ete concues pour une autre echelle de pertes et ne peuvent, a elles seules, preserver la memoire institutionnelle, la posture de gouvernance et la lignee des decisions sur lesquelles repose le mouvement syndical.',
+    abstractBodyTwo:
+      'Ce livre blanc introduit l infrastructure de continuite institutionnelle comme une discipline distincte. Il definit l Indice de continuite institutionnelle (OCI) et l Analyse de risque de continuite institutionnelle (OCRA), decrit la doctrine d IA deterministe et les limites de gouvernance qui permettent aux outils de continuite de resister a un examen syndical rigoureux, et expose les controles de deploiement, le modele de preuve et l alignement juridique qui permettent aux syndicats, federations et organisations democratiques d operationnaliser la continuite sans renoncer a leur autorite sur leur propre memoire institutionnelle.',
+    abstractCallouts: [
+      'Definit OCI et OCRA comme primitives de continuite institutionnelle.',
+      'Enonce la doctrine d IA deterministe et les limites de gouvernance.',
+      'Cartographie le deploiement, la preuve et l alignement juridique pour les organisations syndicales.',
+    ],
   },
 } as const;
 
@@ -1103,6 +1125,31 @@ export default async function LocaleWhitepaperPage({
                 {copy.ctaLabel}
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="whitepaper-abstract" className="border-b border-slate-200 bg-slate-50">
+        <div className="mx-auto w-full max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-7 shadow-sm sm:p-10">
+            <div className="flex flex-col gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+              <h2 id="whitepaper-abstract" className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1f5b84]">
+                {copy.abstractLabel}
+              </h2>
+              <span className="text-xs font-medium text-slate-500">{copy.abstractReadingTime}</span>
+            </div>
+            <p className="mt-5 text-base leading-relaxed text-slate-700 sm:text-lg">{copy.abstractBody}</p>
+            <p className="mt-4 text-base leading-relaxed text-slate-700 sm:text-lg">{copy.abstractBodyTwo}</p>
+            <ul className="mt-6 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
+              {copy.abstractCallouts.map((point) => (
+                <li
+                  key={point}
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 leading-snug"
+                >
+                  {point}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>

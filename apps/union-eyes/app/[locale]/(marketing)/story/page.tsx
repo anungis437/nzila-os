@@ -147,6 +147,17 @@ export default async function LocaleStoryPage({
               <Link href={`/${locale}/contact`}>{t('ctaContact')}</Link>
             </Button>
           </div>
+          <p className="mt-5 text-sm text-slate-600">
+            <Link
+              href={`/${locale}/whitepaper`}
+              className="inline-flex items-center gap-1 text-blue-700 underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+            >
+              {locale === 'fr-CA'
+                ? 'Lire le livre blanc UnionEyes (~25 min)'
+                : 'Read the UnionEyes whitepaper (~25 min read)'}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </p>
         </section>
       </main>
     </div>

@@ -713,6 +713,17 @@ export default async function LocalePricingPage({
           <p className="text-xs text-white/55 mt-6 max-w-2xl mx-auto leading-relaxed">
             {copy.ctaFinePrint}
           </p>
+          <p className="mt-5 text-sm text-white/80">
+            <Link
+              href={`/${locale}/whitepaper`}
+              className="inline-flex items-center gap-1 underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded"
+            >
+              {locale === 'fr-CA'
+                ? 'Lire le livre blanc UnionEyes (~25 min)'
+                : 'Read the UnionEyes whitepaper (~25 min read)'}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </p>
         </div>
       </section>
     </div>
