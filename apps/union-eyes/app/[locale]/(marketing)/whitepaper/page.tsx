@@ -288,7 +288,7 @@ const MAJOR_HEADING_PATTERNS = [
 
 const CURATED_SECTION_IMAGERY: Array<{ match: RegExp; imageUrl: string; alt: string }> = [
   { match: /^Executive Summary$/i, imageUrl: heroImagery.insights, alt: 'Executive continuity summary' },
-  { match: /^Section\s+1\b/i, imageUrl: heroImagery.institutionalContinuity, alt: 'Organizational continuity risk landscape' },
+  { match: /^Section\s+1\b/i, imageUrl: heroImagery.organizationalContinuity, alt: 'Organizational continuity risk landscape' },
   { match: /^Section\s+2\b/i, imageUrl: 'https://images.unsplash.com/photo-1576765608866-5b51046452be?w=1920&q=80&auto=format', alt: 'Aging hands \u2014 Canada\u2019s demographic continuity shock' },
   { match: /^Section\s+3\b/i, imageUrl: heroImagery.organizationalMemoryModule, alt: 'Organizational memory and tacit knowledge transfer' },
   { match: /^Section\s+4\b/i, imageUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1920&q=80&auto=format', alt: 'Financial cost of organizational unpreparedness' },

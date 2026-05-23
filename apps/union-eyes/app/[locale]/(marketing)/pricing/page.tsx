@@ -389,7 +389,7 @@ const pricingCopy = {
     commitmentsBody: 'Every maturity tier inherits the same organizational commitments. These are the positions that distinguish operational infrastructure from generic AI tooling.',
     trustCenter: 'Trust Center',
     governanceStructure: 'Governance Structure',
-    institutionalProof: 'Organizational Proof',
+    organizationalProof: 'Organizational Proof',
     ctaLabel: 'Let’s find the right fit',
     ctaHeading: 'Start with a conversation, not a quote',
     ctaBody: 'Tell us where your organization is today. We’ll help you identify the right tier, walk through what it looks like in practice, and shape the program with you — at the pace that fits your governance.',
@@ -428,7 +428,7 @@ const pricingCopy = {
     commitmentsBody: 'Chaque palier hérite des mêmes engagements organisationnels. Ce sont ces positions qui distinguent l’infrastructure opérationnelle des outils d’IA génériques.',
     trustCenter: 'Centre de confiance',
     governanceStructure: 'Structure de gouvernance',
-    institutionalProof: 'Preuves organisationnelles',
+    organizationalProof: 'Preuves organisationnelles',
     ctaLabel: 'Trouvons le bon ajustement',
     ctaHeading: 'Commencer par une conversation, pas par un devis',
     ctaBody: 'Dites-nous où se situe votre organisation aujourd’hui. Nous vous aidons à identifier le bon palier et à façonner le programme à un rythme compatible avec votre gouvernance.',
@@ -693,7 +693,7 @@ export default async function LocalePricingPage({
               href="../proof"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
             >
-              {copy.institutionalProof} <ArrowRight className="h-4 w-4" />
+              {copy.organizationalProof} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>

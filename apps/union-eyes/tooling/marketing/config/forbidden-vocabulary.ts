@@ -1091,11 +1091,8 @@ export const PUBLIC_MESSAGES_NAMESPACES: ReadonlySet<string> = new Set<string>([
   "executiveIntelligence",
   "insightsPage",
   "insights",
-  // TODO(oci-keys): rename i18n keys to `organizational*` to match the OCI
-  // doctrine flip. Until that lands, the actual JSON keys remain `institutional*`
-  // so we keep these namespace entries on the on-disk names.
-  "institutionalContinuityPage",
-  "institutionalContinuity",
+  "organizationalContinuityPage",
+  "organizationalContinuity",
   "conventionsPage",
   "conventions",
   "proofPage",

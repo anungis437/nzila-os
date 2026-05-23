@@ -70,7 +70,7 @@ export default function LocaleSiteFooter() {
       { name: t('story'),        href: `/${locale}/story` },
       { name: t('insights'),     href: `/${locale}/insights` },
       { name: whitepaperLabel,   href: `/${locale}/whitepaper` },
-      { name: t('institutionalProof'), href: `/${locale}/proof` },
+      { name: t('organizationalProof'), href: `/${locale}/proof` },
       // Case studies hidden until pilots complete — re-enable via CASE_STUDIES_VISIBLE flag.
       // { name: t('caseStudies'),  href: `/${locale}/case-studies` },
       { name: t('pricing'),      href: `/${locale}/pricing` },

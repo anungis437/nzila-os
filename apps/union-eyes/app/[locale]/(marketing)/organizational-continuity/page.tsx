@@ -196,7 +196,7 @@ export default async function InstitutionalContinuityPage({
 
       {/* ── Hero ── */}
       <MarketingHeroSection
-        imageUrl={heroImagery.institutionalContinuity}
+        imageUrl={heroImagery.organizationalContinuity}
         badge={
           <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white">
             {copy.badge}

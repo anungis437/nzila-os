@@ -167,7 +167,7 @@ export default async function ContinuityAssessmentPage({ params }: PageProps) {
   return (
     <main>
       <MarketingHeroSection
-        imageUrl={heroImagery.institutionalContinuity}
+        imageUrl={heroImagery.organizationalContinuity}
         badge={copy.badge}
         heading={copy.heading}
         description={copy.description}
