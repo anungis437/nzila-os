@@ -9,6 +9,7 @@ import { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
 import { eq, and, sql, inArray } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { logger } from '@/lib/logger';
 
 export const GET = withApiAuth(async (
   _request: NextRequest,
@@ -56,10 +57,13 @@ export const GET = withApiAuth(async (
     return NextResponse.json({ error: 'Document not found' }, { status: 404 });
   }
 
-  // Bump view count (fire-and-forget)
+  // Bump view count (fire-and-forget). Log failures so a broken index or
+  // permissions issue is visible instead of silently never recording views.
   withSystemContext(() => db.execute(
     sql`UPDATE knowledge_base SET view_count = view_count + 1 WHERE id = ${id}::uuid`,
-  )).catch(() => {});
+  )).catch((error) => {
+    logger.warn('knowledge-base: failed to increment view_count', { id, error: error instanceof Error ? error.message : String(error) });
+  });
 
   return NextResponse.json({ data: row });
 });
