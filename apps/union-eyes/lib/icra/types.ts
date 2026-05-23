@@ -242,7 +242,7 @@ export interface FollowupRecommendation {
   ctaHref: string;
 }
 
-export interface InstitutionalContinuityProfile {
+export interface OrganizationalContinuityProfile {
   assessmentId: string;
   generatedAt: string;
   maturityBand: MaturityBand;

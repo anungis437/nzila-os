@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/api-auth-guard';
-import { InstitutionalMemoryExplorer } from '@/components/knowledge-transfer/institutional-memory-explorer';
+import { OrganizationalMemoryExplorer } from '@/components/knowledge-transfer/organizational-memory-explorer';
 import { RuntimeHydrationFooter } from '@/components/runtime-hydration';
 import { CONTINUITY_INTELLIGENCE_FOUNDATIONS_VERSION } from '@nzila/institutional-governance-graph';
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     'Navigate your institution\'s preserved context, procedural lineage, and continuity-aware records. Assistive · human-reviewed · review-required.',
 };
 
-export default async function InstitutionalMemoryPage() {
+export default async function OrganizationalMemoryPage() {
   const user = await requireUser();
   if (!user) {
     redirect('/sign-in');
@@ -21,7 +21,7 @@ export default async function InstitutionalMemoryPage() {
 
   return (
     <>
-      <InstitutionalMemoryExplorer />
+      <OrganizationalMemoryExplorer />
       <RuntimeHydrationFooter
         surface="Institutional Memory"
         provenance={{

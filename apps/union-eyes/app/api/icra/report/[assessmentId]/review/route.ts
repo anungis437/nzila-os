@@ -21,7 +21,7 @@ import { db } from '@/db/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { logger } from '@/lib/logger';
 import { ALL_QUESTIONS } from '@/lib/icra/questions';
-import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
+import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
 import {
   applyAdaptiveReportReviewDecision,
   embedPersistedAdaptiveReportAISlot,
@@ -106,7 +106,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Profile not found.' }, { status: 404 });
     }
 
-    const profile = profileRow.profilePayload as InstitutionalContinuityProfile;
+    const profile = profileRow.profilePayload as OrganizationalContinuityProfile;
     const locale = assessment.locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
 
     const slot =

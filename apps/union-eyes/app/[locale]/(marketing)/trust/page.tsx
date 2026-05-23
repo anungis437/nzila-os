@@ -39,7 +39,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusPage } from '@/components/monitoring/StatusPage';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
-import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
+import { OrganizationalContinuityNote } from '@/components/marketing/organizational-continuity-note';
 import { getInstitutionalModeProfile, parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import {
@@ -296,7 +296,7 @@ export default async function TrustPage({
         }
       />
 
-      <InstitutionalContinuityNote
+      <OrganizationalContinuityNote
         surface={tNote('label')}
         posture={tNote('posture')}
       />

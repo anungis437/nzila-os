@@ -26,7 +26,7 @@ import { db } from '@/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type {
   ExecutivePersonaId,
-  InstitutionalContinuityProfile,
+  OrganizationalContinuityProfile,
   ReportTierId,
 } from '@/lib/icra/types';
 import { logger } from '@/lib/logger';
@@ -131,7 +131,7 @@ export async function syncIcraPurchase(
       return { ok: false, skipped: 'profile_missing' };
     }
 
-    const profile = profileRow.profilePayload as InstitutionalContinuityProfile;
+    const profile = profileRow.profilePayload as OrganizationalContinuityProfile;
 
     // Resolve adaptive context — persisted blob, or reconstructed deterministically
     // from declared org form. Failure is non-fatal: HubSpot sync proceeds with

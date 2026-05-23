@@ -35,7 +35,7 @@ import {
   ReadinessAssessmentResult,
 } from '@/lib/pilot/readiness-assessment';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
-import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
+import { OrganizationalContinuityNote } from '@/components/marketing/organizational-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { getInstitutionalModeProfile, parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { logger } from '@/lib/logger';
@@ -231,7 +231,7 @@ export default function LocalePilotRequestPage() {
         contextNote={contextProfile.heroFraming}
       />
 
-      <InstitutionalContinuityNote
+      <OrganizationalContinuityNote
         surface={tNote('label')}
         posture={tNote('posture')}
       />

@@ -18,7 +18,7 @@ import type {
   DimensionScore,
   ExecutivePersonaId,
   FollowupRecommendation,
-  InstitutionalContinuityProfile,
+  OrganizationalContinuityProfile,
   MaturityBand,
   OrganizationContext,
   SectionScore,
@@ -151,7 +151,7 @@ function mapApprovedAdaptiveReportSlot(
 }
 
 export function mapToPdfReportData(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
   orgContext?: OrganizationContext | null,
   executiveStabilization?: ExecutiveStabilizationResult | null,
   options?: MapToPdfReportDataOptions,

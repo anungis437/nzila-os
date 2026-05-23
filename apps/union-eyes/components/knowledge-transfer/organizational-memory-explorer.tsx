@@ -187,7 +187,7 @@ function TopicPill({
   );
 }
 
-export function InstitutionalMemoryExplorer() {
+export function OrganizationalMemoryExplorer() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);

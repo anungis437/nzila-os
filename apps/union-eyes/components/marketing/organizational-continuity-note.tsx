@@ -1,5 +1,5 @@
 /**
- * InstitutionalContinuityNote — Wave 7 procurement inevitability surface.
+ * OrganizationalContinuityNote — Wave 7 procurement inevitability surface.
  *
  * A small, low-energy band rendered immediately under the hero on
  * procurement-facing marketing surfaces (trust, pricing, pilot-request,
@@ -12,7 +12,7 @@
  */
 import { ScrollText } from 'lucide-react';
 
-type InstitutionalContinuityNoteProps = {
+type OrganizationalContinuityNoteProps = {
   /** One-line operational identity of the surface, e.g. "Trust posture". */
   surface: string;
   /**
@@ -24,10 +24,10 @@ type InstitutionalContinuityNoteProps = {
   posture: string;
 };
 
-export function InstitutionalContinuityNote({
+export function OrganizationalContinuityNote({
   surface,
   posture,
-}: InstitutionalContinuityNoteProps) {
+}: OrganizationalContinuityNoteProps) {
   return (
     <aside
       role="note"

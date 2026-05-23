@@ -20,7 +20,7 @@ import type {
   ContinuityInsight,
   ContinuityObservation,
   ContinuitySignal,
-  InstitutionalContinuityProfile,
+  OrganizationalContinuityProfile,
   DimensionScore,
   InsightCategory,
   ReportTierId,
@@ -120,7 +120,7 @@ const OBSERVATION_SEVERITY_ORDER: Record<ContinuityObservation['severity'], numb
 };
 
 interface ICRAProfileProps {
-  profile: InstitutionalContinuityProfile;
+  profile: OrganizationalContinuityProfile;
   tierId?: ReportTierId;
 }
 

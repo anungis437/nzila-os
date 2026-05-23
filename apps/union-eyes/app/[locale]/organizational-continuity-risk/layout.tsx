@@ -11,7 +11,7 @@
  */
 import StandaloneBrandedHeader from '@/components/branding/StandaloneBrandedHeader';
 
-export default async function InstitutionalContinuityRiskLayout({
+export default async function OrganizationalContinuityRiskLayout({
   children,
   params,
 }: {

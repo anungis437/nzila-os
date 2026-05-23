@@ -10,7 +10,7 @@
 
 import type {
   ContinuityObservation,
-  InstitutionalContinuityProfile,
+  OrganizationalContinuityProfile,
 } from '../types';
 import {
   normalizeContextualScore,
@@ -36,7 +36,7 @@ export type ScaleAdjustedWarning = ContinuityObservation;
 
 export interface ContextualAssessmentResult {
   /** Unmodified raw scoring output — never mutated. */
-  readonly rawProfile: InstitutionalContinuityProfile;
+  readonly rawProfile: OrganizationalContinuityProfile;
   /** Organizational profile that drove the adaptation. */
   readonly institutionalProfile: InstitutionalAssessmentProfile;
   /** Per-dimension narrative emphasis. */
@@ -97,7 +97,7 @@ function filterWarningsForProfile(
  * reference and never mutated.
  */
 export function adaptScoring(
-  rawProfile: InstitutionalContinuityProfile,
+  rawProfile: OrganizationalContinuityProfile,
   institutionalProfile: InstitutionalAssessmentProfile,
 ): ContextualAssessmentResult {
   const emphasis = resolveDomainEmphasis(institutionalProfile);

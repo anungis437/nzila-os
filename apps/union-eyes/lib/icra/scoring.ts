@@ -21,7 +21,7 @@ import type {
   DimensionId,
   DimensionScore,
   FollowupRecommendation,
-  InstitutionalContinuityProfile,
+  OrganizationalContinuityProfile,
   MaturityBand,
   Question,
   SectionId,
@@ -56,7 +56,7 @@ export function buildAnswer(question: Question, rawValue: string | number, note?
 export function computeProfile({
   assessmentId,
   answers,
-}: ComputeProfileInput): InstitutionalContinuityProfile {
+}: ComputeProfileInput): OrganizationalContinuityProfile {
   return scoreAssessment(assessmentId, answers).profile
 }
 
@@ -123,7 +123,7 @@ export function scoreAssessment(
   answers: Answer[],
   orgContext?: ScoringOrgContext,
 ): {
-  profile: InstitutionalContinuityProfile
+  profile: OrganizationalContinuityProfile
   trace: ScoringTrace
 } {
   const now = new Date().toISOString()
@@ -234,7 +234,7 @@ export function scoreAssessment(
     composite,
     maturityBand,
   }
-  const profile: InstitutionalContinuityProfile = {
+  const profile: OrganizationalContinuityProfile = {
     assessmentId,
     generatedAt: now,
     maturityBand,

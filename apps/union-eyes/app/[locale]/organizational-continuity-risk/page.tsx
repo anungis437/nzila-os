@@ -67,7 +67,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function InstitutionalContinuityRiskPage({
+export default async function OrganizationalContinuityRiskPage({
   params,
 }: {
   params: Promise<{ locale: string }>;

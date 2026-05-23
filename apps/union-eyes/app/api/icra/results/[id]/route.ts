@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { icraMaturityProfiles } from '@/db/schema/icra-schema';
-import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
+import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
 import { rateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest, { params }: Params): Promise<NextRes
       return NextResponse.json({ error: 'Assessment not found.' }, { status: 404 });
     }
 
-    const profile = row.profilePayload as InstitutionalContinuityProfile;
+    const profile = row.profilePayload as OrganizationalContinuityProfile;
     return NextResponse.json(profile, { status: 200 });
   } catch (err) {
     logger.error('icra.results.fetch_failed', { id, error: (err as Error).message });

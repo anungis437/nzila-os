@@ -1,4 +1,4 @@
-import type { InstitutionalContinuityProfile } from '../types';
+import type { OrganizationalContinuityProfile } from '../types';
 
 import { type SupportedLocale } from './adaptivePassageLibrary';
 import { adaptScoring } from './adaptiveScoringModel';
@@ -41,7 +41,7 @@ export function extractPersistedAdaptiveReportAISlot(
 }
 
 export function resolveAdaptiveReportAISlot(input: {
-  rawProfile: InstitutionalContinuityProfile;
+  rawProfile: OrganizationalContinuityProfile;
   organizationContext: unknown;
   questionBank: readonly RoutableQuestion[];
   locale: SupportedLocale;

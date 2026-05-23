@@ -176,7 +176,7 @@ const pageCopy = {
   },
 } as const;
 
-export default async function InstitutionalContinuityPage({
+export default async function OrganizationalContinuityPage({
   params,
 }: {
   params: Promise<{ locale: string }>;

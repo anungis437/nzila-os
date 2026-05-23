@@ -22,7 +22,7 @@
 import type {
   ContinuityBurdenIndex,
   ExecutivePersonaId,
-  InstitutionalContinuityProfile,
+  OrganizationalContinuityProfile,
   MaturityBandId,
   ReportTierId,
 } from '@/lib/icra/types';
@@ -125,7 +125,7 @@ export const REPORT_TIER_LABELS: Record<ReportTierId, string> = {
 
 export type PostureLabel = 'Low' | 'Moderate' | 'Elevated';
 
-function dimScore(profile: InstitutionalContinuityProfile, dim: string): number {
+function dimScore(profile: OrganizationalContinuityProfile, dim: string): number {
   return profile.dimensions.find((d) => d.dimension === dim)?.score ?? 50;
 }
 
@@ -138,13 +138,13 @@ function postureFromRiskScore(score: number): PostureLabel {
 }
 
 /** Governance entropy — higher governance fragility (= lower score) → elevated entropy. */
-export function mapGovernanceEntropy(profile: InstitutionalContinuityProfile): PostureLabel {
+export function mapGovernanceEntropy(profile: OrganizationalContinuityProfile): PostureLabel {
   return postureFromRiskScore(dimScore(profile, 'governance_fragility'));
 }
 
 /** Stewardship concentration — derived from continuity burden + dependency dims. */
 export function mapStewardshipConcentration(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): PostureLabel {
   const burden = profile.burdenIndex?.score ?? 50;
   const ic = dimScore(profile, 'institutional_continuity');
@@ -156,7 +156,7 @@ export function mapStewardshipConcentration(
 
 /** Organizational dependency risk — operational memory + transition readiness. */
 export function mapInstitutionalDependencyRisk(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): PostureLabel {
   const om = dimScore(profile, 'operational_memory');
   const tr = dimScore(profile, 'transition_readiness');
@@ -171,7 +171,7 @@ export function mapInstitutionalDependencyRisk(
 export type ModernizationAlignmentLabel = 'Aligned' | 'Watch' | 'Misaligned';
 
 export function mapModernizationAlignment(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): ModernizationAlignmentLabel {
   const ic = dimScore(profile, 'institutional_continuity');
   const om = dimScore(profile, 'operational_memory');
@@ -188,7 +188,7 @@ export function mapModernizationAlignment(
 export type ComplexityLabel = 'Low' | 'Moderate' | 'High';
 
 export function mapGovernanceComplexity(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): ComplexityLabel {
   const gf = dimScore(profile, 'governance_fragility');
   const td = dimScore(profile, 'trust_debt');
@@ -199,7 +199,7 @@ export function mapGovernanceComplexity(
 }
 
 export function mapModernizationMaturity(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): ComplexityLabel {
   const ic = dimScore(profile, 'institutional_continuity');
   if (ic >= 70) return 'High';
@@ -208,7 +208,7 @@ export function mapModernizationMaturity(
 }
 
 export function mapContinuityRiskPosture(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): PostureLabel {
   const composite = profile.composite;
   if (composite < 40) return 'Elevated';
@@ -217,7 +217,7 @@ export function mapContinuityRiskPosture(
 }
 
 export function mapTransformationReadiness(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): PostureLabel {
   const tr = dimScore(profile, 'transition_readiness');
   return postureFromRiskScore(tr);
@@ -235,7 +235,7 @@ export interface IcraContactAttribution {
 
 /** Build the HubSpot contact custom-properties record from an ICRA profile. */
 export function buildContactProperties(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
   options: {
     persona?: ExecutivePersonaId;
     attribution?: IcraContactAttribution;
@@ -277,7 +277,7 @@ export function buildContactProperties(
 
 /** Build the HubSpot company custom-properties record from an ICRA profile. */
 export function buildCompanyProperties(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): Record<string, string> {
   const burdenScore = profile.burdenIndex?.score ?? 50;
   return {
