@@ -11,12 +11,12 @@ import { CONTINUITY_GAP_BLOCKS } from '@/lib/whitepaper/continuity-gap';
 
 const WHITEPAPER_COPY = {
   'en-CA': {
-    title: 'UnionEyes Whitepaper | Institutional Continuity Infrastructure',
+    title: 'UnionEyes Whitepaper | Organizational Continuity Infrastructure',
     description:
-      'The UnionEyes whitepaper outlines the institutional continuity model, governance boundaries, deterministic AI doctrine, and deployment controls for labour organizations.',
+      'The UnionEyes whitepaper outlines the organizational continuity model, governance boundaries, deterministic AI doctrine, and deployment controls for labour organizations.',
     heading: 'UnionEyes Whitepaper',
     heroDescription:
-      'An executive technical brief on institutional continuity architecture, governed AI boundaries, and operational safeguards for labour leadership.',
+      'An executive technical brief on organizational continuity architecture, governed AI boundaries, and operational safeguards for labour leadership.',
     subtitle: 'Whitepaper article',
     ctaLabel: 'Read Insights Library',
     ctaHref: '/insights',
@@ -247,7 +247,7 @@ const KNOWN_TABLES: TableSpec[] = [
       ],
       [
         'Is succession planning enough?',
-        'No. Succession planning identifies who follows. Institutional continuity preserves what must survive.',
+        'No. Succession planning identifies who follows. Organizational continuity preserves what must survive.',
       ],
     ],
   },
@@ -1092,7 +1092,7 @@ export default async function LocaleWhitepaperPage({
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-4xl font-semibold text-white drop-shadow-md sm:text-5xl lg:text-6xl">The Continuity Gap</h1>
-            <p className="mt-4 text-base text-white/90 drop-shadow sm:text-lg lg:text-xl">Organizational Memory, Institutional Resilience, and the Future of Operational Trust</p>
+            <p className="mt-4 text-base text-white/90 drop-shadow sm:text-lg lg:text-xl">Organizational Memory, Organizational Resilience, and the Future of Operational Trust</p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center print:hidden">
               {/* PDF download temporarily hidden — see PrintPdfButton */}
