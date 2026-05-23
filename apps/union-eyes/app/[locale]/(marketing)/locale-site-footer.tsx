@@ -28,37 +28,37 @@ const FOOTER_COPY: Record<string, {
   'en-CA': {
     ctaHeading: 'Ready to lead with institutional clarity?',
     ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an Executive Briefing.',
-    pilotBadge: 'Pilot Active',
+    pilotBadge: 'Founding Partner Program',
     canadaBadge: 'Canadian Made',
   },
   en: {
     ctaHeading: 'Ready to lead with institutional clarity?',
     ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an Executive Briefing.',
-    pilotBadge: 'Pilot Active',
+    pilotBadge: 'Founding Partner Program',
     canadaBadge: 'Canadian Made',
   },
   'fr-CA': {
     ctaHeading: 'Prêt à diriger avec clarté institutionnelle?',
     ctaBody: 'Découvrez comment UnionEyes transforme le travail syndical, la gouvernance et la continuité en un dossier institutionnel défendable. Demandez une séance d\'orientation institutionnelle.',
-    pilotBadge: 'Pilote actif',
+    pilotBadge: 'Programme partenaires fondateurs',
     canadaBadge: 'Fait au Canada',
   },
   fr: {
     ctaHeading: 'Prêt à diriger avec clarté institutionnelle?',
     ctaBody: 'Découvrez comment UnionEyes transforme le travail syndical, la gouvernance et la continuité en un dossier institutionnel défendable. Demandez une séance d\'orientation institutionnelle.',
-    pilotBadge: 'Pilote actif',
+    pilotBadge: 'Programme partenaires fondateurs',
     canadaBadge: 'Fait au Canada',
   },
   it: {
     ctaHeading: 'Pronto a guidare con chiarezza istituzionale?',
     ctaBody: 'Scopri come UnionEyes trasforma casework, governance e continuità in un registro istituzionale difendibile. Richiedi un Executive Briefing.',
-    pilotBadge: 'Pilota attivo',
+    pilotBadge: 'Programma partner fondatori',
     canadaBadge: 'Creato in Canada',
   },
   pt: {
     ctaHeading: 'Pronto para liderar com clareza institucional?',
     ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical, a governança e a continuidade em um registro institucional defensável. Solicite um Executive Briefing.',
-    pilotBadge: 'Piloto ativo',
+    pilotBadge: 'Programa Parceiros Fundadores',
     canadaBadge: 'Feito no Canadá',
   },
 };

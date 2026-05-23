@@ -188,7 +188,7 @@ export function ContactForm() {
             <SelectContent>
               <SelectItem value="general">General question</SelectItem>
               <SelectItem value="demo">Request an Executive Briefing</SelectItem>
-              <SelectItem value="pilot">Pilot program inquiry</SelectItem>
+              <SelectItem value="pilot">Founding Partner Program inquiry</SelectItem>
               <SelectItem value="pricing">Pricing information</SelectItem>
               <SelectItem value="support">Technical support</SelectItem>
               <SelectItem value="partnership">Partnership opportunity</SelectItem>
