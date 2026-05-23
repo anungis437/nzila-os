@@ -319,7 +319,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
             {copy.ctaDescription}
           </p>
           <Link
-            href={`/${locale}/continuity-assessment/start`}
+            href={`/${locale}/institutional-continuity-risk`}
             className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
             {copy.cta}

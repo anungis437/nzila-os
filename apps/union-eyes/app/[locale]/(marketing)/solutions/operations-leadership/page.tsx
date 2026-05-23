@@ -105,7 +105,7 @@ export default async function OperationsLeadershipPage({ params }: { params: Pro
         description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/${locale}/continuity-assessment/start`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.primaryCta}
             </Link>
             <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
@@ -170,7 +170,7 @@ export default async function OperationsLeadershipPage({ params }: { params: Pro
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/continuity-assessment/start`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.primaryCta}
           </Link>
         </div>

@@ -197,7 +197,7 @@ export default async function LocaleMemberPortalPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href={`/${locale}/continuity-assessment/start`}
+              href={`/${locale}/institutional-continuity-risk`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm"
             >
               {briefingCta} <ArrowRight className="h-4 w-4" />

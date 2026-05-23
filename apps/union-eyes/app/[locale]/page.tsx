@@ -125,7 +125,7 @@ export default async function LocaleRootPage({
             <ScrollReveal delay={0.24}>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
-                  href={`/${locale}/pilot-request`}
+                  href={`/${locale}/institutional-continuity-risk`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
                   {t('ctaPrimary')}
@@ -273,7 +273,7 @@ export default async function LocaleRootPage({
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href={`/${locale}/pilot-request`}
+                  href={`/${locale}/institutional-continuity-risk`}
                   className="inline-flex items-center justify-center px-10 py-5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
                   {t('finalCtaPrimary')}

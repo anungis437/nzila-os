@@ -7228,7 +7228,7 @@
       "caseStudies": "Case Studies",
       "status": "Status",
       "contact": "Contact",
-      "requestPilot": "Executive Briefing",
+      "requestPilot": "Continuity Reflection",
       "signIn": "Sign In"
     },
     "home": {
@@ -7236,7 +7236,7 @@
       "heroHeadingLine1": "Confidence that",
       "heroHeadingLine2": "institutional memory will outlive any individual.",
       "heroDescription": "When experienced staff retire, when officers rotate, when federations merge — the precedents, relationships, and judgment they carry don’t transfer on their own. Union Eyes is the infrastructure that keeps it in place. Canadian-hosted. No worker surveillance. No black-box decisions.",
-      "ctaPrimary": "Request Executive Briefing",
+      "ctaPrimary": "Start the free Continuity Reflection",
       "ctaSecondary": "Explore Solutions",
       "ctaTertiary": "Read the Continuity Gap Whitepaper",
       "proofSectionLabel": "Built-in platform guarantees",
@@ -7280,7 +7280,7 @@
       "govImageAlt": "Union assembly governance session with democratic oversight",
       "finalCtaHeading": "Ready for institutional continuity at executive scale?",
       "finalCtaDescription": "Start with a guided pilot built around your governance and operations priorities.",
-      "finalCtaPrimary": "Request Executive Briefing",
+      "finalCtaPrimary": "Start the free Continuity Reflection",
       "finalCtaSecondary": "View Governance & Trust"
     },
     "story": {
@@ -7328,7 +7328,7 @@
       "yearly": "Yearly",
       "perMonth": "/ month",
       "perYear": "/ year",
-      "getStarted": "Request Executive Briefing",
+      "getStarted": "Start the free Continuity Reflection",
       "pageTitle": "Continuity Engagement Architecture | UnionEyes",
       "pageDescription": "Institutional continuity engagement architecture — OCI assessment, OCRA deepening, governance mapping, platform activation, longitudinal support. Not SaaS tiers."
     },

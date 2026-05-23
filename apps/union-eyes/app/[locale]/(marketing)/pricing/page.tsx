@@ -138,7 +138,7 @@ const assessmentLadder = [
       'One recommendation to start a conversation',
     ],
     cta: 'Start the assessment',
-    ctaHref: '/continuity-assessment/start',
+    ctaHref: '/institutional-continuity-risk',
     featured: false,
   },
   {
@@ -157,7 +157,7 @@ const assessmentLadder = [
       'Full prioritized recommendations',
     ],
     cta: 'Begin with the brief',
-    ctaHref: '/continuity-assessment/start?intendedTier=executive_continuity_brief',
+    ctaHref: '/institutional-continuity-risk?intendedTier=executive_continuity_brief',
     featured: true,
   },
   {
@@ -195,7 +195,7 @@ const frAssessmentLadder = [
       'Une recommandation pour amorcer la conversation',
     ],
     cta: "Commencer l'évaluation",
-    ctaHref: '/continuity-assessment/start',
+    ctaHref: '/institutional-continuity-risk',
     featured: false,
   },
   {
@@ -214,7 +214,7 @@ const frAssessmentLadder = [
       'Recommandations priorisées complètes',
     ],
     cta: 'Commencer par la note',
-    ctaHref: '/continuity-assessment/start?intendedTier=executive_continuity_brief',
+    ctaHref: '/institutional-continuity-risk?intendedTier=executive_continuity_brief',
     featured: true,
   },
   {
@@ -582,7 +582,7 @@ export default async function LocalePricingPage({
         price: '0',
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
-        url: `${marketingUrl}/${locale}/continuity-assessment/start`,
+        url: `${marketingUrl}/${locale}/institutional-continuity-risk`,
       },
       {
         '@type': 'Offer',
@@ -592,7 +592,7 @@ export default async function LocalePricingPage({
         price: '1200',
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
-        url: `${marketingUrl}/${locale}/continuity-assessment/start?intendedTier=executive_continuity_brief`,
+        url: `${marketingUrl}/${locale}/institutional-continuity-risk?intendedTier=executive_continuity_brief`,
       },
       {
         '@type': 'Offer',
@@ -698,7 +698,7 @@ export default async function LocalePricingPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/continuity-assessment/start`}
+              href={`/${locale}/institutional-continuity-risk`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all"
             >
               {copy.ctaPrimary}
