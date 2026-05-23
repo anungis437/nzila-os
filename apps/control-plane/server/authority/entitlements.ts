@@ -113,9 +113,14 @@ function getDeclaredEntitlementSource(): EntitlementSource {
     logger.warn('Unknown CONTROL_PLANE_ENTITLEMENT_SOURCE value — treating as not_configured', { raw })
     return 'not_configured'
   }
-  // Backwards-compatible default: non-prod keeps the conservative stub so
-  // existing dev/test/staging flows do not regress. Production refuses to
-  // resolve until the operator explicitly declares a source.
+  // No explicit declaration. Auto-select the strongest source the runtime
+  // actually has wired:
+  //   - DATABASE_URL set   → `db`  (use the live `org_entitlements` table)
+  //   - DATABASE_URL unset → `stub` in non-prod (dev/test without a DB),
+  //                          `not_configured` in production so missing
+  //                          infra fails loud instead of silently denying.
+  const hasDb = Boolean(process.env.DATABASE_URL)
+  if (hasDb) return 'db'
   return process.env.NODE_ENV === 'production' ? 'not_configured' : 'stub'
 }
 

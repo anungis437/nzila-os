@@ -66,6 +66,29 @@ registerSideEffectHandler('shopify_sync', async (request): Promise<SideEffectRes
   } else if (action === 'get_fulfillment_status') {
     const shopifyOrderId = request.metadata?.shopify_order_id as number
     await shopify.getFulfillmentStatus(shopifyOrderId)
+  } else if (action === 'sync_products') {
+    const orgId = request.org_id
+    const actorId = request.metadata?.actor_id as string | undefined
+    if (!orgId || !actorId) {
+      return {
+        type: 'shopify_sync',
+        success: false,
+        error: 'shopify_sync action=sync_products requires request.org_id and metadata.actor_id',
+      }
+    }
+    const result = await shopify.syncProducts({
+      orgId,
+      actorId,
+      correlationId: (request.metadata?.correlation_id as string | undefined),
+      actorRole: (request.metadata?.actor_role as string | undefined),
+      defaultCategory: (request.metadata?.default_category as string | undefined),
+    })
+    logger.info('shopify sync_products complete', {
+      orgId,
+      created: result.created,
+      updated: result.updated,
+      skipped: result.skipped,
+    })
   }
 
   return { type: 'shopify_sync', success: true }

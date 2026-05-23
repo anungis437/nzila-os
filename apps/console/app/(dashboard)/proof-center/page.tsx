@@ -17,7 +17,7 @@ import {
   signProcurementPack,
   createRealPorts,
 } from '@nzila/platform-procurement-proof'
-import { createInMemoryPortDeps } from '@/lib/proof-center-ports'
+import { createPortDeps } from '@/lib/proof-center-ports'
 import {
   ShieldCheckIcon,
   ServerIcon,
@@ -155,7 +155,7 @@ export default async function ProofCenterPage({
   const isExecutive = params.mode === 'executive'
 
   // ── Collect real data via port chain ───────────────────────────────────────
-  const portDeps = createInMemoryPortDeps()
+  const portDeps = createPortDeps('org')
   const ports = createRealPorts(portDeps)
   const pack = await collectProcurementPack('org', 'proof-center-page', ports)
   const signed = await signProcurementPack(pack, ports)

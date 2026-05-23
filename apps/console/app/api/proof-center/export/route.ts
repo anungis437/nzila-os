@@ -20,7 +20,7 @@ import {
   exportAsJson,
   createRealPorts,
 } from '@nzila/platform-procurement-proof'
-import { createInMemoryPortDeps } from '@/lib/proof-center-ports'
+import { createPortDeps } from '@/lib/proof-center-ports'
 
 const logger = createLogger('api:proof-center:export')
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Wire real collectors via ports
-    const portDeps = createInMemoryPortDeps()
+    const portDeps = createPortDeps(auth.userId)
     const ports = createRealPorts(portDeps)
 
     // Collect + sign using real port chain
