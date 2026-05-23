@@ -89,6 +89,7 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-gray-900">{s.title}</p>
                     {s.badge && <Badge variant="info">{s.badge}</Badge>}
+                    {!s.href && <Badge variant="warning">Coming soon</Badge>}
                   </div>
                   <p className="text-sm text-gray-500 mt-1">{s.description}</p>
                 </div>
@@ -98,7 +99,10 @@ export default function SettingsPage() {
           return s.href ? (
             <Link key={s.title} href={s.href} className="block">{inner}</Link>
           ) : (
-            <div key={s.title}>{inner}</div>
+            // Non-navigable card — surface this clearly so users do not click
+            // a "cursor-pointer" card that does nothing. Coming-soon sections
+            // get a visible badge + reduced opacity instead of fake affordance.
+            <div key={s.title} aria-disabled="true" className="opacity-60 cursor-not-allowed" title="Coming soon">{inner}</div>
           )
         })}
       </div>

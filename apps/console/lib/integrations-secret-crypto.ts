@@ -1,8 +1,11 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
+import { createLogger } from '@nzila/os-core'
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12
 const PREFIX = 'enc:v1:'
+
+const logger = createLogger('integrations-secret-crypto')
 
 function getDek(): Buffer | null {
   const keyHex = process.env.INTEGRATION_SECRET_ENCRYPTION_KEY ?? process.env.QBO_TOKEN_ENCRYPTION_KEY
@@ -16,6 +19,18 @@ export function encryptSecrets(secrets: Record<string, string>): string {
   const plaintext = JSON.stringify(secrets)
   const dek = getDek()
   if (!dek) {
+    if (process.env.NODE_ENV === 'production') {
+      // Fail-closed: silently storing integration credentials (OAuth tokens,
+      // API keys, webhook secrets) as plaintext JSON in the DB is unacceptable
+      // in production. Anyone with DB read access could pivot to upstream SaaS.
+      logger.error(
+        'Refusing to persist integration secrets in plaintext — set INTEGRATION_SECRET_ENCRYPTION_KEY (or QBO_TOKEN_ENCRYPTION_KEY) to a 64-char hex key',
+      )
+      throw new Error(
+        'INTEGRATION_SECRET_ENCRYPTION_KEY is required in production to encrypt integration secrets at rest',
+      )
+    }
+    logger.warn('integration secrets stored in plaintext (no encryption key configured — dev/test only)')
     return plaintext
   }
 
