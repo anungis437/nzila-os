@@ -360,15 +360,16 @@ describe('data-export-import', () => {
       expect(mocks.mockWhere).toHaveBeenCalled();
     });
 
-    it('exports as excel format', async () => {
+    it('fails excel format because xlsx serialization is not implemented', async () => {
+      // Honesty pass: excel format throws rather than silently emitting a broken file.
       mocks.mockDynamic.mockImplementation(() =>
         Object.assign(Promise.resolve([{ id: '1' }]), { where: mocks.mockWhere })
       );
       const { DataExportService } = await import('../data-export-import');
       const svc = new DataExportService();
       const result = await svc.export('user1', 'members', {}, { format: 'excel', includeRelations: false, dateFormat: '', compression: false });
-      expect(result.status).toBe('completed');
-      expect(result.format).toBe('excel');
+      expect(result.status).toBe('failed');
+      expect(result.error ?? '').toMatch(/excel|xlsx/i);
     });
 
     it('exports with unknown format uses default', async () => {
