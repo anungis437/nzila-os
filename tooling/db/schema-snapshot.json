@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-05-20T16:15:51.109Z",
+  "capturedAt": "2026-05-23T20:56:51.039Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -143,16 +143,16 @@
       "size": 5342
     },
     "packages/db/src/schema/index.ts": {
-      "hash": "3241b9412a9b605d84f696f34bcfd797582ce6054713567ace415e099a8c2335",
-      "size": 2068
+      "hash": "a1d4c5a73c1de06262364ddab467ec79501232897bbbd35a8a60085d81bbb9db",
+      "size": 2108
     },
     "packages/db/src/schema/integrations.ts": {
       "hash": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65",
       "size": 4233
     },
     "packages/db/src/schema/itsm.ts": {
-      "hash": "885ca599ffa6ee9ad37caa5e683d041838661f18990f251199558182870dab4f",
-      "size": 25752
+      "hash": "4ed7378199511c1e2a2198a04b3a4d71a607a591986c4d5d2a09b96a45769720",
+      "size": 29260
     },
     "packages/db/src/schema/ml.ts": {
       "hash": "b42ea0a14e68bedc08ccbe2582a0288c18ae3f2b08d42cd592a89f48b77d1304",
@@ -193,6 +193,10 @@
     "packages/db/src/schema/pipeline-alerts.ts": {
       "hash": "7bb7e50b20ba0c81e928203ad3174805817058054d557e254c1296f94ffb5b23",
       "size": 1370
+    },
+    "packages/db/src/schema/platform-entity-graph.ts": {
+      "hash": "af04157e5557c3d565b663ce59a7bcccee7c74716f1eb8af6800f1ccbe5aa217",
+      "size": 2744
     },
     "packages/db/src/schema/platform.ts": {
       "hash": "52f3b8ec098e9fbce3fffc9adf5d5735c3b178e2095bf9081adb7c7b690cfeb3",
@@ -235,5 +239,5 @@
       "size": 38020
     }
   },
-  "compositeHash": "aa3fe7ef1c816462de8cecb358ad97921919c48b18a03a885bf7d0702413d419"
+  "compositeHash": "3aea3f8197f2e282fce8e82b53f6ba11c482d392bf6fba1f60325a8eb2b3b266"
 }

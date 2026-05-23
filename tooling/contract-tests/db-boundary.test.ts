@@ -55,6 +55,10 @@ const EXEMPT_PATHS = [
   // Console/Partners — only db setup files are exempt, not route handlers
   'apps/console/db/',
   'apps/console/lib/db',
+  // proof-center-ports-db.ts is the data-access port implementation
+  // (RealPortsDeps adapter) consumed by the in-memory port factory.
+  // It IS the DB layer for the proof-center subsystem, not a route handler.
+  'apps/console/lib/proof-center-ports-db.ts',
   'apps/partners/db/',
   'apps/partners/lib/db',
   // Union-Eyes — db setup + schema + multi-db client are exempt.

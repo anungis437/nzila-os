@@ -4,6 +4,12 @@
   "description": "Routes legitimately exempt from per-request Idempotency-Key enforcement (must have alternative dedup or be low-risk).",
   "entries": [
     {
+      "path": "apps/platform-admin/app/api/admin/set-active-org/route.ts",
+      "owner": "platform-team",
+      "justification": "Session-bootstrap endpoint: sets the active-org cookie based on (userId, orgId). The effect is deterministic and naturally idempotent — replays produce identical cookie state with no DB writes. Idempotency-Key would add friction to a UI selection flow without changing dedup semantics.",
+      "expiresOn": "2026-09-01"
+    },
+    {
       "path": "apps/weekone/app/api/cash/route.ts",
       "owner": "platform-core",
       "justification": "WeekOne is INCUBATING (founder-internal only, no external traffic). Idempotency to be added before promotion to PILOT.",

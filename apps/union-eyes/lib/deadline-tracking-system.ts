@@ -15,13 +15,9 @@ import {
   type GrievanceDeadline,
 } from "@/db/schema";
 import { addDays, addBusinessDays, differenceInDays } from "date-fns";
+import { createLogger } from "@nzila/os-core/telemetry";
 
-const logger = {
-  warn: (msg: string, meta?: Record<string, unknown>) => {
-    // eslint-disable-next-line no-console
-    console.warn(`[deadline-tracking-system] ${msg}`, meta ?? {});
-  },
-};
+const logger = createLogger("union-eyes.deadline-tracking-system");
 
 // ============================================================================
 // TYPES

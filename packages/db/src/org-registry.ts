@@ -318,6 +318,8 @@ export const ORG_SCOPED_TABLES = [
   'itsmProblems',
   'itsmChanges',
   'itsmApprovals',
+  'itsmAutomationRules',
+  'itsmTicketFieldDefs',
   'opsClients',
   'itsmKbArticles',
   'commandAlerts',
@@ -408,6 +410,9 @@ export const NON_ORG_SCOPED_TABLES = [
   { table: 'platformIsolationAudits', reason: 'System-level isolation audit results' },
   { table: 'platformProofPacks', reason: 'System-level governance proof packs' },
   { table: 'platformDeploymentProfiles', reason: 'System-level deployment profile configurations (no Org context)' },
+  // ── platform-entity-graph.ts (uses tenantId text, not org_id UUID) ─────
+  { table: 'platformEntityNodes', reason: 'Multi-tenant ontology graph keyed by tenant_id (text) + entityType + entityId — not org_id UUID scoping' },
+  { table: 'platformEntityEdges', reason: 'Multi-tenant ontology graph keyed by tenant_id (text) — not org_id UUID scoping' },
   { table: 'idempotencyCache', reason: 'System-level idempotency cache — keyed by composite key containing orgId' },
   // Decision/audit pipeline tables — system or cross-org scope (no org_id column)
   { table: 'auditRecords', reason: 'Uses organization_id (text) and supports cross-org audit ingestion/export' },

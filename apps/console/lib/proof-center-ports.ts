@@ -17,7 +17,10 @@ import type { RealPortsDeps } from '@nzila/platform-procurement-proof/real-ports
 import type { EvidencePackIndex } from '@nzila/platform-evidence-pack'
 import type { ComplianceSnapshot, SnapshotChainEntry } from '@nzila/platform-compliance-snapshots'
 import type { HealthReport } from '@nzila/platform-observability'
+import { createLogger } from '@nzila/os-core/telemetry'
 import { createDbPortDeps } from './proof-center-ports-db'
+
+const logger = createLogger('console.proof-center-ports')
 
 // ── In-Memory Stores ────────────────────────────────────────────────────────
 // ga-check:exempt — port adapter stubs, replaced by real DB ports at runtime
@@ -55,8 +58,8 @@ export function createInMemoryPortDeps(): RealPortsDeps {  if (process.env.NODE_
     )
   }
   if (typeof console !== 'undefined') {
-    console.warn(
-      '[proof-center-ports] using in-memory port deps — evidence packs, compliance snapshots, integrations and health checks are NOT real',
+    logger.warn(
+      'using in-memory port deps — evidence packs, compliance snapshots, integrations and health checks are NOT real',
     )
   }  return {
     evidencePack: {

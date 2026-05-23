@@ -31,6 +31,20 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
     )
   }
 
+  const idempotencyKey = request.headers.get('Idempotency-Key')
+  if (!idempotencyKey || idempotencyKey.trim().length === 0) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: 'IDEMPOTENCY_KEY_REQUIRED',
+          message: 'Idempotency-Key header is required',
+        },
+      },
+      { status: 400 },
+    )
+  }
+
   return withOrgWrite(request, async (orgCtx) => {
     let body: unknown
     try {
@@ -82,6 +96,20 @@ export async function DELETE(request: NextRequest, ctx: RouteContext) {
   if (!UUID_RE.test(id)) {
     return NextResponse.json(
       { ok: false, error: { code: 'INVALID_ID', message: 'Invalid queue id' } },
+      { status: 400 },
+    )
+  }
+
+  const idempotencyKey = request.headers.get('Idempotency-Key')
+  if (!idempotencyKey || idempotencyKey.trim().length === 0) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: 'IDEMPOTENCY_KEY_REQUIRED',
+          message: 'Idempotency-Key header is required',
+        },
+      },
       { status: 400 },
     )
   }
