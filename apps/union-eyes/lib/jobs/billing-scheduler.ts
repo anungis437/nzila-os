@@ -233,12 +233,22 @@ export class BillingScheduler {
 
       return orgs
         .filter((org) => org.status === 'active')
-        .map((org) => ({
-          organizationId: org.id,
-          organizationName: org.name,
-          frequency: 'monthly' as BillingFrequency, // Default to monthly for now
-          enabled: true,
-        }));
+        .map((org) => {
+          // Per-org billing frequency is not yet persisted on the organizations
+          // table. Hardcoding 'monthly' here means quarterly/annual contracts
+          // would be over-billed by this scheduler. Surface loudly until we
+          // either add a column or a billing_subscription table.
+          logger.warn(
+            'billing-scheduler: org billing frequency is hardcoded to monthly; per-org frequency is not persisted',
+            { organizationId: org.id }
+          );
+          return {
+            organizationId: org.id,
+            organizationName: org.name,
+            frequency: 'monthly' as BillingFrequency,
+            enabled: true,
+          };
+        });
     } catch (error) {
       logger.error('Error fetching organizations for billing', { error });
       throw error;

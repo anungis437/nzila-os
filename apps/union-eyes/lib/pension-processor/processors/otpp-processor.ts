@@ -352,7 +352,21 @@ export class OTTPProcessor extends BasePensionProcessor {
       taxYear,
     });
 
-    // Placeholder implementation
+    // CRA-bound tax statement. Aggregation from contributions storage is not
+    // wired up — returning zeros here would produce a fraudulent T4A-equivalent.
+    if (process.env.NODE_ENV === 'production') {
+      throw new PensionProcessorError(
+        'OTPP annual statement generation requires a contributions data source which is not yet wired up. Refusing to emit zero-valued statement in production.',
+        this.type,
+        'NOT_IMPLEMENTED'
+      );
+    }
+
+    this.logWarn('generateAnnualStatement is returning a zero-valued placeholder. Do not use for CRA filings.', {
+      memberId,
+      taxYear,
+    });
+
     const statement: AnnualPensionStatement = {
       memberId,
       planType: this.type,

@@ -169,22 +169,20 @@ export async function getRLSMetrics(): Promise<RLSMetric> {
  */
 export async function getFSMMetrics(): Promise<FSMMetric> {
   try {
-    // Check for invalid transition attempts (blocked by FSM)
-    // In production, this would query an error log or metrics table
-    const invalidTransitionsBlocked = 0; // Would track in monitoring
-
-    // Calculate compliance rate
-    // In production, compare total transitions vs. FSM-compliant transitions
-    const complianceRate = 100; // Percentage
+    // FSM compliance/blocked-transition tracking is not wired up to a metrics
+    // table yet. Report 'unknown' rather than fake 100% compliance — a trust
+    // dashboard claiming perfect FSM enforcement without measurement is worse
+    // than reporting "unknown".
+    logger.warn('getFSMMetrics: no metrics source wired; reporting unknown rather than synthetic 100% compliance');
 
     return {
-      status: 'active',
-      verification: true,
+      status: 'unknown',
+      verification: false,
       lastCheck: new Date(),
       description:
-        'Finite State Machine prevents invalid workflow transitions',
-      invalidTransitionsBlocked,
-      complianceRate,
+        'FSM enforcement metrics source is not configured. Compliance and blocked-transition counts are not measured.',
+      invalidTransitionsBlocked: 0,
+      complianceRate: 0,
       lastValidation: new Date(),
     };
   } catch (error) {
