@@ -301,9 +301,13 @@ class PerformanceMonitor {
     return today;
   }
 
-  // Helper: Get recent latencies
+  // Helper: Get recent latencies.
+  // NOT IMPLEMENTED: no latency histogram is wired, so this always returns [].
+  // Downstream `calculatePercentiles` will therefore report p50/p95/p99/avg = 0,
+  // which can be mistaken for "AI requests are instantaneous". Warn loudly so
+  // the gap shows up in logs whenever any metrics consumer asks for latencies.
   private getRecentLatencies(_limit: number): number[] {
-    // In a real implementation, this would query a proper histogram
+    logger.warn('AIPerformanceMonitor.getRecentLatencies: latency histogram is not implemented; returning empty array (all latency percentiles will be reported as 0).');
     return [];
   }
 

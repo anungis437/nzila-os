@@ -226,9 +226,9 @@ function getEmailSubject(
 }
 
 /**
- * Send notification for overdue claims
- * NOTE: Deadline tracking not yet implemented in schema
- * This function is a placeholder for future implementation
+ * Send notification for overdue claims.
+ * Reads from the `deadlines` table (status='pending' AND is_overdue=true)
+ * and emails the member plus the assigned steward (when present).
  */
 export async function sendOverdueClaimNotification(
   claimId: string

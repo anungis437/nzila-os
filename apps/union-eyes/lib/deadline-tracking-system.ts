@@ -532,9 +532,16 @@ async function scheduleReminders(
     // Cancel existing reminders
     await cancelDeadlineReminders(deadlineId);
 
-    // Note: Recipient information would need to come from the related grievance
-    // This is a simplified version that just updates the deadline
-    // For now, we skip creating notification records
+    // NOT IMPLEMENTED: we cancel old reminders but never actually schedule new
+    // ones because the recipient/notification wiring (member + assigned
+    // steward + officer pulled from the related grievance) has not been built
+    // yet. Callers think reminders are scheduled — they are not. Warn loudly
+    // so this silent failure surfaces in deadline-tracking observability.
+    logger.warn('deadline-tracking: scheduleReminders is a no-op (cancels existing reminders only); new reminder notifications are NOT being created.', {
+      deadlineId,
+      dueDate: _dueDate.toISOString(),
+      reminderOffsets: _reminderSchedule,
+    });
   } catch (_error) {
 }
 }

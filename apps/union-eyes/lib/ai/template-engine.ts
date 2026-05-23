@@ -1244,15 +1244,21 @@ class AttentionMechanismEngine {
   }
 
   /**
-   * Get embedding provider (simplified)
+   * Get embedding provider.
+   *
+   * NOTE: previously returned a SHA-256 byte stream as a fake "embedding". That
+   * silently poisoned RAG: the resulting pseudo-vector was compared via pgvector
+   * cosine distance against real OpenAI embeddings stored in `knowledgeBase`,
+   * producing meaningless relevance scores. We now refuse to fabricate vectors
+   * and direct callers to the real provider (`lib/ai/embeddings-service.ts`,
+   * which wraps @nzila/ai-sdk). The caller of `retrieveAndScoreRAG` catches
+   * errors and returns no documents, so RAG degrades to "no results" rather
+   * than "random results".
    */
   private getEmbeddingProvider() {
-    // This would use the existing OpenAI/Anthropic provider from chatbot-service
     return {
-      async generateEmbedding(text: string): Promise<number[]> {
-        // Simplified - in production use actual provider
-        const hash = createHash('sha256').update(text).digest();
-        return Array.from(hash).map(b => b / 255);
+      async generateEmbedding(_text: string): Promise<number[]> {
+        throw new Error('template-engine.getEmbeddingProvider is not wired to a real embedding model. Use lib/ai/embeddings-service.ts (@nzila/ai-sdk) instead of generating fake vectors.');
       }
     };
   }
