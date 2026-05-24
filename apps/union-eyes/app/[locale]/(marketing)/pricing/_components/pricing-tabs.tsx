@@ -5,10 +5,10 @@
  *
  * Compacts the long-form pricing narrative into five accessible tabs:
  *   1. "Start here"          → Assessment Ladder (entry tiers)
- *   2. "Engagement layers"   → Institutional engagement layers
+ *   2. "Engagement layers"   → Organizational engagement layers
  *   3. "The journey"         → 5-stage Continuity Journey
  *   4. "Why this exists"     → Continuity fragility + engagement moments
- *   5. "Procurement"         → Procurement-safe institutional commitments
+ *   5. "Procurement"         → Procurement-safe organizational commitments
  *
  * Tab state syncs with the URL hash (e.g. #engagement-layers) so individual
  * tabs are linkable from external materials (e.g. ICR page, proposals).

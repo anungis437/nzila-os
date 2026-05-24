@@ -33,7 +33,7 @@ export default function AnimatedCTA() {
             className="rounded-xl bg-electric hover:bg-electric/90 text-white px-8 shadow-lg shadow-electric/25"
             asChild
           >
-            <Link href="/institutional-continuity-risk">Start the free Continuity Reflection</Link>
+            <Link href="/organizational-continuity-risk">Start the free Continuity Reflection</Link>
           </Button>
         </motion.div>
 

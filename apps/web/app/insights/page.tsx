@@ -12,11 +12,11 @@ const insights = [
   {
     title: 'Why organizations lose knowledge when people leave',
     description: 'A first-contact explanation of operational memory loss and why continuity needs infrastructure.',
-    href: '/institutional-continuity',
+    href: '/organizational-continuity',
   },
   {
     title: 'The difference between continuity intelligence and surveillance',
-    description: 'Continuity measures institutional posture. Surveillance measures individuals. The distinction is architectural.',
+    description: 'Continuity measures organizational posture. Surveillance measures individuals. The distinction is architectural.',
     href: '/anti-surveillance',
   },
   {
@@ -43,7 +43,7 @@ export default function InsightsPage() {
             Operational writing for continuity-critical institutions.
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl">
-            Calm, procurement-safe explainers on institutional continuity, governance evidence,
+            Calm, procurement-safe explainers on organizational continuity, governance evidence,
             operational memory, sovereignty, and anti-surveillance infrastructure.
           </p>
         </div>

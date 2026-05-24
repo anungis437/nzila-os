@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,12 +12,12 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 /**
- * Insights — Institutional Thought Leadership Hub
+ * Insights — Organizational Thought Leadership Hub
  *
- * Category authority through institutional thought leadership.
+ * Category authority through organizational thought leadership.
  * Governance modernization, continuity intelligence, labour-safe AI.
  */
 import type { Metadata } from 'next';
@@ -38,18 +38,18 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const insightsCopy = {
   'en-CA': {
-    title: 'Insights | Institutional Governance & Continuity Library — UnionEyes',
+    title: 'Insights | Organizational Governance & Continuity Library — UnionEyes',
     description:
-      'A doctrine library for unions and democratic organizations: institutional governance, continuity preservation, representational coordination, and audit-grade transparency. Bilingual, sovereignty-conscious, executive-grade.',
-    heroHeading: <>Institutional continuity and governance-of-record intelligence</>,
+      'A doctrine library for unions and democratic organizations: organizational governance, continuity preservation, representational coordination, and audit-grade transparency. Bilingual, sovereignty-conscious, executive-grade.',
+    heroHeading: <>Organizational continuity and governance-of-record intelligence</>,
     heroDescription:
-      'A doctrine publication movement for executive teams preserving institutional memory, reducing fragmentation risk, and operationalizing explainable modernization with continuity confidence.',
+      'A doctrine publication movement for executive teams preserving organizational memory, reducing fragmentation risk, and operationalizing explainable modernization with continuity confidence.',
     ctaPrimary: 'Start the free Continuity Reflection',
     ctaSecondary: 'Receive Doctrine Updates',
     doctrineSpine: 'Doctrine spine',
     pillarsHeading: 'Four pillars organizing every publication',
     pillarsBody:
-      'Every doctrine brief, methodology guide, and resonance essay is anchored in one of four institutional pillars. The library reads as a continuity instrument — not a content marketing surface.',
+      'Every doctrine brief, methodology guide, and resonance essay is anchored in one of four organizational pillars. The library reads as a continuity instrument — not a content marketing surface.',
     themeHeading: 'Move through the Insights system by theme',
     themeBody:
       'The hub is now the entry point. Use the submenu to move into doctrine, methodology, emotional resonance, or category browsing without scrolling through a single long page.',
@@ -71,7 +71,7 @@ const insightsCopy = {
       },
       {
         eyebrow: 'Continuity',
-        title: 'Institutional memory preservation',
+        title: 'Organizational memory preservation',
         body: 'Succession-safe knowledge, doctrine archives, and representational lineage that survive turnover and political cycles.',
       },
       {
@@ -146,9 +146,9 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
     title,
     description,
     keywords: [
-      'institutional governance',
-      'institutional continuity',
-      'institutional memory',
+      'organizational governance',
+      'organizational continuity',
+      'organizational memory',
       'representational coordination',
       'union governance doctrine',
       'audit-grade transparency',
@@ -192,8 +192,8 @@ export default async function InsightsPage({
     inLanguage: locale,
     isPartOf: { '@type': 'WebSite', name: 'UnionEyes' },
     about: [
-      'Institutional governance',
-      'Institutional continuity',
+      'Organizational governance',
+      'Organizational continuity',
       'Representational coordination',
       'Audit-grade transparency',
     ],
@@ -222,7 +222,7 @@ export default async function InsightsPage({
         description={copy.heroDescription}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all">
+            <Link href={withInstitutionalContext(`/${locale}/organizational-continuity-risk`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all">
               {copy.ctaPrimary}
             </Link>
             <Link href={withInstitutionalContext(`/${locale}/contact`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all">
@@ -234,7 +234,7 @@ export default async function InsightsPage({
 
       <InsightsHubSubmenu locale={locale} active="overview" contextMode={contextMode} />
 
-      {/* ── Four institutional pillars (thematic spine) ── */}
+      {/* ── Four organizational pillars (thematic spine) ── */}
       <section className="py-14 bg-[#f8f6f2] border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal delay={0.04} duration={0.85} distance={14} tempo="conference">

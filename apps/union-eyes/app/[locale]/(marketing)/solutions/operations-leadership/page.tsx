@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -38,7 +38,7 @@ const PAGE_COPY = {
     badge: 'Solutions · Operations Leadership',
     heading: 'Operational coherence that survives any transition.',
     description:
-      'UnionEyes Operational Coherence gives operations leaders the institutional memory, fragmentation visibility, and continuity planning tools to keep distributed organizations aligned through any change.',
+      'UnionEyes Operational Coherence gives operations leaders the organizational memory, fragmentation visibility, and continuity planning tools to keep distributed organizations aligned through any change.',
     primaryCta: 'Start the free Continuity Reflection',
     secondaryCta: 'Operational Coherence Architecture',
     challengeHeading: 'The operational fragmentation problem',
@@ -46,12 +46,12 @@ const PAGE_COPY = {
       'Operational knowledge is siloed — regional offices duplicate work because they cannot see what others know',
       'Operational fragility builds invisibly until a leadership change or reorganization triggers a crisis',
       'Cross-functional alignment is assumed but rarely verified — until it breaks down',
-      'Institutional processes are undocumented, so every new manager rebuilds from scratch',
+      'Organizational processes are undocumented, so every new manager rebuilds from scratch',
     ],
     outcomesHeading: 'What operations leaders gain with UnionEyes',
     outcomes: [
       { icon: Network, title: 'Cross-functional alignment surfaced', desc: 'See alignment and coherence across distributed teams, regional offices, and functional areas — in one operational view.' },
-      { icon: RefreshCw, title: 'Continuity through organizational change', desc: 'Maintain operational coherence through reorganization, expansion, and leadership transitions without losing institutional context.' },
+      { icon: RefreshCw, title: 'Continuity through organizational change', desc: 'Maintain operational coherence through reorganization, expansion, and leadership transitions without losing organizational context.' },
       { icon: Users, title: 'Team continuity planning', desc: 'Identify knowledge gaps across teams and build transfer pathways before operational fragilities become crises.' },
       { icon: AlertCircle, title: 'Fragmentation risk made visible', desc: 'Understand the organizational fragmentation patterns undermining long-term operational effectiveness.' },
       { icon: Layers, title: 'Organizational Memory for operations', desc: 'Surface the operational precedents, decisions, and context that inform how your organization actually works.' },
@@ -105,7 +105,7 @@ export default async function OperationsLeadershipPage({ params }: { params: Pro
         description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.primaryCta}
             </Link>
             <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
@@ -170,7 +170,7 @@ export default async function OperationsLeadershipPage({ params }: { params: Pro
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.primaryCta}
           </Link>
         </div>

@@ -108,7 +108,7 @@ const TRUST_COPY = {
     categoryComparisonColLeft: 'Workplace surveillance platforms',
     categoryComparisonColRight: 'Union Eyes — continuity infrastructure',
     categoryComparisonRows: [
-      { axis: 'Subject of analysis', left: 'Individual workers and their behaviour', right: 'Institutional decisions, governance, and case lifecycle' },
+      { axis: 'Subject of analysis', left: 'Individual workers and their behaviour', right: 'Organizational decisions, governance, and case lifecycle' },
       { axis: 'Data captured', left: 'Keystrokes, screen activity, productivity signals, location', right: 'Casework, financials, governance events, audit evidence' },
       { axis: 'Output', left: 'Productivity scores, behavioural rankings, manager dashboards', right: 'Explainable recommendations reviewable by named operators' },
       { axis: 'Default posture', left: 'Always-on monitoring, opt-out where permitted', right: 'Reviewer-of-record required; no autonomous action' },
@@ -313,7 +313,7 @@ export default async function TrustPage({
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href={withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode)}
+              href={withInstitutionalContext(`/${locale}/organizational-continuity-risk`, contextMode)}
               className="border-electric/40 bg-electric inline-flex items-center gap-2 rounded-xl border px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
             >
               {copy.beginBriefing}
@@ -641,7 +641,7 @@ export default async function TrustPage({
           </p>
           <div className="flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href={withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode)}
+              href={withInstitutionalContext(`/${locale}/organizational-continuity-risk`, contextMode)}
               className="bg-navy hover:bg-navy/90 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition-colors"
             >
               {copy.startPilot} <ArrowRight className="h-4 w-4" />

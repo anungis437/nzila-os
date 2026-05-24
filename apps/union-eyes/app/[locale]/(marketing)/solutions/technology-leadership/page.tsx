@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -60,7 +60,7 @@ const PAGE_COPY = {
     ],
     relatedHeading: 'Explore related solutions',
     finalHeading: 'AI your institution can trust',
-    finalBody: 'Request a technical briefing or live institutional walkthrough.',
+    finalBody: 'Request a technical briefing or live organizational walkthrough.',
   },
   'fr-CA': {
     badge: 'Solutions · Direction technologique',
@@ -109,7 +109,7 @@ export default async function TechnologyLeadershipPage({ params }: { params: Pro
         description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.primaryCta}
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
@@ -173,7 +173,7 @@ export default async function TechnologyLeadershipPage({ params }: { params: Pro
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.primaryCta}
           </Link>
         </div>

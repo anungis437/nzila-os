@@ -31,7 +31,7 @@ export default async function DemoPage() {
         <ol className="space-y-6 text-gray-700">
           <li className="flex gap-4">
             <span className="shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">1</span>
-            <p>{isFr ? 'Écrivez à' : 'Email'} <a className="text-electric underline" href="mailto:hello@nzila.ca">hello@nzila.ca</a> {isFr ? 'avec votre contexte institutionnel' : 'with your institutional context'}.</p>
+            <p>{isFr ? 'Écrivez à' : 'Email'} <a className="text-electric underline" href="mailto:hello@nzila.ca">hello@nzila.ca</a> {isFr ? 'avec votre contexte institutionnel' : 'with your organizational context'}.</p>
           </li>
           <li className="flex gap-4">
             <span className="shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">2</span>

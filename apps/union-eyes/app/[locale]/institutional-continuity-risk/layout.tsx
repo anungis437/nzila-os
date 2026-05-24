@@ -1,8 +1,8 @@
 /**
- * Institutional Continuity Risk — standalone landing layout.
+ * Organizational Continuity Risk — standalone landing layout.
  *
  * Deliberately escapes the (marketing) layout. The ICRA landing page is a
- * focused, distraction-free institutional surface: it does not carry the
+ * focused, distraction-free organizational surface: it does not carry the
  * full marketing site navigation or footer, but remains branded with a
  * minimal top bar (UnionEyes logo + locale switcher).
  *

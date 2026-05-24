@@ -191,7 +191,7 @@ export default async function LocalePrioritiesPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href={`/${locale}/institutional-continuity-risk`}
+              href={`/${locale}/organizational-continuity-risk`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 transition-colors text-sm"
             >
               {briefingCta} <ArrowRight className="h-4 w-4" />

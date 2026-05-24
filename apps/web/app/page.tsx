@@ -14,11 +14,11 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Home',
-  description: 'Nzila Ventures builds institutional continuity infrastructure for trust-sensitive organizations that need governance, operational memory, evidence, and trust to survive transition.',
+  description: 'Nzila Ventures builds organizational continuity infrastructure for trust-sensitive organizations that need governance, operational memory, evidence, and trust to survive transition.',
   openGraph: {
-    title: 'Nzila Ventures | Institutional Continuity Infrastructure',
-    description: 'Governed operational infrastructure for continuity, operational memory, audit evidence, and institutional trust.',
-    images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing institutional continuity infrastructure' }],
+    title: 'Nzila Ventures | Organizational Continuity Infrastructure',
+    description: 'Governed operational infrastructure for continuity, operational memory, audit evidence, and organizational trust.',
+    images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing organizational continuity infrastructure' }],
   },
   alternates: { canonical: '/' },
 };
@@ -44,7 +44,7 @@ const flagships = [
 ];
 
 const intelligenceCapabilities = [
-  { name: 'Operational Memory', metric: 'Continuity', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'Structured operational records connected across time', description: 'Preserved procedures, precedents, workflows, decisions, rationale, and institutional context' },
+  { name: 'Operational Memory', metric: 'Continuity', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'Structured operational records connected across time', description: 'Preserved procedures, precedents, workflows, decisions, rationale, and organizational context' },
   { name: 'Governance Evidence', metric: 'Audit-ready', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', alt: 'Governance evidence dashboard with traceable records', description: 'Decision lineage, approvals, audit trails, reviewable records, and governance replay' },
   { name: 'Explainable Assistance', metric: 'Human-led', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800', alt: 'Explainable system infrastructure with visible controls', description: 'AI-assisted summaries and recommendations that remain traceable, inspectable, and overridable' },
   { name: 'Sovereign Federation', metric: 'Portable', image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800', alt: 'Federated infrastructure preserving local data boundaries', description: 'Cross-organization coordination without centralizing control or weakening local ownership' },
@@ -115,7 +115,7 @@ export default async function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              {isFr ? 'Infrastructure de continuité institutionnelle' : 'Institutional Continuity Infrastructure'}
+              {isFr ? 'Infrastructure de continuité institutionnelle' : 'Organizational Continuity Infrastructure'}
             </span>
           </ScrollReveal>
 
@@ -136,7 +136,7 @@ export default async function Home() {
             <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
               {isFr
                 ? 'Nzila Ventures construit Nzila OS: une infrastructure gouvernée qui préserve la mémoire opérationnelle, les décisions, les preuves et la confiance institutionnelle pendant les transitions.'
-                : 'Nzila Ventures builds Nzila OS: governed infrastructure that preserves operational memory, decision rationale, evidence, and institutional trust across leadership change, restructuring, and system transition.'}
+                : 'Nzila Ventures builds Nzila OS: governed infrastructure that preserves operational memory, decision rationale, evidence, and organizational trust across leadership change, restructuring, and system transition.'}
             </p>
           </ScrollReveal>
 
@@ -270,7 +270,7 @@ export default async function Home() {
           <ScrollReveal className="mt-12">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <TrackedLink
-                href="/institutional-continuity"
+                href="/organizational-continuity"
                 eventName="cta_institutional_continuity"
                 eventProps={{ source: 'home_mission' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
@@ -424,7 +424,7 @@ export default async function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge={isFr ? 'Confiance et preuves' : 'Trust and Evidence'}
-            title={isFr ? 'L adoption institutionnelle exige des preuves, pas du bruit' : 'Institutional adoption requires evidence, not noise'}
+            title={isFr ? 'L adoption institutionnelle exige des preuves, pas du bruit' : 'Organizational adoption requires evidence, not noise'}
             subtitle={isFr ? 'Les pilotes, évaluations et études de cas doivent montrer des améliorations mesurables de continuité, gouvernance et confiance.' : 'Pilots, assessments, and case studies must show measurable improvement in continuity, governance, and trust.'}
             light
           />

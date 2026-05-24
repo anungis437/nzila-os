@@ -1,5 +1,5 @@
 /**
- * Institutional Continuity Engagement Architecture
+ * Organizational Continuity Engagement Architecture
  *
  * This page is intentionally NOT a SaaS pricing matrix. UnionEyes is continuity
  * infrastructure — OCI (Organizational Continuity Index) diagnostics, OCRA
@@ -7,7 +7,7 @@
  * platform activation, then longitudinal support. Software is the *fourth*
  * stage of the engagement, not the entry point.
  *
- * Narrative posture: maturity-oriented institutional engagement, not feature
+ * Narrative posture: maturity-oriented organizational engagement, not feature
  * bundling. Every layer is governance-safe, procurement-readable, and assumes
  * human oversight by design. Pricing ranges are starting points for joint
  * scoping with executive and procurement leadership — not self-serve tiers.
@@ -58,7 +58,7 @@ const continuityFragility = [
     body: 'Tooling decisions made without continuity assessment usually accelerate fragmentation rather than resolve it. The wrong platform makes things worse.',
   },
   {
-    title: 'Institutional dependency',
+    title: 'Organizational dependency',
     body: 'The federation depends on individuals more than the individuals know. When they leave, the dependency surfaces — usually under operational pressure.',
   },
 ];
@@ -66,7 +66,7 @@ const continuityFragility = [
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 2 — When Organizations Typically Engage Us
 // Operational moments that bring institutions to the OCI conversation.
-// Grounds the offerings in concrete institutional reality.
+// Grounds the offerings in concrete organizational reality.
 // ─────────────────────────────────────────────────────────────────────────────
 const engagementMoments = [
   { title: 'Leadership transitions', body: 'An incoming president, executive director, or general counsel needs continuity inherited — not reconstructed.' },
@@ -74,7 +74,7 @@ const engagementMoments = [
   { title: 'Operational fragmentation', body: 'Locals, committees, and staff operating without a shared operating record — coordination cost rising every quarter.' },
   { title: 'Onboarding strain', body: 'New stewards and officers are arriving faster than the institution can transfer judgment to them.' },
   { title: 'Governance restructuring', body: 'A merger, reorganization, or constitutional review needs a continuity baseline before any structural decision.' },
-  { title: 'Continuity concerns', body: 'Leadership has named succession and institutional memory as strategic risks and wants them measurable.' },
+  { title: 'Continuity concerns', body: 'Leadership has named succession and organizational memory as strategic risks and wants them measurable.' },
   { title: 'Federation coordination growth', body: 'A national or sectoral body coordinating across many locals needs operational topology, not more meetings.' },
 ];
 
@@ -88,7 +88,7 @@ const continuityJourney = [
     stage: '1',
     name: 'OCI Assessment',
     outcome: 'Understand continuity fragility',
-    summary: 'A scoped institutional diagnostic that surfaces where continuity actually breaks — and where it quietly holds.',
+    summary: 'A scoped organizational diagnostic that surfaces where continuity actually breaks — and where it quietly holds.',
   },
   {
     stage: '2',
@@ -111,16 +111,16 @@ const continuityJourney = [
   {
     stage: '5',
     name: 'Longitudinal Support',
-    outcome: 'Sustain institutional continuity',
+    outcome: 'Sustain organizational continuity',
     summary: 'Ongoing continuity stewardship: governance entropy review, executive intelligence, and federation-level continuity health.',
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 3.5 — Assessment Ladder (GTM entry funnel)
-// Mirrors the three entry tiers on /institutional-continuity-risk so the
+// Mirrors the three entry tiers on /organizational-continuity-risk so the
 // pricing page reflects the actual go-to-market motion: a free ICRA reflection,
-// a paid Executive Continuity Brief at $1,200, and a facilitated Institutional
+// a paid Executive Continuity Brief at $1,200, and a facilitated Organizational
 // Continuity Diagnostic at $6,500. These precede the larger engagement layers.
 // ─────────────────────────────────────────────────────────────────────────────
 const assessmentLadder = [
@@ -130,7 +130,7 @@ const assessmentLadder = [
     price: 'Free',
     pricePosture: 'Pseudonymous · no login required',
     summary:
-      'A scoped institutional continuity assessment that surfaces fragility, signals, and burden — without commitment. The ICRA entry point.',
+      'A scoped organizational continuity assessment that surfaces fragility, signals, and burden — without commitment. The ICRA entry point.',
     includes: [
       'OCI band and continuity score',
       'Quiet-risk signal observations',
@@ -138,7 +138,7 @@ const assessmentLadder = [
       'One recommendation to start a conversation',
     ],
     cta: 'Start the assessment',
-    ctaHref: '/institutional-continuity-risk',
+    ctaHref: '/organizational-continuity-risk',
     featured: false,
   },
   {
@@ -147,35 +147,35 @@ const assessmentLadder = [
     price: '$1,200 CAD',
     pricePosture: 'One-time · delivered as a governance-readable document',
     summary:
-      'A deeper institutional reading of the same assessment — governance entropy, continuity debt, dependency review, and modernization risk surfaced for executive and board conversation.',
+      'A deeper organizational reading of the same assessment — governance entropy, continuity debt, dependency review, and modernization risk surfaced for executive and board conversation.',
     includes: [
       'Everything in Continuity Reflection',
       'Governance entropy analysis',
       'Continuity debt analysis',
-      'Institutional dependency review',
+      'Organizational dependency review',
       'Modernization risk layer',
       'Full prioritized recommendations',
     ],
     cta: 'Begin with the brief',
-    ctaHref: '/institutional-continuity-risk?intendedTier=executive_continuity_brief',
+    ctaHref: '/organizational-continuity-risk?intendedTier=executive_continuity_brief',
     featured: true,
   },
   {
     key: 'institutional_continuity_diagnostic',
-    name: 'Institutional Continuity Diagnostic',
+    name: 'Organizational Continuity Diagnostic',
     price: '$6,500 CAD',
     pricePosture: 'Facilitated engagement · executive workshop included',
     summary:
-      'A full diagnostic engagement: facilitated review, institutional continuity workshop, memory lineage mapping, and an executive briefing note your board can act on.',
+      'A full diagnostic engagement: facilitated review, organizational continuity workshop, memory lineage mapping, and an executive briefing note your board can act on.',
     includes: [
       'Everything in the Executive Continuity Brief',
       'Facilitated diagnostic review',
-      'Institutional continuity workshop',
+      'Organizational continuity workshop',
       'Memory lineage mapping',
       'Executive briefing note',
     ],
     cta: 'Request this diagnostic',
-    ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+    ctaHref: '/contact?topic=organizational-continuity-diagnostic',
     featured: false,
   },
 ];
@@ -195,7 +195,7 @@ const frAssessmentLadder = [
       'Une recommandation pour amorcer la conversation',
     ],
     cta: "Commencer l'évaluation",
-    ctaHref: '/institutional-continuity-risk',
+    ctaHref: '/organizational-continuity-risk',
     featured: false,
   },
   {
@@ -214,7 +214,7 @@ const frAssessmentLadder = [
       'Recommandations priorisées complètes',
     ],
     cta: 'Commencer par la note',
-    ctaHref: '/institutional-continuity-risk?intendedTier=executive_continuity_brief',
+    ctaHref: '/organizational-continuity-risk?intendedTier=executive_continuity_brief',
     featured: true,
   },
   {
@@ -232,14 +232,14 @@ const frAssessmentLadder = [
       'Note de synthèse exécutive',
     ],
     cta: 'Demander ce diagnostic',
-    ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+    ctaHref: '/contact?topic=organizational-continuity-diagnostic',
     featured: false,
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 4 — Engagement Layers
-// Replaces "tiers". These are institutional continuity engagement layers —
+// Replaces "tiers". These are organizational continuity engagement layers —
 // not SaaS plans. Each one is a distinct posture and a distinct conversation.
 // ─────────────────────────────────────────────────────────────────────────────
 const engagementLayers: EngagementLayer[] = [
@@ -247,7 +247,7 @@ const engagementLayers: EngagementLayer[] = [
     key: 'oci',
     icon: 'compass',
     name: 'OCI — Continuity Assessment',
-    posture: 'Institutional diagnostics',
+    posture: 'Organizational diagnostics',
     layer: 'Layer 1 · Continuity intelligence',
     fit: 'Federations and institutions establishing a continuity baseline before any tooling decision.',
     feels: 'Diagnostic. Discreet. Strategic.',
@@ -255,7 +255,7 @@ const engagementLayers: EngagementLayer[] = [
       'OCI Snapshot — scoped continuity baseline',
       'Executive Continuity Brief',
       'Governance Entropy Review',
-      'Institutional Continuity Workshop',
+      'Organizational Continuity Workshop',
     ],
     range: 'Engagement — typically $18K–$45K',
   },
@@ -311,7 +311,7 @@ const engagementLayers: EngagementLayer[] = [
     key: 'founding',
     icon: 'sparkles',
     name: 'Founding Partner Cohort',
-    posture: 'Strategic institutional collaboration',
+    posture: 'Strategic organizational collaboration',
     layer: 'Layer 5 · Cohort engagement',
     fit: 'A small number of institutions co-developing continuity infrastructure with us — operationally embedded, doctrinally close.',
     feels: 'Co-developed. Privileged. Long-cycle.',
@@ -319,25 +319,25 @@ const engagementLayers: EngagementLayer[] = [
       'Direct co-design with the founding team',
       'Reserved governance influence on platform doctrine',
       'Privileged access to OCRA and continuity research',
-      'Named cohort recognition in institutional materials',
+      'Named cohort recognition in organizational materials',
     ],
     range: 'Cohort terms — by invitation and mutual fit',
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION 5 — Procurement-Safe Institutional Commitments
+// SECTION 5 — Procurement-Safe Organizational Commitments
 // These are positions, not features. They distinguish continuity infrastructure
 // from generic AI tooling — and are the procurement department's first real read.
 // ─────────────────────────────────────────────────────────────────────────────
 const procurementCommitments = [
   { title: 'Human oversight by design', body: 'Every operational pathway assumes a named human owner. Cognition surfaces are operator-initiated and operator-reviewable.' },
-  { title: 'Governance-safe AI', body: 'Reasoning operates under institutional governance — not autonomous agent assumptions. Explainability is structural, not optional.' },
-  { title: 'No worker surveillance', body: 'UnionEyes does not rank, score, or monitor individual workers. Continuity infrastructure is institutional, not personal.' },
+  { title: 'Governance-safe AI', body: 'Reasoning operates under organizational governance — not autonomous agent assumptions. Explainability is structural, not optional.' },
+  { title: 'No worker surveillance', body: 'UnionEyes does not rank, score, or monitor individual workers. Continuity infrastructure is organizational, not personal.' },
   { title: 'Explainable interpretation', body: 'Every interpretive surface exposes its confidence posture and its dependency chain. No black-box decisions.' },
-  { title: 'Continuity-focused interpretation', body: 'All cognition is oriented toward institutional continuity — not productivity scoring or behavioural analysis.' },
-  { title: 'No institutional ranking', body: 'We do not benchmark, league-table, or compare unions against each other. Continuity is sovereign to each institution.' },
-  { title: 'Canadian residency', body: 'Canadian-hosted, sovereignty-conscious institutional trust. Data residency and sovereign hosting are structural commitments.' },
+  { title: 'Continuity-focused interpretation', body: 'All cognition is oriented toward organizational continuity — not productivity scoring or behavioural analysis.' },
+  { title: 'No organizational ranking', body: 'We do not benchmark, league-table, or compare unions against each other. Continuity is sovereign to each institution.' },
+  { title: 'Canadian residency', body: 'Canadian-hosted, sovereignty-conscious organizational trust. Data residency and sovereign hosting are structural commitments.' },
   { title: 'Fail-closed degradation', body: 'When systems degrade, they degrade safely — operations remain governable, not opaque.' },
 ];
 
@@ -436,7 +436,7 @@ const frProcurementCommitments = [
 
 const pricingCopy = {
   'en-CA': {
-    heading: <>Institutional continuity engagement architecture,<br />not software pricing tiers.</>,
+    heading: <>Organizational continuity engagement architecture,<br />not software pricing tiers.</>,
     description: 'UnionEyes is continuity infrastructure — assessment, intelligence, then activation. Every engagement starts with the OCI (Organizational Continuity Index), not with a procurement form. Software is the fourth stage of the journey, not the entry point.',
     section1Heading: 'Continuity starts before software',
     section1Body: 'Most institutions discover that the platform decision was actually a continuity decision in disguise. We exist because continuity fragility is rarely measured before it is procured against.',
@@ -458,7 +458,7 @@ const pricingCopy = {
     ladderIncludesLabel: 'What you receive',
     ladderFeaturedBadge: 'Most institutions start here',
     section4Heading: 'Engagement layers',
-    section4Body: 'When an assessment surfaces structural continuity risk that cannot be resolved with a brief or a workshop, the relationship escalates into one of these institutional engagement layers. Each is a coherent posture and a distinct conversation — not a feature bundle or a seat-licensing tier.',
+    section4Body: 'When an assessment surfaces structural continuity risk that cannot be resolved with a brief or a workshop, the relationship escalates into one of these organizational engagement layers. Each is a coherent posture and a distinct conversation — not a feature bundle or a seat-licensing tier.',
     fitPrefix: 'Best for: ',
     deliverablesLabel: 'What you receive',
     investmentLabel: 'Investment',
@@ -467,17 +467,17 @@ const pricingCopy = {
     unsureBody: 'Most institutions start with an OCI conversation — even when they think they need the platform. A short briefing usually makes the right layer obvious.',
     unsureCta: 'Start with an OCI conversation',
     procurementLabel: 'Procurement-safe by design',
-    commitmentsHeading: 'Institutional commitments, not feature claims',
-    commitmentsBody: 'Every engagement layer inherits the same institutional commitments. These are the positions that distinguish continuity infrastructure from generic AI tooling — and are usually the first thing procurement reads.',
+    commitmentsHeading: 'Organizational commitments, not feature claims',
+    commitmentsBody: 'Every engagement layer inherits the same organizational commitments. These are the positions that distinguish continuity infrastructure from generic AI tooling — and are usually the first thing procurement reads.',
     trustCenter: 'Trust Center',
     governanceStructure: 'Governance Structure',
-    institutionalProof: 'Institutional Proof',
+    institutionalProof: 'Organizational Proof',
     ctaLabel: 'Begin with assessment, not procurement',
     ctaHeading: 'Start with a continuity conversation',
     ctaBody: 'Tell us where your institution is today. We will help you identify which layer fits, what an OCI engagement looks like in practice, and shape the journey with you — at the pace your governance can sustain.',
     ctaPrimary: 'Start the free Continuity Reflection',
     ctaSecondary: 'Discuss an OCI Engagement',
-    ctaFinePrint: 'Engagement layers and ranges are positioning structure for institutional planning. Final scope is set jointly with executive and procurement leadership — never as self-serve subscription.',
+    ctaFinePrint: 'Engagement layers and ranges are positioning structure for organizational planning. Final scope is set jointly with executive and procurement leadership — never as self-serve subscription.',
     glossaryLabel: 'The two terms used throughout this page',
     glossary: [
       { acronym: 'OCI', expansion: 'Organizational Continuity Index', body: 'A scoped organizational diagnostic that measures continuity fragility — what would break if a key person, a leadership cycle, or a critical decision-of-record were lost tomorrow.' },
@@ -553,16 +553,16 @@ export default async function LocalePricingPage({
   const { marketingUrl } = getUnionEyesSiteTopology();
 
   // Schema.org Service + Offer surface aligned to the GTM funnel on
-  // /institutional-continuity-risk. Three concrete tiers (Continuity
-  // Reflection / Executive Continuity Brief / Institutional Continuity
+  // /organizational-continuity-risk. Three concrete tiers (Continuity
+  // Reflection / Executive Continuity Brief / Organizational Continuity
   // Diagnostic) plus four engagement layers (priced as ranges) get exposed
   // as a Service with an AggregateOffer so search engines and procurement
   // crawlers see the real entry funnel — not a generic SaaS price band.
   const pricingServiceSchema = {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: 'UnionEyes Institutional Continuity Engagement',
-    serviceType: 'Institutional continuity assessment and infrastructure',
+    name: 'UnionEyes Organizational Continuity Engagement',
+    serviceType: 'Organizational continuity assessment and infrastructure',
     provider: {
       '@type': 'Organization',
       name: 'UnionEyes',
@@ -572,43 +572,43 @@ export default async function LocalePricingPage({
     availableLanguage: ['en-CA', 'fr-CA'],
     url: `${marketingUrl}/${locale}/pricing`,
     description:
-      'Institutional continuity engagement architecture for unions, federations, and democratic organizations — Continuity Reflection, Executive Continuity Brief, Institutional Continuity Diagnostic, then layered platform activation and longitudinal support.',
+      'Organizational continuity engagement architecture for unions, federations, and democratic organizations — Continuity Reflection, Executive Continuity Brief, Organizational Continuity Diagnostic, then layered platform activation and longitudinal support.',
     offers: [
       {
         '@type': 'Offer',
         name: 'Continuity Reflection',
         description:
-          'Pseudonymous institutional continuity assessment (ICRA). OCI band, quiet-risk signal observations, continuity burden index, one starter recommendation. No login required.',
+          'Pseudonymous organizational continuity assessment (ICRA). OCI band, quiet-risk signal observations, continuity burden index, one starter recommendation. No login required.',
         price: '0',
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
-        url: `${marketingUrl}/${locale}/institutional-continuity-risk`,
+        url: `${marketingUrl}/${locale}/organizational-continuity-risk`,
       },
       {
         '@type': 'Offer',
         name: 'Executive Continuity Brief',
         description:
-          'Governance-readable deepening of the continuity assessment: governance entropy, continuity debt, institutional dependency review, modernization risk, prioritized recommendations.',
+          'Governance-readable deepening of the continuity assessment: governance entropy, continuity debt, organizational dependency review, modernization risk, prioritized recommendations.',
         price: '1200',
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
-        url: `${marketingUrl}/${locale}/institutional-continuity-risk?intendedTier=executive_continuity_brief`,
+        url: `${marketingUrl}/${locale}/organizational-continuity-risk?intendedTier=executive_continuity_brief`,
       },
       {
         '@type': 'Offer',
-        name: 'Institutional Continuity Diagnostic',
+        name: 'Organizational Continuity Diagnostic',
         description:
-          'Facilitated diagnostic engagement: institutional continuity workshop, memory lineage mapping, and executive briefing note your board can act on.',
+          'Facilitated diagnostic engagement: organizational continuity workshop, memory lineage mapping, and executive briefing note your board can act on.',
         price: '6500',
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
-        url: `${marketingUrl}/${locale}/contact?topic=institutional-continuity-diagnostic`,
+        url: `${marketingUrl}/${locale}/contact?topic=organizational-continuity-diagnostic`,
       },
       {
         '@type': 'AggregateOffer',
         name: 'OCI — Continuity Assessment engagement layer',
         description:
-          'Layered institutional diagnostic engagement: OCI Snapshot, Executive Continuity Brief, Governance Entropy Review, Institutional Continuity Workshop.',
+          'Layered organizational diagnostic engagement: OCI Snapshot, Executive Continuity Brief, Governance Entropy Review, Organizational Continuity Workshop.',
         priceCurrency: 'CAD',
         lowPrice: '18000',
         highPrice: '45000',
@@ -698,7 +698,7 @@ export default async function LocalePricingPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/institutional-continuity-risk`}
+              href={`/${locale}/organizational-continuity-risk`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all"
             >
               {copy.ctaPrimary}

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const sections = [
   'Operational dependency',
   'Governance visibility',
-  'Institutional memory',
+  'Organizational memory',
   'Onboarding continuity',
   'Transition readiness',
   'Operational traceability',
@@ -26,7 +26,7 @@ const outputs = [
   'Operational memory exposure',
   'Trust debt indicator',
   'Section-level findings',
-  'Recommended institutional next steps',
+  'Recommended organizational next steps',
 ];
 
 export default function ContinuityAssessmentPage() {

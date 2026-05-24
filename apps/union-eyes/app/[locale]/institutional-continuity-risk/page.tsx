@@ -1,11 +1,11 @@
 /**
  * ARTIFACT TYPE: Marketing Landing Page (standalone)
  * DOCTRINE_VERSION: 1.1.0
- * ROUTE: /[locale]/institutional-continuity-risk
+ * ROUTE: /[locale]/organizational-continuity-risk
  *
- * OCI Category Awakening Page — distinct from the /institutional-continuity
+ * OCI Category Awakening Page — distinct from the /organizational-continuity
  * product substrate page. This page defines the category of Organizational
- * Continuity Infrastructure (OCI) as an institutional concern and introduces
+ * Continuity Infrastructure (OCI) as an organizational concern and introduces
  * the ICRA self-assessment as the entry point.
  *
  * Layout note:
@@ -21,7 +21,7 @@
  *
  * Tone:
  * - Calm, credible, unhurried
- * - Institutional, not startup
+ * - Organizational, not startup
  * - Editorial, not sales
  * - "Quietly devastating" observations where appropriate
  * - No AI language anywhere above the fold or in the hero
@@ -36,7 +36,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { COPY } from '@/lib/icra/copy';
 import HumanScenesCarousel from './_components/HumanScenesCarousel';
 
-// Institutional imagery — classical, calm, never stock-cliché.
+// Organizational imagery — classical, calm, never stock-cliché.
 // All Unsplash; CSP allows img-src https: + Unsplash is whitelisted in next.config.
 const HERO_IMAGE_URL =
   'https://images.unsplash.com/photo-1568667256549-094345857637?w=1920&q=80&auto=format';
@@ -59,11 +59,11 @@ export async function generateMetadata({
   return {
     title: isFr
       ? 'Risque de continuité institutionnelle | UnionEyes'
-      : 'Institutional Continuity Risk | UnionEyes',
+      : 'Organizational Continuity Risk | UnionEyes',
     description: isFr
       ? "La plupart des organisations portent plus de risques de continuité qu'elles ne le réalisent. Découvrez les signaux silencieux qui indiquent une fragilité institutionnelle."
-      : 'Most institutions are carrying more continuity risk than they realize. Discover the quiet signals that indicate institutional fragility — and what to do about them.',
-    alternates: buildLocaleAlternates(locale, '/institutional-continuity-risk'),
+      : 'Most institutions are carrying more continuity risk than they realize. Discover the quiet signals that indicate organizational fragility — and what to do about them.',
+    alternates: buildLocaleAlternates(locale, '/organizational-continuity-risk'),
   };
 }
 
@@ -141,12 +141,12 @@ export default async function InstitutionalContinuityRiskPage({
         { label: 'Travail invisible', body: "La traduction du contexte institutionnel, le maintien des relations et la préservation de la mémoire sont absorbés dans des rôles individuels et ne figurent pas dans les descriptions de poste." },
       ]
     : [
-        { label: 'Erosion', body: 'Institutional knowledge disappears gradually, without any single noticeable event.' },
+        { label: 'Erosion', body: 'Organizational knowledge disappears gradually, without any single noticeable event.' },
         { label: 'Drift', body: 'Practiced governance diverges from documented policy, often without anyone noticing.' },
         { label: 'Forgetting', body: 'The organization solves problems it has already solved, because the earlier solution was not preserved.' },
         { label: 'Burden', body: 'The institution\'s continuity rests on a small number of people — who carry it quietly.' },
         { label: 'Fragility', body: 'The organization appears resilient until one or two key people leave at the same time.' },
-        { label: 'Invisible labour', body: 'Translating institutional context, maintaining relationships, and preserving memory are absorbed into individual roles and never appear in job descriptions.' },
+        { label: 'Invisible labour', body: 'Translating organizational context, maintaining relationships, and preserving memory are absorbed into individual roles and never appear in job descriptions.' },
       ];
 
   const techWithSoulLines = isFr
@@ -172,12 +172,12 @@ export default async function InstitutionalContinuityRiskPage({
       price: isFr ? 'Gratuit' : 'Free',
       description: isFr
         ? 'Profil complet de maturité en continuité institutionnelle avec signaux et indice de fardeau.'
-        : 'Full institutional continuity maturity profile with signals and burden index.',
+        : 'Full organizational continuity maturity profile with signals and burden index.',
       includes: isFr
         ? ['Bande OCI et indice de continuité', 'Observations sur la continuité', 'Signaux institutionnels', 'Indice de fardeau de continuité', '1 recommandation']
-        : ['OCI band and continuity score', 'Continuity observations', 'Institutional signals', 'Continuity burden index', '1 recommendation'],
+        : ['OCI band and continuity score', 'Continuity observations', 'Organizational signals', 'Continuity burden index', '1 recommendation'],
       cta: isFr ? 'Commencer l\'évaluation' : 'Start the assessment',
-      ctaHref: '/continuity-assessment/start',
+      ctaHref: `/${locale}/continuity-assessment/start`,
       featured: false,
     },
     {
@@ -186,26 +186,26 @@ export default async function InstitutionalContinuityRiskPage({
       price: isFr ? '1 200 $' : '$1,200',
       description: isFr
         ? 'Analyse institutionnelle approfondie avec analyse de la dette de continuité, des dépendances et des risques de modernisation.'
-        : 'In-depth institutional analysis with governance entropy, continuity debt, dependency review, and modernization risk.',
+        : 'In-depth organizational analysis with governance entropy, continuity debt, dependency review, and modernization risk.',
       includes: isFr
         ? ['Tout dans Réflexion', 'Analyse de l\'entropie de gouvernance', 'Analyse de la dette de continuité', 'Examen des dépendances institutionnelles', 'Couche de risque de modernisation', 'Recommandations complètes']
-        : ['Everything in Reflection', 'Governance entropy analysis', 'Continuity debt analysis', 'Institutional dependency review', 'Modernization risk layer', 'Full recommendations'],
+        : ['Everything in Reflection', 'Governance entropy analysis', 'Continuity debt analysis', 'Organizational dependency review', 'Modernization risk layer', 'Full recommendations'],
       cta: isFr ? 'Demander ce rapport' : 'Request this report',
-      ctaHref: '/contact?topic=executive-continuity-brief',
+      ctaHref: `/${locale}/contact?topic=executive-continuity-brief`,
       featured: true,
     },
     {
       id: 'institutional_continuity_diagnostic',
-      name: isFr ? 'Diagnostic institutionnel de continuité' : 'Institutional Continuity Diagnostic',
+      name: isFr ? 'Diagnostic institutionnel de continuité' : 'Organizational Continuity Diagnostic',
       price: isFr ? '6 500 $' : '$6,500',
       description: isFr
         ? 'Engagement complet avec revue facilitée, atelier et cartographie de la mémoire institutionnelle.'
-        : 'Full engagement with facilitated review, workshop, and institutional memory lineage mapping.',
+        : 'Full engagement with facilitated review, workshop, and organizational memory lineage mapping.',
       includes: isFr
         ? ['Tout dans la Note executive', 'Revue diagnostique facilitée', 'Atelier de continuité institutionnelle', 'Cartographie de la lignée mémorielle', 'Note de synthèse exécutive']
-        : ['Everything in the Brief', 'Facilitated diagnostic review', 'Institutional continuity workshop', 'Memory lineage mapping', 'Executive briefing note'],
+        : ['Everything in the Brief', 'Facilitated diagnostic review', 'Organizational continuity workshop', 'Memory lineage mapping', 'Executive briefing note'],
       cta: isFr ? 'Demander ce diagnostic' : 'Request this diagnostic',
-      ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+      ctaHref: `/${locale}/contact?topic=organizational-continuity-diagnostic`,
       featured: false,
     },
   ];
@@ -236,17 +236,17 @@ export default async function InstitutionalContinuityRiskPage({
         { role: 'Organisation fédérée', signal: "La cohérence de la continuité entre vos unités ou sections affiliées varie significativement." },
       ]
     : [
-        { role: 'Executive Director', signal: 'You are approaching a leadership transition and realize the organization\'s institutional memory is not documented.' },
+        { role: 'Executive Director', signal: 'You are approaching a leadership transition and realize the organization\'s organizational memory is not documented.' },
         { role: 'Union Leadership', signal: 'You are concerned about representation decision consistency across electoral cycles.' },
         { role: 'Healthcare Ops Leadership', signal: 'Onboarding continuity and system fragmentation are affecting care quality.' },
-        { role: 'CIO / COO', signal: 'You are leading a technology modernization and realizing that institutional context cannot be migrated like data.' },
-        { role: 'Governance / Board', signal: 'You want to understand how institutional resilience is actually exercised in operational practice.' },
+        { role: 'CIO / COO', signal: 'You are leading a technology modernization and realizing that organizational context cannot be migrated like data.' },
+        { role: 'Governance / Board', signal: 'You want to understand how organizational resilience is actually exercised in operational practice.' },
         { role: 'Federated Organization', signal: 'Continuity coherence across your affiliated units or locals varies significantly.' },
       ];
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      {/* ── Hero (full-bleed institutional image, light text) ── */}
+      {/* ── Hero (full-bleed organizational image, light text) ── */}
       <section
         className="relative isolate flex min-h-[640px] items-center overflow-hidden"
         style={{
@@ -277,7 +277,7 @@ export default async function InstitutionalContinuityRiskPage({
           </p>
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/continuity-assessment/start"
+              href={`/${locale}/continuity-assessment/start`}
               className="rounded-lg bg-white px-7 py-3.5 text-sm font-semibold text-stone-900 shadow-sm transition-colors hover:bg-stone-100"
             >
               {isFr ? 'Évaluer le risque de continuité institutionnelle' : COPY.hero.primaryCta}
@@ -351,7 +351,7 @@ export default async function InstitutionalContinuityRiskPage({
             <p className="mx-auto max-w-2xl text-sm font-light text-stone-500">
               {isFr
                 ? "Le risque de continuité institutionnelle ne se manifeste pas comme une crise. Il se manifeste comme des frictions quotidiennes, légèrement trop élevées, légèrement trop fréquentes."
-                : "Institutional continuity risk does not present as a crisis. It presents as daily friction — slightly too high, slightly too frequent."}
+                : "Organizational continuity risk does not present as a crisis. It presents as daily friction — slightly too high, slightly too frequent."}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -368,7 +368,7 @@ export default async function InstitutionalContinuityRiskPage({
         </div>
       </section>
 
-      {/* ── Institutional Memory Holders (side-by-side imagery + roles) ── */}
+      {/* ── Organizational Memory Holders (side-by-side imagery + roles) ── */}
       <section className="bg-stone-50 py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
@@ -384,25 +384,25 @@ export default async function InstitutionalContinuityRiskPage({
                 aria-label={
                   isFr
                     ? 'Mains écrivant dans un registre institutionnel'
-                    : 'Hands writing in an institutional ledger'
+                    : 'Hands writing in an organizational ledger'
                 }
               />
               <p className="mt-4 text-xs font-light italic text-stone-500">
                 {isFr
                   ? 'La continuité institutionnelle est portée par des personnes, pas par des systèmes.'
-                  : 'Institutional continuity is carried by people, not by systems.'}
+                  : 'Organizational continuity is carried by people, not by systems.'}
               </p>
             </div>
 
             <div className="space-y-8 lg:col-span-7">
               <div className="space-y-4">
                 <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
-                  {isFr ? 'Les détenteurs de mémoire institutionnelle' : 'Institutional Memory Holders'}
+                  {isFr ? 'Les détenteurs de mémoire institutionnelle' : 'Organizational Memory Holders'}
                 </h2>
                 <p className="font-light leading-relaxed text-stone-600">
                   {isFr
                     ? "Dans chaque organisation, il y a des personnes dont la présence maintient la cohérence institutionnelle — qui ne se définissent pas comme des détenteurs de mémoire, et dont l'organisation ne reconnaît pas toujours le rôle. Ces personnes constituent la première ligne de risque de continuité institutionnelle."
-                    : "In every organization, there are people whose presence maintains institutional coherence — who do not think of themselves as memory holders, and whose role the organization does not always recognize. These people are the first line of institutional continuity risk."}
+                    : "In every organization, there are people whose presence maintains organizational coherence — who do not think of themselves as memory holders, and whose role the organization does not always recognize. These people are the first line of organizational continuity risk."}
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -457,7 +457,7 @@ export default async function InstitutionalContinuityRiskPage({
                 aria-label={
                   isFr
                     ? 'Conversation institutionnelle entre collègues'
-                    : 'Institutional conversation between colleagues'
+                    : 'Organizational conversation between colleagues'
                 }
               />
             </div>
@@ -465,7 +465,7 @@ export default async function InstitutionalContinuityRiskPage({
         </div>
       </section>
 
-      {/* ── OCI Motif (image-backed, deep institutional tone) ── */}
+      {/* ── OCI Motif (image-backed, deep organizational tone) ── */}
       <section
         className="relative isolate overflow-hidden py-24 text-center"
         style={{
@@ -493,7 +493,7 @@ export default async function InstitutionalContinuityRiskPage({
             <p className="mx-auto max-w-2xl text-sm font-light text-stone-500">
               {isFr
                 ? "Commencez gratuitement. Une analyse plus approfondie est disponible pour les équipes qui ont besoin d'un rapport institutionnel complet."
-                : "Start free. Deeper analysis is available for organizations that need a full institutional report."}
+                : "Start free. Deeper analysis is available for organizations that need a full organizational report."}
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
@@ -564,7 +564,7 @@ export default async function InstitutionalContinuityRiskPage({
           <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
             {isFr
               ? 'Évaluer le risque de continuité institutionnelle de votre organisation'
-              : 'Assess your organization\'s institutional continuity risk'}
+              : 'Assess your organization\'s organizational continuity risk'}
           </h2>
           <p className="font-light leading-relaxed text-stone-600">
             {isFr
@@ -572,7 +572,7 @@ export default async function InstitutionalContinuityRiskPage({
               : 'The assessment takes approximately twenty minutes. It is free, pseudonymous, and requires no login.'}
           </p>
           <Link
-            href="/continuity-assessment/start"
+            href={`/${locale}/continuity-assessment/start`}
             className="inline-block rounded-lg bg-stone-900 px-8 py-4 text-sm font-semibold text-white transition-colors hover:bg-stone-700"
           >
             {isFr ? 'Commencer l\'évaluation' : COPY.hero.primaryCta}

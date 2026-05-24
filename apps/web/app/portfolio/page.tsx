@@ -19,8 +19,8 @@ export const metadata: Metadata = {
 };
 
 const platforms = [
-  { name: 'Union Eyes', vertical: 'Uniontech', orgs: '4,773', complexity: 'EXTREME', readiness: 9.5, status: 'Flagship validation wedge', tam: 'Pilot-paid', description: 'Institutional continuity infrastructure for labor organizations' },
-  { name: 'FAIRCASE', vertical: 'Justice/Legaltech', orgs: '132', complexity: 'EXTREME', readiness: 9.2, status: 'Flagship', tam: '$1.5B+', description: 'Institutional anti-racism governance, tribunal intelligence, and evidence-ready remediation workflows' },
+  { name: 'Union Eyes', vertical: 'Uniontech', orgs: '4,773', complexity: 'EXTREME', readiness: 9.5, status: 'Flagship validation wedge', tam: 'Pilot-paid', description: 'Organizational continuity infrastructure for labor organizations' },
+  { name: 'FAIRCASE', vertical: 'Justice/Legaltech', orgs: '132', complexity: 'EXTREME', readiness: 9.2, status: 'Flagship', tam: '$1.5B+', description: 'Organizational anti-racism governance, tribunal intelligence, and evidence-ready remediation workflows' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', orgs: '485', complexity: 'EXTREME', readiness: 6.5, status: 'Flagship', tam: '$100B', description: 'Diaspora banking, KYC/AML, international transfers' },
   { name: 'Zonga', vertical: 'Entertainment', orgs: '83+', complexity: 'HIGH-EXTREME', readiness: 10.0, status: 'Production Ready', tam: '$50B', description: 'Music streaming, royalty management, event ticketing' },
   { name: 'SentryIQ360', vertical: 'Insurtech', orgs: '79+', complexity: 'HIGH-EXTREME', readiness: 7.0, status: 'In Development', tam: '$30B', description: 'Insurance arbitrage, underwriting AI, policy lifecycle' },
@@ -93,7 +93,7 @@ export default async function Portfolio() {
       title: isFr ? 'J explore le risque de continuité' : 'I am Exploring Continuity Risk',
       description: isFr
         ? 'Consultez le diagnostic OCRA et les symptômes de fragilité institutionnelle.'
-        : 'Review the OCRA diagnostic and the symptoms of institutional fragility.',
+        : 'Review the OCRA diagnostic and the symptoms of organizational fragility.',
       href: '/continuity-assessment',
       eventName: 'portfolio_start_here_assessment',
       cta: isFr ? 'Commencer l évaluation' : 'Begin Assessment',

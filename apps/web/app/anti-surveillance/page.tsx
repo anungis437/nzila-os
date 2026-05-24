@@ -4,14 +4,14 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Anti-Surveillance Commitment',
   description:
-    'Nzila systems preserve institutional continuity. They are not worker surveillance systems.',
+    'Nzila systems preserve organizational continuity. They are not worker surveillance systems.',
   alternates: { canonical: '/anti-surveillance' },
 };
 
 const does = [
   'Capture governance decisions and their rationale',
   'Preserve operational memory across transitions',
-  'Measure institutional continuity exposure',
+  'Measure organizational continuity exposure',
   'Document approval lineage and decision history',
   'Support federated coordination without centralizing local sovereignty',
 ];
@@ -36,8 +36,8 @@ export default function AntiSurveillancePage() {
             Nzila is continuity infrastructure. It is not worker surveillance.
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl">
-            The distinction is structural. Nzila measures institutional posture: governance coherence,
-            continuity exposure, operational traceability, and institutional resilience. It does not
+            The distinction is structural. Nzila measures organizational posture: governance coherence,
+            continuity exposure, operational traceability, and organizational resilience. It does not
             measure individual productivity, behavior, location, communication patterns, or performance.
           </p>
         </div>

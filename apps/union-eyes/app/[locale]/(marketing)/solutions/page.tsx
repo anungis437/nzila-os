@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,13 +12,13 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 /**
- * Solutions — Stakeholder-Oriented Institutional Journeys
+ * Solutions — Stakeholder-Oriented Organizational Journeys
  *
  * Enterprise IA: Solutions hub surfacing each stakeholder journey.
- * Hides operating-architecture sophistication. Exposes institutional outcomes.
+ * Hides operating-architecture sophistication. Exposes organizational outcomes.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -51,7 +51,7 @@ const solutions = [
     icon: Users,
     audience: 'Union Executive Leadership',
     href: 'solutions/executive-leadership',
-    challenge: 'Strategic continuity is at risk when institutional knowledge lives in individuals, not in the organization.',
+    challenge: 'Strategic continuity is at risk when organizational knowledge lives in individuals, not in the organization.',
     scenario:
       'A national union prepares for an upcoming presidential transition. Three decades of negotiated precedents, federation-level commitments, and operational doctrine live in one outgoing executive’s memory. OCI (Organizational Continuity Index) surfaces the dependency map; the platform turns it into an inheritable continuity record before the transition window closes.',
     outcomes: [
@@ -79,12 +79,12 @@ const solutions = [
     icon: Settings,
     audience: 'Operations Leadership',
     href: 'solutions/operations-leadership',
-    challenge: 'Operational fragmentation erodes institutional resilience over time.',
+    challenge: 'Operational fragmentation erodes organizational resilience over time.',
     scenario:
       'A federation’s operational work lives across seven inboxes, three shared drives, and a legacy intake form. New officers inherit cases with no precedent map and no continuity briefing. The platform consolidates the operating record without displacing existing tools — onboarding shortens, decisions become defensible.',
     outcomes: [
       'Operational coherence across distributed teams',
-      'Institutional memory preservation during change',
+      'Organizational memory preservation during change',
       'Continuity planning for operational resilience',
     ],
     cta: 'Operations leadership solutions',
@@ -99,7 +99,7 @@ const solutions = [
     outcomes: [
       'Governance-safe AI with full explainability guarantees',
       'Enterprise security and Canadian data residency',
-      'Institutional trust infrastructure with audit capabilities',
+      'Organizational trust infrastructure with audit capabilities',
     ],
     cta: 'Technology leadership solutions',
   },
@@ -121,9 +121,9 @@ const solutions = [
     icon: Briefcase,
     audience: 'Procurement Stakeholders',
     href: 'solutions/procurement',
-    challenge: 'Procurement decisions require operational credibility, implementation readiness, and institutional trust validation.',
+    challenge: 'Procurement decisions require operational credibility, implementation readiness, and organizational trust validation.',
     scenario:
-      'A procurement officer needs to assemble a defensible institutional case for a continuity-infrastructure engagement. The Trust Center, the OCI assessment artifacts, the governance commitments, and the audit-ready exports collapse what would normally be a months-long vendor due-diligence into a structured procurement-readable package.',
+      'A procurement officer needs to assemble a defensible organizational case for a continuity-infrastructure engagement. The Trust Center, the OCI assessment artifacts, the governance commitments, and the audit-ready exports collapse what would normally be a months-long vendor due-diligence into a structured procurement-readable package.',
     outcomes: [
       'Modular deployment with phased implementation pathways',
       'Trust center documentation and audit-ready exports',
@@ -136,12 +136,12 @@ const solutions = [
 const pageCopy = {
   'en-CA': {
     badge: 'Solutions',
-    heading: 'Built for every institutional stakeholder',
+    heading: 'Built for every organizational stakeholder',
     description:
-      'UnionEyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role.',
+      'UnionEyes organizes around organizational stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role.',
     ctaHeading: 'Ready to explore your stakeholder journey?',
     ctaDescription:
-      'Start with a free Continuity Reflection. No commitment, no sales call — just a scoped look at where institutional continuity sits for your organization today.',
+      'Start with a free Continuity Reflection. No commitment, no sales call — just a scoped look at where organizational continuity sits for your organization today.',
     cta: 'Start the free Continuity Reflection',
     solutions,
   },
@@ -319,7 +319,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
             {copy.ctaDescription}
           </p>
           <Link
-            href={`/${locale}/institutional-continuity-risk`}
+            href={`/${locale}/organizational-continuity-risk`}
             className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
             {copy.cta}

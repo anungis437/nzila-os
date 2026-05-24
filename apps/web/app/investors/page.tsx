@@ -11,10 +11,10 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Investors',
-  description: 'Investment context for Nzila Ventures: institutional continuity infrastructure, Union Eyes validation, Nzila OS, and governed operational applications.',
+  description: 'Investment context for Nzila Ventures: organizational continuity infrastructure, Union Eyes validation, Nzila OS, and governed operational applications.',
   openGraph: {
     title: 'Invest in Nzila Ventures',
-    description: 'Institutional continuity infrastructure with Union Eyes as the flagship validation wedge.',
+    description: 'Organizational continuity infrastructure with Union Eyes as the flagship validation wedge.',
     images: [{ url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Modern glass skyscraper reaching skyward — representing growth and investment ambition' }],
   },
   alternates: { canonical: '/investors' },
@@ -96,7 +96,7 @@ export default async function InvestorsPage() {
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
               {isFr ? 'La catégorie est' : 'The category is'}<br />
-              <span className="gradient-text">{isFr ? 'la continuité institutionnelle' : 'institutional continuity'}</span>
+              <span className="gradient-text">{isFr ? 'la continuité institutionnelle' : 'organizational continuity'}</span>
             </h1>
           </ScrollReveal>
 
@@ -104,7 +104,7 @@ export default async function InvestorsPage() {
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mb-10">
               {isFr
                 ? `Nzila Ventures construit une infrastructure de continuité institutionnelle. Union Eyes valide le wedge, Nzila OS porte l architecture, et ${MARKETING_FACTS.governedApplications} applications gouvernées étendent la couche opérationnelle.`
-                : `Nzila Ventures builds institutional continuity infrastructure. Union Eyes validates the wedge, Nzila OS carries the platform architecture, and ${MARKETING_FACTS.governedApplications} governed applications extend the operating layer.`}
+                : `Nzila Ventures builds organizational continuity infrastructure. Union Eyes validates the wedge, Nzila OS carries the platform architecture, and ${MARKETING_FACTS.governedApplications} governed applications extend the operating layer.`}
             </p>
           </ScrollReveal>
 

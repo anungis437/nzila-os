@@ -1,5 +1,5 @@
 /**
- * Governance & Continuity (customer-institutional).
+ * Governance & Continuity (customer-organizational).
  *
  * Per realignment directive, "governance" on UnionEyes public surfaces refers
  * to the CUSTOMER's organizational governance operating environment:

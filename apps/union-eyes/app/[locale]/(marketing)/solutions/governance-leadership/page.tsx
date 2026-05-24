@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -38,7 +38,7 @@ const PAGE_COPY = {
     badge: 'Solutions · Governance Leadership',
     heading: 'Governance modernization that earns democratic trust.',
     description:
-      'UnionEyes Governance-of-Record Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic legitimacy.',
+      'UnionEyes Governance-of-Record Intelligence gives governance leaders the explainability, audit trails, and organizational context to modernize governance operations without compromising democratic legitimacy.',
     primaryCta: 'Start the free Continuity Reflection',
     secondaryCta: 'Governance-of-Record Intelligence Substrate',
     challengeHeading: 'The governance continuity problem',
@@ -53,7 +53,7 @@ const PAGE_COPY = {
       { icon: ShieldCheck, title: 'Governance modernization you can defend', desc: 'Every governance change is explainable, evidence-traceable, and auditable — governance that earns democratic legitimacy.' },
       { icon: Eye, title: 'Continuity oversight across transitions', desc: 'Track governance structure health across leadership transitions with full historical context intact.' },
       { icon: FileCheck, title: 'Audit-ready governance-of-record intelligence', desc: 'Complete audit trails for all governance decisions, intelligence actions, and human review outcomes.' },
-      { icon: GitBranch, title: 'Governance evolution made visible', desc: 'Surface how bylaws, policies, and governance structures have evolved — with the institutional context that explains why.' },
+      { icon: GitBranch, title: 'Governance evolution made visible', desc: 'Surface how bylaws, policies, and governance structures have evolved — with the organizational context that explains why.' },
       { icon: Vote, title: 'Democratic structures preserved', desc: 'Intelligence recommends. Democratic structures decide. Human oversight is structurally enforced at every layer.' },
     ],
     commitmentsHeading: 'Governance & Trust commitments',
@@ -119,7 +119,7 @@ export default async function GovernanceLeadershipPage({ params }: { params: Pro
         description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.primaryCta}
             </Link>
             <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
@@ -198,7 +198,7 @@ export default async function GovernanceLeadershipPage({ params }: { params: Pro
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.primaryCta}
           </Link>
         </div>

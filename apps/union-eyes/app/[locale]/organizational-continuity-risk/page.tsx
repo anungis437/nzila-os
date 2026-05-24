@@ -177,7 +177,7 @@ export default async function OrganizationalContinuityRiskPage({
         ? ['Bande OCI et indice de continuité', 'Observations sur la continuité', 'Signaux institutionnels', 'Indice de fardeau de continuité', '1 recommandation']
         : ['OCI band and continuity score', 'Continuity observations', 'Institutional signals', 'Continuity burden index', '1 recommendation'],
       cta: isFr ? 'Commencer l\'évaluation' : 'Start the assessment',
-      ctaHref: '/continuity-assessment/start',
+      ctaHref: `/${locale}/continuity-assessment/start`,
       featured: false,
     },
     {
@@ -191,7 +191,7 @@ export default async function OrganizationalContinuityRiskPage({
         ? ['Tout dans Réflexion', 'Analyse de l\'entropie de gouvernance', 'Analyse de la dette de continuité', 'Examen des dépendances institutionnelles', 'Couche de risque de modernisation', 'Recommandations complètes']
         : ['Everything in Reflection', 'Governance entropy analysis', 'Continuity debt analysis', 'Institutional dependency review', 'Modernization risk layer', 'Full recommendations'],
       cta: isFr ? 'Commencer l\'évaluation' : 'Start the assessment',
-      ctaHref: '/continuity-assessment/start?intendedTier=executive_continuity_brief',
+      ctaHref: `/${locale}/continuity-assessment/start?intendedTier=executive_continuity_brief`,
       featured: true,
     },
     {
@@ -205,7 +205,7 @@ export default async function OrganizationalContinuityRiskPage({
         ? ['Tout dans la Note executive', 'Revue diagnostique facilitée', 'Atelier de continuité institutionnelle', 'Cartographie de la lignée mémorielle', 'Note de synthèse exécutive']
         : ['Everything in the Brief', 'Facilitated diagnostic review', 'Institutional continuity workshop', 'Memory lineage mapping', 'Executive briefing note'],
       cta: isFr ? 'Demander ce diagnostic' : 'Request this diagnostic',
-      ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+      ctaHref: `/${locale}/contact?topic=institutional-continuity-diagnostic`,
       featured: false,
     },
   ];
@@ -277,7 +277,7 @@ export default async function OrganizationalContinuityRiskPage({
           </p>
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/continuity-assessment/start"
+              href={`/${locale}/continuity-assessment/start`}
               className="rounded-lg bg-white px-7 py-3.5 text-sm font-semibold text-stone-900 shadow-sm transition-colors hover:bg-stone-100"
             >
               {isFr ? 'Évaluer le risque de continuité institutionnelle' : COPY.hero.primaryCta}
@@ -572,7 +572,7 @@ export default async function OrganizationalContinuityRiskPage({
               : 'The assessment takes approximately twenty minutes. It is free, pseudonymous, and requires no login.'}
           </p>
           <Link
-            href="/continuity-assessment/start"
+            href={`/${locale}/continuity-assessment/start`}
             className="inline-block rounded-lg bg-stone-900 px-8 py-4 text-sm font-semibold text-white transition-colors hover:bg-stone-700"
           >
             {isFr ? 'Commencer l\'évaluation' : COPY.hero.primaryCta}

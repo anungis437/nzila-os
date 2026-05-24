@@ -6,7 +6,7 @@
  * Replaces a scroll-heavy grid of 5 "human scenes" with one calm,
  * focus-at-a-time editorial card. Keyboard-accessible (←/→), reduced-motion
  * friendly, no external animation library. Used inside the otherwise
- * server-rendered Institutional Continuity Risk page.
+ * server-rendered Organizational Continuity Risk page.
  */
 
 import { useCallback, useEffect, useState } from 'react';

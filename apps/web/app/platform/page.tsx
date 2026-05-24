@@ -140,7 +140,7 @@ export default async function PlatformPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.3}>
             <TrackedLink
-              href="/institutional-continuity"
+              href="/organizational-continuity"
               eventName="cta_institutional_continuity"
               eventProps={{ source: 'platform_hero' }}
               className="inline-flex items-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition text-lg"

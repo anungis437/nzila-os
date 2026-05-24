@@ -173,7 +173,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
         description="Executive Intelligence surfaces organizational continuity, governance modernization status, and organizational health — in calm, executive-readable formats designed for leadership decision-making."
         cta={
           <Link
-            href={`/${locale}/institutional-continuity-risk`}
+            href={`/${locale}/organizational-continuity-risk`}
             className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
             {briefingCta}
@@ -269,7 +269,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
               : 'Start with a free Continuity Reflection to see Executive Intelligence in action for your organization.'}
           </p>
           <Link
-            href={`/${locale}/institutional-continuity-risk`}
+            href={`/${locale}/organizational-continuity-risk`}
             className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
           >
             {briefingCta}

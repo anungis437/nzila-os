@@ -45,7 +45,7 @@ const verticals = [
     photo: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
     alt: 'Labor union workers raising hands together in solidarity',
     platforms: ['Union Eyes'],
-    description: 'Institutional continuity, grievance lineage, steward handoffs, governance evidence, and CBA context.',
+    description: 'Organizational continuity, grievance lineage, steward handoffs, governance evidence, and CBA context.',
     tam: '$50B', orgs: '4,773', status: 'Flagship',
   },
   {
@@ -200,7 +200,7 @@ export default async function Verticals() {
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               {isFr
                 ? 'Des secteurs où la continuité, la mémoire opérationnelle, les preuves de gouvernance et la confiance institutionnelle deviennent matérielles.'
-                : 'Sectors where continuity, operational memory, governance evidence, and institutional trust become materially important.'}
+                : 'Sectors where continuity, operational memory, governance evidence, and organizational trust become materially important.'}
             </p>
           </ScrollReveal>
         </div>

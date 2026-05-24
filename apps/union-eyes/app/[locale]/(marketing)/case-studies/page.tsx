@@ -224,7 +224,7 @@ export default function LocaleCaseStudiesPage() {
             {copy.ctaBody}
           </p>
           <Link
-            href={`/${locale}/institutional-continuity-risk`}
+            href={`/${locale}/organizational-continuity-risk`}
             className="inline-flex items-center px-6 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition-colors"
           >
             {copy.ctaButton}

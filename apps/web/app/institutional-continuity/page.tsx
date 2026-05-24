@@ -2,15 +2,15 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Institutional Continuity',
+  title: 'Organizational Continuity',
   description:
-    'Nzila builds institutional continuity infrastructure for organizations that need governance, operational memory, and trust to survive transitions.',
-  alternates: { canonical: '/institutional-continuity' },
+    'Nzila builds organizational continuity infrastructure for organizations that need governance, operational memory, and trust to survive transitions.',
+  alternates: { canonical: '/organizational-continuity' },
 };
 
 const symptoms = [
   'Key decisions can only be explained by one or two long-tenured people.',
-  'Onboarding depends on mentorship rather than durable institutional records.',
+  'Onboarding depends on mentorship rather than durable organizational records.',
   'Audit readiness requires preparation because evidence is reconstructed after the fact.',
   'Leadership transitions expose fragmented workflows, missing rationale, and informal approvals.',
 ];
@@ -18,7 +18,7 @@ const symptoms = [
 const capabilities = [
   {
     title: 'Operational memory',
-    body: 'Procedures, precedents, workflows, decisions, historical rationale, and institutional context become preserved assets of the organization.',
+    body: 'Procedures, precedents, workflows, decisions, historical rationale, and organizational context become preserved assets of the organization.',
   },
   {
     title: 'Governance evidence',
@@ -40,7 +40,7 @@ export default function InstitutionalContinuityPage() {
       <section className="bg-navy text-white py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-electric text-sm font-semibold tracking-widest uppercase mb-4">
-            Institutional Continuity
+            Organizational Continuity
           </p>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             Governance becomes fragile when operational memory disappears.

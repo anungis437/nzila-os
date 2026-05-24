@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -36,9 +36,9 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 const PAGE_COPY = {
   'en-CA': {
     badge: 'Solutions · Union Executive Leadership',
-    heading: 'Lead with the full weight of institutional history behind you.',
+    heading: 'Lead with the full weight of organizational history behind you.',
     description:
-      'UnionEyes gives executive leaders the institutional continuity visibility, strategic clarity, and governance-of-record intelligence to lead confidently through any transition — without wading through operational complexity.',
+      'UnionEyes gives executive leaders the organizational continuity visibility, strategic clarity, and governance-of-record intelligence to lead confidently through any transition — without wading through operational complexity.',
     challengeHeading: 'The continuity challenge every executive faces',
     challenges: [
       'Decades of corporate knowledge disappears when senior officers retire or leave',
@@ -55,10 +55,10 @@ const PAGE_COPY = {
       { icon: ShieldCheck, title: 'Labour-safe intelligence, guaranteed', desc: 'All intelligence is explainable, human-reviewed, and built on anti-surveillance principles.' },
     ],
     quote:
-      '"The institutional knowledge that walks out the door when a president retires is irreplaceable — unless it was captured, governed, and made accessible. That\'s what continuity intelligence means."',
-    quoteAttribution: 'UnionEyes Institutional Continuity Principle',
+      '"The organizational knowledge that walks out the door when a president retires is irreplaceable — unless it was captured, governed, and made accessible. That\'s what continuity intelligence means."',
+    quoteAttribution: 'UnionEyes Organizational Continuity Principle',
     relatedHeading: 'Explore related solutions',
-    finalHeading: 'Ready to lead with institutional clarity?',
+    finalHeading: 'Ready to lead with organizational clarity?',
     finalBody: 'Start with a free Continuity Reflection scoped to executive leadership.',
     primaryCta: 'Start the free Continuity Reflection',
     finalCta: 'Start the free Continuity Reflection',
@@ -109,7 +109,7 @@ export default async function ExecutiveLeadershipPage({ params }: { params: Prom
         }
         heading={<>{copy.heading}</>}
         description={copy.description}
-        cta={<Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+        cta={<Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
             {copy.primaryCta}
           </Link>}
       />
@@ -177,7 +177,7 @@ export default async function ExecutiveLeadershipPage({ params }: { params: Prom
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.finalCta}
           </Link>
         </div>

@@ -60,7 +60,7 @@ export default async function TrustCenter() {
           <p className="text-gray-700 max-w-3xl">
             {isFr
               ? 'Nzila mesure la posture institutionnelle: cohérence de gouvernance, exposition de continuité, traçabilité opérationnelle et résilience. Nzila ne mesure pas la productivité, le comportement, la localisation ou la performance individuelle.'
-              : 'Nzila measures institutional posture: governance coherence, continuity exposure, operational traceability, and resilience. Nzila does not measure individual productivity, behavior, location, or performance.'}
+              : 'Nzila measures organizational posture: governance coherence, continuity exposure, operational traceability, and resilience. Nzila does not measure individual productivity, behavior, location, or performance.'}
           </p>
         </div>
       </section>

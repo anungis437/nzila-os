@@ -141,7 +141,7 @@ export default async function LocaleStoryPage({
           <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">{t('ctaBody')}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-              <Link href={`/${locale}/institutional-continuity-risk`}>{t('ctaPilot')}</Link>
+              <Link href={`/${locale}/organizational-continuity-risk`}>{t('ctaPilot')}</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
               <Link href={`/${locale}/contact`}>{t('ctaContact')}</Link>

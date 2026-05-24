@@ -30,7 +30,7 @@ export default function DoctrinePage() {
             Continuity over heroics. Governance before scale.
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl">
-            Nzila OS is institutional continuity infrastructure designed to help trust-sensitive
+            Nzila OS is organizational continuity infrastructure designed to help trust-sensitive
             organizations preserve governance, operational memory, and organizational resilience over time.
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function DoctrinePage() {
             {
               title: 'First contact starts with symptoms',
               body: 'Knowledge walks out the door. Decisions lose rationale. Onboarding depends on the wrong people. Category language comes after recognition.',
-              href: '/institutional-continuity',
+              href: '/organizational-continuity',
             },
             {
               title: 'Trust requires visible boundaries',
@@ -60,7 +60,7 @@ export default function DoctrinePage() {
             },
             {
               title: 'Evidence must be operational',
-              body: 'The assessment, pilot model, and case-study engine turn doctrine into measurable institutional outcomes.',
+              body: 'The assessment, pilot model, and case-study engine turn doctrine into measurable organizational outcomes.',
               href: '/continuity-assessment',
             },
           ].map((item) => (

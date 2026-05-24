@@ -20,11 +20,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL("https://nzilaventures.com"),
   title: {
-    default: "Nzila Ventures | Institutional Continuity Infrastructure",
+    default: "Nzila Ventures | Organizational Continuity Infrastructure",
     template: "%s | Nzila Ventures",
   },
   description: `Nzila Ventures builds ${platformCoverageLabel()}, ${governedCoverageLabel()}, and Nzila OS for organizations where governance, continuity, evidence, and trust matter.`,
-  keywords: ["institutional continuity", "operational memory", "governance infrastructure", "trust infrastructure", "Union Eyes", "Nzila OS", "auditability", "data sovereignty", "explainable AI", "Nzila Ventures"],
+  keywords: ["organizational continuity", "operational memory", "governance infrastructure", "trust infrastructure", "Union Eyes", "Nzila OS", "auditability", "data sovereignty", "explainable AI", "Nzila Ventures"],
   authors: [{ name: "Nzila Ventures" }],
   creator: "Nzila Ventures",
   icons: {
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Nzila Ventures",
-    title: "Nzila Ventures | Institutional Continuity Infrastructure",
+    title: "Nzila Ventures | Organizational Continuity Infrastructure",
     description: `Continuity infrastructure for trust-sensitive institutions, delivered through Nzila OS, Union Eyes, and ${MARKETING_FACTS.governedApplications} governed operational applications.`,
     images: [
       {
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nzila Ventures | Institutional Continuity Infrastructure",
-    description: "Nzila builds governed operational infrastructure that preserves continuity, operational memory, evidence, and institutional trust.",
+    title: "Nzila Ventures | Organizational Continuity Infrastructure",
+    description: "Nzila builds governed operational infrastructure that preserves continuity, operational memory, evidence, and organizational trust.",
     images: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80"],
   },
   robots: {

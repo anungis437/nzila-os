@@ -85,7 +85,7 @@ export default async function InsightCategoryPage({ params, searchParams }: Insi
       }
     : {
         heading: 'Start with a free Continuity Reflection',
-        body: 'A scoped institutional continuity assessment. No commitment. The ICRA entry point.',
+        body: 'A scoped organizational continuity assessment. No commitment. The ICRA entry point.',
         primary: 'Start the free Continuity Reflection',
         secondary: 'Back to Insights',
       };
@@ -172,7 +172,7 @@ export default async function InsightCategoryPage({ params, searchParams }: Insi
           </ScrollReveal>
           <div className="flex flex-col sm:flex-row gap-4 justify-center narrative-sequence">
             <Link
-              href={`/${locale}/institutional-continuity-risk`}
+              href={`/${locale}/organizational-continuity-risk`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
               {ctaCopy.primary}

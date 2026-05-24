@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * LocaleSiteNavigation — Enterprise institutional navigation for UnionEyes (locale-aware)
+ * LocaleSiteNavigation — Enterprise organizational navigation for UnionEyes (locale-aware)
  * Used inside app/[locale]/(marketing)/ where NextIntlClientProvider is active.
  *
  * Enterprise IA (Phase 1 Operational Convergence):
@@ -25,7 +25,7 @@ export default function LocaleSiteNavigation() {
   const searchParams = useSearchParams();
   const locale = (params?.locale as string) || 'en-CA';
   const contextMode = parseInstitutionalMode(searchParams.get('context') ?? undefined);
-  const pilotRequestHref = withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode);
+  const pilotRequestHref = withInstitutionalContext(`/${locale}/organizational-continuity-risk`, contextMode);
   const whitepaperLabel = locale === 'fr-CA' ? 'Livre blanc' : 'Whitepaper';
 
   const solutionsLinks = [
@@ -37,7 +37,7 @@ export default function LocaleSiteNavigation() {
     { name: t('solutionsItems.procurement.name'), href: `/${locale}/solutions/procurement`, desc: t('solutionsItems.procurement.desc') },
   ];
 
-  // Customer-facing pillars (institutional governance & continuity realignment).
+  // Customer-facing pillars (organizational governance & continuity realignment).
   // Four top-level surfaces that own the marketing IA.
   const pillarLinks = [
     { name: t('pillarItems.governance.name'),    href: `/${locale}/governance`,                 desc: t('pillarItems.governance.desc') },

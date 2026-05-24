@@ -9,7 +9,7 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'About Us — Nzila Ventures',
-  description: 'Nzila Ventures is the operating company behind Nzila OS, building institutional continuity infrastructure for trust-sensitive organizations.',
+  description: 'Nzila Ventures is the operating company behind Nzila OS, building organizational continuity infrastructure for trust-sensitive organizations.',
   openGraph: {
     title: 'About Nzila Ventures',
     description: 'The operating company behind Nzila OS, Union Eyes, and governed continuity product lines.',
@@ -271,7 +271,7 @@ export default async function About() {
             <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
               {isFr
                 ? 'La société, la plateforme et les produits existent pour préserver mémoire opérationnelle, gouvernance, preuves et confiance institutionnelle.'
-                : 'The company, platform, and products exist to preserve operational memory, governance, evidence, and institutional trust.'}
+                : 'The company, platform, and products exist to preserve operational memory, governance, evidence, and organizational trust.'}
             </p>
             <div className="inline-flex items-center gap-3 bg-emerald/5 border border-emerald/20 rounded-xl px-6 py-4 mb-10">
               <span className="text-2xl">N</span>

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const kit = [
   {
     title: 'Continuity symptoms checklist',
-    body: 'Identify where decisions, workflows, relationships, approvals, and institutional context depend on specific people.',
+    body: 'Identify where decisions, workflows, relationships, approvals, and organizational context depend on specific people.',
   },
   {
     title: 'Governance evidence inventory',

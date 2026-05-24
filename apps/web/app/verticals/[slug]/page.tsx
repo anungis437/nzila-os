@@ -155,7 +155,7 @@ const verticalData: Record<string, {
     status: 'Flagship',
     color: 'from-gold to-gold-light',
     overview:
-      'Union Eyes is Nzila\'s flagship validation product: institutional continuity infrastructure for labor organizations. It preserves grievance lineage, steward handoffs, CBA context, governance rationale, and evidence-sealed audit trails without becoming a worker surveillance system.',
+      'Union Eyes is Nzila\'s flagship validation product: organizational continuity infrastructure for labor organizations. It preserves grievance lineage, steward handoffs, CBA context, governance rationale, and evidence-sealed audit trails without becoming a worker surveillance system.',
     capabilities: [
       {
         title: 'Pension Forecasting Engine',

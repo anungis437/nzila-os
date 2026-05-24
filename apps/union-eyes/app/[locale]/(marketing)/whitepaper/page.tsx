@@ -35,11 +35,11 @@ const WHITEPAPER_COPY = {
     abstractLabel: 'Abstract',
     abstractReadingTime: '~25 minute read',
     abstractBody:
-      'Canadian labour organizations face a generational continuity gap: 5.2 million boomers have already left the workforce, another 2.7 million are projected to exit within five years, and labour-force participation is forecast to decline by more than two percentage points by 2030. Succession planning, headcount strategy, and document retention were designed for a different scale of loss and cannot, on their own, preserve the institutional memory, governance posture, and decision lineage that organized labour relies on.',
+      'Canadian labour organizations face a generational continuity gap: 5.2 million boomers have already left the workforce, another 2.7 million are projected to exit within five years, and labour-force participation is forecast to decline by more than two percentage points by 2030. Succession planning, headcount strategy, and document retention were designed for a different scale of loss and cannot, on their own, preserve the organizational memory, governance posture, and decision lineage that organized labour relies on.',
     abstractBodyTwo:
-      'This whitepaper introduces organizational continuity infrastructure as a distinct discipline. It defines the Organizational Continuity Index (OCI) and Organizational Continuity Risk Analysis (OCRA), describes the deterministic-AI doctrine and governance boundaries used to keep continuity tooling safe under labour scrutiny, and outlines the deployment controls, evidence model, and legal alignment that allow unions, federations, and democratic organizations to operationalize continuity without surrendering authority over their own institutional memory.',
+      'This whitepaper introduces organizational continuity infrastructure as a distinct discipline. It defines the Organizational Continuity Index (OCI) and Organizational Continuity Risk Analysis (OCRA), describes the deterministic-AI doctrine and governance boundaries used to keep continuity tooling safe under labour scrutiny, and outlines the deployment controls, evidence model, and legal alignment that allow unions, federations, and democratic organizations to operationalize continuity without surrendering authority over their own organizational memory.',
     abstractCallouts: [
-      'Defines OCI and OCRA as institutional continuity primitives.',
+      'Defines OCI and OCRA as organizational continuity primitives.',
       'Articulates deterministic-AI doctrine and governance boundaries.',
       'Maps deployment, evidence, and legal alignment for labour organizations.',
     ],

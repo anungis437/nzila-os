@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Union Eyes',
   description:
-    'Union Eyes is Nzila Ventures flagship validation product: institutional continuity infrastructure for labor organizations.',
+    'Union Eyes is Nzila Ventures flagship validation product: organizational continuity infrastructure for labor organizations.',
   alternates: { canonical: '/union-eyes' },
 };
 
@@ -31,7 +31,7 @@ const pilotSteps = [
   'Baseline continuity review and pilot scope',
   'Governance approval and member-facing visibility plan',
   'Role-scoped deployment for stewards and coordinators',
-  'Measured pilot operation over a defined institutional function',
+  'Measured pilot operation over a defined organizational function',
   'Closure report with continuity, governance, and anti-surveillance findings',
 ];
 
@@ -79,7 +79,7 @@ export default function UnionEyesPage() {
           <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8">
             <h2 className="text-3xl font-bold text-navy mb-6">The boundary is structural</h2>
             <p className="text-gray-700 mb-6">
-              Union Eyes measures institutional posture, not individual productivity. It does not
+              Union Eyes measures organizational posture, not individual productivity. It does not
               score members, profile behavior, track attention, or automate punitive action.
             </p>
             <div className="grid sm:grid-cols-2 gap-4 text-sm">

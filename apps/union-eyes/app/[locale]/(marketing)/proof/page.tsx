@@ -497,11 +497,11 @@ const ANONYMIZED_PROOF_NARRATIVES: Record<
 > = {
   'en-CA': {
     label: 'Anonymized proof narratives',
-    title: 'How institutional continuity reads on the ground',
+    title: 'How organizational continuity reads on the ground',
     intro:
       'Three composite vignettes drawn from the scenario archetypes modeled in our institutional-legitimacy library. They are written in the same voice continuity reviewers use after a real engagement.',
     disclaimer:
-      'These narratives are anonymized composites for institutional review. They are not testimonials, not endorsements, and not retrospective claims about a specific organization. Real engagement evidence is delivered under NDA inside the proof pack.',
+      'These narratives are anonymized composites for organizational review. They are not testimonials, not endorsements, and not retrospective claims about a specific organization. Real engagement evidence is delivered under NDA inside the proof pack.',
     items: [
       {
         archetype: 'Regional labour federation — mid-term executive transition',
@@ -524,11 +524,11 @@ const ANONYMIZED_PROOF_NARRATIVES: Record<
       {
         archetype: 'Public-sector bargaining unit — onboarding instability',
         situation:
-          'High turnover on the executive committee meant every new member spent their first months rebuilding context that already existed but was not legible. Institutional memory was effectively expiring with each rotation.',
+          'High turnover on the executive committee meant every new member spent their first months rebuilding context that already existed but was not legible. Organizational memory was effectively expiring with each rotation.',
         response:
           'Memory lineage was mapped against the active operating responsibilities new members were inheriting. The diagnostic produced a continuity transfer routine, not a training curriculum.',
         observable:
-          'The next two intake cycles completed without the executive committee re-litigating settled decisions. Quiet-risk signals on three institutional dependencies stayed inside their thresholds across both cycles.',
+          'The next two intake cycles completed without the executive committee re-litigating settled decisions. Quiet-risk signals on three organizational dependencies stayed inside their thresholds across both cycles.',
       },
     ],
   },
@@ -1041,7 +1041,7 @@ export default async function ProofPage({
         description={copy.heroDescription}
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link href={withInstitutionalContext(`/${locale}/institutional-continuity-risk`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={withInstitutionalContext(`/${locale}/organizational-continuity-risk`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.pilotCta}
             </Link>
             <Link href={withInstitutionalContext(`/${locale}/trust`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all">
@@ -1548,7 +1548,7 @@ export default async function ProofPage({
                   {copy.proofPackDesc}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-electric text-white font-semibold rounded-xl hover:bg-blue-700 transition-all">
+                  <Link href={`/${locale}/organizational-continuity-risk`} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-electric text-white font-semibold rounded-xl hover:bg-blue-700 transition-all">
                     {copy.pilotCta} <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link href={`/${locale}/trust`} className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-navy font-semibold rounded-xl border border-gray-200 hover:border-gray-300 transition-all">
