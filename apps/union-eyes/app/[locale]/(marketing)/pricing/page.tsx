@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Users } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
-import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
+import { OrganizationalContinuityNote } from '@/components/marketing/organizational-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { getUnionEyesSiteTopology } from '@/lib/site-topology';
@@ -655,7 +655,7 @@ export default async function LocalePricingPage({
         description={copy.description}
       />
 
-      <InstitutionalContinuityNote
+      <OrganizationalContinuityNote
         surface={tNote('label')}
         posture={tNote('posture')}
       />
