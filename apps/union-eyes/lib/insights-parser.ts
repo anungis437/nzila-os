@@ -59,6 +59,9 @@ const featuredSlugs = new Set([
 const categoryDescriptions: Record<string, string> = {
   'Organizational Continuity':
     'How labour organizations build organizational memory, navigate leadership transitions, and strengthen continuity resilience.',
+  // Legacy label alias used by existing markdown frontmatter.
+  'Institutional Continuity':
+    'How labour organizations build organizational memory, navigate leadership transitions, and strengthen continuity resilience.',
   'Governance Modernization':
     'Transforming governance operations with explainable intelligence and modern oversight controls.',
   'Explainable Governance Reasoning':
@@ -78,6 +81,8 @@ const categoryDescriptions: Record<string, string> = {
 
 const categorySlugByName: Record<string, string> = {
   'Organizational Continuity': 'institutional-continuity',
+  // Legacy label alias — keep canonical slug stable.
+  'Institutional Continuity': 'institutional-continuity',
   'Governance Modernization': 'governance-modernization',
   'Explainable Governance Reasoning': 'explainable-intelligence',
   // Legacy alias — keep slug stable for procurement deep links.
