@@ -4,7 +4,7 @@ import { CardSkeleton, TableSkeleton } from "@/components/ui/loading";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Brain, Zap } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
-import { getInsights, getSignals } from "@/server/data";
+import { getInsights, getSignals, getIntelligenceDataMode } from "@/server/data";
 import { IntelligenceQueryBox } from "@/components/intelligence/query-box";
 
 export const dynamic = "force-dynamic";
@@ -15,13 +15,20 @@ export const metadata = {
 };
 
 async function IntelligenceContent() {
-  const [insights, signals] = await Promise.all([
+  const [insights, signals, dataMode] = await Promise.all([
     getInsights(),
     getSignals(),
+    getIntelligenceDataMode(),
   ]);
 
   return (
     <>
+      {dataMode === 'demo' && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+          Demo mode: no live cross-app events have been ingested yet, so deterministic seed insights and signals are shown.
+        </div>
+      )}
+
       {/* Query box */}
       <IntelligenceQueryBox />
 

@@ -42,6 +42,7 @@ export * from './decision-events'
 export * from './org-entitlements'
 export * from './pipeline-alerts'
 export * from './healthcare-surveys'
+export * from './platform-entity-graph'
 
 // Platform OS schemas (re-exported from dedicated packages)
 export {

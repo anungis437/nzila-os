@@ -1,8 +1,11 @@
 /**
  * Nzila OS — Procurement Proof Center
  *
- * Server-rendered page backed by real collectors. Every score, status pill,
- * and evidence reference comes from the collector chain — no mock data.
+ * Server-rendered page backed by procurement-proof collectors. Scores,
+ * status pills and evidence references are derived from the collector
+ * chain. The current port adapter is in-memory and is intended for
+ * development / staging dry-runs only — in production the page throws
+ * unless real DB-backed RealPortsDeps are wired (see proof-center-ports.ts).
  *
  * Sovereignty: Canada Central / PIPEDA + Québec Law 25.
  *

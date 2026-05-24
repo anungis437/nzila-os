@@ -22,6 +22,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { createLogger } from '@nzila/os-core'
+import { platformDb } from '@nzila/db/platform'
+import { orgMembers } from '@nzila/db/schema'
+import { and, eq } from 'drizzle-orm'
 
 const logger = createLogger('platform-admin:org-scope-guard')
 
@@ -40,6 +43,40 @@ export class OrgScopeError extends Error {
     this.code = code
     this.status = status
   }
+}
+
+/**
+ * Resolve the actor's role within the given org, or null if the actor is
+ * not an active member. Platform-admin override is honoured for users in
+ * `PLATFORM_ADMIN_USER_IDS` (comma-separated env var) — they are treated
+ * as 'admin' for every org so the platform-admin app remains operable
+ * during onboarding/incident response.
+ */
+async function resolveOrgRole(
+  actorId: string,
+  orgId: string,
+): Promise<string | null> {
+  const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (platformAdminIds.includes(actorId)) {
+    return 'admin'
+  }
+
+  const [row] = await platformDb
+    .select({ role: orgMembers.role })
+    .from(orgMembers)
+    .where(
+      and(
+        eq(orgMembers.orgId, orgId),
+        eq(orgMembers.userId, actorId),
+        eq(orgMembers.status, 'active'),
+      ),
+    )
+    .limit(1)
+
+  return row?.role ?? null
 }
 
 /**
@@ -77,21 +114,36 @@ export async function requireOrgScope(
     throw new OrgScopeError('Invalid orgId format', 'INVALID_ORG_ID', 400)
   }
 
-  // 4. Verify actor has access to this org
-  // In production: query org_members table to verify membership + role
-  // For now: session-based org check
+  // 4. Verify actor has an active membership in this org and resolve role.
+  //    We refuse to fabricate 'admin' — if no active membership exists the
+  //    request is forbidden. Platform-wide overrides go through
+  //    PLATFORM_ADMIN_USER_IDS (see resolveOrgRole).
   const actorId = session.userId
+  const orgRole = await resolveOrgRole(actorId, orgId)
+  if (!orgRole) {
+    logger.warn('Org scope denied: actor is not an active member', {
+      actorId,
+      orgId,
+      path: request.nextUrl.pathname,
+    })
+    throw new OrgScopeError(
+      'Actor is not an active member of the requested org',
+      'ORG_FORBIDDEN',
+      403,
+    )
+  }
 
   logger.info('Org scope verified', {
     actorId,
     orgId,
+    orgRole,
     path: request.nextUrl.pathname,
   })
 
   return {
     actorId,
     orgId,
-    orgRole: 'admin', // In production: resolve from org_members
+    orgRole,
   }
 }
 
@@ -129,4 +181,59 @@ export async function withOrgScope(
   } catch (error) {
     return handleOrgScopeError(error)
   }
+}
+
+// ── Role helpers ──────────────────────────────────────────────────────────────
+
+/**
+ * Roles that may MUTATE platform-admin resources for an org.
+ * Read-only viewers are explicitly excluded from writes.
+ *
+ * 'admin' is the PLATFORM_ADMIN_USER_IDS override (see resolveOrgRole).
+ */
+const WRITE_ROLES = new Set(['admin', 'org_admin', 'org_secretary'])
+
+/**
+ * Roles that may READ platform-admin resources for an org.
+ * All authenticated org members can read.
+ */
+const READ_ROLES = new Set(['admin', 'org_admin', 'org_secretary', 'org_viewer'])
+
+export function canWrite(role: string): boolean {
+  return WRITE_ROLES.has(role)
+}
+
+export function canRead(role: string): boolean {
+  return READ_ROLES.has(role)
+}
+
+/**
+ * Wrap a handler and enforce that the caller has write authority. Returns
+ * 403 ORG_WRITE_FORBIDDEN when a viewer attempts a mutation.
+ */
+export async function withOrgWrite(
+  request: NextRequest,
+  handler: (context: OrgScopeContext) => Promise<NextResponse>,
+): Promise<NextResponse> {
+  return withOrgScope(request, async (context) => {
+    if (!canWrite(context.orgRole)) {
+      logger.warn('Org write denied: role lacks write authority', {
+        actorId: context.actorId,
+        orgId: context.orgId,
+        orgRole: context.orgRole,
+        path: request.nextUrl.pathname,
+      })
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: 'ORG_WRITE_FORBIDDEN',
+            message: `Role '${context.orgRole}' may not mutate platform-admin resources`,
+          },
+        },
+        { status: 403 },
+      )
+    }
+    return handler(context)
+  })
 }

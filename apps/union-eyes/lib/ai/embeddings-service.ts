@@ -191,24 +191,6 @@ export class EmbeddingsService {
   }
 
   /**
-   * Generate random vector (for simulation)
-   */
-  private generateRandomVector(): number[] {
-    const vector: number[] = [];
-    let magnitude = 0;
-    
-    for (let i = 0; i < this.config.dimensions; i++) {
-      const value = Math.random() * 2 - 1;
-      vector.push(value);
-      magnitude += value * value;
-    }
-    
-    // Normalize
-    magnitude = Math.sqrt(magnitude);
-    return vector.map(v => v / magnitude);
-  }
-
-  /**
    * Calculate cosine similarity
    */
   private cosineSimilarity(a: number[], b: number[]): number {

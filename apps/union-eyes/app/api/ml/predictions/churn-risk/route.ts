@@ -310,6 +310,7 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
     const unionTenure = parseFloat(String(features.union_tenure_years || '0'));
 
     // Predict using ML model
+    const predictionStartedAt = Date.now();
     const mlPrediction = await predictChurnRisk({
       daysSinceLastActivity,
       resolutionRate,
@@ -317,6 +318,7 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
       totalCases,
       unionTenure
     });
+    const predictionElapsedMs = Date.now() - predictionStartedAt;
 
     const riskScore = mlPrediction.riskScore;
     const riskLevel = mlPrediction.riskLevel;
@@ -396,7 +398,7 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
         ${riskLevel},
         ${mlPrediction.confidence},
         NOW(),
-        ${Math.floor(200 + Math.random() * 300)},
+        ${predictionElapsedMs},
         ${JSON.stringify({
           riskScore,
           riskLevel,

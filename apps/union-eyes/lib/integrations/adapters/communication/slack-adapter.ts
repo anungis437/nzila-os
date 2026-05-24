@@ -85,7 +85,10 @@ export class SlackAdapter extends BaseIntegration {
   }
 
   async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
-    return true; // Simplified for now
+    this.logOperation('verifyWebhook', {
+      message: 'Slack webhook signature verification is not yet implemented; rejecting payload (fail-closed).',
+    });
+    return false;
   }
 
   async processWebhook(event: WebhookEvent): Promise<void> {

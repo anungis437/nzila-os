@@ -384,10 +384,12 @@ export class BambooHRAdapter extends BaseIntegration {
   // ==========================================================================
 
   async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
-    // BambooHR webhooks use HMAC SHA256 signature
-    // Implementation would depend on webhook secret configuration
-    // For now, return true to allow webhook processing
-    return true;
+    // BambooHR webhooks use HMAC SHA256 with a configured webhook secret.
+    // Not yet implemented — fail-closed to avoid accepting forged payloads.
+    this.logOperation('verifyWebhook', {
+      message: 'BambooHR webhook signature verification (HMAC SHA256) is not yet implemented; rejecting payload (fail-closed).',
+    });
+    return false;
   }
 
   async processWebhook(event: WebhookEvent): Promise<void> {

@@ -27,8 +27,10 @@ const PREFIX = 'enc:v1:'
  * Resolve the 32-byte data encryption key.
  *
  * Priority:
- *   1. AZURE_KEYVAULT_URL — TODO: integrate @azure/keyvault-keys unwrapKey
- *      (blocked until KV provisioned; currently logged and falls through)
+ *   1. AZURE_KEYVAULT_URL — when set, the local DEK must still be provided
+ *      via QBO_TOKEN_ENCRYPTION_KEY; full envelope encryption (KV wrapKey /
+ *      unwrapKey of the DEK) is tracked separately and intentionally NOT
+ *      implemented here so the surface fails closed if the key is missing.
  *   2. QBO_TOKEN_ENCRYPTION_KEY — hex-encoded 32-byte key for local dev
  *   3. null — plaintext fallback with warning
  */
@@ -57,7 +59,14 @@ function getDek(): Buffer | null {
   }
 
   if (process.env.NODE_ENV === 'production') {
-    logger.warn('QBO tokens stored WITHOUT encryption — set QBO_TOKEN_ENCRYPTION_KEY or AZURE_KEYVAULT_URL')
+    // Fail-closed: storing OAuth bearer tokens (QuickBooks access to customer
+    // financial data) without encryption at rest is unacceptable in production.
+    logger.error(
+      'QBO tokens cannot be stored without encryption in production — set QBO_TOKEN_ENCRYPTION_KEY or AZURE_KEYVAULT_URL',
+    )
+    throw new Error(
+      'QBO_TOKEN_ENCRYPTION_KEY (or AZURE_KEYVAULT_URL + key) is required in production to encrypt QBO OAuth tokens at rest',
+    )
   }
   return null
 }

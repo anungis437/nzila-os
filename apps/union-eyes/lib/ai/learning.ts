@@ -315,14 +315,23 @@ class LearningService {
   }
 
   /**
-   * Apply automatic fix
+   * Apply automatic fix.
+   *
+   * NOT IMPLEMENTED: there is no integration with the template system or
+   * knowledge base yet. This method only marks the pattern as "addressed" by
+   * resetting its frequency counter; no actual content change happens anywhere
+   * downstream. Returns false unless the pattern is auto-fixable, so callers
+   * can still gate on the return value, but a `true` return does NOT mean a
+   * real fix was applied.
    */
   applyAutoFix(patternId: string): boolean {
     const pattern = this.patterns.get(patternId);
     if (!pattern || !pattern.autoFixable) return false;
 
-    // This would integrate with the template system or knowledge base
-    logger.info('Auto-fix applied', { patternId, suggestion: pattern.suggestedFix });
+    logger.warn('learning.applyAutoFix: no real auto-fix integration is wired; only resetting the pattern frequency counter. No template or knowledge-base change has been applied.', {
+      patternId,
+      suggestion: pattern.suggestedFix,
+    });
 
     // Mark pattern as addressed
     pattern.frequency = 0;

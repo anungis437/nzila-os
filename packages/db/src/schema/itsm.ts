@@ -30,6 +30,7 @@ import {
   pgEnum,
   jsonb,
   index,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { orgs } from './orgs'
 
@@ -721,5 +722,80 @@ export const founderPriorities = pgTable(
   (t) => [
     index('founder_priorities_org_idx').on(t.orgId),
     index('founder_priorities_done_idx').on(t.orgId, t.done),
+  ],
+)
+
+// ── itsmAutomationRules ───────────────────────────────────────────────────────
+//
+// Persisted automation rules per org. Mirrors the AutomationRule interface
+// in @nzila/itsm-core. The rule body (conditions + actions + logic) is
+// stored as JSON so the schema does not need to change every time a new
+// operator or action type is added to itsm-core.
+
+export const itsmAutomationRules = pgTable(
+  'itsm_automation_rules',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    name: text('name').notNull(),
+    description: text('description'),
+    enabled: boolean('enabled').notNull().default(true),
+    /** 'all' = AND of every condition, 'any' = OR */
+    conditionLogic: text('condition_logic').notNull().default('all'),
+    /** AutomationCondition[] — see @nzila/itsm-core types */
+    conditions: jsonb('conditions').notNull().default([]),
+    /** AutomationAction[] — see @nzila/itsm-core types */
+    actions: jsonb('actions').notNull().default([]),
+    /** Debounce: do not re-fire within N minutes per subject */
+    cooldownMinutes: integer('cooldown_minutes'),
+    /** When this rule was last evaluated and fired */
+    lastTriggeredAt: timestamp('last_triggered_at', { withTimezone: true }),
+    triggerCount: integer('trigger_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('itsm_automation_rules_org_idx').on(t.orgId),
+    index('itsm_automation_rules_org_enabled_idx').on(t.orgId, t.enabled),
+  ],
+)
+
+// ── itsmTicketFieldDefs ───────────────────────────────────────────────────────
+//
+// Org-defined custom fields for one or more ticket types. Adds tenant-level
+// extensibility on top of the platform's TICKET_TYPES set without forcing
+// a schema migration each time an org wants to track a new attribute.
+
+export const itsmTicketFieldDefs = pgTable(
+  'itsm_ticket_field_defs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    /** Stable machine-readable key, unique per (org, ticketType) */
+    fieldKey: text('field_key').notNull(),
+    /** Which ticket type this field applies to (must be a value from TICKET_TYPES) */
+    ticketType: itsmTicketTypeEnum('ticket_type').notNull(),
+    /** Display label */
+    label: text('label').notNull(),
+    /** Field type — drives the input widget */
+    fieldType: text('field_type').notNull(), // 'text' | 'textarea' | 'number' | 'select' | 'multiselect' | 'date' | 'boolean'
+    /** Select / multiselect options (ignored for other field types) */
+    options: jsonb('options').notNull().default([]),
+    required: boolean('required').notNull().default(false),
+    helpText: text('help_text'),
+    /** Display order within the form */
+    sortOrder: integer('sort_order').notNull().default(0),
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('itsm_ticket_field_defs_org_idx').on(t.orgId),
+    index('itsm_ticket_field_defs_type_idx').on(t.orgId, t.ticketType, t.sortOrder),
+    uniqueIndex('itsm_ticket_field_defs_key_uq').on(t.orgId, t.ticketType, t.fieldKey),
   ],
 )

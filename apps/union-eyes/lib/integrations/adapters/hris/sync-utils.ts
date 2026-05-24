@@ -344,21 +344,23 @@ export async function bulkMapEmployees(
   let success = 0;
   let failed = 0;
 
+  // No junction table exists yet to persist external-employee ↔ internal-member
+  // links. Previously this function silently incremented `success` for every
+  // mapping while writing nothing — callers believed mappings were saved.
+  if (mappings.length > 0) {
+    logger.error(
+      'bulkMapEmployees: no persistence layer for employee mappings (junction table not created). Reporting all mappings as failed instead of silently dropping them.',
+      undefined,
+      { count: mappings.length }
+    );
+  }
+
   for (const mapping of mappings) {
-    try {
-      // Store mapping in a junction table (would need to be created)
-      // For now, just log success
-      logger.info('Employee mapped', {
-        externalId: mapping.externalEmployeeId,
-        memberId: mapping.internalMemberId,
-      });
-      success++;
-    } catch (error) {
-      logger.error('Failed to map employee', error instanceof Error ? error : new Error(String(error)), {
-        mapping,
-      });
-      failed++;
-    }
+    logger.warn('Skipping employee mapping — no junction table to persist into', {
+      externalId: mapping.externalEmployeeId,
+      memberId: mapping.internalMemberId,
+    });
+    failed++;
   }
 
   return { success, failed };

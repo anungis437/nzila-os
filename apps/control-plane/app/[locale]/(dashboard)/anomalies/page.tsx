@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AlertTriangle } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
-import { getAnomalies } from "@/server/data";
+import { getAnomalies, getAnomaliesDataMode } from "@/server/data";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,10 @@ export const metadata = {
 const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 } as const;
 
 async function AnomaliesContent() {
-  const anomalies = await getAnomalies();
+  const [anomalies, dataMode] = await Promise.all([
+    getAnomalies(),
+    getAnomaliesDataMode(),
+  ]);
 
   if (anomalies.length === 0) {
     return (
@@ -34,6 +37,11 @@ async function AnomaliesContent() {
 
   return (
     <div className="space-y-4">
+      {dataMode === 'demo' && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+          Demo mode: no live cost anomalies found in the database, so deterministic seed anomalies are shown.
+        </div>
+      )}
       {sorted.map((anomaly) => (
         <div
           key={anomaly.id}

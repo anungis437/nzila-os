@@ -1,46 +1,74 @@
 /**
  * Platform Admin — Queue Manager
+ *
+ * Real DB-backed list. Each row shows the queue's member count, default SLA
+ * name, and live open-ticket count (computed from itsm_tickets).
  */
-import { auth } from '@nzila/platform-auth/entra/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { getPageOrgContext } from '../../../lib/page-org-context'
+import { listQueues, listSlaProfiles } from '../../../lib/itsm-queries'
+import {
+  ActiveOrgBadge,
+  ForbiddenPanel,
+  OrgPickerPanel,
+} from '../../../lib/org-page-fallbacks'
+import { canWrite } from '../../../lib/org-scope-guard'
+import {
+  DeleteQueueButton,
+  NewQueueDialog,
+} from '../_components/itsm-actions'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Queue Manager | ITSM Config',
 }
 
-export default async function QueueManagerPage() {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+export default async function QueueManagerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orgId?: string }>
+}) {
+  const sp = await searchParams
+  const result = await getPageOrgContext(sp)
 
-  // TODO: fetch queues from DB
-  const queues: Array<{
-    id: string
-    name: string
-    teamId: string | null
-    slaProfileName: string | null
-    ticketCount: number
-    isDefault: boolean
-  }> = []
+  if (result.status === 'unauthenticated') redirect('/sign-in')
+  if (result.status === 'no-selection') {
+    return (
+      <OrgPickerPanel candidates={result.candidates} returnTo="/itsm-config/queues" />
+    )
+  }
+  if (result.status === 'forbidden') {
+    return <ForbiddenPanel orgId={result.orgId} />
+  }
+
+  const { orgId, orgName, orgRole } = result.context
+  const [queues, slaProfiles] = await Promise.all([
+    listQueues(orgId),
+    listSlaProfiles(orgId),
+  ])
+  const writable = canWrite(orgRole)
+  const slaOptions = slaProfiles.map((s) => ({ id: s.id, name: s.name }))
 
   return (
     <div className="p-6 space-y-6">
-      <Link href="/itsm-config" className="text-gray-400 hover:text-gray-600 text-sm">
-        ← ITSM Config
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/itsm-config" className="text-gray-400 hover:text-gray-600 text-sm">
+          ← ITSM Config
+        </Link>
+        <ActiveOrgBadge orgName={orgName} orgId={orgId} orgRole={orgRole} />
+      </div>
 
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Queue Manager</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Configure service queues, teams, working hours, and escalation paths.
+            Configure service queues, members, and default SLA profile assignments.
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-          + New Queue
-        </button>
+        {writable && <NewQueueDialog orgId={orgId} slaProfiles={slaOptions} />}
       </div>
 
       <div className="rounded-lg border border-gray-200 overflow-hidden">
@@ -48,43 +76,58 @@ export default async function QueueManagerPage() {
           <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
             <tr>
               <th className="px-4 py-3 text-left">Queue</th>
-              <th className="px-4 py-3 text-left">Team</th>
-              <th className="px-4 py-3 text-left">SLA Profile</th>
-              <th className="px-4 py-3 text-left">Open Tickets</th>
-              <th className="px-4 py-3 text-left">Default</th>
-              <th className="px-4 py-3 text-left">Actions</th>
+              <th className="px-4 py-3 text-left">Members</th>
+              <th className="px-4 py-3 text-left">Default SLA</th>
+              <th className="px-4 py-3 text-right">Open Tickets</th>
+              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
             {queues.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
-                  No queues configured yet.
+                  No queues configured for this organisation yet.
+                  {writable && ' Click “New Queue” to create one.'}
                 </td>
               </tr>
             ) : (
-              queues.map((queue) => (
-                <tr key={queue.id} className="hover:bg-gray-50">
+              queues.map((q) => (
+                <tr key={q.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-900">
-                    {queue.name}
-                    {queue.isDefault && (
-                      <span className="ml-2 rounded-full bg-blue-100 px-1.5 py-0.5 text-xs text-blue-600">
-                        Default
+                    {q.name}
+                    {q.description && (
+                      <p className="text-xs text-gray-500 mt-0.5 font-normal">
+                        {q.description}
+                      </p>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{q.memberCount}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">
+                    {q.defaultSlaName ?? (
+                      <span className="text-gray-400">Platform default</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-700 font-medium">
+                    {q.openTicketCount}
+                  </td>
+                  <td className="px-4 py-3">
+                    {q.active ? (
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+                        Inactive
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{queue.teamId ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{queue.slaProfileName ?? 'Platform Default'}</td>
-                  <td className="px-4 py-3 text-center text-gray-600">{queue.ticketCount}</td>
-                  <td className="px-4 py-3">
-                    {queue.isDefault ? (
-                      <span className="text-green-600 text-xs font-medium">Yes</span>
+                  <td className="px-4 py-3 text-right">
+                    {writable ? (
+                      <DeleteQueueButton orgId={orgId} queueId={q.id} />
                     ) : (
-                      <span className="text-gray-400 text-xs">No</span>
+                      <span className="text-xs text-gray-300">Read-only</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button className="text-xs text-blue-600 hover:underline">Edit</button>
                   </td>
                 </tr>
               ))

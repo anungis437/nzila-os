@@ -69,10 +69,16 @@ export interface AgreementComparison {
 
 class OntarioLRBClient {
   private baseUrl = 'https://www.olrb.gov.on.ca';
-  
+
   /**
-   * Fetch agreements from Ontario LRB
-   * Note: This is a placeholder - actual implementation would use their API or scraping
+   * Fetch agreements from Ontario LRB.
+   *
+   * NOT IMPLEMENTED: there is no integration with the OLRB API or scraper yet.
+   * In non-production environments this returns a single hardcoded `[SAMPLE]`
+   * row so downstream sync/UI code can be exercised end-to-end, but the
+   * `[SAMPLE]` prefix makes it obvious if the row ever lands in a real DB.
+   * In production we return an empty array so we never persist fabricated
+   * agreements against real employer / union names.
    */
   async fetchAgreements(params: {
     page?: number;
@@ -80,20 +86,20 @@ class OntarioLRBClient {
     unionName?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }): Promise<any[]> {
-    // Placeholder: In production, this would call the actual Ontario LRB API
-    // or scrape their website using puppeteer/cheerio
-    
-    logger.info('[LRB] Fetching Ontario LRB agreements', params);
-    
-    // Simulated response structure
+    logger.warn('[LRB] OntarioLRBClient.fetchAgreements is a stub — no real OLRB integration exists. Returning sample data only in non-production.', params);
+
+    if (process.env.NODE_ENV === 'production') {
+      return [];
+    }
+
     return [
       {
-        sourceId: 'OLRB-2024-001',
-        employerName: 'Ontario Public Service Employees Union',
-        employerAddress: '1000 Yonge Street, Toronto, ON',
-        unionName: 'Ontario Public Service Employees Union',
-        unionCode: 'OPSEU',
-        bargainingUnit: 'All Employees',
+        sourceId: 'OLRB-SAMPLE-001',
+        employerName: '[SAMPLE] Ontario Public Service Employees Union',
+        employerAddress: '[SAMPLE] 1000 Yonge Street, Toronto, ON',
+        unionName: '[SAMPLE] Ontario Public Service Employees Union',
+        unionCode: 'SAMPLE',
+        bargainingUnit: '[SAMPLE] All Employees',
         bargainingUnitSize: 150,
         effectiveDate: '2024-01-01',
         expiryDate: '2025-12-31',
@@ -101,7 +107,7 @@ class OntarioLRBClient {
         jurisdiction: 'ON',
         hourlyWageRange: '$25.00 - $45.00',
         annualSalaryRange: '$52,000 - $94,000',
-        pdfUrl: 'https://www.olrb.gov.on.ca/agreements/2024-001.pdf',
+        pdfUrl: 'https://www.olrb.gov.on.ca/agreements/sample.pdf',
       },
     ];
   }
@@ -114,14 +120,17 @@ class OntarioLRBClient {
 class BCLRBClient {
   private baseUrl = 'https://www.lrb.bc.ca';
   private apiKey?: string;
-  
+
   constructor() {
     this.apiKey = process.env.BC_LRB_API_KEY;
   }
-  
+
   /**
-   * Fetch agreements from BC LRB
-   * Note: BC LRB has a bulk data API available
+   * Fetch agreements from BC LRB.
+   *
+   * NOT IMPLEMENTED: there is no integration with the BC LRB bulk-data API yet.
+   * Same stub strategy as OntarioLRBClient — sample row in non-production,
+   * empty array in production.
    */
   async fetchAgreements(params: {
     page?: number;
@@ -129,17 +138,20 @@ class BCLRBClient {
     unionName?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }): Promise<any[]> {
-    logger.info('[LRB] Fetching BC LRB agreements', params);
-    
-    // Placeholder: In production, this would call the BC LRB API
+    logger.warn('[LRB] BCLRBClient.fetchAgreements is a stub — no real BC LRB integration exists. Returning sample data only in non-production.', { params, hasApiKey: Boolean(this.apiKey) });
+
+    if (process.env.NODE_ENV === 'production') {
+      return [];
+    }
+
     return [
       {
-        sourceId: 'BCLRB-2024-001',
-        employerName: 'BC Public Service Agency',
-        employerAddress: '4000 Seymour Place, Victoria, BC',
-        unionName: 'BC Government and Service Employees Union',
-        unionCode: 'BCGSEU',
-        bargainingUnit: 'Core Public Administration',
+        sourceId: 'BCLRB-SAMPLE-001',
+        employerName: '[SAMPLE] BC Public Service Agency',
+        employerAddress: '[SAMPLE] 4000 Seymour Place, Victoria, BC',
+        unionName: '[SAMPLE] BC Government and Service Employees Union',
+        unionCode: 'SAMPLE',
+        bargainingUnit: '[SAMPLE] Core Public Administration',
         bargainingUnitSize: 250,
         effectiveDate: '2024-04-01',
         expiryDate: '2026-03-31',

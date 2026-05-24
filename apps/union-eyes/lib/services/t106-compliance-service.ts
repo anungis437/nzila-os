@@ -113,8 +113,15 @@ export class T106ComplianceService {
       `Generating T106 report for org ${organizationId}, year ${reportingYear}`
     );
 
-    // Placeholder implementation
-    // In real implementation, would query GL accounts for actual values
+    // GL account aggregation is not wired up. Returning zero-valued amounts as
+    // a CRA T106 filing would constitute a false return. Refuse in production.
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'T106 report generation requires GL account aggregation which is not yet wired up. Refusing to emit zero-valued T106 in production.'
+      );
+    }
+    logger.warn('T106ComplianceService.generateT106Report is returning a zero-valued placeholder. Do not file with CRA.', { organizationId, reportingYear });
+
     const report: T106Report = {
       organizationId,
       reportingYear,

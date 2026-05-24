@@ -109,7 +109,12 @@ export class BoardPacketGenerator {
     periodStart: Date,
     periodEnd: Date
   ) {
-    // Query financial data (simplified - would integrate with finance module)
+    // Only strike-activity totals are real. Dues revenue, operational expenses,
+    // and reserves are NOT wired to the finance module yet — they are returned
+    // as zero. A board reading this packet will see a balance sheet that
+    // understates revenue and reserves. Surface loudly until finance module is
+    // integrated.
+    logger.warn('board-packet financial summary: revenue, operational expenses, and reserves are placeholder zeros (finance module not integrated). Only strike-activity totals are real.', { organizationId, periodStart, periodEnd });
     // Query strike activity data (simplified - uses raw SQL since strike_actions may not have a schema table)
     const strikeActivityResult = await db
       .execute(

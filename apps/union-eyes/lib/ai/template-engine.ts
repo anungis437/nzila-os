@@ -1244,15 +1244,21 @@ class AttentionMechanismEngine {
   }
 
   /**
-   * Get embedding provider (simplified)
+   * Get embedding provider.
+   *
+   * NOTE: previously returned a SHA-256 byte stream as a fake "embedding". That
+   * silently poisoned RAG: the resulting pseudo-vector was compared via pgvector
+   * cosine distance against real OpenAI embeddings stored in `knowledgeBase`,
+   * producing meaningless relevance scores. We now refuse to fabricate vectors
+   * and direct callers to the real provider (`lib/ai/embeddings-service.ts`,
+   * which wraps @nzila/ai-sdk). The caller of `retrieveAndScoreRAG` catches
+   * errors and returns no documents, so RAG degrades to "no results" rather
+   * than "random results".
    */
   private getEmbeddingProvider() {
-    // This would use the existing OpenAI/Anthropic provider from chatbot-service
     return {
-      async generateEmbedding(text: string): Promise<number[]> {
-        // Simplified - in production use actual provider
-        const hash = createHash('sha256').update(text).digest();
-        return Array.from(hash).map(b => b / 255);
+      async generateEmbedding(_text: string): Promise<number[]> {
+        throw new Error('template-engine.getEmbeddingProvider is not wired to a real embedding model. Use lib/ai/embeddings-service.ts (@nzila/ai-sdk) instead of generating fake vectors.');
       }
     };
   }
@@ -1284,13 +1290,16 @@ class AttentionMechanismEngine {
 
   /**
    * Retrieve relevant CBA clauses
+   *
+   * INTENTIONAL STUB — CBA-clause retrieval against the clauses table is not yet wired.
+   * Returns [] so the surrounding attention-scoring pipeline still functions, but logs a
+   * warning the first time a caller relies on it so the gap is visible rather than silent.
    */
   private async retrieveCBAClauses(
-    _cbaId: string,
+    cbaId: string,
     _query: string
   ): Promise<Array<{ content: string; relevanceScore: number }>> {
-    // This would query the CBA clauses table
-    // Simplified placeholder
+    logger.warn('retrieveCBAClauses: CBA-clause retrieval is not yet implemented; returning no clauses.', { cbaId });
     return [];
   }
 
@@ -1613,18 +1622,8 @@ export class UnionEyesAIController {
     this.templateRegistry = new TemplateRegistry();
     this.attentionEngine = new AttentionMechanismEngine(this.templateRegistry);
     this.governanceLayer = new GovernanceAuditLayer(this.templateRegistry);
+    // Providers are added to the pool lazily by callers; there is no static initialization.
     this.providerPool = new Map();
-    
-    // Initialize providers
-    this.initializeProviders();
-  }
-
-  /**
-   * Initialize AI providers
-   */
-  private initializeProviders() {
-    // This would load from existing chatbot-service providers
-    // Simplified placeholder
   }
 
   /**

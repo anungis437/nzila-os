@@ -308,11 +308,16 @@ async function sendEmail(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>
 ): Promise<void> {
+  // The user-table lookup by userId is not yet wired, so callers MUST provide data.email.
+  // Previously we fell back to `user-${userId}@example.com`, which sent live emails to
+  // non-existent example.com addresses and silently polluted Resend deliverability.
+  const userEmail = typeof data.email === 'string' && data.email.length > 0 ? data.email : null;
+  if (!userEmail) {
+    logger.warn('[EMAIL] No recipient email resolved for userId; user-table lookup not implemented and data.email not provided. Skipping send.', { userId, subject });
+    return;
+  }
+
   try {
-    // Get user email from userId (would need to query user table)
-    // For now, using data.email if provided
-    const userEmail = data.email || `user-${userId}@example.com`;
-    
     // Use Resend for email delivery
     const client = getResendClient();
     if (!client) {
@@ -328,7 +333,7 @@ async function sendEmail(
     
     logger.info('[EMAIL] Successfully sent', { userEmail, subject });
   } catch (error) {
-    logger.error('[EMAIL] Failed to send', { error, userEmail: data.email });
+    logger.error('[EMAIL] Failed to send', { error, userEmail });
     throw error;
   }
 }
@@ -338,15 +343,21 @@ async function sendEmail(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendSMS(userId: string, message: string, data: Record<string, any> = {}): Promise<void> {
+  // The user-table lookup by userId is not yet wired, so callers MUST provide data.phone.
+  // Previously we fell back to '+1234567890', a fake number that Twilio rejects but still
+  // counts against API limits / surfaces as a runtime error on every send.
+  const userPhone = typeof data.phone === 'string' && data.phone.length > 0 ? data.phone : null;
+  if (!userPhone) {
+    logger.warn('[SMS] No recipient phone resolved for userId; user-table lookup not implemented and data.phone not provided. Skipping send.', { userId });
+    return;
+  }
+
   try {
     if (!twilioClient) {
       logger.warn('[SMS] Twilio not configured, skipping SMS send');
       return;
     }
-    
-    // Get user phone from data (would need to query user table)
-    const userPhone = data.phone || `+1234567890`; // Fallback for development
-    
+
     // Use Twilio for SMS delivery
     await twilioClient.messages.create({
       body: message,

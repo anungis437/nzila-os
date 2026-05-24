@@ -12,6 +12,10 @@ import {
   Server,
   FileCheck,
 } from "lucide-react";
+import {
+  buildArchitectureSummary,
+  type ArchitectureSummary,
+} from "@/server/architecture-summary";
 
 export const dynamic = "force-dynamic";
 
@@ -21,117 +25,42 @@ export const metadata = {
     "Architecture governance: package ownership, app compliance, lifecycle tiers, and dependency health.",
 };
 
-interface ArchSummary {
-  packages: {
-    total: number;
-    withMeta: number;
-    deprecated: number;
-    categories: Record<string, number>;
-    stability: Record<string, number>;
-    metaCoverage: number;
-  };
-  apps: {
-    items: Array<{
-      app: string;
-      tier: string;
-      owner: string;
-      domain: string;
-      checks: number;
-      passed: number;
-      level: string;
-    }>;
-    fullCompliance: number;
-    partialCompliance: number;
-    total: number;
-    tiers: Record<string, number>;
-    unregistered: string[];
-  };
-  platformServices: {
-    total: number;
-    lifecycles: Record<string, number>;
-  };
-  contracts: {
-    testFiles: number;
-  };
-  overall: {
-    metaCoverage: number;
-    appComplianceRate: number;
-    deprecatedPackages: number;
-    registryCompleteness: number;
-  };
-}
+type ArchSummary = ArchitectureSummary;
 
-async function getArchitectureData(): Promise<ArchSummary> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    if (!baseUrl) {
-      throw new Error('NEXT_PUBLIC_BASE_URL is not configured')
-    }
-    const res = await fetch(`${baseUrl}/api/control-plane/architecture`, {
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      throw new Error("Failed to fetch architecture data");
-    }
-    return res.json();
-  } catch {
-    // Demo-mode fallback when architecture adapter is unavailable
-    return {
-      packages: {
-        total: 62,
-        withMeta: 48,
-        deprecated: 2,
-        categories: {
-          platform: 14,
-          ui: 8,
-          shared: 12,
-          config: 6,
-          tooling: 5,
-          testing: 4,
-          types: 3,
-          integrations: 5,
-          security: 3,
-          analytics: 2,
-        },
-        stability: { stable: 40, beta: 14, alpha: 6, deprecated: 2 },
-        metaCoverage: 77,
-      },
-      apps: {
-        items: [
-          { app: "web", tier: "PRODUCTION", owner: "platform", domain: "portal", checks: 12, passed: 12, level: "FULL" },
-          { app: "console", tier: "PRODUCTION", owner: "platform", domain: "admin", checks: 12, passed: 11, level: "PARTIAL" },
-          { app: "union-eyes", tier: "PRODUCTION", owner: "labour", domain: "union-management", checks: 12, passed: 12, level: "FULL" },
-          { app: "partners", tier: "PRODUCTION", owner: "partnerships", domain: "partner-portal", checks: 12, passed: 10, level: "PARTIAL" },
-          { app: "control-plane", tier: "PILOT", owner: "platform", domain: "ops", checks: 12, passed: 9, level: "PARTIAL" },
-          { app: "flow", tier: "PILOT", owner: "platform", domain: "workflow", checks: 12, passed: 8, level: "PARTIAL" },
-          { app: "cora", tier: "INCUBATING", owner: "ai", domain: "assistant", checks: 12, passed: 7, level: "PARTIAL" },
-          { app: "mobility", tier: "INCUBATING", owner: "mobility", domain: "migration", checks: 12, passed: 6, level: "MINIMAL" },
-          { app: "agrimo", tier: "EXPERIMENTAL", owner: "agriculture", domain: "farm-management", checks: 12, passed: 5, level: "MINIMAL" },
-          { app: "zonga", tier: "EXPERIMENTAL", owner: "commerce", domain: "marketplace", checks: 12, passed: 4, level: "MINIMAL" },
-        ],
-        fullCompliance: 2,
-        partialCompliance: 4,
-        total: 10,
-        tiers: { PRODUCTION: 4, PILOT: 2, INCUBATING: 2, EXPERIMENTAL: 2 },
-        unregistered: ["trade", "nacp-exams", "cfo", "abr"],
-      },
-      platformServices: {
-        total: 14,
-        lifecycles: { stable: 8, beta: 4, alpha: 2 },
-      },
-      contracts: { testFiles: 23 },
-      overall: {
-        metaCoverage: 77,
-        appComplianceRate: 60,
-        deprecatedPackages: 2,
-        registryCompleteness: 71,
-      },
-    };
-  }
+function getArchitectureData(): ArchSummary | null {
+  // Call the same helper the /api/control-plane/architecture endpoint uses,
+  // directly in-process. No HTTP round-trip, no API-key juggling, and — most
+  // importantly — no fabricated "demo" fallback when the workspace cannot be
+  // located. If we cannot derive a real snapshot we render an honest empty
+  // state below.
+  return buildArchitectureSummary();
 }
 
 async function ArchitectureContent() {
-  const data = await getArchitectureData();
+  const data = getArchitectureData();
+
+  if (!data) {
+    return (
+      <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-6">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+          <div>
+            <h2 className="font-semibold text-foreground">
+              Architecture summary unavailable
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              The control plane could not locate the monorepo root from its
+              current working directory. Architecture governance requires
+              access to <code>packages/</code>, <code>apps/</code> and{" "}
+              <code>platform/registry/</code> on disk. This dashboard refuses
+              to show fabricated fallback numbers — fix the deployment so the
+              source tree is mounted, then reload.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

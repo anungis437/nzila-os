@@ -177,8 +177,10 @@ export class DataExportService {
       case 'csv':
         return this.jsonToCsv(data as Record<string, unknown>[]);
       case 'excel':
-        // Would use xlsx library in production
-        return JSON.stringify(data);
+        // Excel/xlsx export is not yet implemented. Returning JSON would silently produce
+        // a file with a .xlsx extension that no spreadsheet program can open, so fail fast.
+        logger.warn('Excel export requested but xlsx serialization is not implemented; rejecting export.');
+        throw new Error('Excel (xlsx) export is not yet implemented. Use CSV or JSON instead.');
       default:
         return JSON.stringify(data);
     }

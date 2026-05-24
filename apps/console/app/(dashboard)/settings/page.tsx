@@ -1,67 +1,47 @@
-'use client'
-
-import { Card } from '@nzila/ui'
-import { Badge } from '@nzila/ui'
-import Link from 'next/link'
 import {
   Cog6ToothIcon,
   UserCircleIcon,
-  ShieldCheckIcon,
-  BellIcon,
-  KeyIcon,
   BuildingOfficeIcon,
   PuzzlePieceIcon,
   CreditCardIcon,
 } from '@heroicons/react/24/outline'
+import { Card } from '@nzila/ui'
+import Link from 'next/link'
 
-const sections = [
+export const metadata = {
+  title: 'Settings | Nzila Console',
+}
+
+interface Section {
+  title: string
+  description: string
+  icon: typeof UserCircleIcon
+  href: string
+}
+
+const sections: Section[] = [
   {
     title: 'Profile',
-    description: 'Update your name, email, and avatar.',
+    description: 'View the identity backing your current session.',
     icon: UserCircleIcon,
-    badge: null,
-    href: null,
-  },
-  {
-    title: 'Security',
-    description: 'Manage passwords, MFA, and active sessions.',
-    icon: KeyIcon,
-    badge: null,
-    href: null,
-  },
-  {
-    title: 'Roles & Permissions',
-    description: 'View your platform and entity-level roles.',
-    icon: ShieldCheckIcon,
-    badge: 'RBAC' as const,
-    href: null,
-  },
-  {
-    title: 'Notifications',
-    description: 'Configure email and in-app notification preferences.',
-    icon: BellIcon,
-    badge: null,
-    href: null,
+    href: '/settings/profile',
   },
   {
     title: 'Organisation',
-    description: 'Manage workspace-level settings and billing.',
+    description: 'View workspace context resolved for this request.',
     icon: BuildingOfficeIcon,
-    badge: null,
-    href: null,
+    href: '/settings/organisation',
   },
   {
     title: 'Integrations',
-    description: 'Connect QuickBooks Online, Stripe, Plaid, and more.',
+    description: 'Connect Resend, Twilio, Slack, M365 and other providers.',
     icon: PuzzlePieceIcon,
-    badge: null,
     href: '/settings/integrations',
   },
   {
     title: 'Billing',
     description: 'Manage your subscription plan, invoices, and payment methods.',
     icon: CreditCardIcon,
-    badge: null,
     href: '/settings/billing',
   },
 ]
@@ -74,34 +54,32 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
           <p className="text-sm text-gray-500">
-            Manage your account, security, and workspace preferences.
+            Manage your account, workspace, and integrated providers.
           </p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {sections.map((s) => {
-          const inner = (
-            <Card key={s.title} variant="bordered" className="hover:shadow-sm transition-all cursor-pointer h-full">
+        {sections.map((s) => (
+          <Link key={s.title} href={s.href} className="block">
+            <Card variant="bordered" className="hover:shadow-sm transition-all cursor-pointer h-full">
               <Card.Body className="flex items-start gap-4">
                 <s.icon className="h-6 w-6 text-gray-500 mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-gray-900">{s.title}</p>
-                    {s.badge && <Badge variant="info">{s.badge}</Badge>}
-                  </div>
+                  <p className="font-medium text-gray-900">{s.title}</p>
                   <p className="text-sm text-gray-500 mt-1">{s.description}</p>
                 </div>
               </Card.Body>
             </Card>
-          )
-          return s.href ? (
-            <Link key={s.title} href={s.href} className="block">{inner}</Link>
-          ) : (
-            <div key={s.title}>{inner}</div>
-          )
-        })}
+          </Link>
+        ))}
       </div>
+
+      <p className="text-xs text-gray-400 mt-8">
+        Password change, MFA enrollment, and notification preferences live in the platform-auth
+        admin surface and are not exposed here yet — open an issue if you need them in this
+        console.
+      </p>
     </div>
   )
 }

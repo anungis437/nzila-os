@@ -382,10 +382,12 @@ export class ADPAdapter extends BaseIntegration {
   // ==========================================================================
 
   async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
-    // ADP webhooks require HMAC SHA256 verification
-    // Would need webhook secret from configuration
-    // For now, return true to allow processing
-    return true;
+    // ADP webhooks require HMAC SHA256 verification with a configured webhook secret.
+    // Not yet implemented — fail-closed to avoid accepting forged payloads.
+    this.logOperation('verifyWebhook', {
+      message: 'ADP webhook signature verification (HMAC SHA256) is not yet implemented; rejecting payload (fail-closed).',
+    });
+    return false;
   }
 
   async processWebhook(event: WebhookEvent): Promise<void> {

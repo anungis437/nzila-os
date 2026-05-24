@@ -15,6 +15,7 @@ import {
   type GrievanceAssignment,
 } from "@/db/schema";
 import { withRLSContext } from "@/lib/db/with-rls-context";
+import { logger } from "@/lib/logger";
 import {
   type RepresentationProtocol,
   getRepresentationProtocol,
@@ -418,11 +419,22 @@ async function getEligibleOfficers(
     
     for (const officer of officers) {
       const workload = await getOfficerWorkload(officer.userId, organizationId);
-      
-      // Extract metadata (this would come from officer profile/settings)
-      // Note: organizationMembers doesn&apos;t have metadata - using defaults
-      const metadata: Record<string, unknown> = {};
-      
+
+      // organizationMembers.metadata is a jsonb column where we persist per-officer
+      // assignment hints (expertise, maxCaseload, weeklyHours, locations, languages,
+      // certifications). Treat missing/empty metadata as "officer has not configured
+      // matching hints yet" — the engine will fall back to workload-only scoring,
+      // which we surface in logs so callers can see the degradation.
+      const metadata: Record<string, unknown> =
+        (officer.metadata as Record<string, unknown> | null) ?? {};
+      if (Object.keys(metadata).length === 0) {
+        logger.warn('case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.', {
+          organizationId,
+          userId: officer.userId,
+          role: officer.role,
+        });
+      }
+
       profiles.push({
         userId: officer.userId,
         name: officer.membershipNumber || officer.userId, // Use membershipNumber or userId as fallback

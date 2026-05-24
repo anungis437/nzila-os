@@ -134,8 +134,11 @@ export class CurrencyService {
         return moneyToNumber(cachedRate.exchangeRate);
       }
 
-      // Fallback to default rate (would fetch from BOC API in production)
-      logger.warn('No cached BOC rate found, using fallback');
+      // Fallback to default rate (would fetch from BOC API in production).
+      // This rate is NOT a real BOC noon rate — callers that record it as
+      // `source: 'BOC'` are emitting a falsified FX provenance. Escalated to
+      // error severity so observability surfaces every fallback.
+      logger.error('No cached BOC rate found; returning hardcoded fallback (1.35). Cross-border tax filings (T106, T4A-NR) derived from this will be inaccurate.', undefined, { date });
       return 1.35; // Fallback rate
     } catch (error) {
       logger.error('Error fetching BOC rate', { error });

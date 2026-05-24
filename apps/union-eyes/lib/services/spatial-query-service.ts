@@ -179,17 +179,15 @@ function calculateDistanceHaversine(point1: Point, point2: Point): number {
  */
 async function isPointInGeofenceHaversine(
   _point: Point,
-  _geofenceId: string
+  geofenceId: string
 ): Promise<{ inside: boolean; distance: number; method: 'haversine' }> {
-  // This would need to fetch geofence data from database
-  // Simplified implementation for demonstration
-  const distance = 0; // Would calculate against geofence center
-
-  return {
-    inside: false, // Would check distance against radius
-    distance,
-    method: 'haversine',
-  };
+  // Geofence row is not fetched here — previous implementation returned
+  // `inside: false` silently, which fails OPEN for any caller that uses
+  // negation (e.g. "alert if member leaves picket-line zone" would never
+  // fire). Refuse to answer rather than lie. PostGIS is the supported path;
+  // if it's unavailable, the caller must handle the error.
+  logger.error('Haversine geofence fallback is not implemented (no geofence row fetch). Refusing to silently return inside=false.', undefined, { geofenceId });
+  throw new Error(`Geofence check unavailable: PostGIS is required and Haversine fallback is not implemented (geofenceId=${geofenceId})`);
 }
 
 /**

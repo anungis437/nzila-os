@@ -502,9 +502,12 @@ export class XeroAdapter extends BaseIntegration {
   // ==========================================================================
 
   async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
-    // Xero uses HMAC SHA256 for webhook verification
-    // Implementation would verify X-Xero-Signature header
-    return true; // Simplified for now
+    // Xero uses HMAC SHA256 for webhook verification (X-Xero-Signature header).
+    // Not yet implemented — fail-closed to avoid accepting forged payloads.
+    this.logOperation('verifyWebhook', {
+      message: 'Xero webhook signature verification (X-Xero-Signature HMAC SHA256) is not yet implemented; rejecting payload (fail-closed).',
+    });
+    return false;
   }
 
   async processWebhook(event: WebhookEvent): Promise<void> {

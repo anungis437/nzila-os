@@ -39,6 +39,7 @@ import {
 } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { sendEmail } from '@/services/email';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -731,18 +732,16 @@ async function getApproversForLevel(
   organizationId: string,
   level: ApprovalLevel
 ): Promise<Array<{ name: string; email: string }>> {
-  // Get users with approval authority for this level
-  const authorityMap: Record<ApprovalLevel, string[]> = {
-    local: ['local_admin'],
-    regional: ['regional_admin'],
-    national: ['national_admin'],
-    clc: ['clc_admin']
-  };
-
-  const _roles = authorityMap[level] || [];
-  
-  // Query users with appropriate roles
-  // For now, return placeholder
+  // INTENTIONAL STUB — role-based approval-authority lookup is not yet implemented.
+  // The role names below (local_admin/regional_admin/national_admin/clc_admin) do not
+  // exist in the current role system, so even a naive query would return nothing.
+  // We emit a visible warning so callers know approval notifications are NOT being sent,
+  // rather than silently returning [] and giving the appearance of a working pipeline.
+  logger.warn('getApproversForLevel: approval-authority lookup is not implemented; no approver emails will be sent for this remittance.', {
+    organizationId,
+    level,
+    expectedRoles: ['local_admin', 'regional_admin', 'national_admin', 'clc_admin'],
+  });
   return [];
 }
 

@@ -93,9 +93,12 @@ export async function processMonthlyDuesCalculation(params: {
         const dueDate = new Date(effectiveDate);
         dueDate.setMonth(dueDate.getMonth() + 1, 0); // Last day of month
 
-        // Calculate total amount based on rule
+        // Calculate total amount based on rule.
+        // NOTE: COPE / PAC / surcharge add-ons are NOT yet implemented — only the flat base
+        // dues rate is applied. Once add-on tables exist, fold them in here. Until then we
+        // log a one-time warn per run so the under-calculation is observable rather than silent.
         const baseDues = Number(rule.flatAmount) || 0;
-        const totalAmount = baseDues; // Simplified - in production would include COPE, PAC, etc.
+        const totalAmount = baseDues;
 
         // Check if transaction already exists for this period
         const existingTransaction = await db
