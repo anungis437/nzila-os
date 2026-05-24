@@ -4,7 +4,7 @@
  * Stateless adapter wrapping ShopifyClient & ShopifySyncService.
  * Internal DB is source of truth; Shopify writes are side effects.
  */
-import { ShopifyClient, type ShopifyProduct, type ShopifyOrder } from '@/lib/shopify'
+import { ShopifyClient, type ShopifyProduct, type ShopifyOrder, type ShopifyLineItem } from '@/lib/shopify'
 import { withSpan } from '@nzila/os-core/telemetry'
 import type { Order } from '@/domain/entities'
 
@@ -46,35 +46,55 @@ export function createShopifyAdapter(config: ShopifyAdapterConfig) {
 
   return {
     /**
-     * Push an internal order to Shopify as a draft order / external record.
+     * Push an internal order to Shopify via the Admin Orders API.
+     *
+     * Shopify requires at least one line item. When the caller provides
+     * `lineItems`, we forward them. Otherwise we synthesize a single custom
+     * line item that references the Flow order id and uses the order total
+     * as the line price — this keeps Shopify totals consistent without
+     * requiring a SKU/variant mapping.
      */
-    async pushOrder(order: Order): Promise<PushOrderResult> {
+    async pushOrder(
+      order: Order,
+      lineItems?: Partial<ShopifyLineItem>[],
+    ): Promise<PushOrderResult> {
       return withSpan('shopify.push_order', { 'order.id': order.id }, async () => {
-        // Map internal order to Shopify-compatible shape
-        const shopifyPayload: Partial<ShopifyOrder> = {
+        const items =
+          lineItems && lineItems.length > 0
+            ? lineItems
+            : [
+                {
+                  title: `Flow order ${order.id}`,
+                  quantity: 1,
+                  price: order.total_amount.toFixed(2),
+                },
+              ]
+
+        const payload: Partial<ShopifyOrder> = {
           financial_status: order.payment_status === 'PAID' ? 'paid' : 'pending',
+          currency: order.currency,
           note: `Flow order ${order.id}`,
+          line_items: items as ShopifyLineItem[],
         }
 
-        // In production this would call the Shopify Orders API.
-        // For now, return a typed stub that is wired when orders endpoint exists.
-        void shopifyPayload
-        return { shopifyOrderId: 0, success: false } satisfies PushOrderResult
+        const created = await client.createOrder(payload)
+        return { shopifyOrderId: created.id, success: true }
       })
     },
 
     /**
      * Sync product catalog from Shopify into internal store.
+     *
+     * NOT WIRED: the Flow products table does not yet have a Shopify
+     * import mapping. This method throws so callers see an honest failure
+     * instead of a silent no-op. Wire `commerce-db/products` upsert here
+     * before re-enabling the `shopify_sync` action='sync_products' path.
      */
     async syncProducts(): Promise<SyncProductsResult> {
       return withSpan('shopify.sync_products', {}, async () => {
-        const products = await client.getProducts()
-        // TODO: upsert into internal product table via Drizzle
-        return {
-          created: 0,
-          updated: 0,
-          skipped: products.length,
-        }
+        throw new Error(
+          'shopify.syncProducts not implemented — wire Drizzle upsert against commerce_products before enabling',
+        )
       })
     },
 

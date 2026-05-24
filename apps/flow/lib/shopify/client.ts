@@ -114,6 +114,26 @@ export class ShopifyClient {
     }
   }
 
+  /**
+   * Create an order in Shopify via Admin REST API (POST /orders.json).
+   *
+   * The caller MUST supply at least one `line_items` entry (Shopify rejects
+   * orders without line items). For Flow-internal orders that lack a SKU
+   * catalog mapping, the caller should pass a single custom line item:
+   *
+   *   { title: 'Flow order <id>', quantity: 1, price: '<total>' }
+   *
+   * Returns the created `ShopifyOrder`. Throws on any 4xx/5xx response.
+   */
+  async createOrder(data: Partial<ShopifyOrder>): Promise<ShopifyOrder> {
+    const response = await this.apiRequest<{ order: ShopifyOrder }>(
+      'POST',
+      '/orders.json',
+      { order: data },
+    )
+    return response.order
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // Customers
   // ─────────────────────────────────────────────────────────────────────────

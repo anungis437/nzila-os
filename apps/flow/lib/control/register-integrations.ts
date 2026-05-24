@@ -95,16 +95,38 @@ registerSideEffectHandler('canva_update', async (request): Promise<SideEffectRes
 })
 
 // ── Customer Notification ──────────────────────────────────────────────────
+//
+// Honest fail-closed handler. Until a notification provider (email, SMS,
+// push) is wired into Flow, this handler returns `success: false` with a
+// warning so the side-effect dispatcher records a real failure instead of
+// pretending the notification was delivered. The handler still logs the
+// intended dispatch so observers can see what would have been sent.
 
 registerSideEffectHandler('customer_notification', async (request): Promise<SideEffectResult> => {
-  // Placeholder for notification service integration
-  // Will dispatch to email/SMS/push when notification service is available
-  logger.info('Customer notification dispatched', {
+  const provider = process.env.NOTIFICATION_PROVIDER ?? ''
+
+  logger.info('Customer notification requested', {
     type: request.metadata?.notification_type,
     customer_id: request.metadata?.customer_id,
+    provider_configured: Boolean(provider),
   })
 
-  return { type: 'customer_notification', success: true }
+  if (!provider) {
+    return {
+      type: 'customer_notification',
+      success: false,
+      warning:
+        'notification provider not configured — set NOTIFICATION_PROVIDER and wire a real send adapter before relying on customer notifications',
+    }
+  }
+
+  // Future: dispatch to email/SMS/push via the configured provider.
+  // For now, the absence of a provider implementation is itself a failure.
+  return {
+    type: 'customer_notification',
+    success: false,
+    error: `notification provider "${provider}" is configured but no send adapter is wired in this build`,
+  }
 })
 
 logger.info('Integration dispatch wrappers registered')

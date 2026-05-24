@@ -1,8 +1,17 @@
 /**
  * Canva Integration Adapter — Flow
  *
- * Manages design proof links and asset references for production workflows.
- * Canva API integration is stubbed until design automation is live.
+ * Adapter for design proof links and asset references.
+ *
+ * Production status: NOT WIRED. The Canva Connect API client has not yet
+ * been implemented in this repo. All adapter methods fail fast with a
+ * clear error so callers (and the side-effect dispatcher) see an honest
+ * failure rather than silently receiving fake design IDs or empty exports.
+ *
+ * To complete this integration:
+ *   1. Add a Canva Connect API client (POST /v1/designs, POST /v1/exports).
+ *   2. Implement the methods below using that client.
+ *   3. Remove the `CanvaNotImplementedError` throws.
  */
 import { withSpan } from '@nzila/os-core/telemetry'
 
@@ -30,12 +39,23 @@ export interface CanvaAdapterConfig {
   brandTemplateId?: string
 }
 
+class CanvaNotImplementedError extends Error {
+  constructor(method: string) {
+    super(
+      `Canva Connect API not implemented — ${method}() is not available. ` +
+        `Wire the Canva Connect REST client before enabling CANVA_API_KEY in this environment.`,
+    )
+    this.name = 'CanvaNotImplementedError'
+  }
+}
+
 // ── Adapter ────────────────────────────────────────────────────────────────
 
 export function createCanvaAdapter(config: CanvaAdapterConfig) {
   return {
     /**
      * Create a new design from a brand template for a production job.
+     * Throws until the Canva Connect API client is wired.
      */
     async createDesignFromTemplate(params: {
       templateId: string
@@ -43,52 +63,41 @@ export function createCanvaAdapter(config: CanvaAdapterConfig) {
       variables?: Record<string, string>
     }): Promise<CanvaDesignRef> {
       return withSpan('canva.create_design', { templateId: params.templateId }, async () => {
-        // Stub: Canva Connect API not yet integrated
-        const now = new Date().toISOString()
-        return {
-          designId: `stub-${Date.now()}`,
-          title: params.title,
-          editUrl: `https://www.canva.com/design/stub/edit`,
-          viewUrl: `https://www.canva.com/design/stub/view`,
-          thumbnailUrl: null,
-          createdAt: now,
-          updatedAt: now,
-        }
+        throw new CanvaNotImplementedError('createDesignFromTemplate')
       })
     },
 
     /**
      * Get a design reference by ID.
+     * Throws until the Canva Connect API client is wired.
      */
     async getDesign(designId: string): Promise<CanvaDesignRef | null> {
       return withSpan('canva.get_design', { designId }, async () => {
-        // Stub: returns null until Canva API is wired
-        return null
+        throw new CanvaNotImplementedError('getDesign')
       })
     },
 
     /**
      * Export a design to a downloadable format (PDF/PNG) for proof approval.
+     * Throws until the Canva Connect API client is wired.
      */
-    async exportDesign(designId: string, format: 'pdf' | 'png' | 'jpg' = 'pdf'): Promise<CanvaExportResult> {
+    async exportDesign(
+      designId: string,
+      format: 'pdf' | 'png' | 'jpg' = 'pdf',
+    ): Promise<CanvaExportResult> {
       return withSpan('canva.export_design', { designId, format }, async () => {
-        // Stub: returns a placeholder export result
-        return {
-          exportId: `export-stub-${Date.now()}`,
-          downloadUrl: '',
-          format,
-          status: 'failed' as const,
-        }
+        throw new CanvaNotImplementedError('exportDesign')
       })
     },
 
     /**
      * Check if the Canva integration is configured and reachable.
+     * Always reports `reachable: false` until the API client is wired.
      */
     async healthCheck(): Promise<{ configured: boolean; reachable: boolean }> {
       return {
         configured: Boolean(config.apiToken),
-        reachable: false, // until Canva Connect API is wired
+        reachable: false,
       }
     },
   }

@@ -1,10 +1,10 @@
 /**
  * Orchestrator-api — ITSM routes
  *
- * Fastify plugin exposing the ITSM command surface.
- * All routes require:
- *   1. API key (enforced globally in index.ts)
- *   2. org_id in request body / query params (all DB queries are org-scoped)
+ * Fastify plugin exposing the ITSM command surface, persisted via
+ * `itsm-store.ts` (Drizzle + Postgres). All routes are org-scoped — the
+ * caller must supply `orgId` (body or query) and the global API-key guard
+ * enforces tenant ownership upstream.
  *
  * Route surface (prefix: /itsm)
  *   POST   /tickets              — Create ticket
@@ -16,23 +16,33 @@
  *   GET    /queues               — List queues for org
  *   GET    /assets               — List CMDB assets
  *   POST   /assets               — Register asset
- *   GET    /kb                   — List KB articles (search)
+ *   GET    /kb                   — List published KB articles (search)
+ *
+ * When `DATABASE_URL` is unset the route layer returns 503 in production
+ * and a warning + empty payload in development. There are no fake-shaped
+ * 202 responses any more.
  */
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import { attemptTransition } from '@nzila/fsm-core'
 import {
   createTicketInputSchema,
   createTicketEventInputSchema,
-  ticketMachine,
-  computeSlaDueDates,
-  isSlaBreached,
-  generateTicketNumber,
-  DEFAULT_SLA_TARGETS,
   createAssetInputSchema,
 } from '@nzila/itsm-core'
-import type { TransitionContext } from '@nzila/fsm-core'
 import type { ItsmRole, TicketStatus } from '@nzila/itsm-core'
+import {
+  appendTicketEvent,
+  createAsset,
+  createTicket,
+  evaluateOpenTicketSla,
+  getTicket,
+  isDbAvailable,
+  listAssets,
+  listKbArticles,
+  listQueues,
+  listTickets,
+  transitionTicketStatus,
+} from '../itsm-store.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -40,29 +50,27 @@ function badRequest(reply: FastifyReply, message: string, details?: unknown) {
   return reply.status(400).send({ error: message, details })
 }
 
+function dbUnavailable(reply: FastifyReply) {
+  return reply.status(503).send({
+    error: 'itsm persistence unavailable',
+    detail: 'DATABASE_URL is not configured on this orchestrator instance',
+  })
+}
+
 // ── Plugin ────────────────────────────────────────────────────────────────────
 
 export async function itsmRoutes(app: FastifyInstance) {
-  // The handlers below are placeholders for the eventual DB-backed service
-  // layer. They return shaped responses, but they DO NOT persist anything
-  // and DO NOT read real ticket state. Returning 202/200 in production would
-  // silently fool callers into believing tickets were created or transitioned.
-  // Fail loudly: 501 Not Implemented in production, warn in dev/staging.
+  // Guard: if the orchestrator was started without a DB, refuse ITSM writes
+  // in production. In dev/staging we let calls through to `dbUnavailable()`
+  // so callers get an honest 503 instead of a silent 200.
   app.addHook('onRequest', async (req, reply) => {
-    if (process.env.NODE_ENV === 'production') {
-      req.log.error(
+    if (!isDbAvailable()) {
+      req.log.warn(
         { url: req.url, method: req.method },
-        'orchestrator-api/itsm: route invoked in production but DB layer is not wired',
+        'orchestrator-api/itsm: DATABASE_URL not set — returning 503',
       )
-      return reply.status(501).send({
-        error: 'itsm routes are not implemented in production yet',
-        url: req.url,
-      })
+      return dbUnavailable(reply)
     }
-    req.log.warn(
-      { url: req.url, method: req.method },
-      'orchestrator-api/itsm: stub handler \u2014 no DB persistence',
-    )
   })
 
   // ── POST /itsm/tickets ─────────────────────────────────────────────────────
@@ -77,57 +85,72 @@ export async function itsmRoutes(app: FastifyInstance) {
         })
       }
 
-      const input = parse.data
-
-      // Compute SLA due dates from default targets (queue-specific SLA lookup
-      // would be added when DB layer is wired)
-      const { responseDue, resolutionDue } = computeSlaDueDates(
-        input.priority,
-        DEFAULT_SLA_TARGETS,
-      )
-
-      // Temporary sequence number (in production: DB sequence or Redis counter)
-      const seq = Date.now() % 10000
-      const ticketNumber = generateTicketNumber(input.type, seq)
-
-      // Placeholder: return accepted shape (DB write wired in service layer)
-      return reply.status(202).send({
-        ticketNumber,
-        status: 'new',
-        slaResponseDue: responseDue,
-        slaResolutionDue: resolutionDue,
-        input,
-      })
+      try {
+        const ticket = await createTicket(
+          parse.data.orgId,
+          parse.data.reportedById,
+          parse.data,
+        )
+        return reply.status(201).send(ticket)
+      } catch (err) {
+        req.log.error({ err }, 'createTicket failed')
+        return reply.status(500).send({ error: 'createTicket failed' })
+      }
     },
   )
 
   // ── GET /itsm/tickets ──────────────────────────────────────────────────────
-  app.get<{ Querystring: { orgId: string; status?: string; type?: string; assignedToId?: string; limit?: string; offset?: string } }>(
-    '/tickets',
-    async (req, reply) => {
-      const { orgId, status, type, assignedToId, limit = '25', offset = '0' } = req.query
+  app.get<{
+    Querystring: {
+      orgId: string
+      status?: string
+      type?: string
+      assignedToId?: string
+      limit?: string
+      offset?: string
+    }
+  }>('/tickets', async (req, reply) => {
+    const { orgId, status, type, assignedToId, limit = '25', offset = '0' } = req.query
+    if (!orgId) return badRequest(reply, 'orgId is required')
 
-      if (!orgId) {
-        return reply.status(400).send({ error: 'orgId is required' })
-      }
+    const lim = Math.min(Math.max(Number(limit) || 25, 1), 100)
+    const off = Math.max(Number(offset) || 0, 0)
 
-      // Placeholder: filtering described for service-layer wiring
+    try {
+      const { tickets, total } = await listTickets(orgId, {
+        status,
+        type,
+        assignedToId,
+        limit: lim,
+        offset: off,
+      })
       return reply.send({
         orgId,
         filters: { status, type, assignedToId },
-        pagination: { limit: Number(limit), offset: Number(offset) },
-        tickets: [],
+        pagination: { limit: lim, offset: off, total },
+        tickets,
       })
-    },
-  )
+    } catch (err) {
+      req.log.error({ err }, 'listTickets failed')
+      return reply.status(500).send({ error: 'listTickets failed' })
+    }
+  })
 
   // ── GET /itsm/tickets/:id ──────────────────────────────────────────────────
   app.get<{ Params: { id: string }; Querystring: { orgId: string } }>(
     '/tickets/:id',
     async (req, reply) => {
       const { orgId } = req.query
-      if (!orgId) return reply.status(400).send({ error: 'orgId is required' })
-      return reply.send({ id: req.params.id, orgId, events: [] })
+      if (!orgId) return badRequest(reply, 'orgId is required')
+
+      try {
+        const result = await getTicket(orgId, req.params.id)
+        if (!result) return reply.status(404).send({ error: 'ticket not found' })
+        return reply.send({ ticket: result.ticket, events: result.events })
+      } catch (err) {
+        req.log.error({ err }, 'getTicket failed')
+        return reply.status(500).send({ error: 'getTicket failed' })
+      }
     },
   )
 
@@ -141,122 +164,115 @@ export async function itsmRoutes(app: FastifyInstance) {
       toStatus: string
       meta?: Record<string, unknown>
     }
-  }>(
-    '/tickets/:id/status',
-    async (req, reply) => {
-      const { orgId, actorId, role, toStatus, meta } = req.body ?? {}
+  }>('/tickets/:id/status', async (req, reply) => {
+    const { orgId, actorId, role, toStatus, meta } = req.body ?? {}
 
-      if (!orgId || !actorId || !role || !toStatus) {
-        return reply.status(400).send({
-          error: 'orgId, actorId, role, and toStatus are required',
-        })
-      }
+    if (!orgId || !actorId || !role || !toStatus) {
+      return badRequest(
+        reply,
+        'orgId, actorId, role, and toStatus are required',
+      )
+    }
 
-      // Fetch ticket — placeholder for DB layer
-      const ticket = {
+    try {
+      const result = await transitionTicketStatus({
         orgId,
-        status: 'new' as const,
-        priority: 'p3_medium',
-        assignedToId: null,
-      }
-
-      const ctx: TransitionContext<ItsmRole> = {
-        orgId,
+        ticketId: req.params.id,
         actorId,
         role,
-        meta: meta ?? {},
-      }
-
-      const result = attemptTransition(
-        ticketMachine,
-        ticket.status,
-        toStatus as TicketStatus,
-        ctx,
-        orgId,
-        ticket,
-      )
-
+        toStatus: toStatus as TicketStatus,
+        meta,
+      })
+      if (!result) return reply.status(404).send({ error: 'ticket not found' })
       if (!result.ok) {
         return reply.status(422).send({
           error: result.reason,
-          from: ticket.status,
-          to: toStatus,
+          from: result.from,
+          to: result.to,
         })
       }
-
       return reply.send({
         ticketId: req.params.id,
-        from: ticket.status,
-        to: toStatus,
-        events: result.eventsToEmit,
+        from: result.from,
+        to: result.to,
+        events: result.events,
       })
-    },
-  )
+    } catch (err) {
+      req.log.error({ err }, 'transitionTicketStatus failed')
+      return reply.status(500).send({ error: 'transitionTicketStatus failed' })
+    }
+  })
 
   // ── POST /itsm/tickets/:id/events ──────────────────────────────────────────
   app.post<{
     Params: { id: string }
     Body: z.infer<typeof createTicketEventInputSchema>
-  }>(
-    '/tickets/:id/events',
-    async (req, reply) => {
-      const parse = createTicketEventInputSchema.safeParse({
-        ...req.body,
-        ticketId: req.params.id,
+  }>('/tickets/:id/events', async (req, reply) => {
+    const parse = createTicketEventInputSchema.safeParse({
+      ...(req.body ?? {}),
+      ticketId: req.params.id,
+    })
+    if (!parse.success) {
+      return reply.status(400).send({
+        error: 'Invalid event input',
+        details: parse.error.flatten(),
       })
-      if (!parse.success) {
-        return reply.status(400).send({
-          error: 'Invalid event input',
-          details: parse.error.flatten(),
-        })
-      }
+    }
 
-      return reply.status(202).send({
-        accepted: true,
-        event: parse.data,
-      })
-    },
-  )
+    try {
+      const event = await appendTicketEvent(parse.data.orgId, parse.data)
+      if (!event) return reply.status(404).send({ error: 'ticket not found' })
+      return reply.status(201).send(event)
+    } catch (err) {
+      req.log.error({ err }, 'appendTicketEvent failed')
+      return reply.status(500).send({ error: 'appendTicketEvent failed' })
+    }
+  })
 
   // ── POST /itsm/sla/check ───────────────────────────────────────────────────
-  // Called by cron — evaluates SLA breach for all open tickets in an org
-  app.post<{ Body: { orgId: string } }>(
-    '/sla/check',
-    async (req, reply) => {
-      const { orgId } = req.body ?? {}
-      if (!orgId) return reply.status(400).send({ error: 'orgId is required' })
+  // Called by cron — evaluates SLA breach for all open tickets in an org and
+  // flips `sla_breached=true` + writes an internal `sla_breached` event for
+  // any tickets that have just crossed the threshold.
+  app.post<{ Body: { orgId: string } }>('/sla/check', async (req, reply) => {
+    const { orgId } = req.body ?? {}
+    if (!orgId) return badRequest(reply, 'orgId is required')
 
-      // Placeholder: in production, scan open tickets from DB
-      // and call isSlaBreached() for each, then persist sla_breached=true
-      // and emit itsm.ticket.sla_breached event
-      app.log.info({ orgId }, 'ITSM SLA check triggered')
-
-      return reply.send({
-        orgId,
-        evaluated: 0,
-        breached: 0,
-        message: 'SLA check complete',
-      })
-    },
-  )
+    try {
+      const { evaluated, breached } = await evaluateOpenTicketSla(orgId)
+      app.log.info({ orgId, evaluated, breached }, 'ITSM SLA check complete')
+      return reply.send({ orgId, evaluated, breached })
+    } catch (err) {
+      req.log.error({ err }, 'evaluateOpenTicketSla failed')
+      return reply.status(500).send({ error: 'evaluateOpenTicketSla failed' })
+    }
+  })
 
   // ── GET /itsm/queues ───────────────────────────────────────────────────────
-  app.get<{ Querystring: { orgId: string } }>(
-    '/queues',
-    async (req, reply) => {
-      const { orgId } = req.query
-      if (!orgId) return reply.status(400).send({ error: 'orgId is required' })
-      return reply.send({ orgId, queues: [] })
-    },
-  )
+  app.get<{ Querystring: { orgId: string } }>('/queues', async (req, reply) => {
+    const { orgId } = req.query
+    if (!orgId) return badRequest(reply, 'orgId is required')
+    try {
+      const queues = await listQueues(orgId)
+      return reply.send({ orgId, queues })
+    } catch (err) {
+      req.log.error({ err }, 'listQueues failed')
+      return reply.status(500).send({ error: 'listQueues failed' })
+    }
+  })
 
   // ── GET /itsm/assets ───────────────────────────────────────────────────────
   app.get<{ Querystring: { orgId: string; type?: string; lifecycle?: string } }>(
     '/assets',
     async (req, reply) => {
       const { orgId, type, lifecycle } = req.query
-      if (!orgId) return reply.status(400).send({ error: 'orgId is required' })
-      return reply.send({ orgId, filters: { type, lifecycle }, assets: [] })
+      if (!orgId) return badRequest(reply, 'orgId is required')
+      try {
+        const assets = await listAssets(orgId, { type, lifecycle })
+        return reply.send({ orgId, filters: { type, lifecycle }, assets })
+      } catch (err) {
+        req.log.error({ err }, 'listAssets failed')
+        return reply.status(500).send({ error: 'listAssets failed' })
+      }
     },
   )
 
@@ -271,7 +287,13 @@ export async function itsmRoutes(app: FastifyInstance) {
           details: parse.error.flatten(),
         })
       }
-      return reply.status(202).send({ accepted: true, asset: parse.data })
+      try {
+        const asset = await createAsset(parse.data.orgId, parse.data)
+        return reply.status(201).send(asset)
+      } catch (err) {
+        req.log.error({ err }, 'createAsset failed')
+        return reply.status(500).send({ error: 'createAsset failed' })
+      }
     },
   )
 
@@ -280,8 +302,14 @@ export async function itsmRoutes(app: FastifyInstance) {
     '/kb',
     async (req, reply) => {
       const { orgId, q, category } = req.query
-      if (!orgId) return reply.status(400).send({ error: 'orgId is required' })
-      return reply.send({ orgId, query: q, category, articles: [] })
+      if (!orgId) return badRequest(reply, 'orgId is required')
+      try {
+        const articles = await listKbArticles(orgId, { query: q, category })
+        return reply.send({ orgId, query: q, category, articles })
+      } catch (err) {
+        req.log.error({ err }, 'listKbArticles failed')
+        return reply.status(500).send({ error: 'listKbArticles failed' })
+      }
     },
   )
 }
