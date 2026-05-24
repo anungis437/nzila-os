@@ -2,7 +2,7 @@
 
 import { createHash } from 'node:crypto'
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 
 import { findRepoRoot } from '../lib/portfolio-governance'
 
@@ -36,12 +36,10 @@ function writeText(root: string, relativePath: string, content: string): void {
 }
 
 function safeJoin(root: string, relativePath: string): string {
-  // nosemgrep
-  const absolutePath = resolve(root, relativePath)
-  // nosemgrep
-  const normalizedRoot = `${resolve(root)}\\`
-  // nosemgrep
-  if (!absolutePath.startsWith(normalizedRoot) && absolutePath !== resolve(root)) {
+  const resolvedRoot = resolve(root)
+  const absolutePath = resolve(resolvedRoot, relativePath)
+  const relativePathFromRoot = relative(resolvedRoot, absolutePath)
+  if (relativePathFromRoot.startsWith('..') || isAbsolute(relativePathFromRoot)) {
     throw new Error(`Unsafe path outside repo root: ${relativePath}`)
   }
   return absolutePath
