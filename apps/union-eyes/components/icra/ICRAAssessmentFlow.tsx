@@ -557,17 +557,27 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
           : Math.min(95, 15 + (answeredScoredCount / Math.max(1, totalRoutedScored)) * 80);
 
   if (step === 0) {
-    return <ConsentGate onConsent={handleConsent} doctrineVersion={DOCTRINE_VERSION} locale={locale} />;
+    return (
+      <div className="mx-auto max-w-3xl py-8" data-testid="icra-assessment-flow" data-step="consent">
+        <div data-testid="icra-consent-step">
+          <ConsentGate onConsent={handleConsent} doctrineVersion={DOCTRINE_VERSION} locale={locale} />
+        </div>
+      </div>
+    );
   }
 
   if (step === 1) {
     return (
-      <OrgContextForm
-        questions={METADATA_QUESTIONS}
-        onSubmit={handleOrgContext}
-        copy={copy}
-        locale={locale === 'fr-CA' ? 'fr-CA' : 'en-CA'}
-      />
+      <div className="mx-auto max-w-3xl py-8" data-testid="icra-assessment-flow" data-step="org-context">
+        <div data-testid="icra-org-context-step">
+          <OrgContextForm
+            questions={METADATA_QUESTIONS}
+            onSubmit={handleOrgContext}
+            copy={copy}
+            locale={locale === 'fr-CA' ? 'fr-CA' : 'en-CA'}
+          />
+        </div>
+      </div>
     );
   }
 
@@ -797,7 +807,7 @@ function OrgContextForm({ questions, onSubmit, copy, locale }: OrgContextFormPro
         {questions.sort((a, b) => a.order - b.order).map((q) => {
           const lq = localizeQuestion(q, locale);
           return (
-          <div key={q.id} className="space-y-1.5">
+          <div key={q.id} className="space-y-1.5" data-testid={`icra-org-question-${q.id}`}>
             <label className="block text-sm font-medium text-stone-900">
               {lq.prompt}
               {q.required && <span className="ml-1 text-stone-400">*</span>}
