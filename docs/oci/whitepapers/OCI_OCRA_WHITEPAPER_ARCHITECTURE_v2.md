@@ -71,10 +71,19 @@ Canonical authority remains: `OCI_METHOD_WHITEPAPER_v1.md`.
 
 The Executive Whitepaper is designed to:
 
+- synthesize existing operational credibility into continuity category language,
 - explain the continuity problem in operational language,
 - introduce OCI/OCRA accessibly,
 - bridge continuity understanding to workflow pain,
 - establish dual-entry GTM without ontology split.
+
+### Live-site synthesis rule
+
+The Executive Whitepaper must start from operational reality already proven on Union Eyes surfaces
+(grievance workflows, evidence continuity, outcomes tracking, governed intelligence, governance operations),
+then reveal continuity fragility as the hidden layer beneath those operations.
+
+Do not draft the Executive Whitepaper as an abstract continuity manifesto.
 
 ### This is not
 
@@ -85,6 +94,11 @@ The Executive Whitepaper is designed to:
 ### Required emotional outcome
 
 "Our organization is already experiencing continuity fragility, and Union Eyes understands it more deeply than traditional operational software."
+
+### Operational credibility principle
+
+The whitepaper should deepen claims already visible in product and marketing surfaces, not reinvent them.
+Operational legitimacy is treated as established; continuity category framing is the incremental reveal.
 
 ---
 
@@ -144,6 +158,19 @@ Operations Core
 Both paths must converge into the same continuity-aware operational infrastructure.
 No ontology split into separate "ops product" and "OCI product" narratives.
 
+### Executive sequencing rule
+
+Preferred narrative flow:
+
+```text
+operational realities
+-> recurring continuity failures
+-> continuity pattern recognition
+-> OCI
+-> OCRA
+-> continuity-aware operations
+```
+
 ---
 
 ## Shared Non-Negotiables Across Both Whitepapers
@@ -156,6 +183,11 @@ Every major section must define:
 - required visual/diagram assets,
 - objection handling statements,
 - procurement boundary statements where relevant.
+
+### Ontology drift guardrail
+
+The whitepaper must not become more abstract than the website.
+Tone and structure should remain operational, labour-aware, governance-serious, and evidence-grounded.
 
 ### Anti-surveillance boundary
 

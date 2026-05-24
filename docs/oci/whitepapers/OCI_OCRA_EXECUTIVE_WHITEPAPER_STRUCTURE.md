@@ -10,7 +10,11 @@
 
 ## Core Thesis
 
-Organizations increasingly modernize operations without preserving operational survivability.
+Union Eyes operational labour workflows surfaced a deeper continuity problem that traditional systems do not solve.
+
+The whitepaper starts from operational reality, then reveals continuity fragility underneath.
+
+Organizations increasingly modernize operations without preserving survivability of institutional knowledge.
 
 This creates:
 
@@ -24,17 +28,50 @@ OCI/OCRA help organizations understand and stabilize continuity safely over time
 
 ---
 
-## Section 1: The Continuity Gap
+## Section 1: Where Representation Actually Happens
 
 ### Objective
 
-Name continuity degradation in operational terms.
+Establish operational trust immediately using real work contexts already visible in Union Eyes.
+
+### Required operational anchors
+
+- grievances,
+- deadlines,
+- evidence,
+- handoffs,
+- governance interpretation,
+- committee continuity,
+- onboarding,
+- follow-through.
+
+### Required proof
+
+- operational process excerpts,
+- grievance-flow continuity examples,
+- handoff and reassignment narratives.
+
+---
+
+## Section 2: The Hidden Problem Beneath Operational Work
+
+### Objective
+
+Reveal continuity fragility as the underlying pattern in recurring operational failures.
 
 ### Required scenarios
 
 1. Grievance transition problem
 2. Executive turnover reconstruction failure
 3. Modernization fragmentation
+
+### Required continuity concepts introduced in this section
+
+- stewardship concentration,
+- continuity debt,
+- reconstruction burden,
+- onboarding fragility,
+- modernization fragmentation.
 
 ### Required visuals
 
@@ -50,7 +87,7 @@ Name continuity degradation in operational terms.
 
 ---
 
-## Section 2: Why Existing Software Fails
+## Section 3: Why Existing Systems Preserve Records but Not Continuity
 
 ### Objective
 
@@ -79,7 +116,98 @@ Explain why workflow software is not continuity infrastructure.
 
 ---
 
-## Section 3: Two Ways Organizations Begin
+## Section 4: How Union Eyes Discovered the Continuity Layer
+
+### Objective
+
+Frame OCI/OCRA as emerging from operational lived reality, not abstract framework invention.
+
+### Required narrative moves
+
+- show progression from workflow execution to recurring continuity failures,
+- show pattern recognition across grievances/governance/onboarding,
+- show why a continuity-specific layer became necessary.
+
+### Required proof
+
+- timeline snippets from product evolution,
+- before/after continuity interpretation examples,
+- operational-to-continuity transition artifacts.
+
+---
+
+## Section 5: Introducing OCI
+
+### Objective
+
+Introduce OCI after operational justification is established.
+
+### Required concepts table
+
+| OCI concept | Operational translation |
+| --- | --- |
+| Continuity debt | Undocumented operational dependency |
+| Stewardship concentration | Too much knowledge with too few people |
+| Reconstruction burden | Rebuilding operations from memory |
+| Governance continuity | Consistent operational interpretation |
+| Onboarding survivability | Successors becoming effective safely |
+
+### Required proof
+
+- sample continuity outputs,
+- anonymized continuity brief excerpts,
+- continuity-risk examples.
+
+---
+
+## Section 6: Introducing OCRA
+
+### Objective
+
+Present OCRA as adaptive continuity interpretation layered on operational infrastructure.
+
+### Mandatory boundary
+
+OCRA is not:
+
+- behavioral analysis,
+- workforce ranking,
+- institutional scoring,
+- surveillance AI.
+
+### Required visuals
+
+- OCI/OCRA operational stack,
+- contradiction-aware interpretation flow,
+- confidence-aware continuity model.
+
+---
+
+## Section 7: Continuity-Aware Operations
+
+### Objective
+
+Show convergence between continuity intelligence and operational workflows.
+
+### Required operational domains
+
+- grievances,
+- governance,
+- onboarding,
+- evidence continuity,
+- intelligence,
+- operational inheritance.
+
+### Required proof
+
+- anonymized workflow breakdown scenarios,
+- grievance reassignment examples,
+- onboarding continuity failures,
+- modernization continuity failures.
+
+---
+
+## Section 8: Two Ways Organizations Begin
 
 ### Objective
 
@@ -112,77 +240,7 @@ Both paths converge into one continuity-aware operational infrastructure.
 
 ---
 
-## Section 4: Introducing OCI
-
-### Objective
-
-Explain OCI in plain language and operationally relevant terms.
-
-### Required concepts table
-
-| OCI concept | Operational translation |
-| --- | --- |
-| Continuity debt | Undocumented operational dependency |
-| Stewardship concentration | Too much knowledge with too few people |
-| Reconstruction burden | Rebuilding operations from memory |
-| Governance continuity | Consistent operational interpretation |
-| Onboarding survivability | Successors becoming effective safely |
-
-### Required proof
-
-- sample continuity outputs,
-- anonymized continuity brief excerpts,
-- continuity-risk examples.
-
----
-
-## Section 5: Introducing OCRA
-
-### Objective
-
-Explain adaptive continuity interpretation and confidence-aware insights.
-
-### Mandatory boundary
-
-OCRA is not:
-
-- behavioral analysis,
-- workforce ranking,
-- institutional scoring,
-- surveillance AI.
-
-### Required visuals
-
-- OCI/OCRA operational stack,
-- contradiction-aware interpretation flow,
-- confidence-aware continuity model.
-
----
-
-## Section 6: Where Continuity Breaks First
-
-### Objective
-
-Anchor thesis in operational reality.
-
-### Required domains
-
-- grievance continuity,
-- governance operations,
-- investigations,
-- onboarding survivability,
-- documentation continuity.
-
-### Required proof
-
-- anonymized workflow breakdown scenarios,
-- grievance reassignment examples,
-- onboarding continuity failures,
-- modernization continuity failures.
-
----
-
-## Section 7: Governance-Safe AI
+## Section 9: Governance-Safe Intelligence
 
 ### Objective
 
@@ -195,27 +253,14 @@ Define assistive AI posture and anti-surveillance boundaries.
 
 ---
 
-## Section 8: The Future of Continuity
+## Section 10: From Operational Tooling to Institutional Continuity Infrastructure
 
 ### Objective
 
-Position longitudinal continuity understanding and continuity observatories.
-
----
-
-## Section 9: Why Union Eyes Exists
-
-### Objective
-
-Humanize continuity doctrine and technology-with-soul posture.
-
----
-
-## Section 10: Conclusion
+Synthesize operations, governance, and continuity into one category narrative.
 
 ### Final positioning
 
 Continuity is infrastructure.
 
-Organizations need not only workflow execution and modernization, but survivability.
-OCI/OCRA help organizations understand fragility and stabilize continuity safely over time.
+Union Eyes is best understood as continuity-aware operational infrastructure: grounded in real labour operations, extended by continuity intelligence, and governed by anti-surveillance, explainable, human-led doctrine.
