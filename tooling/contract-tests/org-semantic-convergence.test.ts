@@ -61,6 +61,7 @@ function collectFiles(dir: string, ext: string[]): string[] {
           'platform-entity-graph', 'platform-context-orchestrator',
           'platform-governed-ai', 'zonga-control-plane',
           'intelligence', 'fsm-core',
+          'organizational-governance-graph',
           'institutional-governance-graph',
           'schema-core', 'governed-workflow',
           // Entity-graph UI surface: entityId is a graph-node identifier

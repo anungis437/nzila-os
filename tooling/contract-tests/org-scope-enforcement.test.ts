@@ -79,6 +79,7 @@ const EXEMPT_ROUTES = new Set([
   'ocra',           // OCRA — canonical alias of icra (OCI↔OCRA convergence Phase 2)
   'workbook',       // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential)
   '_perf',          // Web vitals sendBeacon endpoint (anonymous, no org context)
+  'exit-interviews/institutional-', // Legacy public redirect aliases to organizational-* endpoints
 ])
 
 function isExemptRoute(filePath: string): boolean {

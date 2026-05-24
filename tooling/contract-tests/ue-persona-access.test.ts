@@ -335,6 +335,9 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'institutional-intelligence/page.tsx',         minRole: 'officer',              description: 'Institutional intelligence dashboard' },
   { path: 'institutional-memory/page.tsx',               minRole: 'officer',              description: 'Institutional memory workspace' },
   { path: 'institutional-operating-intelligence/page.tsx', minRole: 'vice_president',     description: 'Institutional operating intelligence workspace' },
+  { path: 'organizational-intelligence/page.tsx',        minRole: 'officer',              description: 'Organizational intelligence dashboard' },
+  { path: 'organizational-memory/page.tsx',              minRole: 'officer',              description: 'Organizational memory workspace' },
+  { path: 'organizational-operating-intelligence/page.tsx', minRole: 'vice_president',    description: 'Organizational operating intelligence workspace' },
   { path: 'knowledge-transfer/page.tsx',                 minRole: 'officer',              description: 'Knowledge transfer index' },
   { path: 'knowledge-transfer/new/page.tsx',             minRole: 'officer',              description: 'Knowledge transfer create' },
   { path: 'knowledge-transfer/[id]/page.tsx',            minRole: 'officer',              description: 'Knowledge transfer detail' },
@@ -344,6 +347,9 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'institutional-chronology/page.tsx',           minRole: 'member',               description: 'Institutional chronology — procedural timeline, evolution, decision lineage, continuity, epochs' },
   { path: 'institutional-observability/page.tsx',        minRole: 'member',               description: 'Institutional observability — chronology, lineage, continuity pathways, provenance' },
   { path: 'institutional-topology/page.tsx',             minRole: 'member',               description: 'Institutional topology — hierarchy, affiliation, delegation, lineage, continuity-aware structures' },
+  { path: 'organizational-chronology/page.tsx',          minRole: 'member',               description: 'Organizational chronology — procedural timeline, evolution, decision lineage, continuity, epochs' },
+  { path: 'organizational-observability/page.tsx',       minRole: 'member',               description: 'Organizational observability — chronology, lineage, continuity pathways, provenance' },
+  { path: 'organizational-topology/page.tsx',            minRole: 'member',               description: 'Organizational topology — hierarchy, affiliation, delegation, lineage, continuity-aware structures' },
 ]
 
 // ── API routes backing dashboard pages ──────────────────────────────────────

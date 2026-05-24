@@ -177,6 +177,8 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/auth_core/',                     // Django auth core health/status endpoints
     '/api/rights/terms',                   // Public rights/terms routes (terms, agreement)
     '/api/icra',                           // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated results)
+    '/api/ocra',                           // OCRA canonical alias for ICRA public diagnostic routes
+    '/api/exit-interviews/institutional-', // Legacy public redirect aliases to organizational-* exit-interview endpoints
     '/api/workbook/',                      // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential; claim route enforces auth() at runtime, Stripe webhook signature-verified)
     '/_perf/',                             // Web vitals beacon — intentionally anonymous (sendBeacon)
   ]
