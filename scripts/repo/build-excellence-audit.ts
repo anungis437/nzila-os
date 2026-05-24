@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { join, relative, resolve } from 'node:path'
 
 import { findRepoRoot } from '../lib/portfolio-governance'
 
@@ -27,10 +27,12 @@ function clamp(value: number): number {
 function safeJoin(root: string, relativePath: string): string {
   // nosemgrep
   const absolutePath = resolve(root, relativePath)
-  // nosemgrep
-  const normalizedRoot = `${resolve(root)}\\`
-  // nosemgrep
-  if (!absolutePath.startsWith(normalizedRoot) && absolutePath !== resolve(root)) {
+  const rootPath = resolve(root)
+  const rel = relative(rootPath, absolutePath)
+  if (rel === '') {
+    return absolutePath
+  }
+  if (rel.startsWith('..') || rel.includes('/..') || rel.includes('\\..')) {
     throw new Error(`Unsafe path outside repo root: ${relativePath}`)
   }
   return absolutePath
@@ -45,12 +47,10 @@ function main(): void {
   const docsIndex = loadJson<any>(root, 'reports/documentation-index.json')
   const ownership = loadJson<any>(root, 'reports/ownership-registry.json')
   const dora = loadJson<any>(root, 'ops/outputs/dora-metrics.json')
-  const evidenceHistory = readFileSync(
-    join(root, 'proof-artifacts/evidence-packs/history.jsonl'),
-    'utf8',
-  )
-    .split('\n')
-    .filter(Boolean)
+  const evidenceHistoryPath = join(root, 'proof-artifacts/evidence-packs/history.jsonl')
+  const evidenceHistory = existsSync(evidenceHistoryPath)
+    ? readFileSync(evidenceHistoryPath, 'utf8').split('\n').filter(Boolean)
+    : []
 
   const exactDuplicateScriptBodies = new Map<string, string[]>()
   for (const [name, value] of Object.entries(packageJson.scripts)) {

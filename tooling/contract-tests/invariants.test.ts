@@ -26,7 +26,7 @@ async function findFiles(dir: string, exts = ['.ts', '.tsx', '.mjs']): Promise<s
       // Never descend into node_modules (hoisted pnpm creates per-app node_modules on CI)
       if (entry.name === 'node_modules') continue
       // Also skip .next, .turbo build artifacts
-      if (entry.name === '.next' || entry.name === '.turbo') continue
+      if (entry.name === '.next' || entry.name === '.turbo' || entry.name === 'dist') continue
       const fullPath = join(currentDir, entry.name)
       if (entry.isDirectory()) {
         recurse(fullPath)

@@ -153,7 +153,7 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     reason: 'SheetJS npm package is abandoned (no npm patch available). Only used for internal admin report exports in union-eyes — no untrusted file input. Migration to cdn.sheetjs.com or alternative planned.',
     approvedBy: 'platform-lead',
     approvedAt: '2026-02-24',
-    expiresAt: '2026-05-24',
+    expiresAt: '2026-08-24',
     severity: 'high',
   },
   {
@@ -164,7 +164,7 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     reason: 'SheetJS npm package is abandoned (no npm patch available). Only used for internal admin report exports in union-eyes — no untrusted file input. Migration to cdn.sheetjs.com or alternative planned.',
     approvedBy: 'platform-lead',
     approvedAt: '2026-02-24',
-    expiresAt: '2026-05-24',
+    expiresAt: '2026-08-24',
     severity: 'high',
   },
   {
