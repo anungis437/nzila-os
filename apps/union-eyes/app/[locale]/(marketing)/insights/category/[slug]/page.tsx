@@ -78,15 +78,15 @@ export default async function InsightCategoryPage({ params, searchParams }: Insi
   const categoryCounts = getInsightCategoryCounts();
   const ctaCopy = locale === 'fr-CA'
     ? {
-        heading: 'Besoin d’un breffage exécutif propre à cette catégorie?',
-        body: 'Nous pouvons adapter un breffage à vos priorités de leadership, de gouvernance et de modernisation.',
-        primary: 'Demander un breffage',
+        heading: 'Commencez par une réflexion de continuité (gratuite)',
+        body: 'Une évaluation institutionnelle ciblée, sans engagement. Le point d’entrée ICRA.',
+        primary: 'Commencer la réflexion gratuite',
         secondary: 'Retour aux perspectives',
       }
     : {
-        heading: 'Need a category-specific executive briefing?',
-        body: 'We can tailor a briefing around your leadership, governance, and modernization priorities.',
-        primary: 'Request a Briefing',
+        heading: 'Start with a free Continuity Reflection',
+        body: 'A scoped institutional continuity assessment. No commitment. The ICRA entry point.',
+        primary: 'Start the free Continuity Reflection',
         secondary: 'Back to Insights',
       };
 
@@ -172,7 +172,7 @@ export default async function InsightCategoryPage({ params, searchParams }: Insi
           </ScrollReveal>
           <div className="flex flex-col sm:flex-row gap-4 justify-center narrative-sequence">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/institutional-continuity-risk`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
               {ctaCopy.primary}

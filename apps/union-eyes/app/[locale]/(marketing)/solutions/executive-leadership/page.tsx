@@ -1,7 +1,7 @@
 /**
- * Organizational Positioning Manifest (UnionEyes marketing surface)
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * organizational trust for democratic infrastructure.
+ * institutional trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -36,9 +36,9 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 const PAGE_COPY = {
   'en-CA': {
     badge: 'Solutions · Union Executive Leadership',
-    heading: 'Lead with the full weight of organizational history behind you.',
+    heading: 'Lead with the full weight of institutional history behind you.',
     description:
-      'UnionEyes gives executive leaders the organizational continuity visibility, strategic clarity, and governance-of-record intelligence to lead confidently through any transition — without wading through operational complexity.',
+      'UnionEyes gives executive leaders the institutional continuity visibility, strategic clarity, and governance-of-record intelligence to lead confidently through any transition — without wading through operational complexity.',
     challengeHeading: 'The continuity challenge every executive faces',
     challenges: [
       'Decades of corporate knowledge disappears when senior officers retire or leave',
@@ -55,22 +55,22 @@ const PAGE_COPY = {
       { icon: ShieldCheck, title: 'Labour-safe intelligence, guaranteed', desc: 'All intelligence is explainable, human-reviewed, and built on anti-surveillance principles.' },
     ],
     quote:
-      '"The organizational knowledge that walks out the door when a president retires is irreplaceable — unless it was captured, governed, and made accessible. That\'s what continuity intelligence means."',
-    quoteAttribution: 'UnionEyes Organizational Continuity Principle',
+      '"The institutional knowledge that walks out the door when a president retires is irreplaceable — unless it was captured, governed, and made accessible. That\'s what continuity intelligence means."',
+    quoteAttribution: 'UnionEyes Institutional Continuity Principle',
     relatedHeading: 'Explore related solutions',
-    finalHeading: 'Ready to lead with organizational clarity?',
-    finalBody: 'Request an Executive Briefing tailored to your executive leadership context.',
-    primaryCta: 'Request an Organizational Briefing',
-    finalCta: 'Request an Executive Briefing',
+    finalHeading: 'Ready to lead with institutional clarity?',
+    finalBody: 'Start with a free Continuity Reflection scoped to executive leadership.',
+    primaryCta: 'Start the free Continuity Reflection',
+    finalCta: 'Start the free Continuity Reflection',
   },
   'fr-CA': {
     badge: 'Solutions · Direction exécutive syndicale',
-    heading: "Diriger avec toute l'histoire organisationnelle derrière vous.",
+    heading: "Diriger avec toute l'histoire institutionnelle derrière vous.",
     description:
-      "UnionEyes donne aux directions exécutives la visibilité de continuité organisationnelle, la clarté stratégique et l'intelligence de gouvernance officielle nécessaires pour diriger avec confiance pendant les transitions, sans devoir traverser toute la complexité opérationnelle.",
+      "UnionEyes donne aux directions exécutives la visibilité de continuité institutionnelle, la clarté stratégique et l'intelligence de gouvernance officielle nécessaires pour diriger avec confiance pendant les transitions, sans devoir traverser toute la complexité opérationnelle.",
     challengeHeading: 'Le défi de continuité auquel chaque direction fait face',
     challenges: [
-      'Des décennies de connaissance organisationnelle disparaissent quand des dirigeantes ou dirigeants quittent leurs fonctions',
+      'Des décennies de connaissance institutionnelle disparaissent quand des dirigeantes ou dirigeants quittent leurs fonctions',
       'Les nouvelles directions prennent souvent des mois à reconstruire le contexte nécessaire pour agir efficacement',
       'Les décisions de gouvernance manquent de contexte historique, et les mêmes erreurs se répètent',
       'La continuité stratégique devient fragile à chaque transition de leadership',
@@ -84,13 +84,13 @@ const PAGE_COPY = {
       { icon: ShieldCheck, title: 'Intelligence sûre pour le travail', desc: 'Toute intelligence est explicable, revue par des humains et fondée sur des principes anti-surveillance.' },
     ],
     quote:
-      '"La connaissance organisationnelle qui quitte l’organisation au départ d’une présidence est irremplaçable, sauf si elle a été capturée, gouvernée et rendue accessible. C’est le sens de l’intelligence de continuité."',
-    quoteAttribution: 'Principe de continuité organisationnelle UnionEyes',
+      '"La connaissance institutionnelle qui quitte l’organisation au départ d’une présidence est irremplaçable, sauf si elle a été capturée, gouvernée et rendue accessible. C’est le sens de l’intelligence de continuité."',
+    quoteAttribution: 'Principe de continuité institutionnelle UnionEyes',
     relatedHeading: 'Explorer les solutions connexes',
-    finalHeading: 'Prêt à diriger avec clarté organisationnelle?',
-    finalBody: 'Demandez un breffage exécutif adapté à votre contexte de leadership.',
-    primaryCta: 'Demander un breffage organisationnel',
-    finalCta: 'Demander un breffage exécutif',
+    finalHeading: 'Prêt à diriger avec clarté institutionnelle?',
+    finalBody: 'Commencez par une réflexion de continuité gratuite adaptée à votre contexte de direction exécutive.',
+    primaryCta: 'Commencer la réflexion de continuité (gratuite)',
+    finalCta: 'Commencer la réflexion de continuité (gratuite)',
   },
 };
 
@@ -109,7 +109,7 @@ export default async function ExecutiveLeadershipPage({ params }: { params: Prom
         }
         heading={<>{copy.heading}</>}
         description={copy.description}
-        cta={<Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+        cta={<Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
             {copy.primaryCta}
           </Link>}
       />
@@ -177,7 +177,7 @@ export default async function ExecutiveLeadershipPage({ params }: { params: Prom
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.finalCta}
           </Link>
         </div>

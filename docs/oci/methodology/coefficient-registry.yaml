@@ -1,0 +1,349 @@
+# OCI Method™ — Coefficient Registry
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Authoritative source for every coefficient, weight, cap, and threshold
+# used by the five OCI signature frameworks. The methodology whitepaper
+# (docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md) cites this file by
+# symbol; the framework source files in apps/union-eyes/lib/oci/frameworks/
+# implement the same values. Audit gate Phase-4 step 17 verifies that
+# whitepaper §6, this file, and the source code are in three-way agreement.
+#
+# `derivation_status` values follow the Methodological Maturity
+# Classification™ taxonomy (whitepaper §4.5):
+#   - theoretical: design-time logical reasoning only.
+#   - practitioner-informed: shaped by reviewer field experience; no statistical fit.
+#   - sector-anchored: published sector evidence supports the value.
+#   - empirically-calibrated: fit against an OCI-held longitudinal dataset.
+#   - externally-validated: peer-reviewed or independently audited fit.
+#
+# At v1.0.0, ZERO coefficients claim sector-anchored or higher.
+# Honesty baseline: every value below is theoretical or practitioner-informed.
+
+doctrine_version: '1.0.0'
+last_changed_in_changelog_version: '1.0.0'
+
+frameworks:
+
+  - framework: 'Stewardship Density Index™'
+    source: 'apps/union-eyes/lib/oci/frameworks/stewardship-density-index.ts'
+    coefficients:
+
+      - symbol: 'CRITICALITY_WEIGHT.routine'
+        value: 0.25
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Routine roles contribute to continuity exposure but their loss is
+          typically absorbed by adjacent stewards within days. A quarter-weight
+          reflects "present but not load-bearing".
+        assumed_invariants:
+          - 'Routine roles have documented handover paths.'
+          - 'Departure does not block governance decisions.'
+        v2_calibration_plan: >
+          Compare actual reconstruction effort (steward-days) for routine-role
+          departures across opted-in institutions; fit weight to median effort
+          relative to institution-critical baseline.
+
+      - symbol: 'CRITICALITY_WEIGHT.important'
+        value: 0.5
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Important roles carry recognisable institutional knowledge but are
+          not the sole carriers of any institution-critical function. Half-weight
+          places them midway between routine and load-bearing on the carrier
+          spectrum.
+        assumed_invariants:
+          - 'At least one other steward holds adjacent institutional context.'
+        v2_calibration_plan: 'Same protocol as routine, fitted independently.'
+
+      - symbol: 'CRITICALITY_WEIGHT.load_bearing'
+        value: 0.85
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Load-bearing roles concentrate continuity. The 0.85 value is
+          deliberately below 1.0 to reserve the institution-critical anchor
+          for roles whose loss produces governance discontinuity, not merely
+          operational disruption.
+        assumed_invariants:
+          - 'Load-bearing carrier loss disrupts operations but does not halt governance.'
+        v2_calibration_plan: >
+          Calibrate against observed continuity-debt accumulation (per
+          docs/oci/stabilization/OCI_CONTINUITY_DEBT.md) following load-bearing
+          carrier transitions.
+
+      - symbol: 'CRITICALITY_WEIGHT.institution_critical'
+        value: 1.0
+        derivation_status: 'theoretical'
+        rationale: >
+          Anchor value. By design, institution-critical equals the unit weight
+          against which all other criticality bands are expressed. Not subject
+          to empirical fit; reframing the anchor would require a coordinated
+          doctrine amendment.
+        assumed_invariants:
+          - 'Institution-critical loss produces a governance breakpoint.'
+        v2_calibration_plan: 'Anchor; not recalibrated.'
+
+      - symbol: 'TENURE_AMPLIFIER.0_3y'
+        value: 0.6
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Carriers with under three years of institutional tenure hold
+          measurably less context. The 0.6 multiplier reflects the practitioner
+          observation that short-tenure carriers can be replaced from the
+          external labour market with moderate friction.
+        assumed_invariants:
+          - 'Short-tenure carriers do not yet hold uncoded governance memory.'
+        v2_calibration_plan: >
+          Survey reviewer assessments of reconstruction effort by tenure band
+          across at least five opted-in institutions.
+
+      - symbol: 'TENURE_AMPLIFIER.3_7y'
+        value: 0.85
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Mid-tenure carriers (3–7 years) typically hold meaningful operational
+          context but limited governance lineage memory. Three-quarters weight
+          reflects partial substitutability.
+
+      - symbol: 'TENURE_AMPLIFIER.7_15y'
+        value: 1.0
+        derivation_status: 'theoretical'
+        rationale: >
+          Reference tenure band. 7–15 years is treated as the normal
+          institutional-memory horizon; weight is unity by design.
+
+      - symbol: 'TENURE_AMPLIFIER.15y_plus'
+        value: 1.15
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Long-tenure carriers accumulate uncoded governance lineage and
+          precedent memory that is meaningfully harder to reconstruct. The
+          modest 15% amplifier is intentional: the registry does not claim
+          tenure produces irreplaceable knowledge, only that it amplifies the
+          reconstruction burden if such carriers depart.
+        assumed_invariants:
+          - 'Amplifier remains modest to avoid implying lifetime irreplaceability.'
+
+      - symbol: 'DENSITY_BANDS.critical.lowerBound'
+        value: 0.7
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          When 70%+ of weighted carrier load sits with unsuccessed carriers,
+          the next transition is likely to produce a governance breakpoint.
+          Threshold derived from reviewer experience with pre-pilot
+          institutions exhibiting visible continuity strain.
+        v2_calibration_plan: >
+          Fit threshold against observed governance-breakpoint frequency in
+          longitudinal panel.
+
+      - symbol: 'DENSITY_BANDS.fragile.lowerBound'
+        value: 0.5
+        derivation_status: 'practitioner-informed'
+        rationale: 'Half-of-load benchmark for "stabilization indicated".'
+
+      - symbol: 'DENSITY_BANDS.concentrated.lowerBound'
+        value: 0.3
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Thirty percent of weighted carrier load without successors is the
+          point at which "recognisable but narrow" stewardship becomes the
+          dominant institutional posture.
+
+      - symbol: 'DENSITY_BANDS.observed.lowerBound'
+        value: 0.15
+        derivation_status: 'practitioner-informed'
+        rationale: 'Boundary between healthy distribution and uneven distribution.'
+
+      - symbol: 'DENSITY_BANDS.distributed.lowerBound'
+        value: 0.0
+        derivation_status: 'theoretical'
+        rationale: 'Floor band. Anchor by design.'
+
+  - framework: 'Governance Entropy Scale™'
+    source: 'apps/union-eyes/lib/oci/frameworks/governance-entropy-scale.ts'
+    coefficients:
+
+      - symbol: 'ENTROPY_LEVELS.systemic_entropy.lowerBound'
+        value: 0.8
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Drift score of 0.8+ corresponds to the practitioner observation
+          that governance practice no longer reliably traces back to
+          governance design. Reconstruction is the appropriate posture.
+        v2_calibration_plan: >
+          Calibrate drift score against independent governance-audit findings
+          across opted-in institutions.
+
+      - symbol: 'ENTROPY_LEVELS.institutional_drift.lowerBound'
+        value: 0.6
+        derivation_status: 'practitioner-informed'
+        rationale: 'Multi-domain divergence threshold.'
+
+      - symbol: 'ENTROPY_LEVELS.patterned_drift.lowerBound'
+        value: 0.4
+        derivation_status: 'practitioner-informed'
+        rationale: 'Recurring single-domain divergence threshold.'
+
+      - symbol: 'ENTROPY_LEVELS.recognised_drift.lowerBound'
+        value: 0.2
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Drift exists and is named by institutional stewards, but governance
+          continuity is intact.
+
+      - symbol: 'ENTROPY_LEVELS.coherent.lowerBound'
+        value: 0.0
+        derivation_status: 'theoretical'
+        rationale: 'Floor anchor.'
+
+  - framework: 'Continuity Burden Map™'
+    source: 'apps/union-eyes/lib/oci/frameworks/continuity-burden-map.ts'
+    coefficients:
+
+      - symbol: 'DENSITY_WEIGHT'
+        value: 0.6
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Stewardship density is the dominant signal in the composite burden
+          map. The 0.6 weight reflects the reviewer judgement that "who is
+          carrying continuity" is the single most informative input.
+        assumed_invariants:
+          - 'DENSITY_WEIGHT + ICRA_WEIGHT + RECONSTRUCTION_WEIGHT == 1.0'
+
+      - symbol: 'ICRA_WEIGHT'
+        value: 0.25
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          ICRA burden indicator contributes a meaningful but secondary
+          signal. Quarter-weight reflects its role as confirmatory rather
+          than primary evidence.
+
+      - symbol: 'RECONSTRUCTION_WEIGHT'
+        value: 0.15
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Reconstruction risk is the smallest weighted component because
+          most of its signal is already captured by stewardship density and
+          ICRA burden; the residual contribution is forward-looking exposure.
+
+      - symbol: 'posturalStatement.severe_threshold'
+        value: 0.7
+        derivation_status: 'practitioner-informed'
+        rationale: 'Composite >=0.7 triggers the "significant share" posture.'
+
+      - symbol: 'posturalStatement.substantial_threshold'
+        value: 0.5
+        derivation_status: 'practitioner-informed'
+        rationale: 'Composite >=0.5 triggers "single transition would reduce capacity".'
+
+      - symbol: 'posturalStatement.moderate_threshold'
+        value: 0.3
+        derivation_status: 'practitioner-informed'
+        rationale: 'Composite >=0.3 triggers "recognisable burden".'
+
+  - framework: 'Continuity Survivability Matrix™'
+    source: 'apps/union-eyes/lib/oci/frameworks/continuity-survivability-matrix.ts'
+    coefficients:
+
+      - symbol: 'matrix.shape'
+        value: '3x3'
+        derivation_status: 'theoretical'
+        rationale: >
+          Dependency concentration (distributed | concentrated | singular)
+          and successor readiness (identified | in_progress | absent) are
+          the two doctrine-canonical axes. Matrix cells are categorical
+          postures; no numeric coefficients.
+        assumed_invariants:
+          - 'Exactly one cell per (dependency, successor) permutation.'
+          - 'Unknown enum inputs fall back to singular_absent (worst case).'
+
+      - symbol: 'WORST_CASE_CELL'
+        value: 'singular_absent'
+        derivation_status: 'theoretical'
+        rationale: >
+          Fail-loud-in-meaning rule. An unmodelled configuration must not
+          surface as a healthy posture; the worst-case cell forces operator
+          investigation.
+
+  - framework: 'Reconstruction Burden Index™'
+    source: 'apps/union-eyes/lib/oci/frameworks/reconstruction-burden-index.ts'
+    coefficients:
+
+      - symbol: 'exposed_carrier_weight'
+        value: 0.8
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Each exposed carrier contributes 0.8 score-units of reconstruction
+          effort, capped at four carriers. Weight derived from reviewer
+          estimates of incremental reconstruction effort per unsuccessed
+          continuity carrier.
+
+      - symbol: 'EXPOSED_CAP'
+        value: 4
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Cap at four carriers reflects diminishing marginal information:
+          beyond four exposed carriers, the institution is in a categorically
+          different posture that the density and entropy components capture
+          more reliably.
+
+      - symbol: 'critical_carrier_weight'
+        value: 1.0
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Institution-critical carriers contribute one full score-unit each,
+          capped at three. Higher weight than exposed carriers because the
+          reconstruction effort is qualitatively different (governance
+          lineage, not operational continuity).
+
+      - symbol: 'CRITICAL_CAP'
+        value: 3
+        derivation_status: 'practitioner-informed'
+        rationale: 'Beyond three institution-critical losses, the institution requires external reconstruction support; index saturation is appropriate.'
+
+      - symbol: 'density_multiplier'
+        value: 2.0
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Density index (0–1) is multiplied by 2.0 to contribute up to two
+          score-units. Reflects density's role as a structural amplifier of
+          the carrier-count components.
+
+      - symbol: 'entropy_per_ordinal_step'
+        value: 0.25
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          Each ordinal step on the Governance Entropy Scale above the
+          coherent baseline adds 0.25 score-units of reconstruction burden,
+          capped at one score-unit at ordinal 5. Deliberately modest
+          contribution because the density and carrier components already
+          capture most of the signal.
+
+      - symbol: 'DEFAULT_ENTROPY_ORDINAL'
+        value: 2
+        derivation_status: 'practitioner-informed'
+        rationale: >
+          When governance entropy data is absent, default to ordinal 2
+          (recognised drift) — the most institutionally common posture per
+          reviewer observation. Avoids both under- and over-stating
+          reconstruction burden in incomplete inputs.
+
+      - symbol: 'MAX_SCORE'
+        value: 10
+        derivation_status: 'theoretical'
+        rationale: 'Anchor. Score reported on a 0–10 operational-disruption scale by design.'
+
+      - symbol: 'severe_threshold'
+        value: 7
+        derivation_status: 'practitioner-informed'
+        rationale: 'Score >=7 corresponds to multi-year operational impact.'
+
+      - symbol: 'substantial_threshold'
+        value: 5
+        derivation_status: 'practitioner-informed'
+        rationale: 'Score >=5 corresponds to months of internal effort, partial recovery.'
+
+      - symbol: 'moderate_threshold'
+        value: 3
+        derivation_status: 'practitioner-informed'
+        rationale: 'Score >=3 corresponds to feasible reconstruction with planning.'

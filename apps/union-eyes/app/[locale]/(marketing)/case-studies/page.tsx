@@ -64,8 +64,8 @@ const CASE_STUDIES_COPY: Record<string, {
     jurisdiction: 'Jurisdiction',
     all: 'All',
     empty: 'No case studies match your filters. Try adjusting your selections.',
-    ctaBody: 'Your organization could be the next controlled deployment.',
-    ctaButton: 'Start a Controlled Pilot',
+    ctaBody: 'Your organization could be the next founding partner deployment.',
+    ctaButton: 'Join the Founding Partner Program',
   },
   'fr-CA': {
     loading: 'Chargement des etudes de cas...',
@@ -75,8 +75,8 @@ const CASE_STUDIES_COPY: Record<string, {
     jurisdiction: 'Juridiction',
     all: 'Toutes',
     empty: 'Aucune etude de cas ne correspond a vos filtres. Essayez dajuster vos selections.',
-    ctaBody: 'Votre organisation pourrait etre le prochain deploiement controle.',
-    ctaButton: 'Demarrer un pilote controle',
+    ctaBody: 'Votre organisation pourrait etre le prochain deploiement partenaire fondateur.',
+    ctaButton: 'Rejoindre le Programme partenaires fondateurs',
   },
   it: {
     loading: 'Caricamento dei casi studio...',
@@ -224,7 +224,7 @@ export default function LocaleCaseStudiesPage() {
             {copy.ctaBody}
           </p>
           <Link
-            href={`/${locale}/pilot-request`}
+            href={`/${locale}/institutional-continuity-risk`}
             className="inline-flex items-center px-6 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition-colors"
           >
             {copy.ctaButton}

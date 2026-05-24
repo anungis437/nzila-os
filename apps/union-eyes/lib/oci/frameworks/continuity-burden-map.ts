@@ -1,6 +1,6 @@
 /**
  * ARTIFACT TYPE: IP / Framework
- * FRAMEWORK: Continuity Burden Map\u2122
+ * FRAMEWORK: Continuity Burden Map™
  * DOCTRINE_VERSION: 1.0.0
  *
  * Identifies and weights the invisible continuity burden a few people are
@@ -12,20 +12,26 @@
  * aggregates and ICRA burden index outputs. Full visualization lands in
  * the Facilitated Edition; the Self-Guided Edition exposes the underlying
  * aggregate via the Memory Holders module + PDF export.
+ *
+ * Hardening invariants:
+ *   1. All numeric inputs are clamped to [0,1]; NaN/Infinity coerced to 0.
+ *   2. Composite is always finite and in [0,1].
+ *   3. Returned arrays are frozen.
+ *   4. Component weights sum to 1.0 (0.6 + 0.25 + 0.15).
  */
 
 import type { StewardshipDensityResult } from './stewardship-density-index';
 
 export interface ContinuityBurdenInputs {
   density: StewardshipDensityResult;
-  /** Optional ICRA-derived burden index (0\u20131). */
+  /** Optional ICRA-derived burden index (0–1). */
   icraBurdenIndex?: number;
-  /** Optional reconstruction risk score (0\u20131). */
+  /** Optional reconstruction risk score (0–1). */
   reconstructionRisk?: number;
 }
 
 export interface ContinuityBurdenMapResult {
-  /** 0.0 \u2013 1.0. Composite burden carried by named carriers. */
+  /** 0.0 – 1.0. Composite burden carried by named carriers. */
   composite: number;
   /** Plain-language posture statement (en-CA). */
   posture: string;
@@ -35,14 +41,23 @@ export interface ContinuityBurdenMapResult {
   }>;
 }
 
+const DENSITY_WEIGHT = 0.6;
+const ICRA_WEIGHT = 0.25;
+const RECONSTRUCTION_WEIGHT = 0.15;
+
 export function computeContinuityBurdenMap(
   inputs: ContinuityBurdenInputs,
 ): ContinuityBurdenMapResult {
-  const densityComponent = inputs.density.index * 0.6;
-  const icraComponent = (inputs.icraBurdenIndex ?? 0) * 0.25;
-  const reconstructionComponent = (inputs.reconstructionRisk ?? 0) * 0.15;
+  const densityIndex = safe01(inputs?.density?.index);
+  const icra = safe01(inputs?.icraBurdenIndex);
+  const reconstruction = safe01(inputs?.reconstructionRisk);
+
+  const densityComponent = densityIndex * DENSITY_WEIGHT;
+  const icraComponent = icra * ICRA_WEIGHT;
+  const reconstructionComponent = reconstruction * RECONSTRUCTION_WEIGHT;
+
   const composite = round2(
-    Math.min(1, densityComponent + icraComponent + reconstructionComponent),
+    clamp01(densityComponent + icraComponent + reconstructionComponent),
   );
 
   const factors = [
@@ -54,7 +69,7 @@ export function computeContinuityBurdenMap(
   return {
     composite,
     posture: posturalStatement(composite),
-    contributingFactors: factors,
+    contributingFactors: Object.freeze(factors.map((f) => Object.freeze(f))),
   };
 }
 
@@ -69,6 +84,18 @@ function posturalStatement(composite: number): string {
     return 'Continuity burden is recognisable. Identifying successors and recording lineage would reduce organizational exposure.';
   }
   return 'Continuity burden appears reasonably distributed. Periodic review remains appropriate.';
+}
+
+function safe01(n: number | undefined | null): number {
+  if (n === undefined || n === null) return 0;
+  if (typeof n !== 'number' || !Number.isFinite(n)) return 0;
+  return clamp01(n);
+}
+
+function clamp01(n: number): number {
+  if (n < 0) return 0;
+  if (n > 1) return 1;
+  return n;
 }
 
 function round2(n: number): number {

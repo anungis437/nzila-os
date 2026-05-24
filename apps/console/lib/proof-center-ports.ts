@@ -17,6 +17,10 @@ import type { RealPortsDeps } from '@nzila/platform-procurement-proof/real-ports
 import type { EvidencePackIndex } from '@nzila/platform-evidence-pack'
 import type { ComplianceSnapshot, SnapshotChainEntry } from '@nzila/platform-compliance-snapshots'
 import type { HealthReport } from '@nzila/platform-observability'
+import { createLogger } from '@nzila/os-core/telemetry'
+import { createDbPortDeps } from './proof-center-ports-db'
+
+const logger = createLogger('console.proof-center-ports')
 
 // ── In-Memory Stores ────────────────────────────────────────────────────────
 // ga-check:exempt — port adapter stubs, replaced by real DB ports at runtime
@@ -28,6 +32,23 @@ const snapshotChains = new Map<string, SnapshotChainEntry[]>()
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
+/**
+ * Resolve the proof-center port dependencies for the given org.
+ *
+ * Prefers the live DB-backed adapter (`createDbPortDeps`) whenever a
+ * `DATABASE_URL` is configured — this is the path used in staging and
+ * production. Falls back to the in-memory stub only when no database is
+ * configured AND we are not running in production, so dev/test workflows
+ * still work without a Postgres instance. In production with no DB the
+ * in-memory path throws (see `createInMemoryPortDeps`).
+ */
+export function createPortDeps(orgId: string): RealPortsDeps {
+  if (process.env.DATABASE_URL) {
+    return createDbPortDeps(orgId)
+  }
+  return createInMemoryPortDeps()
+}
+
 export function createInMemoryPortDeps(): RealPortsDeps {  if (process.env.NODE_ENV === 'production') {
     // Fail-closed: emitting an always-empty / always-healthy procurement pack
     // in production would falsify compliance, evidence, integration and
@@ -37,8 +58,8 @@ export function createInMemoryPortDeps(): RealPortsDeps {  if (process.env.NODE_
     )
   }
   if (typeof console !== 'undefined') {
-    console.warn(
-      '[proof-center-ports] using in-memory port deps — evidence packs, compliance snapshots, integrations and health checks are NOT real',
+    logger.warn(
+      'using in-memory port deps — evidence packs, compliance snapshots, integrations and health checks are NOT real',
     )
   }  return {
     evidencePack: {

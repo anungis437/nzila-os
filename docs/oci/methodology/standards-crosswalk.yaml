@@ -1,0 +1,157 @@
+# OCI Method™ — Standards Positioning Crosswalk
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Maps OCI doctrine sections against widely-cited governance, continuity,
+# and risk standards. Each cell uses one of four relationship classes —
+# never "equivalent-to":
+#
+#   complements      OCI adds an interpretive layer alongside the standard.
+#   extends          OCI carries the standard's concern further into
+#                    institutional continuity terrain.
+#   gap-coverage     OCI addresses ground the standard does not cover.
+#   not-equivalent   Surface similarity only; the two are doing
+#                    different work and should not be substituted.
+#
+# This file is the authoritative source for whitepaper §12 (Standards
+# Positioning). Audit gate Phase-4 step 15 verifies that no whitepaper
+# prose claims "equivalent to ISO ...", "ISO-equivalent", or similar.
+
+doctrine_version: '1.0.0'
+
+standards:
+
+  - standard: 'ISO 22301:2019 — Business Continuity Management Systems'
+    scope: 'BCMS requirements; disruption response; recovery objectives.'
+    relationship: 'complements'
+    notes: >
+      ISO 22301 governs the management system that prepares an institution
+      for disruptive events. The OCI Method™ governs the slower-moving
+      stewardship and governance-lineage exposures that produce continuity
+      failure absent any disruptive event. Institutions running ISO 22301
+      can adopt OCI alongside it without conflict; the two address
+      different time horizons and different failure modes. OCI does NOT
+      certify against ISO 22301 and is not a BCMS.
+    crosswalk:
+      - oci_section: 'Stewardship Density Index™'
+        iso_clause: 'Annex A (informative) — resource analysis'
+        relationship: 'complements'
+        note: 'OCI adds the carrier-concentration reading that ISO leaves implicit.'
+      - oci_section: 'Continuity Burden Map™'
+        iso_clause: 'Clause 8.2 — business impact analysis'
+        relationship: 'extends'
+        note: 'BIA enumerates impact; the burden map adds who is carrying the load.'
+      - oci_section: 'Reconstruction Burden Index™'
+        iso_clause: 'Clause 8.3 — recovery strategies'
+        relationship: 'complements'
+        note: 'Recovery strategies presume the institution can reconstruct; OCI surfaces the cost of doing so.'
+
+  - standard: 'ISO 22317:2021 — Business Impact Analysis Guidelines'
+    scope: 'Guidance for conducting business impact analyses.'
+    relationship: 'complements'
+    notes: >
+      ISO 22317 standardises how impact is named. OCI standardises how
+      stewardship and continuity-lineage exposures are named. The two
+      vocabularies are non-overlapping.
+
+  - standard: 'ISO 37000:2021 — Governance of Organizations'
+    scope: 'Governance principles, behaviours, and outcomes for organisations of any type.'
+    relationship: 'complements'
+    notes: >
+      ISO 37000 articulates governance principles at the institutional
+      level. The Governance Entropy Scale™ measures drift between an
+      institution's governance precedents and its governance practice;
+      this is a measurement layer ISO 37000 does not specify.
+    crosswalk:
+      - oci_section: 'Governance Entropy Scale™'
+        iso_clause: 'Principle 5 — accountability; Principle 9 — performance'
+        relationship: 'extends'
+        note: 'Both principles assume governance design is being practised; entropy measures the gap.'
+
+  - standard: 'ISO 31000:2018 — Risk Management Guidelines'
+    scope: 'Generic risk-management framework.'
+    relationship: 'complements'
+    notes: >
+      ISO 31000 treats risk as an event to be identified, analysed,
+      evaluated, and treated. OCI treats continuity exposure as a slowly
+      compounding structural fact. Both vocabularies can be carried
+      together; neither substitutes for the other.
+
+  - standard: 'COBIT 2019 — Governance Framework for Enterprise IT'
+    scope: 'IT governance and management; aligned with ISO 38500.'
+    relationship: 'not-equivalent'
+    notes: >
+      COBIT addresses enterprise IT governance. OCI addresses
+      institutional continuity governance. Surface similarity (both speak
+      of "governance") should not be read as substitutability. An
+      institution may run both, but COBIT cannot be used as evidence of
+      OCI practice and vice versa.
+
+  - standard: 'NIST SP 800-34 Rev.1 — Contingency Planning Guide'
+    scope: 'Federal information system contingency planning.'
+    relationship: 'not-equivalent'
+    notes: >
+      NIST SP 800-34 covers IT contingency planning for federal
+      information systems. OCI covers institutional-knowledge continuity
+      independent of any IT system. Inclusion of NIST in OCI training
+      reading lists is appropriate; substitution is not.
+
+  - standard: 'DDI — Leadership Continuity / Succession Planning Methodologies'
+    scope: 'Talent-development practice; identifies and develops successor leaders.'
+    relationship: 'complements'
+    notes: >
+      DDI methodology identifies and develops individual successor
+      leaders. OCI measures institutional exposure when successors are
+      absent. Both vocabularies can run side-by-side; the OCI Method™
+      explicitly excludes individual successor assessment (anti-surveillance
+      position).
+
+  - standard: 'Korn Ferry — Succession Management Architecture'
+    scope: 'Enterprise succession architecture and talent planning.'
+    relationship: 'complements'
+    notes: >
+      Korn Ferry treats succession as a talent-planning architecture. OCI
+      treats stewardship density and governance entropy as institutional
+      readings independent of talent assessment. The two perspectives are
+      orthogonal and can be carried simultaneously.
+
+  - standard: 'OECD Principles of Corporate Governance (2023)'
+    scope: 'High-level governance principles for jurisdictional adoption.'
+    relationship: 'complements'
+    notes: >
+      The OECD principles operate at the principle-statement level. OCI
+      operates at the institutional-measurement level. There is no
+      overlap to deconflict; the principles inform sponsor recognition
+      conversations in Phase 1.
+
+  - standard: 'CMMI — Capability Maturity Model Integration'
+    scope: 'Process-capability maturity.'
+    relationship: 'not-equivalent'
+    notes: >
+      CMMI measures process-capability maturity along a five-level scale.
+      The Governance Entropy Scale also has five ordinal levels. The
+      coincidence is structural, not semantic; OCI levels measure
+      governance-design-to-practice drift, not process capability.
+      Whitepaper prose MUST NOT describe the OCI scale as a "maturity
+      model" without immediate disambiguation.
+
+  - standard: 'HHI (Herfindahl–Hirschman Index) — Market concentration'
+    scope: 'Antitrust market-concentration measure.'
+    relationship: 'not-equivalent'
+    notes: >
+      HHI sums squared market shares to measure concentration. The
+      Stewardship Density Index is a weighted exposure ratio, not a sum
+      of squares. Surface similarity in the concentration framing should
+      not produce equivalence claims.
+
+  - standard: 'Gini coefficient — Inequality measure'
+    scope: 'Inequality measure (Lorenz-curve based).'
+    relationship: 'not-equivalent'
+    notes: >
+      Gini measures inequality across a population. SDI measures exposure
+      concentration weighted by criticality and tenure. Different
+      mathematical objects; equivalence claims are unsupported.
+
+# v2 roadmap: this crosswalk is a living artifact. Each standards body
+# revision triggers a crosswalk audit; revisions are recorded in
+# METHODOLOGY_CHANGELOG.md.

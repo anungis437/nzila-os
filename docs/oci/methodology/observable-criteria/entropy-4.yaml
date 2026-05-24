@@ -1,0 +1,83 @@
+# Governance Entropy Scale™ — Observable Criteria (Level 4: Institutional Drift)
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Observable indicators for ordinal 4 (drift score 0.6 <= x < 0.8).
+# Multiple domains show patterned divergence from designed governance.
+# Stabilization is appropriate.
+
+level: 4
+id: 'institutional_drift'
+label: 'Institutional drift'
+lowerBound: 0.6
+upperBound: 0.8
+
+posture: >
+  Multiple domains show patterned divergence from designed governance.
+  Stabilization is appropriate.
+
+observable_indicators:
+
+  - id: 'L4-OBS-01-multi-domain-drift'
+    requirement: 'Drift is visible in two or more institutional domains simultaneously (e.g., procurement AND hiring authority AND contract approval).'
+    evidence_examples:
+      - 'Stewards in different functional areas independently surface drift examples.'
+    auditor_check: >
+      Conduct three independent stewardship conversations across different
+      domains. Pass if each surfaces a drift example without prompting.
+
+  - id: 'L4-OBS-02-decision-register-broken'
+    requirement: 'Decision register lags by more than six months OR has been abandoned.'
+    auditor_check: 'Verify most recent entry date or confirm abandonment.'
+
+governance_evidence:
+
+  - id: 'L4-GOV-01-cadence-broken'
+    requirement: 'Four or more meeting cycles missed in the past twelve months.'
+    auditor_check: 'Count missed cycles.'
+
+  - id: 'L4-GOV-02-quorum-frequent-failure'
+    requirement: 'Quorum met at less than 60% of meetings.'
+    auditor_check: 'Compute quorum-met percentage.'
+
+  - id: 'L4-GOV-03-precedent-arguments-recurrent'
+    requirement: 'Recurring arguments at meetings about what the precedent actually is.'
+    auditor_check: 'Review last twelve months of minutes for precedent-interpretation disputes.'
+
+process_visibility:
+
+  - id: 'L4-PV-01-decisions-largely-undocumented'
+    requirement: '30–50% of governance decisions are not entered into any register and are reconstructable only by interviewing the original steward.'
+    auditor_check: 'Sample ten decisions; classify documentation status.'
+
+documentation_maturity:
+
+  - id: 'L4-DOC-01-charter-contradicted-broadly'
+    requirement: 'Charter contradicts current practice in two or more domains.'
+    auditor_check: 'Identify contradicting domains.'
+
+  - id: 'L4-DOC-02-policy-shadow-dominant'
+    requirement: 'Shadow policy versions are more authoritative in practice than published versions.'
+    auditor_check: 'Ask five stewards which version they follow; compare against published.'
+
+decision_continuity:
+
+  - id: 'L4-DC-01-no-briefing-norm'
+    requirement: 'Governance transitions typically occur without a briefing.'
+    auditor_check: 'Ask governance liaison about briefing practice; verify "rarely happens" answer.'
+
+  - id: 'L4-DC-02-context-loss-incidents'
+    requirement: 'At least one identifiable instance in the past twenty-four months where a governance decision was made without awareness of a contradicting prior precedent.'
+    auditor_check: 'Ask governance liaison to identify such an instance.'
+
+institutional_dependency_indicators:
+
+  - id: 'L4-IDI-01-multiple-single-stewards'
+    requirement: 'Four or more load-bearing governance domains held by a single steward each.'
+    auditor_check: 'Count single-steward domains.'
+
+onboarding_survivability_indicators:
+
+  - id: 'L4-OSI-01-onboarding-ad-hoc'
+    requirement: 'Onboarding is ad-hoc; incoming stewards report "figuring it out as I went".'
+    auditor_check: 'Ask the most recently onboarded steward how they oriented; classify response.'

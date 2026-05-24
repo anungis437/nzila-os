@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
+import { resolveActiveOrgId } from '@/lib/org-context'
 import { createLogger } from '@nzila/os-core'
 import {
   collectProcurementPack,
@@ -20,7 +21,7 @@ import {
   exportAsJson,
   createRealPorts,
 } from '@nzila/platform-procurement-proof'
-import { createInMemoryPortDeps } from '@/lib/proof-center-ports'
+import { createPortDeps } from '@/lib/proof-center-ports'
 
 const logger = createLogger('api:proof-center:export')
 
@@ -40,27 +41,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
+    const orgId = await resolveActiveOrgId(auth.userId)
+    if (!orgId) {
+      return NextResponse.json({ error: 'Forbidden: no active organization' }, { status: 403 })
+    }
+
     // Wire real collectors via ports
-    const portDeps = createInMemoryPortDeps()
+    const portDeps = createPortDeps(orgId)
     const ports = createRealPorts(portDeps)
 
     // Collect + sign using real port chain
-    let pack = await collectProcurementPack(auth.userId, auth.userId, ports)
+    let pack = await collectProcurementPack(orgId, auth.userId, ports)
     pack = await signProcurementPack(pack, ports)
 
     if (parsed.data.format === 'json') {
       const result = exportAsJson(pack)
 
       await recordAuditEvent({
-        orgId: auth.userId,
+        orgId,
         targetType: 'org',
-        targetId: auth.userId,
+        targetId: orgId,
         action: 'procurement_pack_exported',
         actorClerkUserId: auth.userId,
         afterJson: { format: 'json', sectionCount: 5 },
       })
 
-      logger.info('Procurement pack exported (JSON)', { userId: auth.userId })
+      logger.info('Procurement pack exported (JSON)', { userId: auth.userId, orgId })
 
       return new NextResponse(result.data, {
         status: 200,
@@ -72,12 +78,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Default: signed ZIP export
-    const result = exportAsSignedZip(pack, auth.userId)
+    const result = exportAsSignedZip(pack, orgId)
 
     await recordAuditEvent({
-      orgId: auth.userId,
+      orgId,
       targetType: 'org',
-      targetId: auth.userId,
+      targetId: orgId,
       action: 'procurement_pack_exported',
       actorClerkUserId: auth.userId,
       afterJson: {
@@ -91,6 +97,7 @@ export async function POST(req: NextRequest) {
 
     logger.info('Procurement pack exported (ZIP)', {
       userId: auth.userId,
+      orgId,
       filename: result.filename,
       keyId: result.signature.keyId,
     })

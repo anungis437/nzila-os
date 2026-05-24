@@ -65,16 +65,15 @@ describe('spatial-query-service', () => {
     expect(result.method).toBe('postgis');
   });
 
-  it('isPointInGeofence falls back to haversine on PostGIS error', async () => {
+  it('isPointInGeofence throws when PostGIS unavailable (honesty-pass: no silent haversine fallback)', async () => {
     mockExecute.mockRejectedValue(new Error('PostGIS not available'));
 
-    const result = await isPointInGeofence(
-      { latitude: 45.5017, longitude: -73.5673 },
-      '550e8400-e29b-41d4-a716-446655440000'
-    );
-    // Falls back to haversine — result still has inside + method
-    expect(result.method).toBe('haversine');
-    expect(typeof result.inside).toBe('boolean');
+    await expect(
+      isPointInGeofence(
+        { latitude: 45.5017, longitude: -73.5673 },
+        '550e8400-e29b-41d4-a716-446655440000'
+      )
+    ).rejects.toThrow(/PostGIS is required/i);
   });
 
   it('calculateDistance falls back to haversine on PostGIS error', async () => {

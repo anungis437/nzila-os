@@ -1,46 +1,21 @@
-export const dynamic = 'force-dynamic'
+// This non-locale /sign-in route exists so links produced before locale
+// resolution still land somewhere valid. The actual sign-in surface lives
+// under /[locale]/(auth)/sign-in/ where it can render locale-aware copy,
+// metadata, and translated CTAs. Anything that arrives here is redirected
+// to the default-locale sign-in (preserving any catch-all segments).
 
-import type { Metadata } from 'next'
-import AuthPageLayout from '@/components/auth/auth-page-layout'
-import { LoginForm } from '@/components/auth/login-form'
-import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience'
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'Sign In | UnionEyes',
-  description: 'Sign in to UnionEyes — a decision system for labour leadership.',
-}
+import { defaultLocale } from '@/lib/locales';
 
-const defaultStats = [
-  { value: '35+', label: 'Union roles' },
-  { value: '6', label: 'Languages' },
-  { value: '99.9%', label: 'Uptime' },
-]
+export const dynamic = 'force-dynamic';
 
-const cupeStats = [
-  { value: '4,200+', label: 'Members represented' },
-  { value: '100%',   label: 'Case traceability'   },
-  { value: '99.9%',  label: 'Platform uptime'     },
-]
+type PageProps = {
+  params: Promise<{ 'sign-in'?: string[] }>;
+};
 
-export default function SignInPage() {
-  const isCupeDemo = isCupe4373DemoRuntime()
-  const postLoginPath = isCupeDemo ? '/en-CA/dashboard' : undefined
-  const stats = isCupeDemo ? cupeStats : defaultStats
-  const tagline = isCupeDemo
-    ? 'Operational Continuity for Organized Labour'
-    : 'A Decision System for Labour Leadership'
-  const subtitle = isCupeDemo
-    ? 'Casework, collective agreement management, grievance tracking, and member representation — purpose-built for CUPE Local 4373.'
-    : 'From intake to outcome — casework, intelligence, and member services in one system.'
-
-  return (
-    <AuthPageLayout
-      appName="UnionEyes"
-      tagline={tagline}
-      subtitle={subtitle}
-      stats={stats}
-    >
-      <LoginForm postLoginPath={postLoginPath} />
-    </AuthPageLayout>
-  )
+export default async function NonLocaleSignInRedirect({ params }: PageProps) {
+  const { 'sign-in': segments } = await params;
+  const tail = segments?.length ? `/${segments.join('/')}` : '';
+  redirect(`/${defaultLocale}/sign-in${tail}`);
 }

@@ -12,12 +12,15 @@
  * @see @nzila/platform-procurement-proof
  */
 import { requireRole } from '@/lib/rbac'
+import { auth } from '@nzila/platform-auth/entra/server'
+import { redirect } from 'next/navigation'
+import { resolveActiveOrgId } from '@/lib/org-context'
 import {
   collectProcurementPack,
   signProcurementPack,
   createRealPorts,
 } from '@nzila/platform-procurement-proof'
-import { createInMemoryPortDeps } from '@/lib/proof-center-ports'
+import { createPortDeps } from '@/lib/proof-center-ports'
 import {
   ShieldCheckIcon,
   ServerIcon,
@@ -151,13 +154,21 @@ export default async function ProofCenterPage({
   searchParams,
 }: { searchParams: Promise<{ mode?: string }> }) {
   await requireRole('platform_admin', 'studio_admin')
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
+
+  const orgId = await resolveActiveOrgId(userId)
+  if (!orgId) {
+    throw new Error('Forbidden: no active organization membership for user')
+  }
+
   const params = await searchParams
   const isExecutive = params.mode === 'executive'
 
   // ── Collect real data via port chain ───────────────────────────────────────
-  const portDeps = createInMemoryPortDeps()
+  const portDeps = createPortDeps(orgId)
   const ports = createRealPorts(portDeps)
-  const pack = await collectProcurementPack('org', 'proof-center-page', ports)
+  const pack = await collectProcurementPack(orgId, userId, ports)
   const signed = await signProcurementPack(pack, ports)
 
   const sect = pack.sections

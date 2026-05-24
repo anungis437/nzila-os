@@ -23,12 +23,12 @@ const FOOTER_COPY: Record<string, {
   pilotBadge: string;
   canadaBadge: string;
 }> = {
-  'en-CA': { pilotBadge: 'Pilot Active', canadaBadge: 'Canadian Made' },
-  en: { pilotBadge: 'Pilot Active', canadaBadge: 'Canadian Made' },
-  'fr-CA': { pilotBadge: 'Pilote actif', canadaBadge: 'Fait au Canada' },
-  fr: { pilotBadge: 'Pilote actif', canadaBadge: 'Fait au Canada' },
-  it: { pilotBadge: 'Pilota attivo', canadaBadge: 'Creato in Canada' },
-  pt: { pilotBadge: 'Piloto ativo', canadaBadge: 'Feito no Canadá' },
+  'en-CA': { pilotBadge: 'Founding Partner Program',     canadaBadge: 'Canadian Made'   },
+  en:      { pilotBadge: 'Founding Partner Program',     canadaBadge: 'Canadian Made'   },
+  'fr-CA': { pilotBadge: 'Programme partenaires fondateurs', canadaBadge: 'Fait au Canada' },
+  fr:      { pilotBadge: 'Programme partenaires fondateurs', canadaBadge: 'Fait au Canada' },
+  it:      { pilotBadge: 'Programma partner fondatori',  canadaBadge: 'Creato in Canada' },
+  pt:      { pilotBadge: 'Programa Parceiros Fundadores', canadaBadge: 'Feito no Canadá' },
 };
 
 
@@ -49,7 +49,7 @@ export default function LocaleSiteFooter() {
       { name: tNav('intelligence.name'), href: `/${locale}/platform#intelligence` },
       { name: tNav('cognition.name'),    href: `/${locale}/platform#cognition` },
       { name: tNav('governance.name'),   href: `/${locale}/platform#governance` },
-      { name: tNav('memory.name'),       href: `/${locale}/platform#organizational-memory` },
+      { name: tNav('memory.name'),       href: `/${locale}/platform#institutional-memory` },
       { name: tNav('trust.name'),        href: `/${locale}/platform#trust` },
     ],
     [t('solutions') as string]: [
@@ -70,7 +70,7 @@ export default function LocaleSiteFooter() {
       { name: t('story'),        href: `/${locale}/story` },
       { name: t('insights'),     href: `/${locale}/insights` },
       { name: whitepaperLabel,   href: `/${locale}/whitepaper` },
-      { name: t('organizationalProof'), href: `/${locale}/proof` },
+      { name: t('institutionalProof'), href: `/${locale}/proof` },
       // Case studies hidden until pilots complete — re-enable via CASE_STUDIES_VISIBLE flag.
       // { name: t('caseStudies'),  href: `/${locale}/case-studies` },
       { name: t('pricing'),      href: `/${locale}/pricing` },
@@ -87,8 +87,7 @@ export default function LocaleSiteFooter() {
 
   return (
     <footer className="bg-navy text-gray-200">
-      {/* Pre-footer CTA removed — primary CTA above the footer covers this surface;
-          the duplicate "Ready to lead with…" banner was creating redundancy. */}
+      {/* Pre-footer CTA removed — each page now owns its single closing CTA. Duplicate site-wide layer was creating dual-CTA stacking. */}
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

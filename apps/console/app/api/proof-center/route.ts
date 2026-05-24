@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
+import { resolveActiveOrgId } from '@/lib/org-context'
 import { createLogger } from '@nzila/os-core'
 import { z } from 'zod'
 import {
@@ -14,7 +15,7 @@ import {
   exportAsJson,
   createRealPorts,
 } from '@nzila/platform-procurement-proof'
-import { createInMemoryPortDeps } from '@/lib/proof-center-ports'
+import { createPortDeps } from '@/lib/proof-center-ports'
 
 const logger = createLogger('api:proof-center')
 
@@ -29,10 +30,15 @@ export async function GET(_req: NextRequest) {
     const auth = await authenticateUser()
     if (!auth.ok) return auth.response
 
+    const orgId = await resolveActiveOrgId(auth.userId)
+    if (!orgId) {
+      return NextResponse.json({ error: 'Forbidden: no active organization' }, { status: 403 })
+    }
+
     // Wire real collectors
-    const portDeps = createInMemoryPortDeps()
+    const portDeps = createPortDeps(orgId)
     const ports = createRealPorts(portDeps)
-    const pack = await collectProcurementPack(auth.userId, auth.userId, ports)
+    const pack = await collectProcurementPack(orgId, auth.userId, ports)
 
     const sec = pack.sections.security
     const dl = pack.sections.dataLifecycle
@@ -81,18 +87,23 @@ export async function POST(_req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
+    const orgId = await resolveActiveOrgId(auth.userId)
+    if (!orgId) {
+      return NextResponse.json({ error: 'Forbidden: no active organization' }, { status: 403 })
+    }
+
     // Wire real collectors → collect → sign → export
-    const portDeps = createInMemoryPortDeps()
+    const portDeps = createPortDeps(orgId)
     const ports = createRealPorts(portDeps)
 
-    let pack = await collectProcurementPack(auth.userId, auth.userId, ports)
+    let pack = await collectProcurementPack(orgId, auth.userId, ports)
     pack = await signProcurementPack(pack, ports)
     const _exportResult = exportAsJson(pack)
 
     await recordAuditEvent({
-      orgId: auth.userId,
+      orgId,
       targetType: 'org',
-      targetId: auth.userId,
+      targetId: orgId,
       action: 'procurement_pack_generated',
       actorClerkUserId: auth.userId,
       afterJson: { sectionCount: 5, packId: pack.packId },

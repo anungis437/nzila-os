@@ -7179,7 +7179,7 @@
           "desc": "Délégués et décisions"
         },
         "continuity": {
-          "name": "Mémoire organisationnelle",
+          "name": "Mémoire institutionnelle",
           "desc": "Mémoire et précédents"
         },
         "trust": {
@@ -7200,22 +7200,22 @@
         },
         "priorities": {
           "name": "Engagements et échéances",
-          "desc": "Délais statutaires, obligations et prochaines actions organisationnelles"
+          "desc": "Délais statutaires, obligations et prochaines actions institutionnelles"
         },
         "intelligence": {
-          "name": "Intelligence organisationnelle",
+          "name": "Intelligence institutionnelle",
           "desc": "Surfaces exécutives, fédérales et analytiques"
         },
         "cognition": {
           "name": "Raisonnement gouverné",
-          "desc": "Raisonnement souverain ancré dans la doctrine organisationnelle"
+          "desc": "Raisonnement souverain ancré dans la doctrine institutionnelle"
         },
         "governance": {
           "name": "Gouvernance officielle",
           "desc": "Charte, motions et décisions officielles"
         },
         "memory": {
-          "name": "Mémoire organisationnelle",
+          "name": "Mémoire institutionnelle",
           "desc": "Doctrine, précédents et archives de continuité"
         },
         "trust": {
@@ -7232,12 +7232,13 @@
       "signIn": "Se connecter"
     },
     "home": {
-      "badge": "Gouvernance organisationnelle et infrastructure de continuité",
+      "badge": "Gouvernance institutionnelle et infrastructure de continuité",
       "heroHeadingLine1": "La certitude que",
-      "heroHeadingLine2": "la mémoire organisationnelle survivra à toute personne.",
-      "heroDescription": "Union Eyes est la couche d’infrastructure opérationnelle pour la continuité du travail organisationnel — cognition respectueuse de la gouvernance, mémoire organisationnelle, continuité de l’intendance et posture anti-surveillance, incarnées en un seul environnement opérationnel.",
-      "ctaPrimary": "Demander une présentation exécutive",
+      "heroHeadingLine2": "la mémoire institutionnelle survivra à toute personne.",
+      "heroDescription": "Quand le personnel d’expérience prend sa retraite, quand les dirigeantes et dirigeants changent, quand des fédérations fusionnent — les précédents, les relations et le jugement qu’ils portent ne se transmettent pas seuls. Union Eyes est l’infrastructure qui les garde en place. Hébergé au Canada. Aucune surveillance des travailleuses et travailleurs. Aucune décision en boîte noire.",
+      "ctaPrimary": "Commencer la réflexion de continuité (gratuite)",
       "ctaSecondary": "Explorer les solutions",
+      "ctaTertiary": "Lire le livre blanc sur la continuité",
       "proofSectionLabel": "Garanties intégrées à la plateforme",
       "pp1Label": "Décisions explicables",
       "pp1Sub": "Chaque recommandation vérifiable",
@@ -7245,11 +7246,24 @@
       "pp2Sub": "Anti-surveillance par conception",
       "pp3Label": "Résidence des données",
       "pp3Sub": "Hébergement souverain, aucune sortie transfrontalière",
-      "pp4Label": "Mémoire organisationnelle",
+      "pp4Label": "Mémoire institutionnelle",
       "pp4Sub": "Continuité à travers les transitions de leadership",
-      "outcomesHeading": "Opérations de qualité entreprise, conception axée sur l'organization",
+      "outcomesHeading": "Opérations de qualité entreprise, conception axée sur l'institution",
       "outcomesDescription": "Union Eyes est conçu pour la continuité du leadership, la modernisation de la gouvernance et la confiance démocratique à grande échelle.",
-      "outcome1Title": "Continuité organisationnelle",
+      "xlateBadge": "Ce que fait réellement Union Eyes",
+      "xlateHeading": "La continuité institutionnelle, en langage clair",
+      "xlateDescription": "Union Eyes résout cinq problèmes opérationnels que toute institution de longue date finit par rencontrer — dans le langage des personnes qui font le travail, pas dans la doctrine qui l'explique.",
+      "xlate1Title": "Les décisions restent explicables quand les personnes changent",
+      "xlate1Desc": "Quand un président part, qu'une trésorière tourne ou qu'un membre clé du personnel quitte, le raisonnement derrière les griefs actifs, les engagements financiers et les positions de gouvernance reste avec l'institution — pas dans la tête ou la boîte courriel de quelqu'un.",
+      "xlate2Title": "Il arrête la perte de continuité lors des transitions de direction",
+      "xlate2Desc": "Les nouveaux dirigeants héritent d'une vision opérationnelle cohérente au lieu de reconstruire le contexte de zéro. L'intégration cesse de coûter six mois de dérive institutionnelle.",
+      "xlate3Title": "Il transforme les flux non documentés en flux gouvernés",
+      "xlate3Desc": "Les processus de l'ombre qui vivent dans des feuilles de calcul, des conversations parallèles et des pratiques personnelles deviennent structurés, révisables et transmissibles — sans surveiller les personnes qui les ont bâtis.",
+      "xlate4Title": "Il s'intègre à la façon dont votre institution fonctionne déjà",
+      "xlate4Desc": "Union Eyes épouse la gouvernance : il respecte les structures constitutionnelles, les mandats exécutifs et les frontières syndicales au lieu de forcer votre institution à se réorganiser autour de flux SaaS génériques.",
+      "xlate5Title": "Il est structurellement différent de la surveillance au travail",
+      "xlate5Desc": "Aucune analyse comportementale. Aucune notation de productivité. Aucun classement des membres. Aucune sortie de données hors frontière. L'infrastructure de continuité n'est pas la même catégorie que la surveillance des employés — et Union Eyes est bâti pour le prouver.",
+      "outcome1Title": "Continuité institutionnelle",
       "outcome1Desc": "Les transitions de leadership préservent la mémoire stratégique, le contexte de gouvernance et la direction opérationnelle.",
       "outcome2Title": "Cognition respectueuse de la gouvernance",
       "outcome2Desc": "Chaque interprétation est délimitée, ancrée dans les preuves et résolue par un réviseur attitré.",
@@ -7264,9 +7278,9 @@
       "principle3": "Aucune voie de surveillance des travailleurs.",
       "principle4": "Pistes d'audit complètes pour la confiance en matière de gouvernance.",
       "govImageAlt": "Assemblée syndicale — session de gouvernance avec supervision démocratique",
-      "finalCtaHeading": "Prêt pour la continuité organisationnelle à l'échelle exécutive ?",
+      "finalCtaHeading": "Prêt pour la continuité institutionnelle à l'échelle exécutive ?",
       "finalCtaDescription": "Commencez par un pilote guidé construit autour de vos priorités en matière de gouvernance et d'opérations.",
-      "finalCtaPrimary": "Demander une présentation exécutive",
+      "finalCtaPrimary": "Commencer la réflexion de continuité (gratuite)",
       "finalCtaSecondary": "Voir la gouvernance et la confiance"
     },
     "story": {
@@ -7278,9 +7292,9 @@
       "pageTitle": "Notre histoire | UnionEyes",
       "pageDescription": "UnionEyes a été fondé par deux frères qui ont vécu les lacunes de l'infrastructure syndicale — et ont décidé de les combler.",
       "originHeading": "Où tout a commencé",
-      "originParagraph1": "Mike a passé des années à l'intérieur — d'abord comme agent de relations de travail pour un syndicat national, puis comme avocat menant des enquêtes et des évaluations en milieu de travail. Passer de travailler dans un syndicat à travailler avec des syndicats lui a donné une vue sans filtre de l'endroit où se trouvait la friction : les flux de travail, les lacunes, les moments où la bonne information n'était tout simplement pas entre les bonnes mains.",
-      "originParagraph2": "Oby a pris un chemin différent. En tant que technologue chevronné, il a fait carrière à partir d'une idée — que la technologie devrait sembler humaine. Que les plateformes les plus puissantes sont celles que les gens utilisent réellement.",
-      "originParagraph3": "Lorsque leurs chemins se sont croisés, l'opportunité était évidente. Mike savait exactement ce qui était défaillant. Oby savait exactement comment le réparer.",
+      "originParagraph1": "Michel a passé des années à l'intérieur — d'abord comme agent de relations de travail pour un syndicat national, puis comme avocat menant des enquêtes et des évaluations en milieu de travail. Passer de travailler dans un syndicat à travailler avec des syndicats lui a donné une vue sans filtre de l'endroit où se trouvait la friction : les flux de travail, les lacunes, les moments où la bonne information n'était tout simplement pas entre les bonnes mains.",
+      "originParagraph2": "Aubert a pris un chemin différent. En tant que technologue chevronné, il a fait carrière à partir d'une idée — que la technologie devrait sembler humaine. Que les plateformes les plus puissantes sont celles que les gens utilisent réellement.",
+      "originParagraph3": "Lorsque leurs chemins se sont croisés, l'opportunité était évidente. Michel savait exactement ce qui était défaillant. Aubert savait exactement comment le réparer.",
       "originParagraph4": "UnionEyes est ce qui est arrivé ensuite.",
       "missionHeading": "Notre mission",
       "missionBody": "Mettre la même clarté, responsabilité et contrôle opérationnel que les grandes organisations tiennent pour acquis entre les mains de chaque syndicat — construit par quelqu'un qui l'a vécu, et quelqu'un qui sait comment le faire évoluer.",
@@ -7294,9 +7308,18 @@
       "principle4Title": "Gouvernance démocratique intégrée",
       "principle4Description": "UnionEyes a une structure de gouvernance à matières réservées. Les représentants élus par les membres détiennent des sièges de surveillance réservés et exercent un consentement des travailleurs en cas de changement de contrôle ou de mission. Ce n'est pas du marketing — c'est dans notre accord d'actionnaires.",
       "ctaHeading": "Prêt à voir si nous sommes le bon choix ?",
-      "ctaBody": "Nous ne faisons pas de démonstrations. Nous faisons des conversations. Parlez-nous de vos défis. Nous serons honnêtes quant à savoir si UnionEyes peut vous aider — ou si autre chose vous servirait mieux.",
+      "ctaBody": "Nous ne faisons pas de démonstrations génériques. Nous proposons des séances structurées adaptées au profil de continuité de votre organisation. Parlez-nous de vos défis. Nous serons honnêtes quant à savoir si UnionEyes peut vous aider — ou si autre chose vous servirait mieux.",
       "ctaPilot": "Demander un programme pilote",
-      "ctaContact": "Commencer une conversation"
+      "ctaContact": "Commencer une conversation",
+      "foundersHeading": "Qui construit Union Eyes",
+      "foundersIntro": "UnionEyes n’a pas été assemblé par une équipe logicielle généraliste qui aurait découvert le secteur syndical. Il est construit par deux personnes nommées, dont l’expérience sectorielle est complémentaire et attestable.",
+      "founderMichelName": "Michel Nungisa",
+      "founderMichelRole": "Cofondateur · Domaine et doctrine",
+      "founderMichelBio": "Ancien agent de relations de travail d’un syndicat national. Ensuite, avocat menant des enquêtes et des évaluations en milieu de travail. Michel a travaillé dans les syndicats, avec les syndicats, et à travers la surface procédurale que UnionEyes est conçu pour soutenir.",
+      "founderAubertName": "Aubert Nungisa",
+      "founderAubertRole": "Cofondateur · Architecture et opérations",
+      "founderAubertBio": "Technologue de carrière concentré sur les plateformes opérationnelles que les gens utilisent réellement. Responsable de la posture architecturale, de la surface de déploiement et du substrat opérationnel hébergé au Canada de UnionEyes.",
+      "foundersNote": "Les deux cofondateurs sont joignables par le canal de présentation exécutive — et restent opérationnellement impliqués dans chaque déploiement pilote."
     },
     "pricing": {
       "heroHeading": "Déploiement par contrat",
@@ -7306,8 +7329,8 @@
       "perMonth": "/ mois",
       "perYear": "/ an",
       "getStarted": "Démarrer un pilote",
-      "pageTitle": "Tarification et déploiement | UnionEyes",
-      "pageDescription": "Tarification par contrat pour les syndicats canadiens. Facturation au niveau de l'organisation mère avec répartition aux sections locales."
+      "pageTitle": "Architecture d’engagement de continuité | UnionEyes",
+      "pageDescription": "Architecture d’engagement de continuité institutionnelle — évaluation OCI, approfondissement OCRA, cartographie de gouvernance, activation de plateforme, soutien longitudinal. Pas de paliers SaaS."
     },
     "contact": {
       "heroHeading": "Communiquez avec nous",
@@ -7461,7 +7484,7 @@
       "pageDescription": "État en temps réel des services d'UnionEyes."
     },
     "footer": {
-      "description": "Infrastructure organisationnelle de gouvernance et de continuité pour les syndicats canadiens — déployée par contrat, encadrée par habilitations et conçue pour la reddition de comptes.",
+      "description": "Infrastructure institutionnelle de gouvernance et de continuité pour les syndicats canadiens — déployée par contrat, encadrée par habilitations et conçue pour la reddition de comptes.",
       "platform": "Capacités",
       "solutions": "Solutions",
       "trustAndStewardship": "Confiance & intendance",
@@ -7472,7 +7495,7 @@
       "resources": "Ressources",
       "company": "Entreprise",
       "legal": "Légal",
-      "organizationalContinuity": "Continuité organisationnelle",
+      "institutionalContinuity": "Continuité institutionnelle",
       "governanceIntelligence": "Intelligence de gouvernance",
       "organizationalMemory": "Mémoire collective",
       "corporateMemory": "Mémoire collective",
@@ -7490,7 +7513,7 @@
       "labourSafeAi": "IA sécuritaire pour le travail",
       "explainabilityStandards": "Normes d'explicabilité",
       "insights": "Perspectives",
-      "organizationalProof": "Preuves organisationnelles",
+      "institutionalProof": "Preuves institutionnelles",
       "governance": "Gouvernance et surveillance",
       "grievanceTracking": "Gestion des dossiers et griefs",
       "memberPortal": "Portail des membres et engagement",
@@ -7511,7 +7534,7 @@
       "accessibility": "Accessibilité",
       "trust": "Confiance et conformité",
       "rights": "Tous droits réservés.",
-      "tagline": "Infrastructure organisationnelle de gouvernance et de continuité pour les syndicats canadiens."
+      "tagline": "Infrastructure institutionnelle de gouvernance et de continuité pour les syndicats canadiens."
     },
     "features": {
       "grievanceTracking": {
@@ -7780,7 +7803,7 @@
       "phase6": {
         "tabScenario": "Scénarios",
         "leadershipTitle": "Scénarios de continuité lors des transitions de leadership",
-        "leadershipDesc": "Ces scénarios reflètent des transitions organisationnelles réelles et montrent des réponses calmes qui préservent la cohérence de gouvernance.",
+        "leadershipDesc": "Ces scénarios reflètent des transitions institutionnelles réelles et montrent des réponses calmes qui préservent la cohérence de gouvernance.",
         "frictionTitle": "Flux de simulation des frictions de gouvernance",
         "disruptionTitle": "Modélisation des perturbations opérationnelles",
         "stabilizationTitle": "Simulation de stabilisation organisationnelle",
@@ -7957,11 +7980,11 @@
     "solutions": {
       "index": {
         "metaTitle": "Solutions | UnionEyes",
-        "metaDescription": "Solutions de continuité organisationnelle et d’intelligence de gouvernance pour chaque partie prenante : dirigeants syndicaux, responsables de gouvernance, opérations, technologie, politiques et approvisionnement."
+        "metaDescription": "Solutions de continuité institutionnelle et d’intelligence de gouvernance pour chaque partie prenante : dirigeants syndicaux, responsables de gouvernance, opérations, technologie, politiques et approvisionnement."
       },
       "executive": {
         "metaTitle": "Direction exécutive syndicale | Solutions | UnionEyes",
-        "metaDescription": "Préservez la continuité stratégique, dirigez à travers les transitions de leadership et maintenez la cohérence organisationnelle. UnionEyes pour les dirigeants syndicaux."
+        "metaDescription": "Préservez la continuité stratégique, dirigez à travers les transitions de leadership et maintenez la cohérence institutionnelle. UnionEyes pour les dirigeants syndicaux."
       },
       "governance": {
         "metaTitle": "Direction de la gouvernance | Solutions | UnionEyes",
@@ -7981,7 +8004,7 @@
       },
       "procurement": {
         "metaTitle": "Parties prenantes à l’approvisionnement | Solutions | UnionEyes",
-        "metaDescription": "Gouvernance prête pour l’approvisionnement, périmètre d’implémentation clair et valeur mesurable pour les déploiements organisationnels."
+        "metaDescription": "Gouvernance prête pour l’approvisionnement, périmètre d’implémentation clair et valeur mesurable pour les déploiements institutionnels."
       }
     }
   },
@@ -8408,7 +8431,7 @@
       "directDepositNotice": "Les paiements du fonds de grève seront déposés directement dans votre compte bancaire",
       "bankNameLabel": "Nom de la banque *",
       "bankNamePlaceholder": "Banque Royale",
-      "institutionNumberLabel": "N° d'organization *",
+      "institutionNumberLabel": "N° d'institution *",
       "institutionNumberPlaceholder": "001",
       "transitNumberLabel": "N° de transit *",
       "transitNumberPlaceholder": "12345",
@@ -11091,24 +11114,24 @@
   "continuityNotes": {
     "trust": {
       "label": "Posture de confiance",
-      "posture": "La confiance envers UnionEyes est opérationnelle, non symbolique. Les surfaces ci-dessous décrivent comment l'explicabilité, l'examen de gouvernance, les frontières de souveraineté et l'opération continue sont appliqués à l'exécution — non des aspirations à atteindre ultérieurement. Chaque pilier peut être examiné par le responsable organisationnel avant tout engagement de déploiement."
+      "posture": "La confiance envers UnionEyes est opérationnelle, non symbolique. Les surfaces ci-dessous décrivent comment l'explicabilité, l'examen de gouvernance, les frontières de souveraineté et l'opération continue sont appliqués à l'exécution — non des aspirations à atteindre ultérieurement. Chaque pilier peut être examiné par le responsable institutionnel avant tout engagement de déploiement."
     },
     "procurement": {
       "label": "Posture d'approvisionnement",
-      "posture": "Les programmes sont des engagements opérationnels, non des abonnements. Chaque niveau de maturité nomme les responsabilités organisationnelles qu'UnionEyes assumera au nom de l'organization et le registre opérationnel sécurisé pour la continuité qu'il maintiendra. Les responsables d'approvisionnement sont invités à lire les niveaux de maturité comme la forme organisationnelle de l'engagement — non comme une échelle de fonctionnalités."
+      "posture": "Les programmes sont des engagements opérationnels, non des abonnements. Chaque niveau de maturité nomme les responsabilités institutionnelles qu'UnionEyes assumera au nom de l'institution et le registre opérationnel sécurisé pour la continuité qu'il maintiendra. Les responsables d'approvisionnement sont invités à lire les niveaux de maturité comme la forme institutionnelle de l'engagement — non comme une échelle de fonctionnalités."
     },
     "pilot": {
       "label": "Posture pilote",
-      "posture": "Ceci est un breffage de continuité, non une prise de contact commerciale. Le formulaire ci-dessous encadre un pilote borné dont la réussite se mesure en stabilisation opérationnelle — moins d'engagements abandonnés, une escalade plus claire, et un registre organisationnel qui survit aux transitions de leadership. Les travailleurs ne sont jamais l'objet d'évaluation du pilote."
+      "posture": "Ceci est un breffage de continuité, non une prise de contact commerciale. Le formulaire ci-dessous encadre un pilote borné dont la réussite se mesure en stabilisation opérationnelle — moins d'engagements abandonnés, une escalade plus claire, et un registre institutionnel qui survit aux transitions de leadership. Les travailleurs ne sont jamais l'objet d'évaluation du pilote."
     },
     "ontology": {
-      "label": "Ontologie organisationnelle",
+      "label": "Ontologie institutionnelle",
       "posture": "Les huit surfaces ci-dessous ne sont pas une liste de fonctionnalités. Elles nomment les responsabilités opérationnelles qu'un syndicat, une fédération ou un congrès assume déjà. Adopter UnionEyes n'introduit pas de nouvelles responsabilités — cela donne aux existantes un registre opérationnel sécurisé pour la continuité. Chaque pilier renvoie à la surface d'exécution qui l'incarne."
     }
   },
   "sovereignty": {
     "layerLabel": "Couche de souveraineté",
-    "accessNote": "L'accès est journalisé; les actions posées ici font partie du registre organisationnel.",
+    "accessNote": "L'accès est journalisé; les actions posées ici font partie du registre institutionnel.",
     "roleLabels": {
       "officer": "Officier au registre",
       "admin": "Administrateur au registre",
@@ -11120,23 +11143,23 @@
     "surfaces": {
       "cognition": {
         "name": "Cognition",
-        "posture": "Raisonnement borné sur la mémoire organisationnelle; les sorties sont des recommandations pour le responsable au registre, et non des décisions autonomes."
+        "posture": "Raisonnement borné sur la mémoire institutionnelle; les sorties sont des recommandations pour le responsable au registre, et non des décisions autonomes."
       },
       "longitudinalCognition": {
         "name": "Cognition longitudinale",
-        "posture": "Raisonnement organisationnel à travers le temps; examiner les motifs pertinents à la continuité avant toute escalade."
+        "posture": "Raisonnement institutionnel à travers le temps; examiner les motifs pertinents à la continuité avant toute escalade."
       },
       "security": {
         "name": "Sécurité",
-        "posture": "Configuration critique pour la continuité; les changements font partie de la piste d'audit organisationnelle."
+        "posture": "Configuration critique pour la continuité; les changements font partie de la piste d'audit institutionnelle."
       },
       "customerSuccess": {
         "name": "Réussite client",
-        "posture": "Gérance organisationnelle des comptes; agir au nom des syndicats partenaires avec la discipline du responsable au registre."
+        "posture": "Gérance institutionnelle des comptes; agir au nom des syndicats partenaires avec la discipline du responsable au registre."
       },
       "operations": {
         "name": "Opérations",
-        "posture": "Cadence opérationnelle et répartition; ordonnancer le travail comme responsable au registre de l'exécution organisationnelle."
+        "posture": "Cadence opérationnelle et répartition; ordonnancer le travail comme responsable au registre de l'exécution institutionnelle."
       },
       "ops": {
         "name": "Ops souverains",
@@ -11147,23 +11170,23 @@
   "homePage": {
     "meta": {
       "title": "UnionEyes | Infrastructure constitutionnelle de continuité",
-      "description": "UnionEyes est la couche de continuité pour les organizations fédérées — préservant la mémoire organisationnelle, renforçant la coordination de gouvernance et modernisant la confiance opérationnelle par une mise en œuvre non perturbatrice aux côtés des systèmes existants. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
+      "description": "UnionEyes est la couche de continuité pour les institutions fédérées — préservant la mémoire institutionnelle, renforçant la coordination de gouvernance et modernisant la confiance opérationnelle par une mise en œuvre non perturbatrice aux côtés des systèmes existants. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
     },
     "jsonLd": {
       "name": "UnionEyes",
       "description": "Infrastructure constitutionnelle de continuité pour les organisations fédérées. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
     },
     "hero": {
-      "eyebrow": "Gouvernance organisationnelle et infrastructure de continuité",
-      "headlineLine1": "La certitude que la mémoire organisationnelle",
+      "eyebrow": "Gouvernance institutionnelle et infrastructure de continuité",
+      "headlineLine1": "La certitude que la mémoire institutionnelle",
       "headlineLine2": "survivra à toute personne.",
-      "imageAlt": "Gouvernance organisationnelle et infrastructure de continuité",
-      "subhead": "UnionEyes aide les organizations fédérées à préserver la mémoire organisationnelle, à renforcer la coordination de gouvernance et à moderniser la confiance procédurale par une mise en œuvre non perturbatrice aux côtés des systèmes existants.",
+      "imageAlt": "Gouvernance institutionnelle et infrastructure de continuité",
+      "subhead": "UnionEyes aide les institutions fédérées à préserver la mémoire institutionnelle, à renforcer la coordination de gouvernance et à moderniser la confiance procédurale par une mise en œuvre non perturbatrice aux côtés des systèmes existants.",
       "ctaPrimary": "Planifier une découverte stratégique",
       "ctaSecondary": "Découvrir l’infrastructure de continuité"
     },
     "posture": {
-      "eyebrow": "Posture organisationnelle",
+      "eyebrow": "Posture institutionnelle",
       "points": [
         {
           "metric": "Hébergé au Canada",
@@ -11188,12 +11211,12 @@
       ]
     },
     "continuity": {
-      "eyebrow": "Continuité organisationnelle",
+      "eyebrow": "Continuité institutionnelle",
       "heading": "Une intendance qui survit aux changements de leadership.",
-      "lede": "La continuité n’est pas une fonctionnalité. C’est la discipline organisationnelle qui consiste à préserver le contexte procédural, les décisions et le raisonnement à chaque transition.",
+      "lede": "La continuité n’est pas une fonctionnalité. C’est la discipline institutionnelle qui consiste à préserver le contexte procédural, les décisions et le raisonnement à chaque transition.",
       "pillars": [
         {
-          "title": "Préservation de la mémoire organisationnelle",
+          "title": "Préservation de la mémoire institutionnelle",
           "desc": "Conserver le contexte de gouvernance, les décisions et le raisonnement à travers chaque succession de leadership et chaque transition. La continuité de l’intendance survit à toute personne."
         },
         {
@@ -11206,31 +11229,31 @@
         },
         {
           "title": "Mise en œuvre non perturbatrice",
-          "desc": "Une infrastructure de superposition qui renforce les systèmes existants — une couche de continuité que votre organization peut adopter aux côtés de son outillage actuel."
+          "desc": "Une infrastructure de superposition qui renforce les systèmes existants — une couche de continuité que votre institution peut adopter aux côtés de son outillage actuel."
         }
       ]
     },
     "federation": {
       "eyebrow": "Coordination fédérée",
       "heading": "Une coordination respectueuse de la gouvernance entre sections locales, conseils et fédérations.",
-      "body1": "Les fédérations ne sont pas des organigrammes. Ce sont des organizations à plusieurs niveaux, avec une autorité procédurale, des règlements et des structures de comités distincts.",
-      "body2": "UnionEyes assure l’alignement opérationnel et la visibilité organisationnelle au sein de la fédération, sans la réduire à une hiérarchie unique ni contourner l’autorité locale."
+      "body1": "Les fédérations ne sont pas des organigrammes. Ce sont des institutions à plusieurs niveaux, avec une autorité procédurale, des règlements et des structures de comités distincts.",
+      "body2": "UnionEyes assure l’alignement opérationnel et la visibilité institutionnelle au sein de la fédération, sans la réduire à une hiérarchie unique ni contourner l’autorité locale."
     },
     "procedural": {
       "eyebrow": "Confiance procédurale",
       "heading": "Chaque décision est traçable, révisable et redevable.",
-      "body1": "La traçabilité procédurale est le fondement de la confiance organisationnelle. Chaque dossier, recommandation et action de gouvernance est ancré à des preuves et à un réviseur attitré.",
+      "body1": "La traçabilité procédurale est le fondement de la confiance institutionnelle. Chaque dossier, recommandation et action de gouvernance est ancré à des preuves et à un réviseur attitré.",
       "body2": "La transparence de qualité d’audit, l’explicabilité et la responsabilité opérationnelle sont structurelles — non ajoutées après coup."
     },
     "coexistence": {
       "eyebrow": "Modernisation non perturbatrice",
       "heading": "Une infrastructure de superposition — non un remplacement.",
-      "lede": "Les organizations se modernisent au rythme organisationnel. UnionEyes se déploie comme couche de continuité aux côtés des systèmes existants.",
+      "lede": "Les institutions se modernisent au rythme institutionnel. UnionEyes se déploie comme couche de continuité aux côtés des systèmes existants.",
       "points": [
         "Une infrastructure de superposition qui renforce les systèmes existants — aucun remplacement requis.",
         "Adoption modulaire : déployez une couche de continuité un flux de travail à la fois.",
         "La modernisation par couches s’exécute aux côtés des systèmes existants en pleine coexistence.",
-        "L’évolution organisationnelle se poursuit sans perturber les chaînes procédurales actuelles."
+        "L’évolution institutionnelle se poursuit sans perturber les chaînes procédurales actuelles."
       ]
     },
     "labourSafeAi": {
@@ -11246,9 +11269,9 @@
       ]
     },
     "canadian": {
-      "eyebrow": "Infrastructure organisationnelle canadienne",
+      "eyebrow": "Infrastructure institutionnelle canadienne",
       "heading": "Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté.",
-      "lede": "Une infrastructure démocratique conçue pour les organizations qui façonnent la vie au travail au Canada.",
+      "lede": "Une infrastructure démocratique conçue pour les institutions qui façonnent la vie au travail au Canada.",
       "pillars": [
         {
           "title": "Infrastructure hébergée au Canada",
@@ -11256,11 +11279,11 @@
         },
         {
           "title": "Bilingue d’abord par conception",
-          "desc": "Surfaces organisationnelles en français et en anglais dès le premier jour — jamais après coup."
+          "desc": "Surfaces institutionnelles en français et en anglais dès le premier jour — jamais après coup."
         },
         {
-          "title": "Posture de confiance organisationnelle",
-          "desc": "Une infrastructure démocratique pour les fédérations, les conseils et les organizations dirigées par leurs membres."
+          "title": "Posture de confiance institutionnelle",
+          "desc": "Une infrastructure démocratique pour les fédérations, les conseils et les institutions dirigées par leurs membres."
         },
         {
           "title": "Opérations respectueuses de la gouvernance",
@@ -11269,19 +11292,19 @@
       ]
     },
     "finalCta": {
-      "heading": "Discutons d’une infrastructure de continuité pour votre organization.",
-      "body": "Une conversation consultative sur la continuité organisationnelle, la coordination de gouvernance et la confiance procédurale — au rythme de votre fédération, et non d’un cycle de vente.",
+      "heading": "Discutons d’une infrastructure de continuité pour votre institution.",
+      "body": "Une conversation consultative sur la continuité institutionnelle, la coordination de gouvernance et la confiance procédurale — au rythme de votre fédération, et non d’un cycle de vente.",
       "ctaPrimary": "Planifier une découverte stratégique",
       "ctaSecondary": "Voir la confiance et l’intendance"
     },
     "svg": {
       "continuity": {
-        "ariaLabel": "Chronologie de continuité organisationnelle à travers la succession du leadership",
+        "ariaLabel": "Chronologie de continuité institutionnelle à travers la succession du leadership",
         "stewardA": "Intendant·e A",
         "handoff": "Transition",
         "stewardB": "Intendant·e B",
         "stewardC": "Intendant·e C",
-        "caption": "Mémoire organisationnelle préservée à travers la succession"
+        "caption": "Mémoire institutionnelle préservée à travers la succession"
       },
       "federation": {
         "ariaLabel": "Topologie de coordination fédérée",

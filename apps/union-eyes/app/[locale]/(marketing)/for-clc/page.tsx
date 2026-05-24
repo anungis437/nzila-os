@@ -211,7 +211,7 @@ export default async function LocaleForCLCPage({
             <Link href={`/${locale}/proof?context=executive`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.ctaProof}
             </Link>
-            <Link href={`/${locale}/pilot-request?context=conference`} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
+            <Link href={`/${locale}/institutional-continuity-risk?context=conference`} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               {copy.ctaPilot}
             </Link>
           </div>

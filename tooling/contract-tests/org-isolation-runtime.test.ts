@@ -80,6 +80,7 @@ const ORG_GUARD_PATTERNS = [
   /crudRoutes\s*\(/,             // crudRoutes() factory — auth internally
   /withOrganizationAuth\s*\(/,   // Org-scoped auth wrapper
   /withOrgScope\s*\(/,           // Org-scoped composite guard (auth + context + org)
+  /withOrgWrite\s*\(/,           // Write-restricted org-scoped guard (withOrgScope + canWrite role check)
   /withRequiredRole\s*\(/,       // TrustCore role-based auth guard
 ]
 

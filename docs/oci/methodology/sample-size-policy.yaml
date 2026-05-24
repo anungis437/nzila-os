@@ -1,0 +1,130 @@
+# OCI Method™ — Sample-Size & Confidence Policy
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Defines the minimum input quantities required before each framework
+# emits a confidence-tagged result, and the interpretive caution states
+# that must be surfaced to consumers when the threshold is not met.
+
+doctrine_version: '1.0.0'
+
+# Confidence thresholds are framework-specific. They reflect the minimum
+# input quantity at which the reviewer judgement encoded in the framework
+# is operationally meaningful. Below the low_confidence threshold, the
+# result MUST be rendered with the corresponding interpretive caution
+# state; consumers MUST NOT treat the value as a finding.
+
+frameworks:
+
+  - framework: 'Stewardship Density Index™'
+    input_unit: 'continuity carriers (rows in stewardship register)'
+    thresholds:
+      low_confidence_max: 4    # 1..4 carriers => low_confidence
+      moderate_confidence_max: 9   # 5..9 carriers => moderate_confidence
+      high_confidence_min: 10  # 10+ carriers => high_confidence
+    rationale: >
+      Below five carriers, the index is a structural reading of a single
+      team rather than an institutional posture; the band classification is
+      provisional. At ten or more carriers, the weighted ratio stabilises
+      against single-row perturbation.
+    caution_state_below_threshold: 'low_confidence_density'
+
+  - framework: 'Governance Entropy Scale™'
+    input_unit: 'governance precedent observations (paired design/practice items)'
+    thresholds:
+      low_confidence_max: 9
+      moderate_confidence_max: 19
+      high_confidence_min: 20
+    rationale: >
+      The entropy score is a drift ratio across paired observations. Fewer
+      than ten paired observations cannot reliably distinguish patterned
+      drift from sampling noise. Twenty pairs supports a stable ordinal
+      assignment.
+    caution_state_below_threshold: 'low_confidence_entropy'
+
+  - framework: 'Continuity Burden Map™'
+    input_unit: 'composite inputs (density result + ICRA + reconstruction)'
+    thresholds:
+      low_confidence_max: 1    # only one of the three components present
+      moderate_confidence_max: 2
+      high_confidence_min: 3
+    rationale: >
+      The composite is designed to fuse three independent signals. With
+      only one input present, the composite collapses to the underlying
+      framework's posture; the burden map itself adds no information.
+    caution_state_below_threshold: 'low_confidence_burden_composite'
+
+  - framework: 'Continuity Survivability Matrix™'
+    input_unit: 'paired (dependency, successor) observations per institutional domain'
+    thresholds:
+      low_confidence_max: 2
+      moderate_confidence_max: 5
+      high_confidence_min: 6
+    rationale: >
+      The matrix is categorical. Confidence here refers to coverage:
+      below six (dependency, successor) pairs the matrix surfaces a
+      partial institutional picture. The pairs themselves are deterministic
+      once observed.
+    caution_state_below_threshold: 'partial_coverage_survivability'
+
+  - framework: 'Reconstruction Burden Index™'
+    input_unit: 'continuity carriers + density input + (optional) entropy ordinal'
+    thresholds:
+      low_confidence_max: 4
+      moderate_confidence_max: 9
+      high_confidence_min: 10
+    rationale: >
+      Inherits the density-index confidence floor because the density
+      component contributes up to 20% of the score range. Below five
+      carriers the index is reported with low_confidence_density carried
+      through.
+    caution_state_below_threshold: 'low_confidence_reconstruction'
+
+# Interpretive caution states are rendered to product consumers in:
+#   - PDF executive narrative (under the framework heading)
+#   - Workbook UI (framework card badge)
+#   - HubSpot mapper (as a property suffix on the band field)
+# Each state has a defined posture sentence that MUST appear verbatim
+# alongside any low-confidence result.
+
+interpretive_caution_states:
+
+  - id: 'low_confidence_density'
+    posture: >
+      This Stewardship Density Index reading is based on a small number
+      of continuity carriers. It is a provisional structural reading;
+      treat the band as indicative rather than diagnostic.
+
+  - id: 'low_confidence_entropy'
+    posture: >
+      This Governance Entropy Scale reading is based on a small set of
+      paired governance precedent observations. The ordinal assignment
+      may shift as additional observations are recorded.
+
+  - id: 'low_confidence_burden_composite'
+    posture: >
+      This Continuity Burden Map composite is computed from a single
+      input component. The composite contributes no information beyond
+      the underlying framework until additional inputs are present.
+
+  - id: 'partial_coverage_survivability'
+    posture: >
+      This Continuity Survivability Matrix reading covers a partial
+      institutional surface. Domains not yet paired are not visible to
+      the matrix; absence of a finding is not a finding of absence.
+
+  - id: 'low_confidence_reconstruction'
+    posture: >
+      This Reconstruction Burden Index score inherits a low-confidence
+      stewardship density input. Score is provisional; reweighting
+      should be expected as additional carriers are recorded.
+
+# Aggregation k-anonymity (cross-institution intelligence layer).
+# Re-stated here for cross-reference with the benchmark architecture in
+# docs/oci/OCI_METHOD.md §9.
+aggregation:
+  minimum_contributing_institutions: 5
+  rationale: >
+    No aggregate band is published unless at least five opted-in
+    institutions contribute to it. Below this threshold, re-identification
+    risk is not acceptable.

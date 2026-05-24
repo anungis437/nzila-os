@@ -1,7 +1,7 @@
 /**
- * Organizational Positioning Manifest (UnionEyes marketing surface)
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * organizational trust for democratic infrastructure.
+ * institutional trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -39,7 +39,7 @@ const PAGE_COPY = {
     heading: 'Enterprise-safe AI that your institution can trust.',
     description:
       'Labour organizations need AI that is explainable, governed, labour-safe, and institutionally trustworthy — not experimental. UnionEyes is built to meet that standard at every architectural layer.',
-    primaryCta: 'Request an Executive Briefing',
+    primaryCta: 'Start the free Continuity Reflection',
     secondaryCta: 'View Trust Center',
     principlesHeading: 'Technical governance principles',
     principles: [
@@ -60,14 +60,14 @@ const PAGE_COPY = {
     ],
     relatedHeading: 'Explore related solutions',
     finalHeading: 'AI your institution can trust',
-    finalBody: 'Request a technical briefing or live organizational walkthrough.',
+    finalBody: 'Request a technical briefing or live institutional walkthrough.',
   },
   'fr-CA': {
     badge: 'Solutions · Direction technologique',
     heading: 'Une IA sûre pour l’institution, digne de confiance.',
     description:
-      'Les organisations syndicales ont besoin d’une IA explicable, gouvernée, sûre pour le travail et digne de confiance organisationnelle. UnionEyes est conçu pour respecter cette exigence à chaque couche architecturale.',
-    primaryCta: 'Demander un breffage exécutif',
+      'Les organisations syndicales ont besoin d’une IA explicable, gouvernée, sûre pour le travail et digne de confiance institutionnelle. UnionEyes est conçu pour respecter cette exigence à chaque couche architecturale.',
+    primaryCta: 'Commencer la réflexion de continuité (gratuite)',
     secondaryCta: 'Voir le centre de confiance',
     principlesHeading: 'Principes de gouvernance technique',
     principles: [
@@ -81,14 +81,14 @@ const PAGE_COPY = {
     outcomesHeading: 'Ce que les responsables technologiques gagnent avec UnionEyes',
     outcomes: [
       { icon: ShieldCheck, title: 'Architecture IA sûre pour la gouvernance', desc: 'Des systèmes IA qui fonctionnent dans des structures démocratiques avec résultats explicables et surveillance humaine imposée.' },
-      { icon: Lock, title: 'Sécurité organisationnelle et résidence des données', desc: 'Résidence canadienne, infrastructure alignée SOC 2 et capacités d’audit pour la conformité.' },
+      { icon: Lock, title: 'Sécurité institutionnelle et résidence des données', desc: 'Résidence canadienne, infrastructure alignée SOC 2 et capacités d’audit pour la conformité.' },
       { icon: Eye, title: 'Garanties d’explicabilité complètes', desc: 'Chaque résultat d’intelligence est traçable aux preuves sources. Aucun résultat opaque en milieu syndical.' },
       { icon: Cpu, title: 'Architecture modulaire et sûre', desc: 'Déployez les modules nécessaires dans une séquence adaptée à votre niveau de préparation.' },
       { icon: CheckCircle, title: 'Anti-surveillance par conception', desc: 'Aucun chemin de capacité ne peut être réutilisé pour surveiller des personnes ou noter leur conduite.' },
     ],
     relatedHeading: 'Explorer les solutions connexes',
     finalHeading: 'Une IA à laquelle votre institution peut faire confiance',
-    finalBody: 'Demandez un breffage technique ou une visite organisationnelle guidée.',
+    finalBody: 'Demandez un breffage technique ou une visite institutionnelle guidée.',
   },
 };
 
@@ -109,7 +109,7 @@ export default async function TechnologyLeadershipPage({ params }: { params: Pro
         description={copy.description}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
+            <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.primaryCta}
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-navy font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
@@ -173,7 +173,7 @@ export default async function TechnologyLeadershipPage({ params }: { params: Pro
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">{copy.finalHeading}</h2>
           <p className="text-white/70 mb-8">{copy.finalBody}</p>
-          <Link href={`/${locale}/pilot-request`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
+          <Link href={`/${locale}/institutional-continuity-risk`} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             {copy.primaryCta}
           </Link>
         </div>

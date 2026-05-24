@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-22T16:37:00.976Z",
-  "totalDocuments": 1132,
-  "staleDocuments": 0,
+  "generatedAt": "2026-05-23T21:29:33.293Z",
+  "totalDocuments": 1162,
+  "staleDocuments": 1,
   "categories": [
     {
       "category": "GOLDEN_PATH_DEVELOPER_GUIDE.md",
@@ -90,7 +90,7 @@
     },
     {
       "category": "oci",
-      "count": 88,
+      "count": 118,
       "staleCount": 0
     },
     {
@@ -116,7 +116,7 @@
     {
       "category": "root",
       "count": 4,
-      "staleCount": 0
+      "staleCount": 1
     },
     {
       "category": "union-eyes",
@@ -5809,7 +5809,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-05-22",
+      "lastValidated": "2026-05-23",
       "stale": false
     },
     {
@@ -6173,6 +6173,144 @@
       "stale": false
     },
     {
+      "path": "docs/oci/audit/ADAPTIVE_ROUTING_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/CONFIDENCE_GENERATION_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/ENTROPY_SIGNAL_GAP_REPORT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/EVIDENCE_EXTRACTION_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/GES_LEVEL_5_SIGNAL_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/HUMAN_CONTINUITY_THEORY_ALIGNMENT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/LONGITUDINAL_SURVIVABILITY_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/MODERNIZATION_INSTABILITY_SIGNAL_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_ARCHITECTURE_GOVERNANCE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_ARCHITECTURE_INVENTORY.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_ARCHITECTURE_PROCUREMENT_REVIEW.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_POOL_v2_0_ROADMAP.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_REDESIGN_ROADMAP.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/STATISTICAL_INTERPRETABILITY_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_AUDITOR_GUIDE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_COBIT2019_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_COVERAGE_MATRIX.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_ISO22301_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_ISO22317_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_ISO31000_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_ISO37000_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_PROCUREMENT_POSITIONING.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
       "path": "docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md",
       "category": "oci",
       "lastValidated": "2026-05-22",
@@ -6203,6 +6341,24 @@
       "stale": false
     },
     {
+      "path": "docs/oci/methodology/METHODOLOGY_CHANGELOG.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/methodology/README.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
       "path": "docs/oci/migration/OCI_OCRA_CONVERGENCE_PLAN.md",
       "category": "oci",
       "lastValidated": "2026-05-22",
@@ -6211,13 +6367,13 @@
     {
       "path": "docs/oci/OCI_AI_BOUNDARY.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6247,31 +6403,31 @@
     {
       "path": "docs/oci/OCI_EXECUTIVE_EMAIL_SEQUENCE.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_FACILITATOR_CERTIFICATION_RUBRIC.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_FACILITATOR_TRAINING_CURRICULUM.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_INSTITUTIONAL_ACTIVATION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_METHOD.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6283,31 +6439,31 @@
     {
       "path": "docs/oci/OCI_PILOT_INTRODUCTION_GUIDE.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_PILOT_SCOPE_TEMPLATE.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_PRIVACY_POSITION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_SECURITY_OVERVIEW.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6323,69 +6479,93 @@
       "stale": false
     },
     {
+      "path": "docs/oci/procurement/OCI_AUDITOR_QUICK_REFERENCE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/procurement/OCI_CONFIDENCE_INTERPRETATION_GUIDE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/procurement/OCI_GOVERNANCE_ENTROPY_REVIEW_GUIDE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/procurement/OCI_PROCUREMENT_FAQ.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
       "path": "docs/oci/runtime/OCI_CONTINUITY_LEDGER.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_EVENT_RUNTIME.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_GOVERNANCE_MEMORY_RUNTIME.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_GOVERNANCE_TRACEABILITY.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_ONBOARDING_RUNTIME.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_OPERATING_PRIMITIVES.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_PLATFORM_RUNTIME_ALIGNMENT.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_RUNTIME_CONTRACTS.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_RUNTIME_READINESS.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_RUNTIME_STEWARDSHIP.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/runtime/OCI_WORKFLOW_RUNTIME.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6397,13 +6577,13 @@
     {
       "path": "docs/oci/stabilization/OCI_ACTION_SYSTEM.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_CONTINUITY_DEBT.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6415,115 +6595,115 @@
     {
       "path": "docs/oci/stabilization/OCI_CONTINUITY_OPERATIONALIZATION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_EXECUTIVE_STABILIZATION_OPERATIONS.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_FACILITATOR_RUNTIME.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_INTERVENTION_ETHICS.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_INTERVENTION_MODEL.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_LONGITUDINAL_STABILIZATION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_ONBOARDING_STABILIZATION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_RUNTIME_ALIGNMENT.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_RUNTIME_TRANSITION_MODEL.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_COMMERCIALIZATION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_EVOLUTION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_FRAMEWORK.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_LIFECYCLE.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_PERSONAS.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_PRINCIPLES.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_PROGRESSION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_READINESS.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_SEVERITY_MODEL.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6535,55 +6715,55 @@
     {
       "path": "docs/oci/stabilization/OCI_STABILIZATION_TRACKING.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/playbooks/LEADERSHIP_TRANSITION_STABILIZATION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/playbooks/MODERNIZATION_CONTINUITY_REMEDIATION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/playbooks/ONBOARDING_SURVIVABILITY_RECOVERY.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/playbooks/README.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6595,31 +6775,31 @@
     {
       "path": "docs/oci/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
       "path": "docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6631,7 +6811,7 @@
     {
       "path": "docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md",
       "category": "oci",
-      "lastValidated": "2026-05-21",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6667,13 +6847,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-05-22",
+      "lastValidated": "2026-05-23",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-05-22",
+      "lastValidated": "2026-05-23",
       "stale": false
     },
     {
@@ -6703,7 +6883,7 @@
     {
       "path": "docs/platform/portfolio-matrix.md",
       "category": "platform",
-      "lastValidated": "2026-05-14",
+      "lastValidated": "2026-05-22",
       "stale": false
     },
     {
@@ -6920,7 +7100,7 @@
       "path": "SECURITY.md",
       "category": "root",
       "lastValidated": "2026-02-20",
-      "stale": false
+      "stale": true
     }
   ]
 }

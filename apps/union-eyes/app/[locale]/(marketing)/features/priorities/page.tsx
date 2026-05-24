@@ -117,7 +117,7 @@ export default async function LocalePrioritiesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Demander un breffage exécutif' : 'Request an Executive Briefing';
+  const briefingCta = locale === 'fr-CA' ? 'Commencer la réflexion de continuité (gratuite)' : 'Start the free Continuity Reflection';
   const featuresArr = features[locale as keyof typeof features] ?? features['en-CA'];
   const flowArr = flow[locale as keyof typeof flow] ?? flow['en-CA'];
   const sectionCopy = {
@@ -191,7 +191,7 @@ export default async function LocalePrioritiesPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/institutional-continuity-risk`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 transition-colors text-sm"
             >
               {briefingCta} <ArrowRight className="h-4 w-4" />

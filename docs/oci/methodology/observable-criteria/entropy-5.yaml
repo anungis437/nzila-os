@@ -1,0 +1,97 @@
+# Governance Entropy Scale™ — Observable Criteria (Level 5: Systemic Entropy)
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Observable indicators for ordinal 5 (drift score >= 0.8).
+# Governance practice no longer reliably traces back to governance
+# design. Reconstruction is necessary.
+
+level: 5
+id: 'systemic_entropy'
+label: 'Systemic entropy'
+lowerBound: 0.8
+upperBound: 1.0
+
+posture: >
+  Governance practice no longer reliably traces back to governance design.
+  Reconstruction is necessary.
+
+observable_indicators:
+
+  - id: 'L5-OBS-01-design-practice-disconnect'
+    requirement: >
+      Stewards cannot reliably cite the governance precedent or design
+      authorising current practice in load-bearing domains.
+    evidence_examples:
+      - 'Three independent stewardship conversations each fail to surface authorising precedent for a load-bearing practice.'
+    auditor_check: >
+      Sample three load-bearing decisions; ask the responsible steward to
+      cite the authorising precedent. Pass (toward L5) if 2 of 3 cannot.
+
+  - id: 'L5-OBS-02-no-decision-register'
+    requirement: 'No functioning decision register; decisions are recorded only in email or memory.'
+    auditor_check: 'Request the decision register; confirm absence or non-functionality.'
+
+  - id: 'L5-OBS-03-precedent-conflict-routine'
+    requirement: 'Conflicting precedents are routinely cited by different stewards for the same domain.'
+    auditor_check: 'Ask three stewards about a single load-bearing precedent; compare answers.'
+
+governance_evidence:
+
+  - id: 'L5-GOV-01-cadence-collapsed'
+    requirement: 'Governance body meets less than half its mandated cadence.'
+    auditor_check: 'Compare meeting count against bylaw mandate.'
+
+  - id: 'L5-GOV-02-quorum-routine-failure'
+    requirement: 'Quorum met at less than 40% of meetings.'
+    auditor_check: 'Compute quorum-met percentage.'
+
+  - id: 'L5-GOV-03-bylaw-override-by-practice'
+    requirement: 'Identifiable instances where bylaw-mandated process has been overridden by informal practice without an amendment.'
+    auditor_check: 'Identify two or more such instances in the past twenty-four months.'
+
+process_visibility:
+
+  - id: 'L5-PV-01-decisions-opaque'
+    requirement: 'More than 50% of governance decisions cannot be reconstructed without extensive interviewing.'
+    auditor_check: 'Sample ten decisions; classify reconstructability.'
+
+documentation_maturity:
+
+  - id: 'L5-DOC-01-charter-effectively-vestigial'
+    requirement: 'Charter is treated as a historical document; current practice does not refer to it.'
+    auditor_check: 'Ask stewards when they last consulted the charter; verify long answer or none.'
+
+  - id: 'L5-DOC-02-no-policy-source-of-truth'
+    requirement: 'No published policy version is treated as authoritative; practice is governed by what individual stewards remember.'
+    auditor_check: 'Ask five stewards for the canonical version of a policy; document divergent answers.'
+
+decision_continuity:
+
+  - id: 'L5-DC-01-context-loss-recurrent'
+    requirement: 'Multiple identifiable instances of governance decisions made without awareness of contradicting prior precedent.'
+    auditor_check: 'Identify three or more such instances in the past twenty-four months.'
+
+  - id: 'L5-DC-02-transitions-rupture'
+    requirement: 'Governance-body transitions are experienced as rupture rather than continuity.'
+    auditor_check: 'Ask the most recent incoming steward how the transition was experienced.'
+
+institutional_dependency_indicators:
+
+  - id: 'L5-IDI-01-most-domains-single-steward'
+    requirement: 'Five or more load-bearing governance domains held by a single steward each.'
+    auditor_check: 'Count single-steward domains.'
+
+  - id: 'L5-IDI-02-no-redundancy'
+    requirement: 'No load-bearing governance domain has documented redundancy.'
+    auditor_check: 'Inspect stewardship register for redundancy entries.'
+
+onboarding_survivability_indicators:
+
+  - id: 'L5-OSI-01-no-onboarding'
+    requirement: 'No onboarding artifact exists for governance roles; incoming stewards reconstruct context from scratch.'
+    auditor_check: 'Ask for the onboarding artifact; confirm absence.'
+
+  - id: 'L5-OSI-02-incoming-stewards-leave'
+    requirement: 'Recently onboarded governance stewards have departed at a materially higher rate than continuing stewards.'
+    auditor_check: 'Compare twelve-month departure rates for new vs continuing governance stewards.'

@@ -75,6 +75,11 @@ const INSIGHT_CATEGORY_META: Record<
     framing:
       'Modernization that outpaces continuity infrastructure tends to import operational fragility faster than it retires it.',
   },
+  contradiction_detected: {
+    label: 'Unresolved Contradiction',
+    framing:
+      'Two affirmed signals point in opposite directions. Until the contradiction is reconciled, confidence in the affected dimensions should be read as provisional rather than settled.',
+  },
 };
 
 const OBSERVATION_CATEGORY_META: Record<

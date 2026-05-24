@@ -130,7 +130,7 @@ export default async function LocaleRolePageContent({
             <h2 className="text-3xl font-bold mb-4">{t('ctaHeadline')}</h2>
             <p className="text-lg text-white/80 mb-8">{t('ctaSubtitle')}</p>
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/institutional-continuity-risk`}
               className="inline-flex items-center gap-2 px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
             >
               {tShared('ctaPilot')} <ArrowRight className="w-5 h-5" />

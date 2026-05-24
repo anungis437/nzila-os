@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-22T16:37:06.502Z",
+  "generatedAt": "2026-05-23T21:29:36.113Z",
   "overallScore": 7.2,
   "categories": {
     "runtime_proof": {
@@ -34,8 +34,10 @@
       ]
     },
     "docs_truth": {
-      "score": 9,
-      "findings": []
+      "score": 8.9,
+      "findings": [
+        "1 indexed documents are stale by repo-mtime policy (>90 days)."
+      ]
     },
     "naming_consistency": {
       "score": 10,
@@ -110,6 +112,10 @@
     {
       "category": "hidden_fragility",
       "finding": "17 apps still have unresolved live cost attribution."
+    },
+    {
+      "category": "docs_truth",
+      "finding": "1 indexed documents are stale by repo-mtime policy (>90 days)."
     },
     {
       "category": "ci_efficiency",

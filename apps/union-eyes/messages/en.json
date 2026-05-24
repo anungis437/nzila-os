@@ -1184,7 +1184,7 @@
     "executeReport": "Execute Report"
   },
   "reportsCenter": {
-    "title": "Organizational Reports",
+    "title": "Institutional Reports",
     "subtitle": "Reports of record across representation, governance, and continuity. Create custom reports, schedule exports, and share insights.",
     "createReport": "Create Report",
     "tabs": {
@@ -2372,7 +2372,7 @@
     "metaDescription": "Governed labor continuity operations for sources, ingestion, review, and benchmarks"
   },
   "intelligencePage": {
-    "metaTitle": "Organizational Intelligence | UnionEyes",
+    "metaTitle": "Institutional Intelligence | UnionEyes",
     "metaDescription": "Reviewer-assisted insights across representation, governance, and continuity."
   },
   "inboxPage": {
@@ -2501,7 +2501,7 @@
   },
   "crossUnionAnalyticsPage": {
     "metaTitle": "Federation Trends | UnionEyes",
-    "metaDescription": "Compare organizational patterns and trends across unions and locals"
+    "metaDescription": "Compare institutional patterns and trends across unions and locals"
   },
   "employerExecutionPage": {
     "metaTitle": "Employer Execution | UnionEyes",
@@ -2513,11 +2513,11 @@
   },
   "knowledgePage": {
     "metaTitle": "Knowledge | UnionEyes",
-    "metaDescription": "Search agreements, clauses, precedents, and organizational memory references."
+    "metaDescription": "Search agreements, clauses, precedents, and institutional memory references."
   },
   "knowledgeBasePage": {
     "metaTitle": "Knowledge Base | UnionEyes",
-    "metaDescription": "Browse the organizational memory of union documents and reference materials."
+    "metaDescription": "Browse the institutional memory of union documents and reference materials."
   },
   "notificationsPage": {
     "metaTitle": "Notifications | UnionEyes",
@@ -4249,7 +4249,7 @@
     "metaTitle": "Audits & Compliance | UnionEyes",
     "metaDescription": "Financial audits and chronological compliance record.",
     "title": "Audits & Compliance",
-    "subtitle": "Financial audits, compliance reviews, and chronological organizational oversight.",
+    "subtitle": "Financial audits, compliance reviews, and chronological institutional oversight.",
     "scheduleAudit": "Schedule Audit",
     "summary": {
       "totalAudits": "Total Audits",
@@ -7244,22 +7244,22 @@
         },
         "priorities": {
           "name": "Commitments & Deadlines",
-          "desc": "Statutory clocks, obligations, and organizational next actions"
+          "desc": "Statutory clocks, obligations, and institutional next actions"
         },
         "intelligence": {
-          "name": "Organizational Intelligence",
+          "name": "Institutional Intelligence",
           "desc": "Executive, federation, and analytical surfaces"
         },
         "cognition": {
           "name": "Governed Reasoning",
-          "desc": "Sovereign reasoning bound to organizational doctrine"
+          "desc": "Sovereign reasoning bound to institutional doctrine"
         },
         "governance": {
           "name": "Governance of Record",
           "desc": "Charter, motions, and decisions of record"
         },
         "memory": {
-          "name": "Organizational Memory",
+          "name": "Institutional Memory",
           "desc": "Doctrine, precedents, and continuity archive"
         },
         "trust": {
@@ -7272,15 +7272,16 @@
       "caseStudies": "Case Studies",
       "status": "Status",
       "contact": "Contact",
-      "requestPilot": "Executive Briefing",
+      "requestPilot": "Continuity Reflection",
       "signIn": "Sign In"
     },
     "home": {
       "badge": "Constitutional Continuity Infrastructure for Unions",
       "heroHeading": "Command every dimension of your union.",
       "heroDescription": "Grievances. Finances. Membership. Compliance. One governed continuity layer — total transparency, total accountability, zero guesswork.",
-      "ctaPrimary": "Start a Controlled Pilot",
+      "ctaPrimary": "Join the Founding Partner Program",
       "ctaSecondary": "View Governance Architecture",
+      "ctaTertiary": "Read the Continuity Gap Whitepaper",
       "statsLabel": {
         "unionEntities": "Capabilities",
         "timeSaved": "Languages Supported",
@@ -7291,7 +7292,7 @@
       "problemHeading": "Unions Deserve Better Than Spreadsheets and Guesswork",
       "problemDescription": "Grievances tracked in notebooks. Finances reconciled in spreadsheets. Member records scattered across drives. Employers have million-dollar HR systems — unions have manual processes that lose cases, delay reports, and erode trust.",
       "solutionBadge": "The Solution",
-      "solutionHeading": "Organizational Governance Built for How Unions Actually Operate",
+      "solutionHeading": "Institutional Governance Built for How Unions Actually Operate",
       "solutionDescription": "UnionEyes is constitutional continuity infrastructure — not generic workplace software. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged for audit. Billing flows from the parent organization down. Data stays in Canadian jurisdiction.",
       "pillar1": "Contract-Governed Deployment",
       "pillar2": "Financial Accountability",
@@ -7320,7 +7321,7 @@
       "gov3Desc": "All data stored in Canadian Azure data centres. PIPEDA compliant. No cross-border transfers.",
       "gov4Title": "Financial Reconciliation",
       "gov4Desc": "Dues, per capita, strike fund — consolidated across locals with parent-level oversight and export-ready reports.",
-      "modulesBadge": "Organizational Modules",
+      "modulesBadge": "Institutional Modules",
       "modulesHeading": "Activate What You Need. Nothing More.",
       "modulesDescription": "Each module is independently entitled and activated per contract. No bundling, no forced upsells.",
       "module1": "Governance & Oversight",
@@ -7360,9 +7361,9 @@
       "pageTitle": "Our Story | UnionEyes",
       "pageDescription": "UnionEyes was founded by two brothers who lived the gaps in union infrastructure — and decided to close them.",
       "originHeading": "Where it all began",
-      "originParagraph1": "Mike spent years on the inside — first as a Labour Relations Officer for a national union, then as a lawyer conducting workplace investigations and assessments. Moving from working in a union to working with unions gave him an unfiltered view of where the friction lived: the workflows, the gaps, the moments where the right information simply wasn't in the right hands.",
-      "originParagraph2": "Oby took a different path. As a seasoned technologist, he made a career out of one idea — that technology should feel human. That the most powerful platforms are the ones people actually use.",
-      "originParagraph3": "When their paths converged, the opportunity was obvious. Mike knew exactly what was broken. Oby knew exactly how to fix it.",
+      "originParagraph1": "Michel spent years on the inside — first as a Labour Relations Officer for a national union, then as a lawyer conducting workplace investigations and assessments. Moving from working in a union to working with unions gave him an unfiltered view of where the friction lived: the workflows, the gaps, the moments where the right information simply wasn't in the right hands.",
+      "originParagraph2": "Aubert took a different path. As a seasoned technologist, he made a career out of one idea — that technology should feel human. That the most powerful platforms are the ones people actually use.",
+      "originParagraph3": "When their paths converged, the opportunity was obvious. Michel knew exactly what was broken. Aubert knew exactly how to fix it.",
       "originParagraph4": "UnionEyes is what happened next.",
       "missionHeading": "Our mission",
       "missionBody": "Put the same clarity, accountability, and operational control that large organizations take for granted into the hands of every union — built by someone who lived it, and someone who knows how to scale it.",
@@ -7376,19 +7377,28 @@
       "principle4Title": "Democratic governance baked in",
       "principle4Description": "UnionEyes has a reserved-matter governance structure. Union-elected representatives hold reserved oversight seats and exercise worker consent on change of control or mission change. This isn't marketing — it's in our shareholder agreement.",
       "ctaHeading": "Ready to see if we're the right fit?",
-      "ctaBody": "We don't do demos. We do conversations. Tell us about your challenges. We'll be honest about whether UnionEyes can help — or if something else would serve you better.",
+      "ctaBody": "We don't run generic demos. We run structured briefings tailored to your organization's continuity profile. Tell us about your challenges. We'll be honest about whether UnionEyes can help — or if something else would serve you better.",
       "ctaPilot": "Request a pilot program",
-      "ctaContact": "Start a conversation"
+      "ctaContact": "Start a conversation",
+      "foundersHeading": "Who is building this",
+      "foundersIntro": "UnionEyes was not assembled by a generalist software team that discovered the labour market. It was built by two named individuals with complementary, attestable domain experience.",
+      "founderMichelName": "Michel Nungisa",
+      "founderMichelRole": "Co-Founder · Domain & Doctrine",
+      "founderMichelBio": "Former Labour Relations Officer at a national union. Later, a lawyer conducting workplace investigations and assessments. Michel has worked inside unions, with unions, and across the procedural surface that UnionEyes is designed to support.",
+      "founderAubertName": "Aubert Nungisa",
+      "founderAubertRole": "Co-Founder · Architecture & Operations",
+      "founderAubertBio": "Career technologist focused on operational platforms that people actually use. Responsible for the architectural posture, deployment surface, and Canadian-hosted operational substrate of UnionEyes.",
+      "foundersNote": "Both founders are reachable through the Executive Briefing channel — and remain operationally involved in every pilot deployment."
     },
     "pricing": {
-      "heroHeading": "Organizational Modernization Programs",
+      "heroHeading": "Institutional Modernization Programs",
       "heroDescription": "UnionEyes is packaged as a consultative modernization program aligned to governance complexity, organizational scope, and continuity outcomes.",
       "monthly": "Monthly",
       "yearly": "Yearly",
       "perMonth": "/ month",
       "perYear": "/ year",
-      "getStarted": "Request Executive Briefing",
-      "pageTitle": "Organizational Modernization Programs | UnionEyes",
+      "getStarted": "Start the free Continuity Reflection",
+      "pageTitle": "Institutional Modernization Programs | UnionEyes",
       "pageDescription": "Program-based commercial packaging for governance modernization, continuity resilience, and operational trust infrastructure."
     },
     "contact": {
@@ -7412,10 +7422,10 @@
       "pageDescription": "How Canadian unions deploy UnionEyes through governed contracts and controlled pilots."
     },
     "pilotRequest": {
-      "heroHeading": "Request an Organizational Modernization Briefing",
+      "heroHeading": "Request an Institutional Modernization Briefing",
       "heroDescription": "Every UnionEyes engagement begins with a structured modernization pilot pathway aligned to governance maturity, continuity priorities, and implementation scope.",
-      "pageTitle": "Organizational Continuity Modernization Pilot | UnionEyes",
-      "pageDescription": "Begin a structured organizational modernization pilot aligned to governance and operational maturity.",
+      "pageTitle": "Institutional Continuity Modernization Pilot | UnionEyes",
+      "pageDescription": "Begin a structured institutional modernization pilot aligned to governance and operational maturity.",
       "trustCallout": "Every pilot pathway is governance-scoped, implementation-structured, and designed for executive and procurement confidence.",
       "stepLabels": {
         "organization": "Organization",
@@ -7427,7 +7437,7 @@
       "buttons": {
         "continue": "Continue",
         "back": "Back",
-        "assessReadiness": "Assess organizational readiness",
+        "assessReadiness": "Assess institutional readiness",
         "submit": "Submit executive briefing request",
         "submitting": "Submitting…"
       },
@@ -7449,7 +7459,7 @@
         "memberCountHint": "Approximate total membership"
       },
       "step2": {
-        "heading": "Your organizational operating context",
+        "heading": "Your institutional operating context",
         "jurisdictionsLabel": "Jurisdictions *",
         "sectorsLabel": "Sectors *",
         "currentSystemLabel": "Current Operating Environment (Optional)",
@@ -7460,7 +7470,7 @@
         "heading": "Program priorities",
         "modulesLabel": "Operational priorities of interest *",
         "goalsLabel": "Modernization objectives (select all that apply) *",
-        "additionalNotesLabel": "Additional organizational context (Optional)",
+        "additionalNotesLabel": "Additional institutional context (Optional)",
         "additionalNotesPlaceholder": "Share any executive, procurement, or implementation context…"
       },
       "step4": {
@@ -7477,7 +7487,7 @@
         "timelineExploring": "Evaluating options"
       },
       "step5": {
-        "heading": "Your Organizational Readiness Assessment",
+        "heading": "Your Institutional Readiness Assessment",
         "estimatedTimeline": "Estimated implementation pathway:",
         "strengths": "Strengths",
         "areasToAddress": "Areas to address",
@@ -7485,7 +7495,7 @@
       },
       "step6": {
         "heading": "Executive briefing request received",
-        "body": "Thank you for your interest in UnionEyes. Our organizational modernization team will review your submission and connect within 2–3 business days to discuss program scope."
+        "body": "Thank you for your interest in UnionEyes. Our institutional modernization team will review your submission and connect within 2–3 business days to discuss program scope."
       },
       "phase6": {
         "leadershipTitle": "Leadership transition continuity scenarios",
@@ -7685,7 +7695,7 @@
       }
     },
     "footer": {
-      "description": "Organizational governance & continuity infrastructure for Canadian unions — contract-based deployment, governed access scopes, and audit-ready operations of record.",
+      "description": "Institutional governance & continuity infrastructure for Canadian unions — contract-based deployment, governed access scopes, and audit-ready operations of record.",
       "platform": "Capabilities",
       "solutions": "Solutions",
       "governanceAndTrust": "Governance & Trust",
@@ -7693,7 +7703,7 @@
       "resources": "Resources",
       "company": "Company",
       "legal": "Legal",
-      "organizationalContinuity": "Organizational Continuity",
+      "institutionalContinuity": "Institutional Continuity",
       "governanceIntelligence": "Governance-of-Record Intelligence",
       "organizationalMemory": "Organizational Memory",
       "corporateMemory": "Organizational Memory",
@@ -7711,7 +7721,7 @@
       "labourSafeAi": "Labour-Safe AI",
       "explainabilityStandards": "Explainability Standards",
       "insights": "Insights",
-      "organizationalProof": "Organizational Proof",
+      "institutionalProof": "Institutional Proof",
       "governance": "Governance & Oversight",
       "grievanceTracking": "Case & Grievance Management",
       "memberPortal": "Member Portal & Engagement",
@@ -7732,7 +7742,7 @@
       "accessibility": "Accessibility",
       "trust": "Trust & Compliance",
       "rights": "All rights reserved.",
-      "tagline": "Organizational governance & continuity infrastructure for Canadian unions."
+      "tagline": "Institutional governance & continuity infrastructure for Canadian unions."
     },
     "features": {
       "grievanceTracking": {
@@ -8001,7 +8011,7 @@
       "phase6": {
         "tabScenario": "Scenario Intelligence",
         "leadershipTitle": "Leadership transition continuity scenarios",
-        "leadershipDesc": "These scenarios model familiar organizational transition moments and show calm continuity responses that preserve governance coherence.",
+        "leadershipDesc": "These scenarios model familiar institutional transition moments and show calm continuity responses that preserve governance coherence.",
         "frictionTitle": "Governance friction simulation flows",
         "disruptionTitle": "Operational strain modeling",
         "stabilizationTitle": "Organizational stabilization simulation",
@@ -8673,7 +8683,7 @@
       "directDepositNotice": "Strike fund payments will be deposited directly to your bank account",
       "bankNameLabel": "Bank Name *",
       "bankNamePlaceholder": "Royal Bank",
-      "institutionNumberLabel": "Organization # *",
+      "institutionNumberLabel": "Institution # *",
       "institutionNumberPlaceholder": "001",
       "transitNumberLabel": "Transit # *",
       "transitNumberPlaceholder": "12345",
@@ -8688,7 +8698,7 @@
   },
   "trust": {
     "title": "Trust & Sovereignty",
-    "subtitle": "Transparent chronology, verifiable safeguards, and organizational accountability for members.",
+    "subtitle": "Transparent chronology, verifiable safeguards, and institutional accountability for members.",
     "exportReport": "Export Report",
     "lastUpdated": "Last updated:",
     "statImmutability": "Immutability",
@@ -9117,7 +9127,7 @@
     "goodMorning": "Good morning",
     "goodAfternoon": "Good afternoon",
     "goodEvening": "Good evening",
-    "operationsOverview": "Nzila Organizational Continuity — here's your overview.",
+    "operationsOverview": "Nzila Institutional Continuity — here's your overview.",
     "operator": "Operator",
     "organizations": "Organizations",
     "totalMembers": "Total Members",
@@ -10942,7 +10952,7 @@
   },
   "operationsPage": {
     "title": "Continuity Operations",
-    "subtitle": "Continuity-aware health, continuity events, and operational chronology of the organizational platform.",
+    "subtitle": "Continuity-aware health, continuity events, and operational chronology of the institutional platform.",
     "tabOverview": "Overview",
     "tabIncidents": "Incidents",
     "tabSla": "SLA & Performance",
@@ -11077,24 +11087,24 @@
   "continuityNotes": {
     "trust": {
       "label": "Trust posture",
-      "posture": "Trust in UnionEyes is operational, not symbolic. The surfaces below describe how explainability, governance review, sovereignty boundaries, and continuity-safe operation are enforced at runtime — not aspirations to be achieved later. Each pillar is reviewable by the organization's reviewer of record before any deployment commitment."
+      "posture": "Trust in UnionEyes is operational, not symbolic. The surfaces below describe how explainability, governance review, sovereignty boundaries, and continuity-safe operation are enforced at runtime — not aspirations to be achieved later. Each pillar is reviewable by the institution's reviewer of record before any deployment commitment."
     },
     "procurement": {
       "label": "Procurement posture",
-      "posture": "Programs are operational commitments, not subscriptions. Each maturity state names the organizational responsibilities UnionEyes will hold on the organization's behalf and the continuity-safe operating record it will maintain. Procurement reviewers are encouraged to read the maturity tiers as the organizational shape of the engagement — not as a feature ladder."
+      "posture": "Programs are operational commitments, not subscriptions. Each maturity state names the institutional responsibilities UnionEyes will hold on the institution's behalf and the continuity-safe operating record it will maintain. Procurement reviewers are encouraged to read the maturity tiers as the institutional shape of the engagement — not as a feature ladder."
     },
     "pilot": {
       "label": "Pilot posture",
-      "posture": "This is a continuity briefing, not a sales intake. The form below frames a bounded pilot whose success is measured in operational stabilization — fewer dropped commitments, clearer escalation, and an organizational record that survives leadership transitions. Workers are never the subject of pilot assessment."
+      "posture": "This is a continuity briefing, not a sales intake. The form below frames a bounded pilot whose success is measured in operational stabilization — fewer dropped commitments, clearer escalation, and an institutional record that survives leadership transitions. Workers are never the subject of pilot assessment."
     },
     "ontology": {
-      "label": "Organizational ontology",
+      "label": "Institutional ontology",
       "posture": "The eight surfaces below are not a feature list. They name the operational responsibilities a union, federation, or congress already carries. Adopting UnionEyes does not introduce new responsibilities — it gives the existing ones a continuity-safe operating record. Each pillar links to the runtime surface that fulfils it."
     }
   },
   "sovereignty": {
     "layerLabel": "Sovereignty layer",
-    "accessNote": "Access is logged; actions taken here are part of the organizational record.",
+    "accessNote": "Access is logged; actions taken here are part of the institutional record.",
     "roleLabels": {
       "officer": "Officer of record",
       "admin": "Administrator of record",
@@ -11106,23 +11116,23 @@
     "surfaces": {
       "cognition": {
         "name": "Cognition",
-        "posture": "Bounded reasoning over organizational memory; outputs are recommendations for the reviewer of record, never operator-bypassing actions."
+        "posture": "Bounded reasoning over institutional memory; outputs are recommendations for the reviewer of record, never operator-bypassing actions."
       },
       "longitudinalCognition": {
         "name": "Longitudinal cognition",
-        "posture": "Cross-time organizational reasoning; review continuity-relevant patterns before any escalation."
+        "posture": "Cross-time institutional reasoning; review continuity-relevant patterns before any escalation."
       },
       "security": {
         "name": "Security",
-        "posture": "Continuity-critical configuration; changes are part of the organizational audit trail."
+        "posture": "Continuity-critical configuration; changes are part of the institutional audit trail."
       },
       "customerSuccess": {
         "name": "Customer success",
-        "posture": "Organizational account stewardship; act on behalf of partner unions with reviewer-of-record discipline."
+        "posture": "Institutional account stewardship; act on behalf of partner unions with reviewer-of-record discipline."
       },
       "operations": {
         "name": "Operations",
-        "posture": "Operational cadence and dispatch; sequence work as the reviewer of record for organizational execution."
+        "posture": "Operational cadence and dispatch; sequence work as the reviewer of record for institutional execution."
       },
       "ops": {
         "name": "Sovereign ops",
@@ -11133,23 +11143,23 @@
   "homePage": {
     "meta": {
       "title": "UnionEyes | Constitutional Continuity Infrastructure",
-      "description": "UnionEyes is the continuity layer for federated organizations — preserving organizational memory, strengthening governance coordination, and modernizing operational trust through non-disruptive implementation alongside existing systems. Canadian-hosted, bilingual-first, sovereignty-conscious."
+      "description": "UnionEyes is the continuity layer for federated institutions — preserving institutional memory, strengthening governance coordination, and modernizing operational trust through non-disruptive implementation alongside existing systems. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "jsonLd": {
       "name": "UnionEyes",
       "description": "Constitutional continuity infrastructure for federated organizations. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "hero": {
-      "eyebrow": "Organizational Governance & Continuity Infrastructure",
-      "headlineLine1": "Confidence that organizational memory",
+      "eyebrow": "Institutional Governance & Continuity Infrastructure",
+      "headlineLine1": "Confidence that institutional memory",
       "headlineLine2": "will outlive any individual.",
-      "imageAlt": "Organizational governance and continuity infrastructure",
-      "subhead": "UnionEyes helps federated organizations preserve organizational memory, strengthen governance coordination, and modernize procedural trust through non-disruptive implementation alongside existing systems.",
+      "imageAlt": "Institutional governance and continuity infrastructure",
+      "subhead": "UnionEyes helps federated institutions preserve institutional memory, strengthen governance coordination, and modernize procedural trust through non-disruptive implementation alongside existing systems.",
       "ctaPrimary": "Book Strategic Discovery",
       "ctaSecondary": "Explore Continuity Infrastructure"
     },
     "posture": {
-      "eyebrow": "Organizational posture",
+      "eyebrow": "Institutional posture",
       "points": [
         {
           "metric": "Canadian-hosted",
@@ -11174,12 +11184,12 @@
       ]
     },
     "continuity": {
-      "eyebrow": "Organizational continuity",
+      "eyebrow": "Institutional continuity",
       "heading": "Stewardship that outlives leadership turnover.",
-      "lede": "Continuity is not a feature. It is the organizational discipline of preserving procedural context, decisions, and reasoning across every handoff.",
+      "lede": "Continuity is not a feature. It is the institutional discipline of preserving procedural context, decisions, and reasoning across every handoff.",
       "pillars": [
         {
-          "title": "Organizational memory preservation",
+          "title": "Institutional memory preservation",
           "desc": "Retain governance context, decisions, and reasoning through every leadership succession and handoff. Stewardship continuity outlives any individual."
         },
         {
@@ -11192,31 +11202,31 @@
         },
         {
           "title": "Non-disruptive implementation",
-          "desc": "Overlay infrastructure that augments existing systems — a continuity layer your organization can adopt alongside current tooling."
+          "desc": "Overlay infrastructure that augments existing systems — a continuity layer your institution can adopt alongside current tooling."
         }
       ]
     },
     "federation": {
       "eyebrow": "Federated coordination",
       "heading": "Governance-safe coordination across locals, councils, and federations.",
-      "body1": "Federations are not org charts. They are layered organizations with distinct procedural authority, bylaws, and committee structures.",
-      "body2": "UnionEyes provides operational alignment and organizational visibility across the federation without collapsing it into a single hierarchy or bypassing local authority."
+      "body1": "Federations are not org charts. They are layered institutions with distinct procedural authority, bylaws, and committee structures.",
+      "body2": "UnionEyes provides operational alignment and institutional visibility across the federation without collapsing it into a single hierarchy or bypassing local authority."
     },
     "procedural": {
       "eyebrow": "Procedural trust",
       "heading": "Every decision is traceable, reviewable, and accountable.",
-      "body1": "Procedural traceability is the foundation of organizational trust. Each case, recommendation, and governance action is anchored to evidence and a named reviewer of record.",
+      "body1": "Procedural traceability is the foundation of institutional trust. Each case, recommendation, and governance action is anchored to evidence and a named reviewer of record.",
       "body2": "Audit-grade transparency, explainability, and operational accountability are structural — not bolted on."
     },
     "coexistence": {
       "eyebrow": "Non-disruptive modernization",
       "heading": "An overlay infrastructure — not a replacement.",
-      "lede": "Organizations modernize at organizational pace. UnionEyes deploys as a continuity layer alongside existing systems.",
+      "lede": "Institutions modernize at institutional pace. UnionEyes deploys as a continuity layer alongside existing systems.",
       "points": [
         "Overlay infrastructure that augments existing systems — no replacement required.",
         "Modular adoption: deploy a continuity layer one workflow at a time.",
         "Layered modernization runs alongside existing systems with full coexistence.",
-        "Organizational evolution proceeds without disrupting current procedural chains."
+        "Institutional evolution proceeds without disrupting current procedural chains."
       ]
     },
     "labourSafeAi": {
@@ -11232,9 +11242,9 @@
       ]
     },
     "canadian": {
-      "eyebrow": "Canadian organizational infrastructure",
+      "eyebrow": "Canadian institutional infrastructure",
       "heading": "Canadian-hosted, bilingual-first, sovereignty-conscious.",
-      "lede": "Democratic infrastructure built for the organizations that shape Canadian working life.",
+      "lede": "Democratic infrastructure built for the institutions that shape Canadian working life.",
       "pillars": [
         {
           "title": "Canadian-hosted infrastructure",
@@ -11242,11 +11252,11 @@
         },
         {
           "title": "Bilingual-first by design",
-          "desc": "English and French organizational surfaces from day one — never an afterthought."
+          "desc": "English and French institutional surfaces from day one — never an afterthought."
         },
         {
-          "title": "Organizational trust posture",
-          "desc": "Democratic infrastructure for federations, councils, and member-driven organizations."
+          "title": "Institutional trust posture",
+          "desc": "Democratic infrastructure for federations, councils, and member-driven institutions."
         },
         {
           "title": "Governance-safe operations",
@@ -11255,19 +11265,19 @@
       ]
     },
     "finalCta": {
-      "heading": "Discuss continuity infrastructure for your organization.",
-      "body": "A consultative conversation about organizational continuity, governance coordination, and procedural trust — paced to your federation, not to a sales cycle.",
+      "heading": "Discuss continuity infrastructure for your institution.",
+      "body": "A consultative conversation about institutional continuity, governance coordination, and procedural trust — paced to your federation, not to a sales cycle.",
       "ctaPrimary": "Book Strategic Discovery",
       "ctaSecondary": "View Trust & Stewardship"
     },
     "svg": {
       "continuity": {
-        "ariaLabel": "Organizational continuity timeline across leadership succession",
+        "ariaLabel": "Institutional continuity timeline across leadership succession",
         "stewardA": "Steward A",
         "handoff": "Handoff",
         "stewardB": "Steward B",
         "stewardC": "Steward C",
-        "caption": "Organizational memory preserved across succession"
+        "caption": "Institutional memory preserved across succession"
       },
       "federation": {
         "ariaLabel": "Federated coordination topology",

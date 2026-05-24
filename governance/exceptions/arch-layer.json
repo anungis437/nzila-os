@@ -58,6 +58,12 @@
       "expiresOn": "2026-09-01"
     },
     {
+      "path": "apps/platform-admin/app/api/admin/set-active-org/route.ts",
+      "owner": "platform-team",
+      "justification": "Session-bootstrap route that must verify org_members membership BEFORE issuing the active-org cookie. Membership lookup is a single bounded SELECT against orgMembers and lives at the auth boundary, not in business logic. Service-layer extraction tracked alongside other platform-admin ARCH_LAYER exceptions.",
+      "expiresOn": "2026-09-01"
+    },
+    {
       "path": "apps/zonga/app/api/payouts/route.ts",
       "owner": "zonga-team",
       "justification": "Route-local NAR proof adapter still uses schema import pending service-layer migration.",

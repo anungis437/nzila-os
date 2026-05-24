@@ -63,6 +63,9 @@ function collectFiles(dir: string, ext: string[]): string[] {
           'intelligence', 'fsm-core',
           'institutional-governance-graph',
           'schema-core', 'governed-workflow',
+          // Entity-graph UI surface: entityId is a graph-node identifier
+          // (vendor/incident/document being graphed), not org-scoping.
+          'entity-graph',
         ].includes(e.name)) continue
         stack.push(full)
       } else if (e.isFile() && ext.some(x => e.name.endsWith(x))) {
@@ -103,6 +106,8 @@ const ENTITY_ID_EXCEPTIONS = [
   // QueryFinding domain results: entityId names a finding/result subject (path id, summary id, node id)
   /entityId:\s*`/,           // template-literal value (e.g. entityId: `path_${...}`)
   /entityId:\s*'[^']+'/,     // string-literal value (e.g. entityId: 'redundancy_summary')
+  // Platform Entity Graph schema doc comment — `(tenantId, entityType, entityId)` is the graph-node tuple
+  /\*\s+entityId\)/,         // JSDoc line referencing entityId as a graph-node tuple component
 ]
 
 function isExceptionLine(line: string): boolean {

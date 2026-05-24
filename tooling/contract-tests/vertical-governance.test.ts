@@ -141,6 +141,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'crudRoutes(',               // crudRoutes() factory — wraps withApi() internally
     'withMinRole(',              // Role-based auth guard with minimum role check
     'withOrgScope(',              // Org-scoped composite guard (auth + context + org validation)
+    'withOrgWrite(',              // Write-restricted org-scoped guard (withOrgScope + canWrite role check)
     'withRequiredRole(',          // TrustCore role-based auth guard
     'cognitionRoute(',            // Cognition route factory — wraps withApi() with required auth (apps/union-eyes/lib/api/cognition-route.ts)
   ]

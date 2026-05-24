@@ -76,6 +76,14 @@ export default async function LocaleRootPage({
     t('principle4'),
   ];
 
+  const translations = [
+    { title: t('xlate1Title'), desc: t('xlate1Desc') },
+    { title: t('xlate2Title'), desc: t('xlate2Desc') },
+    { title: t('xlate3Title'), desc: t('xlate3Desc') },
+    { title: t('xlate4Title'), desc: t('xlate4Desc') },
+    { title: t('xlate5Title'), desc: t('xlate5Desc') },
+  ];
+
   return (
     <>
       <LocaleSiteNavigation />
@@ -85,6 +93,7 @@ export default async function LocaleRootPage({
           <Image
             src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920"
             alt=""
+            aria-hidden="true"
             fill
             priority
             className="object-cover"
@@ -116,7 +125,7 @@ export default async function LocaleRootPage({
             <ScrollReveal delay={0.24}>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
-                  href={`/${locale}/pilot-request`}
+                  href={`/${locale}/institutional-continuity-risk`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
                   {t('ctaPrimary')}
@@ -128,6 +137,14 @@ export default async function LocaleRootPage({
                   {t('ctaSecondary')}
                 </Link>
               </div>
+              {/* Tertiary low-friction CTA — audit recommendation: give cold visitors a no-commitment entry point. */}
+              <Link
+                href={`/${locale}/whitepaper`}
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white underline underline-offset-4 decoration-white/40 hover:decoration-white transition-colors"
+              >
+                {t('ctaTertiary')}
+                <span aria-hidden="true">→</span>
+              </Link>
             </ScrollReveal>
           </div>
         </section>
@@ -144,6 +161,41 @@ export default async function LocaleRootPage({
                   <div className="text-sm font-semibold text-navy mb-0.5">{item.label}</div>
                   <div className="text-xs text-gray-400">{item.sub}</div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Translation Layer — operational plain-language explainers for cold visitors.
+            Sits between proof bar and outcomes so first-contact readers get a plain
+            explanation of what Union Eyes does BEFORE encountering doctrine vocabulary. */}
+        <section className="py-24 bg-gradient-to-b from-white to-gray-50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ScrollReveal>
+              <div className="text-center mb-12 max-w-3xl mx-auto">
+                <span className="inline-block px-3 py-1 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
+                  {t('xlateBadge')}
+                </span>
+                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
+                  {t('xlateHeading')}
+                </h2>
+                <p className="text-lg text-gray-700">
+                  {t('xlateDescription')}
+                </p>
+              </div>
+            </ScrollReveal>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {translations.map((item, idx) => (
+                <ScrollReveal key={item.title} delay={0.05 * idx}>
+                  <div className="h-full p-6 rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-xs font-bold tracking-widest uppercase text-electric mb-3">
+                      {String(idx + 1).padStart(2, '0')}
+                    </div>
+                    <h3 className="text-lg font-bold text-navy mb-2 leading-tight">{item.title}</h3>
+                    <p className="text-sm text-gray-700 leading-relaxed">{item.desc}</p>
+                  </div>
+                </ScrollReveal>
               ))}
             </div>
           </div>
@@ -221,7 +273,7 @@ export default async function LocaleRootPage({
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href={`/${locale}/pilot-request`}
+                  href={`/${locale}/institutional-continuity-risk`}
                   className="inline-flex items-center justify-center px-10 py-5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
                   {t('finalCtaPrimary')}

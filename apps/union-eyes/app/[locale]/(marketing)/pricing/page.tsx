@@ -1,41 +1,31 @@
 /**
- * Organizational Positioning Manifest (UnionEyes marketing surface)
+ * Institutional Continuity Engagement Architecture
  *
- * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
- * coordination (operational workflow, intake, case management, representation),
- * trust (audit, transparency, evidence, oversight, explainability).
+ * This page is intentionally NOT a SaaS pricing matrix. UnionEyes is continuity
+ * infrastructure — OCI (Organizational Continuity Index) diagnostics, OCRA
+ * (Organizational Continuity Risk Analysis) deepening, governance mapping, then
+ * platform activation, then longitudinal support. Software is the *fourth*
+ * stage of the engagement, not the entry point.
  *
- * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
- * not replacing. Operates alongside existing systems and respects existing tools.
- *
- * AI policy: assistive intelligence with human oversight, explainability, reviewability,
- * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
- *
- * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * organizational trust for democratic infrastructure.
+ * Narrative posture: maturity-oriented institutional engagement, not feature
+ * bundling. Every layer is governance-safe, procurement-readable, and assumes
+ * human oversight by design. Pricing ranges are starting points for joint
+ * scoping with executive and procurement leadership — not self-serve tiers.
  */
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import {
-  ArrowRight,
-  CheckCircle2,
-  Layers,
-  Building2,
-  Landmark,
-  Globe2,
-  ShieldCheck,
-  Users,
-} from 'lucide-react';
+import { Users } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
-import { OrganizationalContinuityNote } from '@/components/marketing/organizational-continuity-note';
-import ScrollReveal from '@/components/public/scroll-reveal';
+import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
+import { getUnionEyesSiteTopology } from '@/lib/site-topology';
+import PricingTabs, { type EngagementLayer } from './_components/pricing-tabs';
 
-export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.pricing' });
   return {
@@ -46,399 +36,508 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Operational reality — the conditions that drive institutions to UE.
+// SECTION 1 — Continuity Starts Before Software
+// Why OCI exists before the platform. The conditions that make continuity
+// fragile inside an institution — before any tooling is procured.
 // ─────────────────────────────────────────────────────────────────────────────
-const operationalReality = [
+const continuityFragility = [
   {
-    title: 'Organizational complexity',
-    body: 'Multiple locals, mandates, and committees operating without a coherent operational picture.',
+    title: 'Continuity fragility',
+    body: 'Procedural knowledge concentrated in a few experienced people. One retirement, one rotation, and the institution loses years of judgment.',
   },
   {
-    title: 'Continuity risk',
-    body: 'Critical knowledge held by individuals — lost on every leadership transition.',
+    title: 'Onboarding burden',
+    body: 'Every new officer, staff member, or steward inherits unfinished casework with no operating record, no precedent map, and no continuity briefing.',
   },
   {
-    title: 'Governance fragmentation',
-    body: 'Decisions, motions, and commitments scattered across inboxes, drives, and meeting notes.',
+    title: 'Governance inconsistency',
+    body: 'Decisions, motions, and commitments scattered across inboxes, drives, and meeting notes — defensible in the moment, undocumented across cycles.',
   },
   {
-    title: 'Operational turnover',
-    body: 'New stewards, officers, and staff inheriting unfinished casework with no operating record.',
+    title: 'Modernization risk',
+    body: 'Tooling decisions made without continuity assessment usually accelerate fragmentation rather than resolve it. The wrong platform makes things worse.',
   },
   {
-    title: 'Steward overload',
-    body: 'Front-line representatives carrying organizational memory the institution itself does not retain.',
-  },
-  {
-    title: 'Organizational memory loss',
-    body: 'Precedents, doctrines, and prior decisions degrading every year they remain unrecorded.',
+    title: 'Institutional dependency',
+    body: 'The federation depends on individuals more than the individuals know. When they leave, the dependency surfaces — usually under operational pressure.',
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Maturity ladder — four canonical tiers.
-// Restrained brand palette only. No multi-color accents.
+// SECTION 2 — When Organizations Typically Engage Us
+// Operational moments that bring institutions to the OCI conversation.
+// Grounds the offerings in concrete institutional reality.
 // ─────────────────────────────────────────────────────────────────────────────
-const maturityTiers = [
+const engagementMoments = [
+  { title: 'Leadership transitions', body: 'An incoming president, executive director, or general counsel needs continuity inherited — not reconstructed.' },
+  { title: 'Modernization initiatives', body: 'A federation is reviewing tooling and wants to understand continuity risk before procuring anything.' },
+  { title: 'Operational fragmentation', body: 'Locals, committees, and staff operating without a shared operating record — coordination cost rising every quarter.' },
+  { title: 'Onboarding strain', body: 'New stewards and officers are arriving faster than the institution can transfer judgment to them.' },
+  { title: 'Governance restructuring', body: 'A merger, reorganization, or constitutional review needs a continuity baseline before any structural decision.' },
+  { title: 'Continuity concerns', body: 'Leadership has named succession and institutional memory as strategic risks and wants them measurable.' },
+  { title: 'Federation coordination growth', body: 'A national or sectoral body coordinating across many locals needs operational topology, not more meetings.' },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION 3 — The Continuity Journey™
+// The maturity-oriented engagement pathway. Five sequential stages.
+// Software (Platform Activation) is stage 4 — never stage 1.
+// ─────────────────────────────────────────────────────────────────────────────
+const continuityJourney = [
   {
-    key: 'foundation',
-    icon: Layers,
-    name: 'Foundation',
-    posture: 'Operational stabilization',
-    fit: 'Locals and small unions establishing a coherent operating record.',
-    feels: 'Stable. Coordinated. Auditable.',
-    focus: [
-      'Unified intake across cases and member messages',
-      'Continuity-safe communication and steward coordination',
-      'Bounded operational memory with explicit retention',
-      'Operational visibility for officers and committees',
-    ],
-    surfaces: ['Inbox', 'Work', 'Priorities', 'Baseline Governance', 'Communications'],
-    range: 'Annual program — typically $12K–$30K',
+    stage: '1',
+    name: 'OCI Assessment',
+    outcome: 'Understand continuity fragility',
+    summary: 'A scoped institutional diagnostic that surfaces where continuity actually breaks — and where it quietly holds.',
   },
   {
-    key: 'governance',
-    icon: Building2,
-    name: 'Governance Operations',
-    posture: 'Governance maturity infrastructure',
-    fit: 'Mid-sized organizations modernizing governance cadence and federation reporting.',
-    feels: 'Disciplined. Measurable. Transparent.',
-    focus: [
-      'Governance operations and decisions of record',
-      'Federation reporting and compliance continuity',
-      'Executive visibility across the operating institution',
-      'Operational cadence with defensible audit trails',
-    ],
-    surfaces: ['Foundation surfaces', 'Governance', 'Analytics', 'Federation', 'Compliance', 'Executive Intelligence'],
-    range: 'Annual program — typically $40K–$120K',
+    stage: '2',
+    name: 'OCRA Deepening',
+    outcome: 'Identify structural continuity risks',
+    summary: 'Adaptive continuity intelligence: continuity topology, modernization pathways, and confidence-aware interpretation.',
   },
   {
-    key: 'continuity',
-    icon: Landmark,
-    name: 'Organizational Continuity',
+    stage: '3',
+    name: 'Governance Mapping',
+    outcome: 'Clarify operational dependencies',
+    summary: 'Translate findings into a governance-readable map of dependencies, decisions of record, and continuity obligations.',
+  },
+  {
+    stage: '4',
+    name: 'Platform Activation',
+    outcome: 'Stabilize continuity operations',
+    summary: 'Only here does the platform enter — as continuity infrastructure activated on top of the assessment, not as generic software.',
+  },
+  {
+    stage: '5',
+    name: 'Longitudinal Support',
+    outcome: 'Sustain institutional continuity',
+    summary: 'Ongoing continuity stewardship: governance entropy review, executive intelligence, and federation-level continuity health.',
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION 3.5 — Assessment Ladder (GTM entry funnel)
+// Mirrors the three entry tiers on /institutional-continuity-risk so the
+// pricing page reflects the actual go-to-market motion: a free ICRA reflection,
+// a paid Executive Continuity Brief at $1,200, and a facilitated Institutional
+// Continuity Diagnostic at $6,500. These precede the larger engagement layers.
+// ─────────────────────────────────────────────────────────────────────────────
+const assessmentLadder = [
+  {
+    key: 'continuity_reflection',
+    name: 'Continuity Reflection',
+    price: 'Free',
+    pricePosture: 'Pseudonymous · no login required',
+    summary:
+      'A scoped institutional continuity assessment that surfaces fragility, signals, and burden — without commitment. The ICRA entry point.',
+    includes: [
+      'OCI band and continuity score',
+      'Quiet-risk signal observations',
+      'Continuity burden index',
+      'One recommendation to start a conversation',
+    ],
+    cta: 'Start the assessment',
+    ctaHref: '/institutional-continuity-risk',
+    featured: false,
+  },
+  {
+    key: 'executive_continuity_brief',
+    name: 'Executive Continuity Brief',
+    price: '$1,200 CAD',
+    pricePosture: 'One-time · delivered as a governance-readable document',
+    summary:
+      'A deeper institutional reading of the same assessment — governance entropy, continuity debt, dependency review, and modernization risk surfaced for executive and board conversation.',
+    includes: [
+      'Everything in Continuity Reflection',
+      'Governance entropy analysis',
+      'Continuity debt analysis',
+      'Institutional dependency review',
+      'Modernization risk layer',
+      'Full prioritized recommendations',
+    ],
+    cta: 'Begin with the brief',
+    ctaHref: '/institutional-continuity-risk?intendedTier=executive_continuity_brief',
+    featured: true,
+  },
+  {
+    key: 'institutional_continuity_diagnostic',
+    name: 'Institutional Continuity Diagnostic',
+    price: '$6,500 CAD',
+    pricePosture: 'Facilitated engagement · executive workshop included',
+    summary:
+      'A full diagnostic engagement: facilitated review, institutional continuity workshop, memory lineage mapping, and an executive briefing note your board can act on.',
+    includes: [
+      'Everything in the Executive Continuity Brief',
+      'Facilitated diagnostic review',
+      'Institutional continuity workshop',
+      'Memory lineage mapping',
+      'Executive briefing note',
+    ],
+    cta: 'Request this diagnostic',
+    ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+    featured: false,
+  },
+];
+
+const frAssessmentLadder = [
+  {
+    key: 'continuity_reflection',
+    name: 'Réflexion sur la continuité',
+    price: 'Gratuit',
+    pricePosture: 'Pseudonyme · aucune connexion requise',
+    summary:
+      "Une évaluation institutionnelle ciblée qui révèle la fragilité, les signaux et le fardeau — sans engagement. Le point d'entrée ICRA.",
+    includes: [
+      'Bande OCI et indice de continuité',
+      'Observations sur les signaux de risque silencieux',
+      'Indice de fardeau de continuité',
+      'Une recommandation pour amorcer la conversation',
+    ],
+    cta: "Commencer l'évaluation",
+    ctaHref: '/institutional-continuity-risk',
+    featured: false,
+  },
+  {
+    key: 'executive_continuity_brief',
+    name: 'Note de continuité exécutive',
+    price: '1 200 $ CAD',
+    pricePosture: 'Ponctuel · livré sous forme de document lisible par la gouvernance',
+    summary:
+      "Une lecture institutionnelle approfondie de la même évaluation — entropie de gouvernance, dette de continuité, revue des dépendances et risque de modernisation, mis en forme pour la conversation exécutive.",
+    includes: [
+      'Tout ce qui est dans la Réflexion sur la continuité',
+      "Analyse de l'entropie de gouvernance",
+      'Analyse de la dette de continuité',
+      'Revue des dépendances institutionnelles',
+      'Couche de risque de modernisation',
+      'Recommandations priorisées complètes',
+    ],
+    cta: 'Commencer par la note',
+    ctaHref: '/institutional-continuity-risk?intendedTier=executive_continuity_brief',
+    featured: true,
+  },
+  {
+    key: 'institutional_continuity_diagnostic',
+    name: 'Diagnostic institutionnel de continuité',
+    price: '6 500 $ CAD',
+    pricePosture: 'Engagement facilité · atelier exécutif inclus',
+    summary:
+      "Un engagement diagnostic complet : revue facilitée, atelier institutionnel de continuité, cartographie de la lignée mémorielle, et note de synthèse exécutive sur laquelle votre conseil peut agir.",
+    includes: [
+      'Tout ce qui est dans la Note exécutive',
+      'Revue diagnostique facilitée',
+      'Atelier institutionnel de continuité',
+      'Cartographie de la lignée mémorielle',
+      'Note de synthèse exécutive',
+    ],
+    cta: 'Demander ce diagnostic',
+    ctaHref: '/contact?topic=institutional-continuity-diagnostic',
+    featured: false,
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION 4 — Engagement Layers
+// Replaces "tiers". These are institutional continuity engagement layers —
+// not SaaS plans. Each one is a distinct posture and a distinct conversation.
+// ─────────────────────────────────────────────────────────────────────────────
+const engagementLayers: EngagementLayer[] = [
+  {
+    key: 'oci',
+    icon: 'compass',
+    name: 'OCI — Continuity Assessment',
+    posture: 'Institutional diagnostics',
+    layer: 'Layer 1 · Continuity intelligence',
+    fit: 'Federations and institutions establishing a continuity baseline before any tooling decision.',
+    feels: 'Diagnostic. Discreet. Strategic.',
+    deliverables: [
+      'OCI Snapshot — scoped continuity baseline',
+      'Executive Continuity Brief',
+      'Governance Entropy Review',
+      'Institutional Continuity Workshop',
+    ],
+    range: 'Engagement — typically $18K–$45K',
+  },
+  {
+    key: 'ocra',
+    icon: 'network',
+    name: 'OCRA — Adaptive Continuity Intelligence',
+    posture: 'Structural risk deepening',
+    layer: 'Layer 2 · Continuity topology',
+    fit: 'Institutions that have a baseline and need structural depth: dependency analysis, modernization pathways, confidence-aware interpretation.',
+    feels: 'Structural. Interpretive. Forward-looking.',
+    deliverables: [
+      'Structural continuity analysis',
+      'Continuity topology mapping',
+      'Modernization pathway evaluation',
+      'Confidence-aware operational interpretation',
+    ],
+    range: 'Engagement — typically $35K–$90K',
+  },
+  {
+    key: 'platform',
+    icon: 'layers',
+    name: 'Platform Activation',
     posture: 'Continuity infrastructure',
-    fit: 'National unions and federations preserving organizational memory across transitions.',
-    feels: 'Durable. Inherited. Continuous.',
-    focus: [
-      'Organizational Memory preserved across leadership transitions',
-      'Continuity preservation and operational resilience',
-      'Succession continuity for officers, stewards, and staff',
-      'Governance-safe cognition across the federation',
+    layer: 'Layer 3 · Operational continuity infrastructure',
+    fit: 'Institutions ready to activate continuity infrastructure on top of an assessed baseline — not generic SaaS onboarding.',
+    feels: 'Operational. Governance-safe. Inherited.',
+    deliverables: [
+      'Operational continuity tooling activation',
+      'Governance infrastructure alignment',
+      'Evidence and decisions-of-record systems',
+      'Continuity-safe workflows for officers, stewards, and staff',
     ],
-    surfaces: [
-      'Governance Operations surfaces',
-      'Organizational Memory',
-      'Continuity Intelligence',
-      'Longitudinal Cognition',
-      'Cross-Union Analytics',
-      'Continuity Simulation',
-    ],
-    range: 'Scoped with executive leadership — let’s talk',
+    range: 'Annual program — typically $40K–$140K',
   },
   {
-    key: 'sovereignty',
-    icon: Globe2,
-    name: 'Sovereignty Layer',
-    posture: 'Organizational operational sovereignty',
-    fit: 'Strategic federation-wide infrastructure with sovereign operational topology.',
-    feels: 'Sovereign. Resilient. Federation-grade.',
-    focus: [
-      'Sovereign operational topology under your governance',
-      'Continuity-safe cognition with fail-closed degradation',
-      'Federation-level operational coordination',
-      'Organizational resilience tooling and shared continuity infrastructure',
+    key: 'longitudinal',
+    icon: 'infinity',
+    name: 'Longitudinal Continuity Support',
+    posture: 'Continuity stewardship',
+    layer: 'Layer 4 · Governance continuity layer',
+    fit: 'National unions and federations sustaining continuity across leadership cycles, mandates, and federation-wide coordination.',
+    feels: 'Durable. Inherited. Federation-grade.',
+    deliverables: [
+      'Continuous governance entropy monitoring',
+      'Longitudinal executive continuity intelligence',
+      'Federation-level continuity coordination',
+      'Operational sovereignty posture maintenance',
     ],
-    surfaces: [
-      'Organizational Continuity surfaces',
-      'Cognition',
-      'Sovereignty Operations',
-      'Federation Coordination',
-      'Governance-Safe AI',
-      'Advanced Continuity Systems',
+    range: 'Strategic engagement — scoped with executive leadership',
+  },
+  {
+    key: 'founding',
+    icon: 'sparkles',
+    name: 'Founding Partner Cohort',
+    posture: 'Strategic institutional collaboration',
+    layer: 'Layer 5 · Cohort engagement',
+    fit: 'A small number of institutions co-developing continuity infrastructure with us — operationally embedded, doctrinally close.',
+    feels: 'Co-developed. Privileged. Long-cycle.',
+    deliverables: [
+      'Direct co-design with the founding team',
+      'Reserved governance influence on platform doctrine',
+      'Privileged access to OCRA and continuity research',
+      'Named cohort recognition in institutional materials',
     ],
-    range: 'Strategic federation engagement — let’s talk',
+    range: 'Cohort terms — by invitation and mutual fit',
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Visibility matrix — what each stakeholder band sees at each tier.
-// ─────────────────────────────────────────────────────────────────────────────
-const visibilityBands = [
-  {
-    band: 'Stewards & front-line representatives',
-    foundation: 'Unified intake, casework, and continuity-safe communication.',
-    governance: 'Casework with governance context and policy precedents.',
-    continuity: 'Casework anchored to organizational memory and prior decisions.',
-    sovereignty: 'Federation-wide casework patterns and cross-union precedents.',
-  },
-  {
-    band: 'Officers & committees',
-    foundation: 'Operational visibility and decisions of record.',
-    governance: 'Governance cadence, motions, and compliance continuity.',
-    continuity: 'Continuity intelligence across mandates and transitions.',
-    sovereignty: 'Sovereign operating intelligence at federation scope.',
-  },
-  {
-    band: 'Executive leadership',
-    foundation: 'Operational picture across the institution.',
-    governance: 'Executive intelligence with federation reporting.',
-    continuity: 'Longitudinal executive intelligence across leadership cycles.',
-    sovereignty: 'Federation-grade executive coordination and resilience posture.',
-  },
-  {
-    band: 'Members & the institution',
-    foundation: 'Confidence that intake and commitments are not lost.',
-    governance: 'Confidence that governance is operating to a defensible cadence.',
-    continuity: 'Confidence that organizational memory will outlive any individual.',
-    sovereignty: 'Confidence that operational sovereignty is preserved by design.',
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Continuity progression — institutions evolve operationally over time.
-// ─────────────────────────────────────────────────────────────────────────────
-const progression = [
-  {
-    from: 'Foundation',
-    to: 'Governance Operations',
-    trigger: 'Governance cadence becomes the binding constraint, not casework throughput.',
-  },
-  {
-    from: 'Governance Operations',
-    to: 'Organizational Continuity',
-    trigger: 'Leadership transitions, succession, and federation reporting become organizational risks.',
-  },
-  {
-    from: 'Organizational Continuity',
-    to: 'Sovereignty Layer',
-    trigger: 'Operational sovereignty, federation coordination, and shared continuity become strategic priorities.',
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Procurement-safe positioning — organizational commitments.
+// SECTION 5 — Procurement-Safe Institutional Commitments
+// These are positions, not features. They distinguish continuity infrastructure
+// from generic AI tooling — and are the procurement department's first real read.
 // ─────────────────────────────────────────────────────────────────────────────
 const procurementCommitments = [
-  {
-    title: 'Operational honesty',
-    body: 'Capabilities, limits, and degradation behaviour are documented before procurement, not after.',
-  },
-  {
-    title: 'Governance-safe cognition',
-    body: 'Reasoning surfaces operate under organizational governance — not autonomous agent assumptions.',
-  },
-  {
-    title: 'Fail-closed degradation',
-    body: 'When systems degrade, they degrade safely — operations remain governable, not opaque.',
-  },
-  {
-    title: 'Sovereignty posture',
-    body: 'Canadian data residency and sovereign hosting are structural commitments, not configuration toggles.',
-  },
-  {
-    title: 'Continuity-safe operations',
-    body: 'No operational pathway depends on a single individual, vendor, or undocumented practice.',
-  },
+  { title: 'Human oversight by design', body: 'Every operational pathway assumes a named human owner. Cognition surfaces are operator-initiated and operator-reviewable.' },
+  { title: 'Governance-safe AI', body: 'Reasoning operates under institutional governance — not autonomous agent assumptions. Explainability is structural, not optional.' },
+  { title: 'No worker surveillance', body: 'UnionEyes does not rank, score, or monitor individual workers. Continuity infrastructure is institutional, not personal.' },
+  { title: 'Explainable interpretation', body: 'Every interpretive surface exposes its confidence posture and its dependency chain. No black-box decisions.' },
+  { title: 'Continuity-focused interpretation', body: 'All cognition is oriented toward institutional continuity — not productivity scoring or behavioural analysis.' },
+  { title: 'No institutional ranking', body: 'We do not benchmark, league-table, or compare unions against each other. Continuity is sovereign to each institution.' },
+  { title: 'Canadian residency', body: 'Canadian-hosted, sovereignty-conscious institutional trust. Data residency and sovereign hosting are structural commitments.' },
+  { title: 'Fail-closed degradation', body: 'When systems degrade, they degrade safely — operations remain governable, not opaque.' },
 ];
 
-const frOperationalReality = [
-  { title: 'Complexité organisationnelle', body: 'Multiples sections locales, mandats et comités sans image opérationnelle cohérente.' },
-  { title: 'Risque de continuité', body: 'Savoir critique détenu par des personnes — perdu à chaque transition de leadership.' },
-  { title: 'Fragmentation de la gouvernance', body: 'Décisions, motions et engagements dispersés entre courriels, lecteurs et notes de réunion.' },
-  { title: 'Roulement opérationnel', body: 'Nouveaux délégués, dirigeants et membres du personnel héritant de dossiers inachevés sans registre opérationnel.' },
-  { title: 'Surcharge des délégués', body: 'Les représentants de première ligne portent une mémoire organisationnelle que l’institution ne retient pas elle-même.' },
-  { title: 'Perte de mémoire organisationnelle', body: 'Les précédents, doctrines et décisions antérieures se dégradent chaque année lorsqu’ils ne sont pas consignés.' },
+// ─────────────────────────────────────────────────────────────────────────────
+// French (fr-CA) parallel content
+// ─────────────────────────────────────────────────────────────────────────────
+const frContinuityFragility = [
+  { title: 'Fragilité de la continuité', body: 'Le savoir procédural est concentré chez quelques personnes expérimentées. Un départ à la retraite, une rotation — et l’institution perd des années de jugement.' },
+  { title: 'Charge d’intégration', body: 'Chaque nouveau dirigeant, employé ou délégué hérite de dossiers inachevés sans registre opérationnel, sans carte des précédents, sans transmission de continuité.' },
+  { title: 'Incohérence de gouvernance', body: 'Décisions, motions et engagements dispersés entre courriels, lecteurs et notes de réunion — défendables sur le moment, non documentés à travers les cycles.' },
+  { title: 'Risque de modernisation', body: 'Les décisions d’outillage prises sans évaluation de continuité accélèrent généralement la fragmentation plutôt que de la résoudre.' },
+  { title: 'Dépendance institutionnelle', body: 'La fédération dépend des individus plus que les individus ne le savent. Leur départ révèle la dépendance — généralement sous pression opérationnelle.' },
 ];
 
-const frMaturityTiers = [
+const frEngagementMoments = [
+  { title: 'Transitions de leadership', body: 'Un nouveau président, directeur exécutif ou conseiller général a besoin que la continuité soit transmise — pas reconstruite.' },
+  { title: 'Initiatives de modernisation', body: 'Une fédération examine son outillage et souhaite comprendre le risque de continuité avant tout investissement.' },
+  { title: 'Fragmentation opérationnelle', body: 'Sections locales, comités et personnel opérant sans registre partagé — les coûts de coordination augmentent à chaque trimestre.' },
+  { title: 'Pression sur l’intégration', body: 'Les nouveaux délégués et dirigeants arrivent plus vite que l’institution ne peut leur transférer son jugement.' },
+  { title: 'Restructuration de la gouvernance', body: 'Une fusion, une réorganisation ou une révision constitutionnelle requiert une base de continuité avant toute décision structurelle.' },
+  { title: 'Préoccupations de continuité', body: 'La direction a nommé la succession et la mémoire institutionnelle comme risques stratégiques et veut les rendre mesurables.' },
+  { title: 'Croissance de la coordination fédérative', body: 'Un organisme national ou sectoriel coordonnant plusieurs sections locales a besoin de topologie opérationnelle, pas de réunions supplémentaires.' },
+];
+
+const frContinuityJourney = [
+  { stage: '1', name: 'Évaluation OCI', outcome: 'Comprendre la fragilité de la continuité', summary: 'Un diagnostic institutionnel ciblé qui révèle où la continuité se rompt — et où elle tient silencieusement.' },
+  { stage: '2', name: 'Approfondissement OCRA', outcome: 'Identifier les risques structurels de continuité', summary: 'Intelligence de continuité adaptative : topologie, parcours de modernisation, interprétation consciente du niveau de confiance.' },
+  { stage: '3', name: 'Cartographie de gouvernance', outcome: 'Clarifier les dépendances opérationnelles', summary: 'Traduire les constats en une carte lisible par la gouvernance des dépendances, des décisions officielles et des obligations de continuité.' },
+  { stage: '4', name: 'Activation de plateforme', outcome: 'Stabiliser les opérations de continuité', summary: 'Ce n’est qu’ici que la plateforme entre en jeu — comme infrastructure de continuité activée sur la base de l’évaluation.' },
+  { stage: '5', name: 'Soutien longitudinal', outcome: 'Soutenir la continuité institutionnelle', summary: 'Intendance continue de continuité : revue d’entropie de gouvernance, intelligence exécutive et santé fédérative.' },
+];
+
+const frEngagementLayers: EngagementLayer[] = [
   {
-    key: 'foundation',
-    icon: Layers,
-    name: 'Fondation',
-    posture: 'Stabilisation opérationnelle',
-    fit: 'Sections locales et petits syndicats établissant un registre opérationnel cohérent.',
-    feels: 'Stable. Coordonné. Vérifiable.',
-    focus: [
-      'Réception unifiée des dossiers et messages des membres',
-      'Communication et coordination des délégués respectueuses de la continuité',
-      'Mémoire opérationnelle bornée avec rétention explicite',
-      'Visibilité opérationnelle pour dirigeants et comités',
-    ],
-    surfaces: ['Réception', 'Travail', 'Priorités', 'Gouvernance de base', 'Communications'],
-    range: 'Programme annuel — généralement 12 k$ à 30 k$',
+    key: 'oci', icon: 'compass',
+    name: 'OCI — Évaluation de continuité',
+    posture: 'Diagnostics institutionnels',
+    layer: 'Couche 1 · Intelligence de continuité',
+    fit: 'Fédérations et institutions établissant une base de continuité avant toute décision d’outillage.',
+    feels: 'Diagnostic. Discret. Stratégique.',
+    deliverables: ['Aperçu OCI — base de continuité ciblée', 'Note exécutive de continuité', 'Revue d’entropie de gouvernance', 'Atelier institutionnel de continuité'],
+    range: 'Engagement — généralement 18 k$ à 45 k$',
   },
   {
-    key: 'governance',
-    icon: Building2,
-    name: 'Opérations de gouvernance',
-    posture: 'Infrastructure de maturité de gouvernance',
-    fit: 'Organisations de taille moyenne modernisant la cadence de gouvernance et les rapports fédératifs.',
-    feels: 'Discipliné. Mesurable. Transparent.',
-    focus: [
-      'Opérations de gouvernance et décisions officielles',
-      'Rapports fédératifs et continuité de conformité',
-      'Visibilité exécutive sur l’institution opérationnelle',
-      'Cadence opérationnelle avec pistes d’audit défendables',
-    ],
-    surfaces: ['Surfaces Fondation', 'Gouvernance', 'Analytique', 'Fédération', 'Conformité', 'Intelligence exécutive'],
-    range: 'Programme annuel — généralement 40 k$ à 120 k$',
+    key: 'ocra', icon: 'network',
+    name: 'OCRA — Intelligence de continuité adaptative',
+    posture: 'Approfondissement structurel des risques',
+    layer: 'Couche 2 · Topologie de continuité',
+    fit: 'Institutions disposant d’une base et nécessitant une profondeur structurelle : analyse des dépendances, parcours de modernisation, interprétation consciente du niveau de confiance.',
+    feels: 'Structurel. Interprétatif. Tourné vers l’avenir.',
+    deliverables: ['Analyse structurelle de continuité', 'Cartographie de la topologie de continuité', 'Évaluation des parcours de modernisation', 'Interprétation opérationnelle consciente du niveau de confiance'],
+    range: 'Engagement — généralement 35 k$ à 90 k$',
   },
   {
-    key: 'continuity',
-    icon: Landmark,
-    name: 'Continuité organisationnelle',
+    key: 'platform', icon: 'layers',
+    name: 'Activation de plateforme',
     posture: 'Infrastructure de continuité',
-    fit: 'Syndicats nationaux et fédérations préservant la mémoire organisationnelle à travers les transitions.',
-    feels: 'Durable. Transmissible. Continu.',
-    focus: [
-      'Mémoire organisationnelle préservée à travers les transitions de leadership',
-      'Préservation de continuité et résilience opérationnelle',
-      'Continuité de succession pour dirigeants, délégués et personnel',
-      'Cognition respectueuse de la gouvernance à l’échelle fédérative',
-    ],
-    surfaces: ['Surfaces de gouvernance', 'Mémoire organisationnelle', 'Intelligence de continuité', 'Cognition longitudinale', 'Analytique intersyndicale', 'Simulation de continuité'],
-    range: 'Défini avec la direction exécutive — discutons-en',
+    layer: 'Couche 3 · Infrastructure opérationnelle de continuité',
+    fit: 'Institutions prêtes à activer une infrastructure de continuité sur une base évaluée — pas un déploiement SaaS générique.',
+    feels: 'Opérationnel. Respectueux de la gouvernance. Transmissible.',
+    deliverables: ['Activation d’outils opérationnels de continuité', 'Alignement d’infrastructure de gouvernance', 'Systèmes de preuve et décisions officielles', 'Flux de travail respectueux de la continuité pour dirigeants, délégués et personnel'],
+    range: 'Programme annuel — généralement 40 k$ à 140 k$',
   },
   {
-    key: 'sovereignty',
-    icon: Globe2,
-    name: 'Couche de souveraineté',
-    posture: 'Souveraineté opérationnelle organisationnelle',
-    fit: 'Infrastructure stratégique à l’échelle fédérative avec topologie opérationnelle souveraine.',
-    feels: 'Souverain. Résilient. À l’échelle fédérative.',
-    focus: [
-      'Topologie opérationnelle souveraine sous votre gouvernance',
-      'Cognition respectueuse de la continuité avec dégradation sécuritaire',
-      'Coordination opérationnelle à l’échelle fédérative',
-      'Outils de résilience organisationnelle et infrastructure de continuité partagée',
-    ],
-    surfaces: ['Surfaces de continuité organisationnelle', 'Cognition', 'Opérations souveraines', 'Coordination fédérative', 'IA respectueuse de la gouvernance', 'Systèmes avancés de continuité'],
-    range: 'Engagement stratégique fédératif — discutons-en',
-  },
-];
-
-const frVisibilityBands = [
-  {
-    band: 'Délégués et représentants de première ligne',
-    foundation: 'Réception unifiée, dossiers et communication respectueuse de la continuité.',
-    governance: 'Dossiers avec contexte de gouvernance et précédents politiques.',
-    continuity: 'Dossiers ancrés dans la mémoire organisationnelle et les décisions antérieures.',
-    sovereignty: 'Tendances fédératives et précédents intersyndicaux.',
+    key: 'longitudinal', icon: 'infinity',
+    name: 'Soutien longitudinal de continuité',
+    posture: 'Intendance de continuité',
+    layer: 'Couche 4 · Couche de continuité de gouvernance',
+    fit: 'Syndicats nationaux et fédérations soutenant la continuité à travers les cycles de leadership, les mandats et la coordination fédérative.',
+    feels: 'Durable. Transmissible. À l’échelle fédérative.',
+    deliverables: ['Surveillance continue de l’entropie de gouvernance', 'Intelligence exécutive longitudinale de continuité', 'Coordination fédérative de continuité', 'Maintien de la posture de souveraineté opérationnelle'],
+    range: 'Engagement stratégique — défini avec la direction exécutive',
   },
   {
-    band: 'Dirigeants et comités',
-    foundation: 'Visibilité opérationnelle et décisions officielles.',
-    governance: 'Cadence de gouvernance, motions et continuité de conformité.',
-    continuity: 'Intelligence de continuité à travers mandats et transitions.',
-    sovereignty: 'Intelligence opérationnelle souveraine à l’échelle fédérative.',
+    key: 'founding', icon: 'sparkles',
+    name: 'Cohorte de partenaires fondateurs',
+    posture: 'Collaboration institutionnelle stratégique',
+    layer: 'Couche 5 · Engagement en cohorte',
+    fit: 'Un petit nombre d’institutions co-développant l’infrastructure de continuité avec nous — engagement opérationnel et doctrinal rapproché.',
+    feels: 'Co-développé. Privilégié. À long cycle.',
+    deliverables: ['Co-conception directe avec l’équipe fondatrice', 'Influence de gouvernance réservée sur la doctrine de plateforme', 'Accès privilégié à la recherche OCRA et continuité', 'Reconnaissance nommée de la cohorte dans le matériel institutionnel'],
+    range: 'Conditions de cohorte — sur invitation et ajustement mutuel',
   },
-  {
-    band: 'Direction exécutive',
-    foundation: 'Image opérationnelle de l’institution.',
-    governance: 'Intelligence exécutive avec rapports fédératifs.',
-    continuity: 'Intelligence exécutive longitudinale à travers les cycles de leadership.',
-    sovereignty: 'Coordination exécutive et posture de résilience à l’échelle fédérative.',
-  },
-  {
-    band: 'Membres et institution',
-    foundation: 'Confiance que les demandes et engagements ne se perdent pas.',
-    governance: 'Confiance que la gouvernance suit une cadence défendable.',
-    continuity: 'Confiance que la mémoire organisationnelle survivra à toute personne.',
-    sovereignty: 'Confiance que la souveraineté opérationnelle est préservée par conception.',
-  },
-];
-
-const frProgression = [
-  { from: 'Fondation', to: 'Opérations de gouvernance', trigger: 'La cadence de gouvernance devient la contrainte principale, plutôt que le volume de dossiers.' },
-  { from: 'Opérations de gouvernance', to: 'Continuité organisationnelle', trigger: 'Les transitions de leadership, la succession et les rapports fédératifs deviennent des risques organisationnels.' },
-  { from: 'Continuité organisationnelle', to: 'Couche de souveraineté', trigger: 'La souveraineté opérationnelle, la coordination fédérative et la continuité partagée deviennent stratégiques.' },
 ];
 
 const frProcurementCommitments = [
-  { title: 'Honnêteté opérationnelle', body: 'Les capacités, limites et comportements de dégradation sont documentés avant l’approvisionnement.' },
-  { title: 'Cognition respectueuse de la gouvernance', body: 'Les surfaces de raisonnement fonctionnent sous gouvernance organisationnelle, pas selon des hypothèses d’agent autonome.' },
+  { title: 'Supervision humaine par conception', body: 'Chaque parcours opérationnel suppose un propriétaire humain nommé. Les surfaces cognitives sont déclenchées et révisées par un opérateur.' },
+  { title: 'IA respectueuse de la gouvernance', body: 'Le raisonnement opère sous gouvernance institutionnelle — pas selon des hypothèses d’agent autonome. L’explicabilité est structurelle, pas optionnelle.' },
+  { title: 'Aucune surveillance des travailleurs', body: 'UnionEyes ne classe pas, n’évalue pas et ne surveille pas les travailleurs. L’infrastructure de continuité est institutionnelle, pas personnelle.' },
+  { title: 'Interprétation explicable', body: 'Chaque surface interprétative expose sa posture de confiance et sa chaîne de dépendance. Aucune décision en boîte noire.' },
+  { title: 'Interprétation orientée continuité', body: 'Toute cognition est orientée vers la continuité institutionnelle — pas vers l’évaluation de productivité ou l’analyse comportementale.' },
+  { title: 'Aucun classement institutionnel', body: 'Nous ne comparons pas les syndicats entre eux. La continuité est souveraine à chaque institution.' },
+  { title: 'Résidence canadienne', body: 'Hébergement canadien, confiance institutionnelle consciente de la souveraineté. La résidence et l’hébergement souverain sont des engagements structurels.' },
   { title: 'Dégradation sécuritaire', body: 'Lorsque les systèmes se dégradent, ils le font de manière gouvernable et non opaque.' },
-  { title: 'Posture de souveraineté', body: 'La résidence des données au Canada et l’hébergement souverain sont des engagements structurels.' },
-  { title: 'Opérations respectueuses de la continuité', body: 'Aucun parcours opérationnel ne dépend d’une seule personne, d’un fournisseur ou d’une pratique non documentée.' },
 ];
 
 const pricingCopy = {
   'en-CA': {
-    heading: <>Organizational operational infrastructure,<br />organized by operational maturity.</>,
-    description: 'We meet institutions where they are. Programs are organized as operational maturity states — chosen with you, not handed down as seat counts or feature matrices. Start where it fits, grow when it matters.',
-    realityHeading: 'Operational reality',
-    realityBody: 'Institutions adopt UnionEyes when operational reality outgrows informal coordination. The conditions below consistently determine the right maturity tier.',
-    tierHeading: 'Find the tier that fits you today',
-    tierBody: 'Four operational maturity states. Each one is a coherent place to live for a while — not a feature bundle. You don’t need to start at the top; you need to start where your institution actually is.',
+    heading: <>Institutional continuity engagement architecture,<br />not software pricing tiers.</>,
+    description: 'UnionEyes is continuity infrastructure — assessment, intelligence, then activation. Every engagement starts with the OCI (Organizational Continuity Index), not with a procurement form. Software is the fourth stage of the journey, not the entry point.',
+    section1Heading: 'Continuity starts before software',
+    section1Body: 'Most institutions discover that the platform decision was actually a continuity decision in disguise. We exist because continuity fragility is rarely measured before it is procured against.',
+    section2Heading: 'When organizations typically engage us',
+    section2Body: 'There is no single trigger — but these are the operational moments that consistently bring federations and unions to the OCI conversation.',
+    section3Heading: 'The Continuity Journey',
+    section3Body: 'A maturity-oriented engagement pathway. Five sequential stages, each one earning the next. Platform activation appears at stage four — never stage one.',
+    stageLabel: 'Stage',
+    outcomeLabel: 'Outcome',
+    tabStartHere: 'Start here',
+    tabEngagementLayers: 'Engagement layers',
+    tabJourney: 'The journey',
+    tabWhy: 'Why this exists',
+    tabProcurement: 'Procurement',
+    sectionLadderEyebrow: 'Start here',
+    sectionLadderHeading: 'The assessment ladder',
+    sectionLadderBody: 'Every UnionEyes relationship begins with an assessment, not a procurement form. The first three steps are scoped, named, and priced — so an executive director or board chair can begin the continuity conversation without waiting for a sales cycle.',
+    sectionLadderFooter: 'These three steps are the entry funnel to the engagement layers below. Most institutions begin with the free Reflection and only escalate when the surfaced risk warrants it.',
+    ladderIncludesLabel: 'What you receive',
+    ladderFeaturedBadge: 'Most institutions start here',
+    section4Heading: 'Engagement layers',
+    section4Body: 'When an assessment surfaces structural continuity risk that cannot be resolved with a brief or a workshop, the relationship escalates into one of these institutional engagement layers. Each is a coherent posture and a distinct conversation — not a feature bundle or a seat-licensing tier.',
     fitPrefix: 'Best for: ',
-    focusLabel: 'What you focus on',
-    includedLabel: 'What’s included',
+    deliverablesLabel: 'What you receive',
     investmentLabel: 'Investment',
-    rangeNote: 'A starting range — we shape the final scope with you and your procurement team.',
-    unsureTitle: 'Not sure where you fit?',
-    unsureBody: 'That’s the most common starting point. A short conversation usually makes the right tier obvious — and we’ll tell you honestly if you don’t need the bigger one yet.',
-    unsureCta: 'Talk it through with us',
-    visibilityHeading: 'What everyone gets out of it',
-    visibilityBody: 'Each tier changes what stewards, officers, executives, and members can see and rely on. High-level on purpose — we keep the feature talk for the conversation.',
-    who: 'Who',
-    growHeading: 'Grow when you’re ready',
-    growBody: 'Organizations evolve. The ladder is designed to be lived in — each tier earns the next when something concrete in your operations changes.',
-    when: 'When it happens: ',
+    rangeNote: 'A starting range. Final scope is shaped jointly with you and your procurement leadership — no self-serve checkout, ever.',
+    unsureTitle: 'Not sure which layer fits?',
+    unsureBody: 'Most institutions start with an OCI conversation — even when they think they need the platform. A short briefing usually makes the right layer obvious.',
+    unsureCta: 'Start with an OCI conversation',
     procurementLabel: 'Procurement-safe by design',
-    commitmentsHeading: 'Organizational commitments, not feature claims',
-    commitmentsBody: 'Every maturity tier inherits the same organizational commitments. These are the positions that distinguish operational infrastructure from generic AI tooling.',
+    commitmentsHeading: 'Institutional commitments, not feature claims',
+    commitmentsBody: 'Every engagement layer inherits the same institutional commitments. These are the positions that distinguish continuity infrastructure from generic AI tooling — and are usually the first thing procurement reads.',
     trustCenter: 'Trust Center',
     governanceStructure: 'Governance Structure',
-    organizationalProof: 'Organizational Proof',
-    ctaLabel: 'Let’s find the right fit',
-    ctaHeading: 'Start with a conversation, not a quote',
-    ctaBody: 'Tell us where your organization is today. We’ll help you identify the right tier, walk through what it looks like in practice, and shape the program with you — at the pace that fits your governance.',
-    ctaPrimary: 'Request Executive Briefing',
-    ctaSecondary: 'Discuss Operational Maturity',
-    ctaFinePrint: 'Maturity tiers and ranges are positioning structure for organizational planning. Final program scope is set jointly with executive and procurement leadership.',
-    operationalReality,
-    maturityTiers,
-    visibilityBands,
-    progression,
-    procurementCommitments,
+    institutionalProof: 'Institutional Proof',
+    ctaLabel: 'Begin with assessment, not procurement',
+    ctaHeading: 'Start with a continuity conversation',
+    ctaBody: 'Tell us where your institution is today. We will help you identify which layer fits, what an OCI engagement looks like in practice, and shape the journey with you — at the pace your governance can sustain.',
+    ctaPrimary: 'Start the free Continuity Reflection',
+    ctaSecondary: 'Discuss an OCI Engagement',
+    ctaFinePrint: 'Engagement layers and ranges are positioning structure for institutional planning. Final scope is set jointly with executive and procurement leadership — never as self-serve subscription.',
+    glossaryLabel: 'The two terms used throughout this page',
+    glossary: [
+      { acronym: 'OCI', expansion: 'Organizational Continuity Index', body: 'A scoped organizational diagnostic that measures continuity fragility — what would break if a key person, a leadership cycle, or a critical decision-of-record were lost tomorrow.' },
+      { acronym: 'OCRA', expansion: 'Organizational Continuity Risk Analysis', body: 'A deeper, structural reading of continuity risk: dependency topology, modernization pathways, governance entropy, and confidence-aware operational interpretation.' },
+    ],
+    continuityFragility, engagementMoments, continuityJourney, assessmentLadder, engagementLayers, procurementCommitments,
   },
   'fr-CA': {
-    heading: <>Infrastructure opérationnelle organisationnelle,<br />organisée par maturité opérationnelle.</>,
-    description: 'Nous rencontrons les organisations là où elles sont. Les programmes sont organisés comme des états de maturité opérationnelle, choisis avec vous plutôt qu’imposés comme des sièges ou des matrices de fonctionnalités.',
-    realityHeading: 'Réalité opérationnelle',
-    realityBody: 'Les organisations adoptent UnionEyes lorsque la réalité opérationnelle dépasse la coordination informelle. Les conditions ci-dessous aident à déterminer le bon niveau de maturité.',
-    tierHeading: 'Trouver le palier qui vous convient aujourd’hui',
-    tierBody: 'Quatre états de maturité opérationnelle. Chacun est un lieu cohérent où vivre pendant un certain temps, pas un ensemble de fonctionnalités.',
+    heading: <>Architecture d’engagement de continuité institutionnelle,<br />pas une grille tarifaire logicielle.</>,
+    description: 'UnionEyes est une infrastructure de continuité — évaluation, intelligence, puis activation. Chaque engagement commence par l’OCI (Indice de continuité organisationnelle), pas par un formulaire d’approvisionnement. Le logiciel est la quatrième étape du parcours, jamais le point d’entrée.',
+    section1Heading: 'La continuité commence avant le logiciel',
+    section1Body: 'La plupart des institutions découvrent que la décision de plateforme était en réalité une décision de continuité déguisée. Nous existons parce que la fragilité de la continuité est rarement mesurée avant d’être contournée par un achat.',
+    section2Heading: 'Quand les organisations nous engagent typiquement',
+    section2Body: 'Il n’y a pas de déclencheur unique — mais voici les moments opérationnels qui amènent constamment les fédérations et les syndicats à la conversation OCI.',
+    section3Heading: 'Le parcours de continuité',
+    section3Body: 'Un parcours d’engagement orienté maturité. Cinq étapes séquentielles, chacune méritant la suivante. L’activation de plateforme apparaît à l’étape quatre — jamais à l’étape un.',
+    stageLabel: 'Étape',
+    outcomeLabel: 'Résultat',
+    tabStartHere: 'Commencer ici',
+    tabEngagementLayers: 'Couches d’engagement',
+    tabJourney: 'Le parcours',
+    tabWhy: 'Pourquoi nous existons',
+    tabProcurement: 'Approvisionnement',
+    sectionLadderEyebrow: 'Commencer ici',
+    sectionLadderHeading: 'L’échelle d’évaluation',
+    sectionLadderBody: 'Chaque relation avec UnionEyes commence par une évaluation, pas par un formulaire d’approvisionnement. Les trois premières étapes sont délimitées, nommées et tarifées — afin qu’un directeur général ou un président de conseil puisse amorcer la conversation de continuité sans attendre un cycle de vente.',
+    sectionLadderFooter: 'Ces trois étapes constituent l’entonnoir d’entrée vers les couches d’engagement ci-dessous. La plupart des institutions commencent par la Réflexion gratuite et n’augmentent l’engagement que lorsque le risque révélé le justifie.',
+    ladderIncludesLabel: 'Ce que vous recevez',
+    ladderFeaturedBadge: 'La plupart des institutions commencent ici',
+    section4Heading: 'Couches d’engagement',
+    section4Body: 'Lorsqu’une évaluation révèle un risque structurel de continuité qui ne peut être résolu par une note ou un atelier, la relation s’élève vers l’une de ces couches d’engagement institutionnel. Chacune est une posture cohérente et une conversation distincte — pas un ensemble de fonctionnalités ni un palier de licences par siège.',
     fitPrefix: 'Convient à : ',
-    focusLabel: 'Ce sur quoi vous vous concentrez',
-    includedLabel: 'Ce qui est inclus',
+    deliverablesLabel: 'Ce que vous recevez',
     investmentLabel: 'Investissement',
-    rangeNote: 'Une fourchette de départ — nous façonnons la portée finale avec vous et votre équipe d’approvisionnement.',
-    unsureTitle: 'Vous ne savez pas où vous situer?',
-    unsureBody: 'C’est le point de départ le plus courant. Une courte conversation rend généralement le bon palier évident.',
-    unsureCta: 'En discuter avec nous',
-    visibilityHeading: 'Ce que chacun y gagne',
-    visibilityBody: 'Chaque palier change ce que les délégués, dirigeants, exécutifs et membres peuvent voir et utiliser avec confiance.',
-    who: 'Qui',
-    growHeading: 'Grandir lorsque vous êtes prêt',
-    growBody: 'Les institutions évoluent. Cette progression est conçue pour être vécue; chaque palier mérite le suivant lorsqu’un changement concret apparaît dans vos opérations.',
-    when: 'Quand cela se produit : ',
+    rangeNote: 'Une fourchette de départ. La portée finale est définie conjointement avec votre équipe d’approvisionnement — jamais en libre-service.',
+    unsureTitle: 'Vous ne savez pas quelle couche convient?',
+    unsureBody: 'La plupart des institutions commencent par une conversation OCI — même lorsqu’elles pensent avoir besoin de la plateforme. Une courte présentation rend généralement la bonne couche évidente.',
+    unsureCta: 'Commencer par une conversation OCI',
     procurementLabel: 'Conçu pour l’approvisionnement',
-    commitmentsHeading: 'Engagements organisationnels, pas promesses de fonctionnalités',
-    commitmentsBody: 'Chaque palier hérite des mêmes engagements organisationnels. Ce sont ces positions qui distinguent l’infrastructure opérationnelle des outils d’IA génériques.',
+    commitmentsHeading: 'Engagements institutionnels, pas promesses de fonctionnalités',
+    commitmentsBody: 'Chaque couche d’engagement hérite des mêmes engagements institutionnels. Ce sont les positions qui distinguent l’infrastructure de continuité des outils d’IA génériques — et habituellement la première chose que l’approvisionnement lit.',
     trustCenter: 'Centre de confiance',
     governanceStructure: 'Structure de gouvernance',
-    organizationalProof: 'Preuves organisationnelles',
-    ctaLabel: 'Trouvons le bon ajustement',
-    ctaHeading: 'Commencer par une conversation, pas par un devis',
-    ctaBody: 'Dites-nous où se situe votre organisation aujourd’hui. Nous vous aidons à identifier le bon palier et à façonner le programme à un rythme compatible avec votre gouvernance.',
-    ctaPrimary: 'Demander une présentation exécutive',
-    ctaSecondary: 'Discuter de la maturité opérationnelle',
-    ctaFinePrint: 'Les paliers et fourchettes servent à planifier l’engagement organisationnel. La portée finale est définie avec la direction exécutive et l’approvisionnement.',
-    operationalReality: frOperationalReality,
-    maturityTiers: frMaturityTiers,
-    visibilityBands: frVisibilityBands,
-    progression: frProgression,
+    institutionalProof: 'Preuves institutionnelles',
+    ctaLabel: 'Commencer par l’évaluation, pas par l’approvisionnement',
+    ctaHeading: 'Commencer par une conversation de continuité',
+    ctaBody: 'Dites-nous où en est votre institution aujourd’hui. Nous vous aidons à identifier la bonne couche, à comprendre à quoi ressemble un engagement OCI en pratique, et à façonner le parcours avec vous.',
+    ctaPrimary: 'Commencer la réflexion de continuité (gratuite)',
+    ctaSecondary: 'Discuter d’un engagement OCI',
+    ctaFinePrint: 'Les couches d’engagement et les fourchettes servent à planifier l’engagement institutionnel. La portée finale est définie avec la direction exécutive et l’approvisionnement — jamais en abonnement libre-service.',
+    glossaryLabel: 'Les deux termes utilisés tout au long de cette page',
+    glossary: [
+      { acronym: 'OCI', expansion: 'Indice de continuité organisationnelle', body: 'Un diagnostic organisationnel ciblé qui mesure la fragilité de la continuité — ce qui se romprait si une personne clé, un cycle de leadership ou une décision critique était perdue demain.' },
+      { acronym: 'OCRA', expansion: 'Analyse des risques de continuité organisationnelle', body: 'Une lecture structurelle approfondie du risque de continuité : topologie des dépendances, parcours de modernisation, entropie de gouvernance, et interprétation opérationnelle consciente du niveau de confiance.' },
+    ],
+    continuityFragility: frContinuityFragility,
+    engagementMoments: frEngagementMoments,
+    continuityJourney: frContinuityJourney,
+    assessmentLadder: frAssessmentLadder,
+    engagementLayers: frEngagementLayers,
     procurementCommitments: frProcurementCommitments,
   },
 } as const;
@@ -451,8 +550,103 @@ export default async function LocalePricingPage({
   const { locale } = await params;
   const tNote = await getTranslations({ locale, namespace: 'continuityNotes.procurement' });
   const copy = pricingCopy[locale as keyof typeof pricingCopy] ?? pricingCopy['en-CA'];
+  const { marketingUrl } = getUnionEyesSiteTopology();
+
+  // Schema.org Service + Offer surface aligned to the GTM funnel on
+  // /institutional-continuity-risk. Three concrete tiers (Continuity
+  // Reflection / Executive Continuity Brief / Institutional Continuity
+  // Diagnostic) plus four engagement layers (priced as ranges) get exposed
+  // as a Service with an AggregateOffer so search engines and procurement
+  // crawlers see the real entry funnel — not a generic SaaS price band.
+  const pricingServiceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'UnionEyes Institutional Continuity Engagement',
+    serviceType: 'Institutional continuity assessment and infrastructure',
+    provider: {
+      '@type': 'Organization',
+      name: 'UnionEyes',
+      url: marketingUrl,
+    },
+    areaServed: { '@type': 'Country', name: 'Canada' },
+    availableLanguage: ['en-CA', 'fr-CA'],
+    url: `${marketingUrl}/${locale}/pricing`,
+    description:
+      'Institutional continuity engagement architecture for unions, federations, and democratic organizations — Continuity Reflection, Executive Continuity Brief, Institutional Continuity Diagnostic, then layered platform activation and longitudinal support.',
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Continuity Reflection',
+        description:
+          'Pseudonymous institutional continuity assessment (ICRA). OCI band, quiet-risk signal observations, continuity burden index, one starter recommendation. No login required.',
+        price: '0',
+        priceCurrency: 'CAD',
+        availability: 'https://schema.org/InStock',
+        url: `${marketingUrl}/${locale}/institutional-continuity-risk`,
+      },
+      {
+        '@type': 'Offer',
+        name: 'Executive Continuity Brief',
+        description:
+          'Governance-readable deepening of the continuity assessment: governance entropy, continuity debt, institutional dependency review, modernization risk, prioritized recommendations.',
+        price: '1200',
+        priceCurrency: 'CAD',
+        availability: 'https://schema.org/InStock',
+        url: `${marketingUrl}/${locale}/institutional-continuity-risk?intendedTier=executive_continuity_brief`,
+      },
+      {
+        '@type': 'Offer',
+        name: 'Institutional Continuity Diagnostic',
+        description:
+          'Facilitated diagnostic engagement: institutional continuity workshop, memory lineage mapping, and executive briefing note your board can act on.',
+        price: '6500',
+        priceCurrency: 'CAD',
+        availability: 'https://schema.org/InStock',
+        url: `${marketingUrl}/${locale}/contact?topic=institutional-continuity-diagnostic`,
+      },
+      {
+        '@type': 'AggregateOffer',
+        name: 'OCI — Continuity Assessment engagement layer',
+        description:
+          'Layered institutional diagnostic engagement: OCI Snapshot, Executive Continuity Brief, Governance Entropy Review, Institutional Continuity Workshop.',
+        priceCurrency: 'CAD',
+        lowPrice: '18000',
+        highPrice: '45000',
+        offerCount: 1,
+        url: `${marketingUrl}/${locale}/pricing#engagement-layers`,
+      },
+      {
+        '@type': 'AggregateOffer',
+        name: 'OCRA — Adaptive Continuity Intelligence engagement layer',
+        description:
+          'Structural continuity analysis, continuity topology mapping, modernization pathway evaluation, confidence-aware operational interpretation.',
+        priceCurrency: 'CAD',
+        lowPrice: '35000',
+        highPrice: '90000',
+        offerCount: 1,
+        url: `${marketingUrl}/${locale}/pricing#engagement-layers`,
+      },
+      {
+        '@type': 'AggregateOffer',
+        name: 'Platform Activation engagement layer',
+        description:
+          'Operational continuity tooling activation atop an assessed baseline — governance infrastructure alignment, decisions-of-record systems, continuity-safe workflows.',
+        priceCurrency: 'CAD',
+        lowPrice: '40000',
+        highPrice: '140000',
+        offerCount: 1,
+        url: `${marketingUrl}/${locale}/pricing#engagement-layers`,
+      },
+    ],
+  };
+
   return (
     <div className="institution-shell min-h-screen">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger -- structured data; values are static literals
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingServiceSchema) }}
+      />
       <MarketingHeroSection
         imageUrl={heroImagery.pricing}
         tone="dark"
@@ -461,243 +655,33 @@ export default async function LocalePricingPage({
         description={copy.description}
       />
 
-      <OrganizationalContinuityNote
+      <InstitutionalContinuityNote
         surface={tNote('label')}
         posture={tNote('posture')}
       />
 
-      {/* ── 1. Operational reality ── */}
-      <section className="py-16 bg-white border-b border-slate-200/70">
+      {/* ── Inline glossary — OCI / OCRA definitions on first encounter ── */}
+      <section className="py-10 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.realityHeading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.realityBody}
-            </p>
-          </ScrollReveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">
-            {copy.operationalReality.map((item) => (
-              <article key={item.title} className="institution-panel calm-elevation p-5">
-                <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
-              </article>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-semibold mb-4">
+            {copy.glossaryLabel}
+          </p>
+          <dl className="grid sm:grid-cols-2 gap-4">
+            {copy.glossary.map((term) => (
+              <div key={term.acronym} className="institution-panel calm-elevation p-5">
+                <dt className="flex items-baseline gap-2 mb-1.5">
+                  <span className="text-base font-bold text-navy tracking-wide">{term.acronym}</span>
+                  <span className="text-xs text-slate-500 font-medium">{term.expansion}</span>
+                </dt>
+                <dd className="text-xs text-slate-600 leading-relaxed">{term.body}</dd>
+              </div>
             ))}
-          </div>
+          </dl>
         </div>
       </section>
 
-      {/* ── 2. Maturity ladder ── */}
-      <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.tierHeading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.tierBody}
-            </p>
-          </ScrollReveal>
-
-          <div className="grid md:grid-cols-2 gap-5 narrative-sequence">
-            {copy.maturityTiers.map((tier) => {
-              const Icon = tier.icon;
-              return (
-                <article key={tier.key} className="institution-panel calm-elevation p-6 flex flex-col">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-                      <Icon className="h-5 w-5 text-navy" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-navy leading-tight">{tier.name}</h3>
-                      <p className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-wider">{tier.posture}</p>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-slate-500 italic mb-4">{tier.feels}</p>
-
-                  <p className="text-sm text-slate-700 leading-relaxed mb-5">
-                    <span className="font-semibold text-navy">{copy.fitPrefix}</span>{tier.fit}
-                  </p>
-
-                  <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
-                    {copy.focusLabel}
-                  </div>
-                  <ul className="space-y-2 mb-5">
-                    {tier.focus.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
-                        <CheckCircle2 className="h-4 w-4 text-[#1f5b84] mt-0.5 shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
-                    {copy.includedLabel}
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mb-5">
-                    {tier.surfaces.map((s) => (
-                      <span
-                        key={s}
-                        className="inline-block px-2.5 py-1 rounded-full bg-slate-100 text-xs text-slate-700"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-auto pt-4 border-t border-slate-200/70">
-                    <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">
-                      {copy.investmentLabel}
-                    </div>
-                    <p className="text-sm font-semibold text-navy">{tier.range}</p>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      {copy.rangeNote}
-                    </p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          {/* Friendly fit-finder */}
-          <div className="institution-panel calm-elevation mt-8 p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5">
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-navy mb-1">{copy.unsureTitle}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                {copy.unsureBody}
-              </p>
-            </div>
-            <Link
-              href="../contact"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-navy text-white text-sm font-semibold rounded-xl hover:bg-[#1f5b84] transition-colors whitespace-nowrap"
-            >
-              {copy.unsureCta} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 3. Visibility matrix ── */}
-      <section className="py-16 bg-white border-b border-slate-200/70">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.visibilityHeading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.visibilityBody}
-            </p>
-          </ScrollReveal>
-
-          <div className="institution-panel overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-slate-200/70">
-                <tr className="text-navy">
-                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">{copy.who}</th>
-                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Foundation</th>
-                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Governance Operations</th>
-                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Organizational Continuity</th>
-                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Sovereignty Layer</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200/70">
-                {copy.visibilityBands.map((row) => (
-                  <tr key={row.band} className="hover:bg-[#f8f6f2]/60 transition-colors">
-                    <td className="px-5 py-4 font-semibold text-navy align-top">{row.band}</td>
-                    <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.foundation}</td>
-                    <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.governance}</td>
-                    <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.continuity}</td>
-                    <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.sovereignty}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 4. Continuity progression ── */}
-      <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.growHeading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.growBody}
-            </p>
-          </ScrollReveal>
-
-          <div className="space-y-4 narrative-sequence">
-            {copy.progression.map((step) => (
-              <article
-                key={`${step.from}-${step.to}`}
-                className="institution-panel calm-elevation p-5 flex flex-col md:flex-row md:items-center gap-4"
-              >
-                <div className="flex items-center gap-3 md:w-1/3">
-                  <span className="text-sm font-semibold text-navy">{step.from}</span>
-                  <ArrowRight className="h-4 w-4 text-[#1f5b84]" />
-                  <span className="text-sm font-semibold text-navy">{step.to}</span>
-                </div>
-                <p className="text-sm text-slate-700 leading-relaxed md:flex-1">
-                  <span className="font-semibold text-navy">{copy.when}</span>
-                  {step.trigger}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 5. Procurement-safe positioning ── */}
-      <section className="py-16 bg-white border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-slate-100 text-navy text-xs font-semibold tracking-wide uppercase mb-4">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              {copy.procurementLabel}
-            </div>
-            <h2 className="text-3xl font-semibold text-navy mb-3">{copy.commitmentsHeading}</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              {copy.commitmentsBody}
-            </p>
-          </ScrollReveal>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">
-            {copy.procurementCommitments.map((item) => (
-              <article key={item.title} className="institution-panel calm-elevation p-5">
-                <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-5">
-            <Link
-              href="../trust"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
-            >
-              {copy.trustCenter} <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="../governance"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
-            >
-              {copy.governanceStructure} <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="../proof"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
-            >
-              {copy.organizationalProof} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* -- Tabbed pricing surface (replaces six long-scroll sections) -- */}
+      <PricingTabs locale={locale} copy={copy} />
 
       {/* ── Executive briefing CTA ── */}
       <section className="py-16 bg-navy text-white">
@@ -714,13 +698,13 @@ export default async function LocalePricingPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="../pilot-request"
+              href={`/${locale}/institutional-continuity-risk`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all"
             >
               {copy.ctaPrimary}
             </Link>
             <Link
-              href="../contact"
+              href={`/${locale}/contact`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all"
             >
               {copy.ctaSecondary}
@@ -728,6 +712,17 @@ export default async function LocalePricingPage({
           </div>
           <p className="text-xs text-white/55 mt-6 max-w-2xl mx-auto leading-relaxed">
             {copy.ctaFinePrint}
+          </p>
+          <p className="mt-5 text-sm text-white/80">
+            <Link
+              href={`/${locale}/whitepaper`}
+              className="inline-flex items-center gap-1 underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded"
+            >
+              {locale === 'fr-CA'
+                ? 'Lire le livre blanc UnionEyes (~25 min)'
+                : 'Read the UnionEyes whitepaper (~25 min read)'}
+              <span aria-hidden="true">→</span>
+            </Link>
           </p>
         </div>
       </section>

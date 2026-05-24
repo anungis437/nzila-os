@@ -1,0 +1,102 @@
+# Governance Entropy Scale™ — Observable Criteria (Level 1: Coherent Governance)
+# ARTIFACT TYPE: Methodology Companion Artifact
+# DOCTRINE_VERSION: 1.0.0
+#
+# Observable indicators a reviewer uses to classify an institution at
+# Governance Entropy ordinal 1 (lowerBound = 0.0, drift score < 0.2).
+# Each indicator carries an `auditor_check` field: a third-party reviewer
+# can reproduce the classification by following the check.
+
+level: 1
+id: 'coherent'
+label: 'Coherent governance'
+lowerBound: 0.0
+upperBound: 0.2  # exclusive
+
+posture: >
+  Governance practice and governance design are in close alignment.
+  Periodic review is sufficient.
+
+observable_indicators:
+
+  - id: 'L1-OBS-01-precedent-traceability'
+    requirement: >
+      For every governance decision in the past twelve months, the precedent
+      that authorises the decision can be cited within five minutes by the
+      governance liaison.
+    evidence_examples:
+      - 'Board minutes cite the bylaw or precedent section that authorised the resolution.'
+      - 'Decision register includes a "precedent-of-record" column populated for >= 95% of entries.'
+    auditor_check: >
+      Sample five decisions from the last twelve months. Ask the governance
+      liaison to cite the authorising precedent for each. Pass if >= 4 of 5
+      cited within five minutes.
+
+  - id: 'L1-OBS-02-amendment-trail'
+    requirement: >
+      Every governance amendment in the past twenty-four months is recorded
+      with date, authorising body, and rationale, and is reachable from the
+      institution's governance index.
+    evidence_examples:
+      - 'Governance index (table-of-contents) links to a dated amendment register.'
+    auditor_check: >
+      Open the institution's governance index. Verify the amendment register
+      exists and is current to within ninety days.
+
+governance_evidence:
+
+  - id: 'L1-GOV-01-board-cadence-met'
+    requirement: 'Governance body meets at or above its bylaw-mandated cadence.'
+    evidence_examples:
+      - 'Meeting attendance records for the past twelve months.'
+    auditor_check: 'Verify meeting count >= mandated cadence.'
+
+  - id: 'L1-GOV-02-quorum-discipline'
+    requirement: 'Quorum is met at >= 90% of governance meetings.'
+    evidence_examples:
+      - 'Meeting minutes record quorum status.'
+    auditor_check: 'Compute quorum-met percentage from minutes of last twelve months.'
+
+process_visibility:
+
+  - id: 'L1-PV-01-decision-register-current'
+    requirement: 'Decision register is current to within thirty days.'
+    auditor_check: 'Verify most recent entry date relative to audit date.'
+
+  - id: 'L1-PV-02-published-cadence'
+    requirement: 'Governance reporting cadence is published and adhered to.'
+    auditor_check: 'Verify cadence document exists and last published report falls within the documented window.'
+
+documentation_maturity:
+
+  - id: 'L1-DOC-01-current-charter'
+    requirement: 'Institutional charter or equivalent has been reviewed in the past five years.'
+    auditor_check: 'Examine charter for "last reviewed" date.'
+
+  - id: 'L1-DOC-02-policy-version-control'
+    requirement: 'Governance policies carry a version number and last-revised date.'
+    auditor_check: 'Sample five policies; verify versioning present on each.'
+
+decision_continuity:
+
+  - id: 'L1-DC-01-successor-briefing'
+    requirement: >
+      Outgoing governance body members provide a documented briefing to
+      successors covering active matters and live precedent threads.
+    auditor_check: 'Examine briefing records for the last two governance-body transitions.'
+
+institutional_dependency_indicators:
+
+  - id: 'L1-IDI-01-no-single-point-of-context'
+    requirement: >
+      No single governance steward is the sole holder of context for any
+      load-bearing governance domain.
+    auditor_check: 'Cross-reference stewardship register with governance-domain map; no domain shows a single steward.'
+
+onboarding_survivability_indicators:
+
+  - id: 'L1-OSI-01-onboarding-playbook'
+    requirement: >
+      A documented onboarding playbook exists for each governance role and
+      has been used in the past twelve months if any transition occurred.
+    auditor_check: 'Request the onboarding playbook(s); verify recent use if applicable.'
