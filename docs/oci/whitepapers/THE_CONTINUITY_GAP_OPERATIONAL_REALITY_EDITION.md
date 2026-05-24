@@ -10,7 +10,7 @@
 
 ## Central Thesis
 
-Operational labour systems revealed a deeper institutional continuity problem — and OCI/OCRA emerged as the framework for understanding and stabilizing it.
+Operational labour systems revealed a deeper organizational continuity problem — and OCI/OCRA emerged as the framework for understanding and stabilizing it.
 
 > "Continuity is not what organizations buy. It is what organizations discover they were quietly losing while they were buying everything else."
 > — Nzila OS Research Initiative
@@ -23,7 +23,7 @@ This edition does not begin from theory. It begins from work.
 
 Union Eyes was not designed in a research lab. It was built inside the operational reality of grievances, governance interpretation, evidence handling, committee continuity, leadership turnover, and the quiet labour of representation. The continuity category emerged from that work — not the other way around.
 
-Over time, recurring operational patterns made one fact undeniable: most labour and governance-heavy institutions are operationally capable but structurally forgetful. The records exist. The workflows exist. The dashboards exist. What disappears, repeatedly, is the institutional context that gives those records, workflows, and dashboards meaning.
+Over time, recurring operational patterns made one fact undeniable: most labour and governance-heavy organizations are operationally capable but structurally forgetful. The records exist. The workflows exist. The dashboards exist. What disappears, repeatedly, is the organizational context that gives those records, workflows, and dashboards meaning.
 
 This whitepaper is the public synthesis of that pattern.
 
@@ -41,7 +41,7 @@ This whitepaper is the public synthesis of that pattern.
 - Section 7 — Continuity-Aware Operations
 - Section 8 — Two Ways Organizations Begin
 - Section 9 — Governance-Safe Intelligence
-- Section 10 — From Operational Tooling to Institutional Continuity Infrastructure
+- Section 10 — From Operational Tooling to Organizational Continuity Infrastructure
 - Section 11 — Practical Frameworks and Adoption Roadmap
 - Section 12 — Sector Implications
 - Section 13 — The Continuity Gap, Quantified Honestly
@@ -55,7 +55,7 @@ This whitepaper is the public synthesis of that pattern.
 
 ## Executive Summary
 
-Modern organizations have invested heavily in workflow software, case management, dashboards, and governance documentation. Operational throughput has improved. Operational visibility has improved. Yet the deeper organizational capability that allows institutions to remain themselves across leadership turnover, modernization, restructuring, and time has not improved at the same rate. In many institutions, it has measurably degraded.
+Modern organizations have invested heavily in workflow software, case management, dashboards, and governance documentation. Operational throughput has improved. Operational visibility has improved. Yet the deeper organizational capability that allows organizations to remain themselves across leadership turnover, modernization, restructuring, and time has not improved at the same rate. In many organizations, it has measurably degraded.
 
 The pattern is most visible in operational labour environments where Union Eyes is deployed. Grievances are tracked, but the interpretive precedent behind them is held in a small number of people. Governance decisions are recorded, but the rationale for those decisions is rarely preserved in a form successors can inherit. Onboarding documentation exists, but new representatives still rely on long conversations with veterans to become operationally effective. Investigations close, but the operational lineage of evidence and reasoning rarely survives a reassignment intact.
 
@@ -63,8 +63,8 @@ These are not anomalies. They are continuity fragility expressed through operati
 
 This whitepaper introduces two frameworks that emerged from this operational reality:
 
-- **Organizational Continuity Infrastructure (OCI)** — the structured operational foundation that preserves institutional memory, governance lineage, operational evidence, and continuity intelligence across time, systems, and leadership transitions.
-- **Organizational Continuity Risk Analysis (OCRA)** — the adaptive interpretation layer that helps institutions understand where continuity is fragile, where reconstruction burden is concentrated, and where modernization is silently creating continuity debt.
+- **Organizational Continuity Infrastructure (OCI)** — the structured operational foundation that preserves organizational memory, governance lineage, operational evidence, and continuity intelligence across time, systems, and leadership transitions.
+- **Organizational Continuity Risk Analysis (OCRA)** — the adaptive interpretation layer that helps organizations understand where continuity is fragile, where reconstruction burden is concentrated, and where modernization is silently creating continuity debt.
 
 ### Argument in one sentence
 
@@ -74,8 +74,8 @@ This whitepaper introduces two frameworks that emerged from this operational rea
 
 - Operational software systems excel at preserving records, but typically do not preserve organizational interpretation.
 - Most continuity failures appear first in everyday workflows — grievances, investigations, governance handoffs — long before they appear in formal continuity exercises.
-- Stewardship concentration is the dominant root cause of continuity fragility in labour, federated, and governance-heavy institutions.
-- Modernization initiatives frequently increase continuity debt by replacing institutional context with workflow surfaces.
+- Stewardship concentration is the dominant root cause of continuity fragility in labour, federated, and governance-heavy organizations.
+- Modernization initiatives frequently increase continuity debt by replacing organizational context with workflow surfaces.
 - Continuity intelligence is most credible when it emerges from operational reality — not when it is layered on top of unrelated abstract frameworks.
 
 ---
@@ -92,25 +92,25 @@ The live Union Eyes platform was built around this operational surface. It captu
 
 ### 1.2 The realities the platform exposes daily
 
-Within ordinary use, several operational realities recur across institutions, regardless of sector, size, or governance structure:
+Within ordinary use, several operational realities recur across organizations, regardless of sector, size, or governance structure:
 
 - A grievance is inherited from a previous steward. The files transfer cleanly. The *interpretation* of why this grievance is structurally different from a superficially similar one does not.
 - A governance decision made in a prior committee cycle is difficult to reconstruct. The minutes exist. The rationale behind the minutes is held by two people, both of whom are now retired or reassigned.
 - Evidence collected for one investigation must be re-contextualized when a successor takes over. The evidence is intact. The chain of judgment that turned it into a case is not.
 - Onboarding a new representative requires repeated explanation of unwritten operational logic — how to read a particular employer, which escalations require pre-conversations, what the local history says about a recurring issue.
-- A modernization project replaces a fragmented workflow with a cleaner workflow, and quietly removes the institutional memory that was embedded in the old one's exception paths.
+- A modernization project replaces a fragmented workflow with a cleaner workflow, and quietly removes the organizational memory that was embedded in the old one's exception paths.
 
-Each of these realities is operational. Each of them is also, on closer examination, a continuity problem. The institution did not lose its records. It lost the connective tissue around them.
+Each of these realities is operational. Each of them is also, on closer examination, a continuity problem. The organization did not lose its records. It lost the connective tissue around them.
 
 ### 1.3 Why this matters before continuity is even named
 
-Naming the continuity problem is the second move, not the first. The first move is to recognize that the operational surface is already producing continuity signals. The institutions that benefit most from OCI/OCRA are the ones whose operational teams have already felt these signals — they simply did not yet have a name for what they were feeling.
+Naming the continuity problem is the second move, not the first. The first move is to recognize that the operational surface is already producing continuity signals. The organizations that benefit most from OCI/OCRA are the ones whose operational teams have already felt these signals — they simply did not yet have a name for what they were feeling.
 
-This matters because most continuity frameworks fail in the opposite direction: they arrive abstractly, demand institutional buy-in for a concept the organization has not yet grounded in its own experience, and consequently get filed under "future maturity initiatives" rather than treated as present, operational reality.
+This matters because most continuity frameworks fail in the opposite direction: they arrive abstractly, demand organizational buy-in for a concept the organization has not yet grounded in its own experience, and consequently get filed under "future maturity initiatives" rather than treated as present, operational reality.
 
-OCI/OCRA are designed to arrive after the institution already knows something is wrong. The framework names it. It does not invent it.
+OCI/OCRA are designed to arrive after the organization already knows something is wrong. The framework names it. It does not invent it.
 
-> "Most institutions already know they are losing something. They do not yet have a way to name what it is."
+> "Most organizations already know they are losing something. They do not yet have a way to name what it is."
 
 ---
 
@@ -118,7 +118,7 @@ OCI/OCRA are designed to arrive after the institution already knows something is
 
 ### 2.1 The continuity pattern under recurring operational failures
 
-When operational failures repeat across grievances, governance handoffs, investigations, and onboarding, the underlying pattern is almost always the same: the institution preserved the artifact but lost the interpretation. The shape of the failure looks operational. The structure of the failure is continuity.
+When operational failures repeat across grievances, governance handoffs, investigations, and onboarding, the underlying pattern is almost always the same: the organization preserved the artifact but lost the interpretation. The shape of the failure looks operational. The structure of the failure is continuity.
 
 ### 2.2 Three recurring continuity scenarios
 
@@ -134,19 +134,19 @@ This is not a failure of the new steward. It is the predictable expression of st
 
 A new executive director takes over a federated organization eighteen months after the previous one departed. The interim period was managed competently. The policy library is intact. Board minutes are searchable. Strategic plans are documented.
 
-Within the first quarter, the new executive begins encountering a pattern: she can describe *what* the organization decided over the past five years, but she cannot reliably reconstruct *why*. A specific committee policy looks restrictive on its face; only after a long conversation with a long-serving board member does she learn it was deliberately written that way because of an incident a previous board had agreed never to allow to recur. A program that appears under-resourced turns out to have been deliberately scoped narrowly for governance reasons that exist nowhere in the strategic plan. A vendor relationship that looks anomalous on paper exists for an interpretive reason that two former staff members carried out of the institution.
+Within the first quarter, the new executive begins encountering a pattern: she can describe *what* the organization decided over the past five years, but she cannot reliably reconstruct *why*. A specific committee policy looks restrictive on its face; only after a long conversation with a long-serving board member does she learn it was deliberately written that way because of an incident a previous board had agreed never to allow to recur. A program that appears under-resourced turns out to have been deliberately scoped narrowly for governance reasons that exist nowhere in the strategic plan. A vendor relationship that looks anomalous on paper exists for an interpretive reason that two former staff members carried out of the organization.
 
-The institution still has its policy library and its meeting minutes. It does not have the connective tissue that explains them. The continuity loss is real, and it is structural, but it does not appear on any dashboard the new executive inherits.
+The organization still has its policy library and its meeting minutes. It does not have the connective tissue that explains them. The continuity loss is real, and it is structural, but it does not appear on any dashboard the new executive inherits.
 
 #### Scenario C — Modernization Fragmentation
 
-A mid-size institution modernizes its case management, document management, and member-services workflows over an eighteen-month digital transformation. The new systems are well-chosen and well-implemented. Operational throughput improves. Surface visibility improves. Reporting improves.
+A mid-size organization modernizes its case management, document management, and member-services workflows over an eighteen-month digital transformation. The new systems are well-chosen and well-implemented. Operational throughput improves. Surface visibility improves. Reporting improves.
 
 Nine months later, two unrelated symptoms emerge. First, onboarding new representatives is taking measurably longer, even though documentation is now better than it has ever been. Second, governance interpretation has become more inconsistent across the federation, even though governance documentation has been formally standardized.
 
 The cause is the same in both cases. The previous, messier system carried interpretive context in its exception paths, its informal annotations, the tribal knowledge of who-knew-what. The modernization preserved the workflow but not the interpretive scaffolding. The result is a more efficient organization that is, structurally, slightly less able to remain itself across time.
 
-This is modernization fragmentation. It is one of the most common — and most unmeasured — sources of continuity debt in the institutions OCI/OCRA serve.
+This is modernization fragmentation. It is one of the most common — and most unmeasured — sources of continuity debt in the organizations OCI/OCRA serve.
 
 ### 2.3 The continuity concepts these patterns name
 
@@ -154,9 +154,9 @@ These scenarios introduce the canonical continuity vocabulary used throughout th
 
 | Concept | Operational expression |
 | --- | --- |
-| Stewardship concentration | A small number of people quietly carrying continuity for the whole institution. |
+| Stewardship concentration | A small number of people quietly carrying continuity for the whole organization. |
 | Continuity debt | Accumulated undocumented operational dependency. |
-| Reconstruction burden | The effort required to rebuild institutional continuity from memory after a transition. |
+| Reconstruction burden | The effort required to rebuild organizational continuity from memory after a transition. |
 | Onboarding fragility | The persistent difficulty of making successors operationally effective without veteran mediation. |
 | Modernization fragmentation | The pattern in which modernization improves surfaces while quietly erasing interpretive context. |
 
@@ -168,11 +168,11 @@ These scenarios introduce the canonical continuity vocabulary used throughout th
 
 ### 3.1 Records are necessary and insufficient
 
-Records management, case management, ticketing, workflow automation, and documentation systems are essential operational infrastructure. They are not, however, continuity infrastructure. They preserve activity. They do not preserve interpretation, inheritance, or institutional meaning.
+Records management, case management, ticketing, workflow automation, and documentation systems are essential operational infrastructure. They are not, however, continuity infrastructure. They preserve activity. They do not preserve interpretation, inheritance, or organizational meaning.
 
 The distinction is not academic. Canada's demographic position makes it unavoidable. An estimated 5.2 million baby boomers have already exited the labour force, and an additional 2.7 million Canadians aged 60–64 are expected to exit within the next five years [1][2]. The Labour Market Information Council has reported that the share of mature workers aged 55+ in the Canadian workforce grew from 12.6% in 2000 to 21.6% in 2023 — a 184% absolute increase in that cohort [3]. The Canadian Federation of Independent Business has estimated that more than $2 trillion in business assets will change hands as 76% of small-business owners plan to exit within the decade, while only 9% have formalized succession plans [6].
 
-These numbers describe a labour-supply event. Beneath the labour-supply event is a continuity event. The institutions losing these workers are also losing the interpretive layer those workers were quietly maintaining. Records remain. Interpretation does not.
+These numbers describe a labour-supply event. Beneath the labour-supply event is a continuity event. The organizations losing these workers are also losing the interpretive layer those workers were quietly maintaining. Records remain. Interpretation does not.
 
 ### 3.2 What each existing category does — and what it does not
 
@@ -186,11 +186,11 @@ These numbers describe a labour-supply event. Beneath the labour-supply event is
 
 ### 3.3 The illusion of visibility
 
-Visibility is not continuity. A dashboard can light up the right indicators while the underlying institution silently loses its ability to explain why those indicators look that way. Institutions can become data-rich and continuity-poor simultaneously.
+Visibility is not continuity. A dashboard can light up the right indicators while the underlying organization silently loses its ability to explain why those indicators look that way. Organizations can become data-rich and continuity-poor simultaneously.
 
 ### 3.4 The objections this section answers
 
-- *Why not use our existing case-management system?* Because most operational tooling preserves records, tasks, and workflow states, but not operational interpretation, onboarding survivability, governance continuity, or institutional inheritance.
+- *Why not use our existing case-management system?* Because most operational tooling preserves records, tasks, and workflow states, but not operational interpretation, onboarding survivability, governance continuity, or organizational inheritance.
 - *Is this consulting or software?* Union Eyes combines continuity intelligence, continuity-aware operational infrastructure, governance continuity tooling, and longitudinal continuity support.
 - *Is this employee surveillance?* No. Union Eyes does not monitor productivity, score workers, conduct behavioural analysis, or rank individuals. It exists to stabilize organizational continuity.
 
@@ -200,11 +200,11 @@ Visibility is not continuity. A dashboard can light up the right indicators whil
 
 ### 4.1 A category that emerged from work
 
-The OCI/OCRA framework was not designed in advance and then applied to labour operations. It was discovered through years of operating real workflows in real institutions. Continuity language emerged because operational language was no longer sufficient to describe what was actually breaking.
+The OCI/OCRA framework was not designed in advance and then applied to labour operations. It was discovered through years of operating real workflows in real organizations. Continuity language emerged because operational language was no longer sufficient to describe what was actually breaking.
 
 ### 4.2 The pattern that crossed every domain
 
-Across grievance handling, governance interpretation, investigations, evidence work, onboarding, and modernization, the same shape repeated: institutions kept the trace and lost the meaning. Once that shape became visible, the next question naturally followed — what kind of infrastructure would preserve meaning, not only trace?
+Across grievance handling, governance interpretation, investigations, evidence work, onboarding, and modernization, the same shape repeated: organizations kept the trace and lost the meaning. Once that shape became visible, the next question naturally followed — what kind of infrastructure would preserve meaning, not only trace?
 
 ### 4.3 Why the continuity layer is operationally credible
 
@@ -218,13 +218,13 @@ The continuity layer is credible precisely because it did not arrive abstractly.
 
 ### 5.1 Definition
 
-**Organizational Continuity Infrastructure (OCI)** is the structured operational foundation that preserves institutional memory, governance lineage, operational evidence, organizational intelligence, and continuity resilience across time, systems, and leadership transitions.
+**Organizational Continuity Infrastructure (OCI)** is the structured operational foundation that preserves organizational memory, governance lineage, operational evidence, organizational intelligence, and continuity resilience across time, systems, and leadership transitions.
 
-OCI treats continuity not as administrative overhead but as institutional infrastructure.
+OCI treats continuity not as administrative overhead but as organizational infrastructure.
 
 ### 5.2 Why OCI now reads as operationally justified
 
-OCI is introduced only after the operational reality has been established and the recurring continuity pattern has been named. By this point in the document, OCI is no longer an abstract category. It is the structural answer to a problem the reader has already recognized in their own institution.
+OCI is introduced only after the operational reality has been established and the recurring continuity pattern has been named. By this point in the document, OCI is no longer an abstract category. It is the structural answer to a problem the reader has already recognized in their own organization.
 
 ### 5.3 Operational translations
 
@@ -238,7 +238,7 @@ OCI is introduced only after the operational reality has been established and th
 
 ### 5.4 What OCI is not
 
-OCI is not a productivity system. It is not surveillance infrastructure. It is not an attempt to replace institutional judgment. It is not a substitute for formal continuity standards, audits, or governance certifications. It is the operational layer that makes institutional continuity practiceable, observable, and survivable.
+OCI is not a productivity system. It is not surveillance infrastructure. It is not an attempt to replace organizational judgment. It is not a substitute for formal continuity standards, audits, or governance certifications. It is the operational layer that makes organizational continuity practiceable, observable, and survivable.
 
 ---
 
@@ -246,7 +246,7 @@ OCI is not a productivity system. It is not surveillance infrastructure. It is n
 
 ### 6.1 Definition
 
-**Organizational Continuity Risk Analysis (OCRA)** is the adaptive interpretation layer that helps institutions understand where continuity is fragile, where stewardship is concentrated, where governance interpretation is drifting, and where modernization is creating continuity debt.
+**Organizational Continuity Risk Analysis (OCRA)** is the adaptive interpretation layer that helps organizations understand where continuity is fragile, where stewardship is concentrated, where governance interpretation is drifting, and where modernization is creating continuity debt.
 
 OCRA is reviewer-led. Its outputs are interpretive readings, not deterministic scores.
 
@@ -256,7 +256,7 @@ OCRA is not:
 
 - behavioural analysis,
 - workforce ranking,
-- institutional scoring,
+- organizational scoring,
 - surveillance AI,
 - a replacement for governance judgment,
 - a substitute for formal audit.
@@ -274,9 +274,9 @@ OCRA layers on top of operational reality to surface:
 
 ### 6.4 The OCRA posture
 
-OCRA is intentionally cautious. It uses confidence-aware interpretation, contradiction-aware reading, and reviewer-led judgment. It is designed to surface continuity insight an institution can act on — never to produce institutional verdicts an institution must accept.
+OCRA is intentionally cautious. It uses confidence-aware interpretation, contradiction-aware reading, and reviewer-led judgment. It is designed to surface continuity insight an organization can act on — never to produce organizational verdicts an organization must accept.
 
-> "OCRA exists to deepen institutional understanding, not to replace institutional judgment."
+> "OCRA exists to deepen organizational understanding, not to replace organizational judgment."
 
 ---
 
@@ -292,19 +292,19 @@ Continuity intelligence and operational workflows must converge. If continuity e
 | --- | --- |
 | Grievance handling | Reassignment continuity, historical context survivability, evidence continuity, operational interpretation continuity |
 | Governance operations | Committee transitions, governance rationale preservation, interpretive drift detection, decision continuity |
-| Investigations | Evidence survivability, operational inheritance, transition-safe continuity, institutional reconstruction |
+| Investigations | Evidence survivability, operational inheritance, transition-safe continuity, organizational reconstruction |
 | Onboarding | Successor operational readiness, undocumented workflow surfacing, stewardship redistribution support |
-| Documentation | Institutional memory preservation, operational inheritance, continuity-safe modernization |
+| Documentation | Organizational memory preservation, operational inheritance, continuity-safe modernization |
 
 ### 7.3 What changes in daily practice
 
-For an operational team, continuity-aware operations look like ordinary work that no longer silently destroys institutional context. Reassignments happen, but interpretive history follows the case. Committee cycles change, but precedent rationale is inherited intentionally. Modernization happens, but operational meaning is preserved alongside operational surfaces.
+For an operational team, continuity-aware operations look like ordinary work that no longer silently destroys organizational context. Reassignments happen, but interpretive history follows the case. Committee cycles change, but precedent rationale is inherited intentionally. Modernization happens, but operational meaning is preserved alongside operational surfaces.
 
-A practical way to see the shift: in a continuity-aware operation, every transition event — a steward reassignment, a committee turnover, an investigation handoff, a system migration — is treated as a continuity moment, not only an operational moment. The institution asks not only *"is the work continuing?"* but *"is the institution remembering enough of itself to keep continuing?"* That second question is the difference between operational competence and institutional survivability.
+A practical way to see the shift: in a continuity-aware operation, every transition event — a steward reassignment, a committee turnover, an investigation handoff, a system migration — is treated as a continuity moment, not only an operational moment. The organization asks not only *"is the work continuing?"* but *"is the organization remembering enough of itself to keep continuing?"* That second question is the difference between operational competence and organizational survivability.
 
 ### 7.4 What continuity-aware operations are not
 
-Continuity-aware operations are not slower operations. They are not more bureaucratic operations. They are not surveillance-adjacent operations. They are not operations that require every decision to be exhaustively documented before it can be made. The continuity-aware posture is calibrated, proportional, and reviewer-led. It strengthens institutional inheritance without burdening institutional practice.
+Continuity-aware operations are not slower operations. They are not more bureaucratic operations. They are not surveillance-adjacent operations. They are not operations that require every decision to be exhaustively documented before it can be made. The continuity-aware posture is calibrated, proportional, and reviewer-led. It strengthens organizational inheritance without burdening organizational practice.
 
 ---
 
@@ -312,7 +312,7 @@ Continuity-aware operations are not slower operations. They are not more bureauc
 
 ### 8.1 Path A — OCRA-first
 
-Some institutions enter through strategic continuity intelligence. They feel governance fragility, modernization strain, onboarding instability, dependency concentration, or institutional continuity uncertainty before they feel a specific workflow pain.
+Some organizations enter through strategic continuity intelligence. They feel governance fragility, modernization strain, onboarding instability, dependency concentration, or organizational continuity uncertainty before they feel a specific workflow pain.
 
 Flow:
 
@@ -322,7 +322,7 @@ OCI → OCRA → continuity roadmap → operational continuity activation → go
 
 ### 8.2 Path B — Operations-first
 
-Other institutions enter because they need grievance workflows, governance operations, investigations support, evidence continuity, onboarding stabilization, or operational coordination. Continuity awareness emerges naturally once the operational layer becomes credible.
+Other organizations enter because they need grievance workflows, governance operations, investigations support, evidence continuity, onboarding stabilization, or operational coordination. Continuity awareness emerges naturally once the operational layer becomes credible.
 
 Flow:
 
@@ -332,7 +332,7 @@ Operations Core → continuity pain visibility → OCI activation → OCRA intel
 
 ### 8.3 Convergence rule
 
-Both paths converge into the same continuity-aware operational infrastructure. The category must never be split into a separate "ops product" and "OCI product"; the institutional reality is single.
+Both paths converge into the same continuity-aware operational infrastructure. The category must never be split into a separate "ops product" and "OCI product"; the organizational reality is single.
 
 > "Two valid entry paths. One continuity architecture."
 
@@ -346,7 +346,7 @@ Union Eyes does not monitor productivity, rank workers, infer behaviour, score i
 
 ### 9.2 Reviewer-led AI
 
-All AI used inside OCI/OCRA is assistive interpretation, governed by explicit human oversight. No AI surface concludes on the institution's behalf. No AI output is treated as institutional truth without a named human reviewer accepting it on the institution's behalf.
+All AI used inside OCI/OCRA is assistive interpretation, governed by explicit human oversight. No AI surface concludes on the organization's behalf. No AI output is treated as organizational truth without a named human reviewer accepting it on the organization's behalf.
 
 ### 9.3 Explainability
 
@@ -354,25 +354,25 @@ Every interpretation surfaces the structural facts that justify it. No black-box
 
 ### 9.4 Democratic governance safeguards
 
-OCI and OCRA respect institutional sovereignty. Continuity outputs are governance-receivable artifacts the institution can adopt, amend, or decline. The institution remains the author of its own continuity practice.
+OCI and OCRA respect organizational sovereignty. Continuity outputs are governance-receivable artifacts the organization can adopt, amend, or decline. The organization remains the author of its own continuity practice.
 
 ---
 
-## Section 10 — From Operational Tooling to Institutional Continuity Infrastructure
+## Section 10 — From Operational Tooling to Organizational Continuity Infrastructure
 
 ### 10.1 The synthesis
 
-The arc of the document is now complete. Operational reality came first. Recurring continuity failures became visible. The continuity pattern was named. OCI gave it structure. OCRA gave it interpretation. Continuity-aware operations brought everything back into daily work. Dual-entry GTM acknowledged that institutions discover this category from different starting points.
+The arc of the document is now complete. Operational reality came first. Recurring continuity failures became visible. The continuity pattern was named. OCI gave it structure. OCRA gave it interpretation. Continuity-aware operations brought everything back into daily work. Dual-entry GTM acknowledged that organizations discover this category from different starting points.
 
-### 10.2 The institutional shift
+### 10.2 The organizational shift
 
-What was previously experienced as "good operational software" is now visible as something deeper: continuity-aware operational infrastructure. The same daily work continues, but it now strengthens institutional survivability rather than silently eroding it.
+What was previously experienced as "good operational software" is now visible as something deeper: continuity-aware operational infrastructure. The same daily work continues, but it now strengthens organizational survivability rather than silently eroding it.
 
 ### 10.3 The category statement
 
-Continuity is infrastructure. It is not a project. It is not a memo. It is not a one-time audit. It is the operational discipline that determines whether an institution can remain itself across time.
+Continuity is infrastructure. It is not a project. It is not a memo. It is not a one-time audit. It is the operational discipline that determines whether an organization can remain itself across time.
 
-> "The future institution will not merely process activity. It will remember its obligations."
+> "The future organization will not merely process activity. It will remember its obligations."
 
 ---
 
@@ -380,7 +380,7 @@ Continuity is infrastructure. It is not a project. It is not a memo. It is not a
 
 ### 11.1 The Continuity Debt Audit
 
-Before adopting OCI/OCRA, institutions benefit from a structured continuity debt audit. The audit is qualitative and reviewer-led. It is not a maturity score. It produces an honest, defensible picture of where continuity is currently fragile.
+Before adopting OCI/OCRA, organizations benefit from a structured continuity debt audit. The audit is qualitative and reviewer-led. It is not a maturity score. It produces an honest, defensible picture of where continuity is currently fragile.
 
 A continuity debt audit asks:
 
@@ -394,17 +394,17 @@ A continuity debt audit asks:
 
 ### 11.2 The OCI Adoption Roadmap
 
-OCI adoption follows the canonical five phases. They are not a maturity ladder; they are a sequence of capability layers an institution acquires deliberately.
+OCI adoption follows the canonical five phases. They are not a maturity ladder; they are a sequence of capability layers an organization acquires deliberately.
 
 | Phase | Purpose |
 | --- | --- |
 | 1. Recognition | Assess continuity exposure, stewardship concentration, governance interpretation drift, onboarding fragility, and modernization-driven continuity debt. |
-| 2. Mapping | Map operational lineage, governance interpretation history, escalation pathways, and institutional precedent. |
+| 2. Mapping | Map operational lineage, governance interpretation history, escalation pathways, and organizational precedent. |
 | 3. Stabilization | Reduce continuity debt, clarify governance, redistribute stewardship burden, and strengthen onboarding survivability. |
 | 4. Runtime Infrastructure | Embed governance memory, continuity events, runtime truth, and operational traceability into daily operations. |
 | 5. Intelligence Network | Develop longitudinal continuity intelligence, sector baselines, and ethically bounded survivability insights. |
 
-Institutions do not need to complete all five phases simultaneously. Most begin with Recognition and Stabilization, and progressively layer in Mapping, Runtime Infrastructure, and Intelligence Network as confidence and operational readiness grow.
+Organizations do not need to complete all five phases simultaneously. Most begin with Recognition and Stabilization, and progressively layer in Mapping, Runtime Infrastructure, and Intelligence Network as confidence and operational readiness grow.
 
 ### 11.3 Proportionality principle
 
@@ -414,24 +414,24 @@ Continuity infrastructure must be proportional. A small local does not need the 
 
 ## Section 12 — Sector Implications
 
-OCI/OCRA are most legible in labour and governance-heavy institutions, but the continuity pattern they describe is present across many sectors. The shape of the fragility differs; the underlying pattern does not.
+OCI/OCRA are most legible in labour and governance-heavy organizations, but the continuity pattern they describe is present across many sectors. The shape of the fragility differs; the underlying pattern does not.
 
 | Sector | Continuity exposure | OCI implication |
 | --- | --- | --- |
 | Labour organizations | Precedent interpretation, grievance history, investigations, governance interpretation, distributed representation | Evidence-backed governance, interpretive lineage preservation, continuity-aware case history |
 | Healthcare systems | Patient handoffs, onboarding under workforce pressure, fragmented systems, operational handoff fragility | Continuity-aware onboarding, operational memory, stewardship support, handoff continuity |
-| Public sector | Policy memory, program rationale, political and governance transitions, regulatory interpretation | Governance memory runtime, defensible lineage, institutional knowledge preservation |
+| Public sector | Policy memory, program rationale, political and governance transitions, regulatory interpretation | Governance memory runtime, defensible lineage, organizational knowledge preservation |
 | Federated organizations | Distributed governance, regional inconsistency, organizational memory fragmentation | Interoperable continuity infrastructure, regional baselines, federation-aware interpretation |
 | SMEs and family enterprises | Founder dependency, ownership exits, informal knowledge, local economic risk | Continuity mapping before succession, knowledge transfer infrastructure, stabilization planning |
 | Associations and nonprofits | Volunteer leadership turnover, mission interpretation, donor relationship continuity | Governance continuity, interpretive lineage, stewardship redistribution |
 
 ### 12.1 Indigenous, oral, and community-governed continuity traditions
 
-The continuity traditions of many Indigenous, oral, and community-governed systems demonstrate that institutional continuity does not depend solely on formalized enterprise structures. Many governance cultures preserve continuity through intergenerational stewardship, oral continuity traditions, relational accountability, and collective memory. OCI is designed to *learn from* these traditions rather than assume Western enterprise documentation is the only valid continuity model.
+The continuity traditions of many Indigenous, oral, and community-governed systems demonstrate that organizational continuity does not depend solely on formalized enterprise structures. Many governance cultures preserve continuity through intergenerational stewardship, oral continuity traditions, relational accountability, and collective memory. OCI is designed to *learn from* these traditions rather than assume Western enterprise documentation is the only valid continuity model.
 
 ### 12.2 Why the framework generalizes
 
-OCI/OCRA generalize because the continuity pattern is not sectoral. It is structural. Wherever institutional interpretation is carried by people, where transition is inevitable, and where artifacts outlast meaning, OCI/OCRA describe a recognizable shape. The intervention is calibrated to the sector; the pattern is not.
+OCI/OCRA generalize because the continuity pattern is not sectoral. It is structural. Wherever organizational interpretation is carried by people, where transition is inevitable, and where artifacts outlast meaning, OCI/OCRA describe a recognizable shape. The intervention is calibrated to the sector; the pattern is not.
 
 ---
 
@@ -439,7 +439,7 @@ OCI/OCRA generalize because the continuity pattern is not sectoral. It is struct
 
 ### 13.1 Why this section exists
 
-A whitepaper that introduces a category must be honest about what it can and cannot quantify. OCI/OCRA are reviewer-led and confidence-aware by design. They do not produce deterministic institutional verdicts. They do, however, sit on top of an evidentiary base that is increasingly difficult to dismiss.
+A whitepaper that introduces a category must be honest about what it can and cannot quantify. OCI/OCRA are reviewer-led and confidence-aware by design. They do not produce deterministic organizational verdicts. They do, however, sit on top of an evidentiary base that is increasingly difficult to dismiss.
 
 ### 13.2 The Canadian evidence base in one paragraph
 
@@ -447,7 +447,7 @@ Canada is entering the final and largest phase of the baby-boom retirement wave 
 
 ### 13.3 What the evidence supports — and does not support
 
-The evidence supports the claim that Canadian institutions are entering a continuity-stress period of historic scale. It does not support the claim that any single institution can be assigned a deterministic continuity score from population data alone. OCI/OCRA respect that distinction. They use the evidence to justify *the seriousness of the category*, not to overclaim about specific institutional readings.
+The evidence supports the claim that Canadian organizations are entering a continuity-stress period of historic scale. It does not support the claim that any single organization can be assigned a deterministic continuity score from population data alone. OCI/OCRA respect that distinction. They use the evidence to justify *the seriousness of the category*, not to overclaim about specific organizational readings.
 
 > "Continuity intelligence is most credible when it is least willing to overstate itself."
 
@@ -463,7 +463,7 @@ The evidence supports the claim that Canadian institutions are entering a contin
 | Does continuity-aware AI increase surveillance risk? | It can if badly designed. OCI/OCRA require consent, minimization, explainability, reviewer-led interpretation, and anti-surveillance architecture. |
 | Is succession planning enough? | No. Succession planning identifies who follows. Organizational continuity preserves what must survive. |
 | Is this consulting or software? | Both, intentionally. OCI/OCRA are operational infrastructure with facilitated practice attached where needed. |
-| Why not extend an existing case management system? | Because case systems preserve activity. OCI preserves institutional inheritance. Different problem, different category. |
+| Why not extend an existing case management system? | Because case systems preserve activity. OCI preserves organizational inheritance. Different problem, different category. |
 
 ---
 
@@ -479,19 +479,19 @@ Compatibility is not equivalence. OCI/OCRA do not certify governance, do not rep
 
 This whitepaper formally positions **Organizational Continuity Infrastructure (OCI)** as a category of operational modernization.
 
-OCI is a continuity-native operational category focused on preserving institutional intelligence, governance coherence, operational trust, evidence integrity, continuity resilience, and continuity-aware modernization across complex organizations.
+OCI is a continuity-native operational category focused on preserving organizational intelligence, governance coherence, operational trust, evidence integrity, continuity resilience, and continuity-aware modernization across complex organizations.
 
-OCI extends beyond workflow software, knowledge management, governance documentation, or traditional digital transformation. It represents a foundational shift toward continuity-native institutions.
+OCI extends beyond workflow software, knowledge management, governance documentation, or traditional digital transformation. It represents a foundational shift toward continuity-native organizations.
 
 ---
 
 ## Closing Statement
 
-The institutions that endure the next decade will not simply digitize faster. They will preserve operational memory, governance lineage, operational trust, and continuity intelligence more deliberately. They will treat continuity not as a project, not as a memo, not as a one-time audit, but as infrastructure — quiet, consistent, governance-safe, reviewer-led, and proportional.
+The organizations that endure the next decade will not simply digitize faster. They will preserve operational memory, governance lineage, operational trust, and continuity intelligence more deliberately. They will treat continuity not as a project, not as a memo, not as a one-time audit, but as infrastructure — quiet, consistent, governance-safe, reviewer-led, and proportional.
 
-The Canadian evidence base now makes the continuity question impossible to defer. The operational evidence inside institutions deploying Union Eyes makes it impossible to abstract. The framework presented in this paper — OCI as structural layer, OCRA as interpretive layer, continuity-aware operations as convergence layer — is the synthesis of that operational and demographic reality.
+The Canadian evidence base now makes the continuity question impossible to defer. The operational evidence inside organizations deploying Union Eyes makes it impossible to abstract. The framework presented in this paper — OCI as structural layer, OCRA as interpretive layer, continuity-aware operations as convergence layer — is the synthesis of that operational and demographic reality.
 
-The future belongs to continuity-native institutions. Not because continuity is fashionable, but because the alternative — institutions that process activity beautifully while quietly forgetting themselves — is no longer survivable at the scale and speed at which institutional memory is now leaving.
+The future belongs to continuity-native organizations. Not because continuity is fashionable, but because the alternative — organizations that process activity beautifully while quietly forgetting themselves — is no longer survivable at the scale and speed at which organizational memory is now leaving.
 
 — Nzila OS Research Initiative
 

@@ -31,15 +31,15 @@ These definitions are binding across all OCI/OCRA materials. They may be expande
 
 | Term | Canonical definition |
 | --- | --- |
-| Organizational Continuity Infrastructure (OCI) | The structured operational foundation that preserves institutional memory, governance lineage, operational evidence, organizational intelligence, and continuity resilience across time, systems, and leadership transitions. |
+| Organizational Continuity Infrastructure (OCI) | The structured operational foundation that preserves organizational memory, governance lineage, operational evidence, organizational intelligence, and continuity resilience across time, systems, and leadership transitions. |
 | Organizational Continuity Risk Analysis (OCRA) | The adaptive, reviewer-led interpretation layer that surfaces continuity fragility, stewardship topology, governance interpretation drift, modernization-driven continuity risk, and onboarding survivability. |
 | Governance Entropy System (GES) | The interpretive framework for governance continuity fragility, treating governance entropy as a continuous, observable property rather than a discrete failure event. |
 | Continuity debt | Accumulated undocumented operational dependency on undocumented interpretation, informal relationships, and individual memory. |
 | Reconstruction burden | The effort required to rebuild operational continuity from memory and fragments after a transition. |
-| Stewardship concentration | The condition in which a small number of individuals carry disproportionate institutional continuity load. |
+| Stewardship concentration | The condition in which a small number of individuals carry disproportionate organizational continuity load. |
 | Onboarding survivability | The structural ability of successors to become operationally effective without veteran mediation. |
 | Modernization fragmentation | The pattern in which modernization improves operational surfaces while eroding interpretive context. |
-| Operational trust | The confidence stakeholders place in an institution's ability to preserve continuity, maintain governance integrity, validate operational lineage, and demonstrate accountable decision-making over time. |
+| Operational trust | The confidence stakeholders place in an organization's ability to preserve continuity, maintain governance integrity, validate operational lineage, and demonstrate accountable decision-making over time. |
 | Runtime truth | The continuously verifiable operational state of governance controls, evidence integrity, and continuity. |
 | Continuity-aware AI | AI systems intentionally designed to preserve organizational memory, governance lineage, operational context, evidence integrity, and traceability throughout AI-assisted operations. |
 
@@ -56,9 +56,9 @@ OCI/OCRA do not:
 - conduct sentiment analysis or political inference on individuals,
 - replace formal external audits,
 - claim ISO, COBIT, SOC, or NIST certification equivalence,
-- function as deterministic ranking systems for institutions,
-- produce institutional verdicts without reviewer acceptance,
-- operate outside explicit institutional consent.
+- function as deterministic ranking systems for organizations,
+- produce organizational verdicts without reviewer acceptance,
+- operate outside explicit organizational consent.
 
 OCI/OCRA are:
 
@@ -79,9 +79,9 @@ These boundaries are doctrine, not configuration. They cannot be relaxed by depl
 The method maintains a strict separation between layers:
 
 1. **Operational reality** — the lived work of grievances, governance, investigations, evidence, onboarding, and modernization.
-2. **OCI structural layer** — the infrastructure that preserves institutional memory, governance lineage, evidence integrity, and continuity resilience.
+2. **OCI structural layer** — the infrastructure that preserves organizational memory, governance lineage, evidence integrity, and continuity resilience.
 3. **OCRA interpretive layer** — the reviewer-led continuity intelligence that reads structural signals against operational reality.
-4. **Continuity-aware operations** — the convergence layer in which OCI and OCRA reinforce daily institutional work.
+4. **Continuity-aware operations** — the convergence layer in which OCI and OCRA reinforce daily organizational work.
 
 Layer separation is doctrine. The method must never collapse operational reality into interpretation, or interpretation into verdict.
 
@@ -91,8 +91,8 @@ Layer separation is doctrine. The method must never collapse operational reality
 
 Reviewer accountability is the legitimacy anchor of the method.
 
-- No continuity reading is institutional truth until a named human reviewer accepts it on behalf of the institution.
-- No AI surface concludes on behalf of the institution.
+- No continuity reading is organizational truth until a named human reviewer accepts it on behalf of the organization.
+- No AI surface concludes on behalf of the organization.
 - Reviewer overrides are first-class outputs and inform future confidence calibration.
 - Reviewer accountability is structural; it cannot be removed by configuration.
 
@@ -120,8 +120,8 @@ Reviewer accountability is the legitimacy anchor of the method.
 The method uses statistical techniques only where statistical claims are appropriate.
 
 - Statistics may be used to detect structural patterns, characterize distributions of stewardship concentration, estimate reconstruction burden ranges, baseline continuity fragility ethically, and support confidence calibration.
-- Statistics must not be used to rank individuals, infer behaviour, produce institutional verdicts, replace reviewer judgment, or claim predictive forecasts about specific transitions.
-- Small institutional samples must be treated honestly: claims are bounded, confidence ranges are widened, and interpretation is preferred to inference.
+- Statistics must not be used to rank individuals, infer behaviour, produce organizational verdicts, replace reviewer judgment, or claim predictive forecasts about specific transitions.
+- Small organizational samples must be treated honestly: claims are bounded, confidence ranges are widened, and interpretation is preferred to inference.
 
 Composite scoring across heterogeneous signals is intentionally avoided where it would obscure structural meaning.
 
@@ -149,7 +149,7 @@ OCI and OCRA are **complementary, not equivalent** to recognized standards.
 - They do not certify governance.
 - They do not replace audits.
 - They do not substitute for management system standards.
-- They sit alongside ISO 22301, ISO 27001, ISO 9001, SOC 2, NIST AI RMF, and COBIT, providing the institutional continuity dimension underneath those frameworks.
+- They sit alongside ISO 22301, ISO 27001, ISO 9001, SOC 2, NIST AI RMF, and COBIT, providing the organizational continuity dimension underneath those frameworks.
 
 Procurement bodies adopting OCI do not have to choose between OCI and their existing standards stack.
 
