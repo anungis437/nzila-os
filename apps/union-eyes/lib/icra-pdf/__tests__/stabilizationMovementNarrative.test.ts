@@ -61,9 +61,9 @@ describe('Stabilization Movement appendix builders', () => {
     expect(p.body).toMatch(/pending/i);
   });
 
-  it('reads onboarding survivability organizationally and never as an individual measurement', () => {
+  it('reads onboarding survivability institutionally and never as an individual measurement', () => {
     const p = buildOnboardingSurvivabilityNarrative(makeResult({ onboarding_survivability: 'stabilizing' }));
-    expect(p.body).toMatch(/organizational|institutional/i);
+    expect(p.body).toMatch(/institutional/i);
     expect(p.body).not.toMatch(/individual.{0,40}measurement/i);
   });
 

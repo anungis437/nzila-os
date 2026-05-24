@@ -20,7 +20,7 @@ export type ResidualReading =
 
 /**
  * A carrier-load reading expresses, per process, how many carriers
- * institutionally hold the practice. This is organizational record,
+ * institutionally hold the practice. This is institutional record,
  * not person-load measurement.
  */
 export interface ProcessCarrierLoad {
@@ -47,7 +47,7 @@ export interface ResidualConcentrationResult {
 }
 
 function classify(pre: number, post: number): ResidualReading {
-  // Higher carrier count means broader organizational carriage, i.e.
+  // Higher carrier count means broader institutional carriage, i.e.
   // LESS concentration. Therefore post > pre means relief.
   if (post > pre) {
     // Sole-carrier resolved (pre=1, post>=2): fully relieved.

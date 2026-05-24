@@ -9,7 +9,7 @@
  * reciprocity terms explicitly, and resists positioning originating
  * stewards as bottlenecks.
  *
- * Pure, deterministic. Tone: organizational, recognition-first,
+ * Pure, deterministic. Tone: institutional, recognition-first,
  * governance-receivable, blame-free. No transformation theatre.
  *
  * Doctrine: docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md and
@@ -134,7 +134,7 @@ function buildSignals(
       severity: lapsedLineage.length >= 3 ? 'warning' : 'observation',
       category: 'lineage_lapse_concentration',
       statement:
-        'Lapsed precedents are present; reconstruct interpretation while organizational memory remains accessible.',
+        'Lapsed precedents are present; reconstruct interpretation while institutional memory remains accessible.',
       evidence: {
         lapsedCount: lapsedLineage.length,
         totalGaps: input.redistribution.lineageGaps.length,

@@ -3,7 +3,7 @@
  * MODULE: OCI Operational Truth Hardening — Part 6
  * DOCTRINE_VERSION: 1.0.0
  *
- * Organizational reliability: the runtime contract surface must enumerate the
+ * Institutional reliability: the runtime contract surface must enumerate the
  * same set of required keys release-over-release. Adding or removing a
  * required contract is an authorized doctrine amendment and should fail this
  * test until the snapshot is intentionally updated.
@@ -20,7 +20,7 @@ const REQUIRED_CONTRACT_KEYS = [
   'data.database_url',
 ] as const;
 
-describe('Organizational reliability — required runtime contracts', () => {
+describe('Institutional reliability — required runtime contracts', () => {
   it('the required contract set is exactly the doctrine-approved list', () => {
     const report = assessRuntimeContracts();
     const required = report.contracts.filter((c) => c.required).map((c) => c.key).sort();

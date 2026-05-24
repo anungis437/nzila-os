@@ -3,7 +3,7 @@
  *
  * Given a chronologically ordered series of per-assessment confidence
  * snapshots for the same institution (already pseudonymized by upstream
- * intelligence-network validators), derive whether organizational
+ * intelligence-network validators), derive whether institutional
  * continuity confidence is stabilizing, improving, eroding, or unchanged
  * per domain.
  *

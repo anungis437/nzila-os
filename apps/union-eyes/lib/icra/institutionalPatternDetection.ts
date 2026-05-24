@@ -1,8 +1,8 @@
 /**
- * Organizational Pattern Detection — higher-order pattern inference.
+ * Institutional Pattern Detection — higher-order pattern inference.
  *
  * Combines archetype readings with dimension scores to surface composite
- * organizational patterns. Calm, descriptive, never accusatory.
+ * institutional patterns. Calm, descriptive, never accusatory.
  *
  * Doctrine: refusal-default. When evidence is insufficient, returns no
  * pattern rather than fabricating one.

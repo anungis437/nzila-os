@@ -16,7 +16,7 @@
  *   - Anti-surveillance. The engine never emits institution-level intelligence.
  *     Per-institution reads remain inside the contributing institution.
  *   - Reviewer-led. Every accepted record carries the reviewer reference that
- *     authored the underlying organizational reading.
+ *     authored the underlying institutional reading.
  */
 
 import type {

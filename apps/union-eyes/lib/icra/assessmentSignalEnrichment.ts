@@ -2,7 +2,7 @@
  * Assessment Signal Enrichment — Product 5 longitudinal intelligence input.
  *
  * Consolidates confidence signals, structural signals, archetype readings,
- * and organizational patterns into a single per-assessment enrichment
+ * and institutional patterns into a single per-assessment enrichment
  * envelope, ready for ingest by Product 5 trajectory aggregation.
  *
  * No PII. No reviewer or institution identifiers — the assessment id is the

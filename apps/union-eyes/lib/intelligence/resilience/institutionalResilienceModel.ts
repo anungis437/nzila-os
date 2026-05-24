@@ -1,9 +1,9 @@
 /**
- * ARTIFACT TYPE: Organizational Resilience Model
+ * ARTIFACT TYPE: Institutional Resilience Model
  * MODULE: OCI Intelligence Network
  * DOCTRINE_VERSION: 1.0.0
  *
- * Organizational Resilience Trajectory™ model.
+ * Institutional Resilience Trajectory™ model.
  *
  * Combines several reviewer-readable trajectories into a single resilience
  * reading describing how the institution's continuity has held up. The model
@@ -16,7 +16,7 @@
  *   - onboarding survivability durability
  *   - stewardship redistribution durability
  *   - modernization continuity retention
- *   - organizational coherence resilience
+ *   - institutional coherence resilience
  *
  * Each capability is a band; the overall resilience reading is the weakest of
  * the readable capabilities.

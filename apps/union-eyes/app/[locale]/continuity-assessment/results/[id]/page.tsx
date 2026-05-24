@@ -14,11 +14,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getIcraProfile } from '@/actions/icra/get-profile';
-import { getIcraAdaptiveResolution } from '@/actions/icra/get-adaptive-resolution';
 import { ICRAProfile } from '@/components/icra/ICRAProfile';
 import PrintReportButton from '@/components/icra/PrintReportButton';
 import { EmailResultsCard } from '@/components/icra/EmailResultsCard';
-import { AdaptiveInterpretationBlock } from '@/components/icra/AdaptiveInterpretationBlock';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 interface PageProps {
@@ -93,8 +91,6 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
 
   const profile = await getIcraProfile(id);
   if (!profile) notFound();
-
-  const adaptiveResolution = await getIcraAdaptiveResolution(id);
 
   const copy = COPY[locale as 'en-CA' | 'fr-CA'] ?? COPY['en-CA'];
   const tierLabel = tierUnlocked ? TIER_LABEL[tierUnlocked] : null;
@@ -198,15 +194,6 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       <div className="mx-auto mt-8 max-w-5xl px-6">
         <EmailResultsCard assessmentId={id} locale={locale} />
       </div>
-      {/* ── Adaptive interpretation context ──────────────────────────────── */}
-      {adaptiveResolution && (
-        <div className="mx-auto mt-8 max-w-5xl px-6">
-          <AdaptiveInterpretationBlock
-            resolution={adaptiveResolution}
-            locale={(locale === 'fr-CA' ? 'fr-CA' : 'en-CA') as 'en-CA' | 'fr-CA'}
-          />
-        </div>
-      )}
       {/* ── Report body ─────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
         <ICRAProfile profile={profile} tierId={profile.reportTierId} />

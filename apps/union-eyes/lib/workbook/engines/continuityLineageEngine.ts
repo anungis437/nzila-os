@@ -3,11 +3,11 @@
  * MODULE: Governance Lineage
  * DOCTRINE_VERSION: 2.0.0
  *
- * Continuity Lineage Engine — reconstructs the organizational governance
+ * Continuity Lineage Engine — reconstructs the institutional governance
  * lineage from named precedents and governance domains. Produces:
  *   - Precedent continuity mappings
  *   - Governance Interpretation Matrix™ cells
- *   - Organizational evolution arc
+ *   - Institutional evolution arc
  *   - Lineage signals consumable by the workbook narrative
  *
  * Pure, deterministic.
@@ -26,9 +26,9 @@ import {
   type InterpretationCell,
 } from './governanceInterpretationMatrix';
 import {
-  trackOrganizationalEvolution,
-  type OrganizationalEvolutionResult,
-} from './organizationalEvolutionTracker';
+  trackInstitutionalEvolution,
+  type InstitutionalEvolutionResult,
+} from './institutionalEvolutionTracker';
 
 export interface ContinuityLineageInput {
   readonly workbookId: string;
@@ -66,7 +66,7 @@ export interface ContinuityLineageResult {
   readonly status: 'facilitated' | 'self-guided';
   readonly precedents: readonly PrecedentMapping[];
   readonly interpretationMatrix: readonly InterpretationCell[];
-  readonly evolution: OrganizationalEvolutionResult;
+  readonly evolution: InstitutionalEvolutionResult;
   readonly survivability: PrecedentSurvivabilityLayer;
   readonly aggregateInterpretationDrift: number;
   readonly signals: readonly LineageSignal[];
@@ -80,7 +80,7 @@ export function runContinuityLineage(
 ): ContinuityLineageResult {
   const precedents = mapPrecedentContinuity(input.precedents);
   const interpretationMatrix = buildInterpretationMatrix(input.governanceDomains);
-  const evolution = trackOrganizationalEvolution(precedents, interpretationMatrix);
+  const evolution = trackInstitutionalEvolution(precedents, interpretationMatrix);
   const survivability = aggregateLineageHealth(precedents);
   const aggregateDrift = aggregateInterpretationDrift(interpretationMatrix);
 
@@ -174,7 +174,7 @@ function synthesizeSignals(
 
 function buildPreview(
   survivability: PrecedentSurvivabilityLayer,
-  evolution: OrganizationalEvolutionResult,
+  evolution: InstitutionalEvolutionResult,
 ): string {
   if (survivability.total === 0) {
     return 'No governance precedents have been named yet — the lineage module will populate as precedents are surfaced.';

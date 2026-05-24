@@ -10,8 +10,8 @@
  * sector-level only — never per-institution.
  *
  * Hard rules enforced by construction:
- *   - No organizational ranking
- *   - No organizational exposure (no handles ever appear in the output)
+ *   - No institutional ranking
+ *   - No institutional exposure (no handles ever appear in the output)
  *   - No worker analytics
  *   - No prestige scoring
  *   - No competitive continuity scoring

@@ -1,6 +1,6 @@
 /**
  * ARTIFACT TYPE: IP / Framework
- * FRAMEWORK: Governance Entropy Scale™
+ * FRAMEWORK: Governance Entropy Scale\u2122
  * DOCTRINE_VERSION: 1.0.0
  *
  * A five-point scale measuring drift between governance design and
@@ -8,11 +8,6 @@
  * the Workbook Governance Lineage module and the PDF executive narrative.
  *
  * Pure, deterministic. Typed scaffold for the Facilitated Edition engine.
- *
- * Hardening invariants:
- *   1. ENTROPY_LEVELS is deeply frozen.
- *   2. classifyEntropy clamps any numeric input to [0,1] and tolerates NaN.
- *   3. Levels are ordered with strictly descending lowerBounds.
  */
 
 export type EntropyLevelId =
@@ -30,63 +25,56 @@ export interface EntropyLevel {
   lowerBound: number;
 }
 
-export const ENTROPY_LEVELS: readonly EntropyLevel[] = Object.freeze([
-  Object.freeze({
-    id: 'systemic_entropy' as const,
-    ordinal: 5 as const,
+export const ENTROPY_LEVELS: readonly EntropyLevel[] = [
+  {
+    id: 'systemic_entropy',
+    ordinal: 5,
     label: 'Systemic entropy',
     posture:
       'Governance practice no longer reliably traces back to governance design. Reconstruction is necessary.',
     lowerBound: 0.8,
-  }),
-  Object.freeze({
-    id: 'institutional_drift' as const,
-    ordinal: 4 as const,
+  },
+  {
+    id: 'institutional_drift',
+    ordinal: 4,
     label: 'Institutional drift',
     posture:
       'Multiple domains show patterned divergence from designed governance. Stabilization is appropriate.',
     lowerBound: 0.6,
-  }),
-  Object.freeze({
-    id: 'patterned_drift' as const,
-    ordinal: 3 as const,
+  },
+  {
+    id: 'patterned_drift',
+    ordinal: 3,
     label: 'Patterned drift',
     posture:
       'Recurring divergence in identifiable domains. Recognition is the prerequisite for stabilization.',
     lowerBound: 0.4,
-  }),
-  Object.freeze({
-    id: 'recognised_drift' as const,
-    ordinal: 2 as const,
+  },
+  {
+    id: 'recognised_drift',
+    ordinal: 2,
     label: 'Recognised drift',
     posture:
       'Drift is named and known to institutional stewards. Continuity is intact but vigilance is warranted.',
     lowerBound: 0.2,
-  }),
-  Object.freeze({
-    id: 'coherent' as const,
-    ordinal: 1 as const,
+  },
+  {
+    id: 'coherent',
+    ordinal: 1,
     label: 'Coherent governance',
     posture:
       'Governance practice and governance design are in close alignment. Periodic review is sufficient.',
     lowerBound: 0,
-  }),
-]);
+  },
+] as const;
 
 /**
- * @param drift A scalar 0–1. Higher values indicate greater divergence.
- *              Non-finite inputs are treated as 0 (coherent).
+ * @param drift A scalar 0\u20131. Higher values indicate greater divergence.
  */
 export function classifyEntropy(drift: number): EntropyLevel {
-  const safe = typeof drift === 'number' && Number.isFinite(drift) ? clamp01(drift) : 0;
+  const clamped = Math.max(0, Math.min(1, drift));
   for (const level of ENTROPY_LEVELS) {
-    if (safe >= level.lowerBound) return level;
+    if (clamped >= level.lowerBound) return level;
   }
   return ENTROPY_LEVELS[ENTROPY_LEVELS.length - 1];
-}
-
-function clamp01(n: number): number {
-  if (n < 0) return 0;
-  if (n > 1) return 1;
-  return n;
 }

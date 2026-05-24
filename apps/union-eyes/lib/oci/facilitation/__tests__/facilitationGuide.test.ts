@@ -1,7 +1,7 @@
 /**
  * OCI facilitation guide invariants.
  *
- * The catalogue is editorial content with organizational consequence.
+ * The catalogue is editorial content with institutional consequence.
  * These tests guard the doctrinal invariants that the guide must
  * uphold so that drift in the data file is caught at CI time.
  */

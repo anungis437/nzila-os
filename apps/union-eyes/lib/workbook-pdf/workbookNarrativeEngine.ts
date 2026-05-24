@@ -37,7 +37,7 @@ const BAND_LABELS: Record<string, string> = {
 
 const BAND_POSTURES: Record<string, string> = {
   distributed:
-    'Continuity is broadly distributed. Loss of any single carrier would not interrupt organizational memory.',
+    'Continuity is broadly distributed. Loss of any single carrier would not interrupt institutional memory.',
   balanced:
     'Continuity is reasonably balanced, with manageable concentration risk in a few load-bearing roles.',
   concentrated:

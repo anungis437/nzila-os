@@ -33,7 +33,7 @@ const baseEvolution: StabilizationEvolutionReading = {
   direction: 'unknown',
   posture: 'unknown',
   continuityRate: 0,
-  reading: 'Organizational evolution has not been read.',
+  reading: 'Institutional evolution has not been read.',
 };
 
 const emptyInput: ExecutiveStabilizationInput = {

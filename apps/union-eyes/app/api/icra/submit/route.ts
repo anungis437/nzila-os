@@ -18,7 +18,7 @@ import { rateLimit } from '@/lib/rate-limit'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { verifyTurnstileToken } from '@/lib/icra/turnstile'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
-import { QUESTION_BANK_VERSION, CTX_PRIMARY_CHALLENGE_MAX_LENGTH, CTX_SELECT_VALUE_MAX_LENGTH, ALL_QUESTIONS } from '@/lib/icra/questions'
+import { QUESTION_BANK_VERSION, CTX_PRIMARY_CHALLENGE_MAX_LENGTH, CTX_SELECT_VALUE_MAX_LENGTH } from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import {
   icraAssessments,
@@ -175,7 +175,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           questionBankVersion: QUESTION_BANK_VERSION,
           doctrineVersion: DOCTRINE_VERSION,
           consent,
-          organizationContext: organizationContextForInsert,
+          organizationContext: normalizedOrgContext,
           locale,
           submittedAt: new Date(),
         })
@@ -187,35 +187,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
 
       const { profile } = scoreAssessment(assessmentId, answers, normalizedOrgContext)
-
-      try {
-        const reportSlot = resolveAdaptiveReportAISlot({
-          rawProfile: profile,
-          organizationContext: organizationContextForInsert,
-          questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
-          locale: locale === 'fr-CA' ? 'fr-CA' : 'en-CA',
-          generatedAt: new Date(profile.generatedAt).toISOString(),
-        })
-        if (reportSlot) {
-          organizationContextForInsert = embedPersistedAdaptiveReportAISlot(
-            organizationContextForInsert,
-            reportSlot,
-          )
-        } else {
-          logger.warn('icra.assessment.report_ai_unresolved', {
-            assessmentId,
-          })
-        }
-        await tx
-          .update(icraAssessments)
-          .set({ organizationContext: organizationContextForInsert })
-          .where(eq(icraAssessments.id, assessmentId))
-      } catch (reportSlotErr) {
-        logger.warn('icra.assessment.report_ai_persist_skipped', {
-          assessmentId,
-          error: reportSlotErr instanceof Error ? reportSlotErr.message : 'unknown',
-        })
-      }
 
       // Run all dependent inserts in parallel — they each only depend on
       // assessmentId, so this collapses ~5 sequential round-trips into one.

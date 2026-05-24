@@ -11,7 +11,7 @@
  * No auth required. Redirects to /continuity-assessment/results/[id].
  */
 
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Answer, ConsentRecord, Question, SectionId } from '@/lib/icra/types';
 import type { MetadataQuestion } from '@/lib/icra/questions';
@@ -33,26 +33,10 @@ import {
   localizeOptionGroup,
   type SupportedLocale,
 } from '@/lib/icra/questions.i18n';
-// Import directly from submodules — NOT the barrel — so we don't pull
-// server-only siblings (adaptiveTelemetry → observability → db → pg)
-// into the client bundle. Turbopack traces the whole barrel surface.
-import { classifyOrgContext } from '@/lib/icra/adaptation/orgContextClassifier';
-import { routeQuestionBank } from '@/lib/icra/adaptation/questionRoutingEngine';
-import {
-  ROUTING_ENGINE_VERSION,
-  type RoutableQuestion,
-  type RoutedQuestionBank,
-  type RoutingRationale,
-} from '@/lib/icra/adaptation/routingTypes';
-import type { InstitutionalAssessmentProfile } from '@/lib/icra/adaptation/types';
-import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { ConsentGate } from './ConsentGate';
 
 const DOCTRINE_VERSION = '1.0.0';
-// Bumped to v2 when adaptive routing state was added to the persisted draft.
-// v1 drafts are intentionally discarded on hydration so they cannot poison
-// the routed bank with stale assumptions.
-const PERSIST_KEY = 'icra.flow.v2';
+const PERSIST_KEY = 'icra.flow.v1';
 const PERSIST_TTL_MS = 1000 * 60 * 60 * 24; // 24h — abandoned drafts expire
 
 const SCORED_SECTIONS: SectionId[] = [
@@ -69,20 +53,13 @@ type OrgContextAnswers = Record<string, string>;
 
 /** Persisted draft snapshot (sessionStorage). */
 interface PersistedDraft {
-  v: 2;
+  v: 1;
   step: number;
   consent: ConsentRecord | null;
   orgContext: OrgContextAnswers;
   answers: Answer[];
   currentSectionAnswers: Array<[string, string]>;
   savedAt: number;
-  // ── OCRA adaptive routing state (doctrine 1.0.0) ────────────────────────
-  adaptiveProfile?: InstitutionalAssessmentProfile;
-  routedBankVersion?: string;
-  routedQuestionIds?: string[];
-  routingFingerprint?: string;
-  routingRationale?: RoutingRationale[];
-  adaptiveExplanationAcknowledged?: boolean;
 }
 
 /** Fire-and-forget client telemetry. Uses sendBeacon when possible so
@@ -196,10 +173,6 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
-  // ── OCRA adaptive routing state (doctrine 1.0.0) ───────────────────────────
-  const [adaptiveProfile, setAdaptiveProfile] = useState<InstitutionalAssessmentProfile | null>(null);
-  const [routedBank, setRoutedBank] = useState<RoutedQuestionBank | null>(null);
-  const [explanationAcknowledged, setExplanationAcknowledged] = useState(false);
   const lastReportedStepRef = useRef<number>(-1);
 
   // ── Hydrate from sessionStorage on mount ─────────────────────────────────
@@ -215,7 +188,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         const fresh = typeof parsed.savedAt === 'number' && Date.now() - parsed.savedAt < PERSIST_TTL_MS;
         if (
           fresh &&
-          parsed.v === 2 &&
+          parsed.v === 1 &&
           typeof parsed.step === 'number' &&
           parsed.step > 0 &&
           parsed.step < 9
@@ -228,58 +201,6 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
           }
           if (Array.isArray(parsed.currentSectionAnswers)) {
             setCurrentSectionAnswers(new Map(parsed.currentSectionAnswers));
-          }
-          // ── Restore adaptive routing state, re-routing on version mismatch ──
-          if (parsed.adaptiveProfile) {
-            setAdaptiveProfile(parsed.adaptiveProfile);
-            const versionMatches =
-              parsed.routedBankVersion === ROUTING_ENGINE_VERSION &&
-              Array.isArray(parsed.routedQuestionIds) &&
-              parsed.routedQuestionIds.length > 0;
-            if (versionMatches) {
-              // Same engine version → reconstruct the routed bank from the
-              // stored ids. Safe because question bank version is also pinned.
-              const includedSet = new Set(parsed.routedQuestionIds);
-              const restored: RoutedQuestionBank = Object.freeze({
-                doctrineVersion: '1.0.0' as const,
-                routeVersion: ROUTING_ENGINE_VERSION,
-                includedQuestions: (ALL_QUESTIONS as unknown as RoutableQuestion[]).filter((q) =>
-                  includedSet.has(q.id),
-                ),
-                deferredQuestions: (ALL_QUESTIONS as unknown as RoutableQuestion[]).filter(
-                  (q) => !includedSet.has(q.id),
-                ),
-                requiredQuestions: [],
-                optionalContextQuestions: [],
-                routingRationale: parsed.routingRationale ?? [],
-                usedSafeDefault: false,
-                selectionFingerprint: parsed.routingFingerprint ?? '',
-              });
-              setRoutedBank(restored);
-            } else {
-              // Route engine drift OR missing ids → reroute deterministically
-              // from the restored profile. Emit a fresh `assessment_routed`.
-              try {
-                const fresh = routeQuestionBank(
-                  ALL_QUESTIONS as unknown as RoutableQuestion[],
-                  parsed.adaptiveProfile,
-                );
-                setRoutedBank(fresh);
-                emitTelemetry('assessment_routed', undefined, {
-                  routeVersion: fresh.routeVersion,
-                  included: fresh.includedQuestions.length,
-                  deferred: fresh.deferredQuestions.length,
-                  safeDefault: fresh.usedSafeDefault,
-                  selection: fresh.selectionFingerprint.slice(0, 60),
-                  reroute: true,
-                });
-              } catch {
-                // Recovery must never break the flow — fall through to static bank.
-              }
-            }
-          }
-          if (typeof parsed.adaptiveExplanationAcknowledged === 'boolean') {
-            setExplanationAcknowledged(parsed.adaptiveExplanationAcknowledged);
           }
           emitTelemetry('assessment_resumed', undefined, { step: parsed.step });
         }
@@ -298,35 +219,19 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     if (step === 0 || step >= 9) return; // Don't persist pre-consent or post-submit.
     try {
       const draft: PersistedDraft = {
-        v: 2,
+        v: 1,
         step,
         consent,
         orgContext,
         answers: Array.from(answers.values()),
         currentSectionAnswers: Array.from(currentSectionAnswers.entries()),
         savedAt: Date.now(),
-        adaptiveProfile: adaptiveProfile ?? undefined,
-        routedBankVersion: routedBank?.routeVersion,
-        routedQuestionIds: routedBank ? routedBank.includedQuestions.map((q) => q.id) : undefined,
-        routingFingerprint: routedBank?.selectionFingerprint,
-        routingRationale: routedBank ? [...routedBank.routingRationale] : undefined,
-        adaptiveExplanationAcknowledged: explanationAcknowledged,
       };
       window.sessionStorage.setItem(PERSIST_KEY, JSON.stringify(draft));
     } catch {
       // Quota exceeded / private mode — silent.
     }
-  }, [
-    hydrated,
-    step,
-    consent,
-    orgContext,
-    answers,
-    currentSectionAnswers,
-    adaptiveProfile,
-    routedBank,
-    explanationAcknowledged,
-  ]);
+  }, [hydrated, step, consent, orgContext, answers, currentSectionAnswers]);
 
   // ── Abandonment telemetry on unload mid-flow ──────────────────────────────
   useEffect(() => {
@@ -463,18 +368,12 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     ? (routedQuestionsBySection[currentSectionId] ?? [])
     : [];
 
-  // Total scored questions for accurate progress — routed count when adapted,
-  // otherwise the static bank total.
-  const totalRoutedScored = routedBank
-    ? routedBank.includedQuestions.length
-    : TOTAL_SCORED_QUESTIONS;
-
   // ── Back navigation: restore the prior section's selections from `answers`.
   function handleSectionBack() {
     if (step <= 2) return;
     const targetSectionId = SCORED_SECTIONS[step - 3];
     const targetQuestions = targetSectionId
-      ? (routedQuestionsBySection[targetSectionId] ?? QUESTIONS_BY_SECTION[targetSectionId] ?? [])
+      ? (QUESTIONS_BY_SECTION[targetSectionId] ?? [])
       : [];
     const restored = new Map<string, string>();
     for (const q of targetQuestions) {
@@ -657,21 +556,6 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     );
   }
 
-  // ── OCRA adaptive explanation card (doctrine 1.0.0) ─────────────────────
-  // Shown once between the org-context step and the first scored section
-  // whenever an adaptive profile + routed bank have been produced. Renders
-  // a calm, transparent summary; never alarming, never manipulative.
-  if (step === 2 && routedBank && adaptiveProfile && !explanationAcknowledged) {
-    return (
-      <AdaptiveExplanationCard
-        profile={adaptiveProfile}
-        routedBank={routedBank}
-        copy={copy}
-        onAcknowledge={() => setExplanationAcknowledged(true)}
-      />
-    );
-  }
-
   if (step === 9 || submitting) {
     return (
       <div className="mx-auto max-w-xl py-24 text-center space-y-4">
@@ -706,6 +590,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
       {/* Progress bar */}
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-stone-500">
+          <span>
           <span>{copy.section} {sectionIndex + 1} {copy.of} {SCORED_SECTIONS.length} — {localizedSection.title}</span>
           <span aria-live="polite" aria-atomic="true">{Math.round(progressPercent)}% {copy.complete}</span>
         </div>
@@ -743,7 +628,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
               const localizedMin = localizeLikertScaleLabel('minLabel', minLabel, supportedLocale);
               const localizedMax = localizeLikertScaleLabel('maxLabel', maxLabel, supportedLocale);
               return (
-                <div key={q.id} data-testid={`icra-question-${q.id}`} className="space-y-3">
+                <div key={q.id} className="space-y-3">
                   <div className="space-y-1">
                     <p id={labelId} className="text-sm font-medium text-stone-900 leading-snug">{lq.prompt}</p>
                     {lq.helpText && (
@@ -887,7 +772,7 @@ function OrgContextForm({ questions, onSubmit, copy, locale }: OrgContextFormPro
         {questions.sort((a, b) => a.order - b.order).map((q) => {
           const lq = localizeQuestion(q, locale);
           return (
-          <div key={q.id} data-testid={`icra-org-question-${q.id}`} className="space-y-1.5">
+          <div key={q.id} className="space-y-1.5">
             <label className="block text-sm font-medium text-stone-900">
               {lq.prompt}
               {q.required && <span className="ml-1 text-stone-400">*</span>}

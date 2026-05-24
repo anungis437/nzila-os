@@ -1,5 +1,5 @@
 /**
- * OCI organizational discovery framework invariants.
+ * OCI institutional discovery framework invariants.
  */
 
 import { describe, expect, it } from 'vitest';

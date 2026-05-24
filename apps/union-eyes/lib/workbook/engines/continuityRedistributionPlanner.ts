@@ -88,7 +88,7 @@ export function planContinuityRedistribution(
     priority: (l.continuity === 'lapsed' ? 1 : idx <= 2 ? 2 : 3) as 1 | 2 | 3,
     rationale:
       l.continuity === 'lapsed'
-        ? 'Precedent is no longer carried in practice; reconstruct interpretation while organizational memory remains accessible.'
+        ? 'Precedent is no longer carried in practice; reconstruct interpretation while institutional memory remains accessible.'
         : 'Precedent is fading; brief successor stewards before it is lost.',
   }));
 

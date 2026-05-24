@@ -5,14 +5,14 @@
  *
  * Executive Continuity Brief — PDF Document Template
  *
- * React-PDF document with full editorial organizational layout.
+ * React-PDF document with full editorial institutional layout.
  * Cover → Executive Summary → Continuity Profile →
  * Governance Entropy → Memory Holders → Modernization Review →
  * Recommendations → Executive Reflection.
  *
  * Visual target: governance briefing, not software artifact.
  * Typography: Times-Roman (serif) headings, Helvetica body.
- * Palette: organizational navy, warm grays, muted editorial tones.
+ * Palette: institutional navy, warm grays, muted editorial tones.
  */
 
 import React from 'react';
@@ -24,7 +24,6 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 import type { PdfReportData } from './reportDataMapper';
-import { AI_DISCLOSURE_COPY } from '../icra-ai/aiDisclosureCopy';
 import {
   COLORS,
   FONTS,
@@ -515,7 +514,7 @@ function ContinuityProfilePage({ data }: { data: PdfReportData }) {
   return (
     <Page size={PAGE.size} style={S.page}>
       <Text style={S.sectionLabel}>Section 2</Text>
-      <Text style={S.sectionHeading}>Organizational Continuity Profile</Text>
+      <Text style={S.sectionHeading}>Institutional Continuity Profile</Text>
 
       <View style={S.divider} />
 
@@ -618,19 +617,19 @@ function GovernanceEntropyPage({ data }: { data: PdfReportData }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Organizational Memory & Continuity Holders
+// Institutional Memory & Continuity Holders
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MemoryHoldersPage({ data }: { data: PdfReportData }) {
   return (
     <Page size={PAGE.size} style={S.page}>
       <Text style={S.sectionLabel}>Section 4</Text>
-      <Text style={S.sectionHeading}>Organizational Memory & Continuity Holders</Text>
+      <Text style={S.sectionHeading}>Institutional Memory & Continuity Holders</Text>
 
       <View style={S.divider} />
 
       <Text style={[S.bodySmall, { marginBottom: SPACE.lg, color: COLORS.ink40 }]}>
-        This section examines where organizational memory lives, how continuity labour is distributed, and what the concentration of operational knowledge in individuals means for transition resilience and governance sustainability.
+        This section examines where institutional memory lives, how continuity labour is distributed, and what the concentration of operational knowledge in individuals means for transition resilience and governance sustainability.
       </Text>
 
       {data.narrative.memoryHolders.map((para, idx) => (
@@ -677,7 +676,7 @@ function ModernizationReviewPage({ data }: { data: PdfReportData }) {
       <View style={S.divider} />
 
       <Text style={[S.bodySmall, { marginBottom: SPACE.lg, color: COLORS.ink40 }]}>
-        This section examines the intersection of technology modernization and organizational continuity — the risks of advancing operational capability without preserving the organizational context that makes that capability purposeful.
+        This section examines the intersection of technology modernization and institutional continuity — the risks of advancing operational capability without preserving the institutional context that makes that capability purposeful.
       </Text>
 
       {data.narrative.modernizationReview.map((para, idx) => (
@@ -722,7 +721,7 @@ function RecommendationsPage({ data }: { data: PdfReportData }) {
       <View style={S.divider} />
 
       <Text style={[S.bodySmall, { marginBottom: SPACE.lg, color: COLORS.ink40 }]}>
-        These recommendations are calibrated to the specific continuity posture of this institution. They are organized by planning horizon and represent a continuity-first approach to organizational development — not digital transformation hype, not consulting boilerplate.
+        These recommendations are calibrated to the specific continuity posture of this institution. They are organized by planning horizon and represent a continuity-first approach to institutional development — not digital transformation hype, not consulting boilerplate.
       </Text>
 
       {immediate.length > 0 && (
@@ -857,175 +856,6 @@ function StabilizationMovementAppendixPage({ data }: { data: PdfReportData }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Adaptive Interpretation Context Page
-//
-// Renders only when data.adaptiveContext is supplied. Exposes the calm,
-// audit-safe interpretation shape (bands + counts) so report readers
-// understand the calibration applied. Bilingual EN/FR. No routing internals,
-// no question IDs, no scoring weights.
-// ─────────────────────────────────────────────────────────────────────────────
-
-const ADAPTIVE_COPY = {
-  'en-CA': {
-    label: 'Interpretation Context',
-    heading: 'Adaptive Interpretation Context',
-    intro:
-      'This report was interpreted using the organizational context declared during the assessment process. Core continuity questions remained included to preserve comparability across institutions, while continuity interpretation reflected organizational scale, governance structure, and operational continuity exposure.',
-    fields: {
-      institutionalScale: 'Organizational scale',
-      governanceComplexity: 'Governance structure',
-      continuityExposure: 'Continuity exposure',
-      respondentLens: 'Respondent lens',
-      routedQuestions: 'Questions interpreted in context',
-      totalQuestions: 'Total questions in adapted set',
-    },
-    fallback:
-      'Limited organizational context was provided. A calibrated default interpretation was applied so this report remains comparable with peer institutions.',
-    closing:
-      'The adapted question set preserves core continuity coverage in every interpretation. Adaptation reflects calibration, not exclusion.',
-  },
-  'fr-CA': {
-    label: "Contexte d'interprétation",
-    heading: "Contexte d'interprétation adaptatif",
-    intro:
-      "Ce rapport a été interprété en fonction du contexte organisationnel déclaré lors du processus d'évaluation. Les questions essentielles de continuité ont été maintenues afin de préserver la comparabilité entre institutions, tandis que l'interprétation de la continuité reflétait l'échelle organisationnelle, la structure de gouvernance et l'exposition opérationnelle à la continuité.",
-    fields: {
-      institutionalScale: 'Échelle organisationnelle',
-      governanceComplexity: 'Structure de gouvernance',
-      continuityExposure: 'Exposition à la continuité',
-      respondentLens: 'Optique du répondant',
-      routedQuestions: 'Questions interprétées en contexte',
-      totalQuestions: "Total de questions dans l'ensemble adapté",
-    },
-    fallback:
-      "Le contexte organisationnel fourni étant limité, une interprétation par défaut calibrée a été appliquée afin que ce rapport demeure comparable aux institutions pairs.",
-    closing:
-      "L'ensemble adapté de questions conserve la couverture essentielle de continuité dans chaque interprétation. L'adaptation reflète un étalonnage, et non une exclusion.",
-  },
-} as const;
-
-function AdaptiveInterpretationContextPage({ data }: { data: PdfReportData }) {
-  const a = data.adaptiveContext;
-  if (!a) return null;
-  const locale: 'en-CA' | 'fr-CA' =
-    data.locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
-  const t = ADAPTIVE_COPY[locale];
-  const total = a.includedQuestionIds.length + a.deferredQuestionIds.length;
-
-  const rows: Array<[string, string]> = [
-    [t.fields.institutionalScale, a.profileBands.institutionalScale],
-    [t.fields.governanceComplexity, a.profileBands.governanceComplexity],
-    [t.fields.continuityExposure, a.profileBands.continuityExposure],
-    [t.fields.respondentLens, a.profileBands.respondentLens],
-    [t.fields.routedQuestions, String(a.includedQuestionIds.length)],
-    [t.fields.totalQuestions, String(total)],
-  ];
-
-  return (
-    <Page size={PAGE.size} style={S.page}>
-      <Text style={S.sectionLabel}>{t.label}</Text>
-      <Text style={S.sectionHeading}>{t.heading}</Text>
-      <View style={S.divider} />
-
-      <Text style={S.bodyPara}>{t.intro}</Text>
-
-      {rows.map(([label, value], idx) => (
-        <View
-          key={`adaptive-${idx}`}
-          style={[
-            S.twoCol,
-            {
-              paddingVertical: 5,
-              borderBottomWidth: 0.5,
-              borderBottomColor: COLORS.borderLight,
-            },
-          ]}
-        >
-          <Text style={[S.bodySmall, { flex: 1, color: COLORS.ink40 }]}>{label}</Text>
-          <Text style={[S.bodySmall, { flex: 2, color: COLORS.ink }]}>{value}</Text>
-        </View>
-      ))}
-
-      {a.fallbackUsed && (
-        <Text style={[S.bodyPara, { marginTop: SPACE.lg, color: COLORS.ink60 }]}>
-          {t.fallback}
-        </Text>
-      )}
-
-      <Text style={[S.bodySmall, { marginTop: SPACE.xl, color: COLORS.ink40, lineHeight: 1.6 }]}>
-        {t.closing}
-      </Text>
-
-      <PageFooter
-        institutionName={data.institutionName}
-        generatedAt={data.generatedAt}
-      />
-    </Page>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// AI-Assisted Narrative Page
-//
-// Renders only when data.aiAssistedNarrative is supplied AND its review
-// status is 'approved'. Carries the canonical bilingual disclosure verbatim
-// from docs/oci/ai/AI_DISCLOSURE_NOTICE.md so the reader knows the section
-// is AI-assisted and reviewer-approved. The narrative itself is reviewer-
-// verified text from the human review workflow — never raw model output.
-// ─────────────────────────────────────────────────────────────────────────────
-
-function AiAssistedNarrativePage({ data }: { data: PdfReportData }) {
-  const ai = data.aiAssistedNarrative;
-  if (!ai || ai.reviewStatus !== 'approved') return null;
-  const locale: 'en-CA' | 'fr-CA' = ai.locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
-  const disclosure = AI_DISCLOSURE_COPY[locale];
-  const label =
-    locale === 'fr-CA' ? 'Synthèse narrative assistée' : 'AI-Assisted Narrative';
-  const heading =
-    locale === 'fr-CA'
-      ? 'Synthèse narrative assistée par IA'
-      : 'AI-Assisted Continuity Narrative';
-  const auditLabel = locale === 'fr-CA' ? 'Référence audit' : 'Audit record';
-  return (
-    <Page size={PAGE.size} style={S.page}>
-      <Text style={S.sectionLabel}>{label}</Text>
-      <Text style={S.sectionHeading}>{heading}</Text>
-      <View style={S.divider} />
-
-      <Text
-        style={[
-          S.bodySmall,
-          {
-            marginBottom: SPACE.lg,
-            color: COLORS.ink60,
-            fontStyle: 'italic',
-            lineHeight: 1.6,
-          },
-        ]}
-      >
-        {disclosure}
-      </Text>
-
-      <Text style={S.bodyPara}>{ai.narrative}</Text>
-
-      <Text
-        style={[
-          S.bodySmall,
-          { marginTop: SPACE.xl, color: COLORS.ink40, lineHeight: 1.6 },
-        ]}
-      >
-        {auditLabel}: {ai.auditRecordRef}
-      </Text>
-
-      <PageFooter
-        institutionName={data.institutionName}
-        generatedAt={data.generatedAt}
-      />
-    </Page>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Assessment Metadata Page (back matter)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1044,7 +874,7 @@ function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
       <View style={S.divider} />
 
       <Text style={S.bodyPara}>
-        This Executive Continuity Brief was generated from the OCI Continuity Risk Assessment (ICRA), a structured self-assessment instrument designed to surface organizational continuity posture across five core dimensions: organizational continuity, governance fragility, evidence and traceability, operational memory, and transition readiness.
+        This Executive Continuity Brief was generated from the OCI Continuity Risk Assessment (ICRA), a structured self-assessment instrument designed to surface institutional continuity posture across five core dimensions: institutional continuity, governance fragility, evidence and traceability, operational memory, and transition readiness.
       </Text>
 
       <Text style={S.bodyPara}>
@@ -1133,7 +963,7 @@ export function ExecutiveContinuityBriefTemplate({
       title={`Executive Continuity Brief${data.institutionName ? ` — ${data.institutionName}` : ''}`}
       author="Union Eyes / Nzila OS"
       subject="OCI Continuity Risk Assessment — Executive Continuity Brief"
-      keywords="OCI, organizational continuity, governance, continuity risk"
+      keywords="OCI, institutional continuity, governance, continuity risk"
       creator="Union Eyes ICRA Platform"
       producer="Union Eyes / Nzila OS"
     >
@@ -1146,8 +976,6 @@ export function ExecutiveContinuityBriefTemplate({
       <RecommendationsPage data={data} />
       <ExecutiveReflectionPage data={data} />
       {data.stabilizationMovement ? <StabilizationMovementAppendixPage data={data} /> : null}
-      {data.adaptiveContext ? <AdaptiveInterpretationContextPage data={data} /> : null}
-      {data.aiAssistedNarrative ? <AiAssistedNarrativePage data={data} /> : null}
       <AssessmentMetadataPage data={data} />
     </Document>
   );

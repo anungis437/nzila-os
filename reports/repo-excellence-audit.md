@@ -1,6 +1,6 @@
 # Repo Excellence Audit
 
-Generated: 2026-05-23T21:29:36.113Z
+Generated: 2026-05-22T01:49:58.222Z
 
 Overall score: 7.2 / 10
 
@@ -30,7 +30,7 @@ Overall score: 7.2 / 10
 - [runtime_proof] Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available.
 - [duplication] Duplicate script bodies remain: contract-tests, contract:test
 - [duplication] Duplicate script bodies remain: inventory:check, docs:sync
-- [script_sprawl] Root script count is 289.
+- [script_sprawl] Root script count is 288.
 - [script_sprawl] Root command surface is still dense and benefits from continued pruning.
 - [hidden_fragility] Complete live synthetic probe rollout for all Tier 1 endpoints.
 - [hidden_fragility] Integrate incident tracker feed for MTTR and monthly incident count.

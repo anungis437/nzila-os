@@ -3,7 +3,7 @@
  * MODULE: Continuity Breakpoints
  * DOCTRINE_VERSION: 2.0.0
  *
- * Continuity Breakpoint Engine — identifies the organizational points at
+ * Continuity Breakpoint Engine — identifies the institutional points at
  * which a continuity break would have the greatest blast radius. Combines
  * the Continuity Survivability Matrix™, the Reconstruction Burden Index™,
  * and the Onboarding Survivability Layer™ into a calm, ranked register
@@ -11,7 +11,7 @@
  *
  * Tone: calm operational observation, NEVER alarmist, NEVER compliance-
  * framed, NEVER risk-consulting boilerplate. Breakpoints are described
- * as the organizational configurations in which continuity is most likely
+ * as the institutional configurations in which continuity is most likely
  * to fail quietly — not as "threats" or "exposures".
  *
  * Pure, deterministic.

@@ -5,7 +5,7 @@
  *
  * Executive Continuity Brief — Report Theme
  *
- * Organizational palette. Editorial hierarchy. Calm materiality.
+ * Institutional palette. Editorial hierarchy. Calm materiality.
  *
  * Visual references: public inquiry reports, governance briefings,
  * editorial strategic publications, calm public-interest design.
@@ -14,7 +14,7 @@
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Color System — organizational, trustworthy, calm
+// Color System — institutional, trustworthy, calm
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const COLORS = {
@@ -31,8 +31,8 @@ export const COLORS = {
   border: '#D6D3D1',      // Divider — stone-300
   borderLight: '#E7E5E4', // Subtle divider — stone-200
 
-  // Brand — organizational, not startup
-  navy: '#1B3A5C',        // Deep organizational blue — headings, emphasis
+  // Brand — institutional, not startup
+  navy: '#1B3A5C',        // Deep institutional blue — headings, emphasis
   navyLight: '#2D5382',   // Lighter navy — pull quotes
   teal: '#6B8F87',        // Muted teal — positive indicators, bars
   tealLight: '#A8C4BF',   // Light teal — low-emphasis bars
@@ -48,7 +48,7 @@ export const COLORS = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Typography — editorial hierarchy, organizational readability
+// Typography — editorial hierarchy, institutional readability
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Built-in React-PDF fonts — reliable, zero external dependency */
@@ -104,7 +104,7 @@ export const SPACE = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Page geometry — A4, organizational margins
+// Page geometry — A4, institutional margins
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const PAGE = {
@@ -142,7 +142,7 @@ export function dimensionBarColor(score: number): string {
 
 /** Dimension name → readable label for the PDF */
 export const DIMENSION_LABELS: Record<string, string> = {
-  institutional_continuity: 'Organizational Continuity',
+  institutional_continuity: 'Institutional Continuity',
   governance_fragility: 'Governance Fragility',
   trust_debt: 'Evidence & Traceability',
   operational_memory: 'Operational Memory',
@@ -154,7 +154,7 @@ export const SECTION_LABELS: Record<string, string> = {
   organizational_context: 'Organizational Context',
   operational_dependency: 'Operational Dependency',
   governance_visibility: 'Governance Visibility',
-  institutional_memory: 'Organizational Memory',
+  institutional_memory: 'Institutional Memory',
   transition_readiness: 'Transition Readiness',
   operational_coordination: 'Operational Coordination',
   explainability_trust: 'Explainability & Trust',

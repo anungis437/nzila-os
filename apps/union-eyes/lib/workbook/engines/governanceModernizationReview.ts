@@ -117,11 +117,11 @@ function buildGapReading(
 ): string {
   switch (gap) {
     case 'aligned':
-      return 'Modernization and governance review are mutually aligned around organizational continuity.';
+      return 'Modernization and governance review are mutually aligned around institutional continuity.';
     case 'governance_lag':
       return 'Modernization is continuity-aware but governance review has not caught up.';
     case 'continuity_lag':
-      return 'Governance review is present but the initiative itself does not yet engage organizational continuity.';
+      return 'Governance review is present but the initiative itself does not yet engage institutional continuity.';
     case 'compound_gap':
       return 'Neither continuity engagement nor governance review is in place for this initiative.';
   }

@@ -14,7 +14,7 @@
  *   - stewardship evolution
  *   - continuity debt reduction
  *   - onboarding survivability evolution
- *   - organizational coherence trends
+ *   - institutional coherence trends
  *
  * It carries narrative paragraphs alongside the structured longitudinal reading
  * so reviewers receive both the reading and the interpretive frame in one

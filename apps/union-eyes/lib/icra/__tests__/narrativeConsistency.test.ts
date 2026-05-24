@@ -14,7 +14,7 @@ import { scoreAssessment } from '../scoring';
 import { generateExecutiveSummary } from '../../icra-pdf/reportNarrativeEngine';
 
 /**
- * Reviewer-led tone: we refuse the prescriptive vocabulary that organizational
+ * Reviewer-led tone: we refuse the prescriptive vocabulary that institutional
  * intelligence should never adopt.
  */
 const FORBIDDEN_TONE = /\b(optimize|disrupt|automate|seamless|leverage|synergy|empower|revolutioniz(e|ing))\b/i;

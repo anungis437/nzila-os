@@ -70,11 +70,11 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
         stepId: 'stewardship-recognition',
         prompt: {
           'en-CA':
-            'The Brief names organizational roles, not individuals. Where the sponsor recognises a specific steward, we name the role and recognise the person quietly.',
+            'The Brief names institutional roles, not individuals. Where the sponsor recognises a specific steward, we name the role and recognise the person quietly.',
         },
         expectedSurface: {
           'en-CA':
-            'The sponsor will, naturally, attach names to the roles. The recognition is organizational even when the name is shared.',
+            'The sponsor will, naturally, attach names to the roles. The recognition is institutional even when the name is shared.',
         },
         facilitatorNotes: {
           'en-CA':
@@ -172,7 +172,7 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
         },
         expectedSurface: {
           'en-CA':
-            'The steward and the sponsor recognise the sections as organizational, not as a survey of personal effort.',
+            'The steward and the sponsor recognise the sections as institutional, not as a survey of personal effort.',
         },
         facilitatorNotes: {
           'en-CA':
@@ -212,7 +212,7 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
         stepId: 'governance-realization',
         prompt: {
           'en-CA':
-            'The Stewardship Density Index will be computed from the workbook. It is organizational, not personal. It is not shared outside this engagement without explicit organizational approval.',
+            'The Stewardship Density Index will be computed from the workbook. It is institutional, not personal. It is not shared outside this engagement without explicit institutional approval.',
         },
         expectedSurface: {
           'en-CA':
@@ -259,7 +259,7 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
     title: { 'en-CA': 'Stewardship Density Review Flow' },
     summary: {
       'en-CA':
-        'A reading of the Stewardship Density Index as an organizational figure, with the cartography alongside, ending in an organizational note rather than personal interventions.',
+        'A reading of the Stewardship Density Index as an institutional figure, with the cartography alongside, ending in an institutional note rather than personal interventions.',
     },
     steps: [
       {
@@ -274,7 +274,7 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
         },
         facilitatorNotes: {
           'en-CA':
-            'This question grounds the Index as a confirmation of organizational self-knowledge, not as an external verdict.',
+            'This question grounds the Index as a confirmation of institutional self-knowledge, not as an external verdict.',
         },
         tonePosture: { 'en-CA': 'Observational, unhurried.' },
         redLines: {
@@ -318,7 +318,7 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
         },
         facilitatorNotes: {
           'en-CA':
-            'When the sponsor reaches for a personal characterisation, return the conversation to the role with a short organizational sentence.',
+            'When the sponsor reaches for a personal characterisation, return the conversation to the role with a short institutional sentence.',
         },
         tonePosture: { 'en-CA': 'Quiet, dignified.' },
         redLines: {
@@ -342,7 +342,7 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
           'en-CA':
             'Acceptance is honourable. Not every concentration is a problem. The institution chooses what to address.',
         },
-        tonePosture: { 'en-CA': 'Respectful of organizational choice.' },
+        tonePosture: { 'en-CA': 'Respectful of institutional choice.' },
         redLines: {
           'en-CA': [
             'Do not pressure the institution toward addressing every concentration',
@@ -354,7 +354,7 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
         stepId: 'stabilization-pathway',
         prompt: {
           'en-CA':
-            'A short organizational note from this session will accompany the cartography into Stabilization. The note is the institution\u2019s record of what it has chosen to take forward.',
+            'A short institutional note from this session will accompany the cartography into Stabilization. The note is the institution\u2019s record of what it has chosen to take forward.',
         },
         expectedSurface: {
           'en-CA':
@@ -550,20 +550,20 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
         stepId: 'stewardship-recognition',
         prompt: {
           'en-CA':
-            'Where the plan names a steward, the plan also names an organizational response. We confirm this pattern across the document.',
+            'Where the plan names a steward, the plan also names an institutional response. We confirm this pattern across the document.',
         },
         expectedSurface: {
           'en-CA':
-            'Every named steward has a paired organizational response, with no exceptions.',
+            'Every named steward has a paired institutional response, with no exceptions.',
         },
         facilitatorNotes: {
           'en-CA':
-            'This is the highest-priority review pass. A steward named without an organizational response is a doctrine violation in print.',
+            'This is the highest-priority review pass. A steward named without an institutional response is a doctrine violation in print.',
         },
         tonePosture: { 'en-CA': 'Vigilant, plain.' },
         redLines: {
           'en-CA': [
-            'Do not approve a section that names a steward without an organizational response',
+            'Do not approve a section that names a steward without an institutional response',
             'Do not allow the plan to read as personal accountability assignment',
           ],
         },

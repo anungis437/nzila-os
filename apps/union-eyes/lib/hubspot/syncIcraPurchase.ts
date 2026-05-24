@@ -5,7 +5,7 @@
  * webhook has already upgraded the assessment in our DB). Responsibility:
  *
  * 1. Load the assessment + maturity profile from the DB.
- * 2. Upsert a HubSpot contact carrying the organizational posture (deterministic
+ * 2. Upsert a HubSpot contact carrying the institutional posture (deterministic
  *    custom properties — no behavioural enrichment).
  * 3. Create a deal in the OCI continuity pipeline at the appropriate stage
  *    so account stewards can engage with context, not cold outreach.
@@ -26,7 +26,7 @@ import { db } from '@/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type {
   ExecutivePersonaId,
-  OrganizationalContinuityProfile,
+  InstitutionalContinuityProfile,
   ReportTierId,
 } from '@/lib/icra/types';
 import { logger } from '@/lib/logger';
@@ -40,10 +40,6 @@ import {
   type IcraContactAttribution,
   type IcraDealStageKey,
 } from './icraPropertyMapper';
-import { deriveOcraAdaptivePropertiesFromPersisted } from './icraAdaptiveProperties';
-import { resolveAdaptiveContext } from '@/lib/icra/adaptation';
-import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from '@/lib/icra/questions';
-import type { RoutableQuestion } from '@/lib/icra/adaptation';
 
 export type SyncSkipReason =
   | 'no_email'
@@ -102,11 +98,7 @@ export async function syncIcraPurchase(
 
     // Load assessment + profile (read-only)
     const [assessment] = await db
-      .select({
-        id: icraAssessments.id,
-        reportTierId: icraAssessments.reportTierId,
-        organizationContext: icraAssessments.organizationContext,
-      })
+      .select({ id: icraAssessments.id, reportTierId: icraAssessments.reportTierId })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, input.assessmentId))
       .limit(1);
@@ -131,31 +123,7 @@ export async function syncIcraPurchase(
       return { ok: false, skipped: 'profile_missing' };
     }
 
-    const profile = profileRow.profilePayload as OrganizationalContinuityProfile;
-
-    // Resolve adaptive context — persisted blob, or reconstructed deterministically
-    // from declared org form. Failure is non-fatal: HubSpot sync proceeds with
-    // legacy properties only.
-    let adaptiveProperties: Record<string, string> = {};
-    try {
-      const resolution = resolveAdaptiveContext({
-        organizationContext: assessment.organizationContext,
-        questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
-        currentQuestionBankVersion: QUESTION_BANK_VERSION,
-      });
-      const raw = deriveOcraAdaptivePropertiesFromPersisted(
-        resolution.adaptiveContext,
-      ) as Record<string, string | number | boolean>;
-      adaptiveProperties = Object.fromEntries(
-        Object.entries(raw).map(([k, v]) => [k, String(v)]),
-      );
-    } catch (adaptiveErr) {
-      logger.warn('[hubspot-icra] adaptive property derivation skipped', {
-        assessmentId: input.assessmentId,
-        message:
-          adaptiveErr instanceof Error ? adaptiveErr.message : String(adaptiveErr),
-      });
-    }
+    const profile = profileRow.profilePayload as InstitutionalContinuityProfile;
 
     const contactProperties = {
       ...buildContactProperties(profile, {
@@ -164,8 +132,6 @@ export async function syncIcraPurchase(
       }),
       // Company-grade properties also useful on the contact when no company exists
       ...buildCompanyProperties(profile),
-      // OCRA adaptive bands + counts (low-cardinality, audit-safe)
-      ...adaptiveProperties,
     };
 
     const contactId = await upsertContact({

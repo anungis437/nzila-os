@@ -18,7 +18,7 @@ import type {
   DimensionScore,
   ExecutivePersonaId,
   FollowupRecommendation,
-  OrganizationalContinuityProfile,
+  InstitutionalContinuityProfile,
   MaturityBand,
   OrganizationContext,
   SectionScore,
@@ -41,7 +41,6 @@ import {
   type StabilizationAppendixParagraph,
 } from './reportNarrativeEngine';
 import type { ExecutiveStabilizationResult } from '../workbook/engines/executive/executiveStabilizationModel';
-import type { AdaptiveReportAISlot, PersistedAdaptiveContext } from '../icra/adaptation';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PdfReportData — the fully-assembled data structure for the template
@@ -97,64 +96,16 @@ export interface PdfReportData {
   stabilizationMovement?: {
     paragraphs: readonly StabilizationAppendixParagraph[];
   };
-
-  // Optional adaptive interpretation context. When supplied, the template
-  // renders an "Adaptive Interpretation Context" page so report readers can
-  // see the calibration applied to interpretation.
-  adaptiveContext?: PersistedAdaptiveContext;
-
-  // Optional AI-assisted narrative slot (doctrine: docs/oci/ai/).
-  // Rendered as a clearly separated, disclosure-stamped section. Only
-  // populated when an approved AI-assisted narrative exists. Renders as
-  // null when absent. See docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md.
-  aiAssistedNarrative?: {
-    readonly narrative: string;
-    readonly auditRecordRef: string;
-    readonly reviewStatus: 'approved';
-    readonly locale: 'en-CA' | 'fr-CA';
-  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mapper
 // ─────────────────────────────────────────────────────────────────────────────
 
-export interface MapToPdfReportDataOptions {
-  readonly adaptiveContext?: PersistedAdaptiveContext | null;
-  readonly adaptiveReportAISlot?: AdaptiveReportAISlot | null;
-  readonly locale?: string;
-}
-
-function mapApprovedAdaptiveReportSlot(
-  slot: AdaptiveReportAISlot | null | undefined,
-): PdfReportData['aiAssistedNarrative'] {
-  if (!slot || slot.reviewWorkflow.status !== 'approved') {
-    return undefined;
-  }
-
-  const auditRef =
-    slot.reviewWorkflow.auditTrail[slot.reviewWorkflow.auditTrail.length - 1]?.auditId
-    ?? slot.reviewWorkflow.workflowId;
-
-  const sections = [
-    slot.narrative.headerStatement,
-    ...slot.narrative.continuityContext,
-    ...slot.executive.paragraphs,
-  ].filter((section) => section.trim().length > 0);
-
-  return {
-    narrative: sections.join('\n\n'),
-    auditRecordRef: auditRef,
-    reviewStatus: 'approved',
-    locale: slot.locale,
-  };
-}
-
 export function mapToPdfReportData(
-  profile: OrganizationalContinuityProfile,
+  profile: InstitutionalContinuityProfile,
   orgContext?: OrganizationContext | null,
   executiveStabilization?: ExecutiveStabilizationResult | null,
-  options?: MapToPdfReportDataOptions,
 ): PdfReportData {
   const persona = orgContext ? detectPersona(orgContext) : undefined;
 
@@ -210,7 +161,7 @@ export function mapToPdfReportData(
   return {
     assessmentId: profile.assessmentId,
     generatedAt: new Date(profile.generatedAt),
-    locale: options?.locale ?? 'en-CA',
+    locale: 'en-CA',
 
     institutionName: orgContext?.name,
     sector: orgContext?.sector,
@@ -246,10 +197,5 @@ export function mapToPdfReportData(
           ],
         }
       : undefined,
-
-    adaptiveContext: options?.adaptiveContext ?? undefined,
-    aiAssistedNarrative: mapApprovedAdaptiveReportSlot(
-      options?.adaptiveReportAISlot,
-    ),
   };
 }

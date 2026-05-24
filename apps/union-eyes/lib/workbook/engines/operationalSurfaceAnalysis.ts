@@ -5,7 +5,7 @@
  *
  * Operational Surface Analysis — derives operational zones from the
  * workbook's process inventory. Zones are calm, editorial observations
- * about where organizational load concentrates, never alarmist findings.
+ * about where institutional load concentrates, never alarmist findings.
  *
  * Pure, deterministic.
  */

@@ -135,12 +135,12 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Tests governance resilience to the loss of a single organizational memory holder without personalising the test.',
+        'Tests governance resilience to the loss of a single institutional memory holder without personalising the test.',
     },
     whatToListenFor: {
       'en-CA': [
         'Acknowledgement of concentration in long tenure rather than office',
-        'Recognition that organizational memory is a governance function',
+        'Recognition that institutional memory is a governance function',
         'Whether the institution has prepared for this scenario',
       ],
     },
@@ -164,7 +164,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Names unrecognised stewardship as an organizational fact requiring organizational response.',
+        'Names unrecognised stewardship as an institutional fact requiring institutional response.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -193,7 +193,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whatToListenFor: {
       'en-CA': [
-        'Roles where organizational knowledge has accumulated invisibly',
+        'Roles where institutional knowledge has accumulated invisibly',
         'Recognition that articulating the value is itself a stewardship act',
         'Stewards whose departure would expose layers of dependency',
       ],
@@ -210,7 +210,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     category: 'stewardship-burden',
     question: {
       'en-CA':
-        'Where has organizational habit assumed a steward\u2019s capacity is unlimited, when in fact it is not?',
+        'Where has institutional habit assumed a steward\u2019s capacity is unlimited, when in fact it is not?',
     },
     whyItMatters: {
       'en-CA':
@@ -218,7 +218,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whatToListenFor: {
       'en-CA': [
-        'Recognition of overload as an organizational pattern, not a personal failing',
+        'Recognition of overload as an institutional pattern, not a personal failing',
         'Willingness to redistribute load as part of stabilisation',
         'Concrete examples of accumulated stewardship overflow',
       ],
@@ -235,7 +235,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     category: 'stewardship-burden',
     question: {
       'en-CA':
-        'Which stewardship responsibilities, if redistributed, would reduce organizational fragility without adding load anywhere?',
+        'Which stewardship responsibilities, if redistributed, would reduce institutional fragility without adding load anywhere?',
     },
     whyItMatters: {
       'en-CA':
@@ -314,11 +314,11 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     category: 'operational-reconstruction',
     question: {
       'en-CA':
-        'Which organizational processes have evolved over the years such that their original rationale is no longer accessible to the people who operate them today?',
+        'Which institutional processes have evolved over the years such that their original rationale is no longer accessible to the people who operate them today?',
     },
     whyItMatters: {
       'en-CA':
-        'Surfaces processes whose stewardship has continued without the organizational understanding that originally shaped them.',
+        'Surfaces processes whose stewardship has continued without the institutional understanding that originally shaped them.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -330,7 +330,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     avoidIfShared: {
       'en-CA': [
         'Sweeping conclusions about processes that "no one understands"',
-        'Plans to retire processes without confirming their current organizational function',
+        'Plans to retire processes without confirming their current institutional function',
       ],
     },
   },
@@ -339,7 +339,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     category: 'operational-reconstruction',
     question: {
       'en-CA':
-        'Where does the institution depend on external counterparts \u2014 suppliers, partners, regulators \u2014 to remember organizational context the institution itself has not preserved?',
+        'Where does the institution depend on external counterparts \u2014 suppliers, partners, regulators \u2014 to remember institutional context the institution itself has not preserved?',
     },
     whyItMatters: {
       'en-CA':
@@ -347,7 +347,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whatToListenFor: {
       'en-CA': [
-        'External counterparts who function as organizational memory holders',
+        'External counterparts who function as institutional memory holders',
         'Acknowledgement that external memory is exposed to that counterpart\u2019s own continuity',
         'Reflection on whether external memory should be repatriated',
       ],
@@ -361,29 +361,29 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
   },
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Category 4 — Organizational Memory
+  // Category 4 — Institutional Memory
   // ─────────────────────────────────────────────────────────────────────────
   {
     id: 'im-001',
     category: 'institutional-memory',
     question: {
       'en-CA':
-        'Which organizational stories does the organisation tell about itself, and where do those stories live when their primary tellers have moved on?',
+        'Which institutional stories does the organisation tell about itself, and where do those stories live when their primary tellers have moved on?',
     },
     whyItMatters: {
       'en-CA':
-        'Names organizational memory as a cultural fact carried by storytelling, not only by records.',
+        'Names institutional memory as a cultural fact carried by storytelling, not only by records.',
     },
     whatToListenFor: {
       'en-CA': [
-        'Stories that orient new members to organizational values',
-        'Stewards who function as primary tellers of organizational history',
-        'Acknowledgement that lost stories shift organizational self-understanding',
+        'Stories that orient new members to institutional values',
+        'Stewards who function as primary tellers of institutional history',
+        'Acknowledgement that lost stories shift institutional self-understanding',
       ],
     },
     avoidIfShared: {
       'en-CA': [
-        'Discussion of contested organizational events whose retelling is politically charged',
+        'Discussion of contested institutional events whose retelling is politically charged',
         'Pressure to canonise or suppress specific stories',
       ],
     },
@@ -397,13 +397,13 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Uses external explanation as a test of whether organizational context has been preserved in usable form.',
+        'Uses external explanation as a test of whether institutional context has been preserved in usable form.',
     },
     whatToListenFor: {
       'en-CA': [
         'Gaps surfaced through explanation that internal work had not surfaced',
         'Recognition that explanation is a continuity activity',
-        'Materials produced for explanation that could become organizational records',
+        'Materials produced for explanation that could become institutional records',
       ],
     },
     avoidIfShared: {
@@ -434,7 +434,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     avoidIfShared: {
       'en-CA': [
         'Pressure on the steward to externalise their knowledge on a deadline',
-        'Treating the steward\u2019s knowledge as organizational property rather than as their stewardship',
+        'Treating the steward\u2019s knowledge as institutional property rather than as their stewardship',
       ],
     },
   },
@@ -447,7 +447,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Recognises deliberate organizational silence as a form of memory governance worth being aware of.',
+        'Recognises deliberate institutional silence as a form of memory governance worth being aware of.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -476,7 +476,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Names the organizational context senior stewards absorb through mentorship and presence rather than through documentation.',
+        'Names the institutional context senior stewards absorb through mentorship and presence rather than through documentation.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -526,7 +526,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Names the conditions for orientation as organizational rather than personal, and identifies fragility in those conditions.',
+        'Names the conditions for orientation as institutional rather than personal, and identifies fragility in those conditions.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -537,7 +537,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     avoidIfShared: {
       'en-CA': [
-        'Plans to systematise orientation in ways that strip it of its organizational character',
+        'Plans to systematise orientation in ways that strip it of its institutional character',
         'Use of past orientation difficulty as evidence in current personnel decisions',
       ],
     },
@@ -555,7 +555,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Names the fairness dimension of continuity work as an organizational concern rather than as an HR concern.',
+        'Names the fairness dimension of continuity work as an institutional concern rather than as an HR concern.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -580,7 +580,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Frames the addition of continuity load as a reciprocal organizational act rather than as a unilateral request.',
+        'Frames the addition of continuity load as a reciprocal institutional act rather than as a unilateral request.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -601,7 +601,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     category: 'continuity-fairness',
     question: {
       'en-CA':
-        'Are there stewardship loads carried disproportionately by stewards in groups whose organizational voice is quieter?',
+        'Are there stewardship loads carried disproportionately by stewards in groups whose institutional voice is quieter?',
     },
     whyItMatters: {
       'en-CA':
@@ -610,7 +610,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     whatToListenFor: {
       'en-CA': [
         'Recognition of patterns of load distribution that may not be the institution\u2019s intent',
-        'Willingness to investigate the patterns with appropriate organizational process',
+        'Willingness to investigate the patterns with appropriate institutional process',
         'Acknowledgement that the engagement is not the venue for equity adjudication',
       ],
     },
@@ -670,7 +670,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     avoidIfShared: {
       'en-CA': [
-        'Plans to pause modernization without proper organizational process',
+        'Plans to pause modernization without proper institutional process',
         'Critique of stewards leading the modernization',
       ],
     },
@@ -684,7 +684,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Recognises deferred modernization as a legitimate organizational choice with continuity rationale worth re-examining periodically.',
+        'Recognises deferred modernization as a legitimate institutional choice with continuity rationale worth re-examining periodically.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -695,7 +695,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     avoidIfShared: {
       'en-CA': [
-        'Pressure to reconsider deferral without proper organizational process',
+        'Pressure to reconsider deferral without proper institutional process',
         'External vendor narratives about why the deferral was wrong',
       ],
     },
@@ -709,7 +709,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     category: 'governance-interpretation-drift',
     question: {
       'en-CA':
-        'Where has the operating interpretation of a governance provision drifted from its written form, and who carries the organizational memory of when and why the drift occurred?',
+        'Where has the operating interpretation of a governance provision drifted from its written form, and who carries the institutional memory of when and why the drift occurred?',
     },
     whyItMatters: {
       'en-CA':
@@ -718,7 +718,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     whatToListenFor: {
       'en-CA': [
         'Provisions whose practice has diverged from text',
-        'Stewards who carry the organizational rationale for the divergence',
+        'Stewards who carry the institutional rationale for the divergence',
         'Acknowledgement that the divergence is exposed to those stewards\u2019 continuity',
       ],
     },
@@ -738,7 +738,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whyItMatters: {
       'en-CA':
-        'Tests whether interpretation acts are preserved as organizational memory or carried orally.',
+        'Tests whether interpretation acts are preserved as institutional memory or carried orally.',
     },
     whatToListenFor: {
       'en-CA': [
@@ -759,7 +759,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     category: 'governance-interpretation-drift',
     question: {
       'en-CA':
-        'Are there governance provisions whose interpretation is concentrated in a single steward, such that their departure would reset the organizational reading?',
+        'Are there governance provisions whose interpretation is concentrated in a single steward, such that their departure would reset the institutional reading?',
     },
     whyItMatters: {
       'en-CA':
@@ -822,7 +822,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
       'en-CA': [
         'Historical readings carried by one steward without secondary witness',
         'Willingness to broaden the reading deliberately rather than wait for departure',
-        'Acceptance that some readings will shift after transition and that is organizational',
+        'Acceptance that some readings will shift after transition and that is institutional',
       ],
     },
     avoidIfShared: {
@@ -920,7 +920,7 @@ export const CONTINUITY_CONVERSATION_PROMPTS: readonly ConversationPrompt[] = [
     },
     whatToListenFor: {
       'en-CA': [
-        'Acceptance that some practice is organizational rather than transferable',
+        'Acceptance that some practice is institutional rather than transferable',
         'Recognition of the burden the next carrier will inherit',
         'Willingness to extend the handover window where the burden is highest',
       ],

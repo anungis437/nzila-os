@@ -29,7 +29,7 @@ export const PERSONAS: Record<ExecutivePersonaId, PersonaDefinition> = {
     environment: 'Non-profit, association, or mission-driven organization',
     operationalConcerns: [
       'Organizational stability through leadership and board transitions',
-      'Turnover risk and organizational knowledge preservation',
+      'Turnover risk and institutional knowledge preservation',
       'Governance consistency across changing leadership generations',
     ],
   },
@@ -48,7 +48,7 @@ export const PERSONAS: Record<ExecutivePersonaId, PersonaDefinition> = {
     label: 'Healthcare Operations Leadership',
     environment: 'Healthcare institution, social services, or care organization',
     operationalConcerns: [
-      'Onboarding continuity and organizational orientation for clinical and operational staff',
+      'Onboarding continuity and institutional orientation for clinical and operational staff',
       'Continuity burden on staff compensating for fragmented systems',
       'Operational fragmentation across units, facilities, or care settings',
     ],
@@ -56,9 +56,9 @@ export const PERSONAS: Record<ExecutivePersonaId, PersonaDefinition> = {
   cio_coo: {
     id: 'cio_coo',
     label: 'CIO / COO',
-    environment: 'Technology and operational leadership in any organizational context',
+    environment: 'Technology and operational leadership in any institutional context',
     operationalConcerns: [
-      'Modernization risk — preserving organizational context during technology transitions',
+      'Modernization risk — preserving institutional context during technology transitions',
       'Operational fragmentation across platforms, systems, and vendors',
       'Governance traceability and audit readiness during infrastructure change',
     ],
@@ -68,7 +68,7 @@ export const PERSONAS: Record<ExecutivePersonaId, PersonaDefinition> = {
     label: 'Board / Governance Leadership',
     environment: 'Governing board, oversight committee, or governance body',
     operationalConcerns: [
-      'Organizational resilience and continuity across board composition changes',
+      'Institutional resilience and continuity across board composition changes',
       'Accountability and governance visibility into operational reality',
       'Continuity stewardship as a governance discipline',
     ],
@@ -79,7 +79,7 @@ export const PERSONAS: Record<ExecutivePersonaId, PersonaDefinition> = {
     environment: 'Federation, national body, or multi-unit organization',
     operationalConcerns: [
       'Continuity coherence across federated units or locals with varying maturity',
-      'Organizational memory preservation at the federation level across affiliate transitions',
+      'Institutional memory preservation at the federation level across affiliate transitions',
       'Governance consistency in federated structures with distributed authority',
     ],
   },
@@ -92,7 +92,7 @@ export const PERSONAS: Record<ExecutivePersonaId, PersonaDefinition> = {
 /**
  * Detect the most likely executive persona from organizational context.
  * Returns the best match based on org type and sector signals.
- * Defaults to governance_board — the safest organizational default.
+ * Defaults to governance_board — the safest institutional default.
  */
 export function detectPersona(context: OrganizationContext): ExecutivePersonaId {
   const sector = context.sector?.toLowerCase() ?? '';

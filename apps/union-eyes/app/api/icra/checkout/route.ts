@@ -7,10 +7,10 @@
  * After payment, Stripe posts checkout.session.completed to /api/payments/webhooks/stripe,
  * which upgrades icraAssessments.reportTierId and the stored profile payload.
  *
- * Env vars (canonical OCRA_ form preferred when present; ICRA_ form still honored):
- *   STRIPE_PRICE_OCRA_BRIEF / STRIPE_PRICE_ICRA_BRIEF              — Stripe Price ID for Executive Continuity Brief (optional)
- *   STRIPE_PRICE_OCRA_DIAGNOSTIC / STRIPE_PRICE_ICRA_DIAGNOSTIC    — Stripe Price ID for Institutional Continuity Diagnostic (optional)
- *   NEXT_PUBLIC_APP_URL                                            — Base URL used for success/cancel redirect (fallback: http://localhost:3000)
+ * Env vars:
+ *   STRIPE_PRICE_ICRA_BRIEF        — Stripe Price ID for Executive Continuity Brief (optional)
+ *   STRIPE_PRICE_ICRA_DIAGNOSTIC   — Stripe Price ID for Institutional Continuity Diagnostic (optional)
+ *   NEXT_PUBLIC_APP_URL            — Base URL used for success/cancel redirect (fallback: http://localhost:3000)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -20,7 +20,6 @@ import { db } from '@/db';
 import { icraAssessments } from '@/db/schema/icra-schema';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
-import { resolveLegacyEnv } from '@/lib/runtime/identity/compatibilityFallbacks';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -41,9 +40,8 @@ function buildLineItems(
   tierId: 'executive_continuity_brief' | 'institutional_continuity_diagnostic',
   currency: string,
 ) {
-  // Prefer canonical OCRA_ form; fall back to legacy ICRA_ form via the alias map.
-  const priceIdBrief = resolveLegacyEnv('STRIPE_PRICE_OCRA_BRIEF', process.env);
-  const priceIdDiagnostic = resolveLegacyEnv('STRIPE_PRICE_OCRA_DIAGNOSTIC', process.env);
+  const priceIdBrief = process.env.STRIPE_PRICE_ICRA_BRIEF;
+  const priceIdDiagnostic = process.env.STRIPE_PRICE_ICRA_DIAGNOSTIC;
 
   if (tierId === 'executive_continuity_brief') {
     if (priceIdBrief) {

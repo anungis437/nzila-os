@@ -229,7 +229,7 @@ export const METADATA_QUESTIONS: MetadataQuestion[] = [
     order: 6,
     prompt: 'Is there a specific continuity or governance challenge that prompted this assessment? (Optional)',
     helpText:
-      'Please describe in general organizational terms — do not include names of individuals, employer names, member identifiers, or specific case facts. This field is stored alongside your assessment. 500 character limit.',
+      'Please describe in general institutional terms — do not include names of individuals, employer names, member identifiers, or specific case facts. This field is stored alongside your assessment. 500 character limit.',
     type: 'text',
     required: false,
   },
@@ -301,6 +301,23 @@ const OPERATIONAL_DEPENDENCY: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 1.0, operational_memory: 0.8 },
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Continuity equity prevents single points of knowledge failure and protects organizational memory holders from unsustainable burden.',
+  },
+  // ── New v2 questions: invisible continuity burden ──
+  {
+    id: 'icb_01', section: 'operational_dependency', order: 6, type: 'maturity_select',
+    prompt: 'To what extent does your organization recognize and account for the informal continuity work that certain staff or leaders carry on behalf of the institution?',
+    helpText: 'Consider whether the time spent compensating for absent institutional memory — translating context, explaining history, maintaining relationships — is visible to leadership or absorbed silently into individual roles.',
+    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Invisible continuity labour is the primary precursor of burnout and sudden institutional knowledge loss.',
+  },
+  {
+    id: 'icb_02', section: 'operational_dependency', order: 7, type: 'maturity_select',
+    prompt: 'How deliberately does your organization distribute continuity responsibilities — so that institutional knowledge is not quietly concentrated in a small number of people?',
+    helpText: 'As opposed to allowing continuity knowledge to accumulate with whoever happens to have been around the longest or is most engaged.',
+    weights: { institutional_continuity: 1.0, operational_memory: 0.8 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Continuity equity prevents single points of knowledge failure and protects institutional memory holders from unsustainable burden.',
   },
 ];
 
@@ -389,15 +406,15 @@ const INSTITUTIONAL_MEMORY: MaturitySelectQuestion[] = [
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Whether memory is treated as infrastructure determines whether it compounds or decays.',
   },
-  // ── New v2 questions: operational reconstruction labour, organizational forgetting ──
+  // ── New v2 questions: operational reconstruction labour, institutional forgetting ──
   {
     id: 'orl_01', section: 'institutional_memory', order: 5, type: 'maturity_select',
     prompt: 'How often does your organization find itself solving the same operational problems that were previously solved — because the earlier solution was not preserved?',
-    helpText: 'This includes re-establishing vendor relationships, re-negotiating terms that were previously settled, re-developing procedures that once existed, or re-learning organizational context already known to former staff.',
+    helpText: 'This includes re-establishing vendor relationships, re-negotiating terms that were previously settled, re-developing procedures that once existed, or re-learning institutional context already known to former staff.',
     weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
     options: MATURITY_OPTIONS, allowNote: true,
     riskInverted: true,
-    rationale: 'Repeated operational reconstruction is the direct cost of organizational forgetting.',
+    rationale: 'Repeated operational reconstruction is the direct cost of institutional forgetting.',
   },
   {
     id: 'orl_02', section: 'institutional_memory', order: 6, type: 'maturity_select',
@@ -410,10 +427,10 @@ const INSTITUTIONAL_MEMORY: MaturitySelectQuestion[] = [
   {
     id: 'if_01', section: 'institutional_memory', order: 7, type: 'maturity_select',
     prompt: 'To what extent does your organization retain the operational knowledge gained during challenging periods — restructurings, disputes, crises, or significant transitions?',
-    helpText: 'Consider whether the organizational learning from difficult periods is preserved and accessible, or whether it is absorbed into the informal memory of those who were present and lost when they leave.',
+    helpText: 'Consider whether the institutional learning from difficult periods is preserved and accessible, or whether it is absorbed into the informal memory of those who were present and lost when they leave.',
     weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
     options: MATURITY_OPTIONS, allowNote: true,
-    rationale: 'Organizational learning from adversity is among the most valuable and most frequently lost forms of organizational memory.',
+    rationale: 'Institutional learning from adversity is among the most valuable and most frequently lost forms of organizational memory.',
   },
 ];
 
@@ -471,6 +488,15 @@ const TRANSITION_READINESS: MaturitySelectQuestion[] = [
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Onboarding quality determines how much organizational intelligence survives each transition.',
   },
+  // ── New v2 question: onboarding continuity ──
+  {
+    id: 'onb_01', section: 'transition_readiness', order: 6, type: 'maturity_select',
+    prompt: 'How effectively does your onboarding process transfer institutional intelligence — not just role responsibilities, but the operational context, relational history, and governance understanding that allow a new person to act effectively?',
+    helpText: 'As opposed to onboarding that covers formal procedures and tools, but leaves new staff to absorb institutional context through observation and informal conversation over months or years.',
+    weights: { institutional_continuity: 0.8, transition_readiness: 1.0, operational_memory: 0.6 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Onboarding quality determines how much institutional intelligence survives each transition.',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -526,6 +552,15 @@ const OPERATIONAL_COORDINATION: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 0.8, operational_memory: 0.6 },
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Continuity fairness is both an equity concern and an organizational resilience indicator.',
+  },
+  // ── New v2 question: continuity fairness ──
+  {
+    id: 'cf_01', section: 'operational_coordination', order: 6, type: 'maturity_select',
+    prompt: 'How equitably is continuity responsibility distributed across your organization — rather than concentrated in a small number of individuals who quietly carry disproportionate institutional burden?',
+    helpText: 'Consider whether the work of maintaining institutional continuity — keeping context, translating between teams, preserving relationships — is recognized and shared, or whether it falls to the same people repeatedly.',
+    weights: { institutional_continuity: 0.8, operational_memory: 0.6 },
+    options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Continuity fairness is both an equity concern and an institutional resilience indicator.',
   },
 ];
 
@@ -616,19 +651,19 @@ const SOVEREIGNTY_GOVERNANCE: MaturitySelectQuestion[] = [
   // ── New v2 questions: modernization trauma ──
   {
     id: 'mt_01', section: 'sovereignty_governance', order: 5, type: 'maturity_select',
-    prompt: 'How well does your organization preserve organizational context and operational memory when transitioning between systems, platforms, or technology approaches?',
-    helpText: 'Consider whether past transitions — moving between case management systems, financial platforms, communication tools — resulted in organizational memory loss or whether context was preserved and transferred.',
+    prompt: 'How well does your organization preserve institutional context and operational memory when transitioning between systems, platforms, or technology approaches?',
+    helpText: 'Consider whether past transitions — moving between case management systems, financial platforms, communication tools — resulted in institutional memory loss or whether context was preserved and transferred.',
     weights: { institutional_continuity: 0.8, operational_memory: 0.8, trust_debt: 0.4 },
     riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
-    rationale: 'Technology transitions are one of the primary pathways through which organizational memory is silently lost.',
+    rationale: 'Technology transitions are one of the primary pathways through which institutional memory is silently lost.',
   },
   {
     id: 'mt_02', section: 'sovereignty_governance', order: 6, type: 'maturity_select',
-    prompt: 'How deliberately does your organization evaluate whether modernization efforts preserve — rather than replace — organizational continuity?',
-    helpText: 'Consider whether modernization decisions account for the organizational knowledge embedded in current practices, relationships, and systems — or whether they prioritize capability gains without assessing continuity risk.',
+    prompt: 'How deliberately does your organization evaluate whether modernization efforts preserve — rather than replace — institutional continuity?',
+    helpText: 'Consider whether modernization decisions account for the institutional knowledge embedded in current practices, relationships, and systems — or whether they prioritize capability gains without assessing continuity risk.',
     weights: { institutional_continuity: 0.8, operational_memory: 0.6, trust_debt: 0.4 },
     riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
-    rationale: 'Modernization without continuity assessment is among the most common causes of organizational forgetting.',
+    rationale: 'Modernization without continuity assessment is among the most common causes of institutional forgetting.',
   },
 ];
 
@@ -725,7 +760,7 @@ const CONTINUITY_CONFIDENCE: LikertQuestion[] = [
     order: 10,
     type: 'likert_5',
     prompt:
-      'A newly onboarded senior leader could act on real organizational context within their first quarter, not after a year of informal learning.',
+      'A newly onboarded senior leader could act on real institutional context within their first quarter, not after a year of informal learning.',
     weights: { institutional_continuity: 0.6, transition_readiness: 0.8 },
     scale: CONFIDENCE_SCALE,
     allowNote: true,
@@ -747,7 +782,7 @@ const CONTINUITY_CONFIDENCE: LikertQuestion[] = [
     order: 10,
     type: 'likert_5',
     prompt:
-      'Past technology and platform transitions preserved organizational context rather than discarding it.',
+      'Past technology and platform transitions preserved institutional context rather than discarding it.',
     weights: { institutional_continuity: 0.6, operational_memory: 0.4 },
     scale: CONFIDENCE_SCALE,
     allowNote: true,
@@ -891,7 +926,7 @@ const STRUCTURAL_CONTINUITY: MultipleChoiceQuestion[] = [
     type: 'multiple_choice',
     prompt: 'How is continuity ownership distributed in your organization?',
     helpText:
-      'Continuity ownership is the responsibility for maintaining organizational memory and ensuring it survives transitions.',
+      'Continuity ownership is the responsibility for maintaining institutional memory and ensuring it survives transitions.',
     weights: { institutional_continuity: 0.3, operational_memory: 0.4 },
     rationale: 'Surfaces continuity ownership topology.',
     options: [
@@ -949,7 +984,7 @@ const STRUCTURAL_CONTINUITY: MultipleChoiceQuestion[] = [
     section: 'transition_readiness',
     order: 20,
     type: 'multiple_choice',
-    prompt: 'When a new person inherits a role, how do they typically acquire the organizational context required to do it well?',
+    prompt: 'When a new person inherits a role, how do they typically acquire the institutional context required to do it well?',
     weights: { institutional_continuity: 0.3, transition_readiness: 0.4 },
     rationale: 'Surfaces onboarding inheritance topology.',
     options: [

@@ -3,9 +3,9 @@
  * DOCTRINE_VERSION: 1.0.0
  * CHANGE CLASS: Operational
  *
- * ICRA Emotional Insight Engine — cross-dimensional organizational observation.
+ * ICRA Emotional Insight Engine — cross-dimensional institutional observation.
  *
- * This engine compares dimensions, detects organizational tensions, and surfaces
+ * This engine compares dimensions, detects institutional tensions, and surfaces
  * human observations that feel true rather than generated.
  *
  * Tone: calm, "quietly devastating," stewardship-oriented, operationally mature.
@@ -26,12 +26,10 @@ import type {
   SectionScore,
   StewardshipSignal,
 } from './types';
-import type { ContradictionReport } from './contradictions/contradictionDetectionEngine';
-import { buildContradictionInsight } from './contradictions/contradictionInsightAdapter';
 
 /**
  * Raw organizational context as captured by the assessment form. Used only to
- * sharpen editorial framing in burden interpretation and the organizational
+ * sharpen editorial framing in burden interpretation and the institutional
  * forgetting body — never to influence scoring or thresholds.
  */
 export type InsightOrgContext = Record<string, string> | null | undefined;
@@ -43,14 +41,14 @@ function sizeFrame(membershipSize: string | undefined, burdenScore: number): str
   switch (membershipSize) {
     case 'under_100':
     case '100_499':
-      return ' At this organizational scale, the stewardship layer is rarely large enough to absorb the simultaneous departure of even one or two of the people currently carrying it.';
+      return ' At this institutional scale, the stewardship layer is rarely large enough to absorb the simultaneous departure of even one or two of the people currently carrying it.';
     case '500_1999':
-      return ' At this organizational scale, the labour is typically held by a recognizable handful of long-tenured people whose contribution is visible inside the organization but rarely reflected in formal reporting.';
+      return ' At this institutional scale, the labour is typically held by a recognizable handful of long-tenured people whose contribution is visible inside the organization but rarely reflected in formal reporting.';
     case '2000_9999':
-      return ' At this organizational scale, the burden tends to be distributed across regions or functions in ways that make it hard to see as a single pattern — until simultaneous transitions force the picture into view.';
+      return ' At this institutional scale, the burden tends to be distributed across regions or functions in ways that make it hard to see as a single pattern — until simultaneous transitions force the picture into view.';
     case '10000_49999':
     case '50000_plus':
-      return ' At this organizational scale, the stewardship load is rarely concentrated in named individuals — it sits inside informal coordination networks whose composition the organization cannot fully describe.';
+      return ' At this institutional scale, the stewardship load is rarely concentrated in named individuals — it sits inside informal coordination networks whose composition the organization cannot fully describe.';
     default:
       return null;
   }
@@ -73,7 +71,7 @@ function ageFrame(yearsOperating: string | undefined): string | null {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Thresholds — tuned for organizational sensitivity, not false-positive alarms
+// Thresholds — tuned for institutional sensitivity, not false-positive alarms
 // ─────────────────────────────────────────────────────────────────────────────
 
 const T = {
@@ -112,7 +110,7 @@ function avgDims(scores: DimensionScore[], ids: DimensionId[]): number {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Detection rules — five organizational tension patterns
+// Detection rules — five institutional tension patterns
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -130,11 +128,11 @@ function detectModernizationContinuityGap(
 
   const personaBody: Partial<Record<ExecutivePersonaId, string>> = {
     healthcare_ops:
-      'Operational systems and governance structures may be evolving, but the organizational memory needed to orient new staff and absorb transitions appears not to be keeping pace.',
+      'Operational systems and governance structures may be evolving, but the institutional memory needed to orient new staff and absorb transitions appears not to be keeping pace.',
     union_leadership:
       'Governance and accountability structures appear to have developed faster than the preservation of precedent, negotiation history, and operational context.',
     cio_coo:
-      'Technology and governance maturity may be outpacing organizational memory infrastructure — a pattern that often becomes visible during leadership transitions.',
+      'Technology and governance maturity may be outpacing institutional memory infrastructure — a pattern that often becomes visible during leadership transitions.',
   };
 
   return {
@@ -143,7 +141,7 @@ function detectModernizationContinuityGap(
     headline: 'Your modernization posture appears stronger than your continuity posture.',
     body:
       personaBody[persona ?? 'governance_board'] ??
-      'Operational systems appear to be evolving faster than organizational memory preservation. The institution may be gaining capability while quietly losing context.',
+      'Operational systems appear to be evolving faster than institutional memory preservation. The institution may be gaining capability while quietly losing context.',
     dimensionsInvolved: ['institutional_continuity', 'operational_memory'],
     severity: memoryProxy < T.MATERIAL_LOW ? 'material' : 'notable',
     affectedSections: ['institutional_memory', 'governance_visibility'],
@@ -169,11 +167,11 @@ function detectInvisibleLabour(
 
   const personaBody: Partial<Record<ExecutivePersonaId, string>> = {
     union_leadership:
-      'Critical continuity knowledge — precedent, negotiation history, operational context — may currently live inside individuals rather than organizational systems. When those individuals transition, so does the knowledge.',
+      'Critical continuity knowledge — precedent, negotiation history, operational context — may currently live inside individuals rather than institutional systems. When those individuals transition, so does the knowledge.',
     healthcare_ops:
-      'Operational continuity may rely on staff compensating for gaps in organizational systems through informal coordination and personal knowledge. This burden is rarely visible until it is absent.',
+      'Operational continuity may rely on staff compensating for gaps in institutional systems through informal coordination and personal knowledge. This burden is rarely visible until it is absent.',
     governance_board:
-      'Governance continuity may currently depend more on the informal authority and memory of specific individuals than on structured organizational systems.',
+      'Governance continuity may currently depend more on the informal authority and memory of specific individuals than on structured institutional systems.',
   };
 
   return {
@@ -183,7 +181,7 @@ function detectInvisibleLabour(
       'Your institution appears operationally functional, but heavily dependent on invisible continuity labour.',
     body:
       personaBody[persona ?? 'executive_director'] ??
-      'Critical continuity knowledge may currently live inside individuals rather than organizational systems. The organization works — but it works because people are quietly compensating for what the systems have not been built to hold.',
+      'Critical continuity knowledge may currently live inside individuals rather than institutional systems. The organization works — but it works because people are quietly compensating for what the systems have not been built to hold.',
     dimensionsInvolved: ['institutional_continuity', 'operational_memory'],
     severity: om < T.MATERIAL_LOW ? 'material' : 'notable',
     affectedSections: ['institutional_memory', 'operational_dependency'],
@@ -192,7 +190,7 @@ function detectInvisibleLabour(
 }
 
 /**
- * Detect governance drift — interpretation depends on organizational veterans.
+ * Detect governance drift — interpretation depends on institutional veterans.
  * Governance fragility scores indicate structural concentration.
  */
 function detectGovernanceDrift(
@@ -204,18 +202,18 @@ function detectGovernanceDrift(
 
   const personaBody: Partial<Record<ExecutivePersonaId, string>> = {
     union_leadership:
-      'Governance interpretation — how policies are applied, how decisions are made, how precedent is read — may currently depend on organizational veterans rather than structured continuity systems. That dependency becomes a vulnerability during every transition.',
+      'Governance interpretation — how policies are applied, how decisions are made, how precedent is read — may currently depend on institutional veterans rather than structured continuity systems. That dependency becomes a vulnerability during every transition.',
     governance_board:
       'The governance body may be receiving a coherent picture of operations while the actual mechanisms of governance depend on individuals who hold interpretive authority informally.',
     executive_director:
-      'Governance procedures may exist in documented form while governance interpretation lives with a small number of people. Both are organizational assets. Only one of them compounds.',
+      'Governance procedures may exist in documented form while governance interpretation lives with a small number of people. Both are institutional assets. Only one of them compounds.',
   };
 
   return {
     id: 'insight_governance_drift',
     category: 'governance_drift',
     headline:
-      'Governance interpretation may currently depend more on organizational veterans than structured continuity systems.',
+      'Governance interpretation may currently depend more on institutional veterans than structured continuity systems.',
     body:
       personaBody[persona ?? 'governance_board'] ??
       'Governance continuity appears to rely on the knowledge and interpretive authority of specific individuals. This is a quiet form of fragility — visible primarily during transitions, disputes, or external scrutiny.',
@@ -227,7 +225,7 @@ function detectGovernanceDrift(
 }
 
 /**
- * Detect reconstruction burden — teams repeatedly rebuild organizational understanding.
+ * Detect reconstruction burden — teams repeatedly rebuild institutional understanding.
  * Both memory and transition readiness are weak.
  */
 function detectReconstructionBurden(
@@ -242,19 +240,19 @@ function detectReconstructionBurden(
 
   const personaBody: Partial<Record<ExecutivePersonaId, string>> = {
     healthcare_ops:
-      'Staff and leadership may be spending measurable operational time rebuilding context that should be available in organizational systems — a pattern that compounds quietly with each transition.',
+      'Staff and leadership may be spending measurable operational time rebuilding context that should be available in institutional systems — a pattern that compounds quietly with each transition.',
     cio_coo:
-      'Operational continuity may require repeated reconstruction of organizational understanding. This is a hidden cost — borne by individuals, absorbed into role transitions, rarely accounted for directly.',
+      'Operational continuity may require repeated reconstruction of institutional understanding. This is a hidden cost — borne by individuals, absorbed into role transitions, rarely accounted for directly.',
   };
 
   return {
     id: 'insight_reconstruction_burden',
     category: 'reconstruction_burden',
     headline:
-      'Teams may be repeatedly rebuilding organizational understanding from fragments.',
+      'Teams may be repeatedly rebuilding institutional understanding from fragments.',
     body:
       personaBody[persona ?? 'executive_director'] ??
-      'Weak organizational memory combined with underdeveloped transition readiness suggests a pattern where each major change requires rebuilding operational context rather than inheriting it. This is continuity debt made visible.',
+      'Weak institutional memory combined with underdeveloped transition readiness suggests a pattern where each major change requires rebuilding operational context rather than inheriting it. This is continuity debt made visible.',
     dimensionsInvolved: ['operational_memory', 'transition_readiness'],
     severity: om < T.MATERIAL_LOW && tr < T.MATERIAL_LOW ? 'material' : 'notable',
     affectedSections: ['institutional_memory', 'transition_readiness'],
@@ -263,7 +261,7 @@ function detectReconstructionBurden(
 }
 
 /**
- * Detect organizational forgetting — multiple continuity dimensions simultaneously weak.
+ * Detect institutional forgetting — multiple continuity dimensions simultaneously weak.
  * The institution may be systematically losing its operational memory.
  */
 function detectInstitutionalForgetting(
@@ -277,14 +275,14 @@ function detectInstitutionalForgetting(
   const om = dim(scores, 'operational_memory');
 
   const baseBody =
-    'Several continuity dimensions are weakening together. This is the signature of quiet organizational forgetting — not a single broken system, but the slow, parallel erosion of operational memory, governance coherence, and transition readiness, each making the others harder to sustain. Institutions in this pattern rarely notice the trajectory until a transition forces the ledger open.';
+    'Several continuity dimensions are weakening together. This is the signature of quiet institutional forgetting — not a single broken system, but the slow, parallel erosion of operational memory, governance coherence, and transition readiness, each making the others harder to sustain. Institutions in this pattern rarely notice the trajectory until a transition forces the ledger open.';
   const ageSuffix = ageFrame(orgContext?.ctx_years_operating) ?? '';
 
   return {
     id: 'insight_institutional_forgetting',
     category: 'institutional_forgetting',
     headline:
-      'Organizational memory fragmentation appears to be increasing operational fragility.',
+      'Institutional memory fragmentation appears to be increasing operational fragility.',
     body: baseBody + ageSuffix,
     dimensionsInvolved: weakDimensions.map((d) => d.dimension) as DimensionId[],
     severity: ic < T.MATERIAL_LOW && om < T.MATERIAL_LOW ? 'material' : 'notable',
@@ -374,7 +372,7 @@ function detectStewardshipConcentration(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Continuity Signals — recognizable organizational patterns
+// Continuity Signals — recognizable institutional patterns
 // ─────────────────────────────────────────────────────────────────────────────
 
 function generateContinuitySignals(
@@ -402,7 +400,7 @@ function generateContinuitySignals(
     },
     {
       id: 'sig_informal_memory',
-      label: 'Informal organizational memory preservation',
+      label: 'Informal institutional memory preservation',
       observed: om < T.NOTABLE_LOW,
     },
     {
@@ -417,12 +415,12 @@ function generateContinuitySignals(
     },
     {
       id: 'sig_trust_accumulation',
-      label: 'Accumulated organizational trust debt',
+      label: 'Accumulated institutional trust debt',
       observed: td < T.NOTABLE_LOW,
     },
     {
       id: 'sig_sovereignty_risk',
-      label: 'Organizational data sovereignty risk',
+      label: 'Institutional data sovereignty risk',
       observed: (sectionMap.get('sovereignty_governance') ?? 100) < T.NOTABLE_LOW,
     },
     {
@@ -434,7 +432,7 @@ function generateContinuitySignals(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Stewardship Signals — organizational care and obligation signals
+// Stewardship Signals — institutional care and obligation signals
 // ─────────────────────────────────────────────────────────────────────────────
 
 function generateStewardshipSignals(scores: DimensionScore[]): StewardshipSignal[] {
@@ -463,7 +461,7 @@ function generateStewardshipSignals(scores: DimensionScore[]): StewardshipSignal
     },
     {
       id: 'stew_memory_fragility',
-      label: 'Organizational memory fragility',
+      label: 'Institutional memory fragility',
       severity: severity(om),
     },
     {
@@ -503,13 +501,13 @@ function computeBurdenIndex(
       'Continuity in this institution is currently held together largely by people, not by systems. The operational labour absorbed informally — to keep precedent intact, to translate between fragmented tools, to onboard newcomers, to remember why things are done — is material, and it is being paid quietly by a small group whose contribution does not appear in any formal report.';
   else if (score >= 55)
     interpretation =
-      'A meaningful share of continuity is sustained through informal human effort rather than organizational infrastructure. Operations remain coherent, but coherence depends on stewardship that the organization has not yet named, measured, or distributed.';
+      'A meaningful share of continuity is sustained through informal human effort rather than institutional infrastructure. Operations remain coherent, but coherence depends on stewardship that the organization has not yet named, measured, or distributed.';
   else if (score >= 40)
     interpretation =
       'Continuity burden is present and concentrated in specific areas. The institution is mostly carrying its own weight, but a few load-bearing dependencies on individuals remain — visible mainly during vacations, sick leave, and role transitions.';
   else
     interpretation =
-      'Continuity burden is low. Organizational systems are absorbing the majority of continuity work, and the organization’s coherence is not unduly dependent on the continued presence of specific individuals.';
+      'Continuity burden is low. Institutional systems are absorbing the majority of continuity work, and the organization’s coherence is not unduly dependent on the continued presence of specific individuals.';
 
   const sizeSuffix = sizeFrame(orgContext?.ctx_membership_size, score);
   if (sizeSuffix) interpretation += sizeSuffix;
@@ -519,11 +517,11 @@ function computeBurdenIndex(
 
   if (ic < T.NOTABLE_LOW)
     humanCompensationIndicators.push(
-      'Operational continuity is held in place by individual knowledge and informal authority rather than organizational procedure',
+      'Operational continuity is held in place by individual knowledge and informal authority rather than institutional procedure',
     );
   if (om < T.NOTABLE_LOW)
     humanCompensationIndicators.push(
-      'Organizational memory lives in personal recall — precedent, exceptions, and rationale travel with people, not with the institution',
+      'Institutional memory lives in personal recall — precedent, exceptions, and rationale travel with people, not with the institution',
     );
   if (tr < T.NOTABLE_LOW)
     humanCompensationIndicators.push(
@@ -566,7 +564,6 @@ export function generateInsights(
   sectionScores: SectionScore[],
   persona?: ExecutivePersonaId,
   orgContext?: InsightOrgContext,
-  contradictionReport?: ContradictionReport,
 ): InsightEngineOutput {
   const continuitySignals = generateContinuitySignals(dimensionScores, sectionScores);
   const stewardshipSignals = generateStewardshipSignals(dimensionScores);
@@ -580,7 +577,6 @@ export function generateInsights(
     detectInstitutionalForgetting(dimensionScores, orgContext),
     detectEvidenceGovernanceGap(dimensionScores, persona),
     detectStewardshipConcentration(dimensionScores, burdenIndex.score, persona),
-    contradictionReport ? buildContradictionInsight(contradictionReport, persona) : null,
   ];
 
   // Severity ordering: material (most consequential) first.
@@ -593,14 +589,13 @@ export function generateInsights(
   // Category priority — if two insights tie on severity, the more executively-relevant
   // (and emotionally precise) category surfaces first. Calibrated by hand, not learned.
   const categoryPriority: Record<ContinuityInsight['category'], number> = {
-    contradiction_detected: 0,
-    institutional_forgetting: 1,
-    invisible_labour: 2,
-    governance_drift: 3,
-    reconstruction_burden: 4,
-    stewardship_concentration: 5,
-    evidence_governance_gap: 6,
-    modernization_continuity_gap: 7,
+    institutional_forgetting: 0,
+    invisible_labour: 1,
+    governance_drift: 2,
+    reconstruction_burden: 3,
+    stewardship_concentration: 4,
+    evidence_governance_gap: 5,
+    modernization_continuity_gap: 6,
   };
 
   const insights = rawInsights

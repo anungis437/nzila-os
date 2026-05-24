@@ -3,8 +3,8 @@
  * MODULE: Governance Lineage
  * DOCTRINE_VERSION: 2.0.0
  *
- * Organizational Evolution Tracker — composes precedent continuity and
- * interpretation drift into a longitudinal arc of how organizational
+ * Institutional Evolution Tracker — composes precedent continuity and
+ * interpretation drift into a longitudinal arc of how institutional
  * governance has evolved across eras.
  *
  * Pure, deterministic.
@@ -26,7 +26,7 @@ export interface EvolutionEraSummary {
   readonly continuityRate: number;
 }
 
-export interface OrganizationalEvolutionResult {
+export interface InstitutionalEvolutionResult {
   readonly posture: EvolutionPosture;
   readonly continuityRate: number;
   readonly interpretationDrift: number;
@@ -36,10 +36,10 @@ export interface OrganizationalEvolutionResult {
 
 const ERA_ORDER: readonly PrecedentEra[] = ['founding', 'long_term', 'mid_term', 'recent'];
 
-export function trackOrganizationalEvolution(
+export function trackInstitutionalEvolution(
   precedents: readonly PrecedentMapping[],
   interpretation: readonly InterpretationCell[],
-): OrganizationalEvolutionResult {
+): InstitutionalEvolutionResult {
   const byEra = new Map<PrecedentEra, { carried: number; lapsed: number }>();
   for (const era of ERA_ORDER) byEra.set(era, { carried: 0, lapsed: 0 });
 
@@ -101,13 +101,13 @@ function posturalReading(
   const pct = (n: number) => `${Math.round(n * 100)}%`;
   switch (posture) {
     case 'continuous':
-      return `Organizational lineage is broadly continuous (${pct(continuityRate)} of precedents carried, ${pct(drift)} interpretation drift).`;
+      return `Institutional lineage is broadly continuous (${pct(continuityRate)} of precedents carried, ${pct(drift)} interpretation drift).`;
     case 'evolved':
-      return `Organizational lineage has evolved while retaining most precedents (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift).`;
+      return `Institutional lineage has evolved while retaining most precedents (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift).`;
     case 'reinterpreted':
-      return `Organizational lineage has been substantially reinterpreted (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift).`;
+      return `Institutional lineage has been substantially reinterpreted (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift).`;
     case 'fractured':
-      return `Organizational lineage shows fracture (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift); reconstruction would require external interpretation.`;
+      return `Institutional lineage shows fracture (${pct(continuityRate)} carried, ${pct(drift)} interpretation drift); reconstruction would require external interpretation.`;
   }
 }
 

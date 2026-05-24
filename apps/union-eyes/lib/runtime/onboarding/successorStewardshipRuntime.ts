@@ -9,7 +9,7 @@
  * and composes a refusable observation about successor stewardship — i.e.
  * whether successor stewards are inheriting the context they need.
  *
- * The runtime never ranks individual stewards. It reports the organizational
+ * The runtime never ranks individual stewards. It reports the institutional
  * reading only.
  */
 

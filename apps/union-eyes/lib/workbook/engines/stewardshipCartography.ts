@@ -94,7 +94,7 @@ export function runStewardshipCartography(
       signalId: 'long_tenure_concentration',
       severity: 'observation',
       category: 'long_tenure_concentration',
-      statement: `${longTenureExposed} long-tenure carrier${longTenureExposed === 1 ? '' : 's'} (15+ years) without identified successor concentrate${longTenureExposed === 1 ? 's' : ''} organizational memory in a single dependency.`,
+      statement: `${longTenureExposed} long-tenure carrier${longTenureExposed === 1 ? '' : 's'} (15+ years) without identified successor concentrate${longTenureExposed === 1 ? 's' : ''} institutional memory in a single dependency.`,
       evidence: { longTenureExposed },
     });
   }

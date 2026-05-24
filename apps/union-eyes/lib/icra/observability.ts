@@ -30,11 +30,7 @@ export type IcraEventKind =
   | 'report_unlock_requested'
   | 'enterprise_diagnostic_requested'
   | 'landing_page_viewed'
-  | 'cta_clicked'
-  // OCRA Dynamic Questionnaire Adaptation (doctrine 1.0.0)
-  | 'adaptive_profile_created'
-  | 'assessment_routed'
-  | 'adaptive_question_deferred';
+  | 'cta_clicked';
 
 export interface IcraEvent {
   kind: IcraEventKind;

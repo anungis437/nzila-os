@@ -5,7 +5,7 @@
  *
  * Shared, deterministic fixtures for cross-product OCI integration tests.
  *
- * These fixtures construct a coherent organizational shape that flows through
+ * These fixtures construct a coherent institutional shape that flows through
  * the full OCI lifecycle: Recognition → Mapping → Stabilization → Runtime →
  * Intelligence. They are intentionally narrow and reviewer-led; nothing here
  * carries identifying detail.
@@ -56,7 +56,7 @@ export function buildUniformAnswers(uniformScore: 0 | 1 | 2 | 3 | 4): Answer[] {
   });
 }
 
-/** Build answers for a graded continuity posture: 0 = absent, 4 = organizational. */
+/** Build answers for a graded continuity posture: 0 = absent, 4 = institutional. */
 export function buildGradedAnswers(
   bandFor: (index: number) => 0 | 1 | 2 | 3 | 4,
 ): Answer[] {

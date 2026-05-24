@@ -626,7 +626,7 @@ describe('resilience layer', () => {
     expect(t.band).toBe('strengthening');
   });
 
-  it('refuses organizational resilience with insufficient readable capabilities', () => {
+  it('refuses institutional resilience with insufficient readable capabilities', () => {
     const r = readInstitutionalResilience({
       institutionRefHash: 'hash_a0000000',
       capabilities: {
@@ -642,7 +642,7 @@ describe('resilience layer', () => {
     expect(r.band).toBe('not_yet_readable');
   });
 
-  it('reads organizational resilience as the weakest readable capability', () => {
+  it('reads institutional resilience as the weakest readable capability', () => {
     const r = readInstitutionalResilience({
       institutionRefHash: 'hash_a0000000',
       capabilities: {

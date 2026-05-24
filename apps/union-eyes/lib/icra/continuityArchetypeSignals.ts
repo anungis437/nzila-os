@@ -1,9 +1,9 @@
 /**
- * Continuity Archetype Signals — organizational pattern detection.
+ * Continuity Archetype Signals — institutional pattern detection.
  *
  * Combines structural signals (multiple_choice) with confidence signals
  * (likert_5) and existing dimension scores to surface recognizable
- * organizational continuity archetypes.
+ * institutional continuity archetypes.
  *
  * Archetypes are descriptive, not normative. They are not rankings.
  *
@@ -34,13 +34,13 @@ const ARCHETYPE_DESCRIPTIONS: Record<ContinuityArchetypeId, string> = {
   governance_fragmentation:
     'Governance authority and escalation paths are unevenly distributed.',
   onboarding_survivability:
-    'Organizational intelligence transfer at onboarding is incomplete or observational.',
+    'Institutional intelligence transfer at onboarding is incomplete or observational.',
   operational_continuity:
     'Operational continuity is structurally distributed and documented.',
   modernization_fragility:
-    'Modernization decisions do not consistently preserve organizational continuity.',
+    'Modernization decisions do not consistently preserve institutional continuity.',
   institutional_memory_dependency:
-    'Organizational memory depends on long-tenured individuals rather than infrastructure.',
+    'Institutional memory depends on long-tenured individuals rather than infrastructure.',
 };
 
 /**

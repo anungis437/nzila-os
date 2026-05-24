@@ -70,7 +70,7 @@ function readDomain(
     return {
       domain,
       band: 'deferred_readiness_insufficient',
-      statement: `Operationalization reading for ${domain} is deferred; organizational readiness is insufficient.`,
+      statement: `Operationalization reading for ${domain} is deferred; institutional readiness is insufficient.`,
       evidence: { unmetReadiness: input.readiness.unmet, observed },
     };
   }

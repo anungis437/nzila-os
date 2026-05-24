@@ -6,14 +6,14 @@
  * Reads a Governance Survivability Recovery shape over the existing
  * continuity lineage engine (which itself composes the governance
  * interpretation matrix, the precedent continuity mapper, and the
- * organizational evolution tracker).
+ * institutional evolution tracker).
  *
  * Pure composition: emits a canonical signal envelope aligned to
  * OCI_STABILIZATION_SEVERITY_MODEL.md, holds the recovered material as
- * organizational record, and refuses to attribute fault to historical
+ * institutional record, and refuses to attribute fault to historical
  * tenure.
  *
- * Pure, deterministic. Tone: organizational, recognition-first,
+ * Pure, deterministic. Tone: institutional, recognition-first,
  * governance-receivable, blame-free.
  *
  * Doctrine: docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md
@@ -117,7 +117,7 @@ function buildSignals(
       severity: lapsedCount >= 3 ? 'critical' : 'warning',
       category: 'lapsed_precedent_recovery_required',
       statement:
-        'Lapsed precedents are present; reconstruct interpretation through secondary sources while organizational memory remains accessible.',
+        'Lapsed precedents are present; reconstruct interpretation through secondary sources while institutional memory remains accessible.',
       evidence: {
         lapsedCount,
         totalPrecedents: lineage.survivability.total,

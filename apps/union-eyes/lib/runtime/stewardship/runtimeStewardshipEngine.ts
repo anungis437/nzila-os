@@ -4,7 +4,7 @@
  * DOCTRINE_VERSION: 1.0.0
  *
  * The Runtime Stewardship Engine reads stewardship transfer records over time
- * and composes a refusable observation about organizational stewardship
+ * and composes a refusable observation about institutional stewardship
  * concentration.
  *
  * Posture:

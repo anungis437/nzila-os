@@ -4,7 +4,7 @@
  * DOCTRINE_VERSION: 2.0.0
  *
  * Continuity Dependency Graph — produces an undirected adjacency view of
- * how named organizational dependencies relate (carriers ↔ processes ↔
+ * how named institutional dependencies relate (carriers ↔ processes ↔
  * governance bodies). Anti-surveillance: this graph is structural only.
  * No carrier names, no notes, no PII flow through this module.
  *

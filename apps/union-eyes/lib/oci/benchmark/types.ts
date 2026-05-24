@@ -4,12 +4,12 @@
  * Schemas for the benchmark layer of the OCI Method.
  *
  * The benchmark layer captures three things:
- *  1. Sector baselines  — characteristic profiles of organizational
+ *  1. Sector baselines  — characteristic profiles of institutional
  *     sectors that ground a pilot in sector-appropriate expectations
  *     without ranking institutions against each other.
- *  2. Stewardship-burden pattern typology — recognised organizational
+ *  2. Stewardship-burden pattern typology — recognised institutional
  *     patterns of stewardship density and burden, named at the
- *     organizational (not personal) level.
+ *     institutional (not personal) level.
  *  3. Aggregate intelligence — opt-in, k-anonymous aggregation across
  *     institutions that have explicitly consented in writing.
  *
@@ -35,8 +35,8 @@ import type { LocalizedString } from '../facilitation/types';
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Canonical organizational sectors the benchmark layer recognises.
- * Sectors are intentionally narrow and named in organizational terms.
+ * Canonical institutional sectors the benchmark layer recognises.
+ * Sectors are intentionally narrow and named in institutional terms.
  */
 export type InstitutionalSectorId =
   | 'union-cba-administration'
@@ -53,7 +53,7 @@ export type InstitutionalSectorId =
   | 'regulated-professional-college';
 
 /**
- * Coarse classification of how organizational authority is held in a sector.
+ * Coarse classification of how institutional authority is held in a sector.
  * Used to ground facilitation posture, not to rank institutions.
  */
 export type GovernanceShape =
@@ -71,7 +71,7 @@ export type RegulatoryProfile =
   | 'multi-jurisdictional';
 
 /**
- * Typical observed range for a continuous organizational measure within
+ * Typical observed range for a continuous institutional measure within
  * a sector. The values are characteristic, not normative; an institution
  * outside the range is not "below baseline" — it is differently shaped.
  */
@@ -88,7 +88,7 @@ export interface SectorBaseline {
   readonly governanceShape: GovernanceShape;
   /** Number of stewards per 100 members typically carrying continuity load. */
   readonly typicalStewardshipDensityRange: SectorRange;
-  /** Years of accumulated organizational memory typically concentrated in <=2 stewards. */
+  /** Years of accumulated institutional memory typically concentrated in <=2 stewards. */
   readonly typicalContinuityFragilityRange: SectorRange;
   /** Burden pattern ids most commonly observed in this sector. */
   readonly commonBurdenPatternIds: readonly StewardshipBurdenPatternId[];
@@ -162,10 +162,10 @@ export interface StewardshipBurdenPattern {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * An organizational submission considered for inclusion in the
+ * An institutional submission considered for inclusion in the
  * aggregate intelligence layer.
  *
- * Every field below is recorded at the organizational level. The intake
+ * Every field below is recorded at the institutional level. The intake
  * MUST NOT carry person-level identifiers, role-level identifiers tied
  * to a specific person, or any field that could be used to re-identify
  * an individual steward.

@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-05-23T21:29:31.542Z",
-  "filesScanned": 1812,
-  "totalFindings": 2534,
+  "generatedAt": "2026-05-22T06:08:18.485Z",
+  "filesScanned": 1769,
+  "totalFindings": 2537,
   "findingsByRule": {
-    "stale-reference": 1033,
+    "stale-reference": 1032,
     "stale-package-ref": 57,
-    "naming-inconsistency": 1329,
+    "naming-inconsistency": 1333,
     "stale-date": 7,
     "missing-required-doc": 3,
     "missing-package-readme": 105
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1198,
-    "info": 1336
+    "warning": 1197,
+    "info": 1340
   },
   "findings": [
     {
@@ -15293,8 +15293,43 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md",
+      "line": 10,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md",
+      "line": 20,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/whitepapers/README.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/whitepapers/README.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/doctrine/whitepapers/README.md",
+      "line": 14,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 956,
+      "line": 954,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16086,13 +16121,6 @@
       "severity": "info",
       "file": "docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md",
       "line": 10,
-      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md",
-      "line": 107,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16954,49 +16982,49 @@
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"February 17, 2026\" is 95 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 94 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",

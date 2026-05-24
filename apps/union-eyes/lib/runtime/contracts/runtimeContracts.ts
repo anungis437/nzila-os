@@ -7,7 +7,7 @@
  *
  * These contracts are the single source of truth for the shapes that flow
  * between OCI runtime engines. They are intentionally narrow: every contract
- * carries the minimum organizational context required to remain readable.
+ * carries the minimum institutional context required to remain readable.
  *
  * Posture:
  *   - Read-only by default. No contract here authorises a write back to the
@@ -15,7 +15,7 @@
  *   - Reviewer-led. Every contract carries a `reviewerRefId` for traceability.
  *   - Anti-surveillance. No contract carries personally identifying details.
  *   - Refusal-friendly. Optional fields are genuinely optional; missing values
- *     never imply absence of the underlying organizational reality.
+ *     never imply absence of the underlying institutional reality.
  */
 
 export const RUNTIME_CONTRACT_VERSION = '1.0.0' as const;
@@ -39,8 +39,8 @@ export type ContinuitySensitivity =
 // ─────────────────────────────────────────────────────────────────────────────
 // RuntimeLineageReference
 //
-// A read-only handle to an upstream organizational artefact. Lineage references
-// are NOT URLs. They are organizational identifiers the runtime can resolve only
+// A read-only handle to an upstream institutional artefact. Lineage references
+// are NOT URLs. They are institutional identifiers the runtime can resolve only
 // through a reviewer-led lookup.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -99,7 +99,7 @@ export interface ContinuityRuntimeContext {
 // ContinuityEventEnvelope
 //
 // The canonical envelope for every event the Continuity Event Runtime emits.
-// Events are deterministic statements about organizational movement; they are
+// Events are deterministic statements about institutional movement; they are
 // never predictions and never recommendations.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -157,7 +157,7 @@ export interface StewardshipTransferRecord {
 // ─────────────────────────────────────────────────────────────────────────────
 // OnboardingSurvivabilityRecord
 //
-// A read-only record of an organizational onboarding artefact's contribution to
+// A read-only record of an institutional onboarding artefact's contribution to
 // survivability. Never a measurement of any individual successor.
 // ─────────────────────────────────────────────────────────────────────────────
 

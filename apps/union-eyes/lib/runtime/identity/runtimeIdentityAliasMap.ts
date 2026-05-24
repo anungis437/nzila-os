@@ -36,9 +36,6 @@ export const ENV_VAR_ALIASES: readonly AliasPair[] = [
   { legacy: 'ICRA_CLAIM_TOKEN_SECRET', canonical: 'OCRA_CLAIM_TOKEN_SECRET' },
   { legacy: 'ICRA_FEATURE_FLAGS', canonical: 'OCRA_FEATURE_FLAGS' },
   { legacy: 'ICRA_PUBLIC_ENDPOINT', canonical: 'OCRA_PUBLIC_ENDPOINT' },
-  // Stripe Price ID env vars consumed by /api/icra/checkout. Phase 4 wiring.
-  { legacy: 'STRIPE_PRICE_ICRA_BRIEF', canonical: 'STRIPE_PRICE_OCRA_BRIEF' },
-  { legacy: 'STRIPE_PRICE_ICRA_DIAGNOSTIC', canonical: 'STRIPE_PRICE_OCRA_DIAGNOSTIC' },
 ];
 
 /** Stripe price keys exposed at the integration layer. */

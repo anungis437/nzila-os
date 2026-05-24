@@ -5,7 +5,7 @@
  *
  * Operational Traceability Review — examines whether modernization
  * initiatives preserve the traceability between operational practice and
- * the organizational reasoning that produced it. Loss of traceability is
+ * the institutional reasoning that produced it. Loss of traceability is
  * the most common quiet continuity failure during modernization.
  *
  * Pure, deterministic.

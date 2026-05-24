@@ -2,13 +2,13 @@
  * ARTIFACT TYPE: React Component
  * DOCTRINE_VERSION: 1.1.0
  *
- * ICRAReportGate — editorial, premium organizational gate.
+ * ICRAReportGate — editorial, premium institutional gate.
  *
  * This is not a SaaS paywall. There is no countdown, scarcity, or coercion.
  * The gate reads as a section of a real published document: a chapter number,
  * the chapter title, an evocative one-line teaser drawn from inside the
  * analysis, a short table of contents for that chapter, and a calm,
- * organizational invitation to obtain the full document.
+ * institutional invitation to obtain the full document.
  *
  * Tone: "This chapter belongs to the Executive Continuity Brief."
  *       Calm. Confident. Worth what is being asked.
@@ -44,7 +44,7 @@ const TIER_PRICE: Record<Exclude<ReportTierId, 'continuity_reflection'>, string>
 
 const TIER_NAME: Record<Exclude<ReportTierId, 'continuity_reflection'>, string> = {
   executive_continuity_brief: 'Executive Continuity Brief',
-  institutional_continuity_diagnostic: 'Organizational Continuity Diagnostic',
+  institutional_continuity_diagnostic: 'Institutional Continuity Diagnostic',
 };
 
 const TIER_FORMAT: Record<Exclude<ReportTierId, 'continuity_reflection'>, readonly string[]> = {

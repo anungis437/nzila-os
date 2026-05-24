@@ -1,23 +1,23 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-23T21:29:31.542Z
+> Generated: 2026-05-22T06:08:18.485Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1812 |
-| Total Findings | 2534 |
+| Files Scanned | 1769 |
+| Total Findings | 2537 |
 | Errors | 0 |
-| Warnings | 1198 |
-| Info | 1336 |
+| Warnings | 1197 |
+| Info | 1340 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1329 |
-| stale-reference | 1033 |
+| naming-inconsistency | 1333 |
+| stale-reference | 1032 |
 | missing-package-readme | 105 |
 | stale-package-ref | 57 |
 | stale-date | 7 |
@@ -1119,7 +1119,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1329)
+## naming-inconsistency (1333)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2213,7 +2213,12 @@
 - ℹ️ `docs/doctrine/SCORING_MODELS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/vocabulary.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/vocabulary.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:956` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md:20` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/whitepapers/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/whitepapers/README.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/whitepapers/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:954` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2327,7 +2332,6 @@
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:127` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md:107` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/OCI_METHOD.md:321` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2453,13 +2457,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 95 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 95 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 95 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 95 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 95 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 95 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 95 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 94 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 94 days old — may be stale
 
 ## missing-required-doc (3)
 

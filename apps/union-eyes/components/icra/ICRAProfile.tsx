@@ -2,15 +2,15 @@
  * ARTIFACT TYPE: React Component
  * DOCTRINE_VERSION: 1.0.0
  *
- * ICRAProfile — results display for the Organizational Continuity Profile.
+ * ICRAProfile — results display for the Institutional Continuity Profile.
  *
  * Implements tiered output:
  *   - Continuity Reflection (free): band + insights + signals + burden index
  *   - Executive Continuity Brief: unlocks governance entropy, continuity debt,
  *     dependency review, modernization risk, full recommendations
- *   - Organizational Continuity Diagnostic: full access
+ *   - Institutional Continuity Diagnostic: full access
  *
- * Tone: calm, organizational, emotionally intelligent.
+ * Tone: calm, institutional, emotionally intelligent.
  * No AI language anywhere in this component.
  *
  * Server component — receives profile and tier as props.
@@ -20,7 +20,7 @@ import type {
   ContinuityInsight,
   ContinuityObservation,
   ContinuitySignal,
-  OrganizationalContinuityProfile,
+  InstitutionalContinuityProfile,
   DimensionScore,
   InsightCategory,
   ReportTierId,
@@ -41,7 +41,7 @@ const INSIGHT_CATEGORY_META: Record<
   { label: string; framing: string }
 > = {
   institutional_forgetting: {
-    label: 'Organizational Forgetting',
+    label: 'Institutional Forgetting',
     framing:
       'When multiple continuity dimensions degrade together, the institution begins to forget itself in operational ways that rarely show up in formal reporting.',
   },
@@ -58,7 +58,7 @@ const INSIGHT_CATEGORY_META: Record<
   reconstruction_burden: {
     label: 'Reconstruction Burden',
     framing:
-      'When organizational understanding has to be rebuilt with each transition, the cost is borne by individuals and absorbed into roles — rarely accounted for as a continuity liability.',
+      'When institutional understanding has to be rebuilt with each transition, the cost is borne by individuals and absorbed into roles — rarely accounted for as a continuity liability.',
   },
   stewardship_concentration: {
     label: 'Stewardship Concentration',
@@ -75,11 +75,6 @@ const INSIGHT_CATEGORY_META: Record<
     framing:
       'Modernization that outpaces continuity infrastructure tends to import operational fragility faster than it retires it.',
   },
-  contradiction_detected: {
-    label: 'Unresolved Contradiction',
-    framing:
-      'Two affirmed signals point in opposite directions. Until the contradiction is reconciled, confidence in the affected dimensions should be read as provisional rather than settled.',
-  },
 };
 
 const OBSERVATION_CATEGORY_META: Record<
@@ -92,10 +87,10 @@ const OBSERVATION_CATEGORY_META: Record<
   },
   operational: {
     label: 'Operational',
-    framing: 'How daily organizational work is sustained between transitions.',
+    framing: 'How daily institutional work is sustained between transitions.',
   },
   memory: {
-    label: 'Organizational Memory',
+    label: 'Institutional Memory',
     framing: 'How precedent, context, and operational understanding persist over time.',
   },
   transition: {
@@ -108,7 +103,7 @@ const OBSERVATION_CATEGORY_META: Record<
   },
   sovereignty: {
     label: 'Sovereignty & Data',
-    framing: 'How organizational information remains under organizational control.',
+    framing: 'How institutional information remains under institutional control.',
   },
 };
 
@@ -125,7 +120,7 @@ const OBSERVATION_SEVERITY_ORDER: Record<ContinuityObservation['severity'], numb
 };
 
 interface ICRAProfileProps {
-  profile: OrganizationalContinuityProfile;
+  profile: InstitutionalContinuityProfile;
   tierId?: ReportTierId;
 }
 
@@ -300,7 +295,7 @@ function ContinuitySignalList({ signals }: { signals: ContinuitySignal[] }) {
         {COPY.results.continuitySignalsTitle}
       </h2>
       <p className="text-sm text-stone-500">
-        Recognizable organizational patterns observed in this assessment.
+        Recognizable institutional patterns observed in this assessment.
       </p>
       <ul className="divide-y divide-stone-100 rounded-xl border border-stone-200 overflow-hidden">
         {observed.map((sig) => (
@@ -324,7 +319,7 @@ function StewardshipSignalList({ signals }: { signals: StewardshipSignal[] }) {
         {COPY.results.stewardshipSignalsTitle}
       </h2>
       <p className="text-sm text-stone-500">
-        Stewardship-layer signals — where organizational obligations may be at risk.
+        Stewardship-layer signals — where institutional obligations may be at risk.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {signals.map((sig) => (
@@ -397,7 +392,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
               {COPY.results.insightsTitle}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-stone-600">
-              These are the organizational patterns this assessment surfaces — derived not from
+              These are the institutional patterns this assessment surfaces — derived not from
               any single answer, but from the relationships between continuity dimensions.
               Each finding names a recognizable pattern, places it in doctrine, and points to
               where it shows up in operational life.
@@ -451,7 +446,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
           {!visible('burden_index_full') && burdenIndex.humanCompensationIndicators.length > 0 && (
             <ICRAReportGate
               sectionName="Continuity Burden — Human Compensation Topography"
-              teaser="The full analysis names the specific places where organizational continuity is currently being maintained through informal human effort rather than organizational systems."
+              teaser="The full analysis names the specific places where institutional continuity is currently being maintained through informal human effort rather than institutional systems."
               requiredTier="executive_continuity_brief"
               assessmentId={assessmentId}
               chapterNumber={5}
@@ -459,7 +454,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                 'A ranked list of the institution\u2019s active human-compensation indicators',
                 'The named operational areas where continuity is currently informal',
                 'A read of how concentrated that compensation is across roles',
-                'Where organizational infrastructure would most reduce the burden carried by individuals',
+                'Where institutional infrastructure would most reduce the burden carried by individuals',
               ]}
             />
           )}
@@ -539,7 +534,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
         <p className="text-sm text-stone-600">
           Each dimension score is computed directly from your answers using published weights.
           Risk dimensions (governance fragility, trust debt) are inverted: a higher score indicates
-          less organizational risk.
+          less institutional risk.
         </p>
         <div className="space-y-4">
           {dimensions.map((dim) => (
@@ -613,30 +608,30 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
             {!visible('continuity_debt') && (
               <ICRAReportGate
                 sectionName="Continuity Debt Topography"
-                teaser="A meaningful portion of organizational continuity appears to be carried informally — sustainable until the people carrying it change."
+                teaser="A meaningful portion of institutional continuity appears to be carried informally — sustainable until the people carrying it change."
                 requiredTier="executive_continuity_brief"
                 assessmentId={assessmentId}
                 chapterNumber={2}
                 chapters={[
-                  'Where continuity is currently held by individuals rather than organizational systems',
+                  'Where continuity is currently held by individuals rather than institutional systems',
                   'The hidden operational cost being absorbed into roles and transitions',
                   'A ranked map of which continuity debts compound fastest if left unaddressed',
-                  'Where targeted organizational investment would most reduce informal dependency',
+                  'Where targeted institutional investment would most reduce informal dependency',
                 ]}
               />
             )}
             {!visible('dependency_review') && (
               <ICRAReportGate
-                sectionName="Organizational Dependency Review"
+                sectionName="Institutional Dependency Review"
                 teaser="Operational coherence may currently depend on a smaller circle of people than the governance posture suggests."
                 requiredTier="executive_continuity_brief"
                 assessmentId={assessmentId}
                 chapterNumber={3}
                 chapters={[
-                  'A map of where critical organizational knowledge is currently concentrated',
+                  'A map of where critical institutional knowledge is currently concentrated',
                   'Roles, relationships, and undocumented stewardship the institution is leaning on',
                   'The exposure profile if a small number of departures occurred simultaneously',
-                  'Where dependency is healthy stewardship and where it has become organizational fragility',
+                  'Where dependency is healthy stewardship and where it has become institutional fragility',
                 ]}
               />
             )}
@@ -648,7 +643,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                 assessmentId={assessmentId}
                 chapterNumber={4}
                 chapters={[
-                  'Where current modernization plans may erode organizational memory if unaccompanied',
+                  'Where current modernization plans may erode institutional memory if unaccompanied',
                   'Continuity preconditions that should be met before each modernization step',
                   'Decisions that are reversible — and decisions that quietly are not',
                   'A sequencing principle for modernization that protects continuity rather than displacing it',
@@ -671,7 +666,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-stone-600">
               These observations are derived directly from the sections you answered. They are
-              grouped by severity and annotated with the organizational lens they belong to —
+              grouped by severity and annotated with the institutional lens they belong to —
               not as alerts, but as plain readings of what the responses reveal.
             </p>
           </header>
@@ -788,10 +783,10 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
         <p className="font-semibold text-stone-700">About this profile</p>
         <p>
           All scores are computed deterministically using published question weights. There is no
-          opaque model. The composite score reflects your organizational continuity dimension score,
+          opaque model. The composite score reflects your institutional continuity dimension score,
           which aggregates weighted responses across all scored sections. Risk dimensions
           (governance fragility, trust debt) are inverted so higher scores consistently indicate
-          stronger organizational position.
+          stronger institutional position.
         </p>
         <p>
           Assessment ID: <code className="font-mono">{profile.assessmentId}</code>

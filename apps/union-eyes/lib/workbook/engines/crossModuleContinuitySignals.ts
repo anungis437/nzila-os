@@ -48,7 +48,7 @@ export function deriveCrossModuleSignals(
       severity: agg.onboardingCriticalCount >= 3 ? 'critical' : 'warning',
       category: 'density_onboarding_survivability_gap',
       statement:
-        'Stewardship density is concentrated and onboarding is critically fragile in one or more roles; organizational survivability depends on a small number of carriers with no resilient route in.',
+        'Stewardship density is concentrated and onboarding is critically fragile in one or more roles; institutional survivability depends on a small number of carriers with no resilient route in.',
       evidence: {
         densityIndex: agg.densityIndex,
         onboardingCriticalCount: agg.onboardingCriticalCount,

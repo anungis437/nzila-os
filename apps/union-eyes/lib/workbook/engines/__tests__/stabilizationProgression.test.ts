@@ -5,7 +5,7 @@ import {
 } from '@/lib/workbook/engines/progression/stabilizationScoringEngine';
 import { readStabilizationEvolution } from '@/lib/workbook/engines/progression/stabilizationEvolutionModel';
 import { readMaturityProgression } from '@/lib/workbook/engines/progression/continuityMaturityProgression';
-import type { OrganizationalEvolutionResult } from '@/lib/workbook/engines/organizationalEvolutionTracker';
+import type { InstitutionalEvolutionResult } from '@/lib/workbook/engines/institutionalEvolutionTracker';
 import type { OciMaturityPathwayResult } from '@/lib/workbook/engines/ociMaturityPathway';
 
 const FORBIDDEN =
@@ -96,7 +96,7 @@ describe('readStabilizationEvolution', () => {
 
   it('maps continuous and evolved postures to advancing', () => {
     for (const posture of ['continuous', 'evolved'] as const) {
-      const evo: OrganizationalEvolutionResult = {
+      const evo: InstitutionalEvolutionResult = {
         posture,
         continuityRate: 0.9,
         interpretationDrift: 0,
@@ -108,7 +108,7 @@ describe('readStabilizationEvolution', () => {
   });
 
   it('maps fractured posture to regressing and is tone-clean', () => {
-    const evo: OrganizationalEvolutionResult = {
+    const evo: InstitutionalEvolutionResult = {
       posture: 'fractured',
       continuityRate: 0.1,
       interpretationDrift: 0.4,

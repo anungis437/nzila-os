@@ -21,17 +21,11 @@ import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
-import type { OrganizationalContinuityProfile, OrganizationContext } from '@/lib/icra/types';
+import type { InstitutionalContinuityProfile, OrganizationContext } from '@/lib/icra/types';
 import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { mapToPdfReportData } from '@/lib/icra-pdf/reportDataMapper';
 import { generateExecutiveContinuityPdf } from '@/lib/icra-pdf/generateExecutiveContinuityPdf';
 import { logger } from '@/lib/logger';
-import {
-  resolveAdaptiveContext,
-  resolveAdaptiveReportAISlot,
-  type RoutableQuestion,
-} from '@/lib/icra/adaptation';
-import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from '@/lib/icra/questions';
 
 const PDF_ELIGIBLE_TIERS = new Set([
   'executive_continuity_brief',
@@ -63,7 +57,6 @@ export async function GET(_request: Request, { params }: RouteContext) {
         status: icraAssessments.status,
         reportTierId: icraAssessments.reportTierId,
         organizationContext: icraAssessments.organizationContext,
-        locale: icraAssessments.locale,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
@@ -99,8 +92,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    const profile = profileRow.profilePayload as unknown as OrganizationalContinuityProfile;
-    const locale = assessment.locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
+    const profile = profileRow.profilePayload as unknown as InstitutionalContinuityProfile;
     const orgContext = mapCtxToOrganizationContext(
       assessment.organizationContext as Record<string, unknown> | OrganizationContext | null,
     );
@@ -113,35 +105,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
       );
     }
 
-    const reportData = mapToPdfReportData(profile, orgContext, undefined, {
-      adaptiveContext: (() => {
-        try {
-          return resolveAdaptiveContext({
-            organizationContext: assessment.organizationContext,
-            questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
-            currentQuestionBankVersion: QUESTION_BANK_VERSION,
-          }).adaptiveContext;
-        } catch {
-          return undefined;
-        }
-      })(),
-      adaptiveReportAISlot: resolveAdaptiveReportAISlot({
-        rawProfile: profile,
-        organizationContext: assessment.organizationContext,
-        questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
-        locale,
-        generatedAt: profile.generatedAt,
-      }),
-      locale,
-    });
-
-    if (!reportData.aiAssistedNarrative) {
-      logger.warn('[icra-pdf] deterministic report slot unavailable or unapproved', {
-        assessmentId,
-        locale,
-      });
-    }
-
+    const reportData = mapToPdfReportData(profile, orgContext);
     const pdfBuffer = await generateExecutiveContinuityPdf(reportData);
 
     const date = reportData.generatedAt.toISOString().slice(0, 10);

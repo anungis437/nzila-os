@@ -30,7 +30,7 @@ export * as continuityDependencyGraph from './continuityDependencyGraph';
 // Helpers — Governance Lineage.
 export * as precedentContinuityMapper from './precedentContinuityMapper';
 export * as governanceInterpretationMatrix from './governanceInterpretationMatrix';
-export * as organizationalEvolutionTracker from './organizationalEvolutionTracker';
+export * as institutionalEvolutionTracker from './institutionalEvolutionTracker';
 
 // Helpers — Continuity Breakpoint.
 export * as reconstructionBurdenAnalyzer from './reconstructionBurdenAnalyzer';

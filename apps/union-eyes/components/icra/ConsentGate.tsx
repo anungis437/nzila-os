@@ -52,7 +52,7 @@ const CONSENT_COPY = {
     preview: 'What you\u2019ll receive',
     previewItems: [
       'A continuity profile across five maturity dimensions, with explicit scoring weights.',
-      'A printable organizational report you can share with your board or executive team.',
+      'A printable institutional report you can share with your board or executive team.',
       'Three recommended next steps tailored to your governance model and workforce band.',
     ],
     proceed: 'Begin Assessment',
@@ -90,7 +90,7 @@ const CONSENT_COPY = {
     preview: 'Ce que vous recevrez',
     previewItems: [
       'Un profil de continuité selon cinq dimensions de maturité, avec pondérations explicites.',
-      'Un rapport organisationnel imprimable que vous pouvez partager avec votre conseil ou direction.',
+      'Un rapport institutionnel imprimable que vous pouvez partager avec votre conseil ou direction.',
       'Trois prochaines étapes recommandées, adaptées à votre modèle de gouvernance et à votre taille.',
     ],
     proceed: "Commencer l'évaluation",
@@ -124,12 +124,8 @@ export function ConsentGate({ onConsent, doctrineVersion, locale = 'en-CA' }: Co
   }
 
   return (
-    <div
-      className="mx-auto max-w-2xl space-y-8 py-12"
-      data-testid="icra-assessment-flow"
-      data-step="consent"
-    >
-      <div className="space-y-3" data-testid="icra-consent-step">
+    <div className="mx-auto max-w-2xl space-y-8 py-12">
+      <div className="space-y-3">
         <h1 className="text-3xl font-bold tracking-tight text-stone-900">
           {copy.title}
         </h1>

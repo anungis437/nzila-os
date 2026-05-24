@@ -23,7 +23,7 @@ export const COPY = {
       'Every organization has people quietly holding continuity together long after the systems around them stopped doing so.',
     sub:
       'Operational knowledge often lives inside people instead of systems. Leadership transitions should not feel like rebuilding the institution from scratch. Modernization without continuity often creates operationally forgetful organizations.',
-    primaryCta: 'Assess Organizational Continuity Risk',
+    primaryCta: 'Assess Institutional Continuity Risk',
     secondaryCta: 'Read what this is, and what it is not',
   },
   /**
@@ -40,7 +40,7 @@ export const COPY = {
     title: 'Technology With Soul Means',
     lines: [
       'Continuity without surveillance.',
-      'Modernization without organizational forgetting.',
+      'Modernization without institutional forgetting.',
       'Operational intelligence without dehumanization.',
       'Governance support without replacing human judgment.',
       'Technology that helps institutions remember their obligations to people.',
@@ -53,17 +53,17 @@ export const COPY = {
   quietRisk: {
     erosion: 'quiet continuity erosion',
     drift: 'silent governance drift',
-    forgetting: 'quiet organizational forgetting',
+    forgetting: 'quiet institutional forgetting',
     burden: 'invisible continuity burden',
     fragility: 'quiet operational fragility',
     labour: 'invisible continuity labour',
   },
   /**
-   * Organizational Memory Holders — the people quietly carrying continuity.
+   * Institutional Memory Holders — the people quietly carrying continuity.
    * Naming this concept is itself a category act.
    */
   institutionalMemoryHolders: {
-    title: 'Organizational Memory Holders',
+    title: 'Institutional Memory Holders',
     definition:
       'In most organizations, there are people who carry continuity not because it is their formal role, but because no system was built to hold it instead.',
     roles: [
@@ -89,7 +89,7 @@ export const COPY = {
         id: 'operational_interpreter',
         label: 'The Operational Interpreter',
         description:
-          'The person who translates between organizational fragments — bridging teams, systems, and practices that were never designed to speak to each other.',
+          'The person who translates between institutional fragments — bridging teams, systems, and practices that were never designed to speak to each other.',
       },
       {
         id: 'organizational_memory',
@@ -176,7 +176,7 @@ export const COPY = {
     stewardshipSignalsTitle: 'Stewardship Signals',
     burdenIndexTitle: 'Continuity Burden Index',
     burdenIndexSub:
-      'How much of your organizational continuity currently depends on people compensating manually.',
+      'How much of your institutional continuity currently depends on people compensating manually.',
     recommendationsTitle: 'Suggested next steps',
     privacyFooter:
       'This profile is yours. We retain a pseudonymous record for benchmark research and may delete it on request. We do not contact you unless you ask us to.',
@@ -184,7 +184,7 @@ export const COPY = {
       'Each indicator above is the deterministic result of your weighted responses. We can show you exactly which questions contributed to each dimension on request.',
   },
   /**
-   * Revenue tiers — organizational naming, not SaaS vocabulary.
+   * Revenue tiers — institutional naming, not SaaS vocabulary.
    */
   tiers: {
     reflection: {
@@ -203,21 +203,21 @@ export const COPY = {
     },
     diagnostic: {
       id: 'institutional_continuity_diagnostic' as const,
-      name: 'Organizational Continuity Diagnostic',
-      tagline: 'A facilitated organizational review for organizations ready to act.',
+      name: 'Institutional Continuity Diagnostic',
+      tagline: 'A facilitated institutional review for organizations ready to act.',
       price: '$6,500 CAD',
       priceLabel: '$6,500 CAD',
     },
   },
   /**
-   * Report gate copy — calm, organizational, non-coercive.
+   * Report gate copy — calm, institutional, non-coercive.
    */
   reportGate: {
     briefLockedLabel: 'This analysis is available in the Executive Continuity Brief.',
-    diagnosticLockedLabel: 'This section is part of the Organizational Continuity Diagnostic.',
+    diagnosticLockedLabel: 'This section is part of the Institutional Continuity Diagnostic.',
     briefCtaLabel: 'Request the Executive Continuity Brief',
     briefCtaHref: '/contact?topic=executive-continuity-brief',
-    diagnosticCtaLabel: 'Open an Organizational Continuity Diagnostic conversation',
+    diagnosticCtaLabel: 'Open an Institutional Continuity Diagnostic conversation',
     diagnosticCtaHref: '/contact?topic=institutional-continuity-diagnostic',
     gateNote:
       'The Executive Continuity Brief is available at $1,200 CAD and is designed for board presentation and executive decision-making.',

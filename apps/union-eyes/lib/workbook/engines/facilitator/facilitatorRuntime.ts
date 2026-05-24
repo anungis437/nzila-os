@@ -88,7 +88,7 @@ export function runFacilitatorRuntime(input: FacilitatorRuntimeInput): Facilitat
       signalId: 'facilitator:overload_engaged',
       severity: 'warning',
       category: 'facilitator_overload_protection_engaged',
-      statement: 'Active intervention count exceeds organizational bandwidth; pacing is held back.',
+      statement: 'Active intervention count exceeds institutional bandwidth; pacing is held back.',
       evidence: { activeInterventionCount: input.pacing.activeInterventionCount },
     });
   }
