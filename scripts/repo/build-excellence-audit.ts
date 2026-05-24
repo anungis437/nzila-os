@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { join, relative, resolve } from 'node:path'
+import { isAbsolute, join, relative, resolve } from 'node:path'
 
 import { findRepoRoot } from '../lib/portfolio-governance'
 
@@ -25,14 +25,10 @@ function clamp(value: number): number {
 }
 
 function safeJoin(root: string, relativePath: string): string {
-  // nosemgrep
-  const absolutePath = resolve(root, relativePath)
-  const rootPath = resolve(root)
-  const rel = relative(rootPath, absolutePath)
-  if (rel === '') {
-    return absolutePath
-  }
-  if (rel.startsWith('..') || rel.includes('/..') || rel.includes('\\..')) {
+  const resolvedRoot = resolve(root)
+  const absolutePath = resolve(resolvedRoot, relativePath)
+  const relativePathFromRoot = relative(resolvedRoot, absolutePath)
+  if (relativePathFromRoot.startsWith('..') || isAbsolute(relativePathFromRoot)) {
     throw new Error(`Unsafe path outside repo root: ${relativePath}`)
   }
   return absolutePath
