@@ -5,7 +5,7 @@
 **Document class:** Canonical methodology authority
 **Status:** Binding source of truth for OCI/OCRA methodological doctrine
 **Applies to:** Executive artifacts, methodology companions, procurement collateral, implementation guidance, contractual descriptions
-**Version:** v1.1
+**Version:** v1.2
 
 ---
 
@@ -167,6 +167,24 @@ These documents are valid only insofar as they remain consistent with this autho
 
 ---
 
+## Brand and Enforcement Doctrine
+
+The names *Organizational Continuity Infrastructure*, *OCI*, *Organizational Continuity Risk Analysis*, *OCRA*, *OCI Method*, *Governance Entropy System*, and *GES*, when used in connection with continuity intelligence or continuity infrastructure, refer to the doctrine defined in this authority.
+
+A deployment, configuration, contract, or downstream interpretation may not be branded as OCI/OCRA if it:
+
+- relaxes any binding method boundary,
+- removes reviewer accountability,
+- introduces workforce surveillance, behavioural inference, or individual scoring,
+- claims certification equivalence with standards listed in the standards positioning doctrine,
+- removes the limitations or epistemic boundaries section from public methodology materials,
+- redefines a canonical term in conflicting form,
+- conflicts with the canonical five-phase *OCI Method*™ doctrine in [docs/oci/OCI_METHOD.md](../OCI_METHOD.md).
+
+Out-of-scope deployments must be named and described under a different label. The integrity of the category depends on this constraint.
+
+---
+
 ## Governance and Versioning
 
 Changes to this document require:
@@ -184,6 +202,7 @@ Companion documents are updated *after* this authority is updated, never before.
 
 - **v1.0** — Initial canonical authority: authority rule, canonical definitions, binding method boundaries, companion relationship, versioning.
 - **v1.1** — Expanded canonical definitions; added ontology and layer separation; added reviewer accountability, confidence, evidence sufficiency, statistical, anti-surveillance, and standards positioning doctrine sections; linked operational reality edition and methodology companion; clarified relationship to canonical *OCI Method* doctrine in [docs/oci/OCI_METHOD.md](../OCI_METHOD.md).
+- **v1.2** — Added Brand and Enforcement Doctrine; codified disqualifying conditions for OCI/OCRA branding; reaffirmed deference to canonical five-phase *OCI Method* doctrine.
 
 ---
 

@@ -159,6 +159,25 @@ Confidence states are surfaced to readers. The method does not hide uncertainty 
 
 When signals contradict, the method does not average them away. It surfaces the contradiction as a meaningful continuity signal in its own right.
 
+### 5.5 Worked example — a confidence reading
+
+Consider an institution being read for *governance interpretation continuity*. Three structural signals are available:
+
+1. The number of distinct individuals who can fluently explain the rationale of a sample of recent governance decisions.
+2. The degree of interpretive consistency observed across a sample of committee transitions over the past three years.
+3. The proportion of governance decisions whose stated rationale a competent successor could reconstruct from documented artifacts alone.
+
+Suppose the first signal is *narrow* (concentrated in two people), the second is *moderate* (some interpretive drift but no major contradictions), and the third is *weak* (most decisions cannot be reconstructed from artifacts alone).
+
+A naïve method would average these into a single "governance continuity index". The OCI Method explicitly does not. Instead, it produces a structured reading:
+
+- **Interpretation:** governance interpretation continuity is fragile, driven primarily by stewardship concentration and weak artifact-only reconstructability.
+- **Confidence:** moderate, because the three signals are structurally consistent in direction even though one is weaker than the others.
+- **Caveat:** the reading is calibrated to this institution's current state; it does not predict whether any specific upcoming transition will degrade governance interpretation.
+- **Reviewer prompt:** is the concentration in the two named individuals reflective of role design, or of accidental accumulation?
+
+This is what a continuity reading looks like. It is not a score. It is an interpretation, a confidence posture, a caveat, and a reviewer prompt — together.
+
 ---
 
 ## Section 6 — Statistical Framework
@@ -187,6 +206,21 @@ The OCI Method uses statistical techniques where statistical techniques are appr
 
 Institutional data is often small-sample data. The method treats small samples honestly: it bounds claims, widens confidence ranges, and prefers interpretation to inference.
 
+### 6.5 Worked example — small-sample honesty
+
+Consider a federation of twelve locals being read for stewardship concentration. Four locals report acute concentration; five report moderate concentration; three report low concentration.
+
+A naïve method might report: *"33% of locals have acute stewardship concentration."* The OCI Method does not. Twelve is too small a sample to support a confident proportional claim, and the locals are not exchangeable: their sizes, governance structures, and operational maturity differ materially.
+
+Instead, the method produces:
+
+- **Pattern reading:** stewardship concentration is unevenly distributed across the federation, with a recognizable cluster of acute cases.
+- **Confidence posture:** moderate at the pattern level; low at the proportional level.
+- **What the method declines to say:** any claim that 33% of comparable federations would exhibit the same pattern.
+- **Reviewer prompt:** what structural characteristic differentiates the four acute-concentration locals from the others?
+
+This is the difference between statistical interpretation and statistical overreach. The OCI Method is explicitly designed to live on the interpretation side of that line.
+
 ---
 
 ## Section 7 — Evidence Sufficiency and Reproducibility
@@ -202,6 +236,16 @@ A continuity reading must be reproducible from its underlying operational facts.
 ### 7.3 Anti-overreach principle
 
 Where evidence is insufficient or reproducibility is uncertain, the method declines to conclude. Declination is treated as a legitimate methodological output, not a failure.
+
+### 7.4 Worked example — reproducibility test
+
+Reproducibility in the OCI Method is operationalized as a **two-reviewer test**: given the same operational facts and the same method, do two independently qualified reviewers arrive at substantially similar interpretations and substantially similar confidence postures?
+
+Where they do, the reading is reproducible.
+Where their interpretations diverge but their reasoning is traceable, the divergence itself becomes a continuity signal: it indicates structural ambiguity in the institution under review.
+Where their reasoning is not traceable, the method requires re-examination of the underlying signals before any institutional output is produced.
+
+The test is not a perfect inter-rater statistic. It is a structural commitment to producing readings that can be defended in front of another competent reviewer — which is the threshold institutional stakeholders are entitled to expect.
 
 ---
 
@@ -302,6 +346,23 @@ OCI/OCRA are designed to be procurement-receivable. They produce auditable artif
 - automated decision-making for governance,
 - generic, universal continuity benchmarks unconnected to institutional context.
 
+### 12.4 Procurement evaluation checklist
+
+Procurement bodies evaluating OCI/OCRA may use the following checklist. Every item should be answerable in the affirmative; any item that cannot be is, by doctrine, a disqualifying condition for branding the deployment as OCI/OCRA.
+
+- [ ] Is a canonical methodology authority document published and current?
+- [ ] Is a methodology companion published that interprets the authority without conflicting with it?
+- [ ] Are anti-surveillance commitments stated as doctrine, not configuration?
+- [ ] Is the reviewer-led architecture documented and enforceable?
+- [ ] Are limitations and epistemic boundaries published as a mandatory section?
+- [ ] Is the relationship to ISO / COBIT / SOC / NIST stated explicitly as complementary, not equivalent?
+- [ ] Are confidence states surfaced to readers of every continuity output?
+- [ ] Is declination a documented, supported methodological output?
+- [ ] Is data minimization stated as an architectural commitment?
+- [ ] Is institutional consent required before continuity readings are produced?
+- [ ] Are reviewer overrides treated as first-class outputs?
+- [ ] Is the method versioned, with a public changelog?
+
 ---
 
 ## Section 13 — Limitations and Epistemic Boundaries
@@ -381,3 +442,24 @@ The method's ambition is not to maximize what it claims. It is to deserve adopti
 ## References
 
 The methodology companion shares the canonical evidence base of *The Continuity Gap | Evidence-Enhanced Edition v3.0* and the *Operational Reality Edition*. The numbered references in those editions apply here unchanged. Methodological references unique to this companion are recorded in the canonical *OCI Methodology Whitepaper v1*.
+
+---
+
+## Appendix A — The Reviewer Workflow
+
+The reviewer workflow is the operational expression of reviewer accountability. It is the discipline that turns continuity intelligence into institutional truth.
+
+1. **Signal intake.** Operational signals are gathered from the OCI structural layer. No interpretation is attached at this stage.
+2. **Interpretive reading.** The OCRA layer produces a structured reading: pattern interpretation, confidence posture, caveats, reviewer prompts. The reading is explicitly *draft*.
+3. **Reviewer engagement.** A named human reviewer engages the draft reading. The reviewer is qualified, accountable, and identifiable. Anonymous acceptance is forbidden.
+4. **Reviewer decision.** The reviewer accepts, amends, or declines the reading. All three are first-class outcomes. Declination is not a failure of the method; it is a methodologically legitimate institutional response.
+5. **Institutional acceptance.** Only readings accepted (or accepted-as-amended) by a named reviewer enter the institutional record as continuity intelligence.
+6. **Calibration feedback.** Reviewer decisions \u2014 including amendments and declinations \u2014 feed back into the method's confidence calibration. The method learns from being challenged.
+
+This workflow is the doctrinal answer to a question procurement officers correctly ask: *who is responsible for this output?* The answer is always a named human reviewer, never the method, never the AI surface, never the platform.
+
+---
+
+## Appendix B — Glossary cross-reference
+
+For canonical definitions of OCI, OCRA, GES, continuity debt, reconstruction burden, stewardship concentration, onboarding survivability, modernization fragmentation, operational trust, runtime truth, and continuity-aware AI, see the *OCI Methodology Whitepaper v1* canonical authority. Any divergence between this companion and the canonical authority is resolved in favor of the authority.
