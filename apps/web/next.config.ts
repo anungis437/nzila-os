@@ -37,6 +37,13 @@ const nextConfig: NextConfig = {
   turbopack: {},
   transpilePackages: ['@nzila/ui'],
   output: process.platform === 'win32' ? undefined : 'standalone',
+  redirects: async () => [
+    {
+      source: '/institutional-continuity',
+      destination: '/organizational-continuity',
+      permanent: true,
+    },
+  ],
   headers: async () => [
     {
       source: '/(.*)',

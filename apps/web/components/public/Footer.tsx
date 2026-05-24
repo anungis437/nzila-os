@@ -35,7 +35,7 @@ const footerCopy: Record<Locale, {
       {
         category: 'Platform',
         links: [
-          { name: 'Institutional Continuity', href: '/institutional-continuity' },
+          { name: 'Organizational Continuity', href: '/organizational-continuity' },
           { name: 'Union Eyes', href: '/union-eyes' },
           { name: 'Platform', href: '/platform' },
           { name: 'Trust Center', href: '/trust' },
@@ -69,7 +69,7 @@ const footerCopy: Record<Locale, {
         ],
       },
     ],
-    blurb: 'Nzila Ventures builds institutional continuity infrastructure across {platformCoverage}.',
+    blurb: 'Nzila Ventures builds organizational continuity infrastructure across {platformCoverage}.',
     seriesA: 'Continuity Infrastructure',
     appsLabel: 'Apps',
     copyright: 'All rights reserved.',
@@ -84,7 +84,7 @@ const footerCopy: Record<Locale, {
       {
         category: 'Plateforme',
         links: [
-          { name: 'Continuité institutionnelle', href: '/institutional-continuity' },
+          { name: 'Continuité organisationnelle', href: '/organizational-continuity' },
           { name: 'Union Eyes', href: '/union-eyes' },
           { name: 'Plateforme', href: '/platform' },
           { name: 'Centre de confiance', href: '/trust' },
@@ -118,7 +118,7 @@ const footerCopy: Record<Locale, {
         ],
       },
     ],
-    blurb: "Nzila Ventures construit une infrastructure de continuité institutionnelle dans {platformCoverage}.",
+    blurb: "Nzila Ventures construit une infrastructure de continuité organisationnelle dans {platformCoverage}.",
     seriesA: 'Infrastructure de continuité',
     appsLabel: 'Applications',
     copyright: 'Tous droits réservés.',

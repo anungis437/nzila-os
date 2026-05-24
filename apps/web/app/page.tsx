@@ -115,7 +115,7 @@ export default async function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              {isFr ? 'Infrastructure de continuité institutionnelle' : 'Organizational Continuity Infrastructure'}
+              {isFr ? 'Infrastructure de continuité organisationnelle' : 'Organizational Continuity Infrastructure'}
             </span>
           </ScrollReveal>
 
@@ -135,7 +135,7 @@ export default async function Home() {
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
               {isFr
-                ? 'Nzila Ventures construit Nzila OS: une infrastructure gouvernée qui préserve la mémoire opérationnelle, les décisions, les preuves et la confiance institutionnelle pendant les transitions.'
+                ? 'Nzila Ventures construit Nzila OS: une infrastructure gouvernée qui préserve la mémoire opérationnelle, les décisions, les preuves et la confiance organisationnelle pendant les transitions.'
                 : 'Nzila Ventures builds Nzila OS: governed infrastructure that preserves operational memory, decision rationale, evidence, and organizational trust across leadership change, restructuring, and system transition.'}
             </p>
           </ScrollReveal>
@@ -148,7 +148,7 @@ export default async function Home() {
                 eventProps={{ source: 'home_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-all text-lg shadow-lg shadow-gold/30 btn-press"
               >
-                {isFr ? 'Commencer l évaluation' : 'Begin Continuity Assessment'}
+                {isFr ? 'Parcours OCRA: évaluer la continuité' : 'OCRA-first: Assess Continuity'}
               </TrackedLink>
               <TrackedLink
                 href="/union-eyes"
@@ -156,7 +156,7 @@ export default async function Home() {
                 eventProps={{ source: 'home_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg btn-press"
               >
-                {isFr ? 'Explorer Union Eyes' : 'Explore Union Eyes'}
+                {isFr ? 'Parcours opérations: stabiliser les workflows' : 'Operations-first: Stabilize Workflows'}
               </TrackedLink>
               <TrackedLink
                 href="/anti-surveillance"
@@ -203,6 +203,57 @@ export default async function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════ DUAL ENTRY GTM ═══════════════════════ */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            badge={isFr ? 'Modèle commercial' : 'Go-To-Market Model'}
+            title={isFr ? 'Deux parcours d entrée valides. Une seule architecture de continuité.' : 'Two valid entry paths. One continuity architecture.'}
+            subtitle={isFr
+              ? 'Les organisations peuvent entrer par la stratégie de continuité (OCRA) ou par la stabilisation opérationnelle (Union Eyes). Les deux parcours convergent vers la même infrastructure.'
+              : 'Organizations can enter through continuity intelligence (OCRA-first) or operational stabilization (Operations-first). Both paths converge into the same continuity infrastructure.'}
+          />
+
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+              <p className="text-xs uppercase tracking-wider text-electric font-semibold mb-2">{isFr ? 'Parcours A' : 'Path A'}</p>
+              <h3 className="text-2xl font-bold text-navy mb-3">{isFr ? 'OCRA-first' : 'OCRA-first'}</h3>
+              <p className="text-gray-700 mb-4">{isFr ? 'Diagnostiquer puis opérationnaliser. Pour la direction, la modernisation et la gouvernance.' : 'Diagnose then operationalize. Best for executive, modernization, and governance-led buyers.'}</p>
+              <TrackedLink
+                href="/continuity-assessment"
+                eventName="cta_dual_path_ocra"
+                eventProps={{ source: 'home_dual_entry' }}
+                className="inline-flex items-center justify-center px-5 py-3 bg-navy text-white font-semibold rounded-xl hover:bg-navy-light transition-all"
+              >
+                {isFr ? 'Entrer par OCRA' : 'Enter via OCRA'}
+              </TrackedLink>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+              <p className="text-xs uppercase tracking-wider text-electric font-semibold mb-2">{isFr ? 'Parcours B' : 'Path B'}</p>
+              <h3 className="text-2xl font-bold text-navy mb-3">{isFr ? 'Operations-first' : 'Operations-first'}</h3>
+              <p className="text-gray-700 mb-4">{isFr ? 'Opérationnaliser puis diagnostiquer. Pour les équipes qui ont besoin d un soulagement workflow immédiat.' : 'Operationalize then diagnose. Best for teams that need immediate workflow stabilization.'}</p>
+              <TrackedLink
+                href="/union-eyes"
+                eventName="cta_dual_path_ops"
+                eventProps={{ source: 'home_dual_entry' }}
+                className="inline-flex items-center justify-center px-5 py-3 bg-navy text-white font-semibold rounded-xl hover:bg-navy-light transition-all"
+              >
+                {isFr ? 'Entrer par les opérations' : 'Enter via Operations'}
+              </TrackedLink>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-navy/15 bg-white p-6">
+            <p className="text-sm text-gray-700">
+              {isFr
+                ? 'Règle architecture: ne jamais séparer la continuité en produits fragmentés. Les parcours se distinguent à l entrée, puis se reconnectent rapidement dans la même ontologie de continuité.'
+                : 'Architecture rule: never split continuity into fragmented products. Paths diverge at entry and reconnect quickly in the same continuity ontology.'}
+            </p>
           </div>
         </div>
       </section>
@@ -271,7 +322,7 @@ export default async function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <TrackedLink
                 href="/organizational-continuity"
-                eventName="cta_institutional_continuity"
+                eventName="cta_organizational_continuity"
                 eventProps={{ source: 'home_mission' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
               >

@@ -43,12 +43,12 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
       'Continuity Burden Index score and interpretation',
       'Section observations summary',
       'First recommended next step',
-      'OCI institutional motif',
+      'OCI organizational motif',
     ],
     excludes: [
       'Governance Entropy Analysis',
       'Continuity Debt Analysis',
-      'Institutional Dependency Review',
+      'Organizational Dependency Review',
       'Modernization Risk Layer',
       'Full Transformation Recommendations',
       'Executive Stewardship Reflections',
@@ -68,10 +68,10 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
       'Everything in the Continuity Reflection',
       'Governance Entropy Analysis — continuity drift indicators and governance inconsistency patterns',
       'Continuity Debt Analysis — invisible continuity burden and reconstruction risk',
-      'Institutional Dependency Review — operational dependency concentration and knowledge holder map',
+      'Organizational Dependency Review — operational dependency concentration and knowledge holder map',
       'Modernization Risk Layer — continuity-safe modernization review and fragmentation risk profile',
       'Full Transformation Recommendations — immediate, medium-term, and transformational',
-      'Executive Stewardship Reflections — institutional obligations and governance posture',
+      'Executive Stewardship Reflections — organizational obligations and governance posture',
       'Full Continuity Burden Index with human compensation indicators',
     ],
     excludes: [
@@ -87,20 +87,20 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
 
   institutional_continuity_diagnostic: {
     id: 'institutional_continuity_diagnostic',
-    name: 'Institutional Continuity Diagnostic',
+    name: 'Organizational Continuity Diagnostic',
     tagline:
-      'A facilitated institutional review for organizations ready to act on what they have learned.',
+      'A facilitated organizational review for organizations ready to act on what they have learned.',
     priceLabel: '$6,500 CAD',
     includes: [
       'Everything in the Executive Continuity Brief',
       'Facilitated leadership continuity review session',
       'Governance continuity workshop with governance body',
-      'Operational lineage mapping — institutional memory and continuity chain',
-      'Institutional dependency analysis — structured review of continuity holders',
+      'Operational lineage mapping — organizational memory and continuity chain',
+      'Organizational dependency analysis — structured review of continuity holders',
       'Executive continuity briefing — deliverable for board presentation',
     ],
     excludes: [],
-    ctaLabel: 'Open an Institutional Continuity Diagnostic conversation',
+    ctaLabel: 'Open an Organizational Continuity Diagnostic conversation',
     ctaHref: '/contact?topic=institutional-continuity-diagnostic',
   },
 };
@@ -140,7 +140,7 @@ export const WORKBOOK_TIERS: Record<WorkbookTierId, WorkbookTierDefinition> = {
     currency: 'CAD',
     includes: [
       'Six-module continuity mapping workbook',
-      'Institutional Memory Holders module \u2014 fully unlocked',
+      'Organizational Memory Holders module \u2014 fully unlocked',
       'Stewardship Density Index\u2122 analysis',
       'Continuity Burden Map\u2122 visualization',
       'Executive PDF export with cover, table of contents, and unlocked chapters',
@@ -154,7 +154,7 @@ export const WORKBOOK_TIERS: Record<WorkbookTierId, WorkbookTierDefinition> = {
 
   workbook_facilitated: {
     id: 'workbook_facilitated',
-    name: 'Governance Entropy Workbook — Facilitated Institutional Edition',
+    name: 'Governance Entropy Workbook — Facilitated Organizational Edition',
     tagline:
       'A facilitated mapping engagement that unlocks all six modules with a stewardship lead.',
     priceLabel: '$8,500 CAD',

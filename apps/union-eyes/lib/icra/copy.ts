@@ -40,7 +40,7 @@ export const COPY = {
     title: 'Technology With Soul Means',
     lines: [
       'Continuity without surveillance.',
-      'Modernization without institutional forgetting.',
+      'Modernization without organizational forgetting.',
       'Operational intelligence without dehumanization.',
       'Governance support without replacing human judgment.',
       'Technology that helps institutions remember their obligations to people.',
@@ -53,7 +53,7 @@ export const COPY = {
   quietRisk: {
     erosion: 'quiet continuity erosion',
     drift: 'silent governance drift',
-    forgetting: 'quiet institutional forgetting',
+    forgetting: 'quiet organizational forgetting',
     burden: 'invisible continuity burden',
     fragility: 'quiet operational fragility',
     labour: 'invisible continuity labour',
@@ -63,7 +63,7 @@ export const COPY = {
    * Naming this concept is itself a category act.
    */
   institutionalMemoryHolders: {
-    title: 'Institutional Memory Holders',
+    title: 'Organizational Memory Holders',
     definition:
       'In most organizations, there are people who carry continuity not because it is their formal role, but because no system was built to hold it instead.',
     roles: [
@@ -89,7 +89,7 @@ export const COPY = {
         id: 'operational_interpreter',
         label: 'The Operational Interpreter',
         description:
-          'The person who translates between institutional fragments — bridging teams, systems, and practices that were never designed to speak to each other.',
+          'The person who translates between organizational fragments — bridging teams, systems, and practices that were never designed to speak to each other.',
       },
       {
         id: 'organizational_memory',
@@ -176,7 +176,7 @@ export const COPY = {
     stewardshipSignalsTitle: 'Stewardship Signals',
     burdenIndexTitle: 'Continuity Burden Index',
     burdenIndexSub:
-      'How much of your institutional continuity currently depends on people compensating manually.',
+      'How much of your organizational continuity currently depends on people compensating manually.',
     recommendationsTitle: 'Suggested next steps',
     privacyFooter:
       'This profile is yours. We retain a pseudonymous record for benchmark research and may delete it on request. We do not contact you unless you ask us to.',
@@ -203,8 +203,8 @@ export const COPY = {
     },
     diagnostic: {
       id: 'institutional_continuity_diagnostic' as const,
-      name: 'Institutional Continuity Diagnostic',
-      tagline: 'A facilitated institutional review for organizations ready to act.',
+      name: 'Organizational Continuity Diagnostic',
+      tagline: 'A facilitated organizational review for organizations ready to act.',
       price: '$6,500 CAD',
       priceLabel: '$6,500 CAD',
     },
@@ -214,10 +214,10 @@ export const COPY = {
    */
   reportGate: {
     briefLockedLabel: 'This analysis is available in the Executive Continuity Brief.',
-    diagnosticLockedLabel: 'This section is part of the Institutional Continuity Diagnostic.',
+    diagnosticLockedLabel: 'This section is part of the Organizational Continuity Diagnostic.',
     briefCtaLabel: 'Request the Executive Continuity Brief',
     briefCtaHref: '/contact?topic=executive-continuity-brief',
-    diagnosticCtaLabel: 'Open an Institutional Continuity Diagnostic conversation',
+    diagnosticCtaLabel: 'Open an Organizational Continuity Diagnostic conversation',
     diagnosticCtaHref: '/contact?topic=institutional-continuity-diagnostic',
     gateNote:
       'The Executive Continuity Brief is available at $1,200 CAD and is designed for board presentation and executive decision-making.',

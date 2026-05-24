@@ -41,9 +41,9 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   const {locale} = await params;
   const isFr = locale === 'fr-CA';
   return {
-    title: isFr ? 'Continuité institutionnelle | UnionEyes' : 'Organizational Continuity | UnionEyes',
+    title: isFr ? 'Continuité organisationnelle | UnionEyes' : 'Organizational Continuity | UnionEyes',
     description: isFr
-      ? 'Préservez la mémoire organisationnelle, renforcez la résilience institutionnelle et maintenez la continuité à travers les transitions de leadership.'
+      ? 'Préservez la mémoire organisationnelle, renforcez la résilience organisationnelle et maintenez la continuité à travers les transitions de leadership.'
       : 'Preserve organizational memory, strengthen organizational resilience, and maintain continuity through leadership transitions. UnionEyes Organizational Continuity substrate.',
     alternates: buildLocaleAlternates(locale, '/organizational-continuity'),
   };
@@ -127,10 +127,10 @@ const pageCopy = {
     pillars: englishPillars,
   },
   'fr-CA': {
-    badge: 'Plateforme · Continuité institutionnelle',
+    badge: 'Plateforme · Continuité organisationnelle',
     heading: <>Préserver ce que votre organisation<br />sait. Protéger ce qu’elle peut faire.</>,
     description:
-      'La continuité institutionnelle est la capacité UnionEyes qui préserve la mémoire organisationnelle, renforce la résilience pendant les transitions et aide les structures de gouvernance à survivre au-delà de toute personne.',
+      'La continuité organisationnelle est la capacité UnionEyes qui préserve la mémoire organisationnelle, renforce la résilience pendant les transitions et aide les structures de gouvernance à survivre au-delà de toute personne.',
     primaryCta: 'Commencer la réflexion de continuité (gratuite)',
     secondaryCta: 'Voir la structure de gouvernance',
     tabs: {
@@ -141,19 +141,19 @@ const pageCopy = {
     },
     problemHeading: 'La connaissance détenue par des personnes disparaît lorsqu’elles partent',
     problemBody1:
-      'Les organisations syndicales font face à un risque de continuité persistant : des décennies de savoir institutionnel — historique de négociation, relations, décisions de gouvernance et précédents opérationnels — vivent chez des personnes plutôt que dans des systèmes.',
+      'Les organisations syndicales font face à un risque de continuité persistant : des décennies de savoir organisationnel — historique de négociation, relations, décisions de gouvernance et précédents opérationnels — vivent chez des personnes plutôt que dans des systèmes.',
     problemBody2:
       'UnionEyes transforme ce savoir fragmenté en structures gouvernées, accessibles et explicables, afin que l’organisation se renforce à travers chaque transition de leadership.',
-    journeyHeading: 'De la fragmentation à la résilience institutionnelle',
+    journeyHeading: 'De la fragmentation à la résilience organisationnelle',
     pillarsHeading: 'Six capacités de continuité. Un système intégré.',
     pillarsBody:
-      'Chaque capacité peut être déployée seule ou avec les autres comme substrat unifié de continuité institutionnelle.',
+      'Chaque capacité peut être déployée seule ou avec les autres comme substrat unifié de continuité organisationnelle.',
     trustSignals: [
       { label: 'Respectueux du travail par conception', sub: 'Aucune notation ou surveillance de conduite individuelle' },
       { label: 'Supervision humaine requise', sub: 'Toute intelligence est revue par des humains' },
       { label: 'Intelligence explicable', sub: 'Chaque signal est traçable à ses preuves' },
     ],
-    finalHeading: 'Prêt à renforcer la continuité institutionnelle?',
+    finalHeading: 'Prêt à renforcer la continuité organisationnelle?',
     finalBody:
       'Voyez comment UnionEyes préserve la mémoire organisationnelle et renforce la résilience pendant vos transitions de leadership.',
     finalSecondary: 'Explorer la mémoire organisationnelle',
@@ -162,16 +162,16 @@ const pageCopy = {
       { step: '02', label: 'Mémoire organisationnelle', desc: 'La mémoire organisationnelle est capturée, préservée et rendue accessible à l’échelle opérationnelle.' },
       { step: '03', label: 'Visibilité de continuité', desc: 'La direction obtient une vue longitudinale du contexte organisationnel et de la résilience.' },
       { step: '04', label: 'Intelligence explicable', desc: 'Chaque signal de continuité est traçable, lisible et respectueux de la gouvernance.' },
-      { step: '05', label: 'Continuité de gouvernance', desc: 'Les structures de gouvernance sont préservées et modernisées sans perdre la cohérence institutionnelle.' },
+      { step: '05', label: 'Continuité de gouvernance', desc: 'Les structures de gouvernance sont préservées et modernisées sans perdre la cohérence organisationnelle.' },
       { step: '06', label: 'Résilience', desc: 'L’organisation traverse le changement avec plus de force, de cohérence et de résilience.' },
     ],
     pillars: [
       { icon: BookOpen, title: 'Mémoire organisationnelle', desc: 'Préserver les décisions, précédents, relations et historiques opérationnels qui doivent survivre aux transitions.' },
       { icon: RefreshCw, title: 'Continuité pendant les transitions', desc: 'Maintenir la cohérence opérationnelle et stratégique pendant la succession, la réorganisation ou l’expansion.' },
-      { icon: Network, title: 'Visibilité institutionnelle longitudinale', desc: 'Faire ressortir le contexte historique et relationnel qui éclaire les décisions actuelles.' },
+      { icon: Network, title: 'Visibilité organisationnelle longitudinale', desc: 'Faire ressortir le contexte historique et relationnel qui éclaire les décisions actuelles.' },
       { icon: Users, title: 'Planification de continuité', desc: 'Repérer les risques de continuité et établir des parcours de résilience avant qu’ils deviennent vulnérables.' },
       { icon: ShieldCheck, title: 'Respectueux du travail par conception', desc: 'Toute intelligence de continuité fonctionne avec supervision humaine, contrôles de gouvernance et sans surveillance des travailleurs.' },
-      { icon: BarChart3, title: 'Intelligence explicable', desc: 'Chaque aperçu institutionnel est traçable à ses preuves sources — sans boîte noire.' },
+      { icon: BarChart3, title: 'Intelligence explicable', desc: 'Chaque aperçu organisationnel est traçable à ses preuves sources — sans boîte noire.' },
     ],
   },
 } as const;

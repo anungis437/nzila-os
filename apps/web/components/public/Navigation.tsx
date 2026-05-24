@@ -12,7 +12,7 @@ const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:300
 const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3004';
 
 const navigation = [
-  { key: 'continuity', href: '/institutional-continuity' },
+  { key: 'continuity', href: '/organizational-continuity' },
   { key: 'unionEyes', href: '/union-eyes' },
   { key: 'platform', href: '/platform' },
   { key: 'trust', href: '/trust' },

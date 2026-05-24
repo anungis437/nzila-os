@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Continuity Assessment',
   description:
-    'A structured diagnostic for organizations that take governance, continuity, operational memory, and trust seriously.',
+    'OCRA-first entry: a structured diagnostic for organizations that need continuity intelligence and governance-safe modernization.',
   alternates: { canonical: '/continuity-assessment' },
 };
 
@@ -38,12 +38,11 @@ export default function ContinuityAssessmentPage() {
             OCI Continuity Risk Assessment
           </p>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            A structured diagnostic for organizations that take continuity seriously.
+            OCRA-first entry for organizations that need continuity intelligence first.
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl">
-            The assessment measures exposure to continuity failure, governance fragility,
-            operational memory loss, trust debt, and sovereignty risk. It is a diagnostic
-            instrument, not a lead capture quiz.
+            This path starts with diagnosis: continuity fragility, governance risk, operational memory
+            exposure, trust debt, and sovereignty posture. It is strategic-entry GTM, not a lead capture quiz.
           </p>
           <div className="mt-8 grid sm:grid-cols-3 gap-4 text-sm">
             <div className="rounded-xl border border-white/15 p-4">
@@ -59,6 +58,25 @@ export default function ContinuityAssessmentPage() {
               <span className="text-gray-400">methodology and outputs documented</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid lg:grid-cols-2 gap-6">
+          <article className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+            <p className="text-xs uppercase tracking-wide text-electric font-semibold mb-2">Path A</p>
+            <h2 className="text-2xl font-bold text-navy mb-3">OCRA-first</h2>
+            <p className="text-gray-700 mb-4">Diagnose then operationalize. Best for executive teams, modernization sponsors, and governance-heavy organizations.</p>
+            <p className="text-sm text-gray-600">Flow: continuity pain recognition → OCI assessment → executive continuity brief → operational activation.</p>
+          </article>
+          <article className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+            <p className="text-xs uppercase tracking-wide text-electric font-semibold mb-2">Path B</p>
+            <h2 className="text-2xl font-bold text-navy mb-3">Operations-first</h2>
+            <p className="text-gray-700 mb-4">Operationalize then diagnose. Teams can start with workflow stabilization and still converge to the same continuity architecture.</p>
+            <Link href="/union-eyes" className="inline-flex px-5 py-2.5 rounded-lg bg-navy text-white font-semibold hover:bg-navy-light transition">
+              Explore operations-first
+            </Link>
+          </article>
         </div>
       </section>
 
@@ -90,18 +108,19 @@ export default function ContinuityAssessmentPage() {
       <section className="bg-gray-50 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-navy mb-4">
-            Start with the risk your institution already feels.
+            Start with the risk your organization already feels.
           </h2>
           <p className="text-gray-600 text-lg mb-8">
             If key-person dependency, missing decision rationale, audit preparation, or transition risk
-            are already visible, the assessment gives those conditions a structured baseline.
+            are already visible, this OCRA-first motion gives those conditions a structured baseline and
+            reconnects them to operational continuity activation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/contact" className="px-6 py-3 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition">
-              Request Assessment
+              Request OCRA Assessment
             </Link>
-            <Link href="/starter-kit" className="px-6 py-3 border border-gray-300 text-gray-900 font-bold rounded-xl hover:bg-white transition">
-              Get Starter Kit
+            <Link href="/union-eyes" className="px-6 py-3 border border-gray-300 text-gray-900 font-bold rounded-xl hover:bg-white transition">
+              Explore operations-first
             </Link>
           </div>
         </div>

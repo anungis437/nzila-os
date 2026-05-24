@@ -114,7 +114,10 @@ function parseInsightDocument(document: string): InsightArticle {
 
   const frontmatter = yaml.load(match[2]) as MarkdownInsightFrontmatter;
   const bodyMarkdown = match[3].trim();
-  const categorySlug = categorySlugByName[frontmatter.category];
+  const categoryName = frontmatter.category === 'Institutional Continuity'
+    ? 'Organizational Continuity'
+    : frontmatter.category;
+  const categorySlug = categorySlugByName[categoryName] ?? categorySlugByName[frontmatter.category];
 
   if (!categorySlug) {
     throw new Error(`Unknown insight category: ${frontmatter.category}`);
@@ -125,7 +128,7 @@ function parseInsightDocument(document: string): InsightArticle {
     title: frontmatter.title,
     excerpt: frontmatter.excerpt,
     categorySlug,
-    categoryName: frontmatter.category,
+    categoryName,
     readTime: frontmatter.readTime,
     format: frontmatter.format,
     audience: frontmatter.audience,
