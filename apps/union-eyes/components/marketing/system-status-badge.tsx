@@ -4,7 +4,7 @@
  * Purpose: Display real-time status of trust infrastructure
  * Shows: RLS enforcement, immutability, FSM validation, governance
  * 
- * Design: Institutional credibility, technical transparency
+ * Design: Organizational credibility, technical transparency
  */
 
 import * as React from 'react';

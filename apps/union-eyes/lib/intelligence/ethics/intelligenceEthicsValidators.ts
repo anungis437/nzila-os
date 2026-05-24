@@ -8,12 +8,12 @@
  * These validators enforce the intelligence network's hard ethical floor:
  *   - k-anonymity preservation
  *   - opt-in participation enforcement
- *   - no institutional exposure
+ *   - no organizational exposure
  *   - no rankings of institutions
  *   - no worker profiling
  *   - no governance reputation scoring
  *   - reviewer-led interpretation
- *   - institutional dignity preservation
+ *   - organizational dignity preservation
  *
  * The validators NEVER reach across institutions on behalf of the network.
  * They simply refuse outputs that would violate the doctrine.

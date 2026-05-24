@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -38,7 +38,7 @@ const PAGE_COPY = {
     badge: 'Solutions · Governance Leadership',
     heading: 'Governance modernization that earns democratic trust.',
     description:
-      'UnionEyes Governance-of-Record Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic legitimacy.',
+      'UnionEyes Governance-of-Record Intelligence gives governance leaders the explainability, audit trails, and organizational context to modernize governance operations without compromising democratic legitimacy.',
     primaryCta: 'Request an Executive Briefing',
     secondaryCta: 'Governance-of-Record Intelligence Substrate',
     challengeHeading: 'The governance continuity problem',
@@ -53,7 +53,7 @@ const PAGE_COPY = {
       { icon: ShieldCheck, title: 'Governance modernization you can defend', desc: 'Every governance change is explainable, evidence-traceable, and auditable — governance that earns democratic legitimacy.' },
       { icon: Eye, title: 'Continuity oversight across transitions', desc: 'Track governance structure health across leadership transitions with full historical context intact.' },
       { icon: FileCheck, title: 'Audit-ready governance-of-record intelligence', desc: 'Complete audit trails for all governance decisions, intelligence actions, and human review outcomes.' },
-      { icon: GitBranch, title: 'Governance evolution made visible', desc: 'Surface how bylaws, policies, and governance structures have evolved — with the institutional context that explains why.' },
+      { icon: GitBranch, title: 'Governance evolution made visible', desc: 'Surface how bylaws, policies, and governance structures have evolved — with the organizational context that explains why.' },
       { icon: Vote, title: 'Democratic structures preserved', desc: 'Intelligence recommends. Democratic structures decide. Human oversight is structurally enforced at every layer.' },
     ],
     commitmentsHeading: 'Governance & Trust commitments',
@@ -71,7 +71,7 @@ const PAGE_COPY = {
     badge: 'Solutions · Direction de la gouvernance',
     heading: 'Une modernisation de la gouvernance qui mérite la confiance démocratique.',
     description:
-      "L'intelligence de gouvernance officielle d’UnionEyes donne aux responsables de gouvernance l’explicabilité, les pistes d’audit et le contexte institutionnel nécessaires pour moderniser les opérations sans compromettre la légitimité démocratique.",
+      "L'intelligence de gouvernance officielle d’UnionEyes donne aux responsables de gouvernance l’explicabilité, les pistes d’audit et le contexte organisationnel nécessaires pour moderniser les opérations sans compromettre la légitimité démocratique.",
     primaryCta: 'Demander un breffage exécutif',
     secondaryCta: 'Substrat d’intelligence de gouvernance officielle',
     challengeHeading: 'Le problème de continuité de gouvernance',
@@ -86,7 +86,7 @@ const PAGE_COPY = {
       { icon: ShieldCheck, title: 'Modernisation de gouvernance défendable', desc: 'Chaque changement de gouvernance est explicable, traçable aux preuves et vérifiable.' },
       { icon: Eye, title: 'Surveillance de continuité pendant les transitions', desc: 'Suivez la santé des structures de gouvernance pendant les transitions avec le contexte historique intact.' },
       { icon: FileCheck, title: 'Intelligence de gouvernance prête pour l’audit', desc: 'Des pistes d’audit complètes pour les décisions de gouvernance, les actions d’intelligence et les revues humaines.' },
-      { icon: GitBranch, title: 'Évolution de gouvernance rendue visible', desc: 'Montrez comment les statuts, politiques et structures ont évolué, avec le contexte institutionnel qui explique pourquoi.' },
+      { icon: GitBranch, title: 'Évolution de gouvernance rendue visible', desc: 'Montrez comment les statuts, politiques et structures ont évolué, avec le contexte organisationnel qui explique pourquoi.' },
       { icon: Vote, title: 'Structures démocratiques préservées', desc: 'L’intelligence recommande. Les structures démocratiques décident. La surveillance humaine est imposée à chaque couche.' },
     ],
     commitmentsHeading: 'Engagements de gouvernance et de confiance',

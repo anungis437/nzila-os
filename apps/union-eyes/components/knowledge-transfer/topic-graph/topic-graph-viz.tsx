@@ -8,7 +8,7 @@
  * across interviews (organizational coupling).
  *
  * Design principles:
- * - Calm, institutional visual language
+ * - Calm, organizational visual language
  * - Risk intensity through opacity and size, not aggressive colors
  * - Node click reveals details — no pop-ups cluttering the graph
  * - Category-based clustering for clarity

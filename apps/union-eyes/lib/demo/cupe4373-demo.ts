@@ -905,7 +905,7 @@ export const retentionPolicy = {
   windowMonths: 24,
   shortLabel: "24-month operational retention",
   fullLabel:
-    "Operational memory: 24-month retention per CUPE 4373 institutional policy. Grievance and arbitration files held for the statutory retention window.",
+    "Operational memory: 24-month retention per CUPE 4373 organizational policy. Grievance and arbitration files held for the statutory retention window.",
   basis: "CUPE National records retention guidance · OLRA s. 96 statutory limitation window",
 } as const;
 

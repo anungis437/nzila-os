@@ -238,7 +238,7 @@ Routes already present in `PILOT_EXCLUDED_PREFIXES` ([role-experience.ts](../../
 
 - `/dashboard/cognition`
 - `/dashboard/institutional-intelligence`
-- `/dashboard/institutional-operating-intelligence`
+- `/dashboard/organizational-operating-intelligence`
 - `/dashboard/longitudinal-cognition`
 - `/dashboard/continuity-simulation`
 - `/dashboard/movement-insights`

@@ -1,9 +1,9 @@
 /**
- * Institutional Intelligence Disclosure Component
+ * Organizational Intelligence Disclosure Component
  *
  * Must be rendered alongside every governance-mediated intelligence output.
  * Provides clear disclosure that:
- * - Output is bounded institutional interpretation — not autonomous decision-making
+ * - Output is bounded organizational interpretation — not autonomous decision-making
  * - Human stewardship review is required before any action
  * - No actions are automatic; all outputs are advisory
  *
@@ -43,7 +43,7 @@ export function AiDisclaimer({ confidence, modelVersion, compact, auditRef }: Ai
     return (
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Bot className="h-3 w-3" />
-        <span>Institutional intelligence</span>
+        <span>Organizational intelligence</span>
         <Badge variant="outline" className={`text-[10px] px-1 py-0 ${confidenceColor(confidence)}`}>
           {confidenceLabel(confidence)} ({(confidence * 100).toFixed(0)}%)
         </Badge>
@@ -60,7 +60,7 @@ export function AiDisclaimer({ confidence, modelVersion, compact, auditRef }: Ai
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
               <Bot className="h-3 w-3 mr-1" />
-              Institutional intelligence
+              Organizational intelligence
             </Badge>
             <Badge variant="outline" className={`text-xs ${confidenceColor(confidence)}`}>
               {confidenceLabel(confidence)} ({(confidence * 100).toFixed(0)}%)
@@ -71,7 +71,7 @@ export function AiDisclaimer({ confidence, modelVersion, compact, auditRef }: Ai
             </Badge>
           </div>
           <p className="text-amber-800">
-            This output is produced by bounded institutional intelligence. It is interpretive and advisory only — it does not constitute a binding decision, legal opinion, or operational directive.
+            This output is produced by bounded organizational intelligence. It is interpretive and advisory only — it does not constitute a binding decision, legal opinion, or operational directive.
             A human steward or administrator must review and confirm any action before it takes effect.
           </p>
           {auditRef && (

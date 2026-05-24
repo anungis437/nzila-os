@@ -1,13 +1,13 @@
 /**
  * Steward Continuity Cognition Service
  *
- * Provides bounded institutional interpretation support for union stewards:
+ * Provides bounded organizational interpretation support for union stewards:
  * - Timeline contextualisation
  * - Continuity step guidance
  * - Draft steward response support
  * - Collective agreement clause interpretation
  * - Governance risk contextualisation
- * - Institutional Q&A (bounded to org knowledge base)
+ * - Organizational Q&A (bounded to org knowledge base)
  *
  * CONSTRAINTS:
  * - Every output carries confidence + explanation

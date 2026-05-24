@@ -6,7 +6,7 @@
  * Sector Continuity Observatory.
  *
  * Deterministic, anonymized, low-cardinality observatory layer for
- * longitudinal institutional intelligence. This module intentionally avoids any
+ * longitudinal organizational intelligence. This module intentionally avoids any
  * generative path.
  *
  * Scope:

@@ -80,7 +80,7 @@ export function decideEligibility(
       kind: 'include',
       band: 'core',
       ruleId: 'eligibility.weight_core',
-      statement: 'Question is declared core; included for every institutional profile.',
+      statement: 'Question is declared core; included for every organizational profile.',
     };
   }
 

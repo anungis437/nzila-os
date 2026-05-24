@@ -102,7 +102,7 @@ export function MarketingHeroSection({
       {/* Primary atmospheric overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(14,31,47,0.78)_0%,rgba(14,31,47,0.72)_46%,rgba(14,31,47,0.84)_100%)]" />
 
-      {/* Warm institutional wash */}
+      {/* Warm organizational wash */}
       <div className={`pointer-events-none absolute inset-0 bg-[#12324a] ${washOpacityClass}`} />
 
       {/* Content */}

@@ -4,7 +4,7 @@
  * Purpose: Display before/after metrics from case studies and pilots
  * Shows tangible improvements in union operations
  * 
- * Design: Data-driven, serious, institutional credibility
+ * Design: Data-driven, serious, organizational credibility
  */
 
 import * as React from 'react';

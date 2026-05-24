@@ -135,7 +135,7 @@ export function KnowledgeTransferConsole() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Knowledge Transfer</h1>
           <p className="text-sm text-muted-foreground">
-            Preserve institutional memory and reduce operational continuity risk.
+            Preserve organizational memory and reduce operational continuity risk.
           </p>
         </div>
         <Link

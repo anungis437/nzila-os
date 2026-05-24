@@ -3,7 +3,7 @@
  * MODULE: Continuity Breakpoints
  * DOCTRINE_VERSION: 2.0.0
  *
- * Onboarding Fragility Analysis — surfaces how fragile institutional
+ * Onboarding Fragility Analysis — surfaces how fragile organizational
  * onboarding is across the workbook's named roles. Onboarding fragility
  * compounds breakpoint risk because new carriers cannot absorb practice
  * fast enough to prevent quiet continuity failure.

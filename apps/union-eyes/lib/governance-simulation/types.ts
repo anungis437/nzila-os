@@ -3,7 +3,7 @@
  *
  * These types define the shared language for Wave 9:
  *   - Simulation scope and severity
- *   - Institutional stress scenarios
+ *   - Organizational stress scenarios
  *   - Governance incident classes
  *   - Readiness scores (shadow-mode, never exposed publicly)
  *   - Simulation results and replay contracts
@@ -27,7 +27,7 @@ export type SimulationScope =
   | 'publication'      // public-experience publication approval chain
   | 'governance'       // general governance policy resolution
   | 'ai-operation'     // AI governance escalation path
-  | 'continuity'       // institutional continuity stress
+  | 'continuity'       // organizational continuity stress
   | 'incident';        // governance incident simulation
 
 // ── Simulation severity ───────────────────────────────────────────────────────
@@ -42,10 +42,10 @@ export type SimulationSeverity =
   | 'critical'            // escalation expected; board/exec awareness recommended
   | 'institutional-risk'; // continuity threat; continuity plan activation simulated
 
-// ── Institutional stress ──────────────────────────────────────────────────────
+// ── Organizational stress ──────────────────────────────────────────────────────
 
 /**
- * The type of institutional stress being applied in a simulation.
+ * The type of organizational stress being applied in a simulation.
  * Covers the principal continuity risk categories for labour/association orgs.
  */
 export type InstitutionalStressType =
@@ -88,7 +88,7 @@ export interface GovernanceSimulationScenario {
   /** Operational domain being simulated. */
   scope: SimulationScope;
 
-  /** Institutional stress type (if applicable). */
+  /** Organizational stress type (if applicable). */
   stressType?: InstitutionalStressType;
 
   /** Federation tier context for federation-scoped scenarios. */
@@ -284,7 +284,7 @@ export interface AISimulationResult {
 // ── Readiness scores ──────────────────────────────────────────────────────────
 
 /**
- * Composite institutional readiness score.
+ * Composite organizational readiness score.
  * Shadow-mode only — never exposed publicly in Wave 9.
  * Generated from simulation ledger aggregation.
  */

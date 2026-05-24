@@ -1,5 +1,5 @@
 /**
- * Institutional Learning Engine
+ * Organizational Learning Engine
  *
  * Analyzes organizational continuity history to extract learning insights.
  * Identifies resilience trends, effective interventions, and recurring failures.
@@ -81,7 +81,7 @@ function maturityStage(
   return 'nascent';
 }
 
-/** Extract institutional learning insights from cognition memory history. */
+/** Extract organizational learning insights from cognition memory history. */
 function extractInsights(dataPoints: LearningDataPoint[]): LearningInsight[] {
   const insights: LearningInsight[] = [];
   if (dataPoints.length < 2) return insights;
@@ -149,7 +149,7 @@ function extractInsights(dataPoints: LearningDataPoint[]): LearningInsight[] {
     insights.push({
       id: randomUUID(),
       insightType: 'effective_intervention' as LearningInsightType,
-      headline: `${mitigationEntries.length} mitigation comparisons recorded — institutional governance learning is active`,
+      headline: `${mitigationEntries.length} mitigation comparisons recorded — organizational governance learning is active`,
       explanation: `The organization has recorded ${mitigationEntries.length} mitigation comparison events, demonstrating active governance learning behavior.`,
       evidenceDataPoints: mitigationEntries.slice(0, 3),
       supportingCount: mitigationEntries.length,
@@ -185,12 +185,12 @@ function extractInsights(dataPoints: LearningDataPoint[]): LearningInsight[] {
     insights.push({
       id: randomUUID(),
       insightType: 'governance_stabilization' as LearningInsightType,
-      headline: `Rich institutional memory: ${dataPoints.length} cognition entries recorded`,
-      explanation: `This organization has developed substantial institutional memory depth with ${dataPoints.length} cognition entries, enabling adaptive governance learning.`,
+      headline: `Rich organizational memory: ${dataPoints.length} cognition entries recorded`,
+      explanation: `This organization has developed substantial organizational memory depth with ${dataPoints.length} cognition entries, enabling adaptive governance learning.`,
       evidenceDataPoints: [],
       supportingCount: dataPoints.length,
       confidence: 'high',
-      governanceImplication: 'Deep institutional memory enables adaptive, evidence-based governance planning.',
+      governanceImplication: 'Deep organizational memory enables adaptive, evidence-based governance planning.',
       suggestedAction: 'Leverage historical cognition memory when planning future continuity investments.',
       detectedAt: new Date().toISOString(),
     });
@@ -249,7 +249,7 @@ export async function analyzeInstitutionalLearning(
   const primaryDrivers: string[] = [];
   const primaryLimiters: string[] = [];
 
-  if (dataPoints.length >= 10) primaryDrivers.push('Rich institutional memory depth');
+  if (dataPoints.length >= 10) primaryDrivers.push('Rich organizational memory depth');
   if (trend === 'improving') primaryDrivers.push('Positive resilience trajectory');
   if (insights.some((i) => i.insightType === 'effective_intervention')) primaryDrivers.push('Active mitigation governance');
 
@@ -264,7 +264,7 @@ export async function analyzeInstitutionalLearning(
     developing: 'Focus on linking mitigation outcomes to measurable resilience improvements.',
     established: 'Invest in governance diversification and dependency reduction strategies.',
     advanced: 'Target high-impact resilience dimensions identified by adaptive modeling.',
-    leading: 'Share institutional governance patterns to strengthen organizational learning networks.',
+    leading: 'Share organizational governance patterns to strengthen organizational learning networks.',
   };
 
   const maturityAssessment: LearningMaturityAssessment = {
@@ -272,7 +272,7 @@ export async function analyzeInstitutionalLearning(
     maturityStage: stage,
     primaryDrivers: primaryDrivers.length > 0 ? primaryDrivers : ['Organizational continuity awareness'],
     primaryLimiters: primaryLimiters.length > 0 ? primaryLimiters : ['Further history needed to identify limiters'],
-    advancementFocus: advancementMap[stage] ?? 'Continue building institutional memory.',
+    advancementFocus: advancementMap[stage] ?? 'Continue building organizational memory.',
   };
 
   const summaryMap: Record<string, string> = {
@@ -280,7 +280,7 @@ export async function analyzeInstitutionalLearning(
     declining: `Organizational resilience has declined by ${Math.abs(totalChange)} points, indicating continuity governance requires renewed attention.`,
     stable: `Organizational resilience is stable at approximately ${last} points with ${dataPoints.length} cognition entries recorded.`,
     volatile: `Organizational resilience shows high volatility, suggesting continuity gains need consolidation through stronger governance practices.`,
-    insufficient_data: `Insufficient continuity history to establish a resilience trend. Continue building institutional memory.`,
+    insufficient_data: `Insufficient continuity history to establish a resilience trend. Continue building organizational memory.`,
   };
 
   return {
@@ -290,6 +290,6 @@ export async function analyzeInstitutionalLearning(
     resilienceEvolution,
     maturityAssessment,
     entriesAnalyzed: dataPoints.length,
-    summary: summaryMap[trend] ?? 'Institutional learning analysis complete.',
+    summary: summaryMap[trend] ?? 'Organizational learning analysis complete.',
   };
 }

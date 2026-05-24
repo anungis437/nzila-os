@@ -50,7 +50,7 @@ describe('OCRA claim token integrity', () => {
     expect(isClaimExpired(expiry, future)).toBe(true);
   });
 
-  it('the TTL is at least 7 days (institutional review windows)', () => {
+  it('the TTL is at least 7 days (organizational review windows)', () => {
     expect(CLAIM_TOKEN_TTL_DAYS).toBeGreaterThanOrEqual(7);
   });
 });

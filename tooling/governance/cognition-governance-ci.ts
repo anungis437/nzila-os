@@ -168,14 +168,14 @@ function checkRedeclarations(file: string, source: string): void {
       code: 'redeclared_envelope',
       file,
       message:
-        'Redeclares InstitutionalExplainabilityEnvelope. Import from @nzila/institutional-cognition-core.',
+        'Redeclares InstitutionalExplainabilityEnvelope. Import from @nzila/organizational-cognition-core.',
     });
   }
   if (DOMAIN_REDECLARE_RE.test(source)) {
     violations.push({
       code: 'redeclared_domain',
       file,
-      message: 'Redeclares CognitionDomain. Import from @nzila/institutional-cognition-core.',
+      message: 'Redeclares CognitionDomain. Import from @nzila/organizational-cognition-core.',
     });
   }
 }
@@ -189,7 +189,7 @@ function checkExitInterviewRoute(file: string, source: string): void {
   const usesKernel =
     source.includes('cognitionRoute(') ||
     source.includes("from '@/lib/institutional-operating-intelligence'") ||
-    source.includes("from '@nzila/institutional-cognition-core'");
+    source.includes("from '@nzila/organizational-cognition-core'");
   if (!usesKernel) {
     violations.push({
       code: 'route_bypass',

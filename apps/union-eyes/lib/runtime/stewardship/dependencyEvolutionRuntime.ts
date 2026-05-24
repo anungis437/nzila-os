@@ -6,13 +6,13 @@
  * Dependency Evolution Runtime.
  *
  * Reads a sequence of dependency observations (each describing how reliant an
- * institutional function is on a single steward or system) and composes a
+ * organizational function is on a single steward or system) and composes a
  * refusable observation about how that dependency has moved over time.
  *
  * Posture:
  *   - Refusal-first: empty inputs → not_yet_readable.
  *   - Deterministic.
- *   - Reports institutional readings only; never about individuals.
+ *   - Reports organizational readings only; never about individuals.
  */
 
 import type {

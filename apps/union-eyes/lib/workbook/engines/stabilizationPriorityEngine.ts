@@ -43,7 +43,7 @@ const CATEGORY_SUMMARY: Record<StabilizationCategory, string> = {
   successor_identification:
     'Identify successors for institution-critical and load-bearing carriers without identified successors.',
   lineage_capture:
-    'Capture lineage for the most exposed institutional decisions and operational practice.',
+    'Capture lineage for the most exposed organizational decisions and operational practice.',
   documentation:
     'Document undocumented single-carrier processes, starting with the most institution-critical.',
   governance_review:

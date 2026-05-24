@@ -3,7 +3,7 @@
 /**
  * CopilotChat — Governance-aware continuity reasoning assistant UI
  *
- * Institutional, explainable copilot for organizational continuity governance.
+ * Organizational, explainable copilot for organizational continuity governance.
  * Every response exposes evidence, reasoning chain, and governance flags.
  *
  * NOT a chatbot gimmick — a governance instrument.

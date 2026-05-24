@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +30,7 @@ import {
   Users,
 } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
-import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
+import { OrganizationalContinuityNote } from '@/components/marketing/organizational-continuity-note';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
@@ -50,7 +50,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 // ─────────────────────────────────────────────────────────────────────────────
 const operationalReality = [
   {
-    title: 'Institutional complexity',
+    title: 'Organizational complexity',
     body: 'Multiple locals, mandates, and committees operating without a coherent operational picture.',
   },
   {
@@ -115,9 +115,9 @@ const maturityTiers = [
   {
     key: 'continuity',
     icon: Landmark,
-    name: 'Institutional Continuity',
+    name: 'Organizational Continuity',
     posture: 'Continuity infrastructure',
-    fit: 'National unions and federations preserving institutional memory across transitions.',
+    fit: 'National unions and federations preserving organizational memory across transitions.',
     feels: 'Durable. Inherited. Continuous.',
     focus: [
       'Organizational Memory preserved across leadership transitions',
@@ -139,17 +139,17 @@ const maturityTiers = [
     key: 'sovereignty',
     icon: Globe2,
     name: 'Sovereignty Layer',
-    posture: 'Institutional operational sovereignty',
+    posture: 'Organizational operational sovereignty',
     fit: 'Strategic federation-wide infrastructure with sovereign operational topology.',
     feels: 'Sovereign. Resilient. Federation-grade.',
     focus: [
       'Sovereign operational topology under your governance',
       'Continuity-safe cognition with fail-closed degradation',
       'Federation-level operational coordination',
-      'Institutional resilience tooling and shared continuity infrastructure',
+      'Organizational resilience tooling and shared continuity infrastructure',
     ],
     surfaces: [
-      'Institutional Continuity surfaces',
+      'Organizational Continuity surfaces',
       'Cognition',
       'Sovereignty Operations',
       'Federation Coordination',
@@ -168,7 +168,7 @@ const visibilityBands = [
     band: 'Stewards & front-line representatives',
     foundation: 'Unified intake, casework, and continuity-safe communication.',
     governance: 'Casework with governance context and policy precedents.',
-    continuity: 'Casework anchored to institutional memory and prior decisions.',
+    continuity: 'Casework anchored to organizational memory and prior decisions.',
     sovereignty: 'Federation-wide casework patterns and cross-union precedents.',
   },
   {
@@ -189,7 +189,7 @@ const visibilityBands = [
     band: 'Members & the institution',
     foundation: 'Confidence that intake and commitments are not lost.',
     governance: 'Confidence that governance is operating to a defensible cadence.',
-    continuity: 'Confidence that institutional memory will outlive any individual.',
+    continuity: 'Confidence that organizational memory will outlive any individual.',
     sovereignty: 'Confidence that operational sovereignty is preserved by design.',
   },
 ];
@@ -205,18 +205,18 @@ const progression = [
   },
   {
     from: 'Governance Operations',
-    to: 'Institutional Continuity',
-    trigger: 'Leadership transitions, succession, and federation reporting become institutional risks.',
+    to: 'Organizational Continuity',
+    trigger: 'Leadership transitions, succession, and federation reporting become organizational risks.',
   },
   {
-    from: 'Institutional Continuity',
+    from: 'Organizational Continuity',
     to: 'Sovereignty Layer',
     trigger: 'Operational sovereignty, federation coordination, and shared continuity become strategic priorities.',
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Procurement-safe positioning — institutional commitments.
+// Procurement-safe positioning — organizational commitments.
 // ─────────────────────────────────────────────────────────────────────────────
 const procurementCommitments = [
   {
@@ -225,7 +225,7 @@ const procurementCommitments = [
   },
   {
     title: 'Governance-safe cognition',
-    body: 'Reasoning surfaces operate under institutional governance — not autonomous agent assumptions.',
+    body: 'Reasoning surfaces operate under organizational governance — not autonomous agent assumptions.',
   },
   {
     title: 'Fail-closed degradation',
@@ -242,7 +242,7 @@ const procurementCommitments = [
 ];
 
 const frOperationalReality = [
-  { title: 'Complexité institutionnelle', body: 'Multiples sections locales, mandats et comités sans image opérationnelle cohérente.' },
+  { title: 'Complexité organisationnelle', body: 'Multiples sections locales, mandats et comités sans image opérationnelle cohérente.' },
   { title: 'Risque de continuité', body: 'Savoir critique détenu par des personnes — perdu à chaque transition de leadership.' },
   { title: 'Fragmentation de la gouvernance', body: 'Décisions, motions et engagements dispersés entre courriels, lecteurs et notes de réunion.' },
   { title: 'Roulement opérationnel', body: 'Nouveaux délégués, dirigeants et membres du personnel héritant de dossiers inachevés sans registre opérationnel.' },
@@ -286,9 +286,9 @@ const frMaturityTiers = [
   {
     key: 'continuity',
     icon: Landmark,
-    name: 'Continuité institutionnelle',
+    name: 'Continuité organisationnelle',
     posture: 'Infrastructure de continuité',
-    fit: 'Syndicats nationaux et fédérations préservant la mémoire institutionnelle à travers les transitions.',
+    fit: 'Syndicats nationaux et fédérations préservant la mémoire organisationnelle à travers les transitions.',
     feels: 'Durable. Transmissible. Continu.',
     focus: [
       'Mémoire organisationnelle préservée à travers les transitions de leadership',
@@ -303,16 +303,16 @@ const frMaturityTiers = [
     key: 'sovereignty',
     icon: Globe2,
     name: 'Couche de souveraineté',
-    posture: 'Souveraineté opérationnelle institutionnelle',
+    posture: 'Souveraineté opérationnelle organisationnelle',
     fit: 'Infrastructure stratégique à l’échelle fédérative avec topologie opérationnelle souveraine.',
     feels: 'Souverain. Résilient. À l’échelle fédérative.',
     focus: [
       'Topologie opérationnelle souveraine sous votre gouvernance',
       'Cognition respectueuse de la continuité avec dégradation sécuritaire',
       'Coordination opérationnelle à l’échelle fédérative',
-      'Outils de résilience institutionnelle et infrastructure de continuité partagée',
+      'Outils de résilience organisationnelle et infrastructure de continuité partagée',
     ],
-    surfaces: ['Surfaces de continuité institutionnelle', 'Cognition', 'Opérations souveraines', 'Coordination fédérative', 'IA respectueuse de la gouvernance', 'Systèmes avancés de continuité'],
+    surfaces: ['Surfaces de continuité organisationnelle', 'Cognition', 'Opérations souveraines', 'Coordination fédérative', 'IA respectueuse de la gouvernance', 'Systèmes avancés de continuité'],
     range: 'Engagement stratégique fédératif — discutons-en',
   },
 ];
@@ -322,7 +322,7 @@ const frVisibilityBands = [
     band: 'Délégués et représentants de première ligne',
     foundation: 'Réception unifiée, dossiers et communication respectueuse de la continuité.',
     governance: 'Dossiers avec contexte de gouvernance et précédents politiques.',
-    continuity: 'Dossiers ancrés dans la mémoire institutionnelle et les décisions antérieures.',
+    continuity: 'Dossiers ancrés dans la mémoire organisationnelle et les décisions antérieures.',
     sovereignty: 'Tendances fédératives et précédents intersyndicaux.',
   },
   {
@@ -343,20 +343,20 @@ const frVisibilityBands = [
     band: 'Membres et institution',
     foundation: 'Confiance que les demandes et engagements ne se perdent pas.',
     governance: 'Confiance que la gouvernance suit une cadence défendable.',
-    continuity: 'Confiance que la mémoire institutionnelle survivra à toute personne.',
+    continuity: 'Confiance que la mémoire organisationnelle survivra à toute personne.',
     sovereignty: 'Confiance que la souveraineté opérationnelle est préservée par conception.',
   },
 ];
 
 const frProgression = [
   { from: 'Fondation', to: 'Opérations de gouvernance', trigger: 'La cadence de gouvernance devient la contrainte principale, plutôt que le volume de dossiers.' },
-  { from: 'Opérations de gouvernance', to: 'Continuité institutionnelle', trigger: 'Les transitions de leadership, la succession et les rapports fédératifs deviennent des risques institutionnels.' },
-  { from: 'Continuité institutionnelle', to: 'Couche de souveraineté', trigger: 'La souveraineté opérationnelle, la coordination fédérative et la continuité partagée deviennent stratégiques.' },
+  { from: 'Opérations de gouvernance', to: 'Continuité organisationnelle', trigger: 'Les transitions de leadership, la succession et les rapports fédératifs deviennent des risques organisationnels.' },
+  { from: 'Continuité organisationnelle', to: 'Couche de souveraineté', trigger: 'La souveraineté opérationnelle, la coordination fédérative et la continuité partagée deviennent stratégiques.' },
 ];
 
 const frProcurementCommitments = [
   { title: 'Honnêteté opérationnelle', body: 'Les capacités, limites et comportements de dégradation sont documentés avant l’approvisionnement.' },
-  { title: 'Cognition respectueuse de la gouvernance', body: 'Les surfaces de raisonnement fonctionnent sous gouvernance institutionnelle, pas selon des hypothèses d’agent autonome.' },
+  { title: 'Cognition respectueuse de la gouvernance', body: 'Les surfaces de raisonnement fonctionnent sous gouvernance organisationnelle, pas selon des hypothèses d’agent autonome.' },
   { title: 'Dégradation sécuritaire', body: 'Lorsque les systèmes se dégradent, ils le font de manière gouvernable et non opaque.' },
   { title: 'Posture de souveraineté', body: 'La résidence des données au Canada et l’hébergement souverain sont des engagements structurels.' },
   { title: 'Opérations respectueuses de la continuité', body: 'Aucun parcours opérationnel ne dépend d’une seule personne, d’un fournisseur ou d’une pratique non documentée.' },
@@ -364,7 +364,7 @@ const frProcurementCommitments = [
 
 const pricingCopy = {
   'en-CA': {
-    heading: <>Institutional operational infrastructure,<br />organized by operational maturity.</>,
+    heading: <>Organizational operational infrastructure,<br />organized by operational maturity.</>,
     description: 'We meet institutions where they are. Programs are organized as operational maturity states — chosen with you, not handed down as seat counts or feature matrices. Start where it fits, grow when it matters.',
     realityHeading: 'Operational reality',
     realityBody: 'Institutions adopt UnionEyes when operational reality outgrows informal coordination. The conditions below consistently determine the right maturity tier.',
@@ -382,20 +382,20 @@ const pricingCopy = {
     visibilityBody: 'Each tier changes what stewards, officers, executives, and members can see and rely on. High-level on purpose — we keep the feature talk for the conversation.',
     who: 'Who',
     growHeading: 'Grow when you’re ready',
-    growBody: 'Institutions evolve. The ladder is designed to be lived in — each tier earns the next when something concrete in your operations changes.',
+    growBody: 'Organizations evolve. The ladder is designed to be lived in — each tier earns the next when something concrete in your operations changes.',
     when: 'When it happens: ',
     procurementLabel: 'Procurement-safe by design',
-    commitmentsHeading: 'Institutional commitments, not feature claims',
-    commitmentsBody: 'Every maturity tier inherits the same institutional commitments. These are the positions that distinguish operational infrastructure from generic AI tooling.',
+    commitmentsHeading: 'Organizational commitments, not feature claims',
+    commitmentsBody: 'Every maturity tier inherits the same organizational commitments. These are the positions that distinguish operational infrastructure from generic AI tooling.',
     trustCenter: 'Trust Center',
     governanceStructure: 'Governance Structure',
-    institutionalProof: 'Institutional Proof',
+    organizationalProof: 'Organizational Proof',
     ctaLabel: 'Let’s find the right fit',
     ctaHeading: 'Start with a conversation, not a quote',
-    ctaBody: 'Tell us where your institution is today. We’ll help you identify the right tier, walk through what it looks like in practice, and shape the program with you — at the pace that fits your governance.',
+    ctaBody: 'Tell us where your organization is today. We’ll help you identify the right tier, walk through what it looks like in practice, and shape the program with you — at the pace that fits your governance.',
     ctaPrimary: 'Request Executive Briefing',
     ctaSecondary: 'Discuss Operational Maturity',
-    ctaFinePrint: 'Maturity tiers and ranges are positioning structure for institutional planning. Final program scope is set jointly with executive and procurement leadership.',
+    ctaFinePrint: 'Maturity tiers and ranges are positioning structure for organizational planning. Final program scope is set jointly with executive and procurement leadership.',
     operationalReality,
     maturityTiers,
     visibilityBands,
@@ -403,10 +403,10 @@ const pricingCopy = {
     procurementCommitments,
   },
   'fr-CA': {
-    heading: <>Infrastructure opérationnelle institutionnelle,<br />organisée par maturité opérationnelle.</>,
-    description: 'Nous rencontrons les institutions là où elles sont. Les programmes sont organisés comme des états de maturité opérationnelle, choisis avec vous plutôt qu’imposés comme des sièges ou des matrices de fonctionnalités.',
+    heading: <>Infrastructure opérationnelle organisationnelle,<br />organisée par maturité opérationnelle.</>,
+    description: 'Nous rencontrons les organisations là où elles sont. Les programmes sont organisés comme des états de maturité opérationnelle, choisis avec vous plutôt qu’imposés comme des sièges ou des matrices de fonctionnalités.',
     realityHeading: 'Réalité opérationnelle',
-    realityBody: 'Les institutions adoptent UnionEyes lorsque la réalité opérationnelle dépasse la coordination informelle. Les conditions ci-dessous aident à déterminer le bon niveau de maturité.',
+    realityBody: 'Les organisations adoptent UnionEyes lorsque la réalité opérationnelle dépasse la coordination informelle. Les conditions ci-dessous aident à déterminer le bon niveau de maturité.',
     tierHeading: 'Trouver le palier qui vous convient aujourd’hui',
     tierBody: 'Quatre états de maturité opérationnelle. Chacun est un lieu cohérent où vivre pendant un certain temps, pas un ensemble de fonctionnalités.',
     fitPrefix: 'Convient à : ',
@@ -424,17 +424,17 @@ const pricingCopy = {
     growBody: 'Les institutions évoluent. Cette progression est conçue pour être vécue; chaque palier mérite le suivant lorsqu’un changement concret apparaît dans vos opérations.',
     when: 'Quand cela se produit : ',
     procurementLabel: 'Conçu pour l’approvisionnement',
-    commitmentsHeading: 'Engagements institutionnels, pas promesses de fonctionnalités',
-    commitmentsBody: 'Chaque palier hérite des mêmes engagements institutionnels. Ce sont ces positions qui distinguent l’infrastructure opérationnelle des outils d’IA génériques.',
+    commitmentsHeading: 'Engagements organisationnels, pas promesses de fonctionnalités',
+    commitmentsBody: 'Chaque palier hérite des mêmes engagements organisationnels. Ce sont ces positions qui distinguent l’infrastructure opérationnelle des outils d’IA génériques.',
     trustCenter: 'Centre de confiance',
     governanceStructure: 'Structure de gouvernance',
-    institutionalProof: 'Preuves institutionnelles',
+    organizationalProof: 'Preuves organisationnelles',
     ctaLabel: 'Trouvons le bon ajustement',
     ctaHeading: 'Commencer par une conversation, pas par un devis',
-    ctaBody: 'Dites-nous où se situe votre institution aujourd’hui. Nous vous aidons à identifier le bon palier et à façonner le programme à un rythme compatible avec votre gouvernance.',
+    ctaBody: 'Dites-nous où se situe votre organisation aujourd’hui. Nous vous aidons à identifier le bon palier et à façonner le programme à un rythme compatible avec votre gouvernance.',
     ctaPrimary: 'Demander une présentation exécutive',
     ctaSecondary: 'Discuter de la maturité opérationnelle',
-    ctaFinePrint: 'Les paliers et fourchettes servent à planifier l’engagement institutionnel. La portée finale est définie avec la direction exécutive et l’approvisionnement.',
+    ctaFinePrint: 'Les paliers et fourchettes servent à planifier l’engagement organisationnel. La portée finale est définie avec la direction exécutive et l’approvisionnement.',
     operationalReality: frOperationalReality,
     maturityTiers: frMaturityTiers,
     visibilityBands: frVisibilityBands,
@@ -461,7 +461,7 @@ export default async function LocalePricingPage({
         description={copy.description}
       />
 
-      <InstitutionalContinuityNote
+      <OrganizationalContinuityNote
         surface={tNote('label')}
         posture={tNote('posture')}
       />
@@ -598,7 +598,7 @@ export default async function LocalePricingPage({
                   <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">{copy.who}</th>
                   <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Foundation</th>
                   <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Governance Operations</th>
-                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Institutional Continuity</th>
+                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Organizational Continuity</th>
                   <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Sovereignty Layer</th>
                 </tr>
               </thead>
@@ -693,7 +693,7 @@ export default async function LocalePricingPage({
               href="../proof"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
             >
-              {copy.institutionalProof} <ArrowRight className="h-4 w-4" />
+              {copy.organizationalProof} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>

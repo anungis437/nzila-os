@@ -4,7 +4,7 @@
  * Structure:
  *   1. Cover
  *   2. Table of Contents
- *   3. Chapter 1 \u2014 Institutional Memory Holders (UNLOCKED)
+ *   3. Chapter 1 \u2014 Organizational Memory Holders (UNLOCKED)
  *   4. Chapters 2\u20136 \u2014 Reserved for the Facilitated Edition
  *   7. Closing reflection
  *
@@ -343,8 +343,8 @@ export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfD
   const fr = data.locale === 'fr-CA';
   const title = fr ? 'Cahier d\u2019Entropie de Gouvernance' : 'Governance Entropy Workbook';
   const subtitle = fr
-    ? 'Une cartographie de la continuit\u00e9 institutionnelle'
-    : 'A cartography of institutional continuity';
+    ? 'Une cartographie de la continuit\u00e9 organisationnelle'
+    : 'A cartography of organizational continuity';
   const institution =
     data.organizationName ?? (fr ? '\u00c9dition autoguid\u00e9e' : 'Self-Guided Edition');
   const generated = data.generatedAt.toLocaleDateString(fr ? 'fr-CA' : 'en-CA', {
@@ -386,7 +386,7 @@ export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfD
         <View style={S.tocRow}>
           <Text style={S.tocNumber}>01</Text>
           <Text style={S.tocTitle}>
-            {fr ? 'Porteurs de m\u00e9moire institutionnelle' : 'Institutional Memory Holders'}
+            {fr ? 'Porteurs de m\u00e9moire organisationnelle' : 'Organizational Memory Holders'}
           </Text>
           <Text style={[S.tocLockChip, { color: COLORS.teal }]}>
             {fr ? 'Ouvert' : 'Open'}
@@ -405,8 +405,8 @@ export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfD
 
         <Text style={S.reservedNote}>
           {fr
-            ? 'Les chapitres 02 \u00e0 06 sont r\u00e9serv\u00e9s \u00e0 l\u2019\u00e9dition facilit\u00e9e. Aucune restriction technique \u2014 ces chapitres exigent un dialogue institutionnel encadr\u00e9.'
-            : 'Chapters 02\u201306 are reserved for the Facilitated Edition. No technical paywall \u2014 these chapters require an in-person institutional dialogue.'}
+            ? 'Les chapitres 02 \u00e0 06 sont r\u00e9serv\u00e9s \u00e0 l\u2019\u00e9dition facilit\u00e9e. Aucune restriction technique \u2014 ces chapitres exigent un dialogue organisationnel encadr\u00e9.'
+            : 'Chapters 02\u201306 are reserved for the Facilitated Edition. No technical paywall \u2014 these chapters require an in-person organizational dialogue.'}
         </Text>
 
         <View style={S.footer} fixed>
@@ -421,7 +421,7 @@ export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfD
           {fr ? 'Chapitre 01' : 'Chapter 01'}
         </Text>
         <Text style={S.sectionHeading}>
-          {fr ? 'Porteurs de m\u00e9moire institutionnelle' : 'Institutional Memory Holders'}
+          {fr ? 'Porteurs de m\u00e9moire organisationnelle' : 'Organizational Memory Holders'}
         </Text>
         <View style={S.rule} />
 
@@ -520,8 +520,8 @@ export function GovernanceEntropyWorkbookTemplate({ data }: { data: WorkbookPdfD
             ) : (
               <Text style={S.reservedNote}>
                 {fr
-                  ? 'R\u00e9serv\u00e9 \u00e0 l\u2019\u00e9dition facilit\u00e9e. Cette section exige un dialogue institutionnel encadr\u00e9 par un facilitateur OCI.'
-                  : 'Reserved for the Facilitated Edition. This chapter requires an institutional dialogue led by an OCI facilitator.'}
+                  ? 'R\u00e9serv\u00e9 \u00e0 l\u2019\u00e9dition facilit\u00e9e. Cette section exige un dialogue organisationnel encadr\u00e9 par un facilitateur OCI.'
+                  : 'Reserved for the Facilitated Edition. This chapter requires an organizational dialogue led by an OCI facilitator.'}
               </Text>
             )}
 

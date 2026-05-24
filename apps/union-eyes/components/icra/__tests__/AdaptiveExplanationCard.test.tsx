@@ -78,7 +78,7 @@ const COPY = {
   adaptiveIncludedLabel: 'Questions included',
   adaptiveDeferredLabel: 'Questions set aside as not applicable',
   adaptiveSafeDefaultNote: 'Full bank preserved.',
-  adaptiveProfileScale: 'Institutional scale',
+  adaptiveProfileScale: 'Organizational scale',
   adaptiveProfileGovernance: 'Governance model',
   adaptiveProfileExposure: 'Continuity exposure',
   adaptiveContinue: 'Continue →',
@@ -102,7 +102,7 @@ describe('AdaptiveExplanationCard', () => {
     expect(document.activeElement).toBe(heading);
   });
 
-  it('exposes the routing engine version and institutional scale as data attributes', () => {
+  it('exposes the routing engine version and organizational scale as data attributes', () => {
     const { container } = render(
       <AdaptiveExplanationCard
         profile={makeProfile({ institutionalScale: 'enterprise' })}

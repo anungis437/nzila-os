@@ -102,7 +102,7 @@ export async function orchestrateMultiDomainCognition(
       },
       {
         sourcedomains: ['resilience_intelligence', 'institutional_memory'] as CognitionDomain[],
-        synthesizedInsight: 'Resilience improves with institutional memory accumulation.',
+        synthesizedInsight: 'Resilience improves with organizational memory accumulation.',
         confidence: 65,
         actionableImplications: ['Capture mitigation outcomes as durable cognition memory.'],
       },
@@ -113,7 +113,7 @@ export async function orchestrateMultiDomainCognition(
         : 'Multi-domain cognition is emerging; integration opportunities remain.',
     operationalDependencyFusion: [
       'Governance ↔ continuity',
-      'Resilience ↔ institutional memory',
+      'Resilience ↔ organizational memory',
       'Coordination ↔ trust',
     ],
     continuityPrecedentLinkage:

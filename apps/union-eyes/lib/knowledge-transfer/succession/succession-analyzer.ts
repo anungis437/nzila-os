@@ -25,7 +25,7 @@ export interface RoleSuccessionStatus {
   role: string;
   /** Number of published exit interviews from this role */
   interviewCount: number;
-  /** Total years of captured institutional service */
+  /** Total years of captured organizational service */
   totalYearsOfServiceCaptured: number;
   /** Average continuity risk score across interviews from this role */
   averageContinuityRiskScore: number;
@@ -50,7 +50,7 @@ export interface SuccessionFragilityReport {
   criticalOperationalGaps: string[];
   /** What should be documented first to improve continuity */
   documentationPriorities: string[];
-  /** Org-level recommendations to improve institutional resilience */
+  /** Org-level recommendations to improve organizational resilience */
   continuityRecommendations: string[];
   /** Governance changes that would reduce succession fragility */
   governanceMitigations: string[];
@@ -215,7 +215,7 @@ export async function analyzeSuccessionFragility(orgId: string): Promise<Success
     }
   } else {
     executiveSummary =
-      'No published exit interviews to analyze. Capturing institutional knowledge through exit interviews is the critical first step toward organizational continuity.';
+      'No published exit interviews to analyze. Capturing organizational knowledge through exit interviews is the critical first step toward organizational continuity.';
   }
 
   return {

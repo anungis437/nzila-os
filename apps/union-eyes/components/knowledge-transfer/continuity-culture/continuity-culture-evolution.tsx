@@ -416,7 +416,7 @@ export function ContinuityCultureEvolution() {
             </div>
           ) : (
             <div className="text-center text-sm text-slate-500 py-8">
-              No distinct behavior patterns detected yet. Continue building institutional memory.
+              No distinct behavior patterns detected yet. Continue building organizational memory.
             </div>
           )}
 

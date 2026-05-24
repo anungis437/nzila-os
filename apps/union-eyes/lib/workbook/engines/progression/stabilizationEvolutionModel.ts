@@ -3,13 +3,13 @@
  * MODULE: OCI Stabilization Progression
  * DOCTRINE_VERSION: 2.0.0
  *
- * Composes institutionalEvolutionTracker into a stabilization-facing
+ * Composes organizationalEvolutionTracker into a stabilization-facing
  * evolution model. Reads only — no scoring, no analytics.
  *
  * Pure, deterministic.
  */
 
-import type { InstitutionalEvolutionResult, EvolutionPosture } from '../institutionalEvolutionTracker';
+import type { OrganizationalEvolutionResult, EvolutionPosture } from '../organizationalEvolutionTracker';
 
 export const ENGINE_VERSION = '2.0.0';
 
@@ -28,7 +28,7 @@ export interface StabilizationEvolutionReading {
 }
 
 export function readStabilizationEvolution(
-  evolution: InstitutionalEvolutionResult | null,
+  evolution: OrganizationalEvolutionResult | null,
 ): StabilizationEvolutionReading {
   if (!evolution) {
     return {
@@ -36,7 +36,7 @@ export function readStabilizationEvolution(
       direction: 'unknown',
       posture: 'unknown',
       continuityRate: 0,
-      reading: 'Institutional evolution has not been read; direction is unknown.',
+      reading: 'Organizational evolution has not been read; direction is unknown.',
     };
   }
   const direction = directionFromPosture(evolution.posture);
@@ -64,12 +64,12 @@ function directionFromPosture(posture: EvolutionPosture): StabilizationEvolution
 function readingFor(direction: StabilizationEvolutionDirection, posture: EvolutionPosture): string {
   switch (direction) {
     case 'advancing':
-      return `Institutional evolution is recorded as ${posture}; lineage is preserved across eras.`;
+      return `Organizational evolution is recorded as ${posture}; lineage is preserved across eras.`;
     case 'holding':
-      return 'Institutional evolution is recorded as reinterpreted; lineage is preserved with reinterpretation.';
+      return 'Organizational evolution is recorded as reinterpreted; lineage is preserved with reinterpretation.';
     case 'regressing':
-      return 'Institutional evolution is recorded as fractured; lineage has not been preserved across at least one era.';
+      return 'Organizational evolution is recorded as fractured; lineage has not been preserved across at least one era.';
     case 'unknown':
-      return 'Institutional evolution has not been read.';
+      return 'Organizational evolution has not been read.';
   }
 }

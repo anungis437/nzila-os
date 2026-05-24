@@ -1,7 +1,7 @@
 /**
  * OCRA — Canonical Copy
  *
- * One source of truth for institutional, calm, anti-surveillance language.
+ * One source of truth for organizational, calm, anti-surveillance language.
  * No marketing claims. No hype. No urgency. No surveillance vocabulary.
  *
  * If a phrase is added here, it has been considered against doctrine.
@@ -23,7 +23,7 @@ export const COPY = {
       'Every organization has people quietly holding continuity together long after the systems around them stopped doing so.',
     sub:
       'Operational knowledge often lives inside people instead of systems. Leadership transitions should not feel like rebuilding the institution from scratch. Modernization without continuity often creates operationally forgetful organizations.',
-    primaryCta: 'Assess Institutional Continuity Risk',
+    primaryCta: 'Assess Organizational Continuity Risk',
     secondaryCta: 'Read what this is, and what it is not',
   },
   /**
@@ -40,7 +40,7 @@ export const COPY = {
     title: 'Technology With Soul Means',
     lines: [
       'Continuity without surveillance.',
-      'Modernization without institutional forgetting.',
+      'Modernization without organizational forgetting.',
       'Operational intelligence without dehumanization.',
       'Governance support without replacing human judgment.',
       'Technology that helps institutions remember their obligations to people.',
@@ -53,17 +53,17 @@ export const COPY = {
   quietRisk: {
     erosion: 'quiet continuity erosion',
     drift: 'silent governance drift',
-    forgetting: 'quiet institutional forgetting',
+    forgetting: 'quiet organizational forgetting',
     burden: 'invisible continuity burden',
     fragility: 'quiet operational fragility',
     labour: 'invisible continuity labour',
   },
   /**
-   * Institutional Memory Holders — the people quietly carrying continuity.
+   * Organizational Memory Holders — the people quietly carrying continuity.
    * Naming this concept is itself a category act.
    */
   institutionalMemoryHolders: {
-    title: 'Institutional Memory Holders',
+    title: 'Organizational Memory Holders',
     definition:
       'In most organizations, there are people who carry continuity not because it is their formal role, but because no system was built to hold it instead.',
     roles: [
@@ -89,7 +89,7 @@ export const COPY = {
         id: 'operational_interpreter',
         label: 'The Operational Interpreter',
         description:
-          'The person who translates between institutional fragments — bridging teams, systems, and practices that were never designed to speak to each other.',
+          'The person who translates between organizational fragments — bridging teams, systems, and practices that were never designed to speak to each other.',
       },
       {
         id: 'organizational_memory',
@@ -106,19 +106,19 @@ export const COPY = {
       'It is not productivity monitoring.',
       'It is not hidden behavioural analytics.',
       'It is not punitive workforce scoring.',
-      'It is a structured examination of institutional continuity: the operational memory, governance visibility, and transition readiness that allow an institution to outlast any individual within it.',
-      'We treat institutional continuity as governance infrastructure, not as workforce control.',
+      'It is a structured examination of organizational continuity: the operational memory, governance visibility, and transition readiness that allow an institution to outlast any individual within it.',
+      'We treat organizational continuity as governance infrastructure, not as workforce control.',
     ],
   },
   overview: {
     title: 'What this assessment looks at',
     bullets: [
-      'Operational dependency — where institutional function relies on specific people rather than institutional procedure.',
+      'Operational dependency — where organizational function relies on specific people rather than organizational procedure.',
       'Governance visibility — whether governance bodies can see operational reality without heroic reporting.',
-      'Institutional memory — whether decisions and precedent outlast the individuals who shaped them.',
+      'Organizational memory — whether decisions and precedent outlast the individuals who shaped them.',
       'Transition readiness — whether the institution can absorb role and leadership change without disruption.',
       'Explainability and trust — whether decisions can be explained from evidence.',
-      'Sovereignty and governance control — whether the institution controls its own institutional data and direction.',
+      'Sovereignty and governance control — whether the institution controls its own organizational data and direction.',
     ],
     duration: 'Most institutions complete the assessment in 15 to 25 minutes.',
     privacy: [
@@ -162,7 +162,7 @@ export const COPY = {
     likertHelp: 'Select the option that best reflects your honest assessment.',
   },
   results: {
-    title: 'Institutional Continuity Profile',
+    title: 'Organizational Continuity Profile',
     profileSub:
       'A calm, structured view of your institution’s continuity posture. This profile is generated deterministically from your responses; nothing here is produced by an opaque model.',
     bandLabel: 'Continuity Band',
@@ -176,7 +176,7 @@ export const COPY = {
     stewardshipSignalsTitle: 'Stewardship Signals',
     burdenIndexTitle: 'Continuity Burden Index',
     burdenIndexSub:
-      'How much of your institutional continuity currently depends on people compensating manually.',
+      'How much of your organizational continuity currently depends on people compensating manually.',
     recommendationsTitle: 'Suggested next steps',
     privacyFooter:
       'This profile is yours. We retain a pseudonymous record for benchmark research and may delete it on request. We do not contact you unless you ask us to.',
@@ -184,7 +184,7 @@ export const COPY = {
       'Each indicator above is the deterministic result of your weighted responses. We can show you exactly which questions contributed to each dimension on request.',
   },
   /**
-   * Revenue tiers — institutional naming, not SaaS vocabulary.
+   * Revenue tiers — organizational naming, not SaaS vocabulary.
    */
   tiers: {
     reflection: {
@@ -203,21 +203,21 @@ export const COPY = {
     },
     diagnostic: {
       id: 'institutional_continuity_diagnostic' as const,
-      name: 'Institutional Continuity Diagnostic',
-      tagline: 'A facilitated institutional review for organizations ready to act.',
+      name: 'Organizational Continuity Diagnostic',
+      tagline: 'A facilitated organizational review for organizations ready to act.',
       price: '$6,500 CAD',
       priceLabel: '$6,500 CAD',
     },
   },
   /**
-   * Report gate copy — calm, institutional, non-coercive.
+   * Report gate copy — calm, organizational, non-coercive.
    */
   reportGate: {
     briefLockedLabel: 'This analysis is available in the Executive Continuity Brief.',
-    diagnosticLockedLabel: 'This section is part of the Institutional Continuity Diagnostic.',
+    diagnosticLockedLabel: 'This section is part of the Organizational Continuity Diagnostic.',
     briefCtaLabel: 'Request the Executive Continuity Brief',
     briefCtaHref: '/contact?topic=executive-continuity-brief',
-    diagnosticCtaLabel: 'Open an Institutional Continuity Diagnostic conversation',
+    diagnosticCtaLabel: 'Open an Organizational Continuity Diagnostic conversation',
     diagnosticCtaHref: '/contact?topic=institutional-continuity-diagnostic',
     gateNote:
       'The Executive Continuity Brief is available at $1,200 CAD and is designed for board presentation and executive decision-making.',

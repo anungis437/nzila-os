@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Cupe 4373 Inbox — Foundation-tier "unified institutional intake" surface.
+ * Cupe 4373 Inbox — Foundation-tier "unified organizational intake" surface.
  *
  * Combines case intakes, member messages, federation signals, and
  * operational alerts into a single governance-safe stream. Mirrors the

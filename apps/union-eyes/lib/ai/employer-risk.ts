@@ -5,7 +5,7 @@
  * dispatch non-compliance, arbitration history) and produces
  * a bounded compliance posture reading and contextual band per employer.
  *
- * This is institutional monitoring for governance continuity —
+ * This is organizational monitoring for governance continuity —
  * not workforce surveillance. The system supports steward decision-making;
  * it does not make determinations or apply consequences autonomously.
  *

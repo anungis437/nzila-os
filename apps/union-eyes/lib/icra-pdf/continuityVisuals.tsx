@@ -8,7 +8,7 @@
  * React-PDF visual components: dimensional spectrums, burden index,
  * maturity band indicator, signal lists.
  *
- * Aesthetic target: editorial horizontal spectrums, muted institutional
+ * Aesthetic target: editorial horizontal spectrums, muted organizational
  * palette, generous whitespace, calm and grounded.
  *
  * NOT: dashboard charts, gamified gauges, analytics exports.
@@ -380,7 +380,7 @@ export function BurdenIndexBlock({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// StewardshipSignalList — quiet institutional signal display
+// StewardshipSignalList — quiet organizational signal display
 // ─────────────────────────────────────────────────────────────────────────────
 
 const signalStyles = StyleSheet.create({
@@ -477,7 +477,7 @@ export function PageDivider({ thin = false }: { thin?: boolean }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OCI Motif block — the closing institutional motif
+// OCI Motif block — the closing organizational motif
 // ─────────────────────────────────────────────────────────────────────────────
 
 const motifStyles = StyleSheet.create({

@@ -70,7 +70,7 @@ export function transitionReview(
 
 /**
  * Gating helper: returns true only when the artefact has been approved and
- * is therefore eligible to enter the institutional delivery layer.
+ * is therefore eligible to enter the organizational delivery layer.
  */
 export function isEligibleForDelivery(artifact: ReviewedArtifact): boolean {
   return artifact.reviewStatus === 'approved';

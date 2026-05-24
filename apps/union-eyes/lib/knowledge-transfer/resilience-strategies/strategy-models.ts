@@ -2,7 +2,7 @@
  * Resilience Strategy Models
  *
  * Data structures for modeling organizational continuity strengthening strategies.
- * Strategies are institutional investment pathways — not workforce plans.
+ * Strategies are organizational investment pathways — not workforce plans.
  *
  * All models describe organizational capability improvements:
  * documentation, governance distribution, operational redundancy.

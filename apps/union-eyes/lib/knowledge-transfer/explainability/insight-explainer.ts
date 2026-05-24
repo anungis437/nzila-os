@@ -79,7 +79,7 @@ CRITICAL RULES:
 - Only describe observable organizational patterns across multiple interviews
 - Distinguish clearly between direct observations and inferences
 - Be honest about limitations and uncertainty
-- Use governance-neutral, institutional language — not surveillance language
+- Use governance-neutral, organizational language — not surveillance language
 
 Return a JSON array (one object per insight):
 [{

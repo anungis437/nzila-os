@@ -21,7 +21,7 @@ const baseTransitionInput: RuntimeTransitionInput = {
     engineVersion: '2.0.0',
     sufficient: true,
     unmet: [],
-    statement: 'All four institutional readiness conditions are present.',
+    statement: 'All four organizational readiness conditions are present.',
   },
   transitionSpecific: {
     hasIrreversiblyRatifiedRedistribution: true,
@@ -87,7 +87,7 @@ const baseOpsInput: OperationalizationInput = {
     engineVersion: '2.0.0',
     sufficient: true,
     unmet: [],
-    statement: 'All four institutional readiness conditions are present.',
+    statement: 'All four organizational readiness conditions are present.',
   },
   governanceCycleObserved: false,
   onboardingIntakeObserved: false,

@@ -1,7 +1,7 @@
 /**
  * Governance Maturity Personality Profiler
  *
- * Models organizational governance posture styles using institutional history.
+ * Models organizational governance posture styles using organizational history.
  * Produces human-readable governance identity profiles.
  *
  * SCOPE: Organizational governance identities — NOT people analytics.
@@ -42,20 +42,20 @@ const PERSONALITY_META: Record<
   governance_maturing: {
     name: 'Governance-Maturing',
     description: 'The organization is on a deliberate governance maturity trajectory — incrementally building resilience capacity.',
-    characteristics: ['Growing governance engagement', 'Improving resilience metrics', 'Developing institutional memory', 'Increasing planning sophistication'],
+    characteristics: ['Growing governance engagement', 'Improving resilience metrics', 'Developing organizational memory', 'Increasing planning sophistication'],
     strategicFocus: 'Sustain maturity momentum and begin benchmarking against governance excellence models.',
   },
   resilience_fragile: {
     name: 'Resilience-Fragile',
-    description: 'Governance gaps create institutional resilience fragility — continuity risks are present without adequate governance response.',
+    description: 'Governance gaps create organizational resilience fragility — continuity risks are present without adequate governance response.',
     characteristics: ['Irregular governance engagement', 'Declining or volatile resilience', 'Documentation gaps', 'Mitigation follow-through issues'],
     strategicFocus: 'Establish foundational governance cadences and begin systematic continuity documentation.',
   },
   continuity_progressive: {
     name: 'Continuity-Progressive',
-    description: 'Leading-edge governance culture with adaptive practices, strong institutional memory, and continuous learning.',
-    characteristics: ['Proactive governance investment', 'Strong documentation discipline', 'Adaptive resilience practices', 'Institutional learning culture'],
-    strategicFocus: 'Pioneer federated governance intelligence and become a model for institutional continuity maturity.',
+    description: 'Leading-edge governance culture with adaptive practices, strong organizational memory, and continuous learning.',
+    characteristics: ['Proactive governance investment', 'Strong documentation discipline', 'Adaptive resilience practices', 'Organizational learning culture'],
+    strategicFocus: 'Pioneer federated governance intelligence and become a model for organizational continuity maturity.',
   },
 };
 
@@ -220,6 +220,6 @@ export async function profileGovernancePersonality(orgId: string): Promise<Gover
     identityStatement,
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
-      'Governance personalities are organizational characterizations — not assessments of individuals. They are intended to inform governance strategy and institutional development planning.',
+      'Governance personalities are organizational characterizations — not assessments of individuals. They are intended to inform governance strategy and organizational development planning.',
   };
 }

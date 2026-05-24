@@ -85,8 +85,8 @@ export function InsightArticleView({
   const profile = getInstitutionalModeProfile(contextMode);
 
   const methodologyByCategory: Record<string, string[]> = {
-    'Institutional Continuity': [
-      'Institutional Memory',
+    'Organizational Continuity': [
+      'Organizational Memory',
       'Governance Continuity',
       'Operational Coherence',
       'Organizational Resilience',
@@ -126,13 +126,13 @@ export function InsightArticleView({
     'Organizational Memory': [
       'Knowledge Discovery',
       'Context Mapping',
-      'Institutional Structuring',
+      'Organizational Structuring',
       'Continuity Operationalization',
     ],
   };
 
   const methodologyNodes = methodologyByCategory[article.categoryName] ?? [
-    'Institutional Context',
+    'Organizational Context',
     'Governance Visibility',
     'Continuity Alignment',
     'Strategic Resilience',
@@ -225,7 +225,7 @@ export function InsightArticleView({
             <div className="continuity-quote">
               <p className="institution-kicker mb-2">Continuity Principle</p>
               <p className="text-sm text-slate-700 leading-relaxed">
-                Institutional trust is preserved when governance knowledge moves safely through time, people, and decisions.
+                Organizational trust is preserved when governance knowledge moves safely through time, people, and decisions.
               </p>
             </div>
           </aside>

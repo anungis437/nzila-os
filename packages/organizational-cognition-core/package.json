@@ -1,0 +1,34 @@
+{
+  "name": "@nzila/organizational-cognition-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical institutional cognition substrate for Union Eyes — contracts, ontology, explainability, governance, orchestration, registry, lifecycle, and SDK.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts": "./src/contracts/index.ts",
+    "./explainability": "./src/explainability/index.ts",
+    "./reasoning": "./src/reasoning/index.ts",
+    "./orchestration": "./src/orchestration/index.ts",
+    "./orchestration/intelligent": "./src/orchestration/intelligent.ts",
+    "./orchestration/context-aware": "./src/orchestration/context-aware.ts",
+    "./ontology": "./src/ontology/index.ts",
+    "./ontology-governance": "./src/ontology-governance/index.ts",
+    "./ontology-governance/deep-semantics": "./src/ontology-governance/deep-semantics.ts",
+    "./governance": "./src/governance/index.ts",
+    "./registry": "./src/registry/index.ts",
+    "./lifecycle": "./src/lifecycle/index.ts",
+    "./observability": "./src/observability/index.ts",
+    "./cache": "./src/cache/index.ts",
+    "./sdk": "./src/sdk/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "devDependencies": {
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

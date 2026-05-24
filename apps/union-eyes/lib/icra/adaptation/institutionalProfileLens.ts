@@ -1,5 +1,5 @@
 /**
- * ARTIFACT TYPE: Institutional Profile Lens
+ * ARTIFACT TYPE: Organizational Profile Lens
  * MODULE: OCRA Dynamic Questionnaire Adaptation
  * DOCTRINE: OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md §6
  *

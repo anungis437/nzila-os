@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
-import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
+import { OrganizationalContinuityNote } from '@/components/marketing/organizational-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
@@ -50,24 +50,24 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 // ─────────────────────────────────────────────────────────────────────────────
 const PAGE_COPY = {
   'en-CA': {
-    metadataTitle: 'The Operating Architecture | Eight Canonical Institutional Surfaces | UnionEyes',
+    metadataTitle: 'The Operating Architecture | Eight Canonical Organizational Surfaces | UnionEyes',
     metadataDescription:
-      'UnionEyes is organized as eight canonical institutional surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Organizational Memory, and Trust — composed into one continuous institutional operating record.',
+      'UnionEyes is organized as eight canonical organizational surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Organizational Memory, and Trust — composed into one continuous organizational operating record.',
     badge: 'The Operating Architecture',
-    heading: 'One institutional operating experience.',
+    heading: 'One organizational operating experience.',
     description:
-      'UnionEyes is organized as eight canonical institutional surfaces — composed, not bundled — into one continuous operating record of governance, continuity, and trust.',
+      'UnionEyes is organized as eight canonical organizational surfaces — composed, not bundled — into one continuous operating record of governance, continuity, and trust.',
     maturityLink: 'Operational maturity programs',
     finalHeading: 'Composed, not bundled.',
     finalBody:
-      'Each canonical surface is governance-safe, continuity-safe, and procurement-safe. Programs activate the maturity bands appropriate to the institution — Foundation, Governance Operations, Institutional Continuity, or the Sovereignty Layer.',
+      'Each canonical surface is governance-safe, continuity-safe, and procurement-safe. Programs activate the maturity bands appropriate to the institution — Foundation, Governance Operations, Organizational Continuity, or the Sovereignty Layer.',
     finalCta: 'See operational maturity programs',
     pillars: [
       {
         id: 'inbox',
         icon: InboxIcon,
         name: 'Inbox',
-        posture: 'Unified institutional intake',
+        posture: 'Unified organizational intake',
         body:
           'A single, governed surface for incoming cases, member messages, federation signals, and operational notifications. Replaces fragmented portal/messaging surfaces with one coherent stream.',
         runtime: 'dashboard/inbox',
@@ -78,7 +78,7 @@ const PAGE_COPY = {
         name: 'Work',
         posture: 'Active representation workbench',
         body:
-          'The operating surface for stewards and officers — active grievances, casework, representation tracking, and continuity-safe handoff. The canonical destination for institutional execution.',
+          'The operating surface for stewards and officers — active grievances, casework, representation tracking, and continuity-safe handoff. The canonical destination for organizational execution.',
         runtime: 'dashboard/work',
       },
       {
@@ -118,13 +118,13 @@ const PAGE_COPY = {
         runtime: 'dashboard/governance',
       },
       {
-        id: 'institutional-memory',
+        id: 'organizational-memory',
         icon: Library,
         name: 'Organizational Memory',
         posture: 'Continuity substrate',
         body:
           'Doctrine, precedents, prior decisions, and the continuity archive. Survives leadership transitions because it is held by the institution, not by individuals.',
-        runtime: 'dashboard/institutional-memory',
+        runtime: 'dashboard/organizational-memory',
       },
       {
         id: 'trust',
@@ -138,24 +138,24 @@ const PAGE_COPY = {
     ],
   },
   'fr-CA': {
-    metadataTitle: 'Architecture opérationnelle | Huit surfaces institutionnelles canoniques | UnionEyes',
+    metadataTitle: 'Architecture opérationnelle | Huit surfaces organisationnelles canoniques | UnionEyes',
     metadataDescription:
-      'UnionEyes s’organise autour de huit surfaces institutionnelles canoniques — Boîte de réception, Travail, Priorités, Intelligence, Cognition, Gouvernance, Mémoire organisationnelle et Confiance — composées en un registre opérationnel continu.',
+      'UnionEyes s’organise autour de huit surfaces organisationnelles canoniques — Boîte de réception, Travail, Priorités, Intelligence, Cognition, Gouvernance, Mémoire organisationnelle et Confiance — composées en un registre opérationnel continu.',
     badge: 'Architecture opérationnelle',
-    heading: 'Une expérience opérationnelle institutionnelle.',
+    heading: 'Une expérience opérationnelle organisationnelle.',
     description:
-      'UnionEyes est organisé en huit surfaces institutionnelles canoniques, composées plutôt que groupées, pour former un registre opérationnel continu de gouvernance, de continuité et de confiance.',
+      'UnionEyes est organisé en huit surfaces organisationnelles canoniques, composées plutôt que groupées, pour former un registre opérationnel continu de gouvernance, de continuité et de confiance.',
     maturityLink: 'Programmes de maturité opérationnelle',
     finalHeading: 'Composé, pas groupé.',
     finalBody:
-      'Chaque surface canonique est sûre pour la gouvernance, la continuité et l’approvisionnement. Les programmes activent les niveaux de maturité adaptés à l’institution : fondation, opérations de gouvernance, continuité institutionnelle ou couche de souveraineté.',
+      'Chaque surface canonique est sûre pour la gouvernance, la continuité et l’approvisionnement. Les programmes activent les niveaux de maturité adaptés à l’institution : fondation, opérations de gouvernance, continuité organisationnelle ou couche de souveraineté.',
     finalCta: 'Voir les programmes de maturité opérationnelle',
     pillars: [
       {
         id: 'inbox',
         icon: InboxIcon,
         name: 'Boîte de réception',
-        posture: 'Entrée institutionnelle unifiée',
+        posture: 'Entrée organisationnelle unifiée',
         body:
           'Une surface gouvernée pour les dossiers entrants, messages des membres, signaux de fédération et notifications opérationnelles. Elle remplace la fragmentation par un flux cohérent.',
         runtime: 'dashboard/inbox',
@@ -193,7 +193,7 @@ const PAGE_COPY = {
         name: 'Cognition',
         posture: 'Raisonnement de souveraineté',
         body:
-          'Raisonnement borné, sûr pour la gouvernance et critique pour la continuité, sur la mémoire institutionnelle. Réservé aux gardiens de souveraineté.',
+          'Raisonnement borné, sûr pour la gouvernance et critique pour la continuité, sur la mémoire organisationnelle. Réservé aux gardiens de souveraineté.',
         runtime: 'dashboard/cognition',
       },
       {
@@ -206,13 +206,13 @@ const PAGE_COPY = {
         runtime: 'dashboard/governance',
       },
       {
-        id: 'institutional-memory',
+        id: 'organizational-memory',
         icon: Library,
         name: 'Mémoire organisationnelle',
         posture: 'Substrat de continuité',
         body:
           'Doctrine, précédents, décisions antérieures et archive de continuité. Elle survit aux transitions parce qu’elle est détenue par l’institution, pas par des personnes.',
-        runtime: 'dashboard/institutional-memory',
+        runtime: 'dashboard/organizational-memory',
       },
       {
         id: 'trust',
@@ -245,7 +245,7 @@ export default async function PlatformOverviewPage({
         imageUrl={heroImagery.platform}
       />
 
-      <InstitutionalContinuityNote
+      <OrganizationalContinuityNote
         surface={tNote('label')}
         posture={tNote('posture')}
       />

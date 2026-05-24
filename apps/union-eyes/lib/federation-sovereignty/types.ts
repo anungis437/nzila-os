@@ -1,7 +1,7 @@
 /**
  * Core vocabulary for the sovereign federation execution layer.
  *
- * Defines the institutional sovereignty semantics used across:
+ * Defines the organizational sovereignty semantics used across:
  *   - autonomy engine      (autonomy.ts)
  *   - delegation engine    (delegation.ts)
  *   - inheritance engine   (inheritance.ts)
@@ -32,7 +32,7 @@ export type SovereigntyTier =
 // ── Modes ─────────────────────────────────────────────────────────────────────
 
 /**
- * Operational sovereignty mode for an institutional unit.
+ * Operational sovereignty mode for an organizational unit.
  *
  * - fully-autonomous:      operates independently; inherits baseline only
  * - federation-aligned:    operates within federation policies; standard inheritance
@@ -61,7 +61,7 @@ export type DelegatedAuthority =
 // ── Contracts ─────────────────────────────────────────────────────────────────
 
 /**
- * Sovereign governance contract for an institutional unit.
+ * Sovereign governance contract for an organizational unit.
  * Defines its tier, sovereignty mode, delegated authorities, and federation
  * inheritance constraints.
  */
@@ -69,7 +69,7 @@ export interface SovereignGovernanceContract {
   /** Unique federation/org identifier. */
   federationId: string;
 
-  /** Institutional tier in the federation hierarchy. */
+  /** Organizational tier in the federation hierarchy. */
   sovereigntyTier: SovereigntyTier;
 
   /** Current operational sovereignty mode. */
@@ -288,7 +288,7 @@ export interface CrossFederationSimulationResult {
 
 // ── Readiness Scores ──────────────────────────────────────────────────────────
 
-/** Shadow-mode institutional autonomy readiness score. */
+/** Shadow-mode organizational autonomy readiness score. */
 export interface FederationAutonomyScore {
   score: number;
   unitsAssessed: number;

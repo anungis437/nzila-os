@@ -7,7 +7,7 @@
  * has evolved over time — simulations, governance investigations,
  * continuity improvements, and resilience score trajectory.
  *
- * An institutional memory audit trail — not a personal activity log.
+ * An organizational memory audit trail — not a personal activity log.
  */
 
 import { useState, useEffect } from 'react';

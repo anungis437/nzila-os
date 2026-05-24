@@ -5,7 +5,7 @@
  *
  * Precedent Continuity Mapper — turns a workbook's named governance
  * precedents (decisions, motions, resolutions, working agreements) into
- * a longitudinal map of how institutional reasoning has carried forward.
+ * a longitudinal map of how organizational reasoning has carried forward.
  *
  * Pure, deterministic. Anti-surveillance: precedents are described by
  * abstract id, era, and structural posture — never by author names or

@@ -636,7 +636,7 @@ This document is the authoritative page-level reference for the UnionEyes labour
 
 - **Route:** `/[locale]/dashboard/institutional-memory`
 - **Module:** Knowledge, Training & Continuity
-- **Purpose:** Navigate the union's preserved institutional context: procedural lineage, continuity-aware case records, knowledge graph artifacts, and provenance-stamped explainability outputs. Rendered by `InstitutionalMemoryExplorer`. Includes a `RuntimeHydrationFooter` with provenance metadata sourced from `@nzila/institutional-governance-graph`. The `/dashboard/knowledge-base` route redirects here to `?tab=knowledge-base`.
+- **Purpose:** Navigate the union's preserved institutional context: procedural lineage, continuity-aware case records, knowledge graph artifacts, and provenance-stamped explainability outputs. Rendered by `InstitutionalMemoryExplorer`. Includes a `RuntimeHydrationFooter` with provenance metadata sourced from `@nzila/organizational-governance-graph`. The `/dashboard/knowledge-base` route redirects here to `?tab=knowledge-base`.
 - **Intended Roles:** All authenticated users (requires auth only, no role elevation).
 - **Required Data:** Institutional governance graph records; topology source adapter; continuity records.
 - **Primary Action:** Explore preserved institutional knowledge and procedural history.

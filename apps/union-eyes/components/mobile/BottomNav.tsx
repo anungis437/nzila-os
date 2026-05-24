@@ -58,7 +58,7 @@ const ICON_BY_LABEL: Record<string, LucideIcon> = {
   Communications: MessageSquare,
   Documents: FileText,
   Reports: BarChart3,
-  'Institutional Reports': BarChart3,
+  'Organizational Reports': BarChart3,
   Priorities: Activity,
   'Commitments & Deadlines': Activity,
   'Executive Overview': BarChart3,

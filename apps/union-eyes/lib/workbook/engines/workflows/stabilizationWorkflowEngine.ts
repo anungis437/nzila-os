@@ -13,7 +13,7 @@
  *   - governanceRecoveryEngine (which composes continuityLineageEngine)
  *   - onboardingFragilityAnalysis
  *
- * Tone: institutional, recognition-first, governance-receivable,
+ * Tone: organizational, recognition-first, governance-receivable,
  * blame-free. Deferral is a method outcome.
  *
  * Doctrine: docs/oci/stabilization/workflows/README.md and the six

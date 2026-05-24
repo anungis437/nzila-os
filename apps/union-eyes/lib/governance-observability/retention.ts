@@ -22,7 +22,7 @@ import type { TelemetryCategory, TelemetrySensitivity } from './types';
  * - `standard`     — standard operational log retention (typically 90 days)
  * - `governance`   — governance-grade retention (typically 2 years)
  * - `legal-hold`   — indefinite hold pending legal resolution
- * - `permanent`    — permanent institutional record (e.g. constitutional votes)
+ * - `permanent`    — permanent organizational record (e.g. constitutional votes)
  */
 export type RetentionClass =
   | 'ephemeral'

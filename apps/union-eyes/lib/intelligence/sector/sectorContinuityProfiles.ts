@@ -5,10 +5,10 @@
  *
  * Sector continuity profiles.
  *
- * Reviewer-curated, doctrinally-shaped profiles describing the institutional
+ * Reviewer-curated, doctrinally-shaped profiles describing the organizational
  * continuity character of each recognised sector. These profiles are NOT
  * benchmarks. They are written to help a reviewer interpret a sector baseline
- * envelope inside the appropriate institutional context.
+ * envelope inside the appropriate organizational context.
  *
  * Profiles never carry numeric performance targets, ranking thresholds, or
  * peer-relative positions. They are descriptive, not prescriptive.
@@ -33,7 +33,7 @@ const PROFILES: Readonly<Record<IntelligenceSector, SectorContinuityProfile>> = 
     continuityCharacter:
       'Mandate-driven, member-ratified, with continuity carried through elected stewards and bargaining cycles.',
     continuityFragilityNote:
-      'Continuity often concentrates in long-tenured stewards; redistribution requires institutional memory transfer, not headcount transfer.',
+      'Continuity often concentrates in long-tenured stewards; redistribution requires organizational memory transfer, not headcount transfer.',
     stewardshipPattern:
       'Federated stewardship with strong local autonomy; redistribution is usually deliberate and ratified.',
     onboardingFragility:
@@ -89,7 +89,7 @@ const PROFILES: Readonly<Record<IntelligenceSector, SectorContinuityProfile>> = 
     stewardshipPattern:
       'Stewardship is heavily formalised; redistribution usually requires ratification.',
     onboardingFragility:
-      'Onboarding survivability depends on institutional memory of interpretation lineage, not just procedure.',
+      'Onboarding survivability depends on organizational memory of interpretation lineage, not just procedure.',
     modernizationPosture:
       'Modernization without governance memory preservation introduces interpretation drift; reviewer pacing is essential.',
   },

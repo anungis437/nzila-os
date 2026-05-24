@@ -160,7 +160,7 @@ export async function analyzeGovernanceAdaptation(
     actively_adapting: 'Institutionalize current governance practices that are driving resilience improvements.',
     slowly_adapting: 'Accelerate governance iteration cycles to translate reasoning into measurable resilience gains.',
     stagnant: 'Conduct a governance gap review — identify why continuity reasoning is not producing measurable improvements.',
-    insufficient_history: 'Build institutional memory by conducting regular governance reasoning sessions and capturing mitigation outcomes.',
+    insufficient_history: 'Build organizational memory by conducting regular governance reasoning sessions and capturing mitigation outcomes.',
   };
 
   const progressionNarrative = totalEvents < 3

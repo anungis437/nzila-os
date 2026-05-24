@@ -5,13 +5,13 @@
  * It exists for procurement reviewers, RFP follow-ups, and diligence requests
  * that need to understand UnionEyes' corporate stewardship structure.
  *
- * Per institutional realignment directive: vendor-side governance mechanics
+ * Per organizational realignment directive: vendor-side governance mechanics
  * (ownership structure, founder protections, control mechanics) are NOT
  * surfaced as public marketing pillars. They live here as a procurement
  * appendix only.
  *
  * The word "governance" in UnionEyes public surfaces refers exclusively to
- * the CUSTOMER's institutional governance ecosystem.
+ * the CUSTOMER's organizational governance ecosystem.
  */
 
 import type { Metadata } from 'next';
@@ -80,8 +80,8 @@ export default function StewardshipAppendixPage() {
           </p>
           <p className="text-sm text-gray-300 mt-4 max-w-2xl">
             The word &ldquo;governance&rdquo; on UnionEyes public surfaces refers to the
-            customer&rsquo;s institutional governance ecosystem &mdash; not to corporate
-            stewardship mechanics.
+            customer&rsquo;s organizational governance operating environment &mdash; not to
+            corporate stewardship mechanics.
           </p>
         </div>
       </header>
@@ -139,7 +139,7 @@ export default function StewardshipAppendixPage() {
               },
               {
                 q: 'Why is this content not in the main navigation?',
-                a: 'Corporate stewardship mechanics are procurement-grade context, not public marketing identity. UnionEyes\u2019 external narrative is built around the customer\u2019s institutional governance, continuity, and operational trust \u2014 not vendor ownership structure.',
+                a: 'Corporate stewardship mechanics are procurement-grade context, not public marketing identity. UnionEyes\u2019 external narrative is built around the customer\u2019s organizational governance, continuity, and operational trust \u2014 not vendor ownership structure.',
               },
             ].map(({ q, a }) => (
               <div key={q} className="pt-6 first:pt-0">
@@ -151,7 +151,7 @@ export default function StewardshipAppendixPage() {
         </div>
 
         <p className="text-sm text-gray-500 mb-10">
-          Platform tooling that surfaces structural stewardship data operates under
+          Continuity-layer tooling that surfaces structural stewardship data operates under
           human oversight, with full explainability available to any party conducting
           procurement review. No governance decision is automated; every output is
           reviewable by counsel, auditors, or labour-elected oversight bodies.

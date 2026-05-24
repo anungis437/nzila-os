@@ -56,7 +56,7 @@ const SECTION_FR: Record<SectionId, SectionStrings> = {
   operational_dependency: {
     title: 'Dépendance opérationnelle',
     intro:
-      'Là où le fonctionnement institutionnel repose sur des personnes précises plutôt que sur des procédures institutionnelles.',
+      'Là où le fonctionnement organisationnel repose sur des personnes précises plutôt que sur des procédures organisationnelles.',
   },
   governance_visibility: {
     title: 'Visibilité de la gouvernance',
@@ -64,7 +64,7 @@ const SECTION_FR: Record<SectionId, SectionStrings> = {
       "Si les instances de gouvernance peuvent voir la réalité opérationnelle sans qu'un effort de signalement héroïque soit nécessaire.",
   },
   institutional_memory: {
-    title: 'Mémoire institutionnelle',
+    title: 'Mémoire organisationnelle',
     intro:
       'Si les décisions, les précédents et le savoir opérationnel survivent aux personnes qui les ont façonnés.',
   },
@@ -86,7 +86,7 @@ const SECTION_FR: Record<SectionId, SectionStrings> = {
   sovereignty_governance: {
     title: 'Souveraineté et contrôle de la gouvernance',
     intro:
-      "Si l'institution maîtrise ses propres données, infrastructures et orientations institutionnelles.",
+      "Si l'institution maîtrise ses propres données, infrastructures et orientations organisationnelles.",
   },
 };
 
@@ -193,7 +193,7 @@ const METADATA_FR: Record<string, QuestionStrings> = {
   ctx_primary_challenge: {
     prompt: "Y a-t-il un défi précis de continuité ou de gouvernance qui a motivé cette évaluation? (Facultatif)",
     helpText:
-      "Veuillez décrire en termes institutionnels généraux \u2014 n'incluez pas de noms de personnes, de noms d'employeurs, d'identifiants de membres ou de faits précis d'un dossier. Ce champ est conservé avec votre évaluation. Limite de 500 caractères.",
+      "Veuillez décrire en termes organisationnels généraux \u2014 n'incluez pas de noms de personnes, de noms d'employeurs, d'identifiants de membres ou de faits précis d'un dossier. Ce champ est conservé avec votre évaluation. Limite de 500 caractères.",
   },
 };
 
@@ -212,7 +212,7 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   },
   od_02: {
     prompt:
-      "Dans quelle mesure le savoir institutionnel critique est-il documenté dans des systèmes auxquels d'autres personnes ont accès?",
+      "Dans quelle mesure le savoir organisationnel critique est-il documenté dans des systèmes auxquels d'autres personnes ont accès?",
     helpText:
       "Cela inclut les procédures, les contacts, l'historique des décisions et le contexte opérationnel \u2014 pas les fichiers personnels ou les boîtes courriel.",
   },
@@ -232,17 +232,17 @@ const SCORED_FR: Record<string, QuestionStrings> = {
     prompt:
       "Dans quelle mesure votre organisation est-elle prête à intégrer un nouveau cadre supérieur ou responsable des opérations sans un long apprentissage informel?",
     helpText:
-      "Une nouvelle personne trouverait-elle du contexte documenté, un historique des décisions et un guide opérationnel \u2014 ou dépendrait-elle surtout de la mémoire institutionnelle du personnel en place?",
+      "Une nouvelle personne trouverait-elle du contexte documenté, un historique des décisions et un guide opérationnel \u2014 ou dépendrait-elle surtout de la mémoire organisationnelle du personnel en place?",
   },
   icb_01: {
     prompt:
       "Dans quelle mesure votre organisation reconnaît-elle et tient-elle compte du travail informel de continuité que certains membres du personnel ou dirigeants portent au nom de l'institution?",
     helpText:
-      "Pensez au temps consacré à compenser l'absence de mémoire institutionnelle \u2014 traduire le contexte, expliquer l'historique, entretenir les relations \u2014 et à sa visibilité pour la direction, ou à son absorption silencieuse dans des rôles individuels.",
+      "Pensez au temps consacré à compenser l'absence de mémoire organisationnelle \u2014 traduire le contexte, expliquer l'historique, entretenir les relations \u2014 et à sa visibilité pour la direction, ou à son absorption silencieuse dans des rôles individuels.",
   },
   icb_02: {
     prompt:
-      "Avec quel niveau d'intention votre organisation répartit-elle les responsabilités de continuité \u2014 de sorte que la mémoire institutionnelle ne se concentre pas discrètement chez un petit nombre de personnes?",
+      "Avec quel niveau d'intention votre organisation répartit-elle les responsabilités de continuité \u2014 de sorte que la mémoire organisationnelle ne se concentre pas discrètement chez un petit nombre de personnes?",
     helpText:
       "Plutôt que de laisser le savoir de continuité s'accumuler chez les personnes les plus anciennes ou les plus engagées.",
   },
@@ -279,7 +279,7 @@ const SCORED_FR: Record<string, QuestionStrings> = {
       "Les nouveaux dirigeants héritent-ils typiquement d'orientations interprétatives documentées, ou développent-ils leurs propres interprétations de façon indépendante, parfois en renversant ce qui précédait?",
   },
 
-  // Institutional memory
+  // Organizational memory
   im_01: {
     prompt:
       "Dans quelle mesure votre organisation préserve-t-elle et rend-elle accessible l'historique des décisions, des négociations et des événements opérationnels importants?",
@@ -300,7 +300,7 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   },
   im_04: {
     prompt:
-      "Avec quelle constance la mémoire institutionnelle est-elle traitée comme un actif organisationnel \u2014 activement entretenue, structurée et protégée contre la perte?",
+      "Avec quelle constance la mémoire organisationnelle est-elle traitée comme un actif organisationnel \u2014 activement entretenue, structurée et protégée contre la perte?",
     helpText:
       "Plutôt que de la traiter comme quelque chose qui vit chez le personnel de longue date, à reconstituer de zéro lorsque ces personnes partent.",
   },
@@ -308,7 +308,7 @@ const SCORED_FR: Record<string, QuestionStrings> = {
     prompt:
       "À quelle fréquence votre organisation se retrouve-t-elle à résoudre les mêmes problèmes opérationnels déjà résolus auparavant \u2014 parce que la solution antérieure n'a pas été préservée?",
     helpText:
-      "Cela inclut le rétablissement de relations fournisseurs, la renégociation de modalités déjà réglées, la reconstruction de procédures qui existaient déjà ou le réapprentissage de contexte institutionnel déjà connu d'anciens employés.",
+      "Cela inclut le rétablissement de relations fournisseurs, la renégociation de modalités déjà réglées, la reconstruction de procédures qui existaient déjà ou le réapprentissage de contexte organisationnel déjà connu d'anciens employés.",
   },
   orl_02: {
     prompt:
@@ -320,7 +320,7 @@ const SCORED_FR: Record<string, QuestionStrings> = {
     prompt:
       "Dans quelle mesure votre organisation retient-elle le savoir opérationnel acquis pendant des périodes difficiles \u2014 restructurations, conflits, crises ou transitions importantes?",
     helpText:
-      "L'apprentissage institutionnel issu des périodes difficiles est-il préservé et accessible, ou est-il absorbé dans la mémoire informelle de ceux qui étaient présents et perdu lorsqu'ils partent?",
+      "L'apprentissage organisationnel issu des périodes difficiles est-il préservé et accessible, ou est-il absorbé dans la mémoire informelle de ceux qui étaient présents et perdu lorsqu'ils partent?",
   },
 
   // Transition readiness
@@ -356,9 +356,9 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   },
   onb_01: {
     prompt:
-      "Dans quelle mesure votre processus d'intégration transmet-il l'intelligence institutionnelle \u2014 pas seulement les responsabilités du rôle, mais le contexte opérationnel, l'historique relationnel et la compréhension de la gouvernance qui permettent à une nouvelle personne d'agir efficacement?",
+      "Dans quelle mesure votre processus d'intégration transmet-il l'intelligence organisationnelle \u2014 pas seulement les responsabilités du rôle, mais le contexte opérationnel, l'historique relationnel et la compréhension de la gouvernance qui permettent à une nouvelle personne d'agir efficacement?",
     helpText:
-      "Plutôt qu'une intégration qui couvre les procédures et outils formels mais laisse le nouveau personnel absorber le contexte institutionnel par observation et conversation informelle pendant des mois ou des années.",
+      "Plutôt qu'une intégration qui couvre les procédures et outils formels mais laisse le nouveau personnel absorber le contexte organisationnel par observation et conversation informelle pendant des mois ou des années.",
   },
 
   // Operational coordination
@@ -382,7 +382,7 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   },
   oc_04: {
     prompt:
-      "Dans quelle mesure votre organisation gère-t-elle les relations avec les fournisseurs, prestataires de services et partenaires \u2014 y compris la surveillance des contrats et le contexte institutionnel?",
+      "Dans quelle mesure votre organisation gère-t-elle les relations avec les fournisseurs, prestataires de services et partenaires \u2014 y compris la surveillance des contrats et le contexte organisationnel?",
     helpText:
       "Le personnel ou la direction entrante trouverait-il le contexte nécessaire pour gérer ces relations sans dépendre du savoir de son prédécesseur?",
   },
@@ -394,9 +394,9 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   },
   cf_01: {
     prompt:
-      "Dans quelle mesure la responsabilité de continuité est-elle répartie équitablement dans votre organisation \u2014 plutôt que concentrée chez un petit nombre de personnes qui portent silencieusement un fardeau institutionnel disproportionné?",
+      "Dans quelle mesure la responsabilité de continuité est-elle répartie équitablement dans votre organisation \u2014 plutôt que concentrée chez un petit nombre de personnes qui portent silencieusement un fardeau organisationnel disproportionné?",
     helpText:
-      "Le travail de maintien de la continuité institutionnelle \u2014 garder le contexte, traduire entre les équipes, préserver les relations \u2014 est-il reconnu et partagé, ou retombe-t-il à répétition sur les mêmes personnes?",
+      "Le travail de maintien de la continuité organisationnelle \u2014 garder le contexte, traduire entre les équipes, préserver les relations \u2014 est-il reconnu et partagé, ou retombe-t-il à répétition sur les mêmes personnes?",
   },
 
   // Explainability & trust
@@ -408,9 +408,9 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   },
   et_02: {
     prompt:
-      "Quelle dette de confiance institutionnelle accumulée votre organisation porte-t-elle \u2014 griefs non résolus, décisions inexpliquées ou conduite de gouvernance qui n'a pas été suffisamment assumée?",
+      "Quelle dette de confiance organisationnelle accumulée votre organisation porte-t-elle \u2014 griefs non résolus, décisions inexpliquées ou conduite de gouvernance qui n'a pas été suffisamment assumée?",
     helpText:
-      "La dette de confiance, c'est l'écart entre la conduite de gouvernance que votre organisation projette et la mémoire institutionnelle de celles et ceux qui l'ont vécue autrement.",
+      "La dette de confiance, c'est l'écart entre la conduite de gouvernance que votre organisation projette et la mémoire organisationnelle de celles et ceux qui l'ont vécue autrement.",
   },
   et_03: {
     prompt:
@@ -434,9 +434,9 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   // Sovereignty & governance
   sg_01: {
     prompt:
-      "Dans quelle mesure votre organisation maintient-elle le contrôle sur ses propres données, dossiers et historique de décisions institutionnels \u2014 indépendamment de tout fournisseur, plateforme ou tiers?",
+      "Dans quelle mesure votre organisation maintient-elle le contrôle sur ses propres données, dossiers et historique de décisions organisationnels \u2014 indépendamment de tout fournisseur, plateforme ou tiers?",
     helpText:
-      "Cela inclut la portabilité de vos dossiers, la possibilité de changer de systèmes sans perdre l'historique institutionnel, et le fait de détenir la copie primaire de votre propre registre de gouvernance.",
+      "Cela inclut la portabilité de vos dossiers, la possibilité de changer de systèmes sans perdre l'historique organisationnel, et le fait de détenir la copie primaire de votre propre registre de gouvernance.",
   },
   sg_02: {
     prompt:
@@ -458,15 +458,15 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   },
   mt_01: {
     prompt:
-      "Dans quelle mesure votre organisation préserve-t-elle le contexte institutionnel et la mémoire opérationnelle lors des transitions entre systèmes, plateformes ou approches technologiques?",
+      "Dans quelle mesure votre organisation préserve-t-elle le contexte organisationnel et la mémoire opérationnelle lors des transitions entre systèmes, plateformes ou approches technologiques?",
     helpText:
-      "Les transitions passées \u2014 changement de système de gestion des dossiers, de plateforme financière, d'outils de communication \u2014 ont-elles entraîné une perte de mémoire institutionnelle, ou le contexte a-t-il été préservé et transféré?",
+      "Les transitions passées \u2014 changement de système de gestion des dossiers, de plateforme financière, d'outils de communication \u2014 ont-elles entraîné une perte de mémoire organisationnelle, ou le contexte a-t-il été préservé et transféré?",
   },
   mt_02: {
     prompt:
-      "Avec quel niveau d'intention votre organisation évalue-t-elle si les efforts de modernisation préservent \u2014 plutôt que remplacent \u2014 la continuité institutionnelle?",
+      "Avec quel niveau d'intention votre organisation évalue-t-elle si les efforts de modernisation préservent \u2014 plutôt que remplacent \u2014 la continuité organisationnelle?",
     helpText:
-      "Les décisions de modernisation tiennent-elles compte du savoir institutionnel intégré aux pratiques, relations et systèmes actuels, ou privilégient-elles les gains de capacité sans évaluer le risque de continuité?",
+      "Les décisions de modernisation tiennent-elles compte du savoir organisationnel intégré aux pratiques, relations et systèmes actuels, ou privilégient-elles les gains de capacité sans évaluer le risque de continuité?",
   },
 
   // Continuity confidence signals (likert_5)
@@ -486,7 +486,7 @@ const SCORED_FR: Record<string, QuestionStrings> = {
   },
   ccs_04: {
     prompt:
-      "Les nouveaux membres du personnel peuvent agir avec efficacité dans un délai raisonnable parce que le contexte institutionnel leur est transféré.",
+      "Les nouveaux membres du personnel peuvent agir avec efficacité dans un délai raisonnable parce que le contexte organisationnel leur est transféré.",
   },
   ccs_05: {
     prompt:

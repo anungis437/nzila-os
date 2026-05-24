@@ -8,7 +8,7 @@
  *
  * Naming doctrine:
  * - Property keys use snake_case prefixed with `oci_` (e.g. `oci_maturity_band`).
- * - Property values use Title Case institutional vocabulary (e.g. `Continuity-Aware`),
+ * - Property values use Title Case organizational vocabulary (e.g. `Continuity-Aware`),
  *   not SaaS / marketing capitalization, and never raw enum identifiers.
  * - Custom property keys are exported so they can be created once on the
  *   HubSpot side (in HubSpot's custom-property UI) and referenced consistently.
@@ -22,7 +22,7 @@
 import type {
   ContinuityBurdenIndex,
   ExecutivePersonaId,
-  InstitutionalContinuityProfile,
+  OrganizationalContinuityProfile,
   MaturityBandId,
   ReportTierId,
 } from '@/lib/icra/types';
@@ -58,7 +58,7 @@ export const ICRA_COMPANY_PROPERTIES = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Maturity band — display labels (institutional, public-facing vocabulary)
+// Maturity band — display labels (organizational, public-facing vocabulary)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const MATURITY_BAND_LABELS: Record<MaturityBandId, string> = {
@@ -71,7 +71,7 @@ export const MATURITY_BAND_LABELS: Record<MaturityBandId, string> = {
 
 /**
  * Operational pattern — separate vocabulary used in CRM-facing properties.
- * Aligned 1:1 with maturity band but worded for institutional readers.
+ * Aligned 1:1 with maturity band but worded for organizational readers.
  */
 export const OPERATIONAL_PATTERN_LABELS: Record<MaturityBandId, string> = {
   personality_dependent: 'Personality Dependent',
@@ -82,12 +82,12 @@ export const OPERATIONAL_PATTERN_LABELS: Record<MaturityBandId, string> = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Burden index — 4 institutional bands (Low / Moderate / Elevated / Severe)
+// Burden index — 4 organizational bands (Low / Moderate / Elevated / Severe)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type BurdenLevelLabel = 'Low' | 'Moderate' | 'Elevated' | 'Severe';
 
-/** Bucket a 0–100 burden score into a calm institutional label. */
+/** Bucket a 0–100 burden score into a calm organizational label. */
 export function mapBurdenLevel(score: number): BurdenLevelLabel {
   const s = Math.max(0, Math.min(100, score));
   if (s >= 75) return 'Severe';
@@ -116,7 +116,7 @@ export const PERSONA_LABELS: Record<ExecutivePersonaId, string> = {
 export const REPORT_TIER_LABELS: Record<ReportTierId, string> = {
   continuity_reflection: 'Continuity Reflection',
   executive_continuity_brief: 'Executive Continuity Brief',
-  institutional_continuity_diagnostic: 'Institutional Continuity Diagnostic',
+  institutional_continuity_diagnostic: 'Organizational Continuity Diagnostic',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ export const REPORT_TIER_LABELS: Record<ReportTierId, string> = {
 
 export type PostureLabel = 'Low' | 'Moderate' | 'Elevated';
 
-function dimScore(profile: InstitutionalContinuityProfile, dim: string): number {
+function dimScore(profile: OrganizationalContinuityProfile, dim: string): number {
   return profile.dimensions.find((d) => d.dimension === dim)?.score ?? 50;
 }
 
@@ -138,25 +138,25 @@ function postureFromRiskScore(score: number): PostureLabel {
 }
 
 /** Governance entropy — higher governance fragility (= lower score) → elevated entropy. */
-export function mapGovernanceEntropy(profile: InstitutionalContinuityProfile): PostureLabel {
+export function mapGovernanceEntropy(profile: OrganizationalContinuityProfile): PostureLabel {
   return postureFromRiskScore(dimScore(profile, 'governance_fragility'));
 }
 
 /** Stewardship concentration — derived from continuity burden + dependency dims. */
 export function mapStewardshipConcentration(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): PostureLabel {
   const burden = profile.burdenIndex?.score ?? 50;
   const ic = dimScore(profile, 'institutional_continuity');
-  // High burden + low institutional continuity = concentration risk.
+  // High burden + low organizational continuity = concentration risk.
   if (burden >= 65 || ic < 40) return 'Elevated';
   if (burden >= 45 || ic < 60) return 'Moderate';
   return 'Low';
 }
 
-/** Institutional dependency risk — operational memory + transition readiness. */
+/** Organizational dependency risk — operational memory + transition readiness. */
 export function mapInstitutionalDependencyRisk(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): PostureLabel {
   const om = dimScore(profile, 'operational_memory');
   const tr = dimScore(profile, 'transition_readiness');
@@ -171,7 +171,7 @@ export function mapInstitutionalDependencyRisk(
 export type ModernizationAlignmentLabel = 'Aligned' | 'Watch' | 'Misaligned';
 
 export function mapModernizationAlignment(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): ModernizationAlignmentLabel {
   const ic = dimScore(profile, 'institutional_continuity');
   const om = dimScore(profile, 'operational_memory');
@@ -182,13 +182,13 @@ export function mapModernizationAlignment(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Company-level — institutional state, not marketing segmentation
+// Company-level — organizational state, not marketing segmentation
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type ComplexityLabel = 'Low' | 'Moderate' | 'High';
 
 export function mapGovernanceComplexity(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): ComplexityLabel {
   const gf = dimScore(profile, 'governance_fragility');
   const td = dimScore(profile, 'trust_debt');
@@ -199,7 +199,7 @@ export function mapGovernanceComplexity(
 }
 
 export function mapModernizationMaturity(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): ComplexityLabel {
   const ic = dimScore(profile, 'institutional_continuity');
   if (ic >= 70) return 'High';
@@ -208,7 +208,7 @@ export function mapModernizationMaturity(
 }
 
 export function mapContinuityRiskPosture(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): PostureLabel {
   const composite = profile.composite;
   if (composite < 40) return 'Elevated';
@@ -217,7 +217,7 @@ export function mapContinuityRiskPosture(
 }
 
 export function mapTransformationReadiness(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): PostureLabel {
   const tr = dimScore(profile, 'transition_readiness');
   return postureFromRiskScore(tr);
@@ -235,7 +235,7 @@ export interface IcraContactAttribution {
 
 /** Build the HubSpot contact custom-properties record from an ICRA profile. */
 export function buildContactProperties(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
   options: {
     persona?: ExecutivePersonaId;
     attribution?: IcraContactAttribution;
@@ -277,7 +277,7 @@ export function buildContactProperties(
 
 /** Build the HubSpot company custom-properties record from an ICRA profile. */
 export function buildCompanyProperties(
-  profile: InstitutionalContinuityProfile,
+  profile: OrganizationalContinuityProfile,
 ): Record<string, string> {
   const burdenScore = profile.burdenIndex?.score ?? 50;
   return {
@@ -291,7 +291,7 @@ export function buildCompanyProperties(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Pipeline / lifecycle stages — institutional, not SaaS funnel
+// Pipeline / lifecycle stages — organizational, not SaaS funnel
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -315,7 +315,7 @@ export const ICRA_DEAL_STAGE_LABELS: Record<keyof typeof ICRA_DEAL_STAGES, strin
   diagnostic_interest: 'Executive Diagnostic Interest',
   oci_discovery: 'OCI Discovery',
   pilot_evaluation: 'Pilot Evaluation',
-  continuity_program: 'Institutional Continuity Program',
+  continuity_program: 'Organizational Continuity Program',
   strategic_partnership: 'OCI Strategic Partnership',
 };
 

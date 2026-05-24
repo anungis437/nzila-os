@@ -21,7 +21,7 @@ import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
-import type { InstitutionalContinuityProfile, OrganizationContext } from '@/lib/icra/types';
+import type { OrganizationalContinuityProfile, OrganizationContext } from '@/lib/icra/types';
 import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { mapToPdfReportData } from '@/lib/icra-pdf/reportDataMapper';
 import { generateExecutiveContinuityPdf } from '@/lib/icra-pdf/generateExecutiveContinuityPdf';
@@ -99,7 +99,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    const profile = profileRow.profilePayload as unknown as InstitutionalContinuityProfile;
+    const profile = profileRow.profilePayload as unknown as OrganizationalContinuityProfile;
     const locale = assessment.locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
     const orgContext = mapCtxToOrganizationContext(
       assessment.organizationContext as Record<string, unknown> | OrganizationContext | null,

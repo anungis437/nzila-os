@@ -83,7 +83,7 @@ const DEMO_TILES: Tile[] = [
   },
   {
     label: 'Reports',
-    desc: 'Analytics, continuity signals, and institutional insights',
+    desc: 'Analytics, continuity signals, and organizational insights',
     href: '/dashboard/reports',
     icon: BarChart3,
     iconBg: 'bg-indigo-500/15',
@@ -142,7 +142,7 @@ const DEFAULT_TILES: Tile[] = [
   },
   {
     label: 'Reports',
-    desc: 'Analytics and institutional insights',
+    desc: 'Analytics and organizational insights',
     href: '/dashboard/reports',
     icon: BarChart3,
     iconBg: 'bg-indigo-500/15',
@@ -529,7 +529,7 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
           transition={{ delay: 1.2, duration: 0.6 }}
           className="mt-20 text-center text-xs text-white/12"
         >
-          Union Eyes · Governance-safe institutional intelligence for Canadian labour
+          Union Eyes · Governance-safe organizational intelligence for Canadian labour
         </motion.p>
       </main>
     </div>

@@ -29,7 +29,7 @@ export type ContinuityComplexity =
   | 'moderate'
   | 'elevated'
   | 'high'
-  | 'institutional';
+  | 'organizational';
 
 export type GovernanceComplexity =
   | 'simple'
@@ -93,7 +93,7 @@ export interface DeclaredProfileInputs {
 }
 
 /**
- * Deterministic institutional profile. Produced by `orgContextClassifier`
+ * Deterministic organizational profile. Produced by `orgContextClassifier`
  * from form-declared inputs only. Never carries org name, free text, IP,
  * geolocation, device, or any inferred personal data.
  */

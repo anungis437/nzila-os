@@ -15,7 +15,7 @@ import { icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { workbooks, workbookPurchases } from '@/db/schema/workbook-schema';
 import { generateClaimToken, computeClaimExpiry } from '@/lib/icra/claim-tokens';
 import { eq } from 'drizzle-orm';
-import type { InstitutionalContinuityProfile } from '@/lib/icra/types';
+import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { evaluateFee, captureTransactionFee, reverseTransactionFee, reconcileExternalInvoicePayment } from '@/services/platform-economics';
 import { logger } from '@/lib/logger';
@@ -354,9 +354,9 @@ export async function POST(request: NextRequest) {
               .limit(1);
 
             if (profileRow?.profilePayload) {
-              const updated: InstitutionalContinuityProfile = {
-                ...(profileRow.profilePayload as InstitutionalContinuityProfile),
-                reportTierId: icraTierId as InstitutionalContinuityProfile['reportTierId'],
+              const updated: OrganizationalContinuityProfile = {
+                ...(profileRow.profilePayload as OrganizationalContinuityProfile),
+                reportTierId: icraTierId as OrganizationalContinuityProfile['reportTierId'],
               };
               await db
                 .update(icraMaturityProfiles)

@@ -1,6 +1,6 @@
 /**
  * /dashboard/knowledge-transfer — Wave 5 collapse (root only).
- * Canonical surface: /dashboard/institutional-memory (transfer tab).
+ * Canonical surface: /dashboard/organizational-memory (transfer tab).
  *
  * NOTE: `/dashboard/knowledge-transfer/new` and `/dashboard/knowledge-transfer/[id]`
  * remain authoritative drilldowns under this segment. Only the root
@@ -16,5 +16,5 @@ export default async function KnowledgeTransferRedirect({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/dashboard/institutional-memory?tab=transfer`);
+  redirect(`/${locale}/dashboard/organizational-memory?tab=transfer`);
 }

@@ -3,7 +3,7 @@
  * MODULE: OCRA Dynamic Questionnaire Adaptation
  * DOCTRINE: OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md §5; OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md §4, §10
  *
- * Given a full question bank and an institutional profile, produces a
+ * Given a full question bank and an organizational profile, produces a
  * deterministic `RoutedQuestionBank` with audit-grade rationale.
  *
  * Refuses to narrow below the minimum-meaningful threshold (returns full
@@ -72,7 +72,7 @@ function buildFullBankFallback(
  *
  * Inputs:
  *  - `bank` — the full inventory of OCRA questions to consider.
- *  - `profile` — deterministic institutional profile.
+ *  - `profile` — deterministic organizational profile.
  *  - `options` — see `RoutingOptions`.
  */
 export function routeQuestionBank(

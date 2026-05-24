@@ -4,7 +4,7 @@
  * Data structures for simulating organizational continuity degradation
  * under various scenarios (retirement, departure, vendor loss, etc.).
  *
- * All models remain organizationally scoped — understanding institutional
+ * All models remain organizationally scoped — understanding organizational
  * resilience, not evaluating individuals.
  */
 

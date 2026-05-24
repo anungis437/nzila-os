@@ -22,7 +22,7 @@ export const heroImagery = {
   technologyLeadership: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1920&q=80&auto=format',
   labourLeadership: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1920&q=80&auto=format',
   procurementLeadership: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&q=80&auto=format',
-  institutionalContinuity: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=1920&q=80&auto=format',
+  organizationalContinuity: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=1920&q=80&auto=format',
   governanceIntelligenceModule: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1920&q=80&auto=format',
   organizationalMemoryModule: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1920&q=80&auto=format',
   executiveIntelligenceModule: 'https://images.unsplash.com/photo-1474631245212-32dc3c8310c6?w=1920&q=80&auto=format',

@@ -33,7 +33,7 @@ const editorialStandards = [
   {
     title: 'Continuity-centered architecture',
     description:
-      'Doctrine prioritizes institutional memory, transition resilience, and stable organizational operations over novelty.',
+      'Doctrine prioritizes organizational memory, transition resilience, and stable organizational operations over novelty.',
   },
   {
     title: 'Executive-readable methodology',
@@ -43,15 +43,15 @@ const editorialStandards = [
   {
     title: 'Labour-safe modernization lens',
     description:
-      'Approaches avoid surveillance positioning and keep modernization anchored in institutional trust and accountability.',
+      'Approaches avoid surveillance positioning and keep modernization anchored in organizational trust and accountability.',
   },
 ];
 
 const narrativePathway = [
   {
-    stage: 'Institutional Problem',
+    stage: 'Organizational Problem',
     detail:
-      'Fragmented governance context, inconsistent operating interpretation, and loss of institutional rationale across transitions.',
+      'Fragmented governance context, inconsistent operating interpretation, and loss of organizational rationale across transitions.',
   },
   {
     stage: 'Governance Risk',
@@ -66,7 +66,7 @@ const narrativePathway = [
   {
     stage: 'Operational Visibility',
     detail:
-      'Institutional leaders require transparent, explainable visibility into policy alignment and implementation maturity.',
+      'Organizational leaders require transparent, explainable visibility into policy alignment and implementation maturity.',
   },
   {
     stage: 'Explainable Intelligence',
@@ -81,7 +81,7 @@ const narrativePathway = [
   {
     stage: 'Strategic Outcome',
     detail:
-      'Organizations modernize with coherence: resilient transitions, explainable governance, and deployable institutional systems.',
+      'Organizations modernize with coherence: resilient transitions, explainable governance, and deployable organizational systems.',
   },
 ];
 
@@ -108,7 +108,7 @@ const INSIGHTS_RHYTHM = {
 const realizationMoments = [
   {
     title: 'Hidden continuity dependency',
-    detail: 'Critical context often lives in people, not in reviewable institutional systems.',
+    detail: 'Critical context often lives in people, not in reviewable organizational systems.',
   },
   {
     title: 'Governance drift accumulation',
@@ -142,7 +142,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Designed for institutional adoption confidence</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Designed for organizational adoption confidence</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-8">
@@ -166,7 +166,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">From institutional fragmentation to operational trust</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">From organizational fragmentation to operational trust</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
@@ -289,7 +289,7 @@ export function InsightsMethodologyPageView({ locale, contextMode = 'executive' 
         tone="dark"
         revealTempo="conference"
         heading={<>Continuity flow, transformation rhythm, and governance symbolism</>}
-        description="This page holds the visual frameworks that make the insights doctrine legible: structure, continuity, and calm institutional motion."
+        description="This page holds the visual frameworks that make the insights doctrine legible: structure, continuity, and calm organizational motion."
       />
 
       <InsightsHubSubmenu locale={locale} active="methodology" contextMode={contextMode} />
@@ -337,7 +337,7 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
         tone="dark"
         revealTempo="conference"
         heading={<>Emotional memorability without theatrics</>}
-        description="This section turns institutional continuity into a remembered idea: trust, resilience, clarity, and continuity flow."
+        description="This section turns organizational continuity into a remembered idea: trust, resilience, clarity, and continuity flow."
       />
 
       <InsightsHubSubmenu locale={locale} active="resonance" contextMode={contextMode} />
@@ -347,7 +347,7 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
       <section className="py-16 border-b border-slate-200/70 bg-[#f8f6f2]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">The four registers of institutional resonance</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">The four registers of organizational resonance</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-8">
@@ -357,7 +357,7 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
           <div className="grid sm:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
             {[
               { title: 'Tone of calm authority', detail: 'Every page reads at the cadence of a steady executive briefing — no alarmism, no theatrics, no marketing volume.' },
-              { title: 'Continuity over novelty', detail: 'Recurring symbols, palette, and rhythm signal that modernization is a steward of institutional memory, not its disruptor.' },
+              { title: 'Continuity over novelty', detail: 'Recurring symbols, palette, and rhythm signal that modernization is a steward of organizational memory, not its disruptor.' },
               { title: 'Memorability without slogans', detail: 'Ideas land through structured contrast and quiet repetition rather than taglines, surviving the move from screen to boardroom conversation.' },
               { title: 'Trust before transformation', detail: 'Resonance reassures governance audiences that the system understands their risk posture before it proposes any change.' },
             ].map((item) => (
@@ -384,7 +384,7 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
           </ScrollReveal>
           <div className="space-y-3">
             {[
-              { stage: 'Anchor the frame', detail: 'Open every narrative on the institutional stakes — continuity, accountability, public trust — before introducing any tool or feature.' },
+              { stage: 'Anchor the frame', detail: 'Open every narrative on the organizational stakes — continuity, accountability, public trust — before introducing any tool or feature.' },
               { stage: 'Hold a single rhythm', detail: 'Maintain one editorial cadence across hero, doctrine, methodology, and resonance so the reader never feels handed off between voices.' },
               { stage: 'Repeat the symbols that matter', detail: 'Continuity language, palette, and structural motifs recur with intent — turning recognition into trust through quiet repetition.' },
               { stage: 'Close with stewardship, not sales', detail: 'End each section by returning the reader to their governance role, not to a conversion funnel.' },
@@ -419,7 +419,7 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
             {[
               { title: 'Shared executive vocabulary', detail: 'Leadership conversations converge on a common, governance-safe way of describing continuity, risk, and modernization choices.' },
               { title: 'Lower-friction governance review', detail: 'Boards and committees enter discussions already aligned on framing, so deliberation time focuses on decisions rather than definitions.' },
-              { title: 'Durable institutional memory', detail: 'The reasoning behind modernization choices remains legible to future leaders, auditors, and successors — long past the original engagement.' },
+              { title: 'Durable organizational memory', detail: 'The reasoning behind modernization choices remains legible to future leaders, auditors, and successors — long past the original engagement.' },
             ].map((moment) => (
               <ScrollReveal key={moment.title} duration={INSIGHTS_RHYTHM.panelDuration} distance={INSIGHTS_RHYTHM.panelDistance} tempo={INSIGHTS_RHYTHM.tempo}>
                 <article className="institution-panel narrative-step p-5">

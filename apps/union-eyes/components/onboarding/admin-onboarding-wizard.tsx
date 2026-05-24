@@ -129,7 +129,7 @@ export function AdminOnboardingWizard() {
         <p className="text-gray-600 dark:text-gray-300 mt-2">
           Welcome to your admin role. This continuity-aware onboarding configures your
           organization through governance-safe deployment — additive to existing
-          institutional systems, under operational stewardship.
+          organizational systems, under operational stewardship.
         </p>
       </div>
 

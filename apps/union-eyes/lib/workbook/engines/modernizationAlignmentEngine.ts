@@ -4,7 +4,7 @@
  * DOCTRINE_VERSION: 2.0.0
  *
  * Modernization Alignment Engine — aligns continuity, governance, and
- * modernization arcs so modernization does not erase institutional
+ * modernization arcs so modernization does not erase organizational
  * memory. Combines the Continuity-Safe Modernization Matrix™, governance
  * review classification, operational traceability review, and the
  * derived Modernization Continuity Gap™.
@@ -173,10 +173,10 @@ function buildPreview(
   const eroding = modernization.filter((m) => m.posture === 'continuity_eroding').length;
   const safe = modernization.filter((m) => m.posture === 'continuity_safe').length;
   if (eroding >= 1) {
-    return `${eroding} of ${modernization.length} initiatives are configured in a way that may erode institutional continuity.`;
+    return `${eroding} of ${modernization.length} initiatives are configured in a way that may erode organizational continuity.`;
   }
   if (safe / modernization.length >= 0.6) {
-    return `${safe} of ${modernization.length} initiatives are continuity-safe; modernization is broadly carrying institutional practice forward.`;
+    return `${safe} of ${modernization.length} initiatives are continuity-safe; modernization is broadly carrying organizational practice forward.`;
   }
   const compoundGaps = gaps.filter((g) => g.gapKind === 'compound_gap').length;
   if (compoundGaps >= 1) {

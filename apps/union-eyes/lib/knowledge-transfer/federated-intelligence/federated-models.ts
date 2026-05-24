@@ -9,7 +9,7 @@
  * - Prevent operational reconstruction
  * - No identifiable continuity details exposed
  *
- * This is institutional learning patterns — NOT competitive intelligence.
+ * This is organizational learning patterns — NOT competitive intelligence.
  */
 
 export type MaturityCohort =

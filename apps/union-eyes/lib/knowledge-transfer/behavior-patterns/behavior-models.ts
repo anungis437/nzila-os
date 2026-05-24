@@ -1,5 +1,5 @@
 /**
- * Institutional Behavior Pattern Models
+ * Organizational Behavior Pattern Models
  *
  * Data structures for recurring organizational continuity behavior patterns.
  *
@@ -7,7 +7,7 @@
  * All patterns characterize how an institution collectively behaves around governance.
  */
 
-/** The type of recurring institutional behavior pattern. */
+/** The type of recurring organizational behavior pattern. */
 export type BehaviorPatternType =
   | 'resilience_improvement_cycle'   // Org repeatedly improves after gaps
   | 'governance_engagement_loop'     // Regular engagement followed by stagnation
@@ -22,7 +22,7 @@ export type BehaviorPatternType =
 /** Strength of evidence behind the detected pattern. */
 export type PatternEvidenceStrength = 'strong' | 'moderate' | 'weak' | 'tentative';
 
-/** A single detected institutional behavior pattern. */
+/** A single detected organizational behavior pattern. */
 export interface InstitutionalBehaviorPattern {
   id: string;
   patternType: BehaviorPatternType;
@@ -46,7 +46,7 @@ export interface InstitutionalBehaviorPattern {
   mostRecentAt: string | null;
 }
 
-/** Institutional behavior pattern summary report. */
+/** Organizational behavior pattern summary report. */
 export interface BehaviorPatternReport {
   organizationId: string;
   analyzedAt: string;
@@ -54,9 +54,9 @@ export interface BehaviorPatternReport {
   patterns: InstitutionalBehaviorPattern[];
   /** The most dominant pattern. */
   dominantPattern: BehaviorPatternType | null;
-  /** Overall institutional learning signal. */
+  /** Overall organizational learning signal. */
   learningSignal: 'active_learning' | 'periodic_learning' | 'passive_learning' | 'insufficient_history';
-  /** Narrative of institutional behavioral observations. */
+  /** Narrative of organizational behavioral observations. */
   behaviorNarrative: string;
   /** Number of memory entries analyzed. */
   entriesAnalyzed: number;

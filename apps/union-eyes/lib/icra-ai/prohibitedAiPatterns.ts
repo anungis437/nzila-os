@@ -6,7 +6,7 @@
  *
  * Categories:
  *   - punitive_grading: institution-grading or risk-classification language
- *   - autonomous_judgment: language implying AI made an institutional decision
+ *   - autonomous_judgment: language implying AI made an organizational decision
  *   - psychological_inference: claims about internal mental/emotional states
  *   - legal_conclusion: legal-style determinations
  *   - hr_diagnostic: HR-style personnel evaluation
@@ -36,7 +36,7 @@ export const PROHIBITED_PATTERNS: ReadonlyArray<ProhibitedPattern> = [
   { category: 'punitive_grading', pattern: /\bunsafe\s+organization\b/i, description: 'unsafe organization' },
   { category: 'punitive_grading', pattern: /\bweak\s+institution\b/i, description: 'weak institution' },
   { category: 'punitive_grading', pattern: /\btoxic\s+culture\b/i, description: 'toxic culture' },
-  { category: 'punitive_grading', pattern: /\binstitutional\s+grade\b/i, description: 'institutional grade' },
+  { category: 'punitive_grading', pattern: /\binstitutional\s+grade\b/i, description: 'organizational grade' },
   { category: 'punitive_grading', pattern: /\bgovernance\s+grade\b/i, description: 'governance grade' },
   { category: 'punitive_grading', pattern: /\bleadership\s+rating\b/i, description: 'leadership rating' },
 

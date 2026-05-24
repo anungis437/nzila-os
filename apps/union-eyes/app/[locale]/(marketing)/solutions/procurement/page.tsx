@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -47,7 +47,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 const PAGE_COPY = {
   'en-CA': {
     badge: 'Solutions · Procurement Stakeholders',
-    heading: 'Procurement clarity for institutional deployment.',
+    heading: 'Procurement clarity for organizational deployment.',
     description:
       'UnionEyes gives procurement teams a coexistence-oriented, sovereignty-conscious deployment path: clear scope, governance-safe deployment controls, federation-aware operations, and evidence provenance for leadership confidence.',
     primaryCta: 'Request an Executive Briefing',
@@ -63,19 +63,19 @@ const PAGE_COPY = {
     outcomes: [
       { icon: Briefcase, title: 'Procurement-ready scope', desc: 'Clear module boundaries, staged rollout options, and governance-safe implementation paths.' },
       { icon: FileCheck, title: 'Trust documentation in hand', desc: 'Explainability standards, governance controls, and security posture are documented for due diligence.' },
-      { icon: CheckCircle2, title: 'Implementation risk reduced', desc: 'Phased deployment avoids big-bang risk and aligns with institutional change capacity.' },
+      { icon: CheckCircle2, title: 'Implementation risk reduced', desc: 'Phased deployment avoids big-bang risk and aligns with organizational change capacity.' },
       { icon: BarChart3, title: 'Value visibility for leadership', desc: 'Outcomes are measured in operational terms: cycle time, admin burden, and continuity health.' },
       { icon: Layers, title: 'Cross-stakeholder alignment', desc: 'Operations, governance, policy, and technology teams align around one shared implementation plan.' },
     ],
     confidenceHeading: 'Build confidence through coexistence-safe, governance-safe deployment',
     confidenceBody:
-      'Procurement teams can evaluate deployment safety through explicit implementation boundaries, continuity safeguards, sovereignty-conscious deployment pacing, and federation-aware operations — additive to existing institutional systems, never displacing them.',
+      'Procurement teams can evaluate deployment safety through explicit implementation boundaries, continuity safeguards, sovereignty-conscious deployment pacing, and federation-aware operations — additive to existing organizational systems, never displacing them.',
     confidenceCards: [
       { title: 'Implementation Boundaries', body: 'Clear scope definitions for pilot modules, governance ownership, and continuity requirements.' },
       { title: 'Governance Review Pathways', body: 'Documented oversight, explainability standards, and audit-ready decision pathways for due diligence.' },
-      { title: 'Phased Adoption Controls', body: 'Sequenced rollout checkpoints that align deployment speed with institutional change capacity.' },
+      { title: 'Phased Adoption Controls', body: 'Sequenced rollout checkpoints that align deployment speed with organizational change capacity.' },
     ],
-    rolloutHeading: 'Institutional rollout sequence for procurement planning',
+    rolloutHeading: 'Organizational rollout sequence for procurement planning',
     rolloutBody:
       'This canonical pathway helps procurement and leadership teams validate deployability, risk posture, and implementation realism before commitment.',
     phaseLabel: 'Phase',
@@ -104,7 +104,7 @@ const PAGE_COPY = {
   },
   'fr-CA': {
     badge: 'Solutions · Parties prenantes à l’approvisionnement',
-    heading: 'Clarté d’approvisionnement pour un déploiement institutionnel.',
+    heading: 'Clarté d’approvisionnement pour un déploiement organisationnel.',
     description:
       'UnionEyes donne aux équipes d’approvisionnement une voie de déploiement orientée vers la coexistence et la souveraineté : portée claire, contrôles sûrs pour la gouvernance, opérations conscientes des fédérations et provenance des preuves pour la confiance du leadership.',
     primaryCta: 'Demander un breffage exécutif',
@@ -120,19 +120,19 @@ const PAGE_COPY = {
     outcomes: [
       { icon: Briefcase, title: 'Portée prête pour l’approvisionnement', desc: 'Frontières de modules claires, options de déploiement par étapes et parcours sûrs pour la gouvernance.' },
       { icon: FileCheck, title: 'Documentation de confiance disponible', desc: 'Normes d’explicabilité, contrôles de gouvernance et posture de sécurité documentés pour la diligence raisonnable.' },
-      { icon: CheckCircle2, title: 'Risque de mise en œuvre réduit', desc: 'Le déploiement par phases évite le risque de bascule massive et respecte la capacité de changement institutionnelle.' },
+      { icon: CheckCircle2, title: 'Risque de mise en œuvre réduit', desc: 'Le déploiement par phases évite le risque de bascule massive et respecte la capacité de changement organisationnelle.' },
       { icon: BarChart3, title: 'Visibilité de valeur pour le leadership', desc: 'Les résultats sont mesurés en termes opérationnels : délais, charge administrative et santé de continuité.' },
       { icon: Layers, title: 'Alignement entre parties prenantes', desc: 'Opérations, gouvernance, politique et technologie s’alignent autour d’un même plan de mise en œuvre.' },
     ],
     confidenceHeading: 'Bâtir la confiance par un déploiement sûr pour la coexistence et la gouvernance',
     confidenceBody:
-      'Les équipes d’approvisionnement peuvent évaluer la sécurité du déploiement au moyen de limites explicites, de garde-fous de continuité, d’un rythme sensible à la souveraineté et d’opérations conscientes des fédérations — en ajout aux systèmes institutionnels existants, jamais en remplacement.',
+      'Les équipes d’approvisionnement peuvent évaluer la sécurité du déploiement au moyen de limites explicites, de garde-fous de continuité, d’un rythme sensible à la souveraineté et d’opérations conscientes des fédérations — en ajout aux systèmes organisationnels existants, jamais en remplacement.',
     confidenceCards: [
       { title: 'Limites de mise en œuvre', body: 'Définitions claires de la portée des modules pilotes, de la propriété de gouvernance et des exigences de continuité.' },
       { title: 'Voies de revue de gouvernance', body: 'Surveillance documentée, normes d’explicabilité et voies décisionnelles prêtes pour l’audit.' },
       { title: 'Contrôles d’adoption par phases', body: 'Points de contrôle séquencés qui alignent la vitesse de déploiement avec la capacité de changement.' },
     ],
-    rolloutHeading: 'Séquence de déploiement institutionnel pour la planification d’approvisionnement',
+    rolloutHeading: 'Séquence de déploiement organisationnel pour la planification d’approvisionnement',
     rolloutBody:
       'Ce parcours aide les équipes d’approvisionnement et de direction à valider la déployabilité, la posture de risque et le réalisme de mise en œuvre avant l’engagement.',
     phaseLabel: 'Phase',
@@ -142,16 +142,16 @@ const PAGE_COPY = {
       'Cartographie de gouvernance',
       'Alignement du pilote',
       'Adoption opérationnelle',
-      'Stabilisation institutionnelle',
+      'Stabilisation organisationnelle',
       'Résilience à long terme',
     ],
     governanceJourneyHeading: 'Carte du parcours de gouvernance',
     governanceJourney: [
       { stage: 'Étape 1 - Opérations fragmentées', detail: 'La gouvernance et les opérations sont actives, mais le contexte de continuité est dispersé.' },
-      { stage: 'Étape 2 - Visibilité de continuité', detail: 'La mémoire institutionnelle et le risque de continuité deviennent visibles dans une vue exploitable.' },
+      { stage: 'Étape 2 - Visibilité de continuité', detail: 'La mémoire organisationnelle et le risque de continuité deviennent visibles dans une vue exploitable.' },
       { stage: 'Étape 3 - Alignement de gouvernance', detail: 'Le raisonnement, les frontières de responsabilité et les parcours opérationnels deviennent lisibles.' },
       { stage: 'Étape 4 - Coordination explicable', detail: 'Les équipes coordonnent leurs décisions avec une justification transparente et des voies de revue claires.' },
-      { stage: 'Étape 5 - Résilience institutionnelle', detail: 'L’institution maintient la continuité pendant les transitions sans déstabilisation opérationnelle ou de gouvernance.' },
+      { stage: 'Étape 5 - Résilience organisationnelle', detail: 'L’institution maintient la continuité pendant les transitions sans déstabilisation opérationnelle ou de gouvernance.' },
     ],
     maturityHeading: 'Modèle de maturité opérationnelle',
     operationalMaturityPathway: ['Réactif', 'Coordonné', 'Explicable', 'Conscient de la continuité', 'Résilient institutionnellement'],
@@ -160,7 +160,7 @@ const PAGE_COPY = {
       { key: 'continuity', label: 'Continuité', focus: 'Résilience organisationnelle' },
       { key: 'governance', label: 'Gouvernance', focus: 'Explicabilité et surveillance' },
       { key: 'operations', label: 'Opérations', focus: 'Coordination et cohérence' },
-      { key: 'memory', label: 'Mémoire institutionnelle', focus: 'Préservation et transfert' },
+      { key: 'memory', label: 'Mémoire organisationnelle', focus: 'Préservation et transfert' },
       { key: 'trust', label: 'Confiance', focus: 'Révisabilité et transparence' },
     ],
     pacingHeading: 'Rythme par phases pour la confiance de l’approvisionnement et du leadership',
@@ -170,14 +170,14 @@ const PAGE_COPY = {
       { title: 'Calendrier pilote', purpose: 'Préparation opérationnelle', detail: 'Évaluation, activation ciblée et points de stabilisation pour la première fenêtre de déploiement.' },
       { title: 'Déploiement de gouvernance', purpose: 'Séquençage de surveillance', detail: 'Activation des voies de revue, cartographie des responsabilités et rythme d’approbation.' },
       { title: 'Adoption de continuité', purpose: 'Stabilisation organisationnelle', detail: 'Adoption progressive qui protège la continuité pendant l’ajustement des équipes.' },
-      { title: 'Alignement institutionnel', purpose: 'Rythme du changement', detail: 'Période où leadership, opérations et gouvernance convergent autour du nouveau modèle.' },
+      { title: 'Alignement organisationnel', purpose: 'Rythme du changement', detail: 'Période où leadership, opérations et gouvernance convergent autour du nouveau modèle.' },
       { title: 'Progression de maturité', purpose: 'Résilience à long terme', detail: 'Pratiques de preuve soutenues qui préservent la résilience à mesure que l’organisation change.' },
     ],
     executiveScenarioModels: [
       { title: 'Transition de leadership', summary: 'Montre comment les preuves de continuité préservent la connaissance opérationnelle lors d’un changement de direction.' },
       { title: 'Opérations de gouvernance fragmentées', summary: 'Montre comment les voies de revue et les responsabilités réduisent l’incertitude.' },
       { title: 'Instabilité d’intégration', summary: 'Montre comment les artefacts de déploiement contrôlé gardent les nouvelles équipes alignées.' },
-      { title: 'Perte de mémoire institutionnelle', summary: 'Montre comment les dossiers de preuve préservent le raisonnement, les précédents et le contexte.' },
+      { title: 'Perte de mémoire organisationnelle', summary: 'Montre comment les dossiers de preuve préservent le raisonnement, les précédents et le contexte.' },
       { title: 'Coordination multi-comités', summary: 'Montre comment les points de revue coordonnés évitent les décisions retardées ou dupliquées.' },
       { title: 'Dérive de gouvernance', summary: 'Montre comment les journaux de preuve gardent les décisions de modernisation alignées avec l’intention initiale.' },
     ],
@@ -195,10 +195,10 @@ const PAGE_COPY = {
       'Engagements de révisabilité',
     ],
     governanceOperationalWalkthroughs: [
-      { type: 'Transition de leadership', focus: 'Préservation de la continuité', narrative: 'Maintient la mémoire institutionnelle et la continuité de gouvernance pendant le roulement.' },
+      { type: 'Transition de leadership', focus: 'Préservation de la continuité', narrative: 'Maintient la mémoire organisationnelle et la continuité de gouvernance pendant le roulement.' },
       { type: 'Revue de gouvernance', focus: 'Explicabilité', narrative: 'Montre comment les décisions restent traçables par des points de revue et des voies de justification.' },
       { type: 'Coordination de comités', focus: 'Cohérence opérationnelle', narrative: 'Aligne les rôles et les transferts afin que les décisions restent coordonnées.' },
-      { type: 'Stabilisation d’intégration', focus: 'Mémoire institutionnelle', narrative: 'Préserve le contexte de continuité lorsque de nouvelles équipes héritent de responsabilités.' },
+      { type: 'Stabilisation d’intégration', focus: 'Mémoire organisationnelle', narrative: 'Préserve le contexte de continuité lorsque de nouvelles équipes héritent de responsabilités.' },
       { type: 'Réduction de fragmentation', focus: 'Alignement', narrative: 'Réduit les silos par un langage de gouvernance partagé et un rythme de revue.' },
       { type: 'Revue d’approvisionnement', focus: 'Confiance de gouvernance', narrative: 'Soutient la diligence raisonnable avec garde-fous, limites et engagements de preuve.' },
     ],

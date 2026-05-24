@@ -67,7 +67,7 @@ export function resolveDomainEmphasis(
   }
   if (profile.institutionalScale === 'federated_complex') {
     out = bump(out, 'governance_fragility', 0.3, 'Federated complexity amplifies governance-fragility interpretation across affiliated units.');
-    out = bump(out, 'operational_memory', 0.2, 'Federations face uneven institutional memory across units.');
+    out = bump(out, 'operational_memory', 0.2, 'Federations face uneven organizational memory across units.');
   }
   if (profile.institutionalScale === 'large' || profile.institutionalScale === 'enterprise') {
     out = bump(out, 'operational_memory', 0.2, 'Large institutions face memory-loss risk from scale and turnover.');

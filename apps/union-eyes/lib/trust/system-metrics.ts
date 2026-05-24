@@ -293,7 +293,7 @@ export async function exportTrustMetricsPDF(_metrics: TrustMetrics): Promise<Blo
 }
 
 /**
- * Generate trust dashboard summary for institutional stakeholders
+ * Generate trust dashboard summary for organizational stakeholders
  */
 export function generateTrustSummary(metrics: TrustMetrics): string {
   const sections = [

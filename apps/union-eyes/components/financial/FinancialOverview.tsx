@@ -372,7 +372,7 @@ function PaymentStatusBadge({ status }: { status: string }) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// FinancialOverview — institutional finance visibility surface
+// FinancialOverview — organizational finance visibility surface
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function FinancialOverview() {

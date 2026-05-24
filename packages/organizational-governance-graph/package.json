@@ -1,0 +1,29 @@
+{
+  "name": "@nzila/organizational-governance-graph",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ontology": "./src/ontology/kinds.ts",
+    "./adapters": "./src/adapters/source-adapter.ts",
+    "./projection": "./src/projection/build.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nzila/platform-decision-graph": "workspace:*",
+    "@nzila/platform-entity-graph": "workspace:*",
+    "@nzila/platform-ontology": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

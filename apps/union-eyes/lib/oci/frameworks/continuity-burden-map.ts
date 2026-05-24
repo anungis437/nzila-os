@@ -63,10 +63,10 @@ function posturalStatement(composite: number): string {
     return 'A significant share of operational coherence is being held by a small number of carriers without redundancy.';
   }
   if (composite >= 0.5) {
-    return 'Continuity burden is concentrated enough that a single transition would meaningfully reduce institutional capacity.';
+    return 'Continuity burden is concentrated enough that a single transition would meaningfully reduce organizational capacity.';
   }
   if (composite >= 0.3) {
-    return 'Continuity burden is recognisable. Identifying successors and recording lineage would reduce institutional exposure.';
+    return 'Continuity burden is recognisable. Identifying successors and recording lineage would reduce organizational exposure.';
   }
   return 'Continuity burden appears reasonably distributed. Periodic review remains appropriate.';
 }

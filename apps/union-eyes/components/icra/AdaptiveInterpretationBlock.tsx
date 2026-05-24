@@ -16,8 +16,8 @@ import type { AdaptiveContextResolution } from '@/lib/icra/adaptation';
 const COPY = {
   'en-CA': {
     overline: 'Adaptive Interpretation Context',
-    body: 'This assessment was interpreted using the organizational context you provided. Core continuity questions remained included to preserve comparability across institutions, while interpretation reflected your institutional scale, governance structure, and continuity exposure.',
-    institutionalScale: 'Institutional scale',
+    body: 'This assessment was interpreted using the organizational context you provided. Core continuity questions remained included to preserve comparability across institutions, while interpretation reflected your organizational scale, governance structure, and continuity exposure.',
+    institutionalScale: 'Organizational scale',
     governanceComplexity: 'Governance structure',
     continuityExposure: 'Continuity exposure',
     routedQuestions: 'Adapted question set',
@@ -28,8 +28,8 @@ const COPY = {
   },
   'fr-CA': {
     overline: "Contexte d'interprétation adaptatif",
-    body: "Cette évaluation a été interprétée en fonction du contexte organisationnel que vous avez fourni. Les questions essentielles de continuité ont été maintenues pour préserver la comparabilité entre institutions, tandis que l'interprétation reflétait votre échelle institutionnelle, votre structure de gouvernance et votre exposition à la continuité.",
-    institutionalScale: 'Échelle institutionnelle',
+    body: "Cette évaluation a été interprétée en fonction du contexte organisationnel que vous avez fourni. Les questions essentielles de continuité ont été maintenues pour préserver la comparabilité entre institutions, tandis que l'interprétation reflétait votre échelle organisationnelle, votre structure de gouvernance et votre exposition à la continuité.",
+    institutionalScale: 'Échelle organisationnelle',
     governanceComplexity: 'Structure de gouvernance',
     continuityExposure: 'Exposition à la continuité',
     routedQuestions: 'Ensemble de questions adapté',

@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 /**
  * Locale-aware Pilot-Request page
@@ -35,7 +35,7 @@ import {
   ReadinessAssessmentResult,
 } from '@/lib/pilot/readiness-assessment';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
-import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
+import { OrganizationalContinuityNote } from '@/components/marketing/organizational-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { getInstitutionalModeProfile, parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { logger } from '@/lib/logger';
@@ -231,7 +231,7 @@ export default function LocalePilotRequestPage() {
         contextNote={contextProfile.heroFraming}
       />
 
-      <InstitutionalContinuityNote
+      <OrganizationalContinuityNote
         surface={tNote('label')}
         posture={tNote('posture')}
       />
@@ -563,7 +563,7 @@ export default function LocalePilotRequestPage() {
                 </section>
 
                 <section className="p-5 rounded-lg border border-gray-200 bg-white">
-                  <h3 className="font-semibold text-gray-900 mb-3">Institutional resilience direction</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">Organizational resilience direction</h3>
                   <p className="text-sm text-gray-700 leading-relaxed mb-3">{assessment.institutionalResilienceDirection}</p>
                   <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">Rollout recommendation:</span> {assessment.rolloutRecommendation}</p>
                 </section>
@@ -585,7 +585,7 @@ export default function LocalePilotRequestPage() {
                     <p>{assessment.continuityOverview.operationalStability}</p>
                   </article>
                   <article className="p-3 rounded bg-gray-50 border border-gray-100">
-                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Institutional memory health</p>
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Organizational memory health</p>
                     <p>{assessment.continuityOverview.institutionalMemoryHealth}</p>
                   </article>
                 </div>
@@ -616,7 +616,7 @@ export default function LocalePilotRequestPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <div>
                     <h3 className="font-semibold text-gray-900">Pilot simulation artifacts</h3>
-                    <p className="text-sm text-gray-600">Reviewable institutional examples for controlled modernization.</p>
+                    <p className="text-sm text-gray-600">Reviewable organizational examples for controlled modernization.</p>
                   </div>
                   <Link href={withInstitutionalContext(`/${locale}/proof`, contextMode)} className="text-sm font-semibold text-blue-700 hover:text-blue-800 inline-flex items-center gap-1">
                     View proof architecture <span aria-hidden>→</span>
@@ -729,7 +729,7 @@ export default function LocalePilotRequestPage() {
               </section>
 
               <section className="p-5 rounded-lg border border-gray-200 bg-white">
-                <h3 className="font-semibold text-gray-900 mb-3">Recommended Institutional Rollout Pathway</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Recommended Organizational Rollout Pathway</h3>
                 <div className="grid sm:grid-cols-2 gap-2">
                   {rolloutPathway.map((stage, index) => (
                     <div key={stage} className="text-sm text-gray-700 p-2 rounded bg-gray-50 border border-gray-100">

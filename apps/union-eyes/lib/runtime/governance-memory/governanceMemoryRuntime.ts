@@ -3,13 +3,13 @@
  * MODULE: OCI Governance Memory Runtime
  * DOCTRINE_VERSION: 1.0.0
  *
- * The Governance Memory Runtime preserves institutional rationale.
+ * The Governance Memory Runtime preserves organizational rationale.
  *
  * It never:
  *   - infers intent,
  *   - ranks people,
  *   - automates governance authority,
- *   - or generates institutional truth autonomously.
+ *   - or generates organizational truth autonomously.
  *
  * It only:
  *   - records rationale that a reviewer has stated,

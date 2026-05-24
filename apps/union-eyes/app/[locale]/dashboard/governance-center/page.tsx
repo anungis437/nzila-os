@@ -15,8 +15,8 @@ import {
   GOVERNANCE_VOCABULARY,
   INSTITUTIONAL_CONCEPTS,
   INSTITUTIONAL_ONTOLOGY_VERSION,
-} from '@nzila/institutional-cognition-core';
-import { CONTINUITY_COGNITION_VERSION } from '@nzila/institutional-governance-graph';
+} from '@nzila/organizational-cognition-core';
+import { CONTINUITY_COGNITION_VERSION } from '@nzila/organizational-governance-graph';
 import { requireUser } from '@/lib/api-auth-guard';
 import { RuntimeHydrationFooter } from '@/components/runtime-hydration';
 
@@ -175,7 +175,7 @@ export default async function GovernanceCenterPage() {
 
         <footer className="border-t border-slate-200 pt-6 text-xs text-slate-500">
           Institutional cognition substrate ·{' '}
-          <span className="font-mono">@nzila/institutional-cognition-core</span> · all surfaces
+          <span className="font-mono">@nzila/organizational-cognition-core</span> · all surfaces
           remain organizationally scoped, explainable, and labor-safe.
         </footer>
         <RuntimeHydrationFooter

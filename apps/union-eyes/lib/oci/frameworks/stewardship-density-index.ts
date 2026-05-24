@@ -3,7 +3,7 @@
  * FRAMEWORK: Stewardship Density Index™
  * DOCTRINE_VERSION: 1.0.0
  *
- * Quantifies how concentrated institutional knowledge is in too few
+ * Quantifies how concentrated organizational knowledge is in too few
  * continuity carriers. The index is the percentage of institution-critical
  * or load-bearing knowledge sitting with carriers who have NO identified
  * successor, weighted by the criticality band.
@@ -65,7 +65,7 @@ export const DENSITY_BANDS: readonly DensityBand[] = [
     id: 'fragile',
     label: 'Fragile concentration',
     posture:
-      'Continuity is carried by too few people relative to the institutional weight involved. Stabilization is appropriate before the next personnel transition.',
+      'Continuity is carried by too few people relative to the organizational weight involved. Stabilization is appropriate before the next personnel transition.',
     lowerBound: 0.5,
   },
   {

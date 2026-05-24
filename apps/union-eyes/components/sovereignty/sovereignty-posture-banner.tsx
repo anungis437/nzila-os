@@ -2,7 +2,7 @@
  * SovereigntyPostureBanner — Wave 6 sovereignty atmosphere embodiment.
  *
  * Server component rendered at the top of sovereignty-gated layouts so
- * that the institutional contract of the surface is *visible* before any
+ * that the organizational contract of the surface is *visible* before any
  * authoritative content loads. This is not decorative — it is the
  * runtime's way of communicating that the surface beneath it is
  * governance-safe, continuity-critical, and reviewer-of-record framed.
@@ -25,7 +25,7 @@ type SovereigntyPostureBannerProps = {
     | 'president';
   /**
    * One-line operational posture for this surface — what kind of
-   * institutional responsibility a viewer is taking on by being here.
+   * organizational responsibility a viewer is taking on by being here.
    */
   posture: string;
   /** Optional translated label for the sovereignty layer (defaults to English). */
@@ -51,7 +51,7 @@ export function SovereigntyPostureBanner({
   posture,
   layerLabel = 'Sovereignty layer',
   roleLabel,
-  accessNote = 'Access is logged; actions taken here are part of the institutional record.',
+  accessNote = 'Access is logged; actions taken here are part of the organizational record.',
 }: SovereigntyPostureBannerProps) {
   const resolvedRoleLabel = roleLabel ?? ROLE_LABELS[minRole];
   return (

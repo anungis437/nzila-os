@@ -61,15 +61,15 @@ const SCALE_OPENERS: Record<InstitutionalScale, BilingualPassage> = {
   },
   enterprise: {
     'en-CA':
-      'At enterprise scale, continuity is institutional infrastructure rather than individual practice. The reading below focuses on whether that infrastructure is observable, replayable, and trusted across the organization.',
+      'At enterprise scale, continuity is organizational infrastructure rather than individual practice. The reading below focuses on whether that infrastructure is observable, replayable, and trusted across the organization.',
     'fr-CA':
-      "À l'échelle d'une grande entreprise, la continuité relève de l'infrastructure institutionnelle plutôt que de la pratique individuelle. La lecture ci-dessous porte sur le caractère observable, rejouable et fiable de cette infrastructure dans l'ensemble de l'organisation.",
+      "À l'échelle d'une grande entreprise, la continuité relève de l'infrastructure organisationnelle plutôt que de la pratique individuelle. La lecture ci-dessous porte sur le caractère observable, rejouable et fiable de cette infrastructure dans l'ensemble de l'organisation.",
   },
   federated_complex: {
     'en-CA':
-      'In federated environments, continuity risk often appears as uneven interpretation across units, regions, committees, or affiliated bodies. The central question is whether institutional memory survives across the federation, not only within one office.',
+      'In federated environments, continuity risk often appears as uneven interpretation across units, regions, committees, or affiliated bodies. The central question is whether organizational memory survives across the federation, not only within one office.',
     'fr-CA':
-      "Dans les environnements fédérés, le risque de continuité se manifeste souvent par une interprétation inégale entre unités, régions, comités ou organismes affiliés. La question centrale est de savoir si la mémoire institutionnelle survit à travers la fédération, et non seulement au sein d'un seul bureau.",
+      "Dans les environnements fédérés, le risque de continuité se manifeste souvent par une interprétation inégale entre unités, régions, comités ou organismes affiliés. La question centrale est de savoir si la mémoire organisationnelle survit à travers la fédération, et non seulement au sein d'un seul bureau.",
   },
 };
 

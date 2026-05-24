@@ -3,7 +3,7 @@
  * DOCTRINE_VERSION: 1.0.0
  *
  * Public landing page for the ICRA — OCI Continuity Risk Assessment.
- * No auth. Fully public. Institutional tone.
+ * No auth. Fully public. Organizational tone.
  */
 
 import type { Metadata } from 'next';
@@ -21,25 +21,25 @@ const PAGE_COPY = {
   'en-CA': {
     metadataTitle: 'OCI Continuity Risk Assessment | Union Eyes',
     metadataDescription:
-      "Assess your labour organization's institutional continuity maturity. Identify governance fragility, operational dependencies, and transition readiness with a fully explainable, no-AI assessment.",
-    badge: 'Institutional Assessment',
+      "Assess your labour organization's organizational continuity maturity. Identify governance fragility, operational dependencies, and transition readiness with a fully explainable, no-AI assessment.",
+    badge: 'Organizational Assessment',
     heading: 'OCI Continuity Risk Assessment',
     description:
-      "A structured, explainable assessment of your labour organization's institutional continuity maturity. No AI scoring. No surveillance. Full transparency.",
+      "A structured, explainable assessment of your labour organization's organizational continuity maturity. No AI scoring. No surveillance. Full transparency.",
     begin: 'Begin Assessment',
     designEyebrow: 'Assessment Design',
     measuresHeading: 'What this assessment measures',
     measuresBody:
-      "Institutional continuity is not about any individual's performance. It is about whether the organization can sustain its operations, governance, and institutional knowledge across transitions.",
+      "Organizational continuity is not about any individual's performance. It is about whether the organization can sustain its operations, governance, and organizational knowledge across transitions.",
     processEyebrow: 'Process',
     processHeading: 'How it works',
     footerHeading: 'Begin your continuity assessment',
-    footerBody: 'A full institutional continuity profile in under 30 minutes.',
+    footerBody: 'A full organizational continuity profile in under 30 minutes.',
     footerCta: 'Start Assessment',
     dimensions: [
-      { label: 'Institutional Continuity', desc: 'How well the institution persists through changes' },
+      { label: 'Organizational Continuity', desc: 'How well the institution persists through changes' },
       { label: 'Governance Fragility', desc: 'Risk of governance failure under leadership transition' },
-      { label: 'Operational Memory', desc: 'Whether institutional knowledge survives personnel changes' },
+      { label: 'Operational Memory', desc: 'Whether organizational knowledge survives personnel changes' },
       { label: 'Transition Readiness', desc: 'Preparedness for planned and unplanned leadership changes' },
       { label: 'Trust Debt', desc: 'Accumulated governance legitimacy risk from past conduct' },
     ],
@@ -57,12 +57,12 @@ const PAGE_COPY = {
       {
         icon: BarChart3,
         title: 'Seven Scored Sections',
-        body: '32 questions across operational dependency, governance visibility, institutional memory, transition readiness, operational coordination, explainability, and sovereignty.',
+        body: '32 questions across operational dependency, governance visibility, organizational memory, transition readiness, operational coordination, explainability, and sovereignty.',
       },
       {
         icon: Shield,
         title: 'Explainable Profile',
-        body: 'A full institutional continuity profile with dimension scores, maturity band, observations, and recommended next steps. Every score is traceable.',
+        body: 'A full organizational continuity profile with dimension scores, maturity band, observations, and recommended next steps. Every score is traceable.',
       },
     ],
     facts: [
@@ -84,27 +84,27 @@ const PAGE_COPY = {
     ],
   },
   'fr-CA': {
-    metadataTitle: 'Évaluation du risque de continuité institutionnelle | Union Eyes',
+    metadataTitle: 'Évaluation du risque de continuité organisationnelle | Union Eyes',
     metadataDescription:
-      "Évaluez la maturité de continuité institutionnelle de votre organisation syndicale. Repérez la fragilité de gouvernance, les dépendances opérationnelles et la préparation aux transitions avec une évaluation entièrement explicable, sans notation par IA.",
-    badge: 'Évaluation institutionnelle',
-    heading: 'Évaluation du risque de continuité institutionnelle',
+      "Évaluez la maturité de continuité organisationnelle de votre organisation syndicale. Repérez la fragilité de gouvernance, les dépendances opérationnelles et la préparation aux transitions avec une évaluation entièrement explicable, sans notation par IA.",
+    badge: 'Évaluation organisationnelle',
+    heading: 'Évaluation du risque de continuité organisationnelle',
     description:
-      "Une évaluation structurée et explicable de la maturité de continuité institutionnelle de votre organisation syndicale. Aucune notation par IA. Aucune surveillance. Transparence complète.",
+      "Une évaluation structurée et explicable de la maturité de continuité organisationnelle de votre organisation syndicale. Aucune notation par IA. Aucune surveillance. Transparence complète.",
     begin: "Commencer l'évaluation",
     designEyebrow: "Conception de l'évaluation",
     measuresHeading: 'Ce que cette évaluation mesure',
     measuresBody:
-      "La continuité institutionnelle ne porte pas sur la performance d'une personne. Elle examine si l'organisation peut maintenir ses opérations, sa gouvernance et ses connaissances institutionnelles pendant les transitions.",
+      "La continuité organisationnelle ne porte pas sur la performance d'une personne. Elle examine si l'organisation peut maintenir ses opérations, sa gouvernance et ses connaissances organisationnelles pendant les transitions.",
     processEyebrow: 'Processus',
     processHeading: 'Comment cela fonctionne',
     footerHeading: 'Commencez votre évaluation de continuité',
-    footerBody: 'Un profil complet de continuité institutionnelle en moins de 30 minutes.',
+    footerBody: 'Un profil complet de continuité organisationnelle en moins de 30 minutes.',
     footerCta: "Démarrer l'évaluation",
     dimensions: [
-      { label: 'Continuité institutionnelle', desc: "Dans quelle mesure l'institution persiste pendant les changements" },
+      { label: 'Continuité organisationnelle', desc: "Dans quelle mesure l'institution persiste pendant les changements" },
       { label: 'Fragilité de gouvernance', desc: 'Risque de défaillance de gouvernance pendant une transition de leadership' },
-      { label: 'Mémoire opérationnelle', desc: 'Capacité des connaissances institutionnelles à survivre aux changements de personnel' },
+      { label: 'Mémoire opérationnelle', desc: 'Capacité des connaissances organisationnelles à survivre aux changements de personnel' },
       { label: 'Préparation aux transitions', desc: 'Préparation aux changements de leadership prévus et imprévus' },
       { label: 'Dette de confiance', desc: 'Risque accumulé de légitimité de gouvernance lié aux conduites passées' },
     ],
@@ -122,12 +122,12 @@ const PAGE_COPY = {
       {
         icon: BarChart3,
         title: 'Sept sections notées',
-        body: "32 questions sur les dépendances opérationnelles, la visibilité de gouvernance, la mémoire institutionnelle, la préparation aux transitions, la coordination opérationnelle, l'explicabilité et la souveraineté.",
+        body: "32 questions sur les dépendances opérationnelles, la visibilité de gouvernance, la mémoire organisationnelle, la préparation aux transitions, la coordination opérationnelle, l'explicabilité et la souveraineté.",
       },
       {
         icon: Shield,
         title: 'Profil explicable',
-        body: 'Un profil complet de continuité institutionnelle avec scores par dimension, niveau de maturité, observations et prochaines étapes recommandées. Chaque score est traçable.',
+        body: 'Un profil complet de continuité organisationnelle avec scores par dimension, niveau de maturité, observations et prochaines étapes recommandées. Chaque score est traçable.',
       },
     ],
     facts: [
@@ -167,7 +167,7 @@ export default async function ContinuityAssessmentPage({ params }: PageProps) {
   return (
     <main>
       <MarketingHeroSection
-        imageUrl={heroImagery.institutionalContinuity}
+        imageUrl={heroImagery.organizationalContinuity}
         badge={copy.badge}
         heading={copy.heading}
         description={copy.description}

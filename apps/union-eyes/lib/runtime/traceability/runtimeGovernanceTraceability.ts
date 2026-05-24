@@ -5,13 +5,13 @@
  *
  * Runtime Governance Traceability reads continuity events, ledger entries,
  * and governance memory references together and reports whether the
- * institutional trail is sufficient for an executive reading.
+ * organizational trail is sufficient for an executive reading.
  *
  * Posture:
  *   - Refusal-first: missing trails → not_yet_traceable.
  *   - Deterministic.
  *   - Reports a binary traceability verdict at the structural level only;
- *     institutional traceability remains the institution's own judgment.
+ *     organizational traceability remains the institution's own judgment.
  */
 
 import type {

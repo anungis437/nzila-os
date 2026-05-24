@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,13 +12,13 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 /**
- * Solutions — Stakeholder-Oriented Institutional Journeys
+ * Solutions — Stakeholder-Oriented Organizational Journeys
  *
  * Enterprise IA: Solutions hub surfacing each stakeholder journey.
- * Hides operating-architecture sophistication. Exposes institutional outcomes.
+ * Hides operating-architecture sophistication. Exposes organizational outcomes.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -51,7 +51,7 @@ const solutions = [
     icon: Users,
     audience: 'Union Executive Leadership',
     href: 'solutions/executive-leadership',
-    challenge: 'Strategic continuity is at risk when institutional knowledge lives in individuals, not in the organization.',
+    challenge: 'Strategic continuity is at risk when organizational knowledge lives in individuals, not in the organization.',
     outcomes: [
       'Organizational continuity visibility across leadership transitions',
       'Strategic coherence through succession and change',
@@ -75,10 +75,10 @@ const solutions = [
     icon: Settings,
     audience: 'Operations Leadership',
     href: 'solutions/operations-leadership',
-    challenge: 'Operational fragmentation erodes institutional resilience over time.',
+    challenge: 'Operational fragmentation erodes organizational resilience over time.',
     outcomes: [
       'Operational coherence across distributed teams',
-      'Institutional memory preservation during change',
+      'Organizational memory preservation during change',
       'Continuity planning for operational resilience',
     ],
     cta: 'Operations leadership solutions',
@@ -91,7 +91,7 @@ const solutions = [
     outcomes: [
       'Governance-safe AI with full explainability guarantees',
       'Enterprise security and Canadian data residency',
-      'Institutional trust infrastructure with audit capabilities',
+      'Organizational trust infrastructure with audit capabilities',
     ],
     cta: 'Technology leadership solutions',
   },
@@ -111,7 +111,7 @@ const solutions = [
     icon: Briefcase,
     audience: 'Procurement Stakeholders',
     href: 'solutions/procurement',
-    challenge: 'Procurement decisions require operational credibility, implementation readiness, and institutional trust validation.',
+    challenge: 'Procurement decisions require operational credibility, implementation readiness, and organizational trust validation.',
     outcomes: [
       'Modular deployment with phased implementation pathways',
       'Trust center documentation and audit-ready exports',
@@ -124,23 +124,23 @@ const solutions = [
 const pageCopy = {
   'en-CA': {
     badge: 'Solutions',
-    heading: 'Built for every institutional stakeholder',
+    heading: 'Built for every organizational stakeholder',
     description:
-      'UnionEyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role.',
+      'UnionEyes organizes around organizational stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role.',
     ctaHeading: 'Ready to explore your stakeholder journey?',
     ctaDescription:
-      'Request an Executive Briefing tailored to your role and institutional context.',
+      'Request an Executive Briefing tailored to your role and organizational context.',
     cta: 'Request an Executive Briefing',
     solutions,
   },
   'fr-CA': {
     badge: 'Solutions',
-    heading: 'Conçu pour chaque partie prenante institutionnelle',
+    heading: 'Conçu pour chaque partie prenante organisationnelle',
     description:
-      'UnionEyes s’organise autour des parcours des parties prenantes institutionnelles, pas autour de systèmes techniques. Chaque capacité met en avant les résultats utiles à votre rôle.',
-    ctaHeading: 'Prêt à explorer votre parcours institutionnel?',
+      'UnionEyes s’organise autour des parcours des parties prenantes organisationnelles, pas autour de systèmes techniques. Chaque capacité met en avant les résultats utiles à votre rôle.',
+    ctaHeading: 'Prêt à explorer votre parcours organisationnel?',
     ctaDescription:
-      'Demandez une présentation exécutive adaptée à votre rôle et à votre contexte institutionnel.',
+      'Demandez une présentation exécutive adaptée à votre rôle et à votre contexte organisationnel.',
     cta: 'Demander une présentation exécutive',
     solutions: [
       {
@@ -148,7 +148,7 @@ const pageCopy = {
         audience: 'Direction exécutive syndicale',
         href: 'solutions/executive-leadership',
         challenge:
-          'La continuité stratégique est fragilisée lorsque la connaissance institutionnelle vit chez des personnes plutôt que dans l’organisation.',
+          'La continuité stratégique est fragilisée lorsque la connaissance organisationnelle vit chez des personnes plutôt que dans l’organisation.',
         outcomes: [
           'Visibilité sur la continuité organisationnelle lors des transitions de leadership',
           'Cohérence stratégique pendant la succession et le changement',
@@ -174,10 +174,10 @@ const pageCopy = {
         audience: 'Direction des opérations',
         href: 'solutions/operations-leadership',
         challenge:
-          'La fragmentation opérationnelle affaiblit la résilience institutionnelle avec le temps.',
+          'La fragmentation opérationnelle affaiblit la résilience organisationnelle avec le temps.',
         outcomes: [
           'Cohérence opérationnelle entre équipes distribuées',
-          'Préservation de la mémoire institutionnelle pendant le changement',
+          'Préservation de la mémoire organisationnelle pendant le changement',
           'Planification de continuité pour la résilience opérationnelle',
         ],
         cta: 'Solutions pour les opérations',
@@ -191,7 +191,7 @@ const pageCopy = {
         outcomes: [
           'IA respectueuse de la gouvernance avec garanties d’explicabilité',
           'Sécurité d’entreprise et résidence des données au Canada',
-          'Infrastructure de confiance institutionnelle avec capacités d’audit',
+          'Infrastructure de confiance organisationnelle avec capacités d’audit',
         ],
         cta: 'Solutions pour la technologie',
       },
@@ -213,7 +213,7 @@ const pageCopy = {
         audience: 'Parties prenantes à l’approvisionnement',
         href: 'solutions/procurement',
         challenge:
-          'Les décisions d’approvisionnement exigent crédibilité opérationnelle, préparation de mise en œuvre et validation de confiance institutionnelle.',
+          'Les décisions d’approvisionnement exigent crédibilité opérationnelle, préparation de mise en œuvre et validation de confiance organisationnelle.',
         outcomes: [
           'Déploiement modulaire avec parcours de mise en œuvre par phases',
           'Documentation du centre de confiance et exports prêts pour l’audit',

@@ -76,7 +76,7 @@ function buildSingleSourceRecommendation(
     ],
     governanceImplications: [
       'Governance knowledge with single-source coverage creates regulatory continuity risk',
-      'Compliance processes may depend on single institutional knowledge holders',
+      'Compliance processes may depend on single organizational knowledge holders',
     ],
     continuityLogic: 'Reducing single-source dependencies directly lowers the probability of operational collapse when knowledge holders are unavailable.',
     tradeoffs: [
@@ -122,13 +122,13 @@ function buildGovernanceRecommendation(
     ],
     keyAssumptions: [
       'Governance classification is based on topic keyword analysis',
-      'Regulatory and compliance obligations require institutional knowledge continuity',
+      'Regulatory and compliance obligations require organizational knowledge continuity',
     ],
     governanceImplications: [
       'Regulatory compliance may be at risk if key governance knowledge is lost',
       'Governance decentralization is both a resilience and democratic organizational improvement',
     ],
-    continuityLogic: 'Governance failures cascade into operational paralysis — approval processes, compliance reporting, and institutional decision-making all depend on governance knowledge continuity.',
+    continuityLogic: 'Governance failures cascade into operational paralysis — approval processes, compliance reporting, and organizational decision-making all depend on governance knowledge continuity.',
     tradeoffs: [
       'Governance decentralization requires careful procedure formalization',
       'Compliance knowledge transfer must meet regulatory standards',
@@ -148,7 +148,7 @@ function buildDocumentationRecommendation(
     urgency: undocumentedChainCount >= 4 ? 'immediate' : 'near_term',
     impact: undocumentedChainCount >= 6 ? 'significant' : 'moderate',
     headline: `Launch documentation campaign — ${undocumentedChainCount} undocumented operational chains`,
-    rationale: `${undocumentedChainCount} operational chains exist only as tacit knowledge with no documented backup. Loss of any link in these chains would require complete relearning with no institutional reference.`,
+    rationale: `${undocumentedChainCount} operational chains exist only as tacit knowledge with no documented backup. Loss of any link in these chains would require complete relearning with no organizational reference.`,
     evidence: [
       {
         observation: `${undocumentedChainCount} single-source chains with no documentation signals`,
@@ -178,7 +178,7 @@ function buildDocumentationRecommendation(
       'Undocumented procedures may not meet governance formalization standards',
       'Audit trails may be incomplete if processes are undocumented',
     ],
-    continuityLogic: 'Documentation creates institutional memory that survives role transitions, enabling operational continuity regardless of individual availability.',
+    continuityLogic: 'Documentation creates organizational memory that survives role transitions, enabling operational continuity regardless of individual availability.',
     tradeoffs: [
       'Documentation requires structured time from existing knowledge holders',
       'Documentation quality is only as good as the review process applied',

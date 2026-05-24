@@ -35,7 +35,7 @@ export interface ReadinessAssessmentResult {
 
 /**
  * Calculate directional readiness profile based on application responses.
- * The score represents institutional deployment readiness, not worker performance.
+ * The score represents organizational deployment readiness, not worker performance.
  */
 export function calculateReadinessScore(
   application: PilotApplicationInput
@@ -387,7 +387,7 @@ function generateRecommendations(
 
   if (score >= 80) {
     recommendations.push('Readiness profile supports pilot launch with standard governance checkpoints');
-    recommendations.push('Schedule institutional kickoff and continuity review within 1 week');
+    recommendations.push('Schedule organizational kickoff and continuity review within 1 week');
   } else if (score >= 65) {
     recommendations.push('Address highlighted readiness gaps before full pilot activation');
     recommendations.push('Complete continuity and governance preparation phase (2-3 weeks)');

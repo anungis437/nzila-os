@@ -3,12 +3,12 @@
  * MODULE: OCI Facilitator Runtime
  * DOCTRINE_VERSION: 2.0.0
  *
- * Intervention sensitivity model. Reads institutional state +
+ * Intervention sensitivity model. Reads organizational state +
  * progression band to flag the sensitivity register the facilitator
  * should operate in.
  *
  * NEVER reads or emits a person-level signal. Sensitivity is an
- * institutional posture, not a personal trait.
+ * organizational posture, not a personal trait.
  *
  * Pure, deterministic.
  */
@@ -56,10 +56,10 @@ export function readInterventionSensitivity(input: SensitivityInput): Sensitivit
 function statementFor(register: SensitivityRegister): string {
   switch (register) {
     case 'high':
-      return 'Institutional sensitivity is high; the facilitator should operate in the calmest available register.';
+      return 'Organizational sensitivity is high; the facilitator should operate in the calmest available register.';
     case 'elevated':
-      return 'Institutional sensitivity is elevated; the facilitator should slow pacing and confirm readiness.';
+      return 'Organizational sensitivity is elevated; the facilitator should slow pacing and confirm readiness.';
     case 'none':
-      return 'No elevated institutional sensitivity is recorded.';
+      return 'No elevated organizational sensitivity is recorded.';
   }
 }

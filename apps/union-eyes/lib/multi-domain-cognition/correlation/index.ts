@@ -1,5 +1,5 @@
 /**
- * Cross-Domain Institutional Correlation
+ * Cross-Domain Organizational Correlation
  */
 
 export interface CorrelationPair {

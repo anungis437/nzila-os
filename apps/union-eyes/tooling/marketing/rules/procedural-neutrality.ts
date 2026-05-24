@@ -39,7 +39,7 @@ export const proceduralNeutralityRule: RuleModule = {
             message: `Non-neutral framing detected (${p.label}).`,
             line: i + 1,
             excerpt: lines[i].trim().slice(0, 200),
-            suggestion: p.suggestion ?? "Rephrase in procedural / institutional terms.",
+            suggestion: p.suggestion ?? "Rephrase in procedural / organizational terms.",
           });
         }
       }

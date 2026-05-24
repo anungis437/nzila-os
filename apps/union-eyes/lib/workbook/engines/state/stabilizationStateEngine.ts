@@ -94,7 +94,7 @@ function severityForCategory(category: StateSignalCategory): StateSignalSeverity
 function statementForEvaluation(ev: TransitionEvaluation): string {
   if (ev.isRegression) {
     if (ev.disposition === 'permitted') {
-      return `Regression from ${ev.from} to ${ev.to} is recognised as institutional record (${ev.regressionTrigger ?? 'unspecified'}).`;
+      return `Regression from ${ev.from} to ${ev.to} is recognised as organizational record (${ev.regressionTrigger ?? 'unspecified'}).`;
     }
     return `Regression from ${ev.from} to ${ev.to} is held pending an explicit trigger.`;
   }

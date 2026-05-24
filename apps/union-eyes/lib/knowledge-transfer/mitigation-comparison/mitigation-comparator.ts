@@ -6,7 +6,7 @@
  * and dependency concentration reductions.
  *
  * This is continuity decision intelligence — helping organizations
- * choose the right investments to strengthen institutional resilience.
+ * choose the right investments to strengthen organizational resilience.
  *
  * FRAMING: All comparisons are organizational interventions.
  * This system models documentation, governance, and operational processes.
@@ -65,7 +65,7 @@ function buildActionPlan(scenario: MitigationScenario): string[] {
       'Assign documentation owners for each critical process',
       'Create standardized documentation templates',
       'Establish documentation review checkpoints',
-      'Build institutional knowledge repository',
+      'Build organizational knowledge repository',
     ],
     cross_training: [
       'Map single-source expertise areas requiring backup coverage',
@@ -103,17 +103,17 @@ function buildActionPlan(scenario: MitigationScenario): string[] {
       'Monitor restructuring effectiveness',
     ],
     continuity_mentorship: [
-      'Identify institutional knowledge holders',
+      'Identify organizational knowledge holders',
       'Pair knowledge holders with continuity successors',
       'Establish structured mentorship programs',
       'Create knowledge transfer milestones',
-      'Document transferred institutional knowledge',
+      'Document transferred organizational knowledge',
     ],
     institutional_transfer_program: [
-      'Create comprehensive institutional knowledge inventory',
+      'Create comprehensive organizational knowledge inventory',
       'Design formal knowledge transfer program',
       'Schedule intensive handover sessions',
-      'Produce institutional memory documentation',
+      'Produce organizational memory documentation',
       'Validate transfer completeness through assessment',
     ],
   };

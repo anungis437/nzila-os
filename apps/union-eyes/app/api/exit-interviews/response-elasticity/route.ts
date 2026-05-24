@@ -1,5 +1,5 @@
 import { cognitionRoute } from '@/lib/api/cognition-route';
-import { responseElasticityEngine } from '@/lib/institutional-operating-intelligence';
+import { responseElasticityEngine } from '@/lib/organizational-operating-intelligence';
 
 export const dynamic = 'force-dynamic';
 

@@ -3,7 +3,7 @@
 /**
  * Shared doctrine compliance footer for CUPE 4373 demo surfaces.
  *
- * Carries the canonical disclaimers required by the institutional
+ * Carries the canonical disclaimers required by the organizational
  * operational cognition doctrine — bounded interpretation, explicit
  * human reviewer of record, escalation pathway, retention basis.
  */
@@ -27,7 +27,7 @@ export function Cupe4373DoctrineFooter({
 }: Props) {
   return (
     <footer
-      aria-label="Institutional cognition doctrine"
+      aria-label="Organizational cognition doctrine"
       className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-700"
     >
       <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr]">
@@ -54,7 +54,7 @@ export function Cupe4373DoctrineFooter({
         </div>
       </div>
       <p className="mt-3 border-t border-slate-200 pt-3 text-slate-600">
-        Bounded institutional interpretation; final authority remains with accountable union
+        Bounded organizational interpretation; final authority remains with accountable union
         officers. {context}
       </p>
     </footer>

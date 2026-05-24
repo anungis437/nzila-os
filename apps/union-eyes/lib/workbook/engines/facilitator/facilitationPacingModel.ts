@@ -65,7 +65,7 @@ export function readFacilitationPacing(input: PacingInput): PacingReading {
 
 function statementFor(pacing: PacingRecommendation, overload: boolean): string {
   const overloadNote = overload
-    ? ' Institutional bandwidth has been exceeded; intervention pacing is held back to protect the institutional rhythm.'
+    ? ' Organizational bandwidth has been exceeded; intervention pacing is held back to protect the organizational rhythm.'
     : '';
   switch (pacing) {
     case 'advance':

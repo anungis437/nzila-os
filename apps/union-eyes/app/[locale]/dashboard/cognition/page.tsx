@@ -22,7 +22,7 @@ import {
   stewardSubject,
 } from '@/lib/cognition/ue-adapter';
 import { RuntimeHydrationFooter } from '@/components/runtime-hydration';
-import { CONTINUITY_COGNITION_VERSION } from '@nzila/institutional-governance-graph';
+import { CONTINUITY_COGNITION_VERSION } from '@nzila/organizational-governance-graph';
 
 export const dynamic = 'force-dynamic';
 

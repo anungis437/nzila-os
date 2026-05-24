@@ -15,7 +15,7 @@ export type LearningArchetypeId =
   | 'resilience_fragmented'     // Inconsistent, siloed resilience
   | 'continuity_maturing'       // On a clear maturity trajectory
   | 'operationally_adaptive'    // Flexibly evolves governance practices
-  | 'documentation_builder'     // Focused on building institutional memory
+  | 'documentation_builder'     // Focused on building organizational memory
   | 'governance_stagnant';      // Limited governance momentum
 
 export interface LearningArchetype {

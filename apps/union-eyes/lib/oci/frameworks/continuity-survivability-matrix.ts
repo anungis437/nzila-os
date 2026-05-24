@@ -3,7 +3,7 @@
  * FRAMEWORK: Continuity Survivability Matrix\u2122
  * DOCTRINE_VERSION: 1.0.0
  *
- * Plots institutional dependencies against successor identification to
+ * Plots organizational dependencies against successor identification to
  * surface survivability gaps. The matrix is the IP shape consumed by the
  * Facilitated Edition Continuity Breakpoints module.
  *

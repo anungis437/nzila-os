@@ -5,7 +5,7 @@
  * DOCTRINE_VERSION: 1.0.0
  *
  * Pure, audit-safe summary of how a routed question bank was selected for a
- * given institutional profile. Designed to be:
+ * given organizational profile. Designed to be:
  *
  *   - Server- AND client-safe (no I/O, no PII, no free text)
  *   - Persistable as JSON on the assessment record

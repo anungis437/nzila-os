@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  *
  * Case study coordination surface
  *
@@ -22,7 +22,7 @@
  * Governance posture: bylaw-aligned procedural cadence, constitutional consistency,
  * accountability surfaces, and compliance choreography across jurisdictions and mandates.
  *
- * Continuity posture: institutional memory preservation, succession-aware handoff,
+ * Continuity posture: organizational memory preservation, succession-aware handoff,
  * stewardship of representational records, and procedural continuity across mandates.
  */
 import { notFound } from 'next/navigation';

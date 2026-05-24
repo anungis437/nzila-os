@@ -23,7 +23,7 @@ export interface AdaptiveNarrativeBundle {
   readonly doctrineVersion: '1.0.0';
   /** Profile-aware one-sentence header (from contextual normalizer). */
   readonly headerStatement: string;
-  /** Scale opener — sets institutional context. */
+  /** Scale opener — sets organizational context. */
   readonly scaleOpener: string;
   /** Governance framing — sets oversight context. */
   readonly governanceFraming: string;

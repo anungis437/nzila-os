@@ -31,7 +31,7 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
     const fetchData = async () => {
       try {
         // Single orchestrated call — replaces the previous 11 parallel fetches.
-        const res = await fetch('/api/exit-interviews/institutional-cognition').then((r) =>
+        const res = await fetch('/api/exit-interviews/organizational-cognition').then((r) =>
           r.json(),
         );
         const byEngine: Record<string, any> = res?.data?.byEngine ?? {};
@@ -64,16 +64,16 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading institutional intelligence...</div>;
+    return <div className="flex items-center justify-center h-screen">Loading organizational intelligence...</div>;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Institutional Operating Intelligence</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Organizational Operating Intelligence</h1>
           <p className="text-slate-600">
-            Unified institutional cognition environment. Systems dynamics, governance coherence, multi-domain correlations.
+            Unified organizational cognition environment. Systems dynamics, governance coherence, multi-domain correlations.
           </p>
         </div>
 
@@ -166,7 +166,7 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
         {/* Correlations Tab */}
         {activeTab === 'correlations' && data && (
           <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
-            <h3 className="font-semibold text-slate-900 mb-4">Cross-Domain Institutional Correlations</h3>
+            <h3 className="font-semibold text-slate-900 mb-4">Cross-Domain Organizational Correlations</h3>
             <div className="space-y-3">
               {data.correlation.correlations?.map((corr: any, i: number) => (
                 <div key={i} className="p-4 bg-slate-50 rounded border border-slate-200">

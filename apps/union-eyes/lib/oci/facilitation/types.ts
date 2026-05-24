@@ -49,7 +49,7 @@ export type FacilitationSessionType =
 /**
  * The eight canonical conversation categories for the continuity
  * conversation prompt catalogue. Each category captures a distinct
- * facet of the institutional continuity question.
+ * facet of the organizational continuity question.
  */
 export type ConversationCategory =
   | 'governance-survivability'
@@ -81,11 +81,11 @@ export type DiscoverySectionId =
 export interface FacilitationGuideEntry {
   /** Canonical session type. Must be unique across the catalogue. */
   readonly sessionType: FacilitationSessionType;
-  /** Short institutional title of the session, in editorial voice. */
+  /** Short organizational title of the session, in editorial voice. */
   readonly title: LocalizedString;
   /** Why the session exists. One or two sentences. */
   readonly purpose: LocalizedString;
-  /** Named institutional roles expected in the room. */
+  /** Named organizational roles expected in the room. */
   readonly audience: LocalizedStringList;
   /** Default duration, in minutes. */
   readonly durationMinutes: number;
@@ -134,7 +134,7 @@ export interface WorkshopStep {
 export interface WorkshopFlow {
   /** Canonical session type this flow belongs to. */
   readonly sessionType: FacilitationSessionType;
-  /** Short institutional title. */
+  /** Short organizational title. */
   readonly title: LocalizedString;
   /** One- or two-sentence summary of the arc. */
   readonly summary: LocalizedString;
@@ -164,7 +164,7 @@ export interface DiscoveryPrompt {
 export interface DiscoveryPromptSection {
   /** Canonical section identifier. */
   readonly sectionId: DiscoverySectionId;
-  /** Short institutional title. */
+  /** Short organizational title. */
   readonly title: LocalizedString;
   /** One- or two-sentence section purpose. */
   readonly purpose: LocalizedString;

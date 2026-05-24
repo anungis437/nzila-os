@@ -13,7 +13,7 @@
  *   - Stewardship Redistribution Evolution
  *   - Onboarding Survivability Progression
  *   - Continuity Debt Reduction
- *   - Institutional Resilience Trajectory
+ *   - Organizational Resilience Trajectory
  *   - Runtime Stabilization Persistence
  *   - Modernization Survivability Evolution
  *

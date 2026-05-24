@@ -1,7 +1,7 @@
 /**
- * Institutional Positioning Manifest (UnionEyes marketing surface)
+ * Organizational Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * Narrative pillars: governance, continuity (organizational memory, succession, stewardship),
  * coordination (operational workflow, intake, case management, representation),
  * trust (audit, transparency, evidence, oversight, explainability).
  *
@@ -12,7 +12,7 @@
  * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * organizational trust for democratic infrastructure.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -38,7 +38,7 @@ const PAGE_COPY = {
     badge: 'Solutions · Operations Leadership',
     heading: 'Operational coherence that survives any transition.',
     description:
-      'UnionEyes Operational Coherence gives operations leaders the institutional memory, fragmentation visibility, and continuity planning tools to keep distributed organizations aligned through any change.',
+      'UnionEyes Operational Coherence gives operations leaders the organizational memory, fragmentation visibility, and continuity planning tools to keep distributed organizations aligned through any change.',
     primaryCta: 'Request an Executive Briefing',
     secondaryCta: 'Operational Coherence Architecture',
     challengeHeading: 'The operational fragmentation problem',
@@ -46,12 +46,12 @@ const PAGE_COPY = {
       'Operational knowledge is siloed — regional offices duplicate work because they cannot see what others know',
       'Operational fragility builds invisibly until a leadership change or reorganization triggers a crisis',
       'Cross-functional alignment is assumed but rarely verified — until it breaks down',
-      'Institutional processes are undocumented, so every new manager rebuilds from scratch',
+      'Organizational processes are undocumented, so every new manager rebuilds from scratch',
     ],
     outcomesHeading: 'What operations leaders gain with UnionEyes',
     outcomes: [
       { icon: Network, title: 'Cross-functional alignment surfaced', desc: 'See alignment and coherence across distributed teams, regional offices, and functional areas — in one operational view.' },
-      { icon: RefreshCw, title: 'Continuity through organizational change', desc: 'Maintain operational coherence through reorganization, expansion, and leadership transitions without losing institutional context.' },
+      { icon: RefreshCw, title: 'Continuity through organizational change', desc: 'Maintain operational coherence through reorganization, expansion, and leadership transitions without losing organizational context.' },
       { icon: Users, title: 'Team continuity planning', desc: 'Identify knowledge gaps across teams and build transfer pathways before operational fragilities become crises.' },
       { icon: AlertCircle, title: 'Fragmentation risk made visible', desc: 'Understand the organizational fragmentation patterns undermining long-term operational effectiveness.' },
       { icon: Layers, title: 'Organizational Memory for operations', desc: 'Surface the operational precedents, decisions, and context that inform how your organization actually works.' },
@@ -64,7 +64,7 @@ const PAGE_COPY = {
     badge: 'Solutions · Direction des opérations',
     heading: 'Une cohérence opérationnelle qui survit à chaque transition.',
     description:
-      'La cohérence opérationnelle d’UnionEyes donne aux responsables des opérations la mémoire institutionnelle, la visibilité sur la fragmentation et les outils de planification de continuité nécessaires pour garder les organisations distribuées alignées pendant le changement.',
+      'La cohérence opérationnelle d’UnionEyes donne aux responsables des opérations la mémoire organisationnelle, la visibilité sur la fragmentation et les outils de planification de continuité nécessaires pour garder les organisations distribuées alignées pendant le changement.',
     primaryCta: 'Demander un breffage exécutif',
     secondaryCta: 'Architecture de cohérence opérationnelle',
     challengeHeading: 'Le problème de fragmentation opérationnelle',
@@ -72,12 +72,12 @@ const PAGE_COPY = {
       'La connaissance opérationnelle reste en silos, et les bureaux régionaux répètent le même travail faute de visibilité',
       'La fragilité opérationnelle s’accumule en silence jusqu’à ce qu’une transition ou une réorganisation la révèle',
       'L’alignement entre fonctions est présumé, mais rarement vérifié, jusqu’au moment où il se brise',
-      'Les processus institutionnels non documentés forcent chaque nouvelle gestion à reconstruire depuis le départ',
+      'Les processus organisationnels non documentés forcent chaque nouvelle gestion à reconstruire depuis le départ',
     ],
     outcomesHeading: 'Ce que les responsables des opérations gagnent avec UnionEyes',
     outcomes: [
       { icon: Network, title: 'Alignement transversal rendu visible', desc: 'Voyez l’alignement et la cohérence entre équipes, bureaux régionaux et fonctions dans une seule vue opérationnelle.' },
-      { icon: RefreshCw, title: 'Continuité pendant les changements organisationnels', desc: 'Maintenez la cohérence pendant les réorganisations, expansions et transitions sans perdre le contexte institutionnel.' },
+      { icon: RefreshCw, title: 'Continuité pendant les changements organisationnels', desc: 'Maintenez la cohérence pendant les réorganisations, expansions et transitions sans perdre le contexte organisationnel.' },
       { icon: Users, title: 'Planification de continuité des équipes', desc: 'Repérez les écarts de connaissances et bâtissez des voies de transfert avant que les fragilités deviennent des crises.' },
       { icon: AlertCircle, title: 'Risque de fragmentation rendu visible', desc: 'Comprenez les modèles de fragmentation qui affaiblissent l’efficacité opérationnelle à long terme.' },
       { icon: Layers, title: 'Mémoire organisationnelle pour les opérations', desc: 'Faites ressortir les précédents, décisions et contextes qui expliquent comment votre organisation fonctionne réellement.' },

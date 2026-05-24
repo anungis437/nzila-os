@@ -2,7 +2,7 @@
  * Canadian positioning rule.
  *
  * Rewards Canadian-hosted, bilingual-first, sovereignty-conscious,
- * institutional-trust, democratic-infrastructure, governance-safe-operations.
+ * organizational-trust, democratic-infrastructure, governance-safe-operations.
  */
 
 import { CANADIAN_POSITIONING_TERMS, countRewards } from "../config/required-vocabulary";

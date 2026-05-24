@@ -101,6 +101,6 @@ describe('buildAiEnvelope', () => {
     expect(result.modelVersion).toBe('1.0.0');
     expect(result.auditRef).toBe('ai-test-123');
     expect(result.disclaimer).toBeDefined();
-    expect(result.disclaimer).toContain('bounded institutional intelligence');
+    expect(result.disclaimer).toContain('bounded organizational intelligence');
   });
 });

@@ -28,7 +28,7 @@ export const viewport: Viewport = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = getUnionEyesSiteTopology();
-  const institutionalDescription =
+  const organizationalDescription =
     'Institutional governance and continuity infrastructure for unions and democratic organizations — bylaw-aligned procedural cadence, institutional memory preservation, representational coordination, and audit-grade transparency. Canadian-hosted, bilingual-first, sovereignty-conscious.';
   const institutionalTitle = `UnionEyes | Institutional Governance & Continuity Infrastructure for Unions${site.titleSuffix}`;
 
@@ -37,13 +37,13 @@ export async function generateMetadata(): Promise<Metadata> {
       default: institutionalTitle,
       template: `%s | UnionEyes${site.titleSuffix}`,
     },
-    description: institutionalDescription,
+    description: organizationalDescription,
     metadataBase: new URL(site.marketingUrl),
     openGraph: {
       type: 'website',
       siteName: 'UnionEyes',
       title: institutionalTitle,
-      description: institutionalDescription,
+      description: organizationalDescription,
       images: [
         {
           url: '/images/og-default.png',
@@ -56,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
       title: institutionalTitle,
-      description: institutionalDescription,
+      description: organizationalDescription,
       images: ['/images/og-default.png'],
     },
     icons: {

@@ -3,7 +3,7 @@
  * MODULE: OCI Operational Truth Hardening — Part 1
  * DOCTRINE_VERSION: 1.0.0
  *
- * Cross-product state progression: assert that an institutional reading
+ * Cross-product state progression: assert that an organizational reading
  * evolves coherently when fed back through the lifecycle a second time.
  * The OCI lifecycle must produce ordered, monotonic, refusal-friendly
  * progression — never invent a trajectory it has not observed.

@@ -1,5 +1,5 @@
 /**
- * Institutional Precedent Intelligence
+ * Organizational Precedent Intelligence
  */
 
 export interface InstitutionalPrecedentProfile {
@@ -27,7 +27,7 @@ export async function analyzeInstitutionalPrecedent(organizationId: string): Pro
       { precedents: ['Governance review', 'Policy adjustment', 'Communication'], impact: 60 },
     ],
     reasoning_lineage: ['Historical patterns suggest governance evolution', 'Mitigation strategies show learning'],
-    interpretationGuidance: 'Institutional memory shows coherent precedent continuity.',
+    interpretationGuidance: 'Organizational memory shows coherent precedent continuity.',
     entriesAnalyzed: memory.totalEntries,
   };
 }

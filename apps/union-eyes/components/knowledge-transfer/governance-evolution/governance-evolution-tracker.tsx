@@ -125,7 +125,7 @@ export function GovernanceEvolutionTracker() {
       try {
         const [learningRes, adaptiveRes, adaptationRes, effectivenessRes, benchmarkRes] =
           await Promise.all([
-            fetch('/api/exit-interviews/institutional-learning'),
+            fetch('/api/exit-interviews/organizational-learning'),
             fetch('/api/exit-interviews/adaptive-resilience'),
             fetch('/api/exit-interviews/governance-adaptation'),
             fetch('/api/exit-interviews/mitigation-effectiveness'),
@@ -146,7 +146,7 @@ export function GovernanceEvolutionTracker() {
         setEffectiveness(e.data);
         setBenchmark(b.data);
       } catch {
-        setError('Failed to load institutional intelligence data.');
+        setError('Failed to load organizational intelligence data.');
       } finally {
         setLoading(false);
       }
@@ -245,7 +245,7 @@ export function GovernanceEvolutionTracker() {
       </div>
 
       {loading && (
-        <div className="py-12 text-center text-slate-500">Loading institutional intelligence…</div>
+        <div className="py-12 text-center text-slate-500">Loading organizational intelligence…</div>
       )}
       {error && (
         <div className="py-6 text-center text-red-600">{error}</div>
@@ -257,7 +257,7 @@ export function GovernanceEvolutionTracker() {
           <p className="text-sm text-slate-600">{learning.summary}</p>
           <div className="grid gap-3">
             {learning.insights.length === 0 ? (
-              <p className="text-slate-400 text-sm">No insights available yet. Build more institutional memory to enable learning analysis.</p>
+              <p className="text-slate-400 text-sm">No insights available yet. Build more organizational memory to enable learning analysis.</p>
             ) : (
               learning.insights.map((insight) => (
                 <LearningInsightCard key={insight.id} insight={insight} />

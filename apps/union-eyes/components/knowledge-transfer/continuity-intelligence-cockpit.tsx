@@ -14,7 +14,7 @@
  *   6. Governance Dependency Alerts
  *   7. Topic Graph (knowledge relationships)
  *
- * Design: calm institutional intelligence. Not surveillance software.
+ * Design: calm organizational intelligence. Not surveillance software.
  * Framing: organizational continuity, not individual evaluation.
  */
 
@@ -229,7 +229,7 @@ export function ContinuityIntelligenceCockpit() {
             ← Knowledge Transfer
           </Link>
           <Link
-            href="../institutional-memory"
+            href="../organizational-memory"
             className="rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Explore Memory →

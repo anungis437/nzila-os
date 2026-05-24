@@ -7181,22 +7181,22 @@
         },
         "priorities": {
           "name": "Compromissos e prazos",
-          "desc": "Prazos estatutários, obrigações e próximas ações institucionais"
+          "desc": "Prazos estatutários, obrigações e próximas ações organizacionais"
         },
         "intelligence": {
-          "name": "Inteligência institucional",
+          "name": "Inteligência organizacional",
           "desc": "Superfícies executivas, federais e analíticas"
         },
         "cognition": {
           "name": "Raciocínio governado",
-          "desc": "Raciocínio soberano ancorado na doutrina institucional"
+          "desc": "Raciocínio soberano ancorado na doutrina organizacional"
         },
         "governance": {
           "name": "Governança oficial",
           "desc": "Carta, moções e decisões oficiais"
         },
         "memory": {
-          "name": "Memória institucional",
+          "name": "Memória organizacional",
           "desc": "Doutrina, precedentes e arquivo de continuidade"
         },
         "trust": {
@@ -7228,7 +7228,7 @@
       "problemHeading": "Os Sindicatos Merecem Mais do que Planilhas e Suposições",
       "problemDescription": "Reclamações rastreadas em cadernos. Finanças reconciliadas em planilhas. Registros de membros espalhados por drives. Empregadores têm sistemas de RH milionários — sindicatos têm processos manuais que perdem casos, atrasam relatórios e corroem a confiança.",
       "solutionBadge": "A Solução",
-      "solutionHeading": "Governança institucional construída para como os sindicatos realmente operam",
+      "solutionHeading": "Governança organizacional construída para como os sindicatos realmente operam",
       "solutionDescription": "UnionEyes é um sistema operacional governado — não mais uma ferramenta SaaS. Cada implantação é delimitada por contrato, cada módulo é ativado por direito, e cada ação é registrada para auditoria. A cobrança flui da organização matriz para baixo. Os dados permanecem na jurisdição canadense.",
       "pillar1": "Implantação Governada por Contrato",
       "pillar2": "Responsabilidade Financeira",
@@ -7257,7 +7257,7 @@
       "gov3Desc": "Todos os dados armazenados em centros de dados Azure no Canadá. Compatível com PIPEDA. Sem transferências transfronteiriças.",
       "gov4Title": "Reconciliação Financeira",
       "gov4Desc": "Contribuições, per capita, fundo de greve — consolidados entre locais com supervisão em nível de matriz e relatórios prontos para exportação.",
-      "modulesBadge": "Módulos institucionais",
+      "modulesBadge": "Módulos organizacionais",
       "modulesHeading": "Ative o Que Você Precisa. Nada Mais.",
       "modulesDescription": "Cada módulo é independentemente autorizado e ativado por contrato. Sem pacotes, sem vendas forçadas.",
       "module1": "Governança & Supervisão",
@@ -7480,7 +7480,7 @@
       "pageDescription": "Status em tempo real dos serviços da plataforma UnionEyes."
     },
     "footer": {
-      "description": "Infraestrutura institucional de governança e continuidade para sindicatos canadenses — implantada por contrato, delimitada por habilitações e projetada para prestação de contas.",
+      "description": "Infraestrutura organizacional de governança e continuidade para sindicatos canadenses — implantada por contrato, delimitada por habilitações e projetada para prestação de contas.",
       "platform": "Modulos",
       "solutions": "Solucoes",
       "governanceAndTrust": "Governanca e confianca",
@@ -7488,7 +7488,7 @@
       "resources": "Recursos",
       "company": "Empresa",
       "legal": "Legal",
-      "institutionalContinuity": "Continuidade institucional",
+      "organizationalContinuity": "Continuidade organizacional",
       "governanceIntelligence": "Inteligencia de governanca",
       "organizationalMemory": "Memória corporativa",
       "corporateMemory": "Memória corporativa",
@@ -7506,7 +7506,7 @@
       "labourSafeAi": "IA segura para o trabalho",
       "explainabilityStandards": "Padroes de explicabilidade",
       "insights": "Analises",
-      "institutionalProof": "Provas institucionais",
+      "organizationalProof": "Provas organizacionais",
       "governance": "Governanca e supervisao",
       "grievanceTracking": "Gestao de casos e reclamacoes",
       "memberPortal": "Portal do membro",
@@ -7527,7 +7527,7 @@
       "accessibility": "Acessibilidade",
       "trust": "Confiança & Conformidade",
       "rights": "Todos os direitos reservados",
-      "tagline": "Infraestrutura institucional de governança e continuidade para sindicatos canadenses."
+      "tagline": "Infraestrutura organizacional de governança e continuidade para sindicatos canadenses."
     },
     "features": {
       "grievanceTracking": {
@@ -7796,7 +7796,7 @@
       "phase6": {
         "tabScenario": "Inteligencia de cenarios",
         "leadershipTitle": "Cenarios de continuidade em transicoes de lideranca",
-        "leadershipDesc": "Esses cenarios refletem transicoes institucionais reais e mostram respostas calmas que preservam a coerencia de governanca.",
+        "leadershipDesc": "Esses cenarios refletem transicoes organizacionais reais e mostram respostas calmas que preservam a coerencia de governanca.",
         "frictionTitle": "Fluxos de simulacao de friccao de governanca",
         "disruptionTitle": "Modelagem de disrupcao operacional",
         "stabilizationTitle": "Simulacao de estabilizacao organizacional",
@@ -11077,23 +11077,23 @@
   "homePage": {
     "meta": {
       "title": "UnionEyes | Constitutional Continuity Infrastructure",
-      "description": "UnionEyes is the continuity layer for federated institutions — preserving institutional memory, strengthening governance coordination, and modernizing operational trust through non-disruptive implementation alongside existing systems. Canadian-hosted, bilingual-first, sovereignty-conscious."
+      "description": "UnionEyes is the continuity layer for federated organizations — preserving organizational memory, strengthening governance coordination, and modernizing operational trust through non-disruptive implementation alongside existing systems. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "jsonLd": {
       "name": "UnionEyes",
       "description": "Constitutional continuity infrastructure for federated organizations. Canadian-hosted, bilingual-first, sovereignty-conscious."
     },
     "hero": {
-      "eyebrow": "Institutional Governance & Continuity Infrastructure",
-      "headlineLine1": "Confidence that institutional memory",
+      "eyebrow": "Organizational Governance & Continuity Infrastructure",
+      "headlineLine1": "Confidence that organizational memory",
       "headlineLine2": "will outlive any individual.",
-      "imageAlt": "Institutional governance and continuity infrastructure",
-      "subhead": "UnionEyes helps federated institutions preserve institutional memory, strengthen governance coordination, and modernize procedural trust through non-disruptive implementation alongside existing systems.",
+      "imageAlt": "Organizational governance and continuity infrastructure",
+      "subhead": "UnionEyes helps federated organizations preserve organizational memory, strengthen governance coordination, and modernize procedural trust through non-disruptive implementation alongside existing systems.",
       "ctaPrimary": "Book Strategic Discovery",
       "ctaSecondary": "Explore Continuity Infrastructure"
     },
     "posture": {
-      "eyebrow": "Institutional posture",
+      "eyebrow": "Organizational posture",
       "points": [
         {
           "metric": "Canadian-hosted",
@@ -11118,12 +11118,12 @@
       ]
     },
     "continuity": {
-      "eyebrow": "Institutional continuity",
+      "eyebrow": "Organizational continuity",
       "heading": "Stewardship that outlives leadership turnover.",
-      "lede": "Continuity is not a feature. It is the institutional discipline of preserving procedural context, decisions, and reasoning across every handoff.",
+      "lede": "Continuity is not a feature. It is the organizational discipline of preserving procedural context, decisions, and reasoning across every handoff.",
       "pillars": [
         {
-          "title": "Institutional memory preservation",
+          "title": "Organizational memory preservation",
           "desc": "Retain governance context, decisions, and reasoning through every leadership succession and handoff. Stewardship continuity outlives any individual."
         },
         {
@@ -11136,31 +11136,31 @@
         },
         {
           "title": "Non-disruptive implementation",
-          "desc": "Overlay infrastructure that augments existing systems — a continuity layer your institution can adopt alongside current tooling."
+          "desc": "Overlay infrastructure that augments existing systems — a continuity layer your organization can adopt alongside current tooling."
         }
       ]
     },
     "federation": {
       "eyebrow": "Federated coordination",
       "heading": "Governance-safe coordination across locals, councils, and federations.",
-      "body1": "Federations are not org charts. They are layered institutions with distinct procedural authority, bylaws, and committee structures.",
-      "body2": "UnionEyes provides operational alignment and institutional visibility across the federation without collapsing it into a single hierarchy or bypassing local authority."
+      "body1": "Federations are not org charts. They are layered organizations with distinct procedural authority, bylaws, and committee structures.",
+      "body2": "UnionEyes provides operational alignment and organizational visibility across the federation without collapsing it into a single hierarchy or bypassing local authority."
     },
     "procedural": {
       "eyebrow": "Procedural trust",
       "heading": "Every decision is traceable, reviewable, and accountable.",
-      "body1": "Procedural traceability is the foundation of institutional trust. Each case, recommendation, and governance action is anchored to evidence and a named reviewer of record.",
+      "body1": "Procedural traceability is the foundation of organizational trust. Each case, recommendation, and governance action is anchored to evidence and a named reviewer of record.",
       "body2": "Audit-grade transparency, explainability, and operational accountability are structural — not bolted on."
     },
     "coexistence": {
       "eyebrow": "Non-disruptive modernization",
       "heading": "An overlay infrastructure — not a replacement.",
-      "lede": "Institutions modernize at institutional pace. UnionEyes deploys as a continuity layer alongside existing systems.",
+      "lede": "Organizations modernize at organizational pace. UnionEyes deploys as a continuity layer alongside existing systems.",
       "points": [
         "Overlay infrastructure that augments existing systems — no replacement required.",
         "Modular adoption: deploy a continuity layer one workflow at a time.",
         "Layered modernization runs alongside existing systems with full coexistence.",
-        "Institutional evolution proceeds without disrupting current procedural chains."
+        "Organizational evolution proceeds without disrupting current procedural chains."
       ]
     },
     "labourSafeAi": {
@@ -11176,9 +11176,9 @@
       ]
     },
     "canadian": {
-      "eyebrow": "Canadian institutional infrastructure",
+      "eyebrow": "Canadian organizational infrastructure",
       "heading": "Canadian-hosted, bilingual-first, sovereignty-conscious.",
-      "lede": "Democratic infrastructure built for the institutions that shape Canadian working life.",
+      "lede": "Democratic infrastructure built for the organizations that shape Canadian working life.",
       "pillars": [
         {
           "title": "Canadian-hosted infrastructure",
@@ -11186,11 +11186,11 @@
         },
         {
           "title": "Bilingual-first by design",
-          "desc": "English and French institutional surfaces from day one — never an afterthought."
+          "desc": "English and French organizational surfaces from day one — never an afterthought."
         },
         {
-          "title": "Institutional trust posture",
-          "desc": "Democratic infrastructure for federations, councils, and member-driven institutions."
+          "title": "Organizational trust posture",
+          "desc": "Democratic infrastructure for federations, councils, and member-driven organizations."
         },
         {
           "title": "Governance-safe operations",
@@ -11199,19 +11199,19 @@
       ]
     },
     "finalCta": {
-      "heading": "Discuss continuity infrastructure for your institution.",
-      "body": "A consultative conversation about institutional continuity, governance coordination, and procedural trust — paced to your federation, not to a sales cycle.",
+      "heading": "Discuss continuity infrastructure for your organization.",
+      "body": "A consultative conversation about organizational continuity, governance coordination, and procedural trust — paced to your federation, not to a sales cycle.",
       "ctaPrimary": "Book Strategic Discovery",
       "ctaSecondary": "View Trust & Stewardship"
     },
     "svg": {
       "continuity": {
-        "ariaLabel": "Institutional continuity timeline across leadership succession",
+        "ariaLabel": "Organizational continuity timeline across leadership succession",
         "stewardA": "Steward A",
         "handoff": "Handoff",
         "stewardB": "Steward B",
         "stewardC": "Steward C",
-        "caption": "Institutional memory preserved across succession"
+        "caption": "Organizational memory preserved across succession"
       },
       "federation": {
         "ariaLabel": "Federated coordination topology",

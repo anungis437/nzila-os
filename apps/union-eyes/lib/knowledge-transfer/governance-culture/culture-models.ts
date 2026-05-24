@@ -81,7 +81,7 @@ export interface GovernanceCultureProfile {
   disciplineProfile: GovernanceDisciplineProfile;
   /** Observed culture evolution phases over time. */
   evolutionPhases: CultureEvolutionPhase[];
-  /** Continuity culture score 0–100 (institutional discipline composite). */
+  /** Continuity culture score 0–100 (organizational discipline composite). */
   cultureScore: number;
   /** Entries analyzed. */
   entriesAnalyzed: number;

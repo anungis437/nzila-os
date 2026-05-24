@@ -1,6 +1,13 @@
-import { cognitionRoute } from '@/lib/api/cognition-route';
-import { institutionalPrecedentEngine } from '@/lib/institutional-operating-intelligence';
+/**
+ * Legacy slug redirect — moved to /api/exit-interviews/organizational-precedent.
+ * Kept for backward compatibility with external integrations.
+ */
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = cognitionRoute(institutionalPrecedentEngine);
+export function GET(request: Request) {
+  const url = new URL(request.url);
+  url.pathname = '/api/exit-interviews/organizational-precedent';
+  return NextResponse.redirect(url, 308);
+}

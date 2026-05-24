@@ -1,7 +1,7 @@
 /**
  * Governance Intelligence Feature Guard
  *
- * Wraps every institutional intelligence endpoint with:
+ * Wraps every organizational intelligence endpoint with:
  * 1. Feature flag check  → 403 if disabled
  * 2. Audit event         → logs all intelligence invocations
  * 3. Fallback response   → structured "unavailable" payload
@@ -37,7 +37,7 @@ export interface AiResponseEnvelope<T = unknown> {
 }
 
 const AI_DISCLAIMER =
-  'This output is produced by bounded institutional intelligence. It is interpretive and advisory only — ' +
+  'This output is produced by bounded organizational intelligence. It is interpretive and advisory only — ' +
   'it does not constitute a binding decision, legal opinion, or operational directive. ' +
   'A human steward or administrator must review and confirm any action before it takes effect.';
 

@@ -100,7 +100,7 @@ function queryIsolatedKnowledge(
   return {
     findings,
     summary: `Found ${findings.length} isolated knowledge area(s). Each represents a single point of failure.`,
-    significance: 'Isolated knowledge creates acute continuity risk. Loss of any single expert means permanent loss of that institutional knowledge.',
+    significance: 'Isolated knowledge creates acute continuity risk. Loss of any single expert means permanent loss of that organizational knowledge.',
     recommendations: [
       'Schedule immediate knowledge transfer sessions with each isolated knowledge holder',
       'Create documentation and runbooks for all isolated areas',
@@ -317,7 +317,7 @@ function queryUndocumentedChains(
   return {
     findings,
     summary: `Found ${findings.length} undocumented workflow chain(s). These represent knowledge at highest risk.`,
-    significance: "Undocumented chains are institutional knowledge that exists only in people's heads. Loss would require complete relearning.",
+    significance: "Undocumented chains are organizational knowledge that exists only in people's heads. Loss would require complete relearning.",
     recommendations: [
       'Document workflows end-to-end',
       'Create process flowcharts and runbooks',
@@ -435,7 +435,7 @@ function queryKnowledgeRedundancy(
 
   return {
     findings,
-    summary: 'Knowledge redundancy analysis shows distribution of institutional knowledge across the organization.',
+    summary: 'Knowledge redundancy analysis shows distribution of organizational knowledge across the organization.',
     significance: 'High redundancy = organization resilient to personnel changes. Low redundancy = organization brittle.',
     recommendations: [
       'Target: achieve 3+ sources for all critical knowledge',

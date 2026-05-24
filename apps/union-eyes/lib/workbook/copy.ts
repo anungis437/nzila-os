@@ -5,8 +5,8 @@
  * Governance Entropy Workbook\u2122 \u2014 editorial copy. EN-CA default, FR-CA via
  * locale. Inline ternary, no i18n framework. Mirrors lib/icra/copy.ts.
  *
- * Tone: editorial, institutional, unhurried, dignified. Mapping work, not
- * dashboard work. Anchored on the Institutional Memory Holders module \u2014
+ * Tone: editorial, organizational, unhurried, dignified. Mapping work, not
+ * dashboard work. Anchored on the Organizational Memory Holders module \u2014
  * the people who carry the institution.
  */
 
@@ -30,9 +30,9 @@ export const WORKBOOK_COPY = {
     },
     lede: {
       'en-CA':
-        'Most continuity loss does not happen in transitions. It happens quietly, in the years before, while the institutional carriers are still in their roles. This workbook helps you see them before you need to.',
+        'Most continuity loss does not happen in transitions. It happens quietly, in the years before, while the organizational carriers are still in their roles. This workbook helps you see them before you need to.',
       'fr-CA':
-        'La plupart des pertes de continuité ne surviennent pas lors des transitions. Elles se produisent silencieusement, dans les ann\u00e9es qui pr\u00e9c\u00e8dent, pendant que les porteurs institutionnels sont encore en poste. Ce cahier vous aide \u00e0 les reconna\u00eetre avant d\u2019en avoir besoin.',
+        'La plupart des pertes de continuité ne surviennent pas lors des transitions. Elles se produisent silencieusement, dans les ann\u00e9es qui pr\u00e9c\u00e8dent, pendant que les porteurs organisationnels sont encore en poste. Ce cahier vous aide \u00e0 les reconna\u00eetre avant d\u2019en avoir besoin.',
     },
     primaryCta: {
       'en-CA': 'Begin the Workbook',
@@ -52,7 +52,7 @@ export const WORKBOOK_COPY = {
       'en-CA':
         'The Governance Entropy Workbook is the second layer of Organizational Continuity Infrastructure. Where the OCI Continuity Risk Assessment helps you recognise what your institution is carrying, this Workbook helps you map it: the carriers, the lineage, the breakpoints, and the moves required to keep continuity intact across the next transition arc.',
       'fr-CA':
-        'Le Cahier d\u2019entropie de gouvernance constitue la deuxi\u00e8me couche de l\u2019Infrastructure de continuit\u00e9 organisationnelle. L\u00e0 o\u00f9 l\u2019\u00c9valuation du risque de continuit\u00e9 institutionnelle vous aide \u00e0 reconna\u00eetre ce que votre institution porte, ce cahier vous aide \u00e0 le cartographier : les porteurs, la filiation, les points de rupture et les mouvements requis pour pr\u00e9server la continuit\u00e9 \u00e0 travers le prochain arc de transition.',
+        'Le Cahier d\u2019entropie de gouvernance constitue la deuxi\u00e8me couche de l\u2019Infrastructure de continuit\u00e9 organisationnelle. L\u00e0 o\u00f9 l\u2019\u00c9valuation du risque de continuit\u00e9 organisationnelle vous aide \u00e0 reconna\u00eetre ce que votre institution porte, ce cahier vous aide \u00e0 le cartographier : les porteurs, la filiation, les points de rupture et les mouvements requis pour pr\u00e9server la continuit\u00e9 \u00e0 travers le prochain arc de transition.',
     },
   },
   modules: {
@@ -62,9 +62,9 @@ export const WORKBOOK_COPY = {
     },
     intro: {
       'en-CA':
-        'The Self-Guided Edition unlocks the Institutional Memory Holders module fully. The other five modules are visible and reserved for the Facilitated Edition. Continuity work is sequenced; you do not need to do all of it at once.',
+        'The Self-Guided Edition unlocks the Organizational Memory Holders module fully. The other five modules are visible and reserved for the Facilitated Edition. Continuity work is sequenced; you do not need to do all of it at once.',
       'fr-CA':
-        'L\u2019\u00e9dition autonome d\u00e9verrouille enti\u00e8rement le module des Porteurs de m\u00e9moire institutionnelle. Les cinq autres modules sont visibles et r\u00e9serv\u00e9s \u00e0 l\u2019\u00e9dition facilit\u00e9e. Le travail de continuit\u00e9 est s\u00e9quenc\u00e9; vous n\u2019avez pas besoin de tout faire en m\u00eame temps.',
+        'L\u2019\u00e9dition autonome d\u00e9verrouille enti\u00e8rement le module des Porteurs de m\u00e9moire organisationnelle. Les cinq autres modules sont visibles et r\u00e9serv\u00e9s \u00e0 l\u2019\u00e9dition facilit\u00e9e. Le travail de continuit\u00e9 est s\u00e9quenc\u00e9; vous n\u2019avez pas besoin de tout faire en m\u00eame temps.',
     },
     items: [
       {
@@ -73,17 +73,17 @@ export const WORKBOOK_COPY = {
         title: { 'en-CA': 'Continuity Landscape', 'fr-CA': 'Paysage de continuit\u00e9' },
         body: {
           'en-CA':
-            'The institutional continuity terrain: operational coherence, governance posture, modernization surface, stewardship terrain. The map your other modules sit on.',
+            'The organizational continuity terrain: operational coherence, governance posture, modernization surface, stewardship terrain. The map your other modules sit on.',
           'fr-CA':
-            'Le terrain de continuit\u00e9 institutionnelle : coh\u00e9rence op\u00e9rationnelle, posture de gouvernance, surface de modernisation, terrain de g\u00e9rance. La carte sur laquelle reposent vos autres modules.',
+            'Le terrain de continuit\u00e9 organisationnelle : coh\u00e9rence op\u00e9rationnelle, posture de gouvernance, surface de modernisation, terrain de g\u00e9rance. La carte sur laquelle reposent vos autres modules.',
         },
       },
       {
         id: 'memory_holders' as const,
         unlockedInSelfGuided: true,
         title: {
-          'en-CA': 'Institutional Memory Holders',
-          'fr-CA': 'Porteurs de m\u00e9moire institutionnelle',
+          'en-CA': 'Organizational Memory Holders',
+          'fr-CA': 'Porteurs de m\u00e9moire organisationnelle',
         },
         body: {
           'en-CA':
@@ -109,9 +109,9 @@ export const WORKBOOK_COPY = {
         title: { 'en-CA': 'Continuity Breakpoints', 'fr-CA': 'Points de rupture de continuit\u00e9' },
         body: {
           'en-CA':
-            'The institutional points at which a continuity break would have the greatest blast radius. Plotted against the Continuity Survivability Matrix\u2122.',
+            'The organizational points at which a continuity break would have the greatest blast radius. Plotted against the Continuity Survivability Matrix\u2122.',
           'fr-CA':
-            'Les points institutionnels o\u00f9 une rupture de continuit\u00e9 aurait la plus grande port\u00e9e. Trac\u00e9s contre la Matrice de survivabilit\u00e9 de continuit\u00e9\u2122.',
+            'Les points organisationnels o\u00f9 une rupture de continuit\u00e9 aurait la plus grande port\u00e9e. Trac\u00e9s contre la Matrice de survivabilit\u00e9 de continuit\u00e9\u2122.',
         },
       },
       {
@@ -120,9 +120,9 @@ export const WORKBOOK_COPY = {
         title: { 'en-CA': 'Modernization Alignment', 'fr-CA': 'Alignement de modernisation' },
         body: {
           'en-CA':
-            'Aligning continuity, governance, and modernization arcs so modernization does not erase institutional memory.',
+            'Aligning continuity, governance, and modernization arcs so modernization does not erase organizational memory.',
           'fr-CA':
-            'Aligner les arcs de continuit\u00e9, de gouvernance et de modernisation pour que la modernisation n\u2019efface pas la m\u00e9moire institutionnelle.',
+            'Aligner les arcs de continuit\u00e9, de gouvernance et de modernisation pour que la modernisation n\u2019efface pas la m\u00e9moire organisationnelle.',
         },
       },
       {
@@ -152,9 +152,9 @@ export const WORKBOOK_COPY = {
         },
         body: {
           'en-CA':
-            'Quantifies how concentrated institutional knowledge is in too few continuity carriers.',
+            'Quantifies how concentrated organizational knowledge is in too few continuity carriers.',
           'fr-CA':
-            'Quantifie \u00e0 quel point la connaissance institutionnelle est concentr\u00e9e chez trop peu de porteurs de continuit\u00e9.',
+            'Quantifie \u00e0 quel point la connaissance organisationnelle est concentr\u00e9e chez trop peu de porteurs de continuit\u00e9.',
         },
       },
       {
@@ -191,9 +191,9 @@ export const WORKBOOK_COPY = {
         },
         body: {
           'en-CA':
-            'Plots institutional dependencies against successor identification to surface survivability gaps.',
+            'Plots organizational dependencies against successor identification to surface survivability gaps.',
           'fr-CA':
-            'Trace les d\u00e9pendances institutionnelles contre l\u2019identification des successeurs pour faire \u00e9merger les \u00e9carts de survivabilit\u00e9.',
+            'Trace les d\u00e9pendances organisationnelles contre l\u2019identification des successeurs pour faire \u00e9merger les \u00e9carts de survivabilit\u00e9.',
         },
       },
       {
@@ -204,17 +204,17 @@ export const WORKBOOK_COPY = {
         },
         body: {
           'en-CA':
-            'Estimates the cost of reconstructing institutional knowledge after a continuity break.',
+            'Estimates the cost of reconstructing organizational knowledge after a continuity break.',
           'fr-CA':
-            'Estime le co\u00fbt de reconstruction de la connaissance institutionnelle apr\u00e8s une rupture de continuit\u00e9.',
+            'Estime le co\u00fbt de reconstruction de la connaissance organisationnelle apr\u00e8s une rupture de continuit\u00e9.',
         },
       },
     ],
   },
   pricing: {
     title: {
-      'en-CA': 'Three editions, sequenced by institutional posture.',
-      'fr-CA': 'Trois \u00e9ditions, ordonn\u00e9es selon la posture institutionnelle.',
+      'en-CA': 'Three editions, sequenced by organizational posture.',
+      'fr-CA': 'Trois \u00e9ditions, ordonn\u00e9es selon la posture organisationnelle.',
     },
     tiers: WORKBOOK_TIERS,
   },

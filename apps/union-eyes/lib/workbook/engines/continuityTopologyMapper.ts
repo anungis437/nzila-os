@@ -141,8 +141,8 @@ function axis(id: TopologyAxisId, raw: number, reading: string): TopologyAxis {
 }
 
 function stewardshipReading(value: number): string {
-  if (value >= 0.7) return 'A small number of carriers hold a disproportionate share of institutional weight.';
-  if (value >= 0.5) return 'Stewardship is narrow relative to the institutional weight being carried.';
+  if (value >= 0.7) return 'A small number of carriers hold a disproportionate share of organizational weight.';
+  if (value >= 0.5) return 'Stewardship is narrow relative to the organizational weight being carried.';
   if (value >= 0.3) return 'Stewardship is recognisable but uneven across carriers.';
   if (value >= 0.15) return 'Stewardship is broadly distributed with localised concentration.';
   return 'Stewardship is broadly distributed across the named carriers.';
@@ -171,7 +171,7 @@ function surfaceReading(value: number, present: boolean): string {
 }
 
 function dependencyReading(value: number): string {
-  if (value >= 0.6) return 'A significant share of institutional load depends on a single carrier.';
+  if (value >= 0.6) return 'A significant share of organizational load depends on a single carrier.';
   if (value >= 0.3) return 'Recognisable single-carrier dependencies are present.';
   return 'Single-carrier dependencies are limited.';
 }

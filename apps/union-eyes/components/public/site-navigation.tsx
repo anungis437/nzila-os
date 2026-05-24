@@ -1,5 +1,5 @@
 /**
- * SiteNavigation — Enterprise institutional navigation for UnionEyes
+ * SiteNavigation — Enterprise organizational navigation for UnionEyes
  * ──────────────────────────────────────────────────────────────────
  * Fixed navbar with scroll-aware transparency, Framer Motion active
  * indicator, mobile drawer with body-scroll lock, keyboard esc-close,
@@ -37,8 +37,8 @@ const solutionsLinks = [
 
 const modulesLinks = [
   {
-    name: 'Institutional Continuity',
-    href: '/institutional-continuity',
+    name: 'Organizational Continuity',
+    href: '/organizational-continuity',
     desc: 'Leadership transition resilience',
   },
   {
@@ -81,7 +81,7 @@ export default function SiteNavigation() {
   const modulesTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const isModulesPath =
-    pathname?.startsWith('/institutional-continuity') ||
+    pathname?.startsWith('/organizational-continuity') ||
     pathname?.startsWith('/platform/governance-intelligence') ||
     pathname?.startsWith('/platform/organizational-memory') ||
     pathname?.startsWith('/executive-intelligence') ||

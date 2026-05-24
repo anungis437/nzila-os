@@ -1,5 +1,5 @@
 import { cognitionRoute } from '@/lib/api/cognition-route';
-import { governancePersonalityEngine } from '@/lib/institutional-operating-intelligence';
+import { governancePersonalityEngine } from '@/lib/organizational-operating-intelligence';
 
 export const dynamic = 'force-dynamic';
 

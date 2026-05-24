@@ -5,7 +5,7 @@
  * webhook has already upgraded the assessment in our DB). Responsibility:
  *
  * 1. Load the assessment + maturity profile from the DB.
- * 2. Upsert a HubSpot contact carrying the institutional posture (deterministic
+ * 2. Upsert a HubSpot contact carrying the organizational posture (deterministic
  *    custom properties — no behavioural enrichment).
  * 3. Create a deal in the OCI continuity pipeline at the appropriate stage
  *    so account stewards can engage with context, not cold outreach.
@@ -26,7 +26,7 @@ import { db } from '@/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type {
   ExecutivePersonaId,
-  InstitutionalContinuityProfile,
+  OrganizationalContinuityProfile,
   ReportTierId,
 } from '@/lib/icra/types';
 import { logger } from '@/lib/logger';
@@ -131,7 +131,7 @@ export async function syncIcraPurchase(
       return { ok: false, skipped: 'profile_missing' };
     }
 
-    const profile = profileRow.profilePayload as InstitutionalContinuityProfile;
+    const profile = profileRow.profilePayload as OrganizationalContinuityProfile;
 
     // Resolve adaptive context — persisted blob, or reconstructed deterministically
     // from declared org form. Failure is non-fatal: HubSpot sync proceeds with
