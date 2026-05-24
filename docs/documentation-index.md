@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-05-23T18:28:14.035Z
+Generated: 2026-05-23T21:29:33.293Z
 
-Total documents indexed: 1135
+Total documents indexed: 1162
 Stale documents (>90 days since repo validation): 1
 
 ## Category Summary
@@ -26,7 +26,7 @@ Stale documents (>90 days since repo validation): 1
 | nzila-runtime-integrity | 11 | 0 |
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
-| oci | 91 | 0 |
+| oci | 118 | 0 |
 | ops | 8 | 0 |
 | platform | 5 | 0 |
 | proof-center | 1 | 0 |
@@ -1046,6 +1046,29 @@ Stale documents (>90 days since repo validation): 1
 | [docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md](docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md](docs/oci/assessment/OCRA_DYNAMIC_QUESTIONNAIRE_MODEL.md) | oci | 2026-05-22 | current |
 | [docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md](docs/oci/assessment/OCRA_FACILITATOR_INTERPRETATION_GUIDE.md) | oci | 2026-05-22 | current |
+| [docs/oci/audit/ADAPTIVE_ROUTING_AUDIT.md](docs/oci/audit/ADAPTIVE_ROUTING_AUDIT.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/CONFIDENCE_GENERATION_AUDIT.md](docs/oci/audit/CONFIDENCE_GENERATION_AUDIT.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/ENTROPY_SIGNAL_GAP_REPORT.md](docs/oci/audit/ENTROPY_SIGNAL_GAP_REPORT.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/EVIDENCE_EXTRACTION_AUDIT.md](docs/oci/audit/EVIDENCE_EXTRACTION_AUDIT.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/GES_LEVEL_5_SIGNAL_MODEL.md](docs/oci/audit/GES_LEVEL_5_SIGNAL_MODEL.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/HUMAN_CONTINUITY_THEORY_ALIGNMENT.md](docs/oci/audit/HUMAN_CONTINUITY_THEORY_ALIGNMENT.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/LONGITUDINAL_SURVIVABILITY_AUDIT.md](docs/oci/audit/LONGITUDINAL_SURVIVABILITY_AUDIT.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/MODERNIZATION_INSTABILITY_SIGNAL_MODEL.md](docs/oci/audit/MODERNIZATION_INSTABILITY_SIGNAL_MODEL.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/QUESTION_ARCHITECTURE_GOVERNANCE.md](docs/oci/audit/QUESTION_ARCHITECTURE_GOVERNANCE.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/QUESTION_ARCHITECTURE_INVENTORY.md](docs/oci/audit/QUESTION_ARCHITECTURE_INVENTORY.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/QUESTION_ARCHITECTURE_PROCUREMENT_REVIEW.md](docs/oci/audit/QUESTION_ARCHITECTURE_PROCUREMENT_REVIEW.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/QUESTION_POOL_v2_0_ROADMAP.md](docs/oci/audit/QUESTION_POOL_v2_0_ROADMAP.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/QUESTION_REDESIGN_ROADMAP.md](docs/oci/audit/QUESTION_REDESIGN_ROADMAP.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md](docs/oci/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md) | oci | 2026-05-23 | current |
+| [docs/oci/audit/STATISTICAL_INTERPRETABILITY_AUDIT.md](docs/oci/audit/STATISTICAL_INTERPRETABILITY_AUDIT.md) | oci | 2026-05-23 | current |
+| [docs/oci/compliance/OCI_AUDITOR_GUIDE.md](docs/oci/compliance/OCI_AUDITOR_GUIDE.md) | oci | 2026-05-23 | current |
+| [docs/oci/compliance/OCI_COBIT2019_CROSSWALK.md](docs/oci/compliance/OCI_COBIT2019_CROSSWALK.md) | oci | 2026-05-23 | current |
+| [docs/oci/compliance/OCI_COVERAGE_MATRIX.md](docs/oci/compliance/OCI_COVERAGE_MATRIX.md) | oci | 2026-05-23 | current |
+| [docs/oci/compliance/OCI_ISO22301_CROSSWALK.md](docs/oci/compliance/OCI_ISO22301_CROSSWALK.md) | oci | 2026-05-23 | current |
+| [docs/oci/compliance/OCI_ISO22317_CROSSWALK.md](docs/oci/compliance/OCI_ISO22317_CROSSWALK.md) | oci | 2026-05-23 | current |
+| [docs/oci/compliance/OCI_ISO31000_CROSSWALK.md](docs/oci/compliance/OCI_ISO31000_CROSSWALK.md) | oci | 2026-05-23 | current |
+| [docs/oci/compliance/OCI_ISO37000_CROSSWALK.md](docs/oci/compliance/OCI_ISO37000_CROSSWALK.md) | oci | 2026-05-23 | current |
+| [docs/oci/compliance/OCI_PROCUREMENT_POSITIONING.md](docs/oci/compliance/OCI_PROCUREMENT_POSITIONING.md) | oci | 2026-05-23 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md](docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md](docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md](docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md) | oci | 2026-05-22 | current |
@@ -1074,6 +1097,10 @@ Stale documents (>90 days since repo validation): 1
 | [docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md](docs/oci/OCI_WORKSHOP_OPENING_SCRIPT.md) | oci | 2026-05-22 | current |
 | [docs/oci/oci-method.md](docs/oci/oci-method.md) | oci | 2026-05-22 | current |
 | [docs/oci/oci-product-ladder.md](docs/oci/oci-product-ladder.md) | oci | 2026-05-22 | current |
+| [docs/oci/procurement/OCI_AUDITOR_QUICK_REFERENCE.md](docs/oci/procurement/OCI_AUDITOR_QUICK_REFERENCE.md) | oci | 2026-05-23 | current |
+| [docs/oci/procurement/OCI_CONFIDENCE_INTERPRETATION_GUIDE.md](docs/oci/procurement/OCI_CONFIDENCE_INTERPRETATION_GUIDE.md) | oci | 2026-05-23 | current |
+| [docs/oci/procurement/OCI_GOVERNANCE_ENTROPY_REVIEW_GUIDE.md](docs/oci/procurement/OCI_GOVERNANCE_ENTROPY_REVIEW_GUIDE.md) | oci | 2026-05-23 | current |
+| [docs/oci/procurement/OCI_PROCUREMENT_FAQ.md](docs/oci/procurement/OCI_PROCUREMENT_FAQ.md) | oci | 2026-05-23 | current |
 | [docs/oci/runtime/OCI_CONTINUITY_LEDGER.md](docs/oci/runtime/OCI_CONTINUITY_LEDGER.md) | oci | 2026-05-22 | current |
 | [docs/oci/runtime/OCI_EVENT_RUNTIME.md](docs/oci/runtime/OCI_EVENT_RUNTIME.md) | oci | 2026-05-22 | current |
 | [docs/oci/runtime/OCI_GOVERNANCE_MEMORY_RUNTIME.md](docs/oci/runtime/OCI_GOVERNANCE_MEMORY_RUNTIME.md) | oci | 2026-05-22 | current |

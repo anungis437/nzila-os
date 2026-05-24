@@ -24,7 +24,7 @@
  */
 import { createHash } from 'node:crypto'
 import { and, asc, count, desc, eq, gte, isNull, sql } from 'drizzle-orm'
-import { db } from '@nzila/db'
+import { db } from '@/lib/db'
 import {
   documents,
   evidencePackArtifacts,

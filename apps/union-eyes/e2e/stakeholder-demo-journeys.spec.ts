@@ -148,7 +148,7 @@ test.describe('Marketing-to-app continuity routes', () => {
       '/proof?context=executive',
       '/trust?context=governance',
       '/proof?context=procurement',
-      '/pilot-request?context=conference',
+      '/institutional-continuity-risk?context=conference',
       '/insights?context=conference',
     ];
 
@@ -167,21 +167,21 @@ test.describe('Marketing-to-app continuity routes', () => {
     await expect(governanceContextLinks.first()).toBeVisible({ timeout: 10000 });
 
     await page.goto(`/${locale}/insights?context=conference`, { waitUntil: 'domcontentloaded' });
-    const conferencePilotCta = page.locator('a[href*="pilot-request"][href*="context=conference"]');
+    const conferencePilotCta = page.locator('a[href*="institutional-continuity-risk"][href*="context=conference"]');
     await expect(conferencePilotCta.first()).toBeVisible({ timeout: 10000 });
   });
 
   test('pilot request CTA remains actionable from context routes', async ({ page }) => {
     await page.goto(`/${locale}/proof?context=procurement`, { waitUntil: 'domcontentloaded' });
     const cta = page
-      .locator('a[href*="/pilot-request"][href*="context=procurement"]')
+      .locator('a[href*="/institutional-continuity-risk"][href*="context=procurement"]')
       .first();
     await expect(cta).toBeVisible({ timeout: 10000 });
     await Promise.all([
-      page.waitForURL(new RegExp(`/${locale}/pilot-request`)),
+      page.waitForURL(new RegExp(`/${locale}/institutional-continuity-risk`)),
       cta.evaluate((link: HTMLAnchorElement) => link.click()),
     ]);
-    await expect(page.url()).toContain(`/${locale}/pilot-request`);
+    await expect(page.url()).toContain(`/${locale}/institutional-continuity-risk`);
     await expect(page.url()).toContain('context=procurement');
   });
 

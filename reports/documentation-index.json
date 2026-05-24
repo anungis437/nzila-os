@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-23T18:28:14.035Z",
-  "totalDocuments": 1135,
+  "generatedAt": "2026-05-23T21:29:33.293Z",
+  "totalDocuments": 1162,
   "staleDocuments": 1,
   "categories": [
     {
@@ -90,7 +90,7 @@
     },
     {
       "category": "oci",
-      "count": 91,
+      "count": 118,
       "staleCount": 0
     },
     {
@@ -6173,6 +6173,144 @@
       "stale": false
     },
     {
+      "path": "docs/oci/audit/ADAPTIVE_ROUTING_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/CONFIDENCE_GENERATION_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/ENTROPY_SIGNAL_GAP_REPORT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/EVIDENCE_EXTRACTION_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/GES_LEVEL_5_SIGNAL_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/HUMAN_CONTINUITY_THEORY_ALIGNMENT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/LONGITUDINAL_SURVIVABILITY_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/MODERNIZATION_INSTABILITY_SIGNAL_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_ARCHITECTURE_GOVERNANCE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_ARCHITECTURE_INVENTORY.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_ARCHITECTURE_PROCUREMENT_REVIEW.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_POOL_v2_0_ROADMAP.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/QUESTION_REDESIGN_ROADMAP.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/audit/STATISTICAL_INTERPRETABILITY_AUDIT.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_AUDITOR_GUIDE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_COBIT2019_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_COVERAGE_MATRIX.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_ISO22301_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_ISO22317_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_ISO31000_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_ISO37000_CROSSWALK.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/compliance/OCI_PROCUREMENT_POSITIONING.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
       "path": "docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md",
       "category": "oci",
       "lastValidated": "2026-05-22",
@@ -6338,6 +6476,30 @@
       "path": "docs/oci/oci-product-ladder.md",
       "category": "oci",
       "lastValidated": "2026-05-22",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/procurement/OCI_AUDITOR_QUICK_REFERENCE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/procurement/OCI_CONFIDENCE_INTERPRETATION_GUIDE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/procurement/OCI_GOVERNANCE_ENTROPY_REVIEW_GUIDE.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/procurement/OCI_PROCUREMENT_FAQ.md",
+      "category": "oci",
+      "lastValidated": "2026-05-23",
       "stale": false
     },
     {

@@ -23,7 +23,7 @@ import { InstitutionalContinuityNote } from '@/components/marketing/institutiona
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { getUnionEyesSiteTopology } from '@/lib/site-topology';
-import PricingTabs from './_components/pricing-tabs';
+import PricingTabs, { type EngagementLayer } from './_components/pricing-tabs';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -242,7 +242,7 @@ const frAssessmentLadder = [
 // Replaces "tiers". These are institutional continuity engagement layers —
 // not SaaS plans. Each one is a distinct posture and a distinct conversation.
 // ─────────────────────────────────────────────────────────────────────────────
-const engagementLayers = [
+const engagementLayers: EngagementLayer[] = [
   {
     key: 'oci',
     icon: 'compass',
@@ -370,7 +370,7 @@ const frContinuityJourney = [
   { stage: '5', name: 'Soutien longitudinal', outcome: 'Soutenir la continuité institutionnelle', summary: 'Intendance continue de continuité : revue d’entropie de gouvernance, intelligence exécutive et santé fédérative.' },
 ];
 
-const frEngagementLayers = [
+const frEngagementLayers: EngagementLayer[] = [
   {
     key: 'oci', icon: 'compass',
     name: 'OCI — Évaluation de continuité',

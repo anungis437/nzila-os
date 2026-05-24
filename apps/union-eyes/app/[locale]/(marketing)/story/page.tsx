@@ -121,15 +121,15 @@ export default async function LocaleStoryPage({
           <div className="grid gap-6 md:grid-cols-2">
             <FounderCard
               initials="MN"
-              name={t('founderMikeName')}
-              role={t('founderMikeRole')}
-              bio={t('founderMikeBio')}
+              name={t('founderMichelName')}
+              role={t('founderMichelRole')}
+              bio={t('founderMichelBio')}
             />
             <FounderCard
-              initials="ON"
-              name={t('founderObyName')}
-              role={t('founderObyRole')}
-              bio={t('founderObyBio')}
+              initials="AN"
+              name={t('founderAubertName')}
+              role={t('founderAubertRole')}
+              bio={t('founderAubertBio')}
             />
           </div>
           <p className="mt-6 text-sm text-slate-500 italic">{t('foundersNote')}</p>
