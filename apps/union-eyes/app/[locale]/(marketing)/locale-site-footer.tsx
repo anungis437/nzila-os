@@ -39,7 +39,7 @@ export default function LocaleSiteFooter() {
   const params = useParams();
   const locale = (params?.locale as string) || 'en-CA';
   const copy = FOOTER_COPY[locale] ?? FOOTER_COPY['en-CA'];
-  const whitepaperLabel = locale === 'fr-CA' ? 'Livre blanc' : 'Whitepaper';
+  const whitepapersLabel = locale === 'fr-CA' ? 'Livres blancs' : 'Whitepapers';
 
   const footerLinks = {
     [t('platform') as string]: [
@@ -69,7 +69,7 @@ export default function LocaleSiteFooter() {
     [t('company') as string]: [
       { name: t('story'),        href: `/${locale}/story` },
       { name: t('insights'),     href: `/${locale}/insights` },
-      { name: whitepaperLabel,   href: `/${locale}/whitepaper` },
+      { name: whitepapersLabel,  href: `/${locale}/whitepapers` },
       { name: t('institutionalProof'), href: `/${locale}/proof` },
       // Case studies hidden until pilots complete — re-enable via CASE_STUDIES_VISIBLE flag.
       // { name: t('caseStudies'),  href: `/${locale}/case-studies` },

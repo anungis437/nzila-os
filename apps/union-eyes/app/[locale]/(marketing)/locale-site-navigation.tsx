@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/components/language-switcher';
 import { parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
+import { WHITEPAPER_LIBRARY } from '@/lib/whitepaper/library';
 
 export default function LocaleSiteNavigation() {
   const t = useTranslations('marketing.nav');
@@ -26,7 +27,15 @@ export default function LocaleSiteNavigation() {
   const locale = (params?.locale as string) || 'en-CA';
   const contextMode = parseInstitutionalMode(searchParams.get('context') ?? undefined);
   const pilotRequestHref = withInstitutionalContext(`/${locale}/organizational-continuity-risk`, contextMode);
-  const whitepaperLabel = locale === 'fr-CA' ? 'Livre blanc' : 'Whitepaper';
+  const whitepapersLabel = locale === 'fr-CA' ? 'Livres blancs' : 'Whitepapers';
+  const whitepaperLibraryLabel = locale === 'fr-CA' ? 'Bibliothèque' : 'Whitepaper Library';
+  const whitepaperLibraryDesc = locale === 'fr-CA' ? 'Tous les livres blancs · portail' : 'All whitepapers · hub';
+
+  const whitepaperLinks = WHITEPAPER_LIBRARY.map((entry) => ({
+    name: entry.title,
+    href: `/${locale}${entry.href}`,
+    desc: `${entry.format} · ${entry.version}`,
+  }));
 
   const solutionsLinks = [
     { name: t('solutionsItems.executive.name'), href: `/${locale}/solutions/executive-leadership`,  desc: t('solutionsItems.executive.desc') },
@@ -50,11 +59,16 @@ export default function LocaleSiteNavigation() {
 
   const primaryNav = [
     { name: t('insights'), href: `/${locale}/insights` },
-    { name: whitepaperLabel, href: `/${locale}/whitepaper` },
     { name: t('proof'), href: `/${locale}/proof` },
     { name: t('pricing'),  href: `/${locale}/pricing` },
     { name: t('contact'),  href: `/${locale}/contact` },
   ];
+
+  const whitepapersHubHref = `/${locale}/whitepapers`;
+  const isWhitepapersActive =
+    pathname === `/${locale}/whitepaper` ||
+    pathname?.startsWith(`/${locale}/whitepapers`) ||
+    pathname?.startsWith(`/${locale}/whitepaper/`);
 
   const [mobileMenuOpen, setMobileMenuOpen]           = useState(false);
   const [scrolled, setScrolled]                       = useState(false);
@@ -62,8 +76,11 @@ export default function LocaleSiteNavigation() {
   const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false);
   const [modulesOpen, setModulesOpen]                 = useState(false);
   const [mobileModulesOpen, setMobileModulesOpen]     = useState(false);
+  const [whitepapersOpen, setWhitepapersOpen]         = useState(false);
+  const [mobileWhitepapersOpen, setMobileWhitepapersOpen] = useState(false);
   const solutionsTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const modulesTimeout   = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const whitepapersTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -209,6 +226,49 @@ export default function LocaleSiteNavigation() {
               </AnimatePresence>
             </div>
 
+            {/* Whitepapers dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => { clearTimeout(whitepapersTimeout.current); setWhitepapersOpen(true); }}
+              onMouseLeave={() => { whitepapersTimeout.current = setTimeout(() => setWhitepapersOpen(false), 150); }}
+            >
+              <Link href={whitepapersHubHref} className={navLinkClass(Boolean(isWhitepapersActive))}>
+                {whitepapersLabel}
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${whitepapersOpen ? 'rotate-180' : ''}`} />
+              </Link>
+              <AnimatePresence>
+                {whitepapersOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full right-0 mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-100 p-2 z-50"
+                  >
+                    <Link
+                      href={whitepapersHubHref}
+                      className="block px-4 py-3 rounded-lg text-sm transition-colors text-gray-700 hover:bg-gray-50 hover:text-navy border-b border-gray-100 mb-1"
+                    >
+                      <span className="block font-medium leading-tight">{whitepaperLibraryLabel}</span>
+                      <span className="block text-[11px] text-gray-400 mt-0.5">{whitepaperLibraryDesc}</span>
+                    </Link>
+                    {whitepaperLinks.map((link) => (
+                      <Link key={link.href} href={link.href}
+                        className={`block px-4 py-3 rounded-lg text-sm transition-colors ${
+                          pathname === link.href
+                            ? 'text-electric bg-electric/5 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-navy'
+                        }`}
+                      >
+                        <span className="block font-medium leading-tight break-words">{link.name}</span>
+                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Primary nav */}
             {primaryNav.map((item) => {
               const isActive = pathname === item.href || pathname?.startsWith(item.href);
@@ -306,6 +366,31 @@ export default function LocaleSiteNavigation() {
                     <Link key={link.href} href={link.href} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
                       <span className="block font-medium leading-tight break-words">{link.name}</span>
                       <span className="block text-xs text-gray-400 mt-0.5 leading-tight break-words">{link.desc}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Whitepapers mobile */}
+              <button
+                onClick={() => setMobileWhitepapersOpen(!mobileWhitepapersOpen)}
+                className={`flex w-full items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  isWhitepapersActive ? 'bg-electric/10 text-electric' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {whitepapersLabel}
+                <ChevronDown className={`h-4 w-4 transition-transform ${mobileWhitepapersOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileWhitepapersOpen && (
+                <div className="pl-4 space-y-1">
+                  <Link href={whitepapersHubHref} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
+                    <span className="block font-medium leading-tight">{whitepaperLibraryLabel}</span>
+                    <span className="block text-[11px] text-gray-400 mt-0.5">{whitepaperLibraryDesc}</span>
+                  </Link>
+                  {whitepaperLinks.map((link) => (
+                    <Link key={link.href} href={link.href} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
+                      <span className="block font-medium leading-tight break-words">{link.name}</span>
+                      <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
                     </Link>
                   ))}
                 </div>
