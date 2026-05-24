@@ -11,7 +11,7 @@
  * No auth required. Redirects to /continuity-assessment/results/[id].
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Answer, ConsentRecord, Question, SectionId } from '@/lib/icra/types';
 import type { MetadataQuestion } from '@/lib/icra/questions';
@@ -33,6 +33,14 @@ import {
   localizeOptionGroup,
   type SupportedLocale,
 } from '@/lib/icra/questions.i18n';
+import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
+import {
+  classifyOrgContext,
+  routeQuestionBank,
+  type InstitutionalAssessmentProfile,
+  type RoutableQuestion,
+  type RoutedQuestionBank,
+} from '@/lib/icra/adaptation';
 import { ConsentGate } from './ConsentGate';
 
 const DOCTRINE_VERSION = '1.0.0';
@@ -173,6 +181,9 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [adaptiveProfile, setAdaptiveProfile] = useState<InstitutionalAssessmentProfile | null>(null);
+  const [routedBank, setRoutedBank] = useState<RoutedQuestionBank | null>(null);
+  const [explanationAcknowledged, setExplanationAcknowledged] = useState(true);
   const lastReportedStepRef = useRef<number>(-1);
 
   // ── Hydrate from sessionStorage on mount ─────────────────────────────────
@@ -367,6 +378,10 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
   const currentQuestions = currentSectionId
     ? (routedQuestionsBySection[currentSectionId] ?? [])
     : [];
+  const totalRoutedScored = SCORED_SECTIONS.reduce(
+    (sum, sectionId) => sum + (routedQuestionsBySection[sectionId]?.length ?? 0),
+    0,
+  );
 
   // ── Back navigation: restore the prior section's selections from `answers`.
   function handleSectionBack() {
@@ -552,6 +567,17 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         onSubmit={handleOrgContext}
         copy={copy}
         locale={locale === 'fr-CA' ? 'fr-CA' : 'en-CA'}
+      />
+    );
+  }
+
+  if (step === 2 && adaptiveProfile && routedBank && !explanationAcknowledged) {
+    return (
+      <AdaptiveExplanationCard
+        profile={adaptiveProfile}
+        routedBank={routedBank}
+        copy={copy}
+        onAcknowledge={() => setExplanationAcknowledged(true)}
       />
     );
   }

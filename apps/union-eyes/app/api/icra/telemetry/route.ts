@@ -25,6 +25,9 @@ const ALLOWED_KINDS: ReadonlySet<IcraEventKind> = new Set<IcraEventKind>([
   'section_completed',
   'section_abandoned',
   'assessment_resumed',
+  'adaptive_profile_created',
+  'assessment_routed',
+  'adaptive_question_deferred',
 ])
 
 const MAX_METADATA_KEYS = 8

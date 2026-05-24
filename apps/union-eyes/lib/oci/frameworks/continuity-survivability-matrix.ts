@@ -28,13 +28,14 @@ const cell = (
   successor: SuccessorReadiness,
   label: string,
   posture: string,
-): SurvivabilityCell => ({
-  id: `${dependency}_${successor}`,
-  dependency,
-  successor,
-  label,
-  posture,
-});
+): SurvivabilityCell =>
+  Object.freeze({
+    id: `${dependency}_${successor}`,
+    dependency,
+    successor,
+    label,
+    posture,
+  });
 
 export const SURVIVABILITY_MATRIX: readonly SurvivabilityCell[] = [
   cell(
@@ -93,6 +94,8 @@ export const SURVIVABILITY_MATRIX: readonly SurvivabilityCell[] = [
   ),
 ] as const;
 
+const WORST_CASE_CELL = SURVIVABILITY_MATRIX[0];
+
 export function classifySurvivability(
   dependency: DependencyConcentration,
   successor: SuccessorReadiness,
@@ -100,5 +103,7 @@ export function classifySurvivability(
   const found = SURVIVABILITY_MATRIX.find(
     (c) => c.dependency === dependency && c.successor === successor,
   );
-  return found ?? SURVIVABILITY_MATRIX[SURVIVABILITY_MATRIX.length - 1];
+  return found ?? WORST_CASE_CELL;
 }
+
+Object.freeze(SURVIVABILITY_MATRIX);

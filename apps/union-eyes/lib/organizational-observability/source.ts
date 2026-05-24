@@ -1,10 +1,10 @@
 /**
  * Institutional Observability — read-only data adapter.
  *
- * Sources an empty institutional substrate today. The IGG public builders
- * apply doctrine fences (redaction + protected-kind assertions) regardless,
- * so this surface is governance-safe even when wired to a future real
- * substrate.
+ * Sources the institutional substrate through the topology adapter.
+ * The IGG public builders apply doctrine fences (redaction + protected-kind
+ * assertions) regardless, so this surface remains governance-safe across
+ * runtime environments.
  *
  * Doctrine: this module answers "How did this institutional state emerge?"
  * — never "How do we optimize institutional behavior?". No automation,
@@ -27,6 +27,8 @@ import {
   type ProvenanceCoverageSummary,
 } from '@nzila/organizational-governance-graph'
 
+import { getInstitutionalGraph as getInstitutionalTopologyGraph } from '../organizational-topology/source'
+
 export interface InstitutionalObservabilityView {
   readonly generatedAt: string
   readonly substrate: {
@@ -44,13 +46,9 @@ export interface InstitutionalObservabilityView {
 
 /**
  * Returns the raw institutional governance graph used by the read surfaces.
- *
- * Placeholder: the real institutional substrate adapter is a future
- * workstream. Returning an empty, well-typed graph keeps the read surfaces
- * calm and exercises the IGG fences end-to-end.
  */
 export async function getInstitutionalGraph(): Promise<InstitutionalTimelineGraph> {
-  return { nodes: [], edges: [], decisions: [] }
+  return getInstitutionalTopologyGraph()
 }
 
 /**

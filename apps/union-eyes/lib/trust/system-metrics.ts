@@ -23,6 +23,10 @@ import {
 } from '@/types/marketing';
 import { GovernanceService } from '@/services/governance-service';
 import { logger } from '@/lib/logger';
+import React from 'react';
+import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer';
+import type { JSXElementConstructor, ReactElement } from 'react';
+import { TrustMetricsPdfDocument } from './TrustMetricsPdfDocument';
 
 /**
  * Get comprehensive trust metrics
@@ -286,10 +290,13 @@ export async function getAuditLogMetrics(): Promise<AuditLogMetric> {
 /**
  * Export trust metrics as PDF (for investor/CIO presentations)
  */
-export async function exportTrustMetricsPDF(_metrics: TrustMetrics): Promise<Blob> {
-  // This would use a PDF generation library like pdf-lib or jsPDF
-  // For now, returning a placeholder
-  throw new Error('PDF export not yet implemented - requires pdf-lib integration');
+export async function exportTrustMetricsPDF(metrics: TrustMetrics): Promise<Blob> {
+  const element = React.createElement(
+    TrustMetricsPdfDocument,
+    { metrics },
+  ) as ReactElement<DocumentProps, string | JSXElementConstructor<unknown>>;
+  const buffer = await renderToBuffer(element);
+  return new Blob([new Uint8Array(buffer)], { type: 'application/pdf' });
 }
 
 /**

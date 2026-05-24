@@ -1,4 +1,63 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { Decimal } from 'decimal.js';
+import { InvoiceGenerator, type InvoiceData } from '../invoice-generator';
+
+function buildInvoice(overrides: Partial<InvoiceData> = {}): InvoiceData {
+  return {
+    invoiceNumber: 'INV-1001',
+    invoiceDate: new Date('2026-05-24T00:00:00.000Z'),
+    dueDate: new Date('2026-06-07T00:00:00.000Z'),
+    customerName: 'CUPE Local 101',
+    customerEmail: 'treasurer@cupe101.ca',
+    customerAddress: {
+      line1: '101 Solidarity Ave',
+      city: 'Toronto',
+      province: 'ON',
+      postalCode: 'M5V 2T6',
+      country: 'Canada',
+    },
+    unionName: 'UnionEyes',
+    unionAddress: {
+      line1: '1 Governance Way',
+      city: 'Ottawa',
+      province: 'ON',
+      postalCode: 'K1A 0A1',
+      country: 'Canada',
+    },
+    unionEmail: 'billing@unioneyes.ca',
+    lineItems: [
+      {
+        description: 'Executive continuity brief',
+        quantity: 1,
+        unitPrice: new Decimal(499),
+        amount: new Decimal(499),
+      },
+    ],
+    subtotal: new Decimal(499),
+    taxRate: 0.13,
+    taxAmount: new Decimal(64.87),
+    totalAmount: new Decimal(563.87),
+    amountDue: new Decimal(563.87),
+    terms: 'Net 14',
+    paymentInstructions: 'Pay by EFT using the remittance details on file.',
+    ...overrides,
+  };
+}
+
+describe('InvoiceGenerator.generatePDF', () => {
+  it('renders a structured invoice PDF from InvoiceData', async () => {
+    const buffer = await InvoiceGenerator.generatePDF(buildInvoice());
+    expect(buffer.subarray(0, 4).toString()).toBe('%PDF');
+    expect(buffer.length).toBeGreaterThan(800);
+  });
+
+  it('renders a compatibility PDF from legacy HTML input', async () => {
+    const html = InvoiceGenerator.generateHTML(buildInvoice());
+    const buffer = await InvoiceGenerator.generatePDF(html);
+    expect(buffer.subarray(0, 4).toString()).toBe('%PDF');
+    expect(buffer.length).toBeGreaterThan(500);
+  });
+});import { describe, it, expect } from 'vitest';
 import { Decimal } from 'decimal.js';
 import { InvoiceGenerator, type InvoiceData } from '../invoice-generator';
 

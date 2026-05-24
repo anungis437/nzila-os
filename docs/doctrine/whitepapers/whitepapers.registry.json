@@ -15,7 +15,7 @@
       "knowledgeType": "policy",
       "domainScope": "doctrine.continuity",
       "tenantScope": "platform",
-      "binaryMaster": "infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf",
+      "binaryMaster": "apps/union-eyes/public/whitepapers/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf",
       "extractedText": "infotech/_continuity_gap.txt",
       "canonicalMarkdown": "docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md",
       "tags": [

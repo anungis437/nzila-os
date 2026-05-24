@@ -29,6 +29,10 @@ import {
   type InstitutionalTimelineGraph,
 } from '@nzila/organizational-governance-graph'
 
+import { db } from '@/db/db'
+import { organizations, organizationRelationships } from '@/db/schema-organizations'
+import { logger } from '@/lib/logger'
+
 // ── View shapes ─────────────────────────────────────────────────────────────
 
 export interface HierarchyNodeView {
@@ -75,18 +79,151 @@ export interface InstitutionalTopologyView {
   readonly continuityTopology: readonly ContinuityEntry[]
 }
 
-// ── Substrate placeholder ───────────────────────────────────────────────────
+// ── Substrate adapter ───────────────────────────────────────────────────────
+
+const IGG_KIND_BY_ORG_TYPE: Readonly<Record<string, string>> = {
+  platform: IggEntityKinds.PLATFORM,
+  congress: IggEntityKinds.CONGRESS,
+  federation: IggEntityKinds.FEDERATION,
+  union: IggEntityKinds.UNION,
+  local: IggEntityKinds.LOCAL,
+  region: IggEntityKinds.REGION,
+  district: IggEntityKinds.DISTRICT,
+}
+
+const IGG_KIND_BY_RELATIONSHIP_TYPE: Readonly<Record<string, string>> = {
+  affiliate: IggRelationshipKinds.AFFILIATED_WITH,
+  federation: IggRelationshipKinds.AFFILIATED_WITH,
+  local: IggRelationshipKinds.AFFILIATED_WITH,
+  chapter: IggRelationshipKinds.AFFILIATED_WITH,
+  region: IggRelationshipKinds.AFFILIATED_WITH,
+  district: IggRelationshipKinds.AFFILIATED_WITH,
+  joint_council: IggRelationshipKinds.AFFILIATED_WITH,
+  merged_from: IggRelationshipKinds.SUPERSEDES,
+  split_from: IggRelationshipKinds.SUPERSEDES,
+}
+
+function toIso(value: Date | string | null | undefined): string {
+  if (!value) return new Date(0).toISOString()
+  if (value instanceof Date) return value.toISOString()
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return new Date(0).toISOString()
+  return parsed.toISOString()
+}
+
+function normalizeStatus(status: string | null | undefined): string {
+  if (status === 'active') return 'active'
+  if (status === 'inactive') return 'inactive'
+  if (status === 'archived') return 'archived'
+  if (status === 'suspended') return 'suspended'
+  return 'active'
+}
 
 /**
  * Returns the raw institutional governance graph used by the topology
  * surfaces.
- *
- * Placeholder: the real institutional substrate adapter is a future
- * workstream. Returning an empty, well-typed graph keeps the read
- * surfaces calm and exercises the IGG fences end-to-end.
  */
 export async function getInstitutionalGraph(): Promise<InstitutionalTimelineGraph> {
-  return { nodes: [], edges: [], decisions: [] }
+  try {
+    const [orgRows, relationshipRows] = await Promise.all([
+      db.select().from(organizations),
+      db.select().from(organizationRelationships),
+    ])
+
+    const nodes: InstitutionalTimelineGraph['nodes'] = orgRows.map((org) => ({
+      entityType: 'Organization',
+      entityId: org.id,
+      tenantId: org.appId ?? org.id,
+      canonicalName: org.displayName ?? org.name,
+      status: normalizeStatus(org.status),
+      metadata: {
+        iggKind: IGG_KIND_BY_ORG_TYPE[org.organizationType] ?? IggEntityKinds.UNION,
+        organizationType: org.organizationType,
+        slug: org.slug,
+        hierarchyLevel: org.hierarchyLevel,
+        foundedAt: org.affiliationDate ? toIso(org.affiliationDate) : undefined,
+        createdAt: toIso(org.createdAt),
+      },
+    }))
+
+    const parentEdges: InstitutionalTimelineGraph['edges'] = orgRows
+      .filter((org) => Boolean(org.parentId))
+      .map((org) => ({
+        id: `org-parent-${org.id}`,
+        sourceEntityType: 'Organization',
+        sourceEntityId: org.parentId as string,
+        targetEntityType: 'Organization',
+        targetEntityId: org.id,
+        relationshipType: 'PARENT_OF',
+        metadata: {
+          iggKind: IggRelationshipKinds.PARENT_OF,
+          effectiveAt: toIso(org.createdAt),
+          summary: `Parent relationship established for ${org.displayName ?? org.name}`,
+        },
+      }))
+
+    const explicitEdges: InstitutionalTimelineGraph['edges'] = relationshipRows.map((rel) => {
+      const iggKind =
+        IGG_KIND_BY_RELATIONSHIP_TYPE[rel.relationshipType] ??
+        IggRelationshipKinds.AFFILIATED_WITH
+      return {
+        id: rel.id,
+        sourceEntityType: 'Organization',
+        sourceEntityId: rel.childOrgId,
+        targetEntityType: 'Organization',
+        targetEntityId: rel.parentOrgId,
+        relationshipType:
+          iggKind === IggRelationshipKinds.SUPERSEDES
+            ? 'DEPENDS_ON'
+            : 'BELONGS_TO',
+        metadata: {
+          ...(rel.metadata ?? {}),
+          iggKind,
+          relationshipType: rel.relationshipType,
+          effectiveAt: toIso(rel.effectiveDate),
+          endedAt: rel.endDate ? toIso(rel.endDate) : undefined,
+          createdAt: toIso(rel.createdAt),
+          summary: `Relationship ${rel.relationshipType} between ${rel.childOrgId} and ${rel.parentOrgId}`,
+        },
+      }
+    })
+
+    const decisions: InstitutionalTimelineGraph['decisions'] = relationshipRows.map((rel) => ({
+      id: `org-rel-decision-${rel.id}`,
+      tenantId: rel.parentOrgId,
+      decisionType: 'policy_evaluation',
+      status: 'executed',
+      actorType: 'system',
+      actorId: 'institutional-topology-adapter',
+      entityType: 'Organization',
+      entityId: rel.childOrgId,
+      summary: `Recorded ${rel.relationshipType} relationship`,
+      outcome: {
+        iggCategory: 'institutional_relationship',
+        iggEventKind: 'relationship_recorded',
+        relationshipType: rel.relationshipType,
+      },
+      policyRefs: [],
+      evidenceRefs: [],
+      knowledgeRefs: [],
+      createdAt: toIso(rel.createdAt),
+      executedAt: toIso(rel.effectiveDate),
+    }))
+
+    return {
+      nodes,
+      edges: [...parentEdges, ...explicitEdges],
+      decisions,
+    }
+  } catch (error) {
+    logger.warn(
+      '[organizational-topology] Failed to load institutional graph from persistence; returning empty graph',
+      {
+        error,
+      },
+    )
+    return { nodes: [], edges: [], decisions: [] }
+  }
 }
 
 // ── Composition ─────────────────────────────────────────────────────────────

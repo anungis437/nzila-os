@@ -41,7 +41,7 @@ export const DOCTRINE_WHITEPAPERS: readonly DoctrineWhitepaperSeed[] = [
     publisher: 'Nzila Ventures / Nzila OS Research Initiative',
     publishedDate: '2026-05-21',
     ingestedDate: '2026-05-22',
-    binaryMaster: 'infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf',
+    binaryMaster: 'apps/union-eyes/public/whitepapers/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf',
     canonicalMarkdown: 'docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md',
     extractedText: 'infotech/_continuity_gap.txt',
     tags: [
@@ -89,7 +89,7 @@ export const DOCTRINE_WHITEPAPERS: readonly DoctrineWhitepaperSeed[] = [
       ],
       structuredPayload: {
         whitepaperId: 'wp.continuity-gap.v3',
-        binaryMaster: 'infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf',
+        binaryMaster: 'apps/union-eyes/public/whitepapers/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf',
         canonicalMarkdown: 'docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md',
         edition: 'Evidence-Enhanced Canadian Edition v3.0',
         publisher: 'Nzila Ventures / Nzila OS Research Initiative',

@@ -18,7 +18,12 @@ import { rateLimit } from '@/lib/rate-limit'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { verifyTurnstileToken } from '@/lib/icra/turnstile'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
-import { QUESTION_BANK_VERSION, CTX_PRIMARY_CHALLENGE_MAX_LENGTH, CTX_SELECT_VALUE_MAX_LENGTH } from '@/lib/icra/questions'
+import {
+  ALL_QUESTIONS,
+  QUESTION_BANK_VERSION,
+  CTX_PRIMARY_CHALLENGE_MAX_LENGTH,
+  CTX_SELECT_VALUE_MAX_LENGTH,
+} from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import {
   icraAssessments,
@@ -141,8 +146,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       // Persisted under the reserved `_adaptive` namespace inside the existing
       // organizationContext jsonb so the result page + PDF can read it back
       // without a schema migration. Never includes raw answers / PII.
-      let organizationContextForInsert: Record<string, unknown> | null =
-        normalizedOrgContext
+      let organizationContextForInsert: Record<string, unknown> | null = normalizedOrgContext
       try {
         const profileForRouting = classifyOrgContext({
           rawForm: normalizedOrgContext ?? {},

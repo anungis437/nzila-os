@@ -106,22 +106,10 @@ export interface StewardshipDensityResult {
   exposedWeight: number;
 }
 
-const EMPTY_RESULT: StewardshipDensityResult = {
-  index: 0,
-  band: DENSITY_BANDS[DENSITY_BANDS.length - 1],
-  totalCarriers: 0,
-  loadBearingCount: 0,
-  institutionCriticalCount: 0,
-  unsuccessedLoadBearingCount: 0,
-  unsuccessedInstitutionCriticalCount: 0,
-  totalWeight: 0,
-  exposedWeight: 0,
-};
-
 export function computeStewardshipDensity(
   holders: readonly HolderForIndex[],
 ): StewardshipDensityResult {
-  if (holders.length === 0) return EMPTY_RESULT;
+  if (!Array.isArray(holders) || holders.length === 0) return buildEmptyResult();
 
   let totalWeight = 0;
   let exposedWeight = 0;
@@ -130,23 +118,28 @@ export function computeStewardshipDensity(
   let unsuccessedLoadBearingCount = 0;
   let unsuccessedInstitutionCriticalCount = 0;
 
+  let totalCarriers = 0;
+
   for (const h of holders) {
-    const crit = h.criticality;
+    if (!h || typeof h !== 'object') continue;
+    totalCarriers += 1;
+    const holder = h as Partial<HolderForIndex>;
+    const crit = isCriticality(holder.criticality) ? holder.criticality : null;
     if (!crit) continue;
     const critWeight = CRITICALITY_WEIGHT[crit];
-    const tenureWeight = h.tenureBand ? TENURE_AMPLIFIER[h.tenureBand] : 1.0;
+    const tenureWeight = isTenureBand(holder.tenureBand) ? TENURE_AMPLIFIER[holder.tenureBand] : 1.0;
     const weight = critWeight * tenureWeight;
 
     totalWeight += weight;
-    if (!h.successorIdentified) exposedWeight += weight;
+    if (!holder.successorIdentified) exposedWeight += weight;
 
     if (crit === 'load_bearing') {
       loadBearingCount += 1;
-      if (!h.successorIdentified) unsuccessedLoadBearingCount += 1;
+      if (!holder.successorIdentified) unsuccessedLoadBearingCount += 1;
     }
     if (crit === 'institution_critical') {
       institutionCriticalCount += 1;
-      if (!h.successorIdentified) unsuccessedInstitutionCriticalCount += 1;
+      if (!holder.successorIdentified) unsuccessedInstitutionCriticalCount += 1;
     }
   }
 
@@ -156,7 +149,7 @@ export function computeStewardshipDensity(
   return {
     index: round2(index),
     band,
-    totalCarriers: holders.length,
+    totalCarriers,
     loadBearingCount,
     institutionCriticalCount,
     unsuccessedLoadBearingCount,
@@ -167,12 +160,43 @@ export function computeStewardshipDensity(
 }
 
 export function classifyDensity(index: number): DensityBand {
+  const normalized = sanitizeUnitInterval(index);
   for (const band of DENSITY_BANDS) {
-    if (index >= band.lowerBound) return band;
+    if (normalized >= band.lowerBound) return band;
   }
   return DENSITY_BANDS[DENSITY_BANDS.length - 1];
+}
+
+function buildEmptyResult(): StewardshipDensityResult {
+  return {
+    index: 0,
+    band: DENSITY_BANDS[DENSITY_BANDS.length - 1],
+    totalCarriers: 0,
+    loadBearingCount: 0,
+    institutionCriticalCount: 0,
+    unsuccessedLoadBearingCount: 0,
+    unsuccessedInstitutionCriticalCount: 0,
+    totalWeight: 0,
+    exposedWeight: 0,
+  };
+}
+
+function isCriticality(value: HolderForIndex['criticality'] | undefined): value is Criticality {
+  return value === 'routine' || value === 'important' || value === 'load_bearing' || value === 'institution_critical';
+}
+
+function isTenureBand(value: HolderForIndex['tenureBand'] | undefined): value is TenureBand {
+  return value === '0_3y' || value === '3_7y' || value === '7_15y' || value === '15y_plus';
+}
+
+function sanitizeUnitInterval(value: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(1, value));
 }
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
+
+for (const band of DENSITY_BANDS) Object.freeze(band);
+Object.freeze(DENSITY_BANDS);

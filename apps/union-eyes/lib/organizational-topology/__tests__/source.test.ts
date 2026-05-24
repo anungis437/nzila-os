@@ -18,11 +18,11 @@ import {
 } from '../source'
 
 describe('organizational-topology projection guard', () => {
-  it('placeholder graph is empty and well-typed', async () => {
+  it('graph adapter returns a well-typed substrate', async () => {
     const raw = await getInstitutionalGraph()
-    expect(raw.nodes).toEqual([])
-    expect(raw.edges).toEqual([])
-    expect(raw.decisions).toEqual([])
+    expect(Array.isArray(raw.nodes)).toBe(true)
+    expect(Array.isArray(raw.edges)).toBe(true)
+    expect(Array.isArray(raw.decisions)).toBe(true)
   })
 
   it('every projected view passes assertNoProtectedKindsInProjections', async () => {

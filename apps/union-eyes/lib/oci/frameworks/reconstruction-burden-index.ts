@@ -34,10 +34,14 @@ export interface ReconstructionBurdenResult {
 export function computeReconstructionBurden(
   inputs: ReconstructionInputs,
 ): ReconstructionBurdenResult {
-  const exposedComponent = Math.min(4, inputs.exposedCarriers * 0.8);
-  const criticalComponent = Math.min(3, inputs.institutionCriticalCarriers * 1.0);
-  const densityComponent = inputs.densityIndex * 2.0;
-  const entropyComponent = ((inputs.governanceEntropyOrdinal ?? 2) - 1) * 0.25;
+  const exposedCarriers = sanitizeNonNegativeFinite(inputs.exposedCarriers);
+  const institutionCriticalCarriers = sanitizeNonNegativeFinite(inputs.institutionCriticalCarriers);
+  const densityIndex = sanitizeUnitInterval(inputs.densityIndex);
+  const governanceEntropyOrdinal = sanitizeEntropyOrdinal(inputs.governanceEntropyOrdinal);
+  const exposedComponent = Math.min(4, exposedCarriers * 0.8);
+  const criticalComponent = Math.min(3, institutionCriticalCarriers * 1.0);
+  const densityComponent = densityIndex * 2.0;
+  const entropyComponent = (governanceEntropyOrdinal - 1) * 0.25;
 
   const score = round1(
     Math.min(10, exposedComponent + criticalComponent + densityComponent + entropyComponent),
@@ -48,6 +52,20 @@ export function computeReconstructionBurden(
     band: classifyBurden(score),
     posture: posturalStatement(score),
   };
+}
+
+function sanitizeNonNegativeFinite(value: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  return Math.max(0, value);
+}
+
+function sanitizeUnitInterval(value: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(1, value));
+}
+
+function sanitizeEntropyOrdinal(value: ReconstructionInputs['governanceEntropyOrdinal']): 1 | 2 | 3 | 4 | 5 {
+  return value === 1 || value === 2 || value === 3 || value === 4 || value === 5 ? value : 2;
 }
 
 function classifyBurden(score: number): ReconstructionBurdenResult['band'] {

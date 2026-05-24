@@ -38,9 +38,12 @@ export interface ContinuityBurdenMapResult {
 export function computeContinuityBurdenMap(
   inputs: ContinuityBurdenInputs,
 ): ContinuityBurdenMapResult {
-  const densityComponent = inputs.density.index * 0.6;
-  const icraComponent = (inputs.icraBurdenIndex ?? 0) * 0.25;
-  const reconstructionComponent = (inputs.reconstructionRisk ?? 0) * 0.15;
+  const densityIndex = sanitizeUnitInterval(inputs?.density?.index);
+  const icraIndex = sanitizeUnitInterval(inputs?.icraBurdenIndex);
+  const reconstructionIndex = sanitizeUnitInterval(inputs?.reconstructionRisk);
+  const densityComponent = densityIndex * 0.6;
+  const icraComponent = icraIndex * 0.25;
+  const reconstructionComponent = reconstructionIndex * 0.15;
   const composite = round2(
     Math.min(1, densityComponent + icraComponent + reconstructionComponent),
   );
@@ -49,13 +52,20 @@ export function computeContinuityBurdenMap(
     { factor: 'Stewardship Density Index\u2122', weight: round2(densityComponent) },
     { factor: 'ICRA continuity burden indicator', weight: round2(icraComponent) },
     { factor: 'Reconstruction risk', weight: round2(reconstructionComponent) },
-  ].filter((f) => f.weight > 0);
+  ]
+    .filter((f) => f.weight > 0)
+    .map((f) => Object.freeze(f));
 
   return {
     composite,
     posture: posturalStatement(composite),
-    contributingFactors: factors,
+    contributingFactors: Object.freeze(factors),
   };
+}
+
+function sanitizeUnitInterval(value: number | undefined): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(1, value));
 }
 
 function posturalStatement(composite: number): string {

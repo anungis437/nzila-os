@@ -26,6 +26,8 @@ import type {
   SectionScore,
   StewardshipSignal,
 } from './types';
+import type { ContradictionReport } from './contradictions/contradictionDetectionEngine';
+import { buildContradictionInsight } from './contradictions/contradictionInsightAdapter';
 
 /**
  * Raw organizational context as captured by the assessment form. Used only to
@@ -564,6 +566,7 @@ export function generateInsights(
   sectionScores: SectionScore[],
   persona?: ExecutivePersonaId,
   orgContext?: InsightOrgContext,
+  contradictionReport?: ContradictionReport,
 ): InsightEngineOutput {
   const continuitySignals = generateContinuitySignals(dimensionScores, sectionScores);
   const stewardshipSignals = generateStewardshipSignals(dimensionScores);
@@ -577,6 +580,7 @@ export function generateInsights(
     detectInstitutionalForgetting(dimensionScores, orgContext),
     detectEvidenceGovernanceGap(dimensionScores, persona),
     detectStewardshipConcentration(dimensionScores, burdenIndex.score, persona),
+    contradictionReport ? buildContradictionInsight(contradictionReport, persona) : null,
   ];
 
   // Severity ordering: material (most consequential) first.
@@ -596,6 +600,7 @@ export function generateInsights(
     stewardship_concentration: 4,
     evidence_governance_gap: 5,
     modernization_continuity_gap: 6,
+    contradiction_detected: 7,
   };
 
   const insights = rawInsights

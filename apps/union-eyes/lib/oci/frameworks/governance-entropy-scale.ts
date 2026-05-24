@@ -72,9 +72,17 @@ export const ENTROPY_LEVELS: readonly EntropyLevel[] = [
  * @param drift A scalar 0\u20131. Higher values indicate greater divergence.
  */
 export function classifyEntropy(drift: number): EntropyLevel {
-  const clamped = Math.max(0, Math.min(1, drift));
+  const clamped = sanitizeUnitInterval(drift);
   for (const level of ENTROPY_LEVELS) {
     if (clamped >= level.lowerBound) return level;
   }
   return ENTROPY_LEVELS[ENTROPY_LEVELS.length - 1];
 }
+
+function sanitizeUnitInterval(value: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(1, value));
+}
+
+for (const level of ENTROPY_LEVELS) Object.freeze(level);
+Object.freeze(ENTROPY_LEVELS);

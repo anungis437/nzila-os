@@ -302,23 +302,6 @@ const OPERATIONAL_DEPENDENCY: MaturitySelectQuestion[] = [
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Continuity equity prevents single points of knowledge failure and protects organizational memory holders from unsustainable burden.',
   },
-  // ── New v2 questions: invisible continuity burden ──
-  {
-    id: 'icb_01', section: 'operational_dependency', order: 6, type: 'maturity_select',
-    prompt: 'To what extent does your organization recognize and account for the informal continuity work that certain staff or leaders carry on behalf of the institution?',
-    helpText: 'Consider whether the time spent compensating for absent institutional memory — translating context, explaining history, maintaining relationships — is visible to leadership or absorbed silently into individual roles.',
-    weights: { institutional_continuity: 0.8, operational_memory: 1.0 },
-    options: MATURITY_OPTIONS, allowNote: true,
-    rationale: 'Invisible continuity labour is the primary precursor of burnout and sudden institutional knowledge loss.',
-  },
-  {
-    id: 'icb_02', section: 'operational_dependency', order: 7, type: 'maturity_select',
-    prompt: 'How deliberately does your organization distribute continuity responsibilities — so that institutional knowledge is not quietly concentrated in a small number of people?',
-    helpText: 'As opposed to allowing continuity knowledge to accumulate with whoever happens to have been around the longest or is most engaged.',
-    weights: { institutional_continuity: 1.0, operational_memory: 0.8 },
-    options: MATURITY_OPTIONS, allowNote: true,
-    rationale: 'Continuity equity prevents single points of knowledge failure and protects institutional memory holders from unsustainable burden.',
-  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -488,15 +471,6 @@ const TRANSITION_READINESS: MaturitySelectQuestion[] = [
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Onboarding quality determines how much organizational intelligence survives each transition.',
   },
-  // ── New v2 question: onboarding continuity ──
-  {
-    id: 'onb_01', section: 'transition_readiness', order: 6, type: 'maturity_select',
-    prompt: 'How effectively does your onboarding process transfer institutional intelligence — not just role responsibilities, but the operational context, relational history, and governance understanding that allow a new person to act effectively?',
-    helpText: 'As opposed to onboarding that covers formal procedures and tools, but leaves new staff to absorb institutional context through observation and informal conversation over months or years.',
-    weights: { institutional_continuity: 0.8, transition_readiness: 1.0, operational_memory: 0.6 },
-    options: MATURITY_OPTIONS, allowNote: true,
-    rationale: 'Onboarding quality determines how much institutional intelligence survives each transition.',
-  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -552,15 +526,6 @@ const OPERATIONAL_COORDINATION: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 0.8, operational_memory: 0.6 },
     options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Continuity fairness is both an equity concern and an organizational resilience indicator.',
-  },
-  // ── New v2 question: continuity fairness ──
-  {
-    id: 'cf_01', section: 'operational_coordination', order: 6, type: 'maturity_select',
-    prompt: 'How equitably is continuity responsibility distributed across your organization — rather than concentrated in a small number of individuals who quietly carry disproportionate institutional burden?',
-    helpText: 'Consider whether the work of maintaining institutional continuity — keeping context, translating between teams, preserving relationships — is recognized and shared, or whether it falls to the same people repeatedly.',
-    weights: { institutional_continuity: 0.8, operational_memory: 0.6 },
-    options: MATURITY_OPTIONS, allowNote: true,
-    rationale: 'Continuity fairness is both an equity concern and an institutional resilience indicator.',
   },
 ];
 

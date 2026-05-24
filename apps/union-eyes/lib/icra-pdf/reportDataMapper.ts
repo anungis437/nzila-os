@@ -41,6 +41,7 @@ import {
   type StabilizationAppendixParagraph,
 } from './reportNarrativeEngine';
 import type { ExecutiveStabilizationResult } from '../workbook/engines/executive/executiveStabilizationModel';
+import type { AdaptiveReportAISlot, SupportedLocale } from '../icra/adaptation';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PdfReportData — the fully-assembled data structure for the template
@@ -96,6 +97,19 @@ export interface PdfReportData {
   stabilizationMovement?: {
     paragraphs: readonly StabilizationAppendixParagraph[];
   };
+
+  // Optional deterministic AI-assisted narrative payload. Exposed only after
+  // workflow approval.
+  aiAssistedNarrative?: {
+    reviewStatus: 'approved';
+    auditRecordRef: string;
+    narrative: string;
+  };
+}
+
+interface ReportMapperOptions {
+  locale?: SupportedLocale;
+  adaptiveReportAISlot?: AdaptiveReportAISlot | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -106,6 +120,7 @@ export function mapToPdfReportData(
   profile: InstitutionalContinuityProfile,
   orgContext?: OrganizationContext | null,
   executiveStabilization?: ExecutiveStabilizationResult | null,
+  options?: ReportMapperOptions,
 ): PdfReportData {
   const persona = orgContext ? detectPersona(orgContext) : undefined;
 
@@ -158,10 +173,26 @@ export function mapToPdfReportData(
     ),
   };
 
+  const adaptiveSlot = options?.adaptiveReportAISlot;
+  const aiAssistedNarrative =
+    adaptiveSlot?.reviewWorkflow.status === 'approved'
+      ? {
+          reviewStatus: 'approved' as const,
+          auditRecordRef:
+            adaptiveSlot.reviewWorkflow.auditTrail.at(-1)?.auditId ??
+            adaptiveSlot.reviewWorkflow.workflowId,
+          narrative: [
+            adaptiveSlot.narrative.headerStatement,
+            ...adaptiveSlot.narrative.continuityContext,
+            ...adaptiveSlot.executive.paragraphs,
+          ].join('\n\n'),
+        }
+      : undefined;
+
   return {
     assessmentId: profile.assessmentId,
     generatedAt: new Date(profile.generatedAt),
-    locale: 'en-CA',
+    locale: options?.locale ?? 'en-CA',
 
     institutionName: orgContext?.name,
     sector: orgContext?.sector,
@@ -197,5 +228,7 @@ export function mapToPdfReportData(
           ],
         }
       : undefined,
+
+    aiAssistedNarrative,
   };
 }
