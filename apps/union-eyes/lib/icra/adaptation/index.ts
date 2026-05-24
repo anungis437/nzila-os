@@ -18,7 +18,6 @@ export * from './adaptiveScoringModel';
 export * from './adaptivePassageLibrary';
 export * from './adaptiveNarrativeEngine';
 export * from './facilitatorAdaptationGuide';
-export * from './adaptiveTelemetry';
 export * from './routingExplainabilitySnapshot';
 export * from './routedSubmissionValidator';
 export * from './persistedAdaptiveContext';
