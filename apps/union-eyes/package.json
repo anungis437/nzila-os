@@ -252,13 +252,13 @@
     "@types/supertest": "^6.0.3",
     "@types/swagger-ui-react": "^5.18.0",
     "@types/uuid": "^9.0.8",
-    "@typescript-eslint/parser": "^8.54.0",
+    "@typescript-eslint/parser": "^8.59.4",
     "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.7",
     "archiver": "^7.0.1",
     "drizzle-kit": "^0.31.8",
-    "eslint": "^10.1.0",
-    "eslint-config-next": "16.2.2",
+    "eslint": "^10.4.0",
+    "eslint-config-next": "16.2.6",
     "fast-glob": "^3.3.2",
     "glob": "^13.0.1",
     "husky": "^9.1.7",
@@ -272,7 +272,7 @@
     "tsx": "^4.21.0",
     "turbo": "2.9.14",
     "typescript": "^6",
-    "vitest": "^4.1.2",
+    "vitest": "^4.1.7",
     "zod-to-json-schema": "^3.25.1"
   }
 }
