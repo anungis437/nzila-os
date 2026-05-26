@@ -21,7 +21,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'marketing.home' });
 
   return {
-    title: `Union Eyes | ${t('badge')}`,
+    title: `UnionEyes | ${t('badge')}`,
     description: t('heroDescription'),
     alternates: buildLocaleAlternates(locale),
   };
@@ -125,7 +125,7 @@ export default async function LocaleRootPage({
             <ScrollReveal delay={0.24}>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
-                  href={`/${locale}/institutional-continuity-risk`}
+                  href={`/${locale}/organizational-continuity-risk`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
                   {t('ctaPrimary')}
@@ -167,8 +167,8 @@ export default async function LocaleRootPage({
         </section>
 
         {/* Translation Layer — operational plain-language explainers for cold visitors.
-            Sits between proof bar and outcomes so first-contact readers get a plain
-            explanation of what Union Eyes does BEFORE encountering doctrine vocabulary. */}
+          Sits between proof bar and outcomes so first-contact readers get a plain
+          explanation of what UnionEyes does before encountering doctrine vocabulary. */}
         <section className="py-24 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <ScrollReveal>
@@ -273,7 +273,7 @@ export default async function LocaleRootPage({
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href={`/${locale}/institutional-continuity-risk`}
+                  href={`/${locale}/organizational-continuity-risk`}
                   className="inline-flex items-center justify-center px-10 py-5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
                   {t('finalCtaPrimary')}
