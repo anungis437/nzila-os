@@ -25,7 +25,7 @@ const en = {
     imageAlt: 'Institutional governance and continuity infrastructure',
     subhead:
       'Union Eyes helps federated institutions preserve institutional memory, strengthen governance coordination, and modernize procedural trust through non-disruptive implementation alongside existing systems.',
-    ctaPrimary: 'Book Strategic Discovery',
+    ctaPrimary: 'Start a review',
     ctaSecondary: 'Explore Continuity Infrastructure',
   },
   posture: {
@@ -118,7 +118,7 @@ const en = {
     heading: 'Discuss continuity infrastructure for your institution.',
     body:
       'A consultative conversation about institutional continuity, governance coordination, and procedural trust — paced to your federation, not to a sales cycle.',
-    ctaPrimary: 'Book Strategic Discovery',
+    ctaPrimary: 'Start a review',
     ctaSecondary: 'View Trust & Stewardship',
   },
   svg: {
@@ -170,7 +170,7 @@ const fr = {
     imageAlt: 'Gouvernance institutionnelle et infrastructure de continuité',
     subhead:
       'Union Eyes aide les institutions fédérées à préserver la mémoire institutionnelle, à renforcer la coordination de gouvernance et à moderniser la confiance procédurale par une mise en œuvre non perturbatrice aux côtés des systèmes existants.',
-    ctaPrimary: 'Planifier une découverte stratégique',
+    ctaPrimary: 'Faire le bilan',
     ctaSecondary: 'Découvrir l’infrastructure de continuité',
   },
   posture: {
@@ -263,7 +263,7 @@ const fr = {
     heading: 'Discutons d’une infrastructure de continuité pour votre institution.',
     body:
       'Une conversation consultative sur la continuité institutionnelle, la coordination de gouvernance et la confiance procédurale — au rythme de votre fédération, et non d’un cycle de vente.',
-    ctaPrimary: 'Planifier une découverte stratégique',
+    ctaPrimary: 'Faire le bilan',
     ctaSecondary: 'Voir la confiance et l’intendance',
   },
   svg: {

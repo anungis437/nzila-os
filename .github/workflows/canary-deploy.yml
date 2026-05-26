@@ -61,7 +61,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Contract tests
-        run: pnpm contract:test
+        run: pnpm contract-tests
 
       - name: SLO gate (current baseline)
         run: node --import tsx scripts/slo-gate.ts --env=prod
@@ -105,10 +105,16 @@ jobs:
       - name: Deploy canary revision
         id: deploy
         run: |
+          CONTAINER_NAME=$(az containerapp show \
+            --name ${{ inputs.app }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "properties.template.containers[0].name" -o tsv)
+
           # Create new revision with canary traffic
           az containerapp update \
             --name ${{ inputs.app }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --container-name "$CONTAINER_NAME" \
             --image ${{ env.IMAGE_BASE }}:${{ inputs.image_tag }} \
             --revision-suffix canary-$(date +%s)
 
@@ -119,6 +125,14 @@ jobs:
             --query "sort_by([], &properties.createdTime) | [-1].name" -o tsv)
           echo "revision=$CANARY" >> "$GITHUB_OUTPUT"
           echo "Canary revision: $CANARY"
+
+      - name: Ensure multi-revision mode for canary traffic
+        run: |
+          # Traffic weighting requires multiple active revisions.
+          az containerapp revision set-mode \
+            --name ${{ inputs.app }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --mode multiple
 
       - name: Split traffic
         run: |

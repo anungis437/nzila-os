@@ -7232,11 +7232,11 @@
       "signIn": "Se connecter"
     },
     "home": {
-      "badge": "Gouvernance institutionnelle et infrastructure de continuité",
-      "heroHeadingLine1": "La certitude que",
-      "heroHeadingLine2": "la mémoire institutionnelle survivra à toute personne.",
-      "heroDescription": "Quand le personnel d’expérience prend sa retraite, quand les dirigeantes et dirigeants changent, quand des fédérations fusionnent — les précédents, les relations et le jugement qu’ils portent ne se transmettent pas seuls. Union Eyes est l’infrastructure qui les garde en place. Hébergé au Canada. Aucune surveillance des travailleuses et travailleurs. Aucune décision en boîte noire.",
-      "ctaPrimary": "Commencer la réflexion de continuité (gratuite)",
+      "badge": "Bilan de préparation organisationnelle",
+      "heroHeadingLine1": "La plupart des organisations ne réalisent pas",
+      "heroHeadingLine2": "combien de savoir risque de partir avec des personnes clés.",
+      "heroDescription": "Dans chaque organisation, certaines personnes tiennent les choses ensemble sans faire de bruit. Quand elles partent, les décisions et le savoir-faire partent souvent avec elles. Faites une courte revue pour voir où votre organisation est la plus exposée.",
+      "ctaPrimary": "Faire le bilan",
       "ctaSecondary": "Explorer les solutions",
       "ctaTertiary": "Lire le livre blanc sur la continuité",
       "proofSectionLabel": "Garanties intégrées à la plateforme",
@@ -7568,7 +7568,7 @@
         "step5Desc": "Règlement, arbitrage ou retrait",
         "ctaHeading": "Voyez le module de gestion des dossiers en action",
         "ctaDescription": "Ce module est activé par votre contrat de déploiement. Démarrez un pilote contrôlé pour voir comment il gère les flux de travail réels de griefs.",
-        "ctaPrimary": "Démarrer un pilote",
+        "ctaPrimary": "Faire le bilan",
         "ctaSecondary": "Voir Confiance et conformité"
       },
       "memberPortal": {
@@ -7603,7 +7603,7 @@
         "steward4": "Gérez les documents avec contrôle de version et approbations",
         "ctaHeading": "Prêt pour un portail qui fonctionne ?",
         "ctaDescription": "Ce module est activé par votre contrat de déploiement. Démarrez un pilote pour voir comment il gère vos flux de travail réels.",
-        "ctaPrimary": "Démarrer un pilote",
+        "ctaPrimary": "Faire le bilan",
         "ctaSecondary": "Voir la gestion des dossiers"
       },
       "aiWorkbench": {
@@ -7633,7 +7633,7 @@
         "safe3Desc": "L'utilisation de l'IA est plafonnée par organisation via la répartition de facturation. Pas de coûts incontrôlés, pas de surprises.",
         "ctaHeading": "Voir le module Renseignements en action",
         "ctaDescription": "Ce module est disponible par déploiement pilote contrôlé. Réservez une démonstration pour voir comment il gère les flux de travail réels de griefs et de rapports.",
-        "ctaPrimary": "Démarrer un pilote",
+        "ctaPrimary": "Faire le bilan",
         "ctaSecondary": "Voir la gestion des dossiers"
       },
       "analytics": {
@@ -7665,7 +7665,7 @@
         "roleTreasurersDesc": "Facturation en une seule facture, visibilité descendante de la répartition et conformité du per capita à travers toutes les sections affiliées.",
         "ctaHeading": "Voir le module financier en action",
         "ctaDescription": "Ce module est activé par votre contrat de déploiement. Démarrez un pilote pour voir comment il gère les flux de travail financiers réels et les règles de répartition.",
-        "ctaPrimary": "Démarrer un pilote",
+        "ctaPrimary": "Faire le bilan",
         "ctaSecondary": "Voir Renseignements et perspectives"
       }
     },
@@ -7778,7 +7778,7 @@
       "included8": "Garantie de disponibilité avec entente de niveau de service",
       "ctaHeading": "Prêt à délimiter un déploiement ?",
       "ctaDescription": "Chaque engagement débute par un pilote contrôlé. Nous travaillons avec votre équipe pour définir la portée, sélectionner les modules et valider la plateforme face à vos flux de travail réels.",
-      "ctaPrimary": "Démarrer un pilote contrôlé",
+      "ctaPrimary": "Faire le bilan",
       "ctaSecondary": "Vue d'ensemble de la plateforme",
       "trustLine1": "Tous les contrats incluent un traitement des données conforme à la LPRPDE et le support bilingue (EN/FR).",
       "trustLine2": "Pas de tarification par siège. Pas de système de crédits. Un contrat, une facture, transparence complète."
