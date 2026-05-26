@@ -1,17 +1,17 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-05-22 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-05-26 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
 | Apps | 26 |
-| Packages (packages/*) | 215 |
-| Workspace Packages (apps|packages|services|tooling) | 247 |
+| Packages (packages/*) | 216 |
+| Workspace Packages (apps|packages|services|tooling) | 248 |
 | GitHub Workflows | 48 |
 | Contract Test Files | 253 |
-| TS/JS Test Files | 1555 |
+| TS/JS Test Files | 1585 |
 | Python Test Files | 32 |
 
 ## Apps
@@ -21,8 +21,8 @@
 | abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 104 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 384 | Internal operations console — platform governance, compliance, analytics, integr |
-| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 321 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
+| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 390 | Internal operations console — platform governance, compliance, analytics, integr |
+| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 322 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 39 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 346 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | maestria | Next.js | 3021 | ✅ | ✅ | ❌ | ✅ | 73 |  |
@@ -30,14 +30,14 @@
 | mobility-client-portal | Next.js | 3013 | ✅ | ✅ | ❌ | ✅ | 32 | Client-facing portal for investment migration applicants to track cases, upload  |
 | nacp-exams | Next.js | 3011 | ✅ | ✅ | ✅ | ✅ | 61 | National Anti-Corruption Programme examination and assessment platform. |
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 105 |  |
-| orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 34 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
+| orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 35 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 107 | Partner portal for managing deals, commissions, certifications, and go-to-market |
-| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 38 | Internal admin console for managing platform services — events, knowledge, ontol |
+| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 62 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 96 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4103 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4178 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 20 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 24 |  |
