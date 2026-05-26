@@ -1,4 +1,4 @@
-# Union Eyes — Public-Safe Architecture Summary
+# UnionEyes — Public-Safe Architecture Summary
 
 > **Audience:** External reviewers, buyers, integration partners.
 > **Scope:** High-level architecture summary safe for external distribution.
@@ -10,7 +10,7 @@
 
 ## Overview
 
-Union Eyes is a governed institutional operating platform designed for labour organisations,
+UnionEyes is a governed institutional operating platform designed for labour organisations,
 unions, and associations. It is built to support:
 
 - Member representation and casework management
@@ -41,7 +41,7 @@ as foundational architectural requirements.
 
 ## Governance Architecture
 
-Union Eyes includes a layered governance architecture built across ten implementation waves:
+UnionEyes includes a layered governance architecture built across ten implementation waves:
 
 | Wave | Capability |
 |------|-----------|
@@ -78,7 +78,7 @@ The platform supports the following role-based experience lanes:
 
 ## Federation Architecture
 
-Union Eyes is designed to support federated labour organisations with multiple governance
+UnionEyes is designed to support federated labour organisations with multiple governance
 tiers. The federation sovereignty layer models national, regional, local, affiliate, and
 coalition units with:
 
@@ -94,7 +94,7 @@ This layer operates entirely in shadow mode and does not alter production data.
 
 ## Evidence and Auditability
 
-Union Eyes is designed to produce verifiable evidence for procurement and governance review:
+UnionEyes is designed to produce verifiable evidence for procurement and governance review:
 
 - **Generated reports:** Route registry, governance simulation summary, federation sovereignty summary
 - **CI governance gates:** 6 automated governance validation checks

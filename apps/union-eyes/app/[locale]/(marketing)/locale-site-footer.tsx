@@ -23,10 +23,10 @@ const FOOTER_COPY: Record<string, {
   pilotBadge: string;
   canadaBadge: string;
 }> = {
-  'en-CA': { pilotBadge: 'Founding Partner Program',     canadaBadge: 'Canadian Made'   },
-  en:      { pilotBadge: 'Founding Partner Program',     canadaBadge: 'Canadian Made'   },
-  'fr-CA': { pilotBadge: 'Programme partenaires fondateurs', canadaBadge: 'Fait au Canada' },
-  fr:      { pilotBadge: 'Programme partenaires fondateurs', canadaBadge: 'Fait au Canada' },
+  'en-CA': { pilotBadge: 'Guided Rollout Available',     canadaBadge: 'Canadian Made'   },
+  en:      { pilotBadge: 'Guided Rollout Available',     canadaBadge: 'Canadian Made'   },
+  'fr-CA': { pilotBadge: 'Déploiement guidé offert', canadaBadge: 'Fait au Canada' },
+  fr:      { pilotBadge: 'Déploiement guidé offert', canadaBadge: 'Fait au Canada' },
   it:      { pilotBadge: 'Programma partner fondatori',  canadaBadge: 'Creato in Canada' },
   pt:      { pilotBadge: 'Programa Parceiros Fundadores', canadaBadge: 'Feito no Canadá' },
 };

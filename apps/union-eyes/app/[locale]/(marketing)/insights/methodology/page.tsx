@@ -25,9 +25,19 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const copy = locale === 'fr-CA'
+    ? {
+        title: 'Methodologie | Perspectives | UnionEyes',
+        description: 'Cadres canoniques et visualisation de continuite pour la modernisation organisationnelle.',
+      }
+    : {
+        title: 'Methodology | Insights | UnionEyes',
+        description: 'Canonical frameworks and continuity visualization for organizational modernization.',
+      };
+
   return {
-    title: 'Methodology | Insights | UnionEyes',
-    description: 'Canonical frameworks and continuity visualization for organizational modernization.',
+    title: copy.title,
+    description: copy.description,
     alternates: buildLocaleAlternates(locale, '/insights/methodology'),
   };
 }

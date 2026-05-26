@@ -45,8 +45,8 @@ const CONTACT_COPY: Record<string, {
     address: 'Address',
     officeHours: 'Office hours',
     officeHoursValue: 'Mon-Fri, 9am-5pm ET',
-    salesHeading: 'No pressure sales',
-    salesBody: "We don't respond to inquiries on a sales cadence. If we're not the right tool for you, we'll tell you honestly.",
+    salesHeading: 'Straight answers',
+    salesBody: "We reply plainly. If we're not the right tool for you, we'll say so.",
   },
   'fr-CA': {
     sendMessage: 'Envoyez-nous un message',
@@ -55,8 +55,8 @@ const CONTACT_COPY: Record<string, {
     address: 'Adresse',
     officeHours: 'Heures de bureau',
     officeHoursValue: 'Lun-Ven, 9h-17h HE',
-    salesHeading: 'Pas de vente sous pression',
-    salesBody: 'Nous ne repondons pas aux demandes sur un rythme commercial. Si nous ne sommes pas le bon outil pour vous, nous vous le dirons honnetement.',
+    salesHeading: 'Reponse directe',
+    salesBody: 'Nous repondons simplement. Si nous ne sommes pas le bon outil pour vous, nous vous le dirons.',
   },
   it: {
     sendMessage: 'Inviaci un messaggio',
@@ -65,8 +65,8 @@ const CONTACT_COPY: Record<string, {
     address: 'Indirizzo',
     officeHours: 'Orari di ufficio',
     officeHoursValue: 'Lun-Ven, 9:00-17:00 ET',
-    salesHeading: 'Nessuna vendita aggressiva',
-    salesBody: 'Non rispondiamo alle richieste con pressione commerciale. Se non siamo lo strumento giusto per te, te lo diremo con onesta.',
+    salesHeading: 'Risposta diretta',
+    salesBody: 'Rispondiamo in modo semplice. Se non siamo lo strumento giusto per te, te lo diremo.',
   },
   pt: {
     sendMessage: 'Envie-nos uma mensagem',
@@ -75,8 +75,8 @@ const CONTACT_COPY: Record<string, {
     address: 'Endereco',
     officeHours: 'Horario comercial',
     officeHoursValue: 'Seg-Sex, 9h-17h ET',
-    salesHeading: 'Sem pressao comercial',
-    salesBody: 'Nao respondemos com pressao de vendas. Se nao formos a ferramenta certa para voce, diremos isso com honestidade.',
+    salesHeading: 'Resposta direta',
+    salesBody: 'Respondemos de forma simples. Se nao formos a ferramenta certa para voce, diremos isso.',
   },
 };
 

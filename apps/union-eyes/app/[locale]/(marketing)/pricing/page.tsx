@@ -1,16 +1,14 @@
 /**
  * Organizational Continuity Engagement Architecture
  *
- * This page is intentionally NOT a SaaS pricing matrix. UnionEyes is continuity
- * infrastructure — OCI (Organizational Continuity Index) diagnostics, OCRA
- * (Organizational Continuity Risk Analysis) deepening, governance mapping, then
- * platform activation, then longitudinal support. Software is the *fourth*
- * stage of the engagement, not the entry point.
+ * This page is intentionally not a SaaS pricing matrix. UnionEyes is continuity
+ * infrastructure: diagnostics, deeper analysis, governance mapping, platform
+ * activation, then longitudinal support. Software is the fourth stage, not the
+ * entry point.
  *
  * Narrative posture: maturity-oriented organizational engagement, not feature
- * bundling. Every layer is governance-safe, procurement-readable, and assumes
- * human oversight by design. Pricing ranges are starting points for joint
- * scoping with executive and procurement leadership — not self-serve tiers.
+ * bundling. Every layer is readable, procurement-friendly, and assumes human
+ * oversight. Pricing ranges are starting points for joint scoping with leaders.
  */
 export const dynamic = 'force-dynamic';
 
@@ -38,16 +36,16 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 1 — Continuity Starts Before Software
 // Why OCI exists before the platform. The conditions that make continuity
-// fragile inside an institution — before any tooling is procured.
+// fragile inside an organization — before any tooling is procured.
 // ─────────────────────────────────────────────────────────────────────────────
 const continuityFragility = [
   {
     title: 'Continuity fragility',
-    body: 'Procedural knowledge concentrated in a few experienced people. One retirement, one rotation, and the institution loses years of judgment.',
+    body: 'Procedural knowledge concentrated in a few experienced people. One retirement, one rotation, and the organization loses years of judgment.',
   },
   {
     title: 'Onboarding burden',
-    body: 'Every new officer, staff member, or steward inherits unfinished casework with no operating record, no precedent map, and no continuity briefing.',
+    body: 'Every new officer, staff member, or steward inherits unfinished casework with no operating record or precedent map.',
   },
   {
     title: 'Governance inconsistency',
@@ -65,14 +63,14 @@ const continuityFragility = [
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 2 — When Organizations Typically Engage Us
-// Operational moments that bring institutions to the OCI conversation.
+// Operational moments that bring organizations to the OCI conversation.
 // Grounds the offerings in concrete organizational reality.
 // ─────────────────────────────────────────────────────────────────────────────
 const engagementMoments = [
   { title: 'Leadership transitions', body: 'An incoming president, executive director, or general counsel needs continuity inherited — not reconstructed.' },
   { title: 'Modernization initiatives', body: 'A federation is reviewing tooling and wants to understand continuity risk before procuring anything.' },
   { title: 'Operational fragmentation', body: 'Locals, committees, and staff operating without a shared operating record — coordination cost rising every quarter.' },
-  { title: 'Onboarding strain', body: 'New stewards and officers are arriving faster than the institution can transfer judgment to them.' },
+  { title: 'Onboarding strain', body: 'New stewards and officers are arriving faster than the organization can transfer judgment to them.' },
   { title: 'Governance restructuring', body: 'A merger, reorganization, or constitutional review needs a continuity baseline before any structural decision.' },
   { title: 'Continuity concerns', body: 'Leadership has named succession and organizational memory as strategic risks and wants them measurable.' },
   { title: 'Federation coordination growth', body: 'A national or sectoral body coordinating across many locals needs operational topology, not more meetings.' },
@@ -120,13 +118,13 @@ const continuityJourney = [
 // SECTION 3.5 — Assessment Ladder (GTM entry funnel)
 // Mirrors the three entry tiers on /organizational-continuity-risk so the
 // pricing page reflects the actual go-to-market motion: a free ICRA reflection,
-// a paid Executive Continuity Brief at $1,200, and a facilitated Organizational
+// a paid Leadership Briefing Report at $1,200, and a facilitated Organizational
 // Continuity Diagnostic at $6,500. These precede the larger engagement layers.
 // ─────────────────────────────────────────────────────────────────────────────
 const assessmentLadder = [
   {
     key: 'continuity_reflection',
-    name: 'Continuity Reflection',
+    name: 'Free Readiness Check',
     price: 'Free',
     pricePosture: 'Pseudonymous · no login required',
     summary:
@@ -143,13 +141,13 @@ const assessmentLadder = [
   },
   {
     key: 'executive_continuity_brief',
-    name: 'Executive Continuity Brief',
+    name: 'Leadership Briefing Report',
     price: '$1,200 CAD',
     pricePosture: 'One-time · delivered as a governance-readable document',
     summary:
       'A deeper organizational reading of the same assessment — governance entropy, continuity debt, dependency review, and modernization risk surfaced for executive and board conversation.',
     includes: [
-      'Everything in Continuity Reflection',
+      'Everything in the Free Readiness Check',
       'Governance entropy analysis',
       'Continuity debt analysis',
       'Organizational dependency review',
@@ -162,13 +160,13 @@ const assessmentLadder = [
   },
   {
     key: 'institutional_continuity_diagnostic',
-    name: 'Organizational Continuity Diagnostic',
+    name: 'Full Diagnostic & Action Plan',
     price: '$6,500 CAD',
     pricePosture: 'Facilitated engagement · executive workshop included',
     summary:
       'A full diagnostic engagement: facilitated review, organizational continuity workshop, memory lineage mapping, and an executive briefing note your board can act on.',
     includes: [
-      'Everything in the Executive Continuity Brief',
+      'Everything in the Leadership Briefing Report',
       'Facilitated diagnostic review',
       'Organizational continuity workshop',
       'Memory lineage mapping',
@@ -187,7 +185,7 @@ const frAssessmentLadder = [
     price: 'Gratuit',
     pricePosture: 'Pseudonyme · aucune connexion requise',
     summary:
-      "Une évaluation institutionnelle ciblée qui révèle la fragilité, les signaux et le fardeau — sans engagement. Le point d'entrée ICRA.",
+      "Une évaluation organisationnelle ciblée qui révèle la fragilité, les signaux et le fardeau — sans engagement. Le point d'entrée ICRA.",
     includes: [
       'Bande OCI et indice de continuité',
       'Observations sur les signaux de risque silencieux',
@@ -204,12 +202,12 @@ const frAssessmentLadder = [
     price: '1 200 $ CAD',
     pricePosture: 'Ponctuel · livré sous forme de document lisible par la gouvernance',
     summary:
-      "Une lecture institutionnelle approfondie de la même évaluation — entropie de gouvernance, dette de continuité, revue des dépendances et risque de modernisation, mis en forme pour la conversation exécutive.",
+      "Une lecture organisationnelle approfondie de la même évaluation — entropie de gouvernance, dette de continuité, revue des dépendances et risque de modernisation, mis en forme pour la conversation exécutive.",
     includes: [
       'Tout ce qui est dans la Réflexion sur la continuité',
       "Analyse de l'entropie de gouvernance",
       'Analyse de la dette de continuité',
-      'Revue des dépendances institutionnelles',
+      'Revue des dépendances organisationnelles',
       'Couche de risque de modernisation',
       'Recommandations priorisées complètes',
     ],
@@ -219,15 +217,15 @@ const frAssessmentLadder = [
   },
   {
     key: 'institutional_continuity_diagnostic',
-    name: 'Diagnostic institutionnel de continuité',
+    name: 'Diagnostic organisationnel de continuité',
     price: '6 500 $ CAD',
     pricePosture: 'Engagement facilité · atelier exécutif inclus',
     summary:
-      "Un engagement diagnostic complet : revue facilitée, atelier institutionnel de continuité, cartographie de la lignée mémorielle, et note de synthèse exécutive sur laquelle votre conseil peut agir.",
+      "Un engagement diagnostic complet : revue facilitée, atelier organisationnel de continuité, cartographie de la lignée mémorielle, et note de synthèse exécutive sur laquelle votre conseil peut agir.",
     includes: [
       'Tout ce qui est dans la Note exécutive',
       'Revue diagnostique facilitée',
-      'Atelier institutionnel de continuité',
+      'Atelier organisationnel de continuité',
       'Cartographie de la lignée mémorielle',
       'Note de synthèse exécutive',
     ],
@@ -249,11 +247,11 @@ const engagementLayers: EngagementLayer[] = [
     name: 'OCI — Continuity Assessment',
     posture: 'Organizational diagnostics',
     layer: 'Layer 1 · Continuity intelligence',
-    fit: 'Federations and institutions establishing a continuity baseline before any tooling decision.',
+    fit: 'Federations and organizations establishing a continuity baseline before any tooling decision.',
     feels: 'Diagnostic. Discreet. Strategic.',
     deliverables: [
       'OCI Snapshot — scoped continuity baseline',
-      'Executive Continuity Brief',
+      'Leadership Briefing Report',
       'Governance Entropy Review',
       'Organizational Continuity Workshop',
     ],
@@ -265,7 +263,7 @@ const engagementLayers: EngagementLayer[] = [
     name: 'OCRA — Adaptive Continuity Intelligence',
     posture: 'Structural risk deepening',
     layer: 'Layer 2 · Continuity topology',
-    fit: 'Institutions that have a baseline and need structural depth: dependency analysis, modernization pathways, confidence-aware interpretation.',
+    fit: 'Organizations that have a baseline and need structural depth: dependency analysis, modernization pathways, confidence-aware interpretation.',
     feels: 'Structural. Interpretive. Forward-looking.',
     deliverables: [
       'Structural continuity analysis',
@@ -281,7 +279,7 @@ const engagementLayers: EngagementLayer[] = [
     name: 'Platform Activation',
     posture: 'Continuity infrastructure',
     layer: 'Layer 3 · Operational continuity infrastructure',
-    fit: 'Institutions ready to activate continuity infrastructure on top of an assessed baseline — not generic SaaS onboarding.',
+    fit: 'Organizations ready to activate continuity infrastructure on top of an assessed baseline — not generic SaaS onboarding.',
     feels: 'Operational. Governance-safe. Inherited.',
     deliverables: [
       'Operational continuity tooling activation',
@@ -313,7 +311,7 @@ const engagementLayers: EngagementLayer[] = [
     name: 'Founding Partner Cohort',
     posture: 'Strategic organizational collaboration',
     layer: 'Layer 5 · Cohort engagement',
-    fit: 'A small number of institutions co-developing continuity infrastructure with us — operationally embedded, doctrinally close.',
+    fit: 'A small number of organizations co-developing continuity infrastructure with us — operationally embedded, doctrinally close.',
     feels: 'Co-developed. Privileged. Long-cycle.',
     deliverables: [
       'Direct co-design with the founding team',
@@ -334,9 +332,9 @@ const procurementCommitments = [
   { title: 'Human oversight by design', body: 'Every operational pathway assumes a named human owner. Cognition surfaces are operator-initiated and operator-reviewable.' },
   { title: 'Governance-safe AI', body: 'Reasoning operates under organizational governance — not autonomous agent assumptions. Explainability is structural, not optional.' },
   { title: 'No worker surveillance', body: 'UnionEyes does not rank, score, or monitor individual workers. Continuity infrastructure is organizational, not personal.' },
-  { title: 'Explainable interpretation', body: 'Every interpretive surface exposes its confidence posture and its dependency chain. No black-box decisions.' },
+  { title: 'Explainable interpretation', body: 'Every interpretive surface exposes its confidence posture and dependency chain. No opaque decisions.' },
   { title: 'Continuity-focused interpretation', body: 'All cognition is oriented toward organizational continuity — not productivity scoring or behavioural analysis.' },
-  { title: 'No organizational ranking', body: 'We do not benchmark, league-table, or compare unions against each other. Continuity is sovereign to each institution.' },
+  { title: 'No organizational ranking', body: 'We do not benchmark, league-table, or compare unions against each other. Continuity is sovereign to each organization.' },
   { title: 'Canadian residency', body: 'Canadian-hosted, sovereignty-conscious organizational trust. Data residency and sovereign hosting are structural commitments.' },
   { title: 'Fail-closed degradation', body: 'When systems degrade, they degrade safely — operations remain governable, not opaque.' },
 ];
@@ -345,40 +343,40 @@ const procurementCommitments = [
 // French (fr-CA) parallel content
 // ─────────────────────────────────────────────────────────────────────────────
 const frContinuityFragility = [
-  { title: 'Fragilité de la continuité', body: 'Le savoir procédural est concentré chez quelques personnes expérimentées. Un départ à la retraite, une rotation — et l’institution perd des années de jugement.' },
+  { title: 'Fragilité de la continuité', body: 'Le savoir procédural est concentré chez quelques personnes expérimentées. Un départ à la retraite, une rotation — et l’organization perd des années de jugement.' },
   { title: 'Charge d’intégration', body: 'Chaque nouveau dirigeant, employé ou délégué hérite de dossiers inachevés sans registre opérationnel, sans carte des précédents, sans transmission de continuité.' },
   { title: 'Incohérence de gouvernance', body: 'Décisions, motions et engagements dispersés entre courriels, lecteurs et notes de réunion — défendables sur le moment, non documentés à travers les cycles.' },
   { title: 'Risque de modernisation', body: 'Les décisions d’outillage prises sans évaluation de continuité accélèrent généralement la fragmentation plutôt que de la résoudre.' },
-  { title: 'Dépendance institutionnelle', body: 'La fédération dépend des individus plus que les individus ne le savent. Leur départ révèle la dépendance — généralement sous pression opérationnelle.' },
+  { title: 'Dépendance organisationnelle', body: 'La fédération dépend des individus plus que les individus ne le savent. Leur départ révèle la dépendance — généralement sous pression opérationnelle.' },
 ];
 
 const frEngagementMoments = [
   { title: 'Transitions de leadership', body: 'Un nouveau président, directeur exécutif ou conseiller général a besoin que la continuité soit transmise — pas reconstruite.' },
   { title: 'Initiatives de modernisation', body: 'Une fédération examine son outillage et souhaite comprendre le risque de continuité avant tout investissement.' },
   { title: 'Fragmentation opérationnelle', body: 'Sections locales, comités et personnel opérant sans registre partagé — les coûts de coordination augmentent à chaque trimestre.' },
-  { title: 'Pression sur l’intégration', body: 'Les nouveaux délégués et dirigeants arrivent plus vite que l’institution ne peut leur transférer son jugement.' },
+  { title: 'Pression sur l’intégration', body: 'Les nouveaux délégués et dirigeants arrivent plus vite que l’organization ne peut leur transférer son jugement.' },
   { title: 'Restructuration de la gouvernance', body: 'Une fusion, une réorganisation ou une révision constitutionnelle requiert une base de continuité avant toute décision structurelle.' },
-  { title: 'Préoccupations de continuité', body: 'La direction a nommé la succession et la mémoire institutionnelle comme risques stratégiques et veut les rendre mesurables.' },
+  { title: 'Préoccupations de continuité', body: 'La direction a nommé la succession et la mémoire organisationnelle comme risques stratégiques et veut les rendre mesurables.' },
   { title: 'Croissance de la coordination fédérative', body: 'Un organisme national ou sectoriel coordonnant plusieurs sections locales a besoin de topologie opérationnelle, pas de réunions supplémentaires.' },
 ];
 
 const frContinuityJourney = [
-  { stage: '1', name: 'Évaluation OCI', outcome: 'Comprendre la fragilité de la continuité', summary: 'Un diagnostic institutionnel ciblé qui révèle où la continuité se rompt — et où elle tient silencieusement.' },
+  { stage: '1', name: 'Évaluation OCI', outcome: 'Comprendre la fragilité de la continuité', summary: 'Un diagnostic organisationnel ciblé qui révèle où la continuité se rompt — et où elle tient silencieusement.' },
   { stage: '2', name: 'Approfondissement OCRA', outcome: 'Identifier les risques structurels de continuité', summary: 'Intelligence de continuité adaptative : topologie, parcours de modernisation, interprétation consciente du niveau de confiance.' },
   { stage: '3', name: 'Cartographie de gouvernance', outcome: 'Clarifier les dépendances opérationnelles', summary: 'Traduire les constats en une carte lisible par la gouvernance des dépendances, des décisions officielles et des obligations de continuité.' },
   { stage: '4', name: 'Activation de plateforme', outcome: 'Stabiliser les opérations de continuité', summary: 'Ce n’est qu’ici que la plateforme entre en jeu — comme infrastructure de continuité activée sur la base de l’évaluation.' },
-  { stage: '5', name: 'Soutien longitudinal', outcome: 'Soutenir la continuité institutionnelle', summary: 'Intendance continue de continuité : revue d’entropie de gouvernance, intelligence exécutive et santé fédérative.' },
+  { stage: '5', name: 'Soutien longitudinal', outcome: 'Soutenir la continuité organisationnelle', summary: 'Intendance continue de continuité : revue d’entropie de gouvernance, intelligence exécutive et santé fédérative.' },
 ];
 
 const frEngagementLayers: EngagementLayer[] = [
   {
     key: 'oci', icon: 'compass',
     name: 'OCI — Évaluation de continuité',
-    posture: 'Diagnostics institutionnels',
+    posture: 'Diagnostics organisationnels',
     layer: 'Couche 1 · Intelligence de continuité',
-    fit: 'Fédérations et institutions établissant une base de continuité avant toute décision d’outillage.',
+    fit: 'Fédérations et organizations établissant une base de continuité avant toute décision d’outillage.',
     feels: 'Diagnostic. Discret. Stratégique.',
-    deliverables: ['Aperçu OCI — base de continuité ciblée', 'Note exécutive de continuité', 'Revue d’entropie de gouvernance', 'Atelier institutionnel de continuité'],
+    deliverables: ['Aperçu OCI — base de continuité ciblée', 'Note exécutive de continuité', 'Revue d’entropie de gouvernance', 'Atelier organisationnel de continuité'],
     range: 'Engagement — généralement 18 k$ à 45 k$',
   },
   {
@@ -386,7 +384,7 @@ const frEngagementLayers: EngagementLayer[] = [
     name: 'OCRA — Intelligence de continuité adaptative',
     posture: 'Approfondissement structurel des risques',
     layer: 'Couche 2 · Topologie de continuité',
-    fit: 'Institutions disposant d’une base et nécessitant une profondeur structurelle : analyse des dépendances, parcours de modernisation, interprétation consciente du niveau de confiance.',
+    fit: 'Organizations disposant d’une base et nécessitant une profondeur structurelle : analyse des dépendances, parcours de modernisation, interprétation consciente du niveau de confiance.',
     feels: 'Structurel. Interprétatif. Tourné vers l’avenir.',
     deliverables: ['Analyse structurelle de continuité', 'Cartographie de la topologie de continuité', 'Évaluation des parcours de modernisation', 'Interprétation opérationnelle consciente du niveau de confiance'],
     range: 'Engagement — généralement 35 k$ à 90 k$',
@@ -396,7 +394,7 @@ const frEngagementLayers: EngagementLayer[] = [
     name: 'Activation de plateforme',
     posture: 'Infrastructure de continuité',
     layer: 'Couche 3 · Infrastructure opérationnelle de continuité',
-    fit: 'Institutions prêtes à activer une infrastructure de continuité sur une base évaluée — pas un déploiement SaaS générique.',
+    fit: 'Organizations prêtes à activer une infrastructure de continuité sur une base évaluée — pas un déploiement SaaS générique.',
     feels: 'Opérationnel. Respectueux de la gouvernance. Transmissible.',
     deliverables: ['Activation d’outils opérationnels de continuité', 'Alignement d’infrastructure de gouvernance', 'Systèmes de preuve et décisions officielles', 'Flux de travail respectueux de la continuité pour dirigeants, délégués et personnel'],
     range: 'Programme annuel — généralement 40 k$ à 140 k$',
@@ -413,37 +411,37 @@ const frEngagementLayers: EngagementLayer[] = [
   },
   {
     key: 'founding', icon: 'sparkles',
-    name: 'Cohorte de partenaires fondateurs',
-    posture: 'Collaboration institutionnelle stratégique',
+    name: 'Cohorte de déploiement guidé',
+    posture: 'Collaboration organisationnelle stratégique',
     layer: 'Couche 5 · Engagement en cohorte',
-    fit: 'Un petit nombre d’institutions co-développant l’infrastructure de continuité avec nous — engagement opérationnel et doctrinal rapproché.',
+    fit: 'Un petit nombre d’organizations co-développant l’infrastructure de continuité avec nous — engagement opérationnel et doctrinal rapproché.',
     feels: 'Co-développé. Privilégié. À long cycle.',
-    deliverables: ['Co-conception directe avec l’équipe fondatrice', 'Influence de gouvernance réservée sur la doctrine de plateforme', 'Accès privilégié à la recherche OCRA et continuité', 'Reconnaissance nommée de la cohorte dans le matériel institutionnel'],
+    deliverables: ['Co-conception directe avec l’équipe fondatrice', 'Influence de gouvernance réservée sur la doctrine de plateforme', 'Accès privilégié à la recherche OCRA et continuité', 'Reconnaissance nommée de la cohorte dans le matériel organisationnel'],
     range: 'Conditions de cohorte — sur invitation et ajustement mutuel',
   },
 ];
 
 const frProcurementCommitments = [
   { title: 'Supervision humaine par conception', body: 'Chaque parcours opérationnel suppose un propriétaire humain nommé. Les surfaces cognitives sont déclenchées et révisées par un opérateur.' },
-  { title: 'IA respectueuse de la gouvernance', body: 'Le raisonnement opère sous gouvernance institutionnelle — pas selon des hypothèses d’agent autonome. L’explicabilité est structurelle, pas optionnelle.' },
-  { title: 'Aucune surveillance des travailleurs', body: 'UnionEyes ne classe pas, n’évalue pas et ne surveille pas les travailleurs. L’infrastructure de continuité est institutionnelle, pas personnelle.' },
+  { title: 'IA respectueuse de la gouvernance', body: 'Le raisonnement opère sous gouvernance organisationnelle — pas selon des hypothèses d’agent autonome. L’explicabilité est structurelle, pas optionnelle.' },
+  { title: 'Aucune surveillance des travailleurs', body: 'UnionEyes ne classe pas, n’évalue pas et ne surveille pas les travailleurs. L’infrastructure de continuité est organisationnelle, pas personnelle.' },
   { title: 'Interprétation explicable', body: 'Chaque surface interprétative expose sa posture de confiance et sa chaîne de dépendance. Aucune décision en boîte noire.' },
-  { title: 'Interprétation orientée continuité', body: 'Toute cognition est orientée vers la continuité institutionnelle — pas vers l’évaluation de productivité ou l’analyse comportementale.' },
-  { title: 'Aucun classement institutionnel', body: 'Nous ne comparons pas les syndicats entre eux. La continuité est souveraine à chaque institution.' },
-  { title: 'Résidence canadienne', body: 'Hébergement canadien, confiance institutionnelle consciente de la souveraineté. La résidence et l’hébergement souverain sont des engagements structurels.' },
+  { title: 'Interprétation orientée continuité', body: 'Toute cognition est orientée vers la continuité organisationnelle — pas vers l’évaluation de productivité ou l’analyse comportementale.' },
+  { title: 'Aucun classement organisationnel', body: 'Nous ne comparons pas les syndicats entre eux. La continuité est souveraine à chaque organization.' },
+  { title: 'Résidence canadienne', body: 'Hébergement canadien, confiance organisationnelle consciente de la souveraineté. La résidence et l’hébergement souverain sont des engagements structurels.' },
   { title: 'Dégradation sécuritaire', body: 'Lorsque les systèmes se dégradent, ils le font de manière gouvernable et non opaque.' },
 ];
 
 const pricingCopy = {
   'en-CA': {
     heading: <>Organizational continuity engagement architecture,<br />not software pricing tiers.</>,
-    description: 'UnionEyes is continuity infrastructure — assessment, intelligence, then activation. Every engagement starts with the OCI (Organizational Continuity Index), not with a procurement form. Software is the fourth stage of the journey, not the entry point.',
+    description: 'UnionEyes starts with an assessment, then moves into deeper review and rollout support if needed. Most organizations begin by understanding their risks before discussing any software rollout.',
     section1Heading: 'Continuity starts before software',
-    section1Body: 'Most institutions discover that the platform decision was actually a continuity decision in disguise. We exist because continuity fragility is rarely measured before it is procured against.',
+    section1Body: 'Most organizations discover they have a knowledge and handoff problem before they have a software problem. We help measure that risk first.',
     section2Heading: 'When organizations typically engage us',
     section2Body: 'There is no single trigger — but these are the operational moments that consistently bring federations and unions to the OCI conversation.',
-    section3Heading: 'The Continuity Journey',
-    section3Body: 'A maturity-oriented engagement pathway. Five sequential stages, each one earning the next. Platform activation appears at stage four — never stage one.',
+    section3Heading: 'The path most organizations follow',
+    section3Body: 'This work usually happens in stages. Organizations start with a check, move into deeper review if needed, and only then decide whether broader rollout support makes sense.',
     stageLabel: 'Stage',
     outcomeLabel: 'Outcome',
     tabStartHere: 'Start here',
@@ -453,32 +451,32 @@ const pricingCopy = {
     tabProcurement: 'Procurement',
     sectionLadderEyebrow: 'Start here',
     sectionLadderHeading: 'The assessment ladder',
-    sectionLadderBody: 'Every UnionEyes relationship begins with an assessment, not a procurement form. The first three steps are scoped, named, and priced — so an executive director or board chair can begin the continuity conversation without waiting for a sales cycle.',
-    sectionLadderFooter: 'These three steps are the entry funnel to the engagement layers below. Most institutions begin with the free Reflection and only escalate when the surfaced risk warrants it.',
+    sectionLadderBody: 'Every UnionEyes relationship begins with an assessment. The first three steps are clear and priced so a leader can start the conversation without waiting for a long sales process.',
+    sectionLadderFooter: 'Most organizations start with the free check and only move further when the risks uncovered justify it.',
     ladderIncludesLabel: 'What you receive',
-    ladderFeaturedBadge: 'Most institutions start here',
-    section4Heading: 'Engagement layers',
-    section4Body: 'When an assessment surfaces structural continuity risk that cannot be resolved with a brief or a workshop, the relationship escalates into one of these organizational engagement layers. Each is a coherent posture and a distinct conversation — not a feature bundle or a seat-licensing tier.',
+    ladderFeaturedBadge: 'Most organizations start here',
+    section4Heading: 'Deeper support options',
+    section4Body: 'When an assessment shows bigger continuity risks, organizations can move into deeper support. These are service options, not seat-based software packages.',
     fitPrefix: 'Best for: ',
     deliverablesLabel: 'What you receive',
     investmentLabel: 'Investment',
     rangeNote: 'A starting range. Final scope is shaped jointly with you and your procurement leadership — no self-serve checkout, ever.',
     unsureTitle: 'Not sure which layer fits?',
-    unsureBody: 'Most institutions start with an OCI conversation — even when they think they need the platform. A short briefing usually makes the right layer obvious.',
-    unsureCta: 'Start with an OCI conversation',
+    unsureBody: 'Most organizations start with a short continuity conversation, even when they think they need software right away.',
+    unsureCta: 'Start with a continuity conversation',
     procurementLabel: 'Procurement-safe by design',
-    commitmentsHeading: 'Organizational commitments, not feature claims',
-    commitmentsBody: 'Every engagement layer inherits the same organizational commitments. These are the positions that distinguish continuity infrastructure from generic AI tooling — and are usually the first thing procurement reads.',
+    commitmentsHeading: 'What we commit to',
+    commitmentsBody: 'Every service option carries the same core commitments. These are usually the first things procurement teams want to review.',
     trustCenter: 'Trust Center',
     governanceStructure: 'Governance Structure',
-    institutionalProof: 'Organizational Proof',
-    ctaLabel: 'Begin with assessment, not procurement',
+    organizationalProof: 'Organizational Proof',
+    ctaLabel: 'Begin with an assessment',
     ctaHeading: 'Start with a continuity conversation',
-    ctaBody: 'Tell us where your institution is today. We will help you identify which layer fits, what an OCI engagement looks like in practice, and shape the journey with you — at the pace your governance can sustain.',
-    ctaPrimary: 'Start the free Continuity Reflection',
-    ctaSecondary: 'Discuss an OCI Engagement',
-    ctaFinePrint: 'Engagement layers and ranges are positioning structure for organizational planning. Final scope is set jointly with executive and procurement leadership — never as self-serve subscription.',
-    glossaryLabel: 'The two terms used throughout this page',
+    ctaBody: 'Tell us where your organization is today. We will help you understand which option fits and what the next step should be.',
+    ctaPrimary: 'Take the review',
+    ctaSecondary: 'Discuss your options',
+    ctaFinePrint: 'Scope and pricing are finalized with executive and procurement leadership. There is no self-serve subscription path.',
+    glossaryLabel: 'Terms used on this page',
     glossary: [
       { acronym: 'OCI', expansion: 'Organizational Continuity Index', body: 'A scoped organizational diagnostic that measures continuity fragility — what would break if a key person, a leadership cycle, or a critical decision-of-record were lost tomorrow.' },
       { acronym: 'OCRA', expansion: 'Organizational Continuity Risk Analysis', body: 'A deeper, structural reading of continuity risk: dependency topology, modernization pathways, governance entropy, and confidence-aware operational interpretation.' },
@@ -486,14 +484,14 @@ const pricingCopy = {
     continuityFragility, engagementMoments, continuityJourney, assessmentLadder, engagementLayers, procurementCommitments,
   },
   'fr-CA': {
-    heading: <>Architecture d’engagement de continuité institutionnelle,<br />pas une grille tarifaire logicielle.</>,
-    description: 'UnionEyes est une infrastructure de continuité — évaluation, intelligence, puis activation. Chaque engagement commence par l’OCI (Indice de continuité organisationnelle), pas par un formulaire d’approvisionnement. Le logiciel est la quatrième étape du parcours, jamais le point d’entrée.',
+    heading: <>Architecture d’engagement de continuité organisationnelle,<br />pas une grille tarifaire logicielle.</>,
+    description: 'UnionEyes commence par une évaluation, puis passe à une revue plus approfondie et à un soutien au déploiement si nécessaire. La plupart des organisations commencent par comprendre leurs risques avant de parler de déploiement logiciel.',
     section1Heading: 'La continuité commence avant le logiciel',
-    section1Body: 'La plupart des institutions découvrent que la décision de plateforme était en réalité une décision de continuité déguisée. Nous existons parce que la fragilité de la continuité est rarement mesurée avant d’être contournée par un achat.',
+    section1Body: 'La plupart des organisations découvrent qu’elles ont d’abord un problème de transfert de savoir et de relève, avant d’avoir un problème de logiciel. Nous aidons à mesurer ce risque en premier.',
     section2Heading: 'Quand les organisations nous engagent typiquement',
     section2Body: 'Il n’y a pas de déclencheur unique — mais voici les moments opérationnels qui amènent constamment les fédérations et les syndicats à la conversation OCI.',
-    section3Heading: 'Le parcours de continuité',
-    section3Body: 'Un parcours d’engagement orienté maturité. Cinq étapes séquentielles, chacune méritant la suivante. L’activation de plateforme apparaît à l’étape quatre — jamais à l’étape un.',
+    section3Heading: 'Le parcours le plus fréquent',
+    section3Body: 'Ce travail se fait généralement par étapes. Les organisations commencent par un bilan, passent à une revue plus approfondie si nécessaire, puis décident si un soutien plus large au déploiement est utile.',
     stageLabel: 'Étape',
     outcomeLabel: 'Résultat',
     tabStartHere: 'Commencer ici',
@@ -503,32 +501,32 @@ const pricingCopy = {
     tabProcurement: 'Approvisionnement',
     sectionLadderEyebrow: 'Commencer ici',
     sectionLadderHeading: 'L’échelle d’évaluation',
-    sectionLadderBody: 'Chaque relation avec UnionEyes commence par une évaluation, pas par un formulaire d’approvisionnement. Les trois premières étapes sont délimitées, nommées et tarifées — afin qu’un directeur général ou un président de conseil puisse amorcer la conversation de continuité sans attendre un cycle de vente.',
-    sectionLadderFooter: 'Ces trois étapes constituent l’entonnoir d’entrée vers les couches d’engagement ci-dessous. La plupart des institutions commencent par la Réflexion gratuite et n’augmentent l’engagement que lorsque le risque révélé le justifie.',
+    sectionLadderBody: 'Chaque relation avec UnionEyes commence par une évaluation. Les trois premières étapes sont claires et tarifées afin qu’une direction puisse lancer la conversation sans attendre un long cycle de vente.',
+    sectionLadderFooter: 'La plupart des organisations commencent par le bilan gratuit et n’avancent que si les risques révélés le justifient.',
     ladderIncludesLabel: 'Ce que vous recevez',
-    ladderFeaturedBadge: 'La plupart des institutions commencent ici',
-    section4Heading: 'Couches d’engagement',
-    section4Body: 'Lorsqu’une évaluation révèle un risque structurel de continuité qui ne peut être résolu par une note ou un atelier, la relation s’élève vers l’une de ces couches d’engagement institutionnel. Chacune est une posture cohérente et une conversation distincte — pas un ensemble de fonctionnalités ni un palier de licences par siège.',
+    ladderFeaturedBadge: 'La plupart des organizations commencent ici',
+    section4Heading: 'Options d’accompagnement plus poussées',
+    section4Body: 'Quand une évaluation révèle des risques plus importants, une organisation peut passer à un accompagnement plus poussé. Ce sont des options de service, pas des forfaits logiciels par utilisateur.',
     fitPrefix: 'Convient à : ',
     deliverablesLabel: 'Ce que vous recevez',
     investmentLabel: 'Investissement',
     rangeNote: 'Une fourchette de départ. La portée finale est définie conjointement avec votre équipe d’approvisionnement — jamais en libre-service.',
     unsureTitle: 'Vous ne savez pas quelle couche convient?',
-    unsureBody: 'La plupart des institutions commencent par une conversation OCI — même lorsqu’elles pensent avoir besoin de la plateforme. Une courte présentation rend généralement la bonne couche évidente.',
-    unsureCta: 'Commencer par une conversation OCI',
+    unsureBody: 'La plupart des organisations commencent par une courte conversation sur la continuité, même lorsqu’elles pensent avoir besoin du logiciel immédiatement.',
+    unsureCta: 'Commencer par une conversation sur la continuité',
     procurementLabel: 'Conçu pour l’approvisionnement',
-    commitmentsHeading: 'Engagements institutionnels, pas promesses de fonctionnalités',
-    commitmentsBody: 'Chaque couche d’engagement hérite des mêmes engagements institutionnels. Ce sont les positions qui distinguent l’infrastructure de continuité des outils d’IA génériques — et habituellement la première chose que l’approvisionnement lit.',
+    commitmentsHeading: 'Nos engagements',
+    commitmentsBody: 'Chaque option de service repose sur les mêmes engagements de base. Ce sont habituellement les premiers éléments que les équipes d’approvisionnement veulent vérifier.',
     trustCenter: 'Centre de confiance',
     governanceStructure: 'Structure de gouvernance',
-    institutionalProof: 'Preuves institutionnelles',
-    ctaLabel: 'Commencer par l’évaluation, pas par l’approvisionnement',
+    organizationalProof: 'Preuves organisationnelles',
+    ctaLabel: 'Commencer par une évaluation',
     ctaHeading: 'Commencer par une conversation de continuité',
-    ctaBody: 'Dites-nous où en est votre institution aujourd’hui. Nous vous aidons à identifier la bonne couche, à comprendre à quoi ressemble un engagement OCI en pratique, et à façonner le parcours avec vous.',
-    ctaPrimary: 'Commencer la réflexion de continuité (gratuite)',
-    ctaSecondary: 'Discuter d’un engagement OCI',
-    ctaFinePrint: 'Les couches d’engagement et les fourchettes servent à planifier l’engagement institutionnel. La portée finale est définie avec la direction exécutive et l’approvisionnement — jamais en abonnement libre-service.',
-    glossaryLabel: 'Les deux termes utilisés tout au long de cette page',
+    ctaBody: 'Dites-nous où en est votre organisation aujourd’hui. Nous vous aidons à comprendre quelle option convient le mieux et quelle devrait être la prochaine étape.',
+    ctaPrimary: 'Faire le bilan',
+    ctaSecondary: 'Discuter de vos options',
+    ctaFinePrint: 'La portée et les prix finaux sont établis avec la direction exécutive et l’approvisionnement. Il n’existe pas de formule libre-service.',
+    glossaryLabel: 'Termes utilisés sur cette page',
     glossary: [
       { acronym: 'OCI', expansion: 'Indice de continuité organisationnelle', body: 'Un diagnostic organisationnel ciblé qui mesure la fragilité de la continuité — ce qui se romprait si une personne clé, un cycle de leadership ou une décision critique était perdue demain.' },
       { acronym: 'OCRA', expansion: 'Analyse des risques de continuité organisationnelle', body: 'Une lecture structurelle approfondie du risque de continuité : topologie des dépendances, parcours de modernisation, entropie de gouvernance, et interprétation opérationnelle consciente du niveau de confiance.' },
@@ -554,7 +552,7 @@ export default async function LocalePricingPage({
 
   // Schema.org Service + Offer surface aligned to the GTM funnel on
   // /organizational-continuity-risk. Three concrete tiers (Continuity
-  // Reflection / Executive Continuity Brief / Organizational Continuity
+  // Reflection / Leadership Briefing Report / Organizational Continuity
   // Diagnostic) plus four engagement layers (priced as ranges) get exposed
   // as a Service with an AggregateOffer so search engines and procurement
   // crawlers see the real entry funnel — not a generic SaaS price band.
@@ -572,11 +570,11 @@ export default async function LocalePricingPage({
     availableLanguage: ['en-CA', 'fr-CA'],
     url: `${marketingUrl}/${locale}/pricing`,
     description:
-      'Organizational continuity engagement architecture for unions, federations, and democratic organizations — Continuity Reflection, Executive Continuity Brief, Organizational Continuity Diagnostic, then layered platform activation and longitudinal support.',
+      'Organizational continuity engagement architecture for unions, federations, and democratic organizations — Free Readiness Check, Leadership Briefing Report, Full Diagnostic & Action Plan, then layered platform activation and longitudinal support.',
     offers: [
       {
         '@type': 'Offer',
-        name: 'Continuity Reflection',
+        name: 'Free Readiness Check',
         description:
           'Pseudonymous organizational continuity assessment (ICRA). OCI band, quiet-risk signal observations, continuity burden index, one starter recommendation. No login required.',
         price: '0',
@@ -586,7 +584,7 @@ export default async function LocalePricingPage({
       },
       {
         '@type': 'Offer',
-        name: 'Executive Continuity Brief',
+        name: 'Leadership Briefing Report',
         description:
           'Governance-readable deepening of the continuity assessment: governance entropy, continuity debt, organizational dependency review, modernization risk, prioritized recommendations.',
         price: '1200',
@@ -596,7 +594,7 @@ export default async function LocalePricingPage({
       },
       {
         '@type': 'Offer',
-        name: 'Organizational Continuity Diagnostic',
+        name: 'Full Diagnostic & Action Plan',
         description:
           'Facilitated diagnostic engagement: organizational continuity workshop, memory lineage mapping, and executive briefing note your board can act on.',
         price: '6500',
@@ -608,7 +606,7 @@ export default async function LocalePricingPage({
         '@type': 'AggregateOffer',
         name: 'OCI — Continuity Assessment engagement layer',
         description:
-          'Layered organizational diagnostic engagement: OCI Snapshot, Executive Continuity Brief, Governance Entropy Review, Organizational Continuity Workshop.',
+          'Layered organizational diagnostic engagement: OCI Snapshot, Leadership Briefing Report, Governance Entropy Review, Organizational Continuity Workshop.',
         priceCurrency: 'CAD',
         lowPrice: '18000',
         highPrice: '45000',
@@ -641,7 +639,7 @@ export default async function LocalePricingPage({
   };
 
   return (
-    <div className="institution-shell min-h-screen">
+    <div className="organization-shell min-h-screen">
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger -- structured data; values are static literals
@@ -668,7 +666,7 @@ export default async function LocalePricingPage({
           </p>
           <dl className="grid sm:grid-cols-2 gap-4">
             {copy.glossary.map((term) => (
-              <div key={term.acronym} className="institution-panel calm-elevation p-5">
+              <div key={term.acronym} className="organization-panel calm-elevation p-5">
                 <dt className="flex items-baseline gap-2 mb-1.5">
                   <span className="text-base font-bold text-navy tracking-wide">{term.acronym}</span>
                   <span className="text-xs text-slate-500 font-medium">{term.expansion}</span>

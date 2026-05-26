@@ -94,7 +94,7 @@ const safeguards = [
     icon: Scale,
     title: 'Auditable use',
     description:
-      'Research and generated support remain visible within the governed operating model instead of becoming black-box advice.',
+      'Research and generated support remain visible within the governed operating model instead of becoming opaque advice.',
   },
 ];
 
@@ -104,7 +104,7 @@ export default async function LocaleAIWorkbenchPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Commencer la réflexion de continuité (gratuite)' : 'Start the free Continuity Reflection';
+  const briefingCta = locale === 'fr-CA' ? 'Faire le bilan' : 'Start a review';
 
   return (
     <div className="min-h-screen bg-white">
@@ -118,9 +118,7 @@ export default async function LocaleAIWorkbenchPage({
             Intelligence gives union teams better context before they act
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
-            This is not just an AI workbench. Intelligence brings together research,
-            reporting, document analysis, and optional AI assistance to support better
-            stewardship and leadership decisions.
+            Intelligence brings together research, reporting, document analysis, and optional AI assistance to support better decisions.
           </p>
         </div>
       </header>
@@ -153,7 +151,7 @@ export default async function LocaleAIWorkbenchPage({
             Governed by design
           </h2>
           <p className="text-slate-600 text-center mb-8 max-w-2xl mx-auto">
-            Intelligence is advisory and role-controlled. UnionEyes keeps human judgment, entitlements, and traceability at the center.
+            Intelligence is advisory and role-controlled. UnionEyes keeps human judgment and traceability at the center.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {safeguards.map((s) => (
@@ -171,7 +169,7 @@ export default async function LocaleAIWorkbenchPage({
             See how Intelligence supports real representation work
           </h2>
           <p className="text-slate-600 mb-6 max-w-lg mx-auto">
-            Intelligence is valuable because it is connected to Inbox, Work, and Outcomes, not because it is a standalone AI demo.
+            Intelligence is valuable because it is connected to Inbox, Work, and Outcomes, not because it is a standalone demo.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link

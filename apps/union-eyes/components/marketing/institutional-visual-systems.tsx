@@ -1,6 +1,10 @@
 import type { ReactNode } from 'react';
 import ScrollReveal from '@/components/public/scroll-reveal';
 
+function isFr(locale: string) {
+  return locale === 'fr-CA';
+}
+
 interface VisualPanelProps {
   title: string;
   subtitle?: string;
@@ -69,49 +73,52 @@ export function PillarDiagram({
   );
 }
 
-export function MethodologyVisualizationSystem() {
+export function MethodologyVisualizationSystem({ locale = 'en-CA' }: { locale?: string }) {
+  const fr = isFr(locale);
+
   return (
     <section className="py-16 bg-white border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={18}>
-          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Organizational doctrine, operationalized visually</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">{fr ? 'Doctrine organisationnelle, operationnalisee visuellement' : 'Organizational doctrine, operationalized visually'}</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.14} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            These diagrams are designed for governance committees and executive briefings. Each framework maps
-            continuity, explainability, and trust as organizational operating infrastructure.
+            {fr
+              ? 'Ces schemas sont concus pour les comites de gouvernance et les breffages executifs. Chaque cadre cartographie la continuite, l explicabilite et la confiance comme infrastructure operationnelle.'
+              : 'These diagrams are designed for governance committees and executive briefings. Each framework maps continuity, explainability, and trust as organizational operating infrastructure.'}
           </p>
         </ScrollReveal>
 
         <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:95ms]">
           <ScrollReveal delay={0.06} duration={0.9} distance={16}>
             <VisualPanel
-              title="Organizational Continuity Reasoning Framework"
-              subtitle="Canonical Continuity Map"
+              title={fr ? 'Cadre de raisonnement de continuite organisationnelle' : 'Organizational Continuity Reasoning Framework'}
+              subtitle={fr ? 'Carte canonique de continuite' : 'Canonical Continuity Map'}
             >
               <PillarDiagram
                 nodes={[
-                  'Organizational Memory',
-                  'Governance Continuity',
-                  'Operational Coherence',
-                  'Explainable Governance Review',
-                  'Organizational Resilience',
+                  fr ? 'Memoire organisationnelle' : 'Organizational Memory',
+                  fr ? 'Continuite de gouvernance' : 'Governance Continuity',
+                  fr ? 'Coherence operationnelle' : 'Operational Coherence',
+                  fr ? 'Revue de gouvernance explicable' : 'Explainable Governance Review',
+                  fr ? 'Resilience organisationnelle' : 'Organizational Resilience',
                 ]}
               />
             </VisualPanel>
           </ScrollReveal>
 
           <ScrollReveal delay={0.12} duration={0.9} distance={16}>
-            <VisualPanel title="Anti-Fragmentation Governance Model" subtitle="Governance Convergence Path">
+            <VisualPanel title={fr ? 'Modele de gouvernance anti-fragmentation' : 'Anti-Fragmentation Governance Model'} subtitle={fr ? 'Parcours de convergence de gouvernance' : 'Governance Convergence Path'}>
               <PillarDiagram
                 nodes={[
-                  'Fragmentation',
-                  'Coordination',
-                  'Explainability',
-                  'Alignment',
-                  'Continuity',
-                  'Resilience',
+                  fr ? 'Fragmentation' : 'Fragmentation',
+                  fr ? 'Coordination' : 'Coordination',
+                  fr ? 'Explicabilite' : 'Explainability',
+                  fr ? 'Alignement' : 'Alignment',
+                  fr ? 'Continuite' : 'Continuity',
+                  fr ? 'Resilience' : 'Resilience',
                 ]}
                 accentClass="bg-[#b59b61] text-[#12324a] border-transparent"
               />
@@ -119,14 +126,14 @@ export function MethodologyVisualizationSystem() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.18} duration={0.9} distance={16}>
-            <VisualPanel title="Governance Explainability Standard" subtitle="Reviewability Layers">
+            <VisualPanel title={fr ? 'Norme d explicabilite de gouvernance' : 'Governance Explainability Standard'} subtitle={fr ? 'Couches de revue' : 'Reviewability Layers'}>
               <div className="space-y-2">
                 {[
-                  'Explainability Layer',
-                  'Human Oversight Layer',
-                  'Governance Review Layer',
-                  'Operational Transparency Layer',
-                  'Accountability Preservation Layer',
+                  fr ? 'Couche d explicabilite' : 'Explainability Layer',
+                  fr ? 'Couche de supervision humaine' : 'Human Oversight Layer',
+                  fr ? 'Couche de revue de gouvernance' : 'Governance Review Layer',
+                  fr ? 'Couche de transparence operationnelle' : 'Operational Transparency Layer',
+                  fr ? 'Couche de preservation de la responsabilite' : 'Accountability Preservation Layer',
                 ].map((layer) => (
                   <div key={layer} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm text-slate-700">
                     {layer}
@@ -137,14 +144,14 @@ export function MethodologyVisualizationSystem() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.24} duration={0.9} distance={16}>
-            <VisualPanel title="Operational Trust Framework" subtitle="Trust Architecture">
+            <VisualPanel title={fr ? 'Cadre de confiance operationnelle' : 'Operational Trust Framework'} subtitle={fr ? 'Architecture de confiance' : 'Trust Architecture'}>
               <PillarDiagram
                 nodes={[
-                  'Trust Formation',
-                  'Explainability',
-                  'Governance Confidence',
-                  'Modernization Safety',
-                  'Continuity Reassurance',
+                  fr ? 'Formation de la confiance' : 'Trust Formation',
+                  fr ? 'Explicabilite' : 'Explainability',
+                  fr ? 'Confiance de gouvernance' : 'Governance Confidence',
+                  fr ? 'Securite de modernisation' : 'Modernization Safety',
+                  fr ? 'Assurance de continuite' : 'Continuity Reassurance',
                 ]}
                 accentClass="bg-[#2b6a62] text-white border-transparent"
               />
@@ -156,19 +163,27 @@ export function MethodologyVisualizationSystem() {
   );
 }
 
-export function ContinuityFlowSignature() {
+export function ContinuityFlowSignature({ locale = 'en-CA' }: { locale?: string }) {
+  const fr = isFr(locale);
+
   const flowNodes = [
     {
-      title: 'Organizational Memory',
-      detail: 'Knowledge remains legible through leadership transitions and policy cycles.',
+      title: fr ? 'Memoire organisationnelle' : 'Organizational Memory',
+      detail: fr
+        ? 'La connaissance reste lisible a travers les transitions de leadership et les cycles de politiques.'
+        : 'Knowledge remains legible through leadership transitions and policy cycles.',
     },
     {
-      title: 'Governance Continuity',
-      detail: 'Oversight logic remains coherent across teams, programs, and decision forums.',
+      title: fr ? 'Continuite de gouvernance' : 'Governance Continuity',
+      detail: fr
+        ? 'La logique de supervision reste coherente entre equipes, programmes et forums de decision.'
+        : 'Oversight logic remains coherent across teams, programs, and decision forums.',
     },
     {
-      title: 'Operational Coherence',
-      detail: 'Execution pathways stay aligned with strategic and governance expectations.',
+      title: fr ? 'Coherence operationnelle' : 'Operational Coherence',
+      detail: fr
+        ? 'Les parcours d execution restent alignes sur les attentes strategiques et de gouvernance.'
+        : 'Execution pathways stay aligned with strategic and governance expectations.',
     },
   ];
 
@@ -177,11 +192,13 @@ export function ContinuityFlowSignature() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Continuity Flow as organizational language</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">{fr ? 'Le flux de continuite comme langage organisationnel' : 'Continuity Flow as organizational language'}</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            UnionEyes uses continuity flow to communicate a simple organizational truth: governance knowledge should move safely through time, never breaking at moments of transition.
+            {fr
+              ? 'UnionEyes utilise le flux de continuite pour communiquer une verite simple : la connaissance de gouvernance doit circuler de facon sure dans le temps, sans rupture en transition.'
+              : 'UnionEyes uses continuity flow to communicate a simple organizational truth: governance knowledge should move safely through time, never breaking at moments of transition.'}
           </p>
         </ScrollReveal>
 
@@ -211,17 +228,21 @@ export function ContinuityFlowSignature() {
   );
 }
 
-export function FragmentationToCoherenceSequence() {
+export function FragmentationToCoherenceSequence({ locale = 'en-CA' }: { locale?: string }) {
+  const fr = isFr(locale);
+
   return (
     <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Fragmentation to resilience, without disruption theatre</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">{fr ? 'De la fragmentation a la resilience, sans theatre de disruption' : 'Fragmentation to resilience, without disruption theatre'}</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            The UnionEyes modernization rhythm is calm and stabilizing: create visibility, align governance, protect continuity, and reinforce organizational trust.
+            {fr
+              ? 'Le rythme de modernisation UnionEyes est calme et stabilisant : creer de la visibilite, aligner la gouvernance, proteger la continuite et renforcer la confiance organisationnelle.'
+              : 'The UnionEyes modernization rhythm is calm and stabilizing: create visibility, align governance, protect continuity, and reinforce organizational trust.'}
           </p>
         </ScrollReveal>
 
@@ -229,7 +250,18 @@ export function FragmentationToCoherenceSequence() {
           {continuityTransformation.map((step, idx) => (
             <article key={step} className={`institution-panel p-4 text-center continuity-appear ${CONTINUITY_DELAY_CLASSES[idx] ?? ''}`}>
               <p className="text-[11px] tracking-widest uppercase text-slate-500 mb-2">Phase {idx + 1}</p>
-              <p className="text-xs sm:text-sm font-semibold text-navy leading-relaxed">{step}</p>
+              <p className="text-xs sm:text-sm font-semibold text-navy leading-relaxed">
+                {fr
+                  ? ({
+                      Fragmentation: 'Fragmentation',
+                      Visibility: 'Visibilite',
+                      Alignment: 'Alignement',
+                      Continuity: 'Continuite',
+                      Trust: 'Confiance',
+                      Resilience: 'Resilience',
+                    } as Record<string, string>)[step] ?? step
+                  : step}
+              </p>
             </article>
           ))}
         </div>
@@ -238,22 +270,26 @@ export function FragmentationToCoherenceSequence() {
   );
 }
 
-export function ConferenceMemoryAnchors() {
+export function ConferenceMemoryAnchors({ locale = 'en-CA' }: { locale?: string }) {
+  const fr = isFr(locale);
+
   const anchors = [
-    'The continuity people',
-    'The governance trust platform',
-    'The explainable modernization company',
-    'The fragmentation to coherence visual language',
-    'The continuity flow doctrine',
+    fr ? 'Les architectes de la continuite' : 'The continuity people',
+    fr ? 'La plateforme de confiance de gouvernance' : 'The governance trust platform',
+    fr ? 'La modernisation explicable' : 'The explainable modernization company',
+    fr ? 'Le langage visuel de la fragmentation a la coherence' : 'The fragmentation to coherence visual language',
+    fr ? 'La doctrine du flux de continuite' : 'The continuity flow doctrine',
   ];
 
   return (
     <section className="py-16 bg-[#12324a] text-white border-b border-[#0e2538]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p className="text-xs tracking-[0.2em] uppercase text-white/70 mb-3 text-center">Conference Recall Layer</p>
-        <h2 className="text-3xl font-semibold mb-4 text-center">Memory anchors for executive environments</h2>
+        <p className="text-xs tracking-[0.2em] uppercase text-white/70 mb-3 text-center">{fr ? 'Couche de rappel conference' : 'Conference Recall Layer'}</p>
+        <h2 className="text-3xl font-semibold mb-4 text-center">{fr ? 'Ancrages de memoire pour les environnements executifs' : 'Memory anchors for executive environments'}</h2>
         <p className="text-sm text-white/80 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
-          This is the language stakeholders should carry after every dialogue, briefing, and conference interaction.
+          {fr
+            ? 'C est le langage que les parties prenantes doivent retenir apres chaque dialogue, breffage et interaction en conference.'
+            : 'This is the language stakeholders should carry after every dialogue, briefing, and conference interaction.'}
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {anchors.map((anchor) => (
@@ -267,27 +303,37 @@ export function ConferenceMemoryAnchors() {
   );
 }
 
-export function ContinuityMappingLanguage() {
+export function ContinuityMappingLanguage({ locale = 'en-CA' }: { locale?: string }) {
+  const fr = isFr(locale);
+
   const maps = [
     {
-      title: 'Leadership Transition Map',
+      title: fr ? 'Carte de transition de leadership' : 'Leadership Transition Map',
       detail:
-        'Shows continuity preservation, onboarding stabilization, and rationale transfer between outgoing and incoming leadership.',
+        fr
+          ? 'Montre la preservation de la continuite, la stabilisation de l accueil et le transfert de raisonnement entre leadership sortant et entrant.'
+          : 'Shows continuity preservation, onboarding stabilization, and rationale transfer between outgoing and incoming leadership.',
     },
     {
-      title: 'Organizational Memory Map',
+      title: fr ? 'Carte de memoire organisationnelle' : 'Organizational Memory Map',
       detail:
-        'Shows where governance context lives, how it is retained, and how organizational context stays coordinated.',
+        fr
+          ? 'Montre ou vit le contexte de gouvernance, comment il est preserve et comment le contexte organisationnel reste coordonne.'
+          : 'Shows where governance context lives, how it is retained, and how organizational context stays coordinated.',
     },
     {
-      title: 'Governance Coherence Map',
+      title: fr ? 'Carte de coherence de gouvernance' : 'Governance Coherence Map',
       detail:
-        'Shows policy alignment pathways that reduce fragmentation and improve cross-team coordination visibility.',
+        fr
+          ? 'Montre les parcours d alignement des politiques qui reduisent la fragmentation et ameliorent la visibilite de coordination entre equipes.'
+          : 'Shows policy alignment pathways that reduce fragmentation and improve cross-team coordination visibility.',
     },
     {
-      title: 'Continuity Lifecycle Visual',
+      title: fr ? 'Visuel du cycle de vie de continuite' : 'Continuity Lifecycle Visual',
       detail:
-        'Shows maturity progression from reactive continuity handling to resilient organizational operating doctrine.',
+        fr
+          ? 'Montre la progression de maturite, de la gestion reactive de continuite vers une doctrine operationnelle resiliente.'
+          : 'Shows maturity progression from reactive continuity handling to resilient organizational operating doctrine.',
     },
   ];
 
@@ -296,7 +342,7 @@ export function ContinuityMappingLanguage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
-          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">A recognizable visual language for organizational resilience</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">{fr ? 'Un langage visuel reconnaissable pour la resilience organisationnelle' : 'A recognizable visual language for organizational resilience'}</h2>
         </ScrollReveal>
         <div className="grid md:grid-cols-2 gap-4 narrative-sequence [--sequence-step:110ms]">
           {maps.map((map) => (
@@ -312,15 +358,17 @@ export function ContinuityMappingLanguage() {
   );
 }
 
-export function ConferenceStoryFlow() {
+export function ConferenceStoryFlow({ locale = 'en-CA' }: { locale?: string }) {
+  const fr = isFr(locale);
+
   const stages = [
-    'Organizational Fragmentation',
-    'Hidden Continuity Risk',
-    'Governance Complexity',
-    'Organizational Memory Loss',
-    'Explainable Visibility',
-    'Operational Coherence',
-    'Organizational Resilience',
+    fr ? 'Fragmentation organisationnelle' : 'Organizational Fragmentation',
+    fr ? 'Risque cache de continuite' : 'Hidden Continuity Risk',
+    fr ? 'Complexite de gouvernance' : 'Governance Complexity',
+    fr ? 'Perte de memoire organisationnelle' : 'Organizational Memory Loss',
+    fr ? 'Visibilite explicable' : 'Explainable Visibility',
+    fr ? 'Coherence operationnelle' : 'Operational Coherence',
+    fr ? 'Resilience organisationnelle' : 'Organizational Resilience',
   ];
 
   return (
@@ -328,11 +376,13 @@ export function ConferenceStoryFlow() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal duration={0.85} distance={12} tempo="conference">        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.95} distance={14} tempo="conference">
-          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Narrative choreography for executive environments</h2>
+          <h2 className="text-3xl font-semibold text-navy mb-4 text-center">{fr ? 'Choregraphie narrative pour les environnements executifs' : 'Narrative choreography for executive environments'}</h2>
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.95} distance={14} tempo="conference">
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            The live storytelling sequence below is optimized for under-five-second executive comprehension at each stage.
+            {fr
+              ? 'La sequence de recit ci-dessous est optimisee pour une comprehension executive en moins de cinq secondes a chaque etape.'
+              : 'The live storytelling sequence below is optimized for under-five-second executive comprehension at each stage.'}
           </p>
         </ScrollReveal>
         <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-3 narrative-sequence [--sequence-step:110ms]">
@@ -345,7 +395,7 @@ export function ConferenceStoryFlow() {
               tempo="conference"
             >
               <article className="institution-panel narrative-step p-4 text-center">
-                <p className="text-[11px] tracking-widest uppercase text-slate-500 mb-2">Stage {idx + 1}</p>
+                <p className="text-[11px] tracking-widest uppercase text-slate-500 mb-2">{fr ? 'Etape' : 'Stage'} {idx + 1}</p>
                 <p className="text-xs sm:text-sm font-medium text-navy leading-relaxed">{stage}</p>
               </article>
             </ScrollReveal>

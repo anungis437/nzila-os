@@ -3,31 +3,34 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
-import { WHITEPAPER_LIBRARY } from '@/lib/whitepaper/library';
+import {
+  WHITEPAPER_LIBRARY,
+  getWhitepaperLocaleContent,
+} from '@/lib/whitepaper/library';
 
 const HUB_COPY = {
   'en-CA': {
     title: 'Whitepapers | UnionEyes',
     description:
-      'The UnionEyes whitepaper library: Organizational Continuity Infrastructure (OCI), the OCI Method canonical authority, the methodology companion, and the operational-reality edition of the Continuity Gap.',
+      'Read the UnionEyes whitepaper library: what continuity is, why it matters, and how teams can apply it in real operations.',
     heading: 'Whitepapers',
     heroDescription:
-      'Doctrinal whitepapers on Organizational Continuity Infrastructure, the OCI Method, and the operational reality from which the category emerged.',
-    introHeading: 'A library, not a single document',
+      'Clear, practical whitepapers on continuity, governance, and real-world operations.',
+    introHeading: 'A library, not one document',
     introBody:
-      'The continuity category surfaced from operational work and was hardened through methodology. This library presents the four documents that together establish OCI / OCRA as a defensible, procurement-grade discipline.',
+      'Each paper covers a different angle: the idea, the method, and the day-to-day use.',
     readingLabel: 'Read',
   },
   'fr-CA': {
     title: 'Livres blancs | UnionEyes',
     description:
-      'La bibliotheque de livres blancs UnionEyes : Infrastructure de continuite organisationnelle (OCI), autorite canonique de la methode OCI, livre blanc compagnon de la methode et edition de realite operationnelle de l ecart de continuite.',
+      'La bibliotheque de livres blancs UnionEyes explique simplement la continuite, son importance, et son application sur le terrain.',
     heading: 'Livres blancs',
     heroDescription:
-      'Livres blancs doctrinaux sur l Infrastructure de continuite organisationnelle, la methode OCI et la realite operationnelle d ou la categorie a emerge.',
-    introHeading: 'Une bibliotheque, pas un seul document',
+      'Des livres blancs clairs et concrets sur la continuite, la gouvernance et les operations reelles.',
+    introHeading: 'Une bibliothèque, pas un seul document',
     introBody:
-      'La categorie de continuite a emerge du travail operationnel et a ete renforcee par la methodologie. Cette bibliotheque presente les quatre documents qui etablissent ensemble OCI / OCRA comme une discipline defendable et qualifiee pour l approvisionnement.',
+      'Chaque document couvre un angle précis: l’idée, la méthode et l’usage au quotidien.',
     readingLabel: 'Lire',
   },
 } as const;
@@ -95,61 +98,57 @@ export default async function WhitepapersHubPage({
 
       <main className="mx-auto w-full max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
         <ul className="grid gap-6 lg:grid-cols-2">
-          {WHITEPAPER_LIBRARY.map((entry) => (
-            <li
-              key={entry.slug}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-            >
-              <Link href={`/${locale}${entry.href}`} className="block">
-                <div className="relative h-44 w-full overflow-hidden">
-                  <Image
-                    src={entry.heroImage}
-                    alt={entry.heroAlt}
-                    fill
-                    sizes="(min-width: 1024px) 600px, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f2133]/80 via-[#0f2133]/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 px-5 py-3">
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/80">
-                      {entry.format} · {entry.version}
-                    </p>
+          {WHITEPAPER_LIBRARY.map((entry) => {
+            const entryCopy = getWhitepaperLocaleContent(entry, locale);
+
+            return (
+              <li
+                key={entry.slug}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+              >
+                <Link href={`/${locale}${entry.href}`} className="block">
+                  <div className="relative h-44 w-full overflow-hidden">
+                    <Image
+                      src={entry.heroImage}
+                      alt={entryCopy.heroAlt}
+                      fill
+                      sizes="(min-width: 1024px) 600px, 100vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f2133]/80 via-[#0f2133]/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 px-5 py-3">
+                      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/80">
+                        {entryCopy.format} · {entry.version}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+                <div className="flex flex-1 flex-col gap-4 p-6">
+                  <div>
+                    <h3 className="text-xl font-semibold tracking-tight text-navy sm:text-2xl">
+                      <Link href={`/${locale}${entry.href}`} className="hover:text-[#1f5b84]">
+                        {entryCopy.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{entryCopy.subtitle}</p>
+                  </div>
+                  <p className="text-sm leading-7 text-slate-700">{entryCopy.abstract}</p>
+                  <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
+                    <span className="text-xs font-medium text-slate-500">
+                      {entryCopy.readingTime}
+                    </span>
+                    <Link
+                      href={`/${locale}${entry.href}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#1f5b84] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#163f5e]"
+                    >
+                      {copy.readingLabel}
+                      <span aria-hidden="true">→</span>
+                    </Link>
                   </div>
                 </div>
-              </Link>
-              <div className="flex flex-1 flex-col gap-4 p-6">
-                <div>
-                  <h3 className="text-xl font-semibold tracking-tight text-navy sm:text-2xl">
-                    <Link href={`/${locale}${entry.href}`} className="hover:text-[#1f5b84]">
-                      {entry.title}
-                    </Link>
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{entry.subtitle}</p>
-                </div>
-                <p className="text-sm leading-7 text-slate-700">{entry.abstract}</p>
-                <ul className="mt-1 grid gap-2 text-xs leading-5 text-slate-700">
-                  {entry.abstractCallouts.map((point) => (
-                    <li
-                      key={point}
-                      className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-                    >
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-                  <span className="text-xs font-medium text-slate-500">{entry.readingTime}</span>
-                  <Link
-                    href={`/${locale}${entry.href}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#1f5b84] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#163f5e]"
-                  >
-                    {copy.readingLabel}
-                    <span aria-hidden="true">→</span>
-                  </Link>
-                </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </main>
     </div>

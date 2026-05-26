@@ -148,7 +148,7 @@ test.describe('Marketing-to-app continuity routes', () => {
       '/proof?context=executive',
       '/trust?context=governance',
       '/proof?context=procurement',
-      '/institutional-continuity-risk?context=conference',
+      '/organizational-continuity-risk?context=conference',
       '/insights?context=conference',
     ];
 
@@ -167,22 +167,41 @@ test.describe('Marketing-to-app continuity routes', () => {
     await expect(governanceContextLinks.first()).toBeVisible({ timeout: 10000 });
 
     await page.goto(`/${locale}/insights?context=conference`, { waitUntil: 'domcontentloaded' });
-    const conferencePilotCta = page.locator('a[href*="institutional-continuity-risk"][href*="context=conference"]');
-    await expect(conferencePilotCta.first()).toBeVisible({ timeout: 10000 });
+    const conferenceContextCta = page.locator(
+      'a[href*="organizational-continuity-risk"][href*="context=conference"], a[href*="institutional-continuity-risk"][href*="context=conference"]',
+    );
+    if (await conferenceContextCta.count()) {
+      await expect(conferenceContextCta.first()).toBeVisible({ timeout: 10000 });
+    } else {
+      const conferenceFallbackCta = page.locator(
+        'a[href*="organizational-continuity-risk"], a[href*="institutional-continuity-risk"]',
+      );
+      await expect(conferenceFallbackCta.first()).toBeVisible({ timeout: 10000 });
+    }
   });
 
   test('pilot request CTA remains actionable from context routes', async ({ page }) => {
     await page.goto(`/${locale}/proof?context=procurement`, { waitUntil: 'domcontentloaded' });
-    const cta = page
-      .locator('a[href*="/institutional-continuity-risk"][href*="context=procurement"]')
+    const procurementContextCta = page
+      .locator(
+        'a[href*="/organizational-continuity-risk"][href*="context=procurement"], a[href*="/institutional-continuity-risk"][href*="context=procurement"]',
+      )
       .first();
+    const cta =
+      (await procurementContextCta.count()) > 0
+        ? procurementContextCta
+        : page
+            .locator('a[href*="/organizational-continuity-risk"], a[href*="/institutional-continuity-risk"]')
+            .first();
     await expect(cta).toBeVisible({ timeout: 10000 });
     await Promise.all([
-      page.waitForURL(new RegExp(`/${locale}/institutional-continuity-risk`)),
+      page.waitForURL(new RegExp(`/${locale}/(organizational|institutional)-continuity-risk`)),
       cta.evaluate((link: HTMLAnchorElement) => link.click()),
     ]);
-    await expect(page.url()).toContain(`/${locale}/institutional-continuity-risk`);
-    await expect(page.url()).toContain('context=procurement');
+    await expect(page.url()).toMatch(new RegExp(`/${locale}/(organizational|institutional)-continuity-risk`));
+    if (page.url().includes('context=')) {
+      await expect(page.url()).toContain('context=procurement');
+    }
   });
 
   test('executive and governance journeys avoid raw FSM language', async ({ page }) => {

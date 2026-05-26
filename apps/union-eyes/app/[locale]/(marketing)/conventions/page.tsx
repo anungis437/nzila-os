@@ -19,7 +19,7 @@
  *
  * Positions UE as organizational governance operations infrastructure for
  * federated democratic institutions. Procedural continuity, constitutional
- * traceability, governance-safe coordination across locals, regions, nationals.
+ * traceability and coordination across locals, regions, nationals.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -41,7 +41,7 @@ const CONVENTIONS_COPY = {
   'en-CA': {
     metaTitle: 'Conventions & Federated Governance | UnionEyes',
     metaDescription:
-      'Federated democratic institutions operating with procedural continuity, constitutional traceability, and governance-safe coordination across locals, regions, and nationals.',
+      'Federated democratic institutions operating with procedural continuity, traceability, and coordination across locals, regions, and nationals.',
     badge: 'Platform · Conventions & Federated Governance',
     headingLine1: 'Federated democratic institutions,',
     headingLine2: 'operating with procedural continuity.',
@@ -53,11 +53,11 @@ const CONVENTIONS_COPY = {
     tabPathways: 'Pathways',
     tabProof: 'Proof',
     tabAction: 'Action',
-    challengeTitle: 'Federated institutions are coordination structures, not events',
+    challengeTitle: 'Federated institutions are coordination structures',
     challengeP1:
       'Federated democratic institutions operate across locals, regions, and nationals — each with constitutional autonomy, procedural rules, and historical lineage. Coordination breaks when resolutions, amendments, and delegate context fragment across documents, spreadsheets, and individual memory between cycles.',
     challengeP2:
-      'UnionEyes Conventions & Federated Governance is a continuity layer that preserves constitutional intent, delegate continuity, and resolution lifecycle integrity — alongside existing parliamentary practice, not in place of it.',
+      'UnionEyes Conventions & Federated Governance is a continuity layer that preserves constitutional intent, delegate continuity, and resolution lifecycle integrity alongside existing parliamentary practice.',
     journeyTitle: 'From procedural fragmentation to federated resilience',
     pillarsTitle: 'Six governance continuity capabilities. One federated structure.',
     pillarsDescription:
@@ -70,7 +70,7 @@ const CONVENTIONS_COPY = {
     trust3Sub: 'Every resolution carries its full lineage',
     actionTitle: 'Ready to strengthen federated governance continuity?',
     actionDescription:
-      'See how UnionEyes preserves constitutional intent, delegate continuity, and resolution lifecycle integrity across your locals, regions, and nationals.',
+      'See how UnionEyes preserves constitutional intent, delegate continuity, and resolution lifecycle integrity across your organization.',
     coexistenceTitle: 'Coexistence with existing systems',
     governanceAiTitle: 'Governance-safe assistive intelligence',
     operationalReassuranceTitle: 'Operational reassurance for constitutional review',
@@ -165,7 +165,7 @@ const CONVENTIONS_CONTENT = {
       { step: '02', label: 'Resolution Traceability', desc: 'Every resolution and amendment carries its lineage — origin, sponsor, prior versions, and disposition — in a reviewable structure.' },
       { step: '03', label: 'Delegate Continuity', desc: 'Credentials, mandates, and constituency context persist across conventions so representation remains coherent.' },
       { step: '04', label: 'Committee Coordination', desc: 'Committees coordinate procedural work alongside chairs and parliamentarians, without replacing constitutional authority.' },
-      { step: '05', label: 'Constitutional Coherence', desc: 'Constitutional intent and precedent rulings remain reviewable across cycles, supporting governance-safe decision making.' },
+      { step: '05', label: 'Constitutional Coherence', desc: 'Constitutional intent and precedent rulings remain reviewable across cycles.' },
       { step: '06', label: 'Federated Resilience', desc: 'The federation operates as a coherent institution — locals, regions, and nationals aligned on procedural continuity and shared organizational memory.' },
     ],
     coexistenceDescription:

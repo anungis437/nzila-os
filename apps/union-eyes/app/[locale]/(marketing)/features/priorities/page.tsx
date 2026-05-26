@@ -47,7 +47,7 @@ const features = {
       icon: ListChecks,
       title: 'One queue for next actions',
       description:
-        'Priorities tells each union representative or officer what needs action next instead of forcing them to interpret raw activity feeds.',
+        'Priorities tells each union representative or officer what needs action next.',
     },
     {
       icon: AlertTriangle,
@@ -65,7 +65,7 @@ const features = {
       icon: Users,
       title: 'Role-routed accountability',
       description:
-        'People see the work they own, the work they must review, and the work that needs handoff across the team.',
+        'People see the work they own, the work they must review, and the work that needs handoff.',
     },
   ],
   'fr-CA': [
@@ -117,7 +117,7 @@ export default async function LocalePrioritiesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Commencer la réflexion de continuité (gratuite)' : 'Start the free Continuity Reflection';
+  const briefingCta = locale === 'fr-CA' ? 'Faire le bilan' : 'Start a review';
   const featuresArr = features[locale as keyof typeof features] ?? features['en-CA'];
   const flowArr = flow[locale as keyof typeof flow] ?? flow['en-CA'];
   const sectionCopy = {

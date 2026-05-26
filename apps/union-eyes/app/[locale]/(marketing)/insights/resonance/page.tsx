@@ -25,9 +25,19 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const copy = locale === 'fr-CA'
+    ? {
+        title: 'Resonance | Perspectives | UnionEyes',
+        description: 'Resonance emotionnelle executive, ancrages memoire de conference et symbolique de continuite.',
+      }
+    : {
+        title: 'Resonance | Insights | UnionEyes',
+        description: 'Executive emotional resonance, conference memory anchors, and continuity symbolism.',
+      };
+
   return {
-    title: 'Resonance | Insights | UnionEyes',
-    description: 'Executive emotional resonance, conference memory anchors, and continuity symbolism.',
+    title: copy.title,
+    description: copy.description,
     alternates: buildLocaleAlternates(locale, '/insights/resonance'),
   };
 }

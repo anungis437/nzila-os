@@ -1,10 +1,10 @@
-# Union Eyes — Trust Center Index
+# UnionEyes — Trust Center Index
 
 > **Audience:** Procurement reviewers, institutional buyers, governance auditors.
 > **Generated:** 2026-05-18T18:36:26.271Z
 > **Coverage score:** 100%
 
-This index provides a buyer-readable summary of Union Eyes governance, security,
+This index provides a buyer-readable summary of UnionEyes governance, security,
 and operational evidence. All claims are grounded in repository artifacts and
 generated automatically from the evidence manifest.
 

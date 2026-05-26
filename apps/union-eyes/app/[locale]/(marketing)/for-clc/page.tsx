@@ -114,7 +114,7 @@ const CLC_COPY = {
   it: {
     title: 'Attivazione campo CLC | UnionEyes',
     description:
-      'Architettura convention-ready con engagement executive, percorsi QR e follow-up procurement governance-safe.',
+      'Architettura convention-ready con engagement executive, percorsi QR e follow-up procurement.',
     badge: 'Sistema conversione CLC',
     heading: 'Attivazione modernizzazione pronta per convention.',
     descriptionHero:
@@ -144,7 +144,7 @@ const CLC_COPY = {
   pt: {
     title: 'Ativacao de campo CLC | UnionEyes',
     description:
-      'Arquitetura pronta para convencao com engajamento executivo, jornadas QR e follow-up de compras governance-safe.',
+      'Arquitetura pronta para convencao com engajamento executivo, jornadas QR e follow-up de compras.',
     badge: 'Sistema de conversao CLC',
     heading: 'Ativacao de modernizacao pronta para convencao.',
     descriptionHero:

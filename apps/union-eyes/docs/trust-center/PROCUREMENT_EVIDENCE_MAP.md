@@ -1,7 +1,7 @@
-# Union Eyes — Procurement Evidence Map
+# UnionEyes — Procurement Evidence Map
 
 > **Audience:** Procurement officers, due diligence reviewers, vendor qualification teams.
-> **Scope:** Maps common procurement questions to available Union Eyes evidence artifacts.
+> **Scope:** Maps common procurement questions to available UnionEyes evidence artifacts.
 > **Caveats:** Claims use language such as "is designed to," "supports," and "provides evidence of."
 > This document is refreshed automatically when the trust center manifest is regenerated.
 
@@ -10,7 +10,7 @@
 ## How to Use This Document
 
 Each row maps a procurement question category to:
-1. The relevant Union Eyes trust claim
+1. The relevant UnionEyes trust claim
 2. The primary evidence artifacts
 3. Where to find the supporting documentation
 
@@ -68,7 +68,7 @@ Each row maps a procurement question category to:
 
 | Procurement Question | Claim | Primary Evidence |
 |---------------------|-------|-----------------|
-| Does Union Eyes support multi-tier governance? | `federation-sovereignty` | `lib/federation-sovereignty/` module |
+| Does UnionEyes support multi-tier governance? | `federation-sovereignty` | `lib/federation-sovereignty/` module |
 | How is authority delegated between tiers? | `federation-sovereignty` | `lib/federation-sovereignty/delegation.ts` |
 | How are federation conflicts handled? | `federation-sovereignty` | `lib/federation-sovereignty/conflicts.ts` |
 | Is continuity shared across the federation? | `business-continuity` | `lib/federation-sovereignty/coordination.ts` |

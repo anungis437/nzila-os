@@ -50,177 +50,177 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 // ─────────────────────────────────────────────────────────────────────────────
 const PAGE_COPY = {
   'en-CA': {
-    metadataTitle: 'The Operating Architecture | Eight Canonical Organizational Surfaces | UnionEyes',
+    metadataTitle: 'Platform overview | How UnionEyes works | UnionEyes',
     metadataDescription:
-      'UnionEyes is organized as eight canonical organizational surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Organizational Memory, and Trust — composed into one continuous organizational operating record.',
-    badge: 'The Operating Architecture',
-    heading: 'One organizational operating experience.',
+      'See the parts of UnionEyes and how they work together to support day-to-day union operations.',
+    badge: 'Platform overview',
+    heading: 'One platform for the work your team does every day.',
     description:
-      'UnionEyes is organized as eight canonical organizational surfaces — composed, not bundled — into one continuous operating record of governance, continuity, and trust.',
+      'UnionEyes brings cases, priorities, decisions, and audit trails into one system.',
     maturityLink: 'Operational maturity programs',
-    finalHeading: 'Composed, not bundled.',
+    finalHeading: 'Everything works better together.',
     finalBody:
-      'Each canonical surface is governance-safe, continuity-safe, and procurement-safe. Programs activate the maturity bands appropriate to the institution — Foundation, Governance Operations, Organizational Continuity, or the Sovereignty Layer.',
+      'Start with the parts you need now, then expand as your team grows.',
     finalCta: 'See operational maturity programs',
     pillars: [
       {
         id: 'inbox',
         icon: InboxIcon,
         name: 'Inbox',
-        posture: 'Unified organizational intake',
+        posture: 'One place for incoming work',
         body:
-          'A single, governed surface for incoming cases, member messages, federation signals, and operational notifications. Replaces fragmented portal/messaging surfaces with one coherent stream.',
+          'Cases, member messages, and alerts come into one queue so nothing gets missed.',
         runtime: 'dashboard/inbox',
       },
       {
         id: 'work',
         icon: Briefcase,
         name: 'Work',
-        posture: 'Active representation workbench',
+        posture: 'Where active casework happens',
         body:
-          'The operating surface for stewards and officers — active grievances, casework, representation tracking, and continuity-safe handoff. The canonical destination for organizational execution.',
+          'Track grievances and casework, assign owners, and hand off work without losing context.',
         runtime: 'dashboard/work',
       },
       {
         id: 'priorities',
         icon: Target,
         name: 'Priorities',
-        posture: 'Operational cadence and commitments',
+        posture: 'Deadlines and next steps',
         body:
-          'Deadlines, commitments, and the next set of operationally responsible actions. Cadence-centric, not feature-centric — institutions operate on rhythms, not menus.',
+          'See what is due next, what is at risk, and what your team should do now.',
         runtime: 'dashboard/priorities',
       },
       {
         id: 'intelligence',
         icon: LineChart,
         name: 'Intelligence',
-        posture: 'Operational interpretation',
+        posture: 'Trends you can act on',
         body:
-          'One canonical executive surface — federation analytics, executive operating views, sector signals, and cross-union interpretation. Replaces overlapping intelligence variants with one bounded reading.',
+          'Turn activity data into trends so leaders can spot risk early and decide faster.',
         runtime: 'dashboard/intelligence',
       },
       {
         id: 'cognition',
         icon: BrainCircuit,
         name: 'Cognition',
-        posture: 'Sovereignty-layer reasoning',
+        posture: 'Assisted analysis for complex work',
         body:
-          "Bounded, governance-safe, continuity-critical reasoning over the institution's memory. Gated to sovereignty stewards. Not a chat product — an operational reasoning substrate.",
+          'Use structured AI help for difficult decisions, with review controls and clear boundaries.',
         runtime: 'dashboard/cognition',
       },
       {
         id: 'governance',
         icon: Scale,
         name: 'Governance',
-        posture: 'Decisions of record',
+        posture: 'Decisions and policy history',
         body:
-          "Charter, motions, votes, decisions of record, and the auditable governance trail. The institution's governance becomes operational infrastructure, not committee minutes.",
+          'Keep motions, votes, and decisions in one place with a clear history.',
         runtime: 'dashboard/governance',
       },
       {
         id: 'organizational-memory',
         icon: Library,
         name: 'Organizational Memory',
-        posture: 'Continuity substrate',
+        posture: 'Shared team memory',
         body:
-          'Doctrine, precedents, prior decisions, and the continuity archive. Survives leadership transitions because it is held by the institution, not by individuals.',
+          'Store key precedents and past decisions so knowledge stays with the organization.',
         runtime: 'dashboard/organizational-memory',
       },
       {
         id: 'trust',
         icon: ShieldCheck,
         name: 'Trust',
-        posture: 'Audit, explainability, sovereignty',
+        posture: 'Audit and accountability',
         body:
-          'Auditable AI use, explainable reasoning, Canadian operational sovereignty, and procurement-safe governance posture. Trust is not a marketing claim — it is a runtime surface.',
+          'Review AI use, controls, and evidence trails so oversight stays straightforward.',
         runtime: 'dashboard/trust',
       },
     ],
   },
   'fr-CA': {
-    metadataTitle: 'Architecture opérationnelle | Huit surfaces organisationnelles canoniques | UnionEyes',
+    metadataTitle: 'Vue de la plateforme | Comment UnionEyes fonctionne | UnionEyes',
     metadataDescription:
-      'UnionEyes s’organise autour de huit surfaces organisationnelles canoniques — Boîte de réception, Travail, Priorités, Intelligence, Cognition, Gouvernance, Mémoire organisationnelle et Confiance — composées en un registre opérationnel continu.',
-    badge: 'Architecture opérationnelle',
-    heading: 'Une expérience opérationnelle organisationnelle.',
+      'Decouvrez les parties de UnionEyes et comment elles travaillent ensemble au quotidien.',
+    badge: 'Vue de la plateforme',
+    heading: 'Une seule plateforme pour le travail quotidien de votre equipe.',
     description:
-      'UnionEyes est organisé en huit surfaces organisationnelles canoniques, composées plutôt que groupées, pour former un registre opérationnel continu de gouvernance, de continuité et de confiance.',
+      'UnionEyes rassemble dossiers, priorites, decisions et traces d audit dans un seul systeme.',
     maturityLink: 'Programmes de maturité opérationnelle',
-    finalHeading: 'Composé, pas groupé.',
+    finalHeading: 'Tout fonctionne mieux ensemble.',
     finalBody:
-      'Chaque surface canonique est sûre pour la gouvernance, la continuité et l’approvisionnement. Les programmes activent les niveaux de maturité adaptés à l’institution : fondation, opérations de gouvernance, continuité organisationnelle ou couche de souveraineté.',
+      'Commencez avec les surfaces utiles maintenant, puis elargissez selon la croissance de votre equipe.',
     finalCta: 'Voir les programmes de maturité opérationnelle',
     pillars: [
       {
         id: 'inbox',
         icon: InboxIcon,
         name: 'Boîte de réception',
-        posture: 'Entrée organisationnelle unifiée',
+        posture: 'Un seul point d entree',
         body:
-          'Une surface gouvernée pour les dossiers entrants, messages des membres, signaux de fédération et notifications opérationnelles. Elle remplace la fragmentation par un flux cohérent.',
+          'Les dossiers, messages des membres et alertes arrivent dans une seule file.',
         runtime: 'dashboard/inbox',
       },
       {
         id: 'work',
         icon: Briefcase,
         name: 'Travail',
-        posture: 'Atelier actif de représentation',
+        posture: 'Espace de travail actif',
         body:
-          'La surface opérationnelle des intendants et responsables : griefs actifs, dossiers, suivi de représentation et transferts sûrs pour la continuité.',
+          'Suivez les griefs et dossiers, assignez les responsables et transferez sans perdre le contexte.',
         runtime: 'dashboard/work',
       },
       {
         id: 'priorities',
         icon: Target,
         name: 'Priorités',
-        posture: 'Cadence opérationnelle et engagements',
+        posture: 'Echeances et prochaines actions',
         body:
-          'Délais, engagements et prochaines actions responsables. Une surface centrée sur la cadence, parce que les institutions fonctionnent par rythmes, pas par menus.',
+          'Voyez ce qui est urgent, ce qui arrive bientot et ce que l equipe doit faire ensuite.',
         runtime: 'dashboard/priorities',
       },
       {
         id: 'intelligence',
         icon: LineChart,
         name: 'Intelligence',
-        posture: 'Interprétation opérationnelle',
+        posture: 'Tendances utiles',
         body:
-          'Une surface exécutive canonique pour l’analytique fédérative, les vues opérationnelles, les signaux sectoriels et l’interprétation entre syndicats.',
+          'Transformez les donnees en tendances pour decider plus vite.',
         runtime: 'dashboard/intelligence',
       },
       {
         id: 'cognition',
         icon: BrainCircuit,
         name: 'Cognition',
-        posture: 'Raisonnement de souveraineté',
+        posture: 'Aide analytiques pour cas complexes',
         body:
-          'Raisonnement borné, sûr pour la gouvernance et critique pour la continuité, sur la mémoire organisationnelle. Réservé aux gardiens de souveraineté.',
+          'Utilisez une aide IA structuree avec controles humains et limites claires.',
         runtime: 'dashboard/cognition',
       },
       {
         id: 'governance',
         icon: Scale,
         name: 'Gouvernance',
-        posture: 'Décisions de référence',
+        posture: 'Historique des decisions',
         body:
-          'Charte, motions, votes, décisions de référence et piste de gouvernance vérifiable. La gouvernance devient infrastructure opérationnelle, pas seulement procès-verbaux.',
+          'Conservez motions, votes et decisions dans un seul endroit.',
         runtime: 'dashboard/governance',
       },
       {
         id: 'organizational-memory',
         icon: Library,
         name: 'Mémoire organisationnelle',
-        posture: 'Substrat de continuité',
+        posture: 'Memoire partagee de l equipe',
         body:
-          'Doctrine, précédents, décisions antérieures et archive de continuité. Elle survit aux transitions parce qu’elle est détenue par l’institution, pas par des personnes.',
+          'Gardez les precedents et decisions cles pour que le savoir reste dans l organisation.',
         runtime: 'dashboard/organizational-memory',
       },
       {
         id: 'trust',
         icon: ShieldCheck,
         name: 'Confiance',
-        posture: 'Audit, explicabilité, souveraineté',
+        posture: 'Audit et responsabilite',
         body:
-          'Usage IA auditable, raisonnement explicable, souveraineté opérationnelle canadienne et posture de gouvernance prête pour l’approvisionnement.',
+          'Suivez l usage IA, les controles et les preuves pour faciliter la supervision.',
         runtime: 'dashboard/trust',
       },
     ],
