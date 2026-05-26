@@ -7228,7 +7228,7 @@
       "caseStudies": "Études de cas",
       "status": "Statut",
       "contact": "Contact",
-      "requestPilot": "Démarrer un pilote",
+      "requestPilot": "Faire le bilan",
       "signIn": "Se connecter"
     },
     "home": {
@@ -7280,7 +7280,7 @@
       "govImageAlt": "Assemblée syndicale — session de gouvernance avec supervision démocratique",
       "finalCtaHeading": "Prêt pour la continuité institutionnelle à l'échelle exécutive ?",
       "finalCtaDescription": "Commencez par un pilote guidé construit autour de vos priorités en matière de gouvernance et d'opérations.",
-      "finalCtaPrimary": "Commencer la réflexion de continuité (gratuite)",
+      "finalCtaPrimary": "Faire le bilan",
       "finalCtaSecondary": "Voir la gouvernance et la confiance"
     },
     "story": {
@@ -11182,7 +11182,7 @@
       "headlineLine2": "survivra à toute personne.",
       "imageAlt": "Gouvernance institutionnelle et infrastructure de continuité",
       "subhead": "UnionEyes aide les institutions fédérées à préserver la mémoire institutionnelle, à renforcer la coordination de gouvernance et à moderniser la confiance procédurale par une mise en œuvre non perturbatrice aux côtés des systèmes existants.",
-      "ctaPrimary": "Planifier une découverte stratégique",
+      "ctaPrimary": "Faire le bilan",
       "ctaSecondary": "Découvrir l’infrastructure de continuité"
     },
     "posture": {
@@ -11294,7 +11294,7 @@
     "finalCta": {
       "heading": "Discutons d’une infrastructure de continuité pour votre institution.",
       "body": "Une conversation consultative sur la continuité institutionnelle, la coordination de gouvernance et la confiance procédurale — au rythme de votre fédération, et non d’un cycle de vente.",
-      "ctaPrimary": "Planifier une découverte stratégique",
+      "ctaPrimary": "Faire le bilan",
       "ctaSecondary": "Voir la confiance et l’intendance"
     },
     "svg": {
