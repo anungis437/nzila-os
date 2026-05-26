@@ -1,16 +1,12 @@
 name: Deploy Union Eyes (Azure Container Apps)
 
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'apps/union-eyes/**'
-      - 'infrastructure/gitops/environments/ue-demo-cupe4373.yml'
-      - 'Dockerfile'
-      - '.github/workflows/deploy-union-eyes.yml'
-      - 'governance/release/deployment-inventory.json'
   workflow_dispatch:
     inputs:
+      emergency_ack:
+        description: Type EMERGENCY to run this fallback workflow
+        required: true
+        type: string
       environment:
         description: Target environment override
         required: true
@@ -233,6 +229,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Emergency acknowledgement gate
+        run: |
+          if [ "${{ github.event.inputs.emergency_ack }}" != "EMERGENCY" ]; then
+            echo "Emergency ack missing. Use gitops-deploy.yml or deploy-production.yml for canonical release paths."
+            exit 1
+          fi
+
       - name: DNS provider preflight (fail fast)
         if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
         shell: bash
@@ -311,7 +314,7 @@ jobs:
             turbo-deploy-ue-${{ runner.os }}-
 
       - name: Governance check
-        run: pnpm governance:check
+        run: pnpm exec tsx scripts/governance-check.ts
 
       - name: Sync change records from main
         run: |
@@ -323,7 +326,7 @@ jobs:
 
       - name: Run contract tests (fail closed)
         id: contract_tests
-        run: pnpm contract:test
+        run: pnpm contract-tests
 
       - name: SLO gate (fail closed)
         id: slo_gate
@@ -515,10 +518,23 @@ jobs:
             "NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app"
             "AUTH_URL=${{ needs.plan.outputs.app_url }}"
             "AUTH_TRUST_HOST=true"
-            "DJANGO_API_URL=http://localhost:8000"
             "PLATFORM_ADMIN_USER_IDS=${{ secrets.PLATFORM_ADMIN_USER_IDS }}"
             "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}"
           )
+
+          if [ "${{ needs.plan.outputs.environment }}" = "pilot" ]; then
+            FRONTEND_ENV_VARS+=(
+              "DJANGO_API_URL=http://nzila-os-union-eyes-django-pilot"
+              "NEXT_PUBLIC_DJANGO_API_URL=http://nzila-os-union-eyes-django-pilot"
+              "READY_REQUIRE_QUEUE=true"
+            )
+          else
+            FRONTEND_ENV_VARS+=(
+              "DJANGO_API_URL=http://localhost:8000"
+              "NEXT_PUBLIC_DJANGO_API_URL=http://localhost:8000"
+              "READY_REQUIRE_QUEUE=false"
+            )
+          fi
 
           if [ -n "${{ needs.plan.outputs.demo_profile }}" ]; then
             FRONTEND_ENV_VARS+=(
@@ -595,9 +611,32 @@ jobs:
             --query "properties.configuration.ingress.fqdn" \
             -o tsv)
 
+          probe_with_retries() {
+            local url="$1"
+            local attempts="${2:-5}"
+            local timeout="${3:-15}"
+            local delay="${4:-5}"
+            local status="000"
+
+            for attempt in $(seq 1 "$attempts"); do
+              status=$(curl -sS -o /dev/null -w "%{http_code}" --max-time "$timeout" "$url" || echo "000")
+              if [[ "$status" =~ ^(200|301|302|307|308)$ ]]; then
+                echo "$status"
+                return 0
+              fi
+
+              if [ "$attempt" -lt "$attempts" ]; then
+                echo "::notice::Smoke retry $attempt/$attempts for $url -> HTTP $status; retrying in ${delay}s."
+                sleep "$delay"
+              fi
+            done
+
+            echo "$status"
+            return 1
+          }
+
           if [ -n "$DEFAULT_HOST" ]; then
-            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "https://$DEFAULT_HOST" || echo "000")
-            if [[ "$STATUS" =~ ^(200|301|302|307|308)$ ]]; then
+            if STATUS=$(probe_with_retries "https://$DEFAULT_HOST" 5 15 5); then
               echo "✅ default hostname https://$DEFAULT_HOST -> HTTP $STATUS"
             else
               echo "❌ default hostname https://$DEFAULT_HOST -> HTTP $STATUS"
@@ -631,8 +670,7 @@ jobs:
 
           for URL in ${{ needs.plan.outputs.smoke_urls }}; do
             HOST="$(echo "$URL" | awk -F/ '{print $3}')"
-            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "$URL" || echo "000")
-            if [[ "$STATUS" =~ ^(200|301|302|307|308)$ ]]; then
+            if STATUS=$(probe_with_retries "$URL" 5 15 5); then
               echo "✅ $URL -> HTTP $STATUS"
             elif host_is_soft "$HOST"; then
               echo "::warning::Soft smoke host $URL -> HTTP $STATUS (listed in UE_SOFT_SMOKE_HOSTS); not failing the deploy."
