@@ -15,7 +15,9 @@
  * organizational trust for democratic infrastructure.
  */
 import { redirect } from 'next/navigation';
+import { getPreferredLocaleForRedirect } from '@/lib/locale-routing';
 
-export default function Page() {
-  redirect('/en-CA/solutions/technology-leadership');
+export default async function Page() {
+  const locale = await getPreferredLocaleForRedirect();
+  redirect(`/${locale}/solutions/technology-leadership`);
 }
