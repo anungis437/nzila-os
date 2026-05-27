@@ -13,7 +13,7 @@ describe('Union Eyes DR restore readiness contract', () => {
     const packageJson = read('package.json');
 
     expect(packageJson).toContain('"db:restore-drill"');
-    expect(packageJson).toContain('"db:restore-drill:execute"');
+    expect(packageJson).not.toContain('"db:restore-drill:execute"');
     expect(packageJson).toContain('"dr:drill:checklist"');
     expect(packageJson).toContain('"dr:drill:report"');
   });
@@ -33,7 +33,7 @@ describe('Union Eyes DR restore readiness contract', () => {
     const runbook = read('docs/union-eyes/dr/restore-drill-runbook.md');
 
     expect(runbook).toContain('pnpm dr:drill:checklist --live');
-    expect(runbook).toContain('pnpm db:restore-drill:execute');
+    expect(runbook).toContain('pnpm db:restore-drill -- --execute');
     expect(runbook).toContain('reports/dr/restore-drill-YYYY-MM-DD.md');
   });
 

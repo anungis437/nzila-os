@@ -2,7 +2,7 @@
 
 Zonga restore drill execution steps:
 - pnpm dr:drill:checklist --live
-- pnpm db:restore-drill:execute
+- pnpm db:restore-drill -- --execute
 - reports/dr/restore-drill-YYYY-MM-DD.md
 
 Evidence tag prefix: zonga_drill_

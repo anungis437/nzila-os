@@ -7,7 +7,7 @@
 **Doctrine:** Institutional semantic discipline. *Additive, classification-driven,
 explainable. No automation. No analytics. No exposure. No promotion of protected
 governance metadata.*
-[packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts).
+[packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/organizational-governance-graph/src/ontology/kinds.ts).
 The canonical [packages/platform-ontology/src/types.ts](../../packages/platform-ontology/src/types.ts)
 
 ## 1. Why this audit exists
@@ -76,12 +76,12 @@ The full enumeration with rationale per concept is in
 
 The canonical registry is **closed-set** (TypeScript const enum). Adding kinds
 requires a substrate change — explicitly out of scope for IGG (see
-[packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts#L1)
+[packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/organizational-governance-graph/src/ontology/kinds.ts#L1)
 header comment).
 
 ### 3.2 IGG-local ontology — `@nzila/institutional-governance-graph`
 
-Source: [packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts#L19)
+Source: [packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/organizational-governance-graph/src/ontology/kinds.ts#L19)
 
 - **Entity kinds (25):** PLATFORM, CONGRESS, FEDERATION, UNION, LOCAL, REGION,
   DISTRICT, EMPLOYER, WORKSITE, BARGAINING_UNIT, COMMITTEE, MEMBER, STEWARD, LRO,
@@ -100,7 +100,7 @@ Source: [packages/institutional-governance-graph/src/ontology/kinds.ts](../../pa
   **GOLDEN_SHARE_SUNSET_PROGRESSION**, PROTOCOL_AMENDMENT.
 
 Bold entries are already enumerated as protected in
-[packages/institutional-governance-graph/src/governance/protected.ts](../../packages/institutional-governance-graph/src/governance/protected.ts#L26).
+[packages/institutional-governance-graph/src/governance/protected.ts](../../packages/organizational-governance-graph/src/governance/protected.ts#L26).
 
 ### 3.3 Existing fence
 
@@ -193,7 +193,7 @@ The following are the consolidated answers across the inventory:
 5. **Expressible via existing canonical kinds?** Yes for the structural
    relationships (BELONGS_TO, REFERENCES, LINKS_TO, ASSIGNED_TO, HAS, DEPENDS_ON,
    PARENT_OF). Substrate fallback is already implemented at
-   [packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts#L160).
+   [packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/organizational-governance-graph/src/ontology/kinds.ts#L160).
 6. **Surface area expansion?** Promotion of any IGG kind would inject
    institutional semantics into every consumer of `platform-ontology`. **Not
    acceptable** without explicit cross-domain demand and a substrate proposal.
@@ -214,7 +214,7 @@ The following are the consolidated answers across the inventory:
 ## 6. Canonicalization deny-list (to be enforced in §F implementation)
 
 The deny-list is the *intent declaration*. The implementation in
-[packages/institutional-governance-graph/src/ontology/canonicalization.ts](../../packages/institutional-governance-graph/src/ontology/canonicalization.ts)
+[packages/institutional-governance-graph/src/ontology/canonicalization.ts](../../packages/organizational-governance-graph/src/ontology/canonicalization.ts)
 enforces it at test time and exposes inspection helpers.
 
 **Tier 1 — Absolute (protected governance metadata, never canonicalize):**

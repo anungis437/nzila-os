@@ -13,7 +13,7 @@ describe('Zonga DR restore readiness contract', () => {
     const packageJson = read('package.json')
 
     expect(packageJson).toContain('"db:restore-drill"')
-    expect(packageJson).toContain('"db:restore-drill:execute"')
+    expect(packageJson).not.toContain('"db:restore-drill:execute"')
     expect(packageJson).toContain('"dr:drill:checklist"')
     expect(packageJson).toContain('"dr:drill:report"')
   })
@@ -34,7 +34,7 @@ describe('Zonga DR restore readiness contract', () => {
 
     expect(runbook).toContain('Zonga')
     expect(runbook).toContain('pnpm dr:drill:checklist --live')
-    expect(runbook).toContain('pnpm db:restore-drill:execute')
+    expect(runbook).toContain('pnpm db:restore-drill -- --execute')
     expect(runbook).toContain('reports/dr/restore-drill-YYYY-MM-DD.md')
     expect(runbook).toContain('zonga_drill_')
     // RTO / RPO targets must be explicit so claims are measurable

@@ -15,7 +15,9 @@
  * organizational trust for democratic infrastructure.
  */
 import { redirect } from 'next/navigation';
+import { getPreferredLocaleForRedirect } from '@/lib/locale-routing';
 
-export default function SolutionsPage() {
-  redirect('/en-CA/solutions');
+export default async function SolutionsPage() {
+  const locale = await getPreferredLocaleForRedirect();
+  redirect(`/${locale}/solutions`);
 }

@@ -18,7 +18,7 @@
 ### A.1 Package surface
 
 `@nzila/institutional-governance-graph` is a **read-only, IO-free** package.
-Its public surface (from [packages/institutional-governance-graph/src/index.ts](../../packages/institutional-governance-graph/src/index.ts)) groups into:
+Its public surface (from [packages/institutional-governance-graph/src/index.ts](../../packages/organizational-governance-graph/src/index.ts)) groups into:
 
 | Layer | Modules |
 |---|---|
@@ -32,7 +32,7 @@ Its public surface (from [packages/institutional-governance-graph/src/index.ts](
 | Governance (Phase 4) | `governance/timeline`, `governance/evidence`, `governance/continuity`, `governance/trust` |
 | Observability | `observability/snapshot` |
 
-### A.2 Read-only query API ([governance/queries.ts](../../packages/institutional-governance-graph/src/governance/queries.ts))
+### A.2 Read-only query API ([governance/queries.ts](../../packages/organizational-governance-graph/src/governance/queries.ts))
 
 Six pure functions over a `GovernanceGraphProjection`:
 
@@ -50,7 +50,7 @@ Doctrine note inside the file (verbatim):
 > Dependency. FORBIDDEN: Predictive / influence / caucus / profiling /
 > behavioural / optimization queries.*
 
-### A.3 Protected fence ([governance/protected.ts](../../packages/institutional-governance-graph/src/governance/protected.ts))
+### A.3 Protected fence ([governance/protected.ts](../../packages/organizational-governance-graph/src/governance/protected.ts))
 
 | Set | Members |
 |---|---|
@@ -70,7 +70,7 @@ access-control system"*. Every WS K UX surface must call `redactProtected`
 on incoming nodes/edges and gate every observability panel with the
 projection guard.
 
-### A.4 Composition orchestrator ([projection/build.ts](../../packages/institutional-governance-graph/src/projection/build.ts))
+### A.4 Composition orchestrator ([projection/build.ts](../../packages/organizational-governance-graph/src/projection/build.ts))
 
 `buildGovernanceGraphProjection(adapter)` resolves seven adapter calls in
 parallel and returns:
@@ -93,15 +93,15 @@ only as integers. No derived ratios, scores, rankings, or trends.
 
 | Module | Exports relevant to WS K |
 |---|---|
-| [governance/chronology.ts](../../packages/institutional-governance-graph/src/governance/chronology.ts) | `orderDecisionsChronologically`, `chronologyForEntity`, `lineageChain` |
-| [governance/continuity.ts](../../packages/institutional-governance-graph/src/governance/continuity.ts) | `buildContinuityTimeline`, `successionBreakpoints`, `continuityForEntity`, `continuityForOrganization`, `continuityLineage` |
-| [delegation/resolver.ts](../../packages/institutional-governance-graph/src/delegation/resolver.ts) | `resolveDelegationChains` (`DelegationResolutionState`) |
-| [governance/trust.ts](../../packages/institutional-governance-graph/src/governance/trust.ts) | `buildExplainabilityRecords`, `explainabilityForDecision`, `explainabilityForEntity`, `summarizeProvenanceCoverage` |
+| [governance/chronology.ts](../../packages/organizational-governance-graph/src/governance/chronology.ts) | `orderDecisionsChronologically`, `chronologyForEntity`, `lineageChain` |
+| [governance/continuity.ts](../../packages/organizational-governance-graph/src/governance/continuity.ts) | `buildContinuityTimeline`, `successionBreakpoints`, `continuityForEntity`, `continuityForOrganization`, `continuityLineage` |
+| [delegation/resolver.ts](../../packages/organizational-governance-graph/src/delegation/resolver.ts) | `resolveDelegationChains` (`DelegationResolutionState`) |
+| [governance/trust.ts](../../packages/organizational-governance-graph/src/governance/trust.ts) | `buildExplainabilityRecords`, `explainabilityForDecision`, `explainabilityForEntity`, `summarizeProvenanceCoverage` |
 
 ### A.6 Consumer surface (`apps/union-eyes`)
 
 Sole IGG consumer is
-[apps/union-eyes/lib/institutional-observability/source.ts](../../apps/union-eyes/lib/institutional-observability/source.ts)
+[apps/union-eyes/lib/institutional-observability/source.ts](../../apps/union-eyes/app/[locale]/dashboard/institutional-observability/page.tsx)
 which wraps the package behind `getInstitutionalObservabilityView()` and
 returns an `InstitutionalObservabilityView` shaped for the dashboard.
 

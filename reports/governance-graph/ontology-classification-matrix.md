@@ -119,6 +119,6 @@ the ten audit questions in
 - A row whose **Recommended Scope** matches **Current Scope** is in compliance.
 - A row whose **Promotion Status** is `denied` or `frozen` is enforced by the
   canonicalization deny-list at
-   [packages/institutional-governance-graph/src/ontology/canonicalization.ts](../../packages/institutional-governance-graph/src/ontology/canonicalization.ts).
+   [packages/institutional-governance-graph/src/ontology/canonicalization.ts](../../packages/organizational-governance-graph/src/ontology/canonicalization.ts).
 - A row whose **Promotion Status** is `hold-for-demand` may only move to
   *Canonical* via an RFC that re-runs the ten audit questions.
