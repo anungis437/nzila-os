@@ -184,7 +184,9 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
         logger.warn('platform_cost_rollups schema is incomplete; using zero platform burn rows')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`platform_cost_rollups query failed; using zero platform burn rows (${message})`)
+      return []
     })
 
   const subscriptionPromise = platformDb
