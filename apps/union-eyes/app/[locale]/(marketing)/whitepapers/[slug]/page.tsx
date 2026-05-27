@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { locales } from '@/i18n';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import {
   WHITEPAPER_LIBRARY,
@@ -105,9 +106,13 @@ const ARTICLE_COPY = {
 type Params = { params: Promise<{ locale: string; slug: string }> };
 
 export function generateStaticParams() {
-  return WHITEPAPER_LIBRARY.filter((entry) => entry.localized['en-CA'].sourceFile).map((entry) => ({
-    slug: entry.slug,
-  }));
+  const entries = WHITEPAPER_LIBRARY.filter((entry) => entry.localized['en-CA'].sourceFile);
+  return locales.flatMap((locale) =>
+    entries.map((entry) => ({
+      locale,
+      slug: entry.slug,
+    }))
+  );
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

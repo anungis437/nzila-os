@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
-import { CONTINUITY_GAP_BLOCKS } from '@/lib/whitepaper/continuity-gap';
+import { getWhitepaperBlocks } from '@/lib/whitepaper/continuity-gap';
 // PDF download temporarily hidden; keep PrintPdfButton import path available for re-enable.
 // import { PrintPdfButton } from './PrintPdfButton';
 
@@ -25,6 +25,7 @@ const WHITEPAPER_COPY = {
     tocLabel: 'On this page',
     quickActionsLabel: 'Quick actions',
     startReadingLabel: 'Start reading',
+    backToLibrary: 'Back to Whitepaper Library',
     articleMeta: {
       format: 'Evidence-Enhanced Whitepaper',
       version: 'v3.0',
@@ -62,6 +63,7 @@ const WHITEPAPER_COPY = {
     tocLabel: 'Sommaire',
     quickActionsLabel: 'Actions rapides',
     startReadingLabel: 'Commencer la lecture',
+    backToLibrary: 'Retour a la bibliotheque de livres blancs',
     articleMeta: {
       format: 'Livre blanc renforce par preuves',
       version: 'v3.0',
@@ -1010,7 +1012,9 @@ export default async function LocaleWhitepaperPage({
 }) {
   const { locale } = await params;
   const copy = WHITEPAPER_COPY[locale as keyof typeof WHITEPAPER_COPY] ?? WHITEPAPER_COPY['en-CA'];
-  const whitepaperBlocks = CONTINUITY_GAP_BLOCKS.map(normalizeBlock).filter((block) => block.length > 0);
+  const whitepaperBlocks = getWhitepaperBlocks(locale)
+    .map(normalizeBlock)
+    .filter((block) => block.length > 0);
   const sections = buildWhitepaperSections(whitepaperBlocks);
   const tocHeadings = sections
     .filter((section) => section.level === 2 && !/^The Continuity Gap$/i.test(section.heading))
@@ -1451,7 +1455,7 @@ export default async function LocaleWhitepaperPage({
             className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100"
           >
             <span aria-hidden="true">←</span>
-            Back to Whitepaper Library
+            {copy.backToLibrary}
           </Link>
         </div>
       </main>
