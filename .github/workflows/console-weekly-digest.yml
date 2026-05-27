@@ -31,7 +31,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Send weekly digest
-        run: NODE_OPTIONS="--conditions=react-server" pnpm --dir apps/console exec tsx scripts/console-weekly-digest.ts --send
+        run: |
+          SEND_FLAG=""
+          if [ -n "${WEEKLY_DIGEST_SLACK_WEBHOOK_URL}" ] || [ -n "${WEEKLY_DIGEST_EMAIL_PROVIDER}" -a -n "${WEEKLY_DIGEST_EMAIL_TO}" ]; then
+            SEND_FLAG="--send"
+          fi
+
+          NODE_OPTIONS="--conditions=react-server" pnpm --dir apps/console exec tsx scripts/console-weekly-digest.ts ${SEND_FLAG}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           WEEKLY_DIGEST_EMAIL_PROVIDER: ${{ vars.WEEKLY_DIGEST_EMAIL_PROVIDER }}
