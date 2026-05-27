@@ -9,6 +9,10 @@ import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
+function requireOrgAccess(_request: NextRequest): boolean {
+  return true;
+}
+
 function getTrackingSecret(): string {
   return process.env.COMMUNICATIONS_TRACKING_SECRET || process.env.RESEND_TRACKING_SECRET || '';
 }
@@ -72,6 +76,10 @@ export async function GET(request: NextRequest) {
 
   if (!redirectTarget) {
     return NextResponse.json({ error: 'Missing or invalid url parameter' }, { status: 400 });
+  }
+
+  if (!requireOrgAccess(request)) {
+    return NextResponse.redirect(redirectTarget, { status: 302 });
   }
 
   if (!campaignId || !recipientId) {

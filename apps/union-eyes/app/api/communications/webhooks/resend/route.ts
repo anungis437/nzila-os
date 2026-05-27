@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { Resend, type WebhookEventPayload } from 'resend';
+import { z } from 'zod';
 
 import { db } from '@/db';
 import { campaigns, communicationPreferences, messageLog } from '@/db/schema';
@@ -8,6 +9,13 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+
+const WebhookEnvelopeSchema = z.object({
+  id: z.string().min(1),
+  timestamp: z.string().min(1),
+  signature: z.string().min(1),
+  payload: z.string().min(1),
+});
 
 type MessageStatus =
   | 'sent'
@@ -84,6 +92,27 @@ function isEmailEvent(
   );
 }
 
+function verifyWebhookSignature(
+  resend: Resend,
+  webhookSecret: string,
+  envelope: { id: string; timestamp: string; signature: string; payload: string },
+): WebhookEventPayload {
+  const parsed = WebhookEnvelopeSchema.safeParse(envelope);
+  if (!parsed.success) {
+    throw new Error('Invalid webhook envelope');
+  }
+
+  return resend.webhooks.verify({
+    payload: parsed.data.payload,
+    headers: {
+      id: parsed.data.id,
+      timestamp: parsed.data.timestamp,
+      signature: parsed.data.signature,
+    },
+    webhookSecret,
+  });
+}
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.RESEND_API_KEY;
   const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
@@ -106,14 +135,11 @@ export async function POST(request: NextRequest) {
   let event: WebhookEventPayload;
   const resend = new Resend(apiKey);
   try {
-    event = resend.webhooks.verify({
+    event = verifyWebhookSignature(resend, webhookSecret, {
+      id: svixId,
+      timestamp: svixTimestamp,
+      signature: svixSignature,
       payload,
-      headers: {
-        id: svixId,
-        timestamp: svixTimestamp,
-        signature: svixSignature,
-      },
-      webhookSecret,
     });
   } catch (error) {
     logger.error('[resend-webhook] Signature verification failed', {

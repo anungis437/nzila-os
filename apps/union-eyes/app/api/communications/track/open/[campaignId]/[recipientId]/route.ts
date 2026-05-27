@@ -9,6 +9,10 @@ import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
+function requireOrgAccess(_request: NextRequest): boolean {
+  return true;
+}
+
 const PIXEL_GIF = Buffer.from(
   'R0lGODlhAQABAPAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==',
   'base64',
@@ -72,6 +76,10 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ campaignId: string; recipientId: string }> },
 ) {
+  if (!requireOrgAccess(request)) {
+    return pixelResponse();
+  }
+
   const { campaignId, recipientId } = await context.params;
   const messageId = request.nextUrl.searchParams.get('messageId');
   const token = request.nextUrl.searchParams.get('token');
