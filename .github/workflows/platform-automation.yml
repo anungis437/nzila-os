@@ -383,8 +383,8 @@ jobs:
         if: steps.pack-state.outputs.exists != 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: chore(evidence): add monthly evidence pack ${{ steps.resolve-month.outputs.target_month }}
-          title: chore(evidence): monthly evidence pack ${{ steps.resolve-month.outputs.target_month }}
+          commit-message: "chore(evidence): add monthly evidence pack ${{ steps.resolve-month.outputs.target_month }}"
+          title: "chore(evidence): monthly evidence pack ${{ steps.resolve-month.outputs.target_month }}"
           body: |
             Automated monthly evidence cadence run.
 
