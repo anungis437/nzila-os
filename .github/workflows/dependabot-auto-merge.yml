@@ -21,12 +21,24 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check repository auto-merge support
+        id: repo-settings
+        run: |
+          allow_auto_merge="$(gh api repos/$GITHUB_REPOSITORY --jq '.allow_auto_merge')"
+          echo "allow_auto_merge=$allow_auto_merge" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Enable auto-merge for patch updates
-        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' && steps.repo-settings.outputs.allow_auto_merge == 'true'
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip auto-merge when disabled
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' && steps.repo-settings.outputs.allow_auto_merge != 'true'
+        run: echo "Repository auto-merge is disabled; approving Dependabot patch update without enabling auto-merge."
 
       - name: Approve patch update PRs
         if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
