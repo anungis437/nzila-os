@@ -19,7 +19,7 @@
 > _“Continuity is not nostalgia for how organizations used to work. It is the discipline of ensuring that what matters can survive the people who carried it.”_
 > — Nzila OS Research Initiative
 
-This document is the canonical Markdown ingestion of the Continuity Gap Master Whitepaper, Evidence-Enhanced Canadian Edition (v3.0). The binary PDF master remains preserved at [infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf](../../../infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf). This Markdown edition is the citable source for downstream platform doctrine, the OCRA assessment instrument, narrative engines, and grounded AI retrieval.
+This document is the canonical Markdown ingestion of the Continuity Gap Master Whitepaper, Evidence-Enhanced Canadian Edition (v3.0). The binary PDF master remains preserved at [apps/union-eyes/public/whitepapers/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf](../../../apps/union-eyes/public/whitepapers/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf). This Markdown edition is the citable source for downstream platform doctrine, the OCRA assessment instrument, narrative engines, and grounded AI retrieval.
 
 ---
 

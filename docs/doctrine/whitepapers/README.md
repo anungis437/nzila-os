@@ -19,7 +19,7 @@ This file lists every research whitepaper that has been ingested into Nzila OS a
 
 | ID | Title | Edition | Canonical Markdown | Binary Master | Ingested |
 |---|---|---|---|---|---|
-| `wp.continuity-gap.v3` | The Continuity Gap — Master Whitepaper | Evidence-Enhanced Canadian Edition v3.0 | [CONTINUITY_GAP_MASTER_WHITEPAPER.md](./CONTINUITY_GAP_MASTER_WHITEPAPER.md) | [infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf](../../../infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf) | 2026-05-22 |
+| `wp.continuity-gap.v3` | The Continuity Gap — Master Whitepaper | Evidence-Enhanced Canadian Edition v3.0 | [CONTINUITY_GAP_MASTER_WHITEPAPER.md](./CONTINUITY_GAP_MASTER_WHITEPAPER.md) | [apps/union-eyes/public/whitepapers/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf](../../../apps/union-eyes/public/whitepapers/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf) | 2026-05-22 |
 
 ---
 
@@ -32,6 +32,6 @@ This file lists every research whitepaper that has been ingested into Nzila OS a
 
 ## Validation
 
-- `pnpm docs:index` auto-discovers entries under this folder.
-- `pnpm validate:docs` enforces link integrity (registry → MD → binary).
+- `pnpm exec tsx scripts/docs/build-docs-index.ts` auto-discovers entries under this folder.
+- `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts` enforces link integrity (registry → MD → binary).
 - Substantive changes to a canonized whitepaper follow the change process in [DOCTRINE_GOVERNANCE.md](../DOCTRINE_GOVERNANCE.md).

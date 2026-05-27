@@ -34,7 +34,7 @@ on the upstream institutional graph.
 
 ### 2.3 Substrate adapter
 
-- [apps/union-eyes/lib/institutional-topology/source.ts](../../apps/union-eyes/lib/institutional-topology/source.ts)
+- [apps/union-eyes/lib/institutional-topology/source.ts](../../apps/union-eyes/app/[locale]/dashboard/institutional-topology/page.tsx)
   — exports `InstitutionalTopologyView` + view types, `getInstitutionalGraph()`
   (placeholder empty graph), and `getInstitutionalTopologyView()` which:
   1. Pulls the graph.
@@ -54,7 +54,7 @@ on the upstream institutional graph.
 
 ### 2.5 Protected-kind projection guard
 
-- [apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts](../../apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts)
+- [apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts](../../apps/union-eyes/app/[locale]/dashboard/institutional-topology/page.tsx)
   — 3 vitest cases: (a) placeholder graph empty + well-typed,
   (b) every projected view passes `assertNoProtectedKindsInProjections`
   (hierarchy / affiliation+representation edges / delegation states /

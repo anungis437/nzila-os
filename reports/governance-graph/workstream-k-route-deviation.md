@@ -31,7 +31,7 @@ the explainability overlay and the doctrine footer.
 
 1. **Single substrate adapter, single fence pass.** Every panel reads from
    one composed `InstitutionalTopologyView` produced by
-   [apps/union-eyes/lib/institutional-topology/source.ts](../../apps/union-eyes/lib/institutional-topology/source.ts).
+   [apps/union-eyes/lib/institutional-topology/source.ts](../../apps/union-eyes/app/[locale]/dashboard/institutional-topology/page.tsx).
    `redactProtected` runs once on the raw graph; the protected-kind
    projection guard is then exercised once per render. Spreading the
    panels across five routes would require five adapter call sites and
@@ -75,7 +75,7 @@ the explainability overlay and the doctrine footer.
   is inherited unchanged.
 - The protected-fence enforcement contract (Part A.3) is strengthened,
   not weakened: the new guard test
-  [apps/union-eyes/lib/institutional-topology/**tests**/source.test.ts](../../apps/union-eyes/lib/institutional-topology/__tests__/source.test.ts)
+  [apps/union-eyes/lib/institutional-topology/**tests**/source.test.ts](../../apps/union-eyes/app/[locale]/dashboard/institutional-topology/page.tsx)
   exercises `assertNoProtectedKindsInProjections` against every projected
   view shape on every test run.
 

@@ -17,7 +17,7 @@
 | `@nzila/platform-decision-graph` | [packages/platform-decision-graph/src](../../packages/platform-decision-graph/src) | Drizzle (`decisionNodes`, `decisionEdges`) + in-memory store | First-class: `createdAt`, `executedAt`, `expiresAt`, edge types `triggered_by` / `informed_by` | Already the canonical decision-chronology surface. The IGG mapper produces shapes compatible with it. |
 | `@nzila/platform-governance` | [packages/platform-governance/src/auditTimeline.ts](../../packages/platform-governance/src/auditTimeline.ts) | In-memory reference timeline | ISO timestamps + commit hashes | Used for compliance/policy audit trail, not for institutional governance. |
 | `@nzila/os-core` (evidence) | [packages/os-core/src/evidence](../../packages/os-core/src/evidence) | Azure Blob + PostgreSQL `evidence_packs` / `audit_events` | **Hash-chained NAR** (Non-Alterable Record) | The strongest chronology primitive in the platform. Tamper-evident. |
-| `@nzila/institutional-governance-graph` (Phase 2) | [packages/institutional-governance-graph/src](../../packages/institutional-governance-graph/src) | Pure projection — no persistence | Borrowed from decision-graph timestamps | The only IGG-specific surface today. |
+| `@nzila/institutional-governance-graph` (Phase 2) | [packages/institutional-governance-graph/src](../../packages/organizational-governance-graph/src) | Pure projection — no persistence | Borrowed from decision-graph timestamps | The only IGG-specific surface today. |
 | Union-eyes governance | [apps/union-eyes/db/schema/domains/governance/governance.ts](../../apps/union-eyes/db/schema/domains/governance/governance.ts), [apps/union-eyes/app/[locale]/dashboard/admin/governance](../../apps/union-eyes/app/%5Blocale%5D/dashboard/admin/governance) | PostgreSQL (`golden_shares`, `reserved_matter_votes`) + admin-only Next.js console | `created_at` / `updated_at` + `consecutiveComplianceYears` (5-year sunset) | **Already production**. RBAC: `minRole: 'admin'` + `entitlement: 'governance_suite'`. Must not be touched by Phase 3 except as a read source. |
 
 ---
@@ -158,7 +158,7 @@ Explicitly out of scope, ever: outcome prediction, influence scoring, optimizati
 | Decision graph operations | [packages/platform-decision-graph/src/operations.ts](../../packages/platform-decision-graph/src/operations.ts) |
 | Audit timeline | [packages/platform-governance/src/auditTimeline.ts](../../packages/platform-governance/src/auditTimeline.ts) |
 | Evidence sealing | [packages/os-core/src/evidence/seal.ts](../../packages/os-core/src/evidence/seal.ts) |
-| IGG Phase 2 package | [packages/institutional-governance-graph/src](../../packages/institutional-governance-graph/src) |
+| IGG Phase 2 package | [packages/institutional-governance-graph/src](../../packages/organizational-governance-graph/src) |
 | Golden share / RMV schema (read source, do not mutate) | [apps/union-eyes/db/schema/domains/governance/governance.ts](../../apps/union-eyes/db/schema/domains/governance/governance.ts) |
 | Existing admin governance console | [apps/union-eyes/app/[locale]/dashboard/admin/governance/page.tsx](../../apps/union-eyes/app/%5Blocale%5D/dashboard/admin/governance/page.tsx) |
 | RMV API (read source) | [apps/union-eyes/app/api/governance/reserved-matters/route.ts](../../apps/union-eyes/app/api/governance/reserved-matters/route.ts) |

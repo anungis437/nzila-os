@@ -139,7 +139,7 @@ export const RelationshipTypes = {
 } as const
 ```
 
-After promotion, `substrateTypeFor` and `substrateRelationshipFor` in [packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/institutional-governance-graph/src/ontology/kinds.ts) return the promoted canonical type for the corresponding `igg:*` kind. The `metadata.iggKind` string is retained for backward compatibility.
+After promotion, `substrateTypeFor` and `substrateRelationshipFor` in [packages/institutional-governance-graph/src/ontology/kinds.ts](../../packages/organizational-governance-graph/src/ontology/kinds.ts) return the promoted canonical type for the corresponding `igg:*` kind. The `metadata.iggKind` string is retained for backward compatibility.
 
 **No removals.** The 12 IGG-local kinds delegated to existing substrate concepts continue to surface their `iggKind` string in metadata. This preserves all Phase 2 consumers.
 
