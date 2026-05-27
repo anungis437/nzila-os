@@ -18,10 +18,10 @@ everywhere; only the strictness varies.
 |----------------------------|-------------------------------------------------------------|
 | Identity advertisement     | `/health/identity` per app + UI badge.                      |
 | Legitimacy summary         | Rollout governance panel (calm summary).                    |
-| Promotion attestation      | `pnpm rollout:promote:attest`.                              |
+| Promotion attestation      | `node tooling/scripts/record-promotion-attestation.mjs`.                              |
 | Bootstrap attestation      | ORM governance bootstrap orchestrator.                      |
-| Readiness review           | `pnpm rollout:readiness`.                                   |
-| Rollback attestation       | `pnpm rollout:rollback:attest`.                             |
+| Readiness review           | `node tooling/scripts/run-rollout-readiness-review.mjs`.                                   |
+| Rollback attestation       | `node tooling/scripts/record-rollback-attestation.mjs`.                             |
 | Continuity windows         | Per-tier minutes in `governance/foundations/rollout/environments.json`. |
 
 ## 3. Strictness Matrix
@@ -45,7 +45,7 @@ Adding a new environment tier requires:
    fields.
 2. Update of the strictness matrix above.
 3. Update of the master index decision tree.
-4. Validator pass (`pnpm rollout:validate`).
+4. Validator pass (`node tooling/scripts/validate-rollout-legitimacy.mjs`).
 
 ## 5. Cross-Tier Anti-Patterns
 

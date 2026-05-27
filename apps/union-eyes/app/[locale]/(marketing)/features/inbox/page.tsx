@@ -48,7 +48,7 @@ const features = {
       icon: ClipboardList,
       title: 'Intake arrives in context',
       description:
-        'New intake lands where union representatives can review it with the right organizational context instead of chasing email threads.',
+        'New intake lands where union representatives can review it without chasing email threads.',
     },
     {
       icon: Bell,
@@ -103,7 +103,7 @@ export default async function LocaleInboxPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Commencer la réflexion de continuité (gratuite)' : 'Start the free Continuity Reflection';
+  const briefingCta = locale === 'fr-CA' ? 'Faire le bilan' : 'Start a review';
   const featuresArr = features[locale as keyof typeof features] ?? features['en-CA'];
   const sectionCopy = {
     'en-CA': {

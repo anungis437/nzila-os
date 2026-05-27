@@ -116,7 +116,7 @@ export default async function LocaleGrievanceTrackingPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Commencer la réflexion de continuité (gratuite)' : 'Start the free Continuity Reflection';
+  const briefingCta = locale === 'fr-CA' ? 'Faire le bilan' : 'Start a review';
 
   return (
     <div className="min-h-screen bg-white">

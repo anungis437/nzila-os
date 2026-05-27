@@ -181,7 +181,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Financial Service Health
-        run: pnpm financial-service:health
+        run: pnpm exec tsx scripts/financial-service-health.ts
 
   security-scans:
     runs-on: ubuntu-latest

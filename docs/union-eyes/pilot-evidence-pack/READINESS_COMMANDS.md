@@ -42,7 +42,7 @@ pnpm typecheck --filter "@nzila/union-eyes"
 
 | Field | Value |
 |-------|-------|
-| **Command** | `pnpm governance:check-db-imports` |
+| **Command** | `pnpm exec tsx scripts/check-ue-db-import-guard.ts` |
 | **Purpose** | Confirms zero files import the raw `db` object outside approved paths |
 | **Expected output** | `✓ 0 violations found` with exit 0 |
 | **Failure interpretation** | A file bypassed the RLS context wrappers — security regression |
@@ -51,7 +51,7 @@ pnpm typecheck --filter "@nzila/union-eyes"
 | **Blocking** | ✅ YES — hard CI block |
 
 ```bash
-pnpm governance:check-db-imports
+pnpm exec tsx scripts/check-ue-db-import-guard.ts
 ```
 
 ---
@@ -101,7 +101,7 @@ Key test files:
 
 | Field | Value |
 |-------|-------|
-| **Command** | `pnpm governance:audit` |
+| **Command** | `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts` |
 | **Purpose** | Validates docs, ownership, index freshness, release secrets, repo health, and DB import guard |
 | **Expected output** | Exit 0; all governance checks pass |
 | **Failure interpretation** | Governance drift — typically stale docs, missing ownership, or broken links |
@@ -110,7 +110,7 @@ Key test files:
 | **Blocking** | ✅ YES for releases; advisory for PRs |
 
 ```bash
-pnpm governance:audit
+pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts
 ```
 
 ---
@@ -119,7 +119,7 @@ pnpm governance:audit
 
 | Field | Value |
 |-------|-------|
-| **Command** | `pnpm validate:docs` |
+| **Command** | `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts` |
 | **Purpose** | Checks cross-document consistency, no broken internal refs, doc schema compliance |
 | **Expected output** | Exit 0 |
 | **Failure interpretation** | Documentation drift — update referenced docs |
@@ -128,7 +128,7 @@ pnpm governance:audit
 | **Blocking** | ✅ YES for releases |
 
 ```bash
-pnpm validate:docs
+pnpm exec tsx packages/platform-validation/src/doc-consistency.ts
 ```
 
 ---
@@ -137,7 +137,7 @@ pnpm validate:docs
 
 | Field | Value |
 |-------|-------|
-| **Command** | `pnpm release:secrets:audit` (or CI: gitleaks via `.github/workflows/`) |
+| **Command** | `pnpm exec tsx scripts/release/audit-secrets.ts` (or CI: gitleaks via `.github/workflows/`) |
 | **Purpose** | Detects accidentally committed secrets or tokens |
 | **Expected output** | 0 secrets found |
 | **Failure interpretation** | Potential secret leak — immediate remediation required |
@@ -183,7 +183,7 @@ node -e "JSON.parse(require('fs').readFileSync('reports/runtime/platform-runtime
 
 | Field | Value |
 |-------|-------|
-| **Command** | `pnpm brand:leakage:check` |
+| **Command** | `pnpm exec tsx scripts/check-brand-leakage.ts` |
 | **Purpose** | Ensures no internal brand identifiers leak into pilot-facing materials |
 | **Expected output** | Exit 0; no leakage |
 | **Failure interpretation** | Internal brand exposed — remediate before sharing with pilot org |
@@ -213,7 +213,7 @@ The `readiness:union-eyes` script in `package.json` runs the subset of checks th
 do NOT require Azure credentials or network access:
 
 ```json
-"readiness:union-eyes": "pnpm typecheck --filter @nzila/union-eyes && pnpm governance:check-db-imports && pnpm test:fast --filter @nzila/union-eyes && node -e \"JSON.parse(require('fs').readFileSync('reports/runtime/platform-runtime-truth-latest.json','utf8'))\" && echo '✓ Union Eyes readiness gates: PASS'"
+"readiness:union-eyes": "pnpm typecheck --filter @nzila/union-eyes && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm test:fast --filter @nzila/union-eyes && node -e \"JSON.parse(require('fs').readFileSync('reports/runtime/platform-runtime-truth-latest.json','utf8'))\" && echo '✓ Union Eyes readiness gates: PASS'"
 ```
 
 **What it checks:**
@@ -227,7 +227,7 @@ do NOT require Azure credentials or network access:
 - Azure resource group separation
 - Key Vault separation
 - Secret scan (runs in CI via gitleaks)
-- Full governance audit (run `pnpm governance:audit` separately)
+- Full governance audit (run `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts` separately)
 
 ---
 

@@ -259,7 +259,7 @@ CSP `unsafe-inline` / `unsafe-eval` are noted in code comments as required by Ne
 |---------|---------|---------|
 | Required CI jobs in `.github/workflows/ci.yml` | lint-and-typecheck, test, build (needs lint+test), ml-gates, ai-eval-gate, contract-tests, ops-pack-validation, schema-drift | ✅ PASS |
 | Changeset present | `.changeset/config.json` — `access: "restricted"`, `baseBranch: "main"` | ✅ PASS |
-| `release` + `version-packages` scripts | `package.json` scripts | ✅ PASS |
+| `release` script + `changeset version` command | release script + Changesets CLI | ✅ PASS |
 | Release workflow exists | `.github/workflows/release-train.yml` — tag-triggered, staging/production dispatch | ✅ PASS |
 
 ### 7.2 Reproducible Builds

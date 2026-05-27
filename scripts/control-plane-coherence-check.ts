@@ -6,7 +6,7 @@
  * Extends the existing control-plane-surface-check.ts with
  * cross-surface analysis (console, platform-admin overlap detection).
  *
- * Usage: pnpm control-plane:coherence:check
+ * Usage: pnpm exec tsx scripts/control-plane-coherence-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

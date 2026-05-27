@@ -77,7 +77,7 @@ router.post('/calculate', async (req: Request, res: Response) => {
           .reduce((sum, e) => sum + e.stipendAmount, 0),
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to calculate stipends',
@@ -112,7 +112,7 @@ router.post('/disbursements', async (req: Request, res: Response) => {
     }
 
     res.json(result);
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to create disbursement',
@@ -142,7 +142,7 @@ router.post('/disbursements/batch', async (req: Request, res: Response) => {
     });
 
     res.json(result);
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to batch create disbursements',
@@ -170,7 +170,7 @@ router.get('/disbursements/pending/:strikeFundId', async (req: Request, res: Res
       disbursements,
       count: disbursements.length,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to get pending disbursements',
@@ -201,7 +201,7 @@ router.get('/disbursements/member/:memberId', async (req: Request, res: Response
       count: disbursements.length,
       totalAmount: disbursements.reduce((sum, d) => sum + d.amount, 0),
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to get member disbursements',
@@ -234,7 +234,7 @@ router.post('/disbursements/:disbursementId/approve', async (req: Request, res: 
     }
 
     res.json(result);
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to approve disbursement',
@@ -265,7 +265,7 @@ router.post('/disbursements/:disbursementId/paid', async (req: Request, res: Res
     }
 
     res.json(result);
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to mark disbursement as paid',
@@ -292,7 +292,7 @@ router.get('/summary/:strikeFundId', async (req: Request, res: Response) => {
       success: true,
       summary,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to get disbursement summary',

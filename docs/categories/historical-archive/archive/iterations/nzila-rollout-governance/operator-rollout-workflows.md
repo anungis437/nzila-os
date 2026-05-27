@@ -54,9 +54,9 @@ Operator workflows are mirrored by CLI commands for environments
 without UI access:
 
 ```bash
-pnpm rollout:validate
-pnpm rollout:readiness
-pnpm rollout:promote:attest -- --from <tier> --to <tier> --release-id <id> --reviewer <name> --reason <text>
+node tooling/scripts/validate-rollout-legitimacy.mjs
+node tooling/scripts/run-rollout-readiness-review.mjs
+node tooling/scripts/record-promotion-attestation.mjs -- --from <tier> --to <tier> --release-id <id> --reviewer <name> --reason <text>
 ```
 
 ## 7. Anti-Patterns

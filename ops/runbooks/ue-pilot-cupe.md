@@ -165,6 +165,9 @@ az containerapp update \
     PILOT_ORG_ID=cupe-local-123 \
     PILOT_ORG_SLUG=cupe-local-123 \
     ALLOW_MASS_ONBOARDING=false \
+    DJANGO_API_URL=http://nzila-os-union-eyes-django-pilot \
+    NEXT_PUBLIC_DJANGO_API_URL=http://nzila-os-union-eyes-django-pilot \
+    READY_REQUIRE_QUEUE=true \
     OTEL_TRACES_SAMPLER_ARG=1.0 \
     DATABASE_POOL_SIZE=10
 
@@ -173,6 +176,13 @@ az containerapp revision show \
   --name nzila-os-union-eyes \
   --resource-group nzila-canada-staging-rg \
   --revision nzila-os-union-eyes--ue-pilot-cupe
+
+# Verify pilot Django sidecar revision health
+az containerapp revision list \
+  --name nzila-os-union-eyes-django-pilot \
+  --resource-group nzila-canada-pilot-rg \
+  --query "[].{name:name,active:properties.active,health:properties.healthState,replicas:properties.replicas}" \
+  -o table
 ```
 
 ---

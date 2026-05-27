@@ -1,14 +1,14 @@
-# Union Eyes — Governance and Auditability Overview
+# UnionEyes — Governance and Auditability Overview
 
 > **Audience:** Governance auditors, procurement reviewers, institutional buyers.
-> **Scope:** Public-safe summary of Union Eyes runtime governance controls and audit trail posture.
+> **Scope:** Public-safe summary of UnionEyes runtime governance controls and audit trail posture.
 > **Caveats:** Claims use language such as "is designed to," "supports," and "provides evidence of."
 
 ---
 
 ## 1. Runtime Governance Architecture
 
-Union Eyes is designed with a layered governance architecture that operates in parallel with
+UnionEyes is designed with a layered governance architecture that operates in parallel with
 production runtime without blocking or modifying it (shadow mode).
 
 **Governance layers (Waves 1–10):**
@@ -29,7 +29,7 @@ production runtime without blocking or modifying it (shadow mode).
 
 ## 2. Audit Trail
 
-Union Eyes is designed to support audit trail reconstruction through:
+UnionEyes is designed to support audit trail reconstruction through:
 
 - **Correlation IDs:** All governance events are assigned a correlation ID that links related
   operations across the audit ledger.

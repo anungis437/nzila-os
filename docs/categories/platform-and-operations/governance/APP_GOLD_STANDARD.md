@@ -93,7 +93,7 @@ Export endpoint must return:
 
 ## Validation
 
-Run `pnpm governance:check` to validate all apps against this standard.
+Run `pnpm exec tsx scripts/governance-check.ts` to validate all apps against this standard.
 
 ## Compliance Levels
 

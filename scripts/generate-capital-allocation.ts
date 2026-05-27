@@ -278,7 +278,7 @@ function main(): void {
   const outputs = buildCapitalOutputs(root)
 
   if (outputs.validation.errors.length > 0) {
-    console.log('\n[generate:capital-allocation] FAIL')
+    console.log('\n[generate-capital-allocation] FAIL')
     for (const error of outputs.validation.errors) console.log(` - ${error}`)
     for (const warning of outputs.validation.warnings) console.log(` ! ${warning}`)
     process.exit(1)
@@ -298,7 +298,7 @@ function main(): void {
   writeFile(root, 'reports/product-shutdown-playbooks.md', buildShutdownPlaybook(outputs))
   writeFile(root, 'reports/board-pack.md', buildBoardPack(outputs))
 
-  console.log('\n[generate:capital-allocation] PASS')
+  console.log('\n[generate-capital-allocation] PASS')
   console.log('Wrote 13 capital operating system reports.')
   for (const warning of outputs.validation.warnings) console.log(` ! ${warning}`)
 }

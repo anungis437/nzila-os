@@ -157,10 +157,10 @@ function main() {
 
   const runtimeChecks: RuntimeCheck[] = []
 
-  const pilotCheck = runCommand('pnpm pilot:check')
+  const pilotCheck = runCommand('pnpm exec tsx scripts/pilot-check.ts')
   runtimeChecks.push({
     id: 'pilot_check_pass',
-    command: 'pnpm pilot:check',
+    command: 'pnpm exec tsx scripts/pilot-check.ts',
     ok: pilotCheck.ok,
     output: pilotCheck.output,
   })
@@ -168,7 +168,7 @@ function main() {
     checklist,
     'pilot_check_pass',
     pilotCheck.ok ? 'complete' : 'blocked',
-    `pilot:check=${pilotCheck.ok ? 'pass' : 'fail'}`,
+    `pilot-check=${pilotCheck.ok ? 'pass' : 'fail'}`,
   )
 
   const lockdownCheck = runCommand('pnpm --filter @nzila/flow lockdown:check')
@@ -186,10 +186,10 @@ function main() {
   )
 
   if (args.checkDns) {
-    const dnsCheck = runCommand('pnpm dns:verify')
+    const dnsCheck = runCommand('pnpm exec tsx scripts/dns/verify.ts')
     runtimeChecks.push({
       id: 'dns_health',
-      command: 'pnpm dns:verify',
+      command: 'pnpm exec tsx scripts/dns/verify.ts',
       ok: dnsCheck.ok,
       output: dnsCheck.output,
     })
@@ -197,7 +197,7 @@ function main() {
       checklist,
       'dns_health',
       dnsCheck.ok ? 'complete' : 'blocked',
-      `dns:verify=${dnsCheck.ok ? 'pass' : 'fail'}`,
+      `dns-verify=${dnsCheck.ok ? 'pass' : 'fail'}`,
     )
   }
 
@@ -221,7 +221,7 @@ function main() {
 
   const runtimeFailures = runtimeChecks.some((run) => !run.ok)
 
-  // Runtime sub-gates (`pnpm pilot:check`, `pnpm flow lockdown:check`,
+  // Runtime sub-gates (`pnpm exec tsx scripts/pilot-check.ts`, `pnpm flow lockdown:check`,
   // optional DNS) may legitimately fail in PRs that do not touch flow-pilot
   // infrastructure (e.g. unrelated repo-wide test/contract failures). Only
   // fail the gate on runtime issues when --enforce is requested or when

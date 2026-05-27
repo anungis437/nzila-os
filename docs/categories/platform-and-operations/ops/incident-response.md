@@ -110,8 +110,8 @@ Nzila OS evidence packs (`@nzila/platform-evidence-pack`) serve as forensic arti
 
 ### Preservation Procedure
 
-1. Generate evidence pack: `pnpm demo:golden`
-2. Export signed procurement pack: `pnpm validate:pack`
+1. Generate evidence pack: `pnpm exec tsx scripts/demo-golden-path.ts`
+2. Export signed procurement pack: `pnpm exec tsx scripts/validate-procurement-pack.ts`
 3. Store cryptographic hash of all artifacts
 4. Record incident timeline with UTC timestamps (ISO 8601, no milliseconds)
 5. Maintain immutable log export for affected time window

@@ -14,7 +14,7 @@ operations require explicit admin authorization.
 ## Entrypoint
 
 ```bash
-pnpm proof:run compliance-sensitive-action
+pnpm exec tsx scripts/proof/run-proof.ts compliance-sensitive-action
 ```
 
 Or via the test runner:
@@ -91,12 +91,12 @@ proof-artifacts/compliance-sensitive-action/
 ## How to Run Locally
 
 ```bash
-pnpm proof:run compliance-sensitive-action
+pnpm exec tsx scripts/proof/run-proof.ts compliance-sensitive-action
 ```
 
 ## How to Validate in CI
 
-Verified automatically by `pnpm proof:verify`.
+Verified automatically by `pnpm exec tsx scripts/proof/verify-artifacts.ts`.
 
 ## What "Pass" Means
 

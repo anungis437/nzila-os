@@ -19,7 +19,7 @@ export const EXECUTIVE_WORKSHOP_FLOWS: readonly WorkshopFlow[] = [
     title: { 'en-CA': 'Executive Interpretation Flow' },
     summary: {
       'en-CA':
-        'A reading of the Executive Continuity Brief with the sponsor, page by page, with no diagnosis and no decision request at close.',
+        'A reading of the Leadership Briefing Report with the sponsor, page by page, with no diagnosis and no decision request at close.',
     },
     steps: [
       {

@@ -40,7 +40,7 @@
 
 | Criterion | Control | Evidence | Status |
 |-----------|---------|----------|--------|
-| CC4.1 Ongoing monitoring | CI gates, governance audit | `pnpm governance:audit`, `pnpm validate:docs` | ✅ |
+| CC4.1 Ongoing monitoring | CI gates, governance audit | `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts`, `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts` | ✅ |
 | CC4.2 Deficiency communication | Issue tracker, retro logs | GitHub Issues, `governance/` | 🟡 |
 
 ## CC5 — Control Activities

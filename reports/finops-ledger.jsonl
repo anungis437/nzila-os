@@ -1,1 +1,4 @@
 {"ts":"2026-05-11T04:57:50.615Z","report":"finops-summary","path":"reports/finops-summary.json","scoreNew":{"finops":8,"unitEconomics":8.9,"pricingReadiness":8.4,"capitalAllocation":9.1,"forecastingReadiness":8.2},"unresolvedCostApps":17}
+{"ts":"2026-05-25T17:57:20.355Z","report":"finops-summary","path":"reports/finops-summary.json","scoreNew":{"finops":8,"unitEconomics":8.9,"pricingReadiness":8.4,"capitalAllocation":9.1,"forecastingReadiness":8.2},"unresolvedCostApps":26}
+{"ts":"2026-05-25T18:04:19.219Z","report":"finops-summary","path":"reports/finops-summary.json","scoreNew":{"finops":8,"unitEconomics":8.9,"pricingReadiness":8.4,"capitalAllocation":9.1,"forecastingReadiness":8.2},"unresolvedCostApps":26}
+{"ts":"2026-05-25T18:08:34.028Z","report":"finops-summary","path":"reports/finops-summary.json","scoreNew":{"finops":8.79,"unitEconomics":8.9,"pricingReadiness":8.4,"capitalAllocation":9.1,"forecastingReadiness":8.2},"unresolvedCostApps":0}

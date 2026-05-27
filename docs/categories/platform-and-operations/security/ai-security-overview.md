@@ -177,7 +177,7 @@ The `ue-qa-report.ts` script checks for AI compliance and adds blockers if artif
 | `AIBanner.tsx` component exists | `'AI disclosure banner component is missing.'` |
 | AI usage admin page exists | `'AI usage audit viewer page is missing.'` |
 
-The `ue-qa-gate.ts` gate runs `ue:qa:report --enforce` and exits non-zero if any blockers are present. CI will fail if the AI disclosure or audit viewer artifacts are removed.
+The `ue-qa-gate.ts` gate runs `pnpm exec tsx scripts/ue-qa-report.ts --enforce` and exits non-zero if any blockers are present. CI will fail if the AI disclosure or audit viewer artifacts are removed.
 
 The QA report also tracks:
 - `aiUxCoveragePercent` — coverage of AI-tagged stories

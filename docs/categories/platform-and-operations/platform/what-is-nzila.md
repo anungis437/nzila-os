@@ -12,7 +12,7 @@ Nzila is a governed multi-product software group with one shared operating engin
 ## Why the model is credible
 
 - Canonical product truth in `governance/portfolio/product-catalog.json`
-- Anti-drift validation in CI (`validate:product-catalog`, `validate:canonical-truth`)
+- Anti-drift validation in CI (`pnpm exec tsx scripts/validate-product-catalog.ts`, `pnpm exec tsx scripts/validate-canonical-truth.ts`)
 - Explicit proof statuses (`no-proof`, `internal-proof`, `pilot-proof`, `paid-proof`, `scaled-proof`)
 - Claim discipline: no paid/scaled claim without evidence
 

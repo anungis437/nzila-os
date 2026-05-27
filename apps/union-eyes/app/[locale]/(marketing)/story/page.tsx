@@ -153,8 +153,8 @@ export default async function LocaleStoryPage({
               className="inline-flex items-center gap-1 text-blue-700 underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
             >
               {locale === 'fr-CA'
-                ? 'Lire le livre blanc UnionEyes (~25 min)'
-                : 'Read the UnionEyes whitepaper (~25 min read)'}
+                ? 'Lire le livre blanc UnionEyes'
+                : 'Read the UnionEyes whitepaper'}
               <span aria-hidden="true">→</span>
             </Link>
           </p>

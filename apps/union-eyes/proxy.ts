@@ -1,7 +1,7 @@
 /**
  * Next.js Edge Middleware — implementation module.
  *
- * This file contains the full edge-safe middleware stack for Union Eyes.
+ * This file contains the full edge-safe middleware stack for UnionEyes.
  * It is intentionally named `proxy.ts` rather than `middleware.ts` to signal
  * that this layer acts as an edge proxy (intercepts, inspects, and
  * forwards/rejects requests) and to allow it to be imported and tested

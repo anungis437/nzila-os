@@ -104,9 +104,9 @@ Every governance event is recorded with:
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm governance:check` | Run governance validation across all apps |
-| `pnpm validate:governance` | Full governance validation (GA check + contract tests + release) |
-| `pnpm generate:sbom` | Generate Software Bill of Materials |
+| `pnpm exec tsx scripts/governance-check.ts` | Run governance validation across all apps |
+| `pnpm exec tsx tooling/ga-check/ga-check.ts && pnpm contract-tests && pnpm inventory:check && pnpm exec tsx scripts/check-brand-leakage.ts && pnpm exec tsx scripts/validate-product-catalog.ts && pnpm exec tsx scripts/validate-portfolio.ts && pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts && pnpm exec tsx scripts/validate-auth-authority.ts && pnpm exec tsx scripts/validate-ga-state.ts && pnpm exec tsx scripts/validate-workspace-links.ts && pnpm exec tsx scripts/validate-release-strict.ts && pnpm exec tsx scripts/generate-commercial-traction.ts` | Full governance validation (GA check + contract tests + release) |
+| `pnpm exec tsx scripts/generate-sbom.ts` | Generate Software Bill of Materials |
 
 ## CI/CD Integration
 
@@ -114,7 +114,7 @@ Every governance event is recorded with:
 
 - Triggers on push to main (apps/ and packages/platform-* paths)
 - Weekly scheduled check (Monday 04:00 UTC)
-- Runs `pnpm governance:check`
+- Runs `pnpm exec tsx scripts/governance-check.ts`
 - Uploads report artifact on failure
 
 ### compliance.yml

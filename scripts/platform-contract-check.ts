@@ -3,7 +3,7 @@
  * the platform-adapters scaffold and that the platform-contracts
  * package contract modules are structurally valid.
  *
- * Usage: pnpm platform:contract:check
+ * Usage: pnpm exec tsx scripts/platform-contract-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

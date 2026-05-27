@@ -1,14 +1,14 @@
-# Union Eyes — Business Continuity and Recovery Overview
+# UnionEyes — Business Continuity and Recovery Overview
 
 > **Audience:** Procurement reviewers, operations teams, institutional buyers.
-> **Scope:** Public-safe summary of Union Eyes continuity, rollback, and recovery posture.
+> **Scope:** Public-safe summary of UnionEyes continuity, rollback, and recovery posture.
 > **Caveats:** Claims use language such as "is designed to," "supports," and "provides evidence of."
 
 ---
 
 ## 1. Continuity Philosophy
 
-Union Eyes is designed with institutional continuity as a first-class concern. Continuity
+UnionEyes is designed with institutional continuity as a first-class concern. Continuity
 is addressed at three layers:
 
 1. **Operational continuity** — documented runbooks, rehearsed deployment and rollback procedures.
@@ -48,7 +48,7 @@ Backup and restore procedures have been tested and documented.
 
 ## 4. Governance Continuity
 
-Union Eyes includes a governance-level continuity model that detects and classifies:
+UnionEyes includes a governance-level continuity model that detects and classifies:
 
 - **Steward turnover:** When a steward leaves and their governance jurisdiction is not transferred.
 - **Executive turnover:** When executive authority gaps emerge during leadership transitions.
@@ -66,7 +66,7 @@ These are modeled in shadow mode and produce preparedness evidence without affec
 
 ## 5. Federation Continuity Sharing
 
-At the federation level, Union Eyes supports continuity-sharing semantics:
+At the federation level, UnionEyes supports continuity-sharing semantics:
 
 - National observes continuity health trends across the federation.
 - Locals retain sovereign control of their operational details.

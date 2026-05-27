@@ -127,7 +127,7 @@ export default function SiteFooter() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full bg-emerald/20 text-emerald">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald mr-1.5 animate-pulse" />
-                Founding Partner Program
+                Guided Rollout Available
               </span>
               <span className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full bg-gold/20 text-gold">
                 Canadian Made

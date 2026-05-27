@@ -34,6 +34,6 @@ This matrix summarizes package ownership expectations from `CODEOWNERS` and plat
 
 ## Automation Hooks
 
-- `pnpm package:ownership:check`
-- `pnpm platform:authority:check`
-- `pnpm platform:adoption:check`
+- `pnpm exec tsx scripts/package-ownership-check.ts`
+- `pnpm exec tsx scripts/platform-authority-check.ts`
+- `pnpm exec tsx scripts/platform-adoption-gate.ts`

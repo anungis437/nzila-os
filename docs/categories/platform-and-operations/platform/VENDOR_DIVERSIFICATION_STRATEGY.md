@@ -41,7 +41,7 @@ This strategy reduces single-vendor concentration risk by requiring explicit sec
 ## Enforcement
 
 - Machine-readable source of truth: governance/foundations/resilience/vendor-diversification-registry.json
-- Validation command: pnpm validate:strategic-resilience
+- Validation command: node tooling/scripts/validate-strategic-resilience.mjs --enforce
 - Governance gate: GOV-GATE-021 ensures this strategy and registry stay present and complete
 
 ---

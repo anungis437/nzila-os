@@ -64,10 +64,10 @@ The hourly job runs `--mode=incremental`. Both triggers share the same workflow 
 pnpm aggregates:materialize
 
 # Full rebuild
-pnpm aggregates:materialize:full
+pnpm --filter @nzila/control-plane job:aggregate-full
 
 # Dry run (validates without writing)
-pnpm aggregates:materialize:dry
+pnpm --filter @nzila/control-plane job:aggregate-dry-run
 
 # Pipeline health check (alias for dry run)
 pnpm intelligence:pipeline-health

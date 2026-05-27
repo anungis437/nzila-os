@@ -1,7 +1,7 @@
 /**
  * change-seed-demo.ts — Seed demo change records
  *
- * Usage: pnpm change:seed-demo
+ * Usage: pnpm exec tsx scripts/change-seed-demo.ts
  *
  * Creates 5 demo change records in ops/change-records/:
  *   1. Standard change (auto-approved)

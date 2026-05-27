@@ -11,7 +11,7 @@
  * (requires az CLI + AZURE_CREDENTIALS or active `az login` session).
  *
  * Usage:
- *   pnpm drift:env:staging
+ *   pnpm exec tsx scripts/release/drift-env.ts --env staging
  *   pnpm tsx scripts/release/drift-env.ts [--env staging] [--live]
  *
  * Output:
@@ -321,7 +321,7 @@ async function main() {
   if (!liveMode) {
     console.log(`\nNOTE: This audit is based on staging.yml static config only.`)
     console.log(`      Secret-ref vars (DATABASE_URL, AUTH_SECRET, etc.) must be audited`)
-    console.log(`      against live Container Apps using: pnpm drift:env:staging --live`)
+    console.log(`      against live Container Apps using: pnpm exec tsx scripts/release/drift-env.ts --env staging --live`)
   }
 
   const report = {

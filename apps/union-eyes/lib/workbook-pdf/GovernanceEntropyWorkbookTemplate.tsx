@@ -8,7 +8,7 @@
  *   4. Chapters 2\u20136 \u2014 Reserved for the Facilitated Edition
  *   7. Closing reflection
  *
- * Same editorial palette and type as the Executive Continuity Brief.
+ * Same editorial palette and type as the Leadership Briefing Report.
  */
 
 import React from 'react';

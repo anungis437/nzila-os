@@ -3,7 +3,7 @@
  * structural, testing, and integration requirements defined in
  * docs/governance/APP_GOLD_STANDARD.md.
  *
- * Usage: pnpm app:gold-standard:check
+ * Usage: pnpm exec tsx scripts/app-gold-standard-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

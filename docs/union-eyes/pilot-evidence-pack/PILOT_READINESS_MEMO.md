@@ -33,7 +33,7 @@ This is not a demo-only clearance. The security controls, type discipline, and o
 | ClamAV malware scanning | `lib/security/clamav.ts`; `__tests__/clamav.test.ts` |
 | Org-scoped idempotency | Intake hash includes `organizationId`; duplicate check in `app/api/cases/intake/route.ts` |
 | Fail-closed RLS context | `withRLSContext` throws on missing `organizationId`; no silent bypass paths |
-| Zero raw-db import violations | `governance:check-db-imports` — 0 violations (zero-tolerance CI guard) |
+| Zero raw-db import violations | `pnpm exec tsx scripts/check-ue-db-import-guard.ts` — 0 violations (zero-tolerance CI guard) |
 | Prod/staging blast-radius separation | EXC-001 resolved; `deploy-production.yml` hardcodes `nzila-canada-prod-rg`; blast-radius gate hard-blocks cross-contamination |
 | TypeScript strict mode | `noImplicitAny: true`; `pnpm typecheck` — 0 errors |
 | Correlation IDs across routes/DB | `lib/governance-observability/correlation.ts`; Django backend parity; 5/5 parity tests pass |
@@ -54,7 +54,7 @@ This is not a demo-only clearance. The security controls, type discipline, and o
 
 ## Conditions for Pilot Launch
 
-1. **Operational environment confirmation** — run `pnpm proof:ingest:azure` to confirm physical placement in `nzila-canada-prod-rg`; record in `reports/runtime/`.
+1. **Operational environment confirmation** — run `pnpm exec tsx scripts/proof/ingest-azure-runtime.ts` to confirm physical placement in `nzila-canada-prod-rg`; record in `reports/runtime/`.
 2. **Live smoke tests** — hit `/api/health` and `/api/readiness` on the pilot URL; capture and store output in `reports/runtime/`.
 3. **Key Vault separation verification** — confirm prod Key Vault is `nzila-ue-prod-kv` (not staging); log in `reports/runtime/`.
 4. **DPA signature** — signed Data Processing Agreement (template at `docs/compliance/dpa-template.md`) on file before any real member data is entered.
@@ -86,7 +86,7 @@ This is not a demo-only clearance. The security controls, type discipline, and o
 | No external pen-test yet | Network isolation + fail-closed RLS + strict TS + zero raw-db imports | Low for controlled pilot |
 | No SOC 2 Type I yet | Readiness scaffold + control mapping complete; audit scheduled | Low for controlled 1-org pilot |
 | Finance persistence in-memory | Finance excluded from pilot scope | None for this pilot |
-| Broad multi-org production not yet confirmed | Conditional GO; requires `pnpm proof:ingest:azure` confirmation | Medium — must complete before expanding |
+| Broad multi-org production not yet confirmed | Conditional GO; requires `pnpm exec tsx scripts/proof/ingest-azure-runtime.ts` confirmation | Medium — must complete before expanding |
 
 ---
 

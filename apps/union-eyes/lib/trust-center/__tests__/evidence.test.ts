@@ -186,7 +186,7 @@ describe('manifest shape', () => {
     const claim = buildClaim(
       'route-governance',
       'Route governance registry',
-      'Union Eyes maintains a generated registry of governed routes.',
+      'UnionEyes maintains a generated registry of governed routes.',
       [buildArtifact('apps/union-eyes/reports/route-registry.json', 'report', 'Generated route registry')],
       { buyerVisible: true, riskIfMissing: 'Buyers cannot verify route coverage.' },
     );

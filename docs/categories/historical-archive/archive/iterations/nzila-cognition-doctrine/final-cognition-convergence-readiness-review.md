@@ -6,7 +6,7 @@
 
 - ✅ Canonical doctrine published at `docs/nzila-cognition-doctrine/`.
 - ✅ Cross-app consistency doctrine published.
-- ✅ Validator (`pnpm validate:cognition`) implemented and enforced.
+- ✅ Validator (`node tooling/scripts/validate-institutional-cognition-convergence.mjs`) implemented and enforced.
 - 🟡 Package-level renames intentionally deferred to follow-on PRs to preserve CI stability.
 
 ## 2. Governance-Safe Intelligence Maturity

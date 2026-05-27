@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/components/language-switcher';
 import { parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
-import { WHITEPAPER_LIBRARY } from '@/lib/whitepaper/library';
+import { WHITEPAPER_LIBRARY, getWhitepaperLocaleContent } from '@/lib/whitepaper/library';
 
 export default function LocaleSiteNavigation() {
   const t = useTranslations('marketing.nav');
@@ -32,9 +32,9 @@ export default function LocaleSiteNavigation() {
   const whitepaperLibraryDesc = locale === 'fr-CA' ? 'Tous les livres blancs · portail' : 'All whitepapers · hub';
 
   const whitepaperLinks = WHITEPAPER_LIBRARY.map((entry) => ({
-    name: entry.title,
+    name: getWhitepaperLocaleContent(entry, locale).title,
     href: `/${locale}${entry.href}`,
-    desc: `${entry.format} · ${entry.version}`,
+    desc: `${getWhitepaperLocaleContent(entry, locale).format} · ${entry.version}`,
   }));
 
   const solutionsLinks = [

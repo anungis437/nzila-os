@@ -75,11 +75,11 @@ UE is now positioned as **the operational infrastructure layer for institutional
 
 ## 10. Validator Coverage
 
-- `pnpm validate:cognition`: PASS
-- `pnpm validate:labor-continuity`: PASS
-- `pnpm validate:maturity-elevation`: PASS
-- `pnpm validate:final-convergence`: PASS
-- `pnpm validate:ue-infrastructure`: PASS (this layer)
+- `node tooling/scripts/validate-institutional-cognition-convergence.mjs`: PASS
+- `node tooling/scripts/validate-labor-continuity-governance.mjs`: PASS
+- `node tooling/scripts/validate-maturity-convergence.mjs`: PASS
+- `node tooling/scripts/validate-final-convergence.mjs`: PASS
+- `node tooling/scripts/validate-ue-infrastructure.mjs`: PASS (this layer)
 - `pnpm validate:maturity`: app-maturity contract tests (separate semantic domain)
 
 ## 11. Authority

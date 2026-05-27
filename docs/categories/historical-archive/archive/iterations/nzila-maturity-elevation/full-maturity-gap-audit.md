@@ -53,7 +53,7 @@ Audited:
 
 ## 5. Cognition Inconsistency Findings
 
-- All live cognition surfaces validated by `pnpm validate:cognition` and `pnpm validate:labor-continuity` carry bounded-interpretation and human-authority cues.
+- All live cognition surfaces validated by `node tooling/scripts/validate-institutional-cognition-convergence.mjs` and `node tooling/scripts/validate-labor-continuity-governance.mjs` carry bounded-interpretation and human-authority cues.
 
 ## 6. UX Drift Findings
 
@@ -61,7 +61,7 @@ Audited:
 
 ## 7. Convergence Risk Findings
 
-- Risk: future intelligence surfaces may regress without doctrine anchoring. Mitigation: validator-enforced convergence checks (`pnpm validate:maturity-elevation`).
+- Risk: future intelligence surfaces may regress without doctrine anchoring. Mitigation: validator-enforced convergence checks (`node tooling/scripts/validate-maturity-convergence.mjs`).
 
 ## 8. Sustainability Risk Findings
 

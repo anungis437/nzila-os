@@ -28,7 +28,7 @@
 | EXC-001 | ✅ RESOLVED 2026-05-14 | `platform-runtime-truth-latest.json` |
 | Data residency | ✅ HEALTHY — canadacentral only | `platform-runtime-truth-latest.json` |
 | Org isolation | ✅ FIXED — fail-closed | `platform-runtime-truth-latest.json` |
-| DB import violations | ✅ 0 | CI `governance:check-db-imports` |
+| DB import violations | ✅ 0 | CI `pnpm exec tsx scripts/check-ue-db-import-guard.ts` |
 | Typecheck errors | ✅ 0 | CI `pnpm typecheck` |
 
 ### A2. Deployed applications (14 container apps, all canadacentral)
@@ -57,7 +57,7 @@ Source: `reports/runtime/azure-runtime-latest.json`
 | Check | Result |
 |---|---|
 | `pnpm typecheck --filter @nzila/union-eyes` | ✅ 0 errors |
-| `pnpm governance:check-db-imports` | ✅ 0 violations |
+| `pnpm exec tsx scripts/check-ue-db-import-guard.ts` | ✅ 0 violations |
 | `gitleaks` (secret scan) | ✅ 0 secrets detected |
 | `pnpm test:fast` | ✅ passing |
 | Evidence lifecycle tests (6/6) | ✅ |

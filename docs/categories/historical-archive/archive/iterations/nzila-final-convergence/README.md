@@ -48,15 +48,15 @@ This phase is **not**:
 Convergence is validator-enforced:
 
 ```bash
-pnpm validate:final-convergence
+node tooling/scripts/validate-final-convergence.mjs
 ```
 
 This complements (does not replace):
 
-- `pnpm validate:cognition`
-- `pnpm validate:labor-continuity`
+- `node tooling/scripts/validate-institutional-cognition-convergence.mjs`
+- `node tooling/scripts/validate-labor-continuity-governance.mjs`
 - `pnpm validate:maturity` (app-maturity contract tests)
-- `pnpm validate:maturity-elevation`
+- `node tooling/scripts/validate-maturity-convergence.mjs`
 
 ## Authority Anchors
 

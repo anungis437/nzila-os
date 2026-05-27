@@ -46,6 +46,10 @@ apps:
         value: "true"
       - name: UE_PILOT_APP_DOMAIN
         value: pilot.unioneyes.app
+      - name: DJANGO_API_URL
+        value: http://nzila-os-union-eyes-django-pilot
+      - name: READY_REQUIRE_QUEUE
+        value: "true"
 
 database:
   name: nzila-canada-pilot-db

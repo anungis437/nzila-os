@@ -19,7 +19,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
     },
     purpose: {
       'en-CA':
-        'To read the Executive Continuity Brief with the sponsor and at most one other institutional reader, in editorial pace, without diagnosis.',
+        'To read the Leadership Briefing Report with the sponsor and at most one other institutional reader, in editorial pace, without diagnosis.',
     },
     audience: {
       'en-CA': [
@@ -62,7 +62,7 @@ export const FACILITATION_GUIDE: readonly FacilitationGuideEntry[] = [
     },
     materialsRequired: {
       'en-CA': [
-        'Printed and bound Executive Continuity Brief (one copy per reader)',
+        'Printed and bound Leadership Briefing Report (one copy per reader)',
         'Quiet room, in person where possible',
         'No slides, no laptops on the table, no projection',
       ],

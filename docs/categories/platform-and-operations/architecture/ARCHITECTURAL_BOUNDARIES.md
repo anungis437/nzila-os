@@ -55,7 +55,7 @@
 
 ## Enforcement
 
-- Dependency check: `pnpm deps:check` (`scripts/dependency-boundary-check.ts`)
+- Dependency check: `pnpm exec tsx scripts/dependency-boundary-check.ts` (`scripts/dependency-boundary-check.ts`)
 - CI: Runs on every PR
 
 ## Exception Process

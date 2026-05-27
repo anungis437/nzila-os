@@ -6,7 +6,7 @@
 
 ```bash
 # Run all contract tests from repo root
-pnpm contract:test
+pnpm contract-tests
 # or
 pnpm contract-tests
 ```

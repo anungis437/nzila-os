@@ -13,7 +13,7 @@
  *   6. Print verification results
  *
  * Usage:
- *   pnpm demo:golden
+ *   pnpm exec tsx scripts/demo-golden-path.ts
  *   npx tsx scripts/demo-golden-path.ts
  *
  * @module scripts/demo-golden-path

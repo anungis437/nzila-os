@@ -5,7 +5,7 @@
  *
  * GET /api/icra/report/[assessmentId]
  *
- * Serves the Executive Continuity Brief as a PDF download.
+ * Serves the Leadership Briefing Report as a PDF download.
  *
  * Pseudonymous by design — no auth required, gated by tier check.
  * Only assessments with reportTierId = 'executive_continuity_brief' or

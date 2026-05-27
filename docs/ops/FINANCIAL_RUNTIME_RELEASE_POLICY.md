@@ -21,9 +21,9 @@ Required gates:
 1. `pnpm --filter financial-service typecheck`
 2. `pnpm --filter financial-service lint`
 3. `pnpm --filter financial-service test`
-4. `pnpm financial-service:health`
-5. `pnpm validate:docs`
-6. `pnpm governance:audit`
+4. `pnpm exec tsx scripts/financial-service-health.ts`
+5. `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts`
+6. `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts`
 7. `pnpm test:fast`
 
 ## Fail-Closed Rules

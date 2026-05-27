@@ -65,10 +65,10 @@ and carried to Phase E. No risk blocks Phase D closure.
 
 | Validator                   | Result    |
 | --------------------------- | --------- |
-| `pnpm rollout:validate`     | OK        |
-| `pnpm field-ops:validate`   | OK        |
-| `pnpm ops:prove`            | OK        |
-| `pnpm final:go`             | CERTIFIED |
+| `node tooling/scripts/validate-rollout-legitimacy.mjs`     | OK        |
+| `node tooling/scripts/validate-field-operations-legitimacy.mjs`   | OK        |
+| `node tooling/scripts/validate-operational-proving.mjs`            | OK        |
+| `node tooling/scripts/validate-final-go-status.mjs`             | CERTIFIED |
 | Control Plane typecheck     | clean     |
 | Console typecheck           | clean     |
 | Union Eyes typecheck        | clean     |

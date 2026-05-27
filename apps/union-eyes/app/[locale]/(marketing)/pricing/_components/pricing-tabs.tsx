@@ -135,7 +135,7 @@ export type PricingTabsCopy = {
   commitmentsBody: string;
   trustCenter: string;
   governanceStructure: string;
-  institutionalProof: string;
+  organizationalProof: string;
   procurementCommitments: readonly NarrativeCard[];
 };
 
@@ -569,7 +569,7 @@ function ProcurementPanel({ copy, locale }: { copy: PricingTabsCopy; locale: str
           href={`/${locale}/proof`}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
         >
-          {copy.institutionalProof} <ArrowRight className="h-4 w-4" />
+          {copy.organizationalProof} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

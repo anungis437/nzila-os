@@ -4,7 +4,7 @@
 > This document defines the official layers, allowed dependency directions,
 > and prohibited import patterns.
 >
-> Enforced by: `pnpm architecture:layers:check`
+> Enforced by: `pnpm exec tsx scripts/architecture-layer-check.ts`
 > Machine-readable source: `platform/registry/layers.json`
 
 ---
@@ -172,9 +172,9 @@ If an app needs a capability provided by infrastructure, wrap it in a platform s
 ## Enforcement
 
 - **Machine-readable layer map**: `platform/registry/layers.json`
-- **Automated check**: `pnpm architecture:layers:check` (runs `scripts/architecture-layer-check.ts`)
+- **Automated check**: `pnpm exec tsx scripts/architecture-layer-check.ts` (runs `scripts/architecture-layer-check.ts`)
 - **Contract tests**: `tooling/contract-tests/arch-layer.test.ts`
-- **CI integration**: Runs on every PR alongside `pnpm deps:check`
+- **CI integration**: Runs on every PR alongside `pnpm exec tsx scripts/dependency-boundary-check.ts`
 
 ---
 

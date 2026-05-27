@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-05-25T12:02:57.322Z",
+  "matrixVersion": "1.4.2",
+  "constitutionVersion": "1.0.0",
+  "constitutionStatus": "active",
+  "antiPatternMode": "warn",
+  "warningInventory": {
+    "scannedSources": 185,
+    "totalMatches": 0,
+    "warningDensityPerSource": 0,
+    "classificationBreakdown": {},
+    "severityBreakdown": {},
+    "promotionCandidateCount": 0
+  },
+  "governanceStack": [
+    {
+      "layer": "Ontology matrix",
+      "status": "active",
+      "note": "Matrix 1.4.2 is structurally validated."
+    },
+    {
+      "layer": "Runtime registry drift",
+      "status": "enforced",
+      "note": "Live API registry matches ontology."
+    },
+    {
+      "layer": "Role-access drift",
+      "status": "enforced",
+      "note": "Doctrine-derived gating remains aligned."
+    },
+    {
+      "layer": "Docs semantic drift",
+      "status": "enforced",
+      "note": "Docs references match required canonical terms."
+    },
+    {
+      "layer": "Semantic dictionary integrity",
+      "status": "enforced",
+      "note": "Canonical terms remain governed."
+    },
+    {
+      "layer": "Nav composition policy",
+      "status": "enforced",
+      "note": "Role nav remains ontology-composed."
+    },
+    {
+      "layer": "Anti-pattern intelligence",
+      "status": "warning-only",
+      "note": "Calibration telemetry is active and non-blocking."
+    },
+    {
+      "layer": "Constitution freeze scaffold",
+      "status": "active",
+      "note": "Frozen domains: 6"
+    }
+  ],
+  "calibrationClasses": [
+    "harmless-legacy-language",
+    "transitional-acceptable-language",
+    "risky-saas-drift",
+    "surveillance-adjacent-language",
+    "doctrine-violation"
+  ],
+  "recommendation": "Continue warning-only posture; use this zero-match baseline as the current semantic health reference point."
+}

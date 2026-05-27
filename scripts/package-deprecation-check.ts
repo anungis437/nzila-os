@@ -2,7 +2,7 @@
  * Package Deprecation Check — validates that deprecated packages have
  * correct metadata and that no non-allowlisted consumers depend on them.
  *
- * Usage: pnpm package:deprecation:check
+ * Usage: pnpm exec tsx scripts/package-deprecation-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

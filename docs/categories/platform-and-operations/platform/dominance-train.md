@@ -28,7 +28,7 @@ Implement four repo-wide multipliers as a single coordinated PR train:
 - Evidence packs for terminal/irreversible events
 - Integrations via `integrations-runtime` ONLY (no direct SDK usage in apps)
 - Contract tests expanded to prevent regression
-- Must pass: `pnpm -w lint`, `pnpm -w test`, `pnpm contract:test`, `turbo run build`
+- Must pass: `pnpm -w lint`, `pnpm -w test`, `pnpm contract-tests`, `turbo run build`
 
 ---
 
@@ -124,7 +124,7 @@ Cosmetic only. Revert commit.
 ```bash
 pnpm -w lint
 pnpm -w test
-pnpm contract:test
+pnpm contract-tests
 turbo run build
 ```
 

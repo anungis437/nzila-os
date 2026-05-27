@@ -492,7 +492,7 @@ router.get('/fund-health', async (req: Request, res: Response) => {
                 : 'healthy',
             alerts: forecast.alerts,
           };
-        } catch (error) {
+        } catch (_error) {
           // Fallback for funds without forecasts - calculate balance
           const [balanceData] = await db
             .select({

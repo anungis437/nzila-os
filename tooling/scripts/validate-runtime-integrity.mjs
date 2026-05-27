@@ -14,7 +14,7 @@
  *  - final review covers required convergence axes + validator coverage
  *  - required tone signals distributed across the layer
  *  - forbidden framings only inside negated/forbidden contexts
- *  - validator script registered in root package.json
+ *  - required validator executables exist in tooling/scripts
  *
  * Doctrine anchor: docs/nzila-runtime-integrity/README.md
  *
@@ -32,8 +32,14 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 
 const layerRoot = path.join(repoRoot, 'docs', 'nzila-runtime-integrity');
 const runtimeConvergenceRoot = path.join(repoRoot, 'docs', 'union-eyes', 'runtime-convergence');
-const navRoot = path.join(repoRoot, 'docs', 'union-eyes', 'navigation-monetization-matrix');
-const rootPackageJson = path.join(repoRoot, 'package.json');
+const navRoot = path.join(
+  repoRoot,
+  'docs',
+  'categories',
+  'products-and-market',
+  'union-eyes',
+  'navigation-monetization-matrix',
+);
 
 const requiredDocs = [
   'README.md',
@@ -51,12 +57,12 @@ const requiredDocs = [
 
 const requiredUpstreamAnchors = [
   ['union-eyes', 'runtime-convergence', 'README.md'],
-  ['union-eyes', 'navigation-monetization-matrix', 'README.md'],
-  ['union-eyes', 'navigation-monetization-matrix', 'tier1-institutional-continuity-core.md'],
-  ['union-eyes', 'navigation-monetization-matrix', 'tier2-governance-continuity-operations.md'],
-  ['union-eyes', 'navigation-monetization-matrix', 'tier3-institutional-operating-infrastructure.md'],
-  ['union-eyes', 'navigation-monetization-matrix', 'tier4-institutional-sovereignty-layer.md'],
-  ['union-eyes', 'navigation-monetization-matrix', 'final-gating-philosophy.md'],
+  ['categories', 'products-and-market', 'union-eyes', 'navigation-monetization-matrix', 'README.md'],
+  ['categories', 'products-and-market', 'union-eyes', 'navigation-monetization-matrix', 'tier1-institutional-continuity-core.md'],
+  ['categories', 'products-and-market', 'union-eyes', 'navigation-monetization-matrix', 'tier2-governance-continuity-operations.md'],
+  ['categories', 'products-and-market', 'union-eyes', 'navigation-monetization-matrix', 'tier3-institutional-operating-infrastructure.md'],
+  ['categories', 'products-and-market', 'union-eyes', 'navigation-monetization-matrix', 'tier4-institutional-sovereignty-layer.md'],
+  ['categories', 'products-and-market', 'union-eyes', 'navigation-monetization-matrix', 'final-gating-philosophy.md'],
 ];
 
 const requiredAuthSurfaces = [
@@ -167,15 +173,15 @@ const forbiddenFramings = [
   'engagement gamification',
 ];
 
-const requiredScripts = [
-  'validate:cognition',
-  'validate:labor-continuity',
-  'validate:maturity-elevation',
-  'validate:final-convergence',
-  'validate:ue-infrastructure',
-  'validate:navigation-monetization',
-  'validate:runtime-convergence',
-  'validate:runtime-integrity',
+const requiredValidatorPaths = [
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-institutional-cognition-convergence.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-labor-continuity-governance.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-maturity-convergence.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-final-convergence.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-ue-infrastructure.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-navigation-monetization.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-runtime-convergence.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-runtime-integrity.mjs'),
 ];
 
 async function readText(filePath) {
@@ -322,25 +328,13 @@ async function main() {
     errors.push(`Forbidden framings appear unbounded in runtime-integrity layer:\n- ${forbiddenHits.join('\n- ')}`);
   }
 
-  // ── 11. Validator scripts registered in root package.json ────────
-  if (await exists(rootPackageJson)) {
-    const pkgRaw = await readText(rootPackageJson);
-    let pkg;
-    try {
-      pkg = JSON.parse(pkgRaw);
-    } catch (err) {
-      errors.push(`Could not parse root package.json: ${err instanceof Error ? err.message : String(err)}`);
-      pkg = null;
-    }
-    if (pkg && typeof pkg === 'object') {
-      const scripts = pkg.scripts ?? {};
-      const missingScripts = requiredScripts.filter((s) => !(s in scripts));
-      if (missingScripts.length > 0) {
-        errors.push(`Required validator scripts missing in root package.json:\n- ${missingScripts.join('\n- ')}`);
-      }
-    }
-  } else {
-    errors.push('Root package.json is missing.');
+  // ── 11. Required validator executables exist ─────────────────────
+  const missingValidators = [];
+  for (const validatorPath of requiredValidatorPaths) {
+    if (!(await exists(validatorPath))) missingValidators.push(rel(validatorPath));
+  }
+  if (missingValidators.length > 0) {
+    errors.push(`Required validator executables missing:\n- ${missingValidators.join('\n- ')}`);
   }
 
   if (errors.length > 0) {
@@ -352,7 +346,7 @@ async function main() {
   console.log('Runtime-integrity validation passed.');
   console.log(`Validated docs: ${docPaths.length}`);
   console.log(`Validated upstream anchors: ${requiredUpstreamAnchors.length}`);
-  console.log(`Validated required scripts: ${requiredScripts.length}`);
+  console.log(`Validated required executables: ${requiredValidatorPaths.length}`);
 }
 
 main().catch((error) => {

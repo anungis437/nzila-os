@@ -68,4 +68,4 @@ Control Plane, Console, and Union Eyes.
 ## 5. Posture
 
 The ecosystem behaves as one operating system. The convergence
-audit re-runs as part of `pnpm ops:prove`.
+audit re-runs as part of `node tooling/scripts/validate-operational-proving.mjs`.

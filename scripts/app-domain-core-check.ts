@@ -8,7 +8,7 @@
  * 3. ARCHITECTURE_SHAPE.md documentation exists
  * 4. Critical workflow logic is not only UI-local
  *
- * Usage: pnpm app:domain-core:check
+ * Usage: pnpm exec tsx scripts/app-domain-core-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

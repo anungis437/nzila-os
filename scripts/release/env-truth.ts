@@ -1,5 +1,5 @@
 /**
- * release:env-truth — Cross-check deployment inventory against real environment.
+ * env-truth.ts — Cross-check deployment inventory against real environment.
  *
  * Reads the governance deployment inventory and validates:
  *   1. Every app in inventory has a corresponding Container App
@@ -13,8 +13,8 @@
  *   --dry-run     Validate inventory structure only (default)
  *
  * Usage:
- *   pnpm release:env-truth                    # structural validation
- *   pnpm release:env-truth --live             # live Azure query
+ *   pnpm exec tsx scripts/release/env-truth.ts                    # structural validation
+ *   pnpm exec tsx scripts/release/env-truth.ts --live             # live Azure query
  *
  * Output:
  *   reports/release/environment-truth.json

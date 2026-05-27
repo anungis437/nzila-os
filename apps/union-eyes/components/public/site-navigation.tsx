@@ -26,10 +26,15 @@ const primaryNav = [
 ];
 
 /** Whitepapers dropdown — every public whitepaper, hub link first. */
+const WHITEPAPER_NAV_LABELS: Record<string, string> = {
+  'the-continuity-gap': 'The Continuity Gap',
+  'operational-reality-edition': 'The Continuity Gap — Ops Edition',
+  'oci-method-companion': 'The OCI Method — Companion',
+  'oci-method-canonical': 'The OCI Method — Canonical',
+};
 const whitepaperLinks = WHITEPAPER_LIBRARY.map((entry) => ({
-  name: entry.title,
+  name: WHITEPAPER_NAV_LABELS[entry.slug] ?? entry.localized['en-CA'].title.split(' — ')[0],
   href: entry.href,
-  desc: `${entry.format} · ${entry.version}`,
 }));
 
 /** Solutions dropdown — stakeholder-oriented journeys */
@@ -46,32 +51,32 @@ const modulesLinks = [
   {
     name: 'Organizational Continuity',
     href: '/organizational-continuity',
-    desc: 'Leadership transition resilience',
+    desc: 'Stay strong through leadership change',
   },
   {
-    name: 'Governance Transparency Hub',
+    name: 'Decision Tracking',
     href: '/platform/governance-intelligence',
-    desc: 'Decision traceability and oversight',
+    desc: 'See how decisions are made and why',
   },
   {
-    name: 'Organizational Memory Vault',
+    name: 'Knowledge Capture',
     href: '/platform/organizational-memory',
-    desc: 'Protected organizational knowledge',
+    desc: 'Protect what your people know',
   },
   {
-    name: 'Executive Briefing Engine',
+    name: 'Leadership Briefings',
     href: '/executive-intelligence',
-    desc: 'Strategic briefing for leadership',
+    desc: 'Clear briefings for executives',
   },
   {
-    name: 'Operations Coherence Layer',
+    name: 'Team Alignment',
     href: '/platform/operational-coherence',
-    desc: 'Cross-team operating alignment',
+    desc: 'Keep teams working in sync',
   },
   {
-    name: 'Explainability and Audit Layer',
+    name: 'Transparent AI',
     href: '/platform/explainable-intelligence',
-    desc: 'Transparent and reviewable AI',
+    desc: 'AI that shows its reasoning',
   },
 ];
 
@@ -102,6 +107,15 @@ export default function SiteNavigation() {
     pathname?.startsWith('/executive-intelligence') ||
     pathname?.startsWith('/platform/operational-coherence') ||
     pathname?.startsWith('/platform/explainable-intelligence');
+
+  const localePrefix = pathname?.startsWith('/fr-CA')
+    ? '/fr-CA'
+    : pathname?.startsWith('/en-CA')
+      ? '/en-CA'
+      : '';
+  const topNavCtaHref = pathname?.startsWith('/fr-CA')
+    ? `${localePrefix}/organizational-continuity-risk`
+    : `${localePrefix}/pilot-request`;
 
   /* ── Scroll-aware glass effect ── */
   useEffect(() => {
@@ -257,13 +271,17 @@ export default function SiteNavigation() {
               onMouseEnter={() => { clearTimeout(whitepapersTimeout.current); setWhitepapersOpen(true); }}
               onMouseLeave={() => { whitepapersTimeout.current = setTimeout(() => setWhitepapersOpen(false), 150); }}
             >
-              <Link href="/whitepapers" className={navLinkClass(Boolean(isWhitepapersPath))}>
+              <button
+                type="button"
+                onClick={() => setWhitepapersOpen((v) => !v)}
+                className={navLinkClass(Boolean(isWhitepapersPath))}
+              >
                 Whitepapers
                 <ChevronDown className={`h-3.5 w-3.5 transition-transform ${whitepapersOpen ? 'rotate-180' : ''}`} />
                 {Boolean(isWhitepapersPath) && (
                   <motion.div layoutId="ue-nav-indicator" className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-electric rounded-full" />
                 )}
-              </Link>
+              </button>
               <AnimatePresence>
                 {whitepapersOpen && (
                   <motion.div
@@ -273,13 +291,6 @@ export default function SiteNavigation() {
                     transition={{ duration: 0.15 }}
                     className="absolute top-full right-0 mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-100 p-2 z-50"
                   >
-                    <Link
-                      href="/whitepapers"
-                      className="block px-4 py-3 rounded-lg text-sm transition-colors text-gray-700 hover:bg-gray-50 hover:text-navy border-b border-gray-100 mb-1"
-                    >
-                      <span className="block font-medium leading-tight">Whitepaper Library</span>
-                      <span className="block text-[11px] text-gray-400 mt-0.5">All whitepapers · hub</span>
-                    </Link>
                     {whitepaperLinks.map((link) => (
                       <Link
                         key={link.href}
@@ -291,7 +302,6 @@ export default function SiteNavigation() {
                         }`}
                       >
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-2">{link.desc}</span>
                       </Link>
                     ))}
                   </motion.div>
@@ -315,7 +325,7 @@ export default function SiteNavigation() {
             <div className="w-px h-6 bg-gray-300/30" />
 
             <Link
-              href="/pilot-request"
+              href={topNavCtaHref}
               className="px-5 py-2.5 bg-[#1f5b84] text-white text-sm font-semibold rounded-xl hover:bg-[#12324a] transition-colors btn-press"
             >
               Request a Demo
@@ -420,16 +430,10 @@ export default function SiteNavigation() {
                 </button>
                 {mobileWhitepapersOpen && (
                   <div className="pl-4 space-y-1">
-                    <Link href="/whitepapers" onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:text-navy transition-colors border-b border-gray-100 mb-1">
-                      <span className="block font-medium leading-tight">Whitepaper Library</span>
-                      <span className="block text-[11px] text-gray-400 mt-0.5">All whitepapers · hub</span>
-                    </Link>
                     {whitepaperLinks.map((link) => (
                       <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)}
                         className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:text-navy transition-colors">
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-2">{link.desc}</span>
                       </Link>
                     ))}
                   </div>
@@ -449,7 +453,7 @@ export default function SiteNavigation() {
                 })}
 
                 <div className="pt-2 mt-2 border-t border-gray-100 space-y-1">
-                  <Link href="/pilot-request" onClick={() => setMobileMenuOpen(false)}
+                  <Link href={topNavCtaHref} onClick={() => setMobileMenuOpen(false)}
                     className="block px-4 py-3 bg-[#1f5b84] text-white rounded-xl text-base font-semibold text-center">
                     Request a Demo
                   </Link>

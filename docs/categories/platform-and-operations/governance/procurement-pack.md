@@ -171,7 +171,7 @@ POST /api/proof-center/refresh
 Run automated validation against a fresh procurement pack:
 
 ```bash
-pnpm validate:pack
+pnpm exec tsx scripts/validate-procurement-pack.ts
 ```
 
 This checks:
@@ -186,7 +186,7 @@ This checks:
 Run the golden-path demo to see end-to-end pack generation:
 
 ```bash
-pnpm demo:golden
+pnpm exec tsx scripts/demo-golden-path.ts
 ```
 
 ## Response Headers (ZIP)

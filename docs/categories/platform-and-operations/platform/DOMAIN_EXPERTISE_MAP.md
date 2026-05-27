@@ -116,7 +116,7 @@ Succession risk is fail-closed for domains with bus factor 1:
 2. If a critical owner is unavailable without a documented deputy, block non-emergency releases in that domain.
 3. Every high-risk domain must maintain at least 2 validated backups in the succession registry.
 
-Automated checks are enforced via `pnpm validate:strategic-resilience`.
+Automated checks are enforced via `node tooling/scripts/validate-strategic-resilience.mjs --enforce`.
 
 ## Diversity and Coverage Metrics
 

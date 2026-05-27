@@ -128,7 +128,7 @@
 | ID | Type | Path | Key Extract |
 |----|------|------|-------------|
 | E10-a | Changeset config | `.changeset/config.json` | `access: "restricted"`, `baseBranch: "main"`, `updateInternalDependencies: "patch"` |
-| E10-b | Release scripts | `package.json` | `release: changeset publish`, `version-packages: changeset version` |
+| E10-b | Release commands | `package.json` + Changesets CLI | `release: changeset publish`, `changeset version` |
 | E10-c | Release workflow | `.github/workflows/release-train.yml` | Tag-triggered + dispatch (staging/production), pre-release-checks gate |
 | E10-d | Frozen lockfile | All CI workflows | Every `pnpm install` uses `--frozen-lockfile` |
 | E10-e | Node version pinned | All CI workflows | `node-version: 22` consistent |

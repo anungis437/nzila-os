@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const localizedInsightsRoot = path.join(__dirname, '../scripts/articles/fr-CA');
 
 export interface InsightCategory {
   slug: string;
@@ -97,6 +98,15 @@ function readInsightLibrary(): string {
   return fs.readFileSync(insightLibraryPath, 'utf8');
 }
 
+function readLocalizedInsightMarkdown(locale: string, slug: string): string | null {
+  if (locale !== 'fr-CA') return null;
+
+  const localizedPath = path.join(localizedInsightsRoot, `${slug}.md`);
+  if (!fs.existsSync(localizedPath)) return null;
+
+  return fs.readFileSync(localizedPath, 'utf8');
+}
+
 function splitInsightDocuments(markdown: string): string[] {
   const normalized = markdown.replace(/\r\n/g, '\n').trim();
   return normalized
@@ -159,14 +169,46 @@ function extractHeadings(markdown: string): string[] {
   return Array.from(markdown.matchAll(/^#{1,3}\s+(.+)$/gm)).map((match) => match[1].trim());
 }
 
-export const insightArticles = splitInsightDocuments(readInsightLibrary()).map(parseInsightDocument);
-const categoryNames = Array.from(new Set(insightArticles.map((article) => article.categoryName)));
+function loadInsightArticles(locale: string): InsightArticle[] {
+  const englishArticles = splitInsightDocuments(readInsightLibrary()).map(parseInsightDocument);
 
-export const insightCategories: InsightCategory[] = categoryNames.map((name) => ({
-  slug: categorySlugByName[name],
-  name,
-  description: categoryDescriptions[name],
-}));
+  if (locale !== 'fr-CA') {
+    return englishArticles;
+  }
+
+  const localizedBySlug = new Map<string, InsightArticle>();
+
+  for (const article of englishArticles) {
+    const localizedMarkdown = readLocalizedInsightMarkdown(locale, article.slug);
+    if (!localizedMarkdown) continue;
+
+    localizedBySlug.set(article.slug, parseInsightDocument(localizedMarkdown));
+  }
+
+  return englishArticles.map((article) => localizedBySlug.get(article.slug) ?? article);
+}
+
+export const insightArticles = loadInsightArticles('en-CA');
+
+function getCategoryNames(articles: InsightArticle[]): string[] {
+  return Array.from(new Set(articles.map((article) => article.categoryName)));
+}
+
+export function getInsightArticles(locale = 'en-CA'): InsightArticle[] {
+  return loadInsightArticles(locale);
+}
+
+export function getInsightCategories(locale = 'en-CA'): InsightCategory[] {
+  const categoryNames = getCategoryNames(loadInsightArticles(locale));
+
+  return categoryNames.map((name) => ({
+    slug: categorySlugByName[name],
+    name,
+    description: categoryDescriptions[name],
+  }));
+}
+
+export const insightCategories: InsightCategory[] = getInsightCategories('en-CA');
 
 export const upcomingInsightTopics: UpcomingInsightTopic[] = [
   {
@@ -187,34 +229,36 @@ export const upcomingInsightTopics: UpcomingInsightTopic[] = [
   },
 ];
 
-export function getFeaturedInsights(): InsightArticle[] {
-  return insightArticles.filter((article) => article.featured);
+export function getFeaturedInsights(locale = 'en-CA'): InsightArticle[] {
+  return loadInsightArticles(locale).filter((article) => article.featured);
 }
 
-export function getInsightBySlug(slug: string): InsightArticle | undefined {
-  return insightArticles.find((article) => article.slug === slug);
+export function getInsightBySlug(slug: string, locale = 'en-CA'): InsightArticle | undefined {
+  return loadInsightArticles(locale).find((article) => article.slug === slug);
 }
 
-export function getInsightsByCategory(categorySlug: string): InsightArticle[] {
-  return insightArticles.filter((article) => article.categorySlug === categorySlug);
+export function getInsightsByCategory(categorySlug: string, locale = 'en-CA'): InsightArticle[] {
+  return loadInsightArticles(locale).filter((article) => article.categorySlug === categorySlug);
 }
 
-export function getInsightCategory(slug: string): InsightCategory | undefined {
-  return insightCategories.find((category) => category.slug === slug);
+export function getInsightCategory(slug: string, locale = 'en-CA'): InsightCategory | undefined {
+  return getInsightCategories(locale).find((category) => category.slug === slug);
 }
 
-export function getInsightCategoryCounts(): Record<string, number> {
-  return insightArticles.reduce<Record<string, number>>((accumulator, article) => {
+export function getInsightCategoryCounts(locale = 'en-CA'): Record<string, number> {
+  return loadInsightArticles(locale).reduce<Record<string, number>>((accumulator, article) => {
     accumulator[article.categorySlug] = (accumulator[article.categorySlug] ?? 0) + 1;
     return accumulator;
   }, {});
 }
 
-export function getRelatedInsights(slug: string, limit = 3): InsightArticle[] {
-  const source = getInsightBySlug(slug);
+export function getRelatedInsights(slug: string, limit = 3, locale = 'en-CA'): InsightArticle[] {
+  const source = getInsightBySlug(slug, locale);
   if (!source) return [];
 
-  const sameCategory = insightArticles.filter(
+  const allArticles = loadInsightArticles(locale);
+
+  const sameCategory = allArticles.filter(
     (article) => article.slug !== slug && article.categorySlug === source.categorySlug,
   );
 
@@ -222,7 +266,7 @@ export function getRelatedInsights(slug: string, limit = 3): InsightArticle[] {
     return sameCategory.slice(0, limit);
   }
 
-  const remaining = insightArticles.filter(
+  const remaining = allArticles.filter(
     (article) => article.slug !== slug && article.categorySlug !== source.categorySlug,
   );
 

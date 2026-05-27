@@ -1,18 +1,22 @@
 # Release Governance Audit
 
-Generated: 2026-05-24T17:59:53.543Z
+Generated: 2026-05-25T22:20:07.866Z
 
 ## Scores
 
-- Release Governance Score: 7/10
-- Deployment Risk Score: 8/10
-- Workflow Sprawl Score: 6/10
+- Release Governance Score: 9/10
+- Deployment Risk Score: 10/10
+- Workflow Sprawl Score: 10/10
 - Environment Drift Score: 8/10
 
 ## Canonical Workflows
 
 - gitops-deploy.yml
 - deploy-production.yml
+
+## App-Specific Deployment Workflows (Active)
+
+- None
 
 ## App-Specific Deployment Workflows (Demoted to Emergency/Manual)
 

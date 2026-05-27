@@ -260,6 +260,8 @@ resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'SECRET_TOPOLOGY', value: environment == 'prod' ? (useKvSecrets ? 'aca-kv-integrated' : 'aca-secrets-inline') : 'local' }
             { name: 'SECRET_AUTHORITY', value: environment == 'prod' ? 'azure-key-vault' : 'local' }
             { name: 'ENVIRONMENT_ISOLATION', value: environment == 'prod' || environment == 'pilot' ? 'full' : 'partial' }
+            { name: 'DJANGO_API_URL', value: environment == 'pilot' ? 'http://nzila-os-union-eyes-django-pilot' : '' }
+            { name: 'READY_REQUIRE_QUEUE', value: environment == 'pilot' ? 'true' : 'false' }
           ], isProd ? [
             { name: 'UPSTASH_REDIS_REST_URL', secretRef: 'upstash-redis-url' }
             { name: 'UPSTASH_REDIS_REST_TOKEN', secretRef: 'upstash-redis-token' }

@@ -8,12 +8,12 @@
  * Every production release MUST go through this script. No manual ad-hoc tags.
  *
  * Usage:
- *   pnpm release:tag --bump patch        # 1.2.3 → 1.2.4
- *   pnpm release:tag --bump minor        # 1.2.3 → 1.3.0
- *   pnpm release:tag --bump major        # 1.2.3 → 2.0.0
- *   pnpm release:tag --version 1.4.0     # explicit version
- *   pnpm release:tag --bump patch --dry-run
- *   pnpm release:tag --bump patch --skip-branch-push
+ *   pnpm exec tsx scripts/release/tag-release.ts --bump patch        # 1.2.3 → 1.2.4
+ *   pnpm exec tsx scripts/release/tag-release.ts --bump minor        # 1.2.3 → 1.3.0
+ *   pnpm exec tsx scripts/release/tag-release.ts --bump major        # 1.2.3 → 2.0.0
+ *   pnpm exec tsx scripts/release/tag-release.ts --version 1.4.0     # explicit version
+ *   pnpm exec tsx scripts/release/tag-release.ts --bump patch --dry-run
+ *   pnpm exec tsx scripts/release/tag-release.ts --bump patch --skip-branch-push
  *
  * The annotated tag body contains:
  *   - version, sha, date, artifact-id
@@ -107,8 +107,8 @@ function main(): void {
   const versionArg = parseArg('--version')
 
   if (!bumpArg && !versionArg) {
-    console.error('Usage: pnpm release:tag --bump patch|minor|major')
-    console.error('       pnpm release:tag --version X.Y.Z')
+    console.error('Usage: pnpm exec tsx scripts/release/tag-release.ts --bump patch|minor|major')
+    console.error('       pnpm exec tsx scripts/release/tag-release.ts --version X.Y.Z')
     process.exit(1)
   }
   if (bumpArg && !['major', 'minor', 'patch'].includes(bumpArg)) {

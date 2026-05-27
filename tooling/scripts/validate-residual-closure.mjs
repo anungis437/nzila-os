@@ -11,7 +11,7 @@
  *  - canonical environment + verdict vocabulary distributed across the layer
  *  - required tone signals distributed across the layer
  *  - forbidden framings only inside negated/forbidden contexts
- *  - validator script registered in root package.json
+ *  - required validator executables exist in tooling/scripts
  *
  * Authority style: stewardship cadence, not feature plumbing. Continuity-safe,
  * governance-safe, anti-surveillance, evidence-anchored.
@@ -26,7 +26,6 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..');
 
 const layerRoot = path.join(repoRoot, 'docs', 'nzila-residual-closure');
-const rootPackageJson = path.join(repoRoot, 'package.json');
 
 const requiredDocs = [
   'README.md',
@@ -204,11 +203,11 @@ const forbiddenFramings = [
   'engagement gamification',
 ];
 
-const requiredScripts = [
-  'validate:runtime-integrity',
-  'validate:tier2-hardening',
-  'validate:sovereignty-proving',
-  'validate:residual-closure',
+const requiredValidatorPaths = [
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-runtime-integrity.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-tier2-hardening.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-sovereignty-proving.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-residual-closure.mjs'),
 ];
 
 async function readText(filePath) {
@@ -307,25 +306,13 @@ async function main() {
     errors.push(`Forbidden framings appear unbounded in residual closure layer:\n- ${forbiddenHits.join('\n- ')}`);
   }
 
-  // ── 14. Validator scripts registered ─────────────────────────────
-  if (await exists(rootPackageJson)) {
-    const pkgRaw = await readText(rootPackageJson);
-    let pkg;
-    try {
-      pkg = JSON.parse(pkgRaw);
-    } catch (err) {
-      errors.push(`Could not parse root package.json: ${err instanceof Error ? err.message : String(err)}`);
-      pkg = null;
-    }
-    if (pkg && typeof pkg === 'object') {
-      const scripts = pkg.scripts ?? {};
-      const missingScripts = requiredScripts.filter((s) => !(s in scripts));
-      if (missingScripts.length > 0) {
-        errors.push(`Required validator scripts missing in root package.json:\n- ${missingScripts.join('\n- ')}`);
-      }
-    }
-  } else {
-    errors.push('Root package.json is missing.');
+  // ── 14. Required validator executables exist ─────────────────────
+  const missingValidators = [];
+  for (const validatorPath of requiredValidatorPaths) {
+    if (!(await exists(validatorPath))) missingValidators.push(rel(validatorPath));
+  }
+  if (missingValidators.length > 0) {
+    errors.push(`Required validator executables missing:\n- ${missingValidators.join('\n- ')}`);
   }
 
   if (errors.length > 0) {
@@ -340,7 +327,7 @@ async function main() {
       `  ${requiredEnvironments.length} environments enumerated\n` +
       `  ${requiredVerdicts.length} verdict classes present\n` +
       `  ${requiredToneSignals.length} tone signals distributed\n` +
-      `  ${requiredScripts.length} validator scripts registered\n`,
+      `  ${requiredValidatorPaths.length} validator executables present\n`,
   );
 }
 

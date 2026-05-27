@@ -51,8 +51,8 @@ details removed.
 |---------|--------|
 | Backup infrastructure in place | ✅ Confirmed via Infrastructure-as-Code |
 | DR runbooks published and versioned | ✅ Five runbooks in `docs/union-eyes/dr/` |
-| Reproducible drill script operational | ✅ `pnpm db:restore-drill` |
-| Live drill pre-flight guard | ✅ `pnpm dr:drill:checklist --live` |
+| Reproducible drill script operational | ✅ `pnpm exec tsx scripts/db/restore-drill.ts` |
+| Live drill pre-flight guard | ✅ `pnpm exec tsx scripts/dr/drill-checklist.ts --live` |
 | Quarterly drill cadence established | ✅ Automated reminder workflow |
 | Live RTO measurement | ⏳ Scheduled 2026-Q2 |
 | Formal RTO publication | ⏳ Pending live measurement |

@@ -1,13 +1,140 @@
 {
-  "timestamp": "2026-05-24T18:02:45.788Z",
-  "status": "unverified",
+  "timestamp": "2026-05-27T14:34:34.869Z",
+  "status": "violation",
   "allowed_regions": [
     "canadacentral",
     "canadaeast"
   ],
   "resource_group_scope": null,
-  "total_resources_seen": 0,
-  "violations_count": 0,
-  "violations": [],
-  "error": "Command failed: az resource list --output json\n/bin/sh: az: command not found\n"
+  "total_resources_seen": 83,
+  "violations_count": 18,
+  "violations": [
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2",
+      "name": "NetworkWatcher_eastus2",
+      "type": "Microsoft.Network/networkWatchers",
+      "location": "eastus2",
+      "resourceGroup": "NetworkWatcherRG"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus",
+      "name": "NetworkWatcher_eastus",
+      "type": "Microsoft.Network/networkWatchers",
+      "location": "eastus",
+      "resourceGroup": "NetworkWatcherRG"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/cloud-shell-storage-eastus/providers/Microsoft.Storage/storageAccounts/cs210032000d23f28ec",
+      "name": "cs210032000d23f28ec",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "eastus",
+      "resourceGroup": "cloud-shell-storage-eastus"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/DefaultResourceGroup-EUS/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-5d819f33-d16f-429c-a3c0-5b0e94740ba3-EUS",
+      "name": "DefaultWorkspace-5d819f33-d16f-429c-a3c0-5b0e94740ba3-EUS",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "location": "eastus",
+      "resourceGroup": "DefaultResourceGroup-EUS"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Network/virtualNetworks/nzila-staging-vnet",
+      "name": "nzila-staging-vnet",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "eastus",
+      "resourceGroup": "nzila-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-staging-logs",
+      "name": "nzila-staging-logs",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "location": "eastus",
+      "resourceGroup": "nzila-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Storage/storageAccounts/nzilastagingstore",
+      "name": "nzilastagingstore",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "eastus",
+      "resourceGroup": "nzila-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.KeyVault/vaults/nzila-staging-kv",
+      "name": "nzila-staging-kv",
+      "type": "Microsoft.KeyVault/vaults",
+      "location": "eastus",
+      "resourceGroup": "nzila-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-db-connections-high",
+      "name": "zonga-db-connections-high",
+      "type": "Microsoft.Insights/metricalerts",
+      "location": "global",
+      "resourceGroup": "nzila-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.CognitiveServices/accounts/nzila-openai-eastus",
+      "name": "nzila-openai-eastus",
+      "type": "Microsoft.CognitiveServices/accounts",
+      "location": "eastus",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.CognitiveServices/accounts/nzila-openai-eastus2",
+      "name": "nzila-openai-eastus2",
+      "type": "Microsoft.CognitiveServices/accounts",
+      "location": "eastus2",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/actiongroups/zonga-ops-alerts",
+      "name": "zonga-ops-alerts",
+      "type": "Microsoft.Insights/actiongroups",
+      "location": "global",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-cpu-high",
+      "name": "zonga-cpu-high",
+      "type": "Microsoft.Insights/metricalerts",
+      "location": "global",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-5xx-errors",
+      "name": "zonga-5xx-errors",
+      "type": "Microsoft.Insights/metricalerts",
+      "location": "global",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Insights/actiongroups/ue-prod-ops-alerts",
+      "name": "ue-prod-ops-alerts",
+      "type": "Microsoft.Insights/actiongroups",
+      "location": "global",
+      "resourceGroup": "nzila-canada-prod-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Cdn/profiles/nzila-ue-afd-prod",
+      "name": "nzila-ue-afd-prod",
+      "type": "Microsoft.Cdn/profiles",
+      "location": "global",
+      "resourceGroup": "nzila-canada-prod-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Cdn/profiles/nzila-ue-afd-prod/afdendpoints/ue-prod",
+      "name": "nzila-ue-afd-prod/ue-prod",
+      "type": "Microsoft.Cdn/profiles/afdendpoints",
+      "location": "global",
+      "resourceGroup": "nzila-canada-prod-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.Network/frontdoorWebApplicationFirewallPolicies/nzilauewafdprod",
+      "name": "nzilauewafdprod",
+      "type": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies",
+      "location": "global",
+      "resourceGroup": "nzila-canada-prod-rg"
+    }
+  ],
+  "error": null
 }

@@ -49,7 +49,7 @@ const features = {
       icon: ClipboardList,
       title: 'Structured intake submission',
       description:
-        'Members submit a clear intake with issue details, desired outcome, and supporting context before a union representative turns it into formal casework.',
+        'Members submit a clear intake with issue details, the outcome they want, and supporting context before a representative turns it into casework.',
     },
     {
       icon: FileUp,
@@ -61,7 +61,7 @@ const features = {
       icon: Eye,
       title: 'Lightweight case follow-up',
       description:
-        'Members can check status and recent updates without needing access to Inbox, Priorities, Work, Intelligence, or Outcomes.',
+        'Members can check status and recent updates without needing access to the full admin surface.',
     },
     {
       icon: Bell,
@@ -73,7 +73,7 @@ const features = {
       icon: MessageSquare,
       title: 'Representative handoff',
       description:
-        'Once intake is reviewed, union representatives take over inside the core app while members stay in a narrow, controlled follow-up flow.',
+        'Once intake is reviewed, union representatives take over inside the core app while members stay in a narrow follow-up flow.',
     },
   ],
   'fr-CA': [
@@ -116,13 +116,13 @@ export default async function LocaleMemberPortalPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Commencer la réflexion de continuité (gratuite)' : 'Start the free Continuity Reflection';
+  const briefingCta = locale === 'fr-CA' ? 'Faire le bilan' : 'Start a review';
   const featuresArr = features[locale as keyof typeof features] ?? features['en-CA'];
   const sectionCopy = {
     'en-CA': {
       badge: 'Member-Facing Entry',
       heading: 'Submit intake. Follow progress. Leave the casework to your union team.',
-      description: 'Members do not work inside the full UnionEyes application. They submit intake, share supporting material, and follow lightweight updates while union representatives operate Inbox, Priorities, Work, Intelligence, and Outcomes.',
+      description: 'Members do not work inside the full UnionEyes application. They submit intake, share supporting material, and follow lightweight updates while union representatives handle the rest.',
     },
     'fr-CA': {
       badge: 'Entrée côté membre',
@@ -190,7 +190,7 @@ export default async function LocaleMemberPortalPage({
 
         <section className="text-center bg-slate-50 rounded-2xl border border-slate-200 p-10">
           <h2 className="text-2xl font-bold text-slate-900 mb-3">
-            See how member intake feeds the steward workflow
+            See how member intake feeds the workflow
           </h2>
           <p className="text-slate-600 mb-6 max-w-lg mx-auto">
             The member-facing flow stays narrow by design. Inbox and Work pick it up from there.

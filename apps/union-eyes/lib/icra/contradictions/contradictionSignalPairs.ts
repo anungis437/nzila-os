@@ -54,6 +54,28 @@ export const CONTRADICTION_PAIRS: readonly ContradictionPairDefinition[] = [
     resolutionRequired: 'reviewer_escalation',
   },
   {
+    pairId: 'pair_undocumented_workflow_replacement',
+    name: 'Documented workflow replacement vs operational reconstructability',
+    description:
+      'Modernization workflow replacements are documented, yet teams still rely on hidden institutional memory to execute them reliably.',
+    severity: 'high',
+    signalAQuestionId: 'v2_cp_undocumented_workflow_replacement',
+    signalBQuestionId: 'v2_cp_undocumented_workflow_replacement',
+    reducesConfidenceIn: ['institutional_continuity', 'operational_memory', 'trust_debt'],
+    resolutionRequired: 'evidence_review',
+  },
+  {
+    pairId: 'pair_modernization_onboarding_burden',
+    name: 'Documented modernization onboarding vs successor burden',
+    description:
+      'Modernization onboarding pathways are documented, yet successors still require prolonged informal apprenticeship before operating independently.',
+    severity: 'high',
+    signalAQuestionId: 'v2_cp_modernization_onboarding_burden',
+    signalBQuestionId: 'v2_cp_modernization_onboarding_burden',
+    reducesConfidenceIn: ['transition_readiness', 'institutional_continuity', 'trust_debt'],
+    resolutionRequired: 'facilitation',
+  },
+  {
     pairId: 'pair_stewardship_recoverability',
     name: 'Concentrated stewardship vs reported recoverability',
     description:

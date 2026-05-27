@@ -55,13 +55,13 @@ database recovery scenarios:
 
 ```bash
 # Step 0: Validate readiness
-pnpm dr:drill:checklist --live
+pnpm exec tsx scripts/dr/drill-checklist.ts --live
 
 # Step 1: Execute live restore drill with measured RTO
-pnpm db:restore-drill:execute -- --db-host "$DR_DB_HOST" --db-user "$DR_DB_USER" --ready-url "$DR_READY_URL"
+pnpm exec tsx scripts/db/restore-drill.ts -- --execute --db-host "$DR_DB_HOST" --db-user "$DR_DB_USER" --ready-url "$DR_READY_URL"
 
 # Step 2: Generate human-readable and JSON evidence
-pnpm dr:drill:report
+pnpm exec tsx scripts/dr/drill-report.ts
 ```
 
 This path is preferred for quarterly live drills because it produces consistent,
@@ -156,10 +156,10 @@ az postgres flexible-server delete \
 
 ```bash
 # Step 1: Identify last known-good artifact digest
-pnpm release:rollback:list
+pnpm exec tsx scripts/release/rollback-prod.ts --list
 
 # Step 2: Execute rollback to previous container image
-pnpm release:rollback -- <artifact_digest>
+pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.1.0 --execute
 
 # Step 3: Re-deploy the previous container image via Azure CLI
 az containerapp update \
@@ -219,7 +219,7 @@ az containerapp create \
 # Key Vault references are wired via container app managed identity — automatic on provision.
 
 # Step 5: Run full verification suite
-pnpm release:smoke
+pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
 ```
 
 ### Estimated Rebuild Time (RTO Components)

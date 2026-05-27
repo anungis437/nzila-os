@@ -8,7 +8,7 @@
  * Usage:
  *   npx tsx scripts/rfp-generate.ts
  *   npx tsx scripts/rfp-generate.ts --out docs/rfp/answers.md
- *   pnpm rfp:generate
+ *   pnpm exec tsx scripts/rfp-generate.ts --out docs/rfp/answers.md
  *
  * @module scripts/rfp-generate
  */

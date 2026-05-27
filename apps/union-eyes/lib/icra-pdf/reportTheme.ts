@@ -3,7 +3,7 @@
  * DOCTRINE_VERSION: 1.0.0
  * CHANGE CLASS: Commercial
  *
- * Executive Continuity Brief — Report Theme
+ * Leadership Briefing Report — Report Theme
  *
  * Institutional palette. Editorial hierarchy. Calm materiality.
  *

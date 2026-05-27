@@ -132,7 +132,7 @@ Key targets:
 | RTO    | 4 hours       |
 | RPO    | 1 hour        |
 
-Verification: `pnpm verify:backup`
+Verification: `pnpm exec tsx scripts/backup-verify.ts`
 
 ---
 
@@ -159,27 +159,27 @@ All verification commands and their purpose:
 
 | Command                    | Purpose                                      |
 |----------------------------|----------------------------------------------|
-| `pnpm verify:env`         | Validate Node, pnpm, lockfile, env vars       |
-| `pnpm generate:sbom`      | Generate CycloneDX SBOM                      |
-| `pnpm attest:build`       | Sign build attestation (ed25519)              |
-| `pnpm validate:pack`      | Validate procurement pack completeness        |
-| `pnpm reproduce:evidence` | Verify evidence reproducibility               |
-| `pnpm verify:security`    | Check security headers (CSP, HSTS, etc.)      |
-| `pnpm verify:backup`      | Verify backup integrity                       |
-| `pnpm health:report`      | Generate platform health report               |
+| `pnpm exec tsx tooling/build-env-check.ts`         | Validate Node, pnpm, lockfile, env vars       |
+| `pnpm exec tsx scripts/generate-sbom.ts`      | Generate CycloneDX SBOM                      |
+| `pnpm exec tsx scripts/attest-build.ts`       | Sign build attestation (ed25519)              |
+| `pnpm exec tsx scripts/validate-procurement-pack.ts`      | Validate procurement pack completeness        |
+| `pnpm exec tsx scripts/reproduce-evidence.ts` | Verify evidence reproducibility               |
+| `pnpm exec tsx tooling/security-headers-check.ts`    | Check security headers (CSP, HSTS, etc.)      |
+| `pnpm exec tsx scripts/backup-verify.ts`      | Verify backup integrity                       |
+| `pnpm exec tsx scripts/platform-health-report.ts`      | Generate platform health report               |
 | `pnpm contract-tests`     | Run architectural invariant tests             |
-| `pnpm demo:golden`        | Run golden-path demo artefact generation       |
+| `pnpm exec tsx scripts/demo-golden-path.ts`        | Run golden-path demo artefact generation       |
 
 ### Full Validation Sequence
 
 ```bash
-pnpm verify:env
-pnpm generate:sbom
-pnpm validate:pack
-pnpm reproduce:evidence
-pnpm verify:security
-pnpm health:report
-pnpm demo:golden
+pnpm exec tsx tooling/build-env-check.ts
+pnpm exec tsx scripts/generate-sbom.ts
+pnpm exec tsx scripts/validate-procurement-pack.ts
+pnpm exec tsx scripts/reproduce-evidence.ts
+pnpm exec tsx tooling/security-headers-check.ts
+pnpm exec tsx scripts/platform-health-report.ts
+pnpm exec tsx scripts/demo-golden-path.ts
 ```
 
 Expected output:
@@ -208,7 +208,7 @@ The CI pipeline (`.github/workflows/ci.yml`) enforces all gates:
 6. Schema drift detection
 7. Red-team adversarial tests
 8. Hash chain drift detection
-9. **Enterprise hardening gate** — `verify:env`, `generate:sbom`, `validate:pack`, `verify:security`, `health:report`
+9. **Enterprise hardening gate** — `verify:env`, `pnpm exec tsx scripts/generate-sbom.ts`, `pnpm exec tsx scripts/validate-procurement-pack.ts`, `verify:security`, `pnpm exec tsx scripts/platform-health-report.ts`
 10. Ops pack validation
 
 All gates must pass before merge to `main`.

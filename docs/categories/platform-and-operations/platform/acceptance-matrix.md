@@ -11,7 +11,7 @@
 | TypeScript strict | `strict: true`, no `any` escape hatches | `pnpm -w typecheck` |
 | Lint clean | Zero warnings, zero errors | `pnpm -w lint` |
 | Unit tests pass | All existing + new tests green | `pnpm -w test` |
-| Contract tests pass | All structural/boundary tests green | `pnpm contract:test` |
+| Contract tests pass | All structural/boundary tests green | `pnpm contract-tests` |
 | Build succeeds | Full Turborepo build completes | `turbo run build` |
 | No feature drift | PR contains only scoped changes, no bonus features | Code review |
 | Layering respected | `route → service → domain → adapter` — no shortcuts | Code review |

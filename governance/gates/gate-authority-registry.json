@@ -107,7 +107,7 @@
     },
     {
       "id": "validate-governance-gate",
-      "command": "pnpm validate:governance:gate",
+      "command": "pnpm exec tsx tooling/governance/validate-governance-gate.ts",
       "path": "tooling/governance/validate-governance-gate.ts",
       "purpose": "Composite gate: orchestrates the blocking validators below into a single CI signal.",
       "classification": "blocking",

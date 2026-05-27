@@ -44,7 +44,7 @@ At completion every major area must score **Mature** or **Strong Mature** across
 Convergence is validator-enforced:
 
 ```bash
-pnpm validate:maturity-elevation
+node tooling/scripts/validate-maturity-convergence.mjs
 ```
 
 > The legacy `pnpm validate:maturity` continues to run app-maturity contract tests; the new script enforces ecosystem-wide convergence doctrine.

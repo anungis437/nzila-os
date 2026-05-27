@@ -14,7 +14,7 @@ the rollout governance UI, and the CLI commands that wrap them.
 ## 1. Demo Preparation
 
 **Surface:** Control Plane → Governance → Rollout · Promotion Review.
-**CLI mirror:** `pnpm rollout:validate` then `pnpm rollout:promote:attest`.
+**CLI mirror:** `node tooling/scripts/validate-rollout-legitimacy.mjs` then `node tooling/scripts/record-promotion-attestation.mjs`.
 
 Steps:
 1. Confirm staging tier is attested and outside its stabilization
@@ -30,7 +30,7 @@ Steps:
 ## 2. Pilot Preparation
 
 **Surface:** Union Eyes → Pilot Governance + Control Plane → Rollout.
-**CLI mirror:** `pnpm rollout:validate` then `pnpm rollout:promote:attest`.
+**CLI mirror:** `node tooling/scripts/validate-rollout-legitimacy.mjs` then `node tooling/scripts/record-promotion-attestation.mjs`.
 
 Steps:
 1. Sponsor sign-off recorded out-of-band (incident-tracker reference).
@@ -44,7 +44,7 @@ Steps:
 ## 3. Rollout Review
 
 **Surface:** Control Plane → Governance → Rollout · Rollout Readiness panel.
-**CLI mirror:** `pnpm rollout:readiness`.
+**CLI mirror:** `node tooling/scripts/run-rollout-readiness-review.mjs`.
 
 Outcome is one of PASS / PASS-WITH-CONDITIONS / HOLD / REFUSE per
 [rollout-legitimacy-review-system.md §3](./rollout-legitimacy-review-system.md).
@@ -91,9 +91,9 @@ window closes.
 ## Cross-cutting CLI
 
 ```bash
-pnpm rollout:validate         # static legitimacy of registry + docs
-pnpm rollout:readiness        # aggregate posture; records readiness attestation
-pnpm rollout:promote:attest   # record a governed promotion event
+node tooling/scripts/validate-rollout-legitimacy.mjs         # static legitimacy of registry + docs
+node tooling/scripts/run-rollout-readiness-review.mjs        # aggregate posture; records readiness attestation
+node tooling/scripts/record-promotion-attestation.mjs   # record a governed promotion event
 ```
 
 All CLI commands write into `proof-artifacts/rollout-attestations/`,

@@ -7986,6 +7986,26 @@
         "metaTitle": "Union Executive Leadership | Solutions | UnionEyes",
         "metaDescription": "Preserve strategic continuity, lead through leadership transitions, and maintain organizational coherence. UnionEyes for union executive leaders."
       },
+      "governance": {
+        "metaTitle": "Governance Leadership | Solutions | UnionEyes",
+        "metaDescription": "Advance governance modernization with explainable intelligence, continuity safeguards, and audit-ready decision context for leadership teams."
+      },
+      "labour": {
+        "metaTitle": "Labour Leadership | Solutions | UnionEyes",
+        "metaDescription": "Support labour leadership with continuity-aware coordination, explainable guidance, and transparent governance workflows across teams."
+      },
+      "operations": {
+        "metaTitle": "Operations Leadership | Solutions | UnionEyes",
+        "metaDescription": "Strengthen operational continuity with practical workflows, human-reviewable intelligence, and governance-aligned execution support."
+      },
+      "procurement": {
+        "metaTitle": "Procurement Stakeholders | Solutions | UnionEyes",
+        "metaDescription": "Give procurement teams clear scope, phased rollout confidence, and review-ready governance evidence for safer organizational deployment."
+      },
+      "technology": {
+        "metaTitle": "Technology Leadership | Solutions | UnionEyes",
+        "metaDescription": "Equip technology leaders with integration clarity, bounded AI governance, and auditable implementation pathways that preserve continuity."
+      },
       "members": {
         "pageTitle": "For Union Members | UnionEyes",
         "pageDescription": "UnionEyes helps members see their case status, share documents, and stay connected with their representative.",
@@ -11182,7 +11202,7 @@
       "headlineLine2": "will outlive any individual.",
       "imageAlt": "Organizational governance and continuity infrastructure",
       "subhead": "UnionEyes helps federated institutions keep organizational memory, improve governance coordination, and modernize operations without disrupting existing systems.",
-      "ctaPrimary": "Book a Discovery Call",
+      "ctaPrimary": "Start a review",
       "ctaSecondary": "Explore Continuity Infrastructure"
     },
     "posture": {
@@ -11294,7 +11314,7 @@
     "finalCta": {
       "heading": "Discuss continuity infrastructure for your institution.",
       "body": "A practical conversation about continuity, governance coordination, and trust — paced to your federation, not a sales cycle.",
-      "ctaPrimary": "Book a Discovery Call",
+      "ctaPrimary": "Start a review",
       "ctaSecondary": "View Trust & Stewardship"
     },
     "svg": {

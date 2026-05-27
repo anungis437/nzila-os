@@ -45,7 +45,7 @@ jobs:
           git diff --cached --quiet || git commit -m "chore(release): update release state [skip ci]"
 
       - name: Auto tag release
-        run: pnpm release:tag --bump patch --allow-unsigned --allow-non-main --skip-branch-push --skip-if-exists
+        run: pnpm exec tsx scripts/release/tag-release.ts --bump patch --allow-unsigned --allow-non-main --skip-branch-push --skip-if-exists
         env:
           LEFTHOOK: "0"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

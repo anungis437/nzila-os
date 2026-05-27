@@ -30,6 +30,13 @@ export interface ContinuityConfidenceSignal {
   longitudinalTracked: boolean;
 }
 
+export interface ContinuityConfidenceComposite {
+  /** Mean confidence in 0..1; null when no signals exist for the domain. */
+  score: number | null;
+  /** Explicit sample size feeding this domain composite. */
+  sampleSize: number;
+}
+
 /**
  * Map likert_5 questions to their declared confidence domain.
  * Keyed by question id. Authored alongside question creation.
@@ -42,6 +49,7 @@ const QUESTION_TO_DOMAIN: Record<string, ContinuityConfidenceDomain> = {
   ccs_05: 'modernization_continuity_confidence',
   ccs_06: 'recoverability_confidence',
   ccs_07: 'operational_clarity',
+  ccs_08: 'governance_confidence',
 };
 
 export function deriveConfidenceSignals(
@@ -81,6 +89,24 @@ export function deriveConfidenceSignals(
 export function aggregateConfidenceByDomain(
   signals: ContinuityConfidenceSignal[],
 ): Record<ContinuityConfidenceDomain, number | null> {
+  const composite = aggregateConfidenceByDomainComposite(signals);
+  return {
+    operational_clarity: composite.operational_clarity.score,
+    governance_confidence: composite.governance_confidence.score,
+    reconstruction_confidence: composite.reconstruction_confidence.score,
+    onboarding_confidence: composite.onboarding_confidence.score,
+    modernization_continuity_confidence: composite.modernization_continuity_confidence.score,
+    recoverability_confidence: composite.recoverability_confidence.score,
+  };
+}
+
+/**
+ * Aggregate per-domain confidence with explicit sample-size disclosure.
+ * This is the canonical contract for confidence-domain composites.
+ */
+export function aggregateConfidenceByDomainComposite(
+  signals: ContinuityConfidenceSignal[],
+): Record<ContinuityConfidenceDomain, ContinuityConfidenceComposite> {
   const buckets: Record<ContinuityConfidenceDomain, number[]> = {
     operational_clarity: [],
     governance_confidence: [],
@@ -90,18 +116,19 @@ export function aggregateConfidenceByDomain(
     recoverability_confidence: [],
   };
   for (const s of signals) buckets[s.domain].push(s.confidence);
-  const out: Record<ContinuityConfidenceDomain, number | null> = {
-    operational_clarity: null,
-    governance_confidence: null,
-    reconstruction_confidence: null,
-    onboarding_confidence: null,
-    modernization_continuity_confidence: null,
-    recoverability_confidence: null,
+  const out: Record<ContinuityConfidenceDomain, ContinuityConfidenceComposite> = {
+    operational_clarity: { score: null, sampleSize: 0 },
+    governance_confidence: { score: null, sampleSize: 0 },
+    reconstruction_confidence: { score: null, sampleSize: 0 },
+    onboarding_confidence: { score: null, sampleSize: 0 },
+    modernization_continuity_confidence: { score: null, sampleSize: 0 },
+    recoverability_confidence: { score: null, sampleSize: 0 },
   };
   for (const key of Object.keys(buckets) as ContinuityConfidenceDomain[]) {
     const vals = buckets[key];
+    out[key].sampleSize = vals.length;
     if (vals.length === 0) continue;
-    out[key] = vals.reduce((a, b) => a + b, 0) / vals.length;
+    out[key].score = vals.reduce((a, b) => a + b, 0) / vals.length;
   }
   return out;
 }

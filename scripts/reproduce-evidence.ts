@@ -11,7 +11,7 @@
  * If hashes match, evidence is reproducible. If not, a drift has occurred.
  *
  * Usage:
- *   pnpm reproduce:evidence
+ *   pnpm exec tsx scripts/reproduce-evidence.ts
  *
  * Exit codes:
  *   0 — evidence reproducible

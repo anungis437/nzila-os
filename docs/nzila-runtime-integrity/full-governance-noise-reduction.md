@@ -26,7 +26,7 @@ A trustworthy governance gate is:
 | --- | --- | --- |
 | `.github/workflows/flow-shopmoica-cutover-gate.yml` | previously triggered on `package.json` (already narrowed) | reviewed every quarter against actual flow-pilot scope |
 | `scripts/flow-shopmoica-cutover-check.ts` | runtime sub-gates now respect `--enforce` (already remediated) | all sub-gates must remain explicit; informational vs blocking distinction must be preserved |
-| pilot gates (`pnpm pilot:check`) | currently fails when slo-gate, contract-test, or test fail | each subgate must declare whether failure is institutional-blocking or institutional-informational; subgate failure must produce evidence, not noise |
+| pilot gates (`pnpm exec tsx scripts/pilot-check.ts`) | currently fails when slo-gate, contract-test, or test fail | each subgate must declare whether failure is institutional-blocking or institutional-informational; subgate failure must produce evidence, not noise |
 | infra gates | governance, residency, DORA collectors | each gate must declare its blast radius (which PR types it gates) and respect that boundary |
 | validator blast radius | doctrine validators | each validator must run only on PRs that touch its scope, plus a daily scheduled run for canary coverage |
 | workflow scope | every `paths:` filter | reviewed against actual file dependencies; over-broad filters are governance noise |

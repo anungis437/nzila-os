@@ -1,4 +1,5 @@
-import { getResendClient, getFromEmail } from '@/lib/email-service';
+import type { ReactNode } from 'react';
+import { getFromEmail, sendResendEmail } from '@/lib/email-service';
 import RegistrationConfirmationEmail from "@/emails/training/registration-confirmation";
 import SessionReminderEmail from "@/emails/training/session-reminder";
 import CompletionCertificateEmail from "@/emails/training/completion-certificate";
@@ -13,6 +14,25 @@ interface SendEmailResult {
   success: boolean;
   error?: string;
   messageId?: string;
+}
+
+async function sendTrainingEmail(
+  toEmail: string,
+  subject: string,
+  react: ReactNode,
+  templateId: string,
+): Promise<SendEmailResult> {
+  const result = await sendResendEmail({
+    from: fromEmail,
+    to: [toEmail],
+    subject,
+    react,
+  }, {
+    feature: 'training_notifications',
+    templateId,
+  });
+
+  return result;
 }
 
 /**
@@ -42,13 +62,10 @@ export async function sendRegistrationConfirmation({
   totalHours?: number;
 }): Promise<SendEmailResult> {
   try {
-    const client = getResendClient();
-    if (!client) return { success: false, error: 'Resend not configured' };
-    const { data, error } = await client.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      subject: `Registration Confirmed: ${courseName}`,
-      react: RegistrationConfirmationEmail({
+    return await sendTrainingEmail(
+      toEmail,
+      `Registration Confirmed: ${courseName}`,
+      RegistrationConfirmationEmail({
         memberName,
         courseName,
         courseCode,
@@ -61,13 +78,8 @@ export async function sendRegistrationConfirmation({
         dashboardUrl: `${baseUrl}/education`,
         unionName,
       }),
-    });
-
-    if (error) {
-return { success: false, error: error.message };
-    }
-
-    return { success: true, messageId: data?.id };
+      'training_registration_confirmation',
+    );
   } catch (error) {
 return {
       success: false,
@@ -107,14 +119,11 @@ export async function sendSessionReminder({
   try {
     const reminderType =
       daysUntilSession === 1 ? "Tomorrow" : `${daysUntilSession} Days`;
-    
-    const client = getResendClient();
-    if (!client) return { success: false, error: 'Resend not configured' };
-    const { data, error } = await client.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      subject: `Reminder: Training Session in ${reminderType} - ${courseName}`,
-      react: SessionReminderEmail({
+
+    return await sendTrainingEmail(
+      toEmail,
+      `Reminder: Training Session in ${reminderType} - ${courseName}`,
+      SessionReminderEmail({
         memberName,
         courseName,
         sessionDate,
@@ -128,13 +137,8 @@ export async function sendSessionReminder({
         dashboardUrl: `${baseUrl}/education`,
         unionName,
       }),
-    });
-
-    if (error) {
-return { success: false, error: error.message };
-    }
-
-    return { success: true, messageId: data?.id };
+      'training_session_reminder',
+    );
   } catch (error) {
 return {
       success: false,
@@ -172,13 +176,10 @@ export async function sendCompletionCertificate({
   clcApproved?: boolean;
 }): Promise<SendEmailResult> {
   try {
-    const client = getResendClient();
-    if (!client) return { success: false, error: 'Resend not configured' };
-    const { data, error } = await client.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      subject: `Congratulations! Course Completed: ${courseName}`,
-      react: CompletionCertificateEmail({
+    return await sendTrainingEmail(
+      toEmail,
+      `Congratulations! Course Completed: ${courseName}`,
+      CompletionCertificateEmail({
         memberName,
         courseName,
         courseCode,
@@ -192,13 +193,8 @@ export async function sendCompletionCertificate({
         dashboardUrl: `${baseUrl}/education`,
         unionName,
       }),
-    });
-
-    if (error) {
-return { success: false, error: error.message };
-    }
-
-    return { success: true, messageId: data?.id };
+      'training_completion_certificate',
+    );
   } catch (error) {
 return {
       success: false,
@@ -233,14 +229,11 @@ export async function sendCertificationExpiryWarning({
 }): Promise<SendEmailResult> {
   try {
     const urgencyLevel = daysUntilExpiry <= 30 ? "URGENT" : "Important";
-    
-    const client = getResendClient();
-    if (!client) return { success: false, error: 'Resend not configured' };
-    const { data, error } = await client.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      subject: `${urgencyLevel}: Certification Expires in ${daysUntilExpiry} Days - ${certificationName}`,
-      react: CertificationExpiryWarningEmail({
+
+    return await sendTrainingEmail(
+      toEmail,
+      `${urgencyLevel}: Certification Expires in ${daysUntilExpiry} Days - ${certificationName}`,
+      CertificationExpiryWarningEmail({
         memberName,
         certificationName,
         certificateNumber,
@@ -252,13 +245,8 @@ export async function sendCertificationExpiryWarning({
         dashboardUrl: `${baseUrl}/education`,
         unionName,
       }),
-    });
-
-    if (error) {
-return { success: false, error: error.message };
-    }
-
-    return { success: true, messageId: data?.id };
+      'training_certification_expiry_warning',
+    );
   } catch (error) {
 return {
       success: false,
@@ -302,13 +290,10 @@ export async function sendProgramMilestone({
   nextMilestone?: string;
 }): Promise<SendEmailResult> {
   try {
-    const client = getResendClient();
-    if (!client) return { success: false, error: 'Resend not configured' };
-    const { data, error } = await client.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      subject: `Milestone Achieved: ${milestoneTitle} - ${programName}`,
-      react: ProgramMilestoneEmail({
+    return await sendTrainingEmail(
+      toEmail,
+      `Milestone Achieved: ${milestoneTitle} - ${programName}`,
+      ProgramMilestoneEmail({
         memberName,
         programName,
         milestoneTitle,
@@ -325,13 +310,8 @@ export async function sendProgramMilestone({
         dashboardUrl: `${baseUrl}/education`,
         unionName,
       }),
-    });
-
-    if (error) {
-return { success: false, error: error.message };
-    }
-
-    return { success: true, messageId: data?.id };
+      'training_program_milestone',
+    );
   } catch (error) {
 return {
       success: false,

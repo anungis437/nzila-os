@@ -1,5 +1,5 @@
 /**
- * release:evidence — Append-only JSONL evidence ledger for releases.
+ * release-ledger.ts — Append-only JSONL evidence ledger for releases.
  *
  * Every production release appends a structured record to:
  *   reports/releases/release-ledger.jsonl
@@ -9,9 +9,9 @@
  * hotfix flag, changelog hash.
  *
  * Usage:
- *   pnpm release:evidence --tag v1.2.0 --sha abc1234 --deployer ci
- *   pnpm release:evidence --tag v1.2.0 --hotfix
- *   pnpm release:evidence --list                   # print recent entries
+ *   pnpm exec tsx scripts/release/release-ledger.ts --tag v1.2.0 --sha abc1234 --deployer ci
+ *   pnpm exec tsx scripts/release/release-ledger.ts --tag v1.2.0 --hotfix
+ *   pnpm exec tsx scripts/release/release-ledger.ts --list                   # print recent entries
  *
  * This script is typically called by CI after successful production deploy.
  */

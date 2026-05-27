@@ -43,7 +43,7 @@ Plane / ExecutiveOS / UE Ops, not in this phase. Until then, operator
 surfaces are CLI-first.
 
 ### 3.2 Rollback CLI not yet implemented
-`pnpm rollout:rollback:attest` is documented but will be implemented
+`node tooling/scripts/record-rollback-attestation.mjs` is documented but will be implemented
 on first non-trivial rollback to ensure the implementation matches
 real operator need.
 

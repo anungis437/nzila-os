@@ -9,7 +9,7 @@
  * 4. No feature_class appears in forbidden_capabilities
  * 5. Discovered routes on disk are documented in route.meta.json
  *
- * Usage: pnpm platform:surface:model:check
+ * Usage: pnpm exec tsx scripts/platform-surface-model-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

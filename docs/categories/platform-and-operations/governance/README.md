@@ -14,10 +14,10 @@ The governance layer defines how the platform captures policy references, valida
 
 ## Current Guardrails
 
-- `pnpm decision:coverage` — warning-only decision registration coverage check
-- `pnpm decision:coverage:strict` — blocking decision-proof gate (coverage, mappings, proof-required enforcement)
-- `pnpm governance:check` — existing governance checks
-- `pnpm validate:governance:gate` — governance gate validation
+- `pnpm exec tsx scripts/check-decision-coverage.ts` — warning-only decision registration coverage check
+- `pnpm exec tsx scripts/check-decision-coverage.ts --strict` — blocking decision-proof gate (coverage, mappings, proof-required enforcement)
+- `pnpm exec tsx scripts/governance-check.ts` — existing governance checks
+- `pnpm exec tsx tooling/governance/validate-governance-gate.ts` — governance gate validation
 
 The platform now runs both modes: warning inventory for local visibility and strict blocking gate for CI non-bypassability.
 
@@ -25,7 +25,7 @@ The platform now runs both modes: warning inventory for local visibility and str
 
 - Decisions are immutable and retained through append-only records plus immutable blob retention metadata.
 - Decision proofs are externally verifiable through hash, signature, and chain continuity checks.
-- Audit exports are signed and reproducible through `pnpm audit:pack:verify`.
+- Audit exports are signed and reproducible through `pnpm exec tsx scripts/verify-audit-pack.ts`.
 - Auditor access is time-bound, org-scoped, and read-only.
 
 ## Intelligence Guarantees

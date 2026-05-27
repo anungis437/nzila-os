@@ -25,4 +25,4 @@ Gap levels:
 
 - `flow.vendor.selected` remains a documented temporary exception (route not present)
 - `zonga.rights.validated` remains a documented temporary exception (no standalone validation mutation route)
-- strict gate requires `pnpm decision:coverage:strict` in CI
+- strict gate requires `pnpm exec tsx scripts/check-decision-coverage.ts --strict` in CI

@@ -73,7 +73,7 @@ Meaning:
 4. Truth manifest deployment status must match `apps/<app>/maturity.json`.
 5. Public docs must explicitly label whether they are reporting product tier or deployment status.
 
-These rules are enforced by `pnpm validate:truth-authority`.
+These rules are enforced by `pnpm exec tsx scripts/validate-truth-authority.ts`.
 
 ## Communication standard
 

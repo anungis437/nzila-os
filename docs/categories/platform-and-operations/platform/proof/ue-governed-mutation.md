@@ -13,7 +13,7 @@ mutation that must be fully governed before any state change occurs.
 ## Entrypoint
 
 ```bash
-pnpm proof:run ue-governed-mutation
+pnpm exec tsx scripts/proof/run-proof.ts ue-governed-mutation
 ```
 
 Or via the test runner:
@@ -63,15 +63,15 @@ proof-artifacts/ue-governed-mutation/
 ## How to Run Locally
 
 ```bash
-pnpm proof:run ue-governed-mutation
+pnpm exec tsx scripts/proof/run-proof.ts ue-governed-mutation
 ```
 
 Artifacts are written to `proof-artifacts/ue-governed-mutation/`.
 
 ## How to Validate in CI
 
-The `proof-publish` CI job runs `pnpm proof:run` and uploads `proof-artifacts/**`
-as a build artifact. Verification is performed automatically by `pnpm proof:verify`.
+The `proof-publish` CI job runs `pnpm exec tsx scripts/proof/run-proof.ts` and uploads `proof-artifacts/**`
+as a build artifact. Verification is performed automatically by `pnpm exec tsx scripts/proof/verify-artifacts.ts`.
 
 ## What "Pass" Means
 

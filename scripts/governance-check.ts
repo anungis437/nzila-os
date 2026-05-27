@@ -2,7 +2,7 @@
  * Governance Check — validates SBOM, policy engine, evidence packs,
  * compliance, and governance endpoints across all target apps.
  *
- * Usage: pnpm governance:check
+ * Usage: pnpm exec tsx scripts/governance-check.ts
  */
 
 import * as fs from 'node:fs'

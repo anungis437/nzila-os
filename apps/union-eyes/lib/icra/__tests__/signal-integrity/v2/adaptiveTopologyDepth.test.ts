@@ -64,8 +64,17 @@ describe('v2 Foundation — adaptive topology depth', () => {
     }
   });
 
-  // v1.4.0 deliverable — the live routing engine activates these paths;
-  // the depth assertion (≥3 probes per path) is enforced once the engine
-  // resolves deepens-tags into concrete question sequences.
-  it.todo('every routing path resolves to >= 3 concrete probes (v1.4.0 engine)');
+  it('every routing path resolves to >= 3 concrete probes (v1.4.0 engine)', () => {
+    for (const path of ROUTING_PATHS) {
+      const probes = new Set(
+        V2_QUESTIONS.filter((q) =>
+          q.intelligence.deepens.some((tag) => path.deepensWith.includes(tag)),
+        ).map((q) => q.id),
+      );
+      expect(
+        probes.size,
+        `${path.id} resolved only ${probes.size} probes: [${[...probes].join(', ')}]`,
+      ).toBeGreaterThanOrEqual(3);
+    }
+  });
 });

@@ -34,7 +34,7 @@ service component, the recovery method, and the responsible owner.
 |---------|---------|--------|
 | Azure Canada Central unavailable > 30 min | P1 | Activate DR plan; consider geo-failover |
 | Database unrecoverable from primary backup | P1 | PITR restore to new server (Scenario 1 in database-restore.md) |
-| Container deploy breaks health check | P2 | Rollback via `pnpm release:rollback` |
+| Container deploy breaks health check | P2 | Rollback via `pnpm exec tsx scripts/release/rollback-prod.ts` |
 | Evidence pack storage unavailable | P1 | Blob geo-failover (blob-recovery.md) |
 | Key personnel unavailable | P2 | On-call escalation path (ops/runbooks/ue-pilot.md) |
 | Secret rotation required post-incident | P1 | Credential rotation runbook (below) |

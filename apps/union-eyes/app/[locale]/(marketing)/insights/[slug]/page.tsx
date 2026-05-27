@@ -38,35 +38,44 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: InsightArticlePageProps): Promise<Metadata> {
   const { slug, locale } = await params;
+  const isFr = locale === 'fr-CA';
 
   if (slug === 'doctrine') {
     return {
-      title: 'Doctrine | Insights | UnionEyes',
-      description: 'Editorial standards and narrative architecture for organizational continuity insights.',
+      title: isFr ? 'Doctrine | Perspectives | UnionEyes' : 'Doctrine | Insights | UnionEyes',
+      description: isFr
+        ? 'Normes editoriales et architecture narrative pour les perspectives de continuite organisationnelle.'
+        : 'Editorial standards and narrative architecture for organizational continuity insights.',
       alternates: buildLocaleAlternates(locale, '/insights/doctrine'),
     };
   }
 
   if (slug === 'methodology') {
     return {
-      title: 'Methodology | Insights | UnionEyes',
-      description: 'Canonical frameworks and continuity visualization for organizational modernization.',
+      title: isFr ? 'Methodologie | Perspectives | UnionEyes' : 'Methodology | Insights | UnionEyes',
+      description: isFr
+        ? 'Cadres canoniques et visualisation de continuite pour la modernisation organisationnelle.'
+        : 'Canonical frameworks and continuity visualization for organizational modernization.',
       alternates: buildLocaleAlternates(locale, '/insights/methodology'),
     };
   }
 
   if (slug === 'resonance') {
     return {
-      title: 'Resonance | Insights | UnionEyes',
-      description: 'Executive emotional resonance, conference memory anchors, and continuity symbolism.',
+      title: isFr ? 'Resonance | Perspectives | UnionEyes' : 'Resonance | Insights | UnionEyes',
+      description: isFr
+        ? 'Resonance emotionnelle executive, ancrages memoire de conference et symbolique de continuite.'
+        : 'Executive emotional resonance, conference memory anchors, and continuity symbolism.',
       alternates: buildLocaleAlternates(locale, '/insights/resonance'),
     };
   }
 
   if (slug === 'categories') {
     return {
-      title: 'Categories | Insights | UnionEyes',
-      description: 'Browse the governance domains and topic pathways in the UnionEyes Insights system.',
+      title: isFr ? 'Categories | Perspectives | UnionEyes' : 'Categories | Insights | UnionEyes',
+      description: isFr
+        ? 'Parcourez les domaines de gouvernance et les parcours thematiques du systeme Perspectives UnionEyes.'
+        : 'Browse the governance domains and topic pathways in the UnionEyes Insights system.',
       alternates: buildLocaleAlternates(locale, '/insights/categories'),
     };
   }
@@ -75,14 +84,16 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
 
   if (!article) {
     return {
-      title: 'Insight Not Found | UnionEyes',
-      description: 'The requested insight article could not be found.',
+      title: isFr ? 'Perspective introuvable | UnionEyes' : 'Insight Not Found | UnionEyes',
+      description: isFr
+        ? 'La perspective demandee est introuvable.'
+        : 'The requested insight article could not be found.',
       alternates: buildLocaleAlternates(locale, `/insights/${slug}`),
     };
   }
 
   return {
-    title: `${article.title} | Insights | UnionEyes`,
+    title: `${article.title} | ${isFr ? 'Perspectives' : 'Insights'} | UnionEyes`,
     description: article.excerpt,
     alternates: buildLocaleAlternates(locale, `/insights/${slug}`),
   };
@@ -109,13 +120,13 @@ export default async function InsightArticlePage({ params, searchParams }: Insig
     return <InsightsCategoriesPageView locale={locale} contextMode={contextMode} />;
   }
 
-  const article = getInsightBySlug(slug);
+  const article = getInsightBySlug(slug, locale);
 
   if (!article) {
     notFound();
   }
 
-  const related = getRelatedInsights(article.slug, 3);
+  const related = getRelatedInsights(article.slug, 3, locale);
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unioneyes.app';
   const articleUrl = `${siteUrl}/${locale}/insights/${article.slug}`;

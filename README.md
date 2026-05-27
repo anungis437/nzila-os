@@ -95,7 +95,7 @@ Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tool
 | `pnpm validate:governance` | Full governance gate |
 | `pnpm governance:audit` | Doc, ownership, release, and repo audit |
 | `pnpm decision:coverage` | Warn-only decision registration coverage check |
-| `pnpm decision:coverage:strict` | Blocking decision-proof coverage gate |
+| `pnpm decision:coverage -- --strict` | Blocking decision-proof coverage gate |
 | `pnpm audit:pack:verify -- --input=<pack.json|pack.zip>` | External audit-pack integrity verification |
 | `pnpm repo:audit` | Repo excellence audit |
 | `pnpm docs:index` | Rebuild documentation index |

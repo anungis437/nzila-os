@@ -36,7 +36,7 @@ Nzila OS exists to preserve continuity and institutional legitimacy. Surveillanc
 
 - **Validator**: `tooling/scripts/validate-institutional-cognition-convergence.mjs` enforces prohibited semantics absence on user-facing surfaces.
 - **Terminology guards**: prohibited terms documented here are scanned across live surfaces.
-- **CI doctrine checks**: `pnpm validate:cognition` runs the validator and fails the build on regression.
+- **CI doctrine checks**: `node tooling/scripts/validate-institutional-cognition-convergence.mjs` runs the validator and fails the build on regression.
 - **Doctrine review**: any new intelligence surface must reference the [Institutional Operational Cognition Doctrine](institutional-operational-cognition-doctrine.md) and pass the validator.
 
 ## 4. Required Live-Surface Posture

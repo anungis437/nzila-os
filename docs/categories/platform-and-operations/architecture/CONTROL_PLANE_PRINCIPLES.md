@@ -66,7 +66,7 @@ New routes require:
 
 ## Enforcement
 
-- Route check: `pnpm control-plane:check` (`scripts/control-plane-check.ts`)
+- Route check: `pnpm exec tsx scripts/control-plane-check.ts` (`scripts/control-plane-check.ts`)
 - Route manifest: `apps/control-plane/route.meta.json`
 - CI: Runs on every PR
 

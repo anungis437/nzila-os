@@ -2,8 +2,8 @@
  * Environment Health Check — validates environment configuration, isolation,
  * and deployment readiness for LOCAL, PREVIEW, STAGING, and PRODUCTION.
  *
- * Usage: pnpm env:health [environment]
- *        e.g. pnpm env:health STAGING
+ * Usage: pnpm exec tsx scripts/environment-health.ts [environment]
+ *        e.g. pnpm exec tsx scripts/environment-health.ts STAGING
  */
 
 import * as fs from 'node:fs'

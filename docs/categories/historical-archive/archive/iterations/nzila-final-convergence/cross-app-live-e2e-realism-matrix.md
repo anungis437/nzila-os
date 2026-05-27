@@ -24,11 +24,11 @@ Maturity must increasingly be validated **operationally**, not only doctrinally.
 ## 3. Anchor Tests
 
 - `apps/union-eyes/e2e/cba-intelligence.spec.ts` — protected continuity route, entitlement-aware (PASS).
-- `pnpm validate:cognition` — cross-app cognition coherence.
-- `pnpm validate:labor-continuity` — UE labor continuity invariants.
+- `node tooling/scripts/validate-institutional-cognition-convergence.mjs` — cross-app cognition coherence.
+- `node tooling/scripts/validate-labor-continuity-governance.mjs` — UE labor continuity invariants.
 - `pnpm validate:maturity` — app-maturity contract tests.
-- `pnpm validate:maturity-elevation` — ecosystem convergence.
-- `pnpm validate:final-convergence` — final convergence enforcement.
+- `node tooling/scripts/validate-maturity-convergence.mjs` — ecosystem convergence.
+- `node tooling/scripts/validate-final-convergence.mjs` — final convergence enforcement.
 
 ## 4. Expansion Direction
 

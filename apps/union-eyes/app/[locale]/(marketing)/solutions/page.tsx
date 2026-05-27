@@ -51,13 +51,13 @@ const solutions = [
     icon: Users,
     audience: 'Union Executive Leadership',
     href: 'solutions/executive-leadership',
-    challenge: 'Strategic continuity is at risk when organizational knowledge lives in individuals, not in the organization.',
+    challenge: 'Leadership transitions get risky when too much knowledge lives in a few people.',
     scenario:
-      'A national union prepares for an upcoming presidential transition. Three decades of negotiated precedents, federation-level commitments, and operational doctrine live in one outgoing executive’s memory. OCI (Organizational Continuity Index) surfaces the dependency map; the platform turns it into an inheritable continuity record before the transition window closes.',
+      'A national union is preparing for a leadership transition. UnionEyes helps turn the outgoing team’s knowledge into a record the next team can use.',
     outcomes: [
-      'Organizational continuity visibility across leadership transitions',
+      'Continuity visibility across leadership transitions',
       'Strategic coherence through succession and change',
-      'Executive-grade operational summaries without technical complexity',
+      'Clear operational summaries without technical complexity',
     ],
     cta: 'Executive leadership solutions',
   },
@@ -65,11 +65,11 @@ const solutions = [
     icon: ShieldCheck,
     audience: 'Governance Leadership',
     href: 'solutions/governance-leadership',
-    challenge: 'Governance modernization requires explainability, oversight controls, and continuity — not opaque AI.',
+    challenge: 'Governance work needs clear reasoning and human review.',
     scenario:
-      'A board of directors is asked to approve an AI-assisted policy interpretation workflow. Their counsel needs to see the dependency chain, the confidence posture, and the human-review checkpoint for every recommendation. Governance-safe cognition makes that readable in the same surface where the decision is recorded.',
+      'A board is asked to approve AI-assisted policy interpretation. Counsel needs to see the evidence, the confidence level, and where human review happens.',
     outcomes: [
-      'Explainable governance-of-record intelligence with human oversight',
+      'Clear policy recommendations with human oversight',
       'Governance modernization with full audit trails',
       'Continuity oversight across governance transitions',
     ],
@@ -79,9 +79,9 @@ const solutions = [
     icon: Settings,
     audience: 'Operations Leadership',
     href: 'solutions/operations-leadership',
-    challenge: 'Operational fragmentation erodes organizational resilience over time.',
+    challenge: 'Operations get harder when files, decisions, and context are spread out.',
     scenario:
-      'A federation’s operational work lives across seven inboxes, three shared drives, and a legacy intake form. New officers inherit cases with no precedent map and no continuity briefing. The platform consolidates the operating record without displacing existing tools — onboarding shortens, decisions become defensible.',
+      'A federation’s work lives across inboxes, shared drives, and an old intake form. UnionEyes pulls the record together so onboarding is faster.',
     outcomes: [
       'Operational coherence across distributed teams',
       'Organizational memory preservation during change',
@@ -93,11 +93,11 @@ const solutions = [
     icon: Cpu,
     audience: 'Technology Leadership',
     href: 'solutions/technology-leadership',
-    challenge: 'Labour organizations need enterprise-safe AI that is explainable, governed, and trusted — not experimental.',
+    challenge: 'Labour organizations need AI that is secure and explainable.',
     scenario:
-      'A CIO is asked to evaluate an AI procurement that touches sensitive labour data. Their security team needs Canadian residency, fail-closed degradation posture, and an explainability surface that survives an audit. The Trust Center answers those questions before the vendor call begins.',
+      'A CIO is asked to evaluate AI that will touch sensitive labour data. The security team needs Canadian hosting and explanations that hold up in an audit.',
     outcomes: [
-      'Governance-safe AI with full explainability guarantees',
+      'Explainable AI with clear governance controls',
       'Enterprise security and Canadian data residency',
       'Organizational trust infrastructure with audit capabilities',
     ],
@@ -107,12 +107,12 @@ const solutions = [
     icon: Heart,
     audience: 'Policy & Labour Leadership',
     href: 'solutions/labour-leadership',
-    challenge: 'AI adoption in labour environments requires unambiguous labour-safe postures and human oversight.',
+    challenge: 'AI in labour environments needs worker protections and human oversight.',
     scenario:
-      'A labour-side policy team is reviewing a member-services modernization. The concern: any tool that ranks, scores, or surveils workers is non-starter. The platform’s anti-monitoring posture, plural-only analytics, and operator-initiated cognition surfaces make the procurement conversation possible without compromising labour values.',
+      'A labour policy team is reviewing a member-services modernization. UnionEyes keeps the boundary clear so the team can discuss it without compromising labour values.',
     outcomes: [
       'Anti-monitoring by design — no individual conduct grading',
-      'Human oversight in all intelligence recommendations',
+      'Human oversight on all recommendations',
       'Labour-safe modernization with democratic governance controls',
     ],
     cta: 'Policy & labour solutions',
@@ -121,9 +121,9 @@ const solutions = [
     icon: Briefcase,
     audience: 'Procurement Stakeholders',
     href: 'solutions/procurement',
-    challenge: 'Procurement decisions require operational credibility, implementation readiness, and organizational trust validation.',
+    challenge: 'Procurement teams need proof that a rollout is practical and ready.',
     scenario:
-      'A procurement officer needs to assemble a defensible organizational case for a continuity-infrastructure engagement. The Trust Center, the OCI assessment artifacts, the governance commitments, and the audit-ready exports collapse what would normally be a months-long vendor due-diligence into a structured procurement-readable package.',
+      'A procurement officer needs a clear case for a continuity engagement. The trust center outputs and audit-ready exports make the review easier.',
     outcomes: [
       'Modular deployment with phased implementation pathways',
       'Trust center documentation and audit-ready exports',
@@ -136,33 +136,33 @@ const solutions = [
 const pageCopy = {
   'en-CA': {
     badge: 'Solutions',
-    heading: 'Built for every organizational stakeholder',
+    heading: 'Built for the people who run the work',
     description:
-      'UnionEyes organizes around organizational stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role.',
-    ctaHeading: 'Ready to explore your stakeholder journey?',
+      'UnionEyes is organized around what each team needs to do.',
+    ctaHeading: 'Ready to find the right starting point?',
     ctaDescription:
-      'Start with a free Continuity Reflection. No commitment, no sales call — just a scoped look at where organizational continuity sits for your organization today.',
-    cta: 'Start the free Continuity Reflection',
+      'Start with a short review and see where your organization is most exposed.',
+    cta: 'Take the review',
     solutions,
   },
   'fr-CA': {
     badge: 'Solutions',
-    heading: 'Conçu pour chaque partie prenante institutionnelle',
+    heading: 'Conçu pour les personnes qui font avancer le travail',
     description:
-      'UnionEyes s’organise autour des parcours des parties prenantes institutionnelles, pas autour de systèmes techniques. Chaque capacité met en avant les résultats utiles à votre rôle.',
-    ctaHeading: 'Prêt à explorer votre parcours institutionnel?',
+      'UnionEyes s’organise autour des besoins de chaque équipe.',
+    ctaHeading: 'Prêt à trouver le bon point de départ?',
     ctaDescription:
-      'Commencez par une réflexion de continuité gratuite. Sans engagement, sans appel commercial — simplement un regard ciblé sur l’état actuel de la continuité institutionnelle de votre organisation.',
-    cta: 'Commencer la réflexion de continuité (gratuite)',
+      'Commencez par un court bilan et voyez où votre organisation est la plus exposée.',
+    cta: 'Faire le bilan',
     solutions: [
       {
         icon: Users,
         audience: 'Direction exécutive syndicale',
         href: 'solutions/executive-leadership',
         challenge:
-          'La continuité stratégique est fragilisée lorsque la connaissance institutionnelle vit chez des personnes plutôt que dans l’organisation.',
+          'Les transitions de leadership deviennent risquées quand trop de savoir vit chez quelques personnes.',
         scenario:
-          'Un syndicat national prépare une transition présidentielle. Trois décennies de précédents négociés, d’engagements fédéraux et de doctrine opérationnelle vivent dans la mémoire d’un seul dirigeant sortant. L’OCI (Indice de continuité organisationnelle) révèle la carte des dépendances ; la plateforme la transforme en dossier de continuité transmissible avant la fermeture de la fenêtre de transition.',
+          'Un syndicat national prépare une transition de leadership. Des décennies de précédents, d’engagements et de savoir-faire vivent dans la mémoire d’un seul dirigeant sortant. Le bilan montre où se trouvent les dépendances, puis UnionEyes aide à créer un dossier que la prochaine équipe peut réellement reprendre.',
         outcomes: [
           'Visibilité sur la continuité organisationnelle lors des transitions de leadership',
           'Cohérence stratégique pendant la succession et le changement',
@@ -175,11 +175,11 @@ const pageCopy = {
         audience: 'Direction de la gouvernance',
         href: 'solutions/governance-leadership',
         challenge:
-          'La modernisation de la gouvernance exige explicabilité, contrôles de supervision et continuité — pas une IA opaque.',
+          'Le travail de gouvernance a besoin de raisonnement clair et de revue humaine, pas d’une IA opaque.',
         scenario:
-          'Un conseil d’administration doit approuver un flux d’interprétation des politiques assisté par IA. Le conseiller juridique doit voir la chaîne de dépendances, la posture de confiance et le point de révision humaine de chaque recommandation. La cognition gouvernée rend cela lisible dans la même surface où la décision est consignée.',
+          'Un conseil doit approuver une interprétation de politiques assistée par IA. Le conseiller juridique doit voir les preuves utilisées, le niveau de confiance et l’endroit où la revue humaine intervient avant toute action.',
         outcomes: [
-          'Intelligence explicable de gouvernance officielle avec supervision humaine',
+          'Recommandations claires avec supervision humaine',
           'Modernisation de la gouvernance avec pistes d’audit complètes',
           'Supervision de continuité à travers les transitions de gouvernance',
         ],
@@ -190,12 +190,12 @@ const pageCopy = {
         audience: 'Direction des opérations',
         href: 'solutions/operations-leadership',
         challenge:
-          'La fragmentation opérationnelle affaiblit la résilience institutionnelle avec le temps.',
+          'Les opérations deviennent plus difficiles quand les dossiers, les décisions et le contexte sont dispersés.',
         scenario:
-          'Le travail opérationnel d’une fédération vit à travers sept boîtes courriel, trois lecteurs partagés et un formulaire d’intake hérité. Les nouveaux délégués héritent de dossiers sans carte des précédents ni breffage de continuité. La plateforme consolide le dossier opérationnel sans déplacer les outils existants — l’intégration raccourcit, les décisions deviennent défendables.',
+          'Le travail d’une fédération vit dans des boîtes courriel, des lecteurs partagés et un ancien formulaire d’entrée. Les nouveaux responsables héritent de dossiers sans historique clair. UnionEyes rassemble le dossier opérationnel pour accélérer l’intégration et rendre les décisions plus défendables.',
         outcomes: [
           'Cohérence opérationnelle entre équipes distribuées',
-          'Préservation de la mémoire institutionnelle pendant le changement',
+          'Préservation de la mémoire organisationnelle pendant le changement',
           'Planification de continuité pour la résilience opérationnelle',
         ],
         cta: 'Solutions pour les opérations',
@@ -205,13 +205,13 @@ const pageCopy = {
         audience: 'Direction technologique',
         href: 'solutions/technology-leadership',
         challenge:
-          'Les organisations syndicales ont besoin d’une IA sécuritaire, explicable, gouvernée et fiable — pas expérimentale.',
+          'Les organisations syndicales ont besoin d’une IA sécuritaire, explicable et facile à gouverner.',
         scenario:
-          'Un directeur informatique doit évaluer un achat d’IA qui touche des données syndicales sensibles. L’équipe de sécurité exige une résidence canadienne, une posture de dégradation sécuritaire et une surface d’explicabilité qui résiste à un audit. Le Centre de confiance répond à ces questions avant le premier appel fournisseur.',
+          'Un directeur informatique doit évaluer une IA qui touche des données syndicales sensibles. L’équipe de sécurité veut un hébergement canadien, des modes de défaillance sûrs et des explications qui tiennent en audit. Le Centre de confiance répond à ces questions avant le premier appel fournisseur.',
         outcomes: [
-          'IA respectueuse de la gouvernance avec garanties d’explicabilité',
+          'IA explicable avec contrôles de gouvernance clairs',
           'Sécurité d’entreprise et résidence des données au Canada',
-          'Infrastructure de confiance institutionnelle avec capacités d’audit',
+          'Infrastructure de confiance organisationnelle avec capacités d’audit',
         ],
         cta: 'Solutions pour la technologie',
       },
@@ -220,12 +220,12 @@ const pageCopy = {
         audience: 'Direction des politiques et du travail',
         href: 'solutions/labour-leadership',
         challenge:
-          'L’adoption de l’IA en milieu syndical exige une posture clairement respectueuse du travail et de la supervision humaine.',
+          'L’IA en milieu syndical exige des protections claires pour les travailleurs et une supervision humaine.',
         scenario:
-          'Une équipe de politiques syndicales examine une modernisation des services aux membres. La préoccupation : tout outil qui classe, note ou surveille les travailleurs est rédhibitoire. La posture anti-surveillance, l’analyse uniquement pluraliste et les surfaces de cognition initiées par l’opérateur rendent la conversation d’approvisionnement possible sans compromettre les valeurs syndicales.',
+          'Une équipe de politiques syndicales examine une modernisation des services aux membres. Tout outil qui classe, note ou surveille les travailleurs est exclu. UnionEyes garde cette limite claire pour permettre la conversation sans compromettre les valeurs syndicales.',
         outcomes: [
           'Anti-surveillance par conception — aucune notation de conduite individuelle',
-          'Supervision humaine dans toutes les recommandations d’intelligence',
+          'Supervision humaine sur toutes les recommandations',
           'Modernisation respectueuse du travail avec contrôles démocratiques',
         ],
         cta: 'Solutions politiques et travail',
@@ -235,9 +235,9 @@ const pageCopy = {
         audience: 'Parties prenantes à l’approvisionnement',
         href: 'solutions/procurement',
         challenge:
-          'Les décisions d’approvisionnement exigent crédibilité opérationnelle, préparation de mise en œuvre et validation de confiance institutionnelle.',
+          'Les équipes d’approvisionnement ont besoin de preuves claires qu’un déploiement est réaliste, sûr et prêt à être mis en œuvre.',
         scenario:
-          'Un agent d’approvisionnement doit constituer un dossier institutionnel défendable pour un engagement d’infrastructure de continuité. Le Centre de confiance, les artefacts d’évaluation OCI, les engagements de gouvernance et les exports prêts pour l’audit réduisent une diligence fournisseur normalement de plusieurs mois à un dossier structuré et lisible.',
+          'Un agent d’approvisionnement doit monter un dossier clair pour un engagement de continuité. Le Centre de confiance, les résultats du bilan, les engagements de gouvernance et les exports prêts pour l’audit transforment des mois de vérification fournisseur en dossier plus simple à évaluer.',
         outcomes: [
           'Déploiement modulaire avec parcours de mise en œuvre par phases',
           'Documentation du centre de confiance et exports prêts pour l’audit',

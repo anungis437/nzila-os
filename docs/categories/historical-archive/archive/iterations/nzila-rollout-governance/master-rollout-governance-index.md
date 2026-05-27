@@ -75,15 +75,15 @@ for the question at hand.
 
 ```bash
 # Static rollout legitimacy check (registry + topology + promotion graph)
-pnpm rollout:validate
+node tooling/scripts/validate-rollout-legitimacy.mjs
 
 # Record a promotion attestation (governs the act of promoting)
-pnpm rollout:promote:attest -- \
+node tooling/scripts/record-promotion-attestation.mjs -- \
   --from staging --to demo --release-id R-2026-05-09-01 \
   --reviewer alice --reason "Phase A complete; demo schema legitimacy pending snapshot wiring"
 
 # Aggregate readiness across environments (calm, sparse summary)
-pnpm rollout:readiness
+node tooling/scripts/run-rollout-readiness-review.mjs
 ```
 
 ---

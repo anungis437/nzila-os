@@ -1,11 +1,11 @@
-# Union Eyes — Module / Package / Runtime Narrative Alignment Audit
+# UnionEyes — Module / Package / Runtime Narrative Alignment Audit
 
 Generated: 2026-05-13T00:00:00Z
 Workstream: A (audit-only, no code changes)
 Scope: Runtime product surfaces (`apps/union-eyes/**`) and supporting `packages/**` — labels, module names, navigation, taxonomies and surfaced terminology consumed by signed-in users.
 Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files, 67/100 maturity).
 
-> Reframe target: Union Eyes is **institutional governance & continuity infrastructure** — *not* union SaaS, *not* workflow software, *not* generic case management.
+> Reframe target: UnionEyes is **institutional governance & continuity infrastructure** — *not* union SaaS, *not* workflow software, *not* generic case management.
 
 ---
 

@@ -25,7 +25,7 @@ The enumerated contracts (already canonicalized in [`docs/nzila-tier2-hardening/
 - `lineage.secret_authority` — `SECRET_AUTHORITY`
 - `lineage.environment_isolation` — `ENVIRONMENT_ISOLATION`
 
-Validator: `pnpm validate:tier2-hardening` enforces gate parity.
+Validator: `node tooling/scripts/validate-tier2-hardening.mjs` enforces gate parity.
 
 ## 2. Auth failure behavior — proven
 

@@ -10,7 +10,7 @@ tenant and actor identity with trace context.
 ## Entrypoint
 
 ```bash
-pnpm proof:run ai-controlled-request
+pnpm exec tsx scripts/proof/run-proof.ts ai-controlled-request
 ```
 
 Or via the test runner:
@@ -60,13 +60,13 @@ proof-artifacts/ai-controlled-request/
 ## How to Run Locally
 
 ```bash
-pnpm proof:run ai-controlled-request
+pnpm exec tsx scripts/proof/run-proof.ts ai-controlled-request
 ```
 
 ## How to Validate in CI
 
 The `proof-publish` CI job runs all scenarios. AI control artifacts are uploaded
-and verified by `pnpm proof:verify`.
+and verified by `pnpm exec tsx scripts/proof/verify-artifacts.ts`.
 
 ## What "Pass" Means
 

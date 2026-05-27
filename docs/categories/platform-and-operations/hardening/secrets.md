@@ -33,7 +33,7 @@ After cloning the repo, run:
 pnpm install
 ```
 
-This triggers the `prepare` script, which runs `lefthook install` to set up Git hooks automatically.
+After dependency install, run `pnpm exec lefthook install` to set up Git hooks.
 
 ### Verify hooks are active
 

@@ -11,6 +11,8 @@ on:
   schedule:
     # Daily FinOps analysis at 06:00 UTC
     - cron: '0 6 * * *'
+    # Monthly evidence cadence on day 1 at 07:15 UTC
+    - cron: '15 7 1 * *'
     # Hourly incremental decision-aggregate materialization
     - cron: '0 * * * *'
   workflow_dispatch:
@@ -26,7 +28,17 @@ on:
           - org-health
           - cost-recommendations
           - aggregate-materialization
+          - monthly-evidence
         default: all
+      month:
+        description: 'Target month in YYYY-MM format (monthly-evidence only; defaults to current UTC month)'
+        required: false
+        type: string
+      skip-live:
+        description: 'Skip live Azure cost API for monthly-evidence and use fallback data only'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -292,3 +304,106 @@ jobs:
         run: pnpm aggregates:materialize -- --mode=incremental
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  # ── Monthly Evidence Cadence ───────────────────────────────────────────
+  monthly-evidence:
+    runs-on: ubuntu-latest
+    name: Monthly Evidence Pack
+    if: >
+      github.event.inputs.task == 'all' ||
+      github.event.inputs.task == 'monthly-evidence' ||
+      github.event.schedule == '15 7 1 * *'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Resolve target month
+        id: resolve-month
+        shell: bash
+        run: |
+          set -euo pipefail
+          month='${{ github.event.inputs.month }}'
+          if [ -z "$month" ]; then
+            month=$(date -u +%Y-%m)
+          fi
+          echo "TARGET_MONTH=$month" >> "$GITHUB_ENV"
+          echo "target_month=$month" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether monthly pack already exists
+        id: pack-state
+        shell: bash
+        run: |
+          set -euo pipefail
+          month='${{ steps.resolve-month.outputs.target_month }}'
+          if [ -d "proof-artifacts/evidence-packs/$month" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Evidence pack for $month already committed; skipping generation."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Collect DORA metrics
+        if: steps.pack-state.outputs.exists != 'true'
+        run: node tooling/scripts/collect-dora-metrics.mjs
+
+      - name: Collect cost attribution
+        if: steps.pack-state.outputs.exists != 'true'
+        run: node tooling/scripts/collect-cost-attribution.mjs
+        env:
+          COST_ENABLE_AZURE_API: ${{ github.event.inputs['skip-live'] == 'true' && '0' || (vars.COST_ENABLE_AZURE_API || '0') }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Collect onboarding KPIs
+        if: steps.pack-state.outputs.exists != 'true'
+        run: node tooling/scripts/collect-onboarding-kpis.mjs
+
+      - name: Refresh governance rollups
+        if: steps.pack-state.outputs.exists != 'true'
+        run: |
+          pnpm exec tsx scripts/release/generate-governance-audit.ts
+          pnpm exec tsx scripts/sre/generate-executive-dashboard.ts
+          pnpm exec tsx scripts/finops/build-portfolio-finops.ts
+
+      - name: Build monthly evidence pack
+        if: steps.pack-state.outputs.exists != 'true'
+        run: pnpm exec tsx scripts/proof/build-monthly-evidence-pack.ts -- --month=${{ steps.resolve-month.outputs.target_month }}
+
+      - name: Create monthly evidence PR
+        if: steps.pack-state.outputs.exists != 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: chore(evidence): add monthly evidence pack ${{ steps.resolve-month.outputs.target_month }}
+          title: chore(evidence): monthly evidence pack ${{ steps.resolve-month.outputs.target_month }}
+          body: |
+            Automated monthly evidence cadence run.
+
+            Generated from live repo governance artifacts for `${{ steps.resolve-month.outputs.target_month }}`.
+          branch: automation/monthly-evidence-${{ steps.resolve-month.outputs.target_month }}
+          delete-branch: true
+          add-paths: |
+            proof-artifacts/evidence-packs/${{ steps.resolve-month.outputs.target_month }}/
+            proof-artifacts/evidence-packs/history.jsonl
+            proof-artifacts/evidence-packs/README.md
+
+      - name: Upload monthly evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: monthly-evidence-${{ steps.resolve-month.outputs.target_month }}-${{ github.run_id }}
+          path: |
+            proof-artifacts/evidence-packs/${{ steps.resolve-month.outputs.target_month }}/
+            proof-artifacts/evidence-packs/history.jsonl
+            proof-artifacts/evidence-packs/README.md
+          if-no-files-found: warn
+          retention-days: 365

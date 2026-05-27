@@ -15,7 +15,7 @@ const groups = [
     commands: [
       'pnpm check:governance',
       'pnpm validate:governance',
-      'pnpm validate:governance:gate',
+      'pnpm exec tsx tooling/governance/validate-governance-gate.ts',
       'pnpm validate:evidence:lifecycle',
     ],
   },

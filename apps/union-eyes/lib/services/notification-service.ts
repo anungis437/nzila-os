@@ -9,7 +9,7 @@
 import { db } from "@/db";
 import { v4 as uuid } from "uuid";
 import { logger } from "@/lib/logger";
-import { getResendClient, getFromEmail } from "@/lib/email-service";
+import { getFromEmail, sendResendEmail } from "@/lib/email-service";
 import { createAuditLog } from "./audit-service";
 import {
   notificationQueue,
@@ -170,30 +170,28 @@ export class ResendEmailProvider implements NotificationProvider {
         throw new Error("Recipient email not provided");
       }
 
-      const client = getResendClient();
-      if (!client) {
-        throw new Error("Resend API key not configured");
-      }
-
       const fromEmail = getFromEmail();
       const replyTo = process.env.EMAIL_REPLY_TO;
       const subject = payload.subject || 'Notification';
       const htmlBody = payload.htmlBody || `<p>${payload.body}</p>`;
 
-      const { data, error } = await client.emails.send({
+      const result = await sendResendEmail({
         from: fromEmail,
         to: [payload.recipientEmail],
         subject,
         html: htmlBody,
         text: stripHtml(htmlBody),
         replyTo,
+      }, {
+        feature: 'notification_service',
+        organizationId: payload.organizationId,
       });
 
-      if (error) {
-        throw new Error(error.message || 'Resend send error');
+      if (!result.success) {
+        throw new Error(result.error || 'Resend send error');
       }
 
-      const messageId = data?.id || `rs-${uuid()}`;
+      const messageId = result.messageId || `rs-${uuid()}`;
 
       logger.info("Email notification sent via Resend", {
         to: payload.recipientEmail,

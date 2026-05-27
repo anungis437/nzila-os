@@ -12,7 +12,7 @@ Nzila OS provides five categories of verifiable evidence:
 | Category | What You Get | How to Verify |
 |----------|-------------|---------------|
 | **Evidence packs** | Per-action tamper-evident bundles (hash-chained, Azure Blob sealed) | Hash-chain verification: any altered record breaks the chain |
-| **Compliance snapshots** | Point-in-time compliance state (deterministic, hash-chained) | Reproduce via `pnpm validate:all` |
+| **Compliance snapshots** | Point-in-time compliance state (deterministic, hash-chained) | Reproduce via `pnpm exec tsx packages/platform-validation/src/run-all.ts` |
 | **Build attestation** | Ed25519-signed build provenance | Verify signature against published public key |
 | **SBOM** | CycloneDX software bill of materials | `scripts/generate-sbom.ts` → `ops/security/sbom.json` |
 | **Procurement pack** | Signed ZIP bundle (security + data + ops + governance + sovereignty) | 5-step verification in [procurement-pack.md](../governance/procurement-pack.md) |
@@ -35,7 +35,7 @@ Nzila OS provides five categories of verifiable evidence:
 | Governance gate | `validate-governance-gate.ts` | 8 governance packages present (fail-closed, no skip flags) |
 | App gold standard | `app-gold-standard-check.ts` | Health, metrics, evidence, policy, tests, docs |
 
-**Composite command**: `pnpm architecture:check` runs all architecture gates.
+**Composite command**: `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` runs all architecture gates.
 
 ### Governance Data
 
@@ -112,28 +112,28 @@ An auditor with repository access can independently verify:
 
 ```bash
 # Run all architecture gates
-pnpm architecture:check
+pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts
 
 # Run all governance checks
-pnpm validate:governance
+pnpm exec tsx tooling/ga-check/ga-check.ts && pnpm contract-tests && pnpm inventory:check && pnpm exec tsx scripts/check-brand-leakage.ts && pnpm exec tsx scripts/validate-product-catalog.ts && pnpm exec tsx scripts/validate-portfolio.ts && pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts && pnpm exec tsx scripts/validate-auth-authority.ts && pnpm exec tsx scripts/validate-ga-state.ts && pnpm exec tsx scripts/validate-workspace-links.ts && pnpm exec tsx scripts/validate-release-strict.ts && pnpm exec tsx scripts/generate-commercial-traction.ts
 
 # Run platform adoption gate (shell, schema, workflow, observability)
-pnpm platform:adoption:check
+pnpm exec tsx scripts/platform-adoption-gate.ts
 
 # Validate control manifests (CM-001 through CM-009)
-pnpm validate:control:manifests
+pnpm exec tsx tooling/governance/validate-control-manifests.ts
 
 # Generate SBOM
-pnpm generate:sbom
+pnpm exec tsx scripts/generate-sbom.ts
 
 # Run contract tests (5,000+ invariants)
 pnpm contract-tests
 
 # Reproduce evidence pack
-pnpm reproduce:evidence
+pnpm exec tsx scripts/reproduce-evidence.ts
 
 # Full validation suite
-pnpm validate:all
+pnpm exec tsx packages/platform-validation/src/run-all.ts
 ```
 
 ---

@@ -10,7 +10,7 @@
 
 ## Core Thesis
 
-Union Eyes operational labour workflows surfaced a deeper continuity problem that traditional systems do not solve.
+UnionEyes operational labour workflows surfaced a deeper continuity problem that traditional systems do not solve.
 
 The whitepaper starts from operational reality, then reveals continuity fragility underneath.
 
@@ -32,7 +32,7 @@ OCI/OCRA help organizations understand and stabilize continuity safely over time
 
 ### Objective
 
-Establish operational trust immediately using real work contexts already visible in Union Eyes.
+Establish operational trust immediately using real work contexts already visible in UnionEyes.
 
 ### Required operational anchors
 
@@ -116,7 +116,7 @@ Explain why workflow software is not continuity infrastructure.
 
 ---
 
-## Section 4: How Union Eyes Discovered the Continuity Layer
+## Section 4: How UnionEyes Discovered the Continuity Layer
 
 ### Objective
 
@@ -263,4 +263,4 @@ Synthesize operations, governance, and continuity into one category narrative.
 
 Continuity is infrastructure.
 
-Union Eyes is best understood as continuity-aware operational infrastructure: grounded in real labour operations, extended by continuity intelligence, and governed by anti-surveillance, explainable, human-led doctrine.
+UnionEyes is best understood as continuity-aware operational infrastructure: grounded in real labour operations, extended by continuity intelligence, and governed by anti-surveillance, explainable, human-led doctrine.

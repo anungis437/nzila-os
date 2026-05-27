@@ -41,13 +41,13 @@ function main(): void {
   }
 
   if (findings.length > 0) {
-    console.log('\n[validate:truth-authority] FAIL')
+    console.log('\n[validate-truth-authority] FAIL')
     for (const finding of findings) console.log(` - ${finding}`)
     for (const warning of validation.warnings) console.log(` ! ${warning}`)
     process.exit(1)
   }
 
-  console.log('\n[validate:truth-authority] PASS')
+  console.log('\n[validate-truth-authority] PASS')
   console.log('Portfolio truth now flows from one editable source into all published surfaces.')
   for (const warning of validation.warnings) console.log(` ! ${warning}`)
 }

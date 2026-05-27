@@ -39,7 +39,7 @@ under real conditions.
 All proving evidence is captured under
 `proof-artifacts/operational-proving/`, indexed by
 `proving-manifest.json`. The proving validator
-(`pnpm ops:prove`) reads the manifest and verifies that every
+(`node tooling/scripts/validate-operational-proving.mjs`) reads the manifest and verifies that every
 referenced attestation exists in the rollout ledger.
 
 ## Authority

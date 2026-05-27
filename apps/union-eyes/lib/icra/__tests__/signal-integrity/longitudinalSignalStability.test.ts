@@ -50,9 +50,34 @@ describe('Question Architecture Audit™ — longitudinal signal stability', () 
     }
   });
 
-  // mt_02 carries an institutional-anchor exception documented in
-  // LONGITUDINAL_SURVIVABILITY_AUDIT.md §3. Re-classified L-Stable in v1.2.0
-  // per Roadmap R-H4.
-  it.todo('L-Decaying count = 0 after Roadmap R-H4 rewords mt_02 anchor');
-  it.todo('every ccs_* question declares a stable institutional anchor in metadata');
+  it('L-Decaying count = 0 after Roadmap R-H4 rewords mt_02 anchor', () => {
+    const decayingPatterns = [
+      /last (?:month|quarter|year)/i,
+      /this (?:month|quarter|year)/i,
+      /newly appointed/i,
+      /current [a-z]+ cycle/i,
+      /recently introduced/i,
+    ];
+    const mtQuestions = ALL_QUESTIONS.filter((q) => q.id.startsWith('mt_'));
+    const decaying = mtQuestions.filter((q) =>
+      decayingPatterns.some((p) => p.test(q.prompt) || p.test(q.helpText ?? '')),
+    );
+    expect(decaying.map((q) => q.id)).toEqual([]);
+  });
+
+  it('every ccs_* question declares a stable institutional anchor in metadata', () => {
+    const ccsQuestions = ALL_QUESTIONS.filter((q) => q.id.startsWith('ccs_'));
+    expect(ccsQuestions.length).toBeGreaterThan(0);
+    for (const q of ccsQuestions) {
+      expect(q.intelligence, `${q.id}: intelligence metadata required`).toBeDefined();
+      expect(
+        q.intelligence?.longitudinalValue,
+        `${q.id}: longitudinalValue should be high for stable anchoring`,
+      ).toBe('high');
+      expect(
+        q.intelligence?.stabilizationRelevance,
+        `${q.id}: stabilizationRelevance must not be not_applicable`,
+      ).not.toBe('not_applicable');
+    }
+  });
 });

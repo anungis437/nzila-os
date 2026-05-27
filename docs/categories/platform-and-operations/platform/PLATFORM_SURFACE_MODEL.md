@@ -196,7 +196,7 @@ Features **must** be placed in the correct surface. Overlap is a governance viol
 
 - Machine-readable registry: `platform/registry/platform-surfaces.json`
 - Route manifests: `apps/<surface>/route.meta.json`
-- Check script: `pnpm platform:surface:model:check`
+- Check script: `pnpm exec tsx scripts/platform-surface-model-check.ts`
 - See also: `docs/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md`
 
 ---

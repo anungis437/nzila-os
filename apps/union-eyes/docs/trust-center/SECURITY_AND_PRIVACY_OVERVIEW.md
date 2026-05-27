@@ -1,7 +1,7 @@
-# Union Eyes — Security and Privacy Overview
+# UnionEyes — Security and Privacy Overview
 
 > **Audience:** Procurement reviewers, security assessors, institutional buyers.
-> **Scope:** Public-safe summary of Union Eyes security controls and data privacy posture.
+> **Scope:** Public-safe summary of UnionEyes security controls and data privacy posture.
 > **Caveats:** This document uses language such as "is designed to," "supports," and "provides evidence of."
 > No claim represents a formal certification unless a certification document is explicitly referenced.
 
@@ -9,7 +9,7 @@
 
 ## 1. Authentication and Access Control
 
-Union Eyes is designed with server-side authentication enforcement as its primary security boundary.
+UnionEyes is designed with server-side authentication enforcement as its primary security boundary.
 
 - **Role-based access control (RBAC):** All dashboard routes and API handlers are protected by
   server-side auth wrappers (`withRoleAuth`, `withMinRole`). Roles include member, steward,
@@ -27,7 +27,7 @@ Union Eyes is designed with server-side authentication enforcement as its primar
 
 ## 2. Secret and Credential Management
 
-Union Eyes is designed to prevent secret leakage into source code and build artifacts.
+UnionEyes is designed to prevent secret leakage into source code and build artifacts.
 
 - Secrets are managed through environment variables and are not committed to the repository.
 - A pre-commit secret scanning gate (`gitleaks`) is active on all commits.
@@ -54,7 +54,7 @@ A layered rate limiting system is active in the middleware layer.
 
 ## 4. Data Privacy
 
-Union Eyes is designed to support the data minimisation and access control requirements
+UnionEyes is designed to support the data minimisation and access control requirements
 applicable to labour relations and union member data.
 
 - Member data is accessible only to authenticated users with the appropriate role.

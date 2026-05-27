@@ -34,7 +34,7 @@ If two consecutive months miss any KPI target, an onboarding improvement action 
 Automated KPI report generation:
 
 ```bash
-pnpm collect:onboarding:kpis
+node tooling/scripts/collect-onboarding-kpis.mjs
 ```
 
 GitHub API enrichment is automatically attempted (via `gh api`) using:
@@ -105,7 +105,7 @@ Key entry points:
 
 | What | Where |
 |---|---|
-| All available scripts | `pnpm help:commands` |
+| All available scripts | `node tooling/scripts/show-command-catalog.mjs` |
 | App registry (tiers, owners) | `platform/registry/apps.json` |
 | Architecture overview | `ARCHITECTURE.md` |
 | SLO targets | `ops/slo-policy.yml` |
@@ -139,8 +139,8 @@ Scopes: `web`, `console`, `union-eyes`, `abr`, `governance`, `platform`, `securi
 ### Step 2: Before pushing
 
 ```bash
-pnpm check:core        # lint + typecheck + changed-package tests
-pnpm check:governance  # governance gate (14+ checks, must pass)
+pnpm lint && pnpm typecheck && pnpm test:changed        # lint + typecheck + changed-package tests
+pnpm exec tsx tooling/ga-check/ga-check.ts && pnpm contract-tests && pnpm inventory:check && pnpm exec tsx scripts/check-brand-leakage.ts && pnpm exec tsx scripts/validate-product-catalog.ts && pnpm exec tsx scripts/validate-portfolio.ts && pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts && pnpm exec tsx scripts/validate-auth-authority.ts && pnpm exec tsx scripts/validate-ga-state.ts && pnpm exec tsx scripts/validate-workspace-links.ts && pnpm exec tsx scripts/validate-release-strict.ts && pnpm exec tsx scripts/generate-commercial-traction.ts && pnpm exec tsx tooling/governance/validate-governance-gate.ts && pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts && node tooling/scripts/validate-strategic-resilience.mjs --enforce && node tooling/scripts/check-governance-runtime-budget.mjs --enforce  # governance gate (14+ checks, must pass)
 ```
 
 ### Step 3: Pre-commit hooks
@@ -153,8 +153,8 @@ LEFTHOOK=0 git commit -m "..."
 
 ### Step 4: PR checklist
 
-- [ ] `pnpm check:core` passes (exit 0)
-- [ ] `pnpm check:governance` passes (exit 0)
+- [ ] `pnpm lint && pnpm typecheck && pnpm test:changed` passes (exit 0)
+- [ ] `pnpm exec tsx tooling/ga-check/ga-check.ts && pnpm contract-tests && pnpm inventory:check && pnpm exec tsx scripts/check-brand-leakage.ts && pnpm exec tsx scripts/validate-product-catalog.ts && pnpm exec tsx scripts/validate-portfolio.ts && pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts && pnpm exec tsx scripts/validate-auth-authority.ts && pnpm exec tsx scripts/validate-ga-state.ts && pnpm exec tsx scripts/validate-workspace-links.ts && pnpm exec tsx scripts/validate-release-strict.ts && pnpm exec tsx scripts/generate-commercial-traction.ts && pnpm exec tsx tooling/governance/validate-governance-gate.ts && pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts && node tooling/scripts/validate-strategic-resilience.mjs --enforce && node tooling/scripts/check-governance-runtime-budget.mjs --enforce` passes (exit 0)
 - [ ] No new `any` types without a comment explaining why
 - [ ] Evidence exports unchanged or updated with new schema version
 - [ ] For new API routes: authz check wired, health endpoint present
@@ -167,11 +167,11 @@ These may feel heavyweight initially. Each has a purpose:
 
 | Process | Command | Why it exists |
 |---|---|---|
-| Governance gate | `pnpm validate:governance:gate` | Blocks deployment when platform invariants drift |
-| Evidence lifecycle | `pnpm validate:evidence:lifecycle` | Ensures retention policy compliance |
+| Governance gate | `pnpm exec tsx tooling/governance/validate-governance-gate.ts` | Blocks deployment when platform invariants drift |
+| Evidence lifecycle | `pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts` | Ensures retention policy compliance |
 | SLO gate | `pnpm contract-tests` (slo-* tests) | Prevents p95 latency regressions reaching production |
 | Load test | `pnpm k6:smoke` | Catches throughput regressions before merge |
-| Quarterly scorecard | `pnpm strategic:quarterly` | Feeds leadership with adoption + cost + DORA metrics |
+| Quarterly scorecard | `node tooling/scripts/generate-quarterly-strategic-scorecard.mjs` | Feeds leadership with adoption + cost + DORA metrics |
 
 All gates are **fail-closed** — they must pass before merging to main.
 
@@ -205,7 +205,7 @@ If a gate is failing on a clean branch and you believe it is a false positive, o
 
 | Pitfall category | Share of onboarding issues | Prevention action |
 |---|---|---|
-| Environment drift (Node/pnpm mismatch) | 34% | Auto-check in `pnpm verify:env` during day-1 setup |
+| Environment drift (Node/pnpm mismatch) | 34% | Auto-check in `pnpm exec tsx tooling/build-env-check.ts` during day-1 setup |
 | Auth/org context confusion | 23% | Mandatory walkthrough of org resolution flow before first backend PR |
 | Data-layer misuse (raw SQL/Drizzle result assumptions) | 21% | Add pair-review checklist item for DB touchpoints |
 | CI parity mismatch (CRLF/cache behavior) | 14% | Enforce pre-push git + cache strategy validation |

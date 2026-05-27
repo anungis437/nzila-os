@@ -4,7 +4,7 @@
  * Validates authoritative package map coherence and prevents overlap drift
  * between authoritative and subordinate platform abstractions.
  *
- * Usage: pnpm platform:authority:check
+ * Usage: pnpm exec tsx scripts/platform-authority-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

@@ -1,0 +1,119 @@
+{
+  "generatedAt": "2026-05-25T17:56:40.052Z",
+  "routes": [
+    {
+      "app": "union-eyes",
+      "team": "union-eyes-engineering",
+      "primary": "oncall-union-eyes@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "abr",
+      "team": "faircase-engineering",
+      "primary": "oncall-faircase@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "flow",
+      "team": "flow-engineering",
+      "primary": "oncall-flow@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "web",
+      "team": "web-engineering",
+      "primary": "oncall-web@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "partners",
+      "team": "partners-engineering",
+      "primary": "oncall-partners@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "cfo",
+      "team": "cfo-engineering",
+      "primary": "oncall-cfo@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "zonga",
+      "team": "zonga-engineering",
+      "primary": "oncall-zonga@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "agrimo",
+      "team": "agrimo-engineering",
+      "primary": "oncall-agrimo@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "cora",
+      "team": "cora-engineering",
+      "primary": "oncall-cora@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "trade",
+      "team": "trade-engineering",
+      "primary": "oncall-trade@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "mobility",
+      "team": "mobility-engineering",
+      "primary": "oncall-mobility@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "console",
+      "team": "platform-admin",
+      "primary": "oncall-platform@nzila.ai",
+      "secondary": "vp-platform@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "control-plane",
+      "team": "platform-admin",
+      "primary": "oncall-platform@nzila.ai",
+      "secondary": "vp-platform@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    },
+    {
+      "app": "orchestrator-api",
+      "team": "platform-admin",
+      "primary": "oncall-platform@nzila.ai",
+      "secondary": "vp-platform@nzila.ai",
+      "p1AckMinutes": 15,
+      "p2AckMinutes": 60
+    }
+  ],
+  "ownerlessAlerts": [],
+  "passed": true
+}

@@ -8,7 +8,7 @@
  * failing apps, drift delta vs prior deploy, and promotion readiness verdict.
  *
  * Usage:
- *   pnpm deploy:evidence
+ *   pnpm exec tsx scripts/release/build-deploy-evidence.ts --env staging
  *   tsx scripts/release/build-deploy-evidence.ts [--env staging]
  *
  * Output:

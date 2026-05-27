@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ─── hoisted mocks ───
 const mocks = vi.hoisted(() => ({
-  mockSend: vi.fn(),
+  mockSendResendEmail: vi.fn(),
 }));
 
 vi.mock('@/lib/email-service', () => ({
-  getResendClient: () => ({ emails: { send: mocks.mockSend } }),
+  sendResendEmail: mocks.mockSendResendEmail,
   getFromEmail: (label?: string) => label ? `${label} <noreply@test.app>` : 'noreply@test.app',
 }));
 
@@ -24,7 +24,7 @@ import {
 describe('email-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.mockSend.mockResolvedValue({ data: { id: 'msg-1' }, error: null });
+    mocks.mockSendResendEmail.mockResolvedValue({ success: true, messageId: 'msg-1' });
   });
 
   // ──────────────── sendAwardReceivedEmail ────────────────
@@ -43,18 +43,18 @@ describe('email-service', () => {
     it('sends email successfully', async () => {
       const result = await sendAwardReceivedEmail(awardData);
       expect(result.success).toBe(true);
-      expect(mocks.mockSend).toHaveBeenCalledTimes(1);
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledTimes(1);
     });
 
     it('returns error when Resend returns error', async () => {
-      mocks.mockSend.mockResolvedValue({ data: null, error: { message: 'rate limit' } });
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'rate limit' });
       const result = await sendAwardReceivedEmail(awardData);
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
     });
 
     it('handles thrown errors gracefully', async () => {
-      mocks.mockSend.mockRejectedValue(new Error('Network failure'));
+      mocks.mockSendResendEmail.mockRejectedValue(new Error('Network failure'));
       const result = await sendAwardReceivedEmail(awardData);
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
@@ -62,17 +62,19 @@ describe('email-service', () => {
 
     it('includes recipient email in the send payload', async () => {
       await sendAwardReceivedEmail(awardData);
-      expect(mocks.mockSend).toHaveBeenCalledWith(
-        expect.objectContaining({ to: 'alice@example.com' })
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({ to: 'alice@example.com' }),
+        expect.anything(),
       );
     });
 
     it('includes issuer name in the subject', async () => {
       await sendAwardReceivedEmail(awardData);
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           subject: expect.stringContaining('Bob'),
-        })
+        }),
+        expect.anything(),
       );
     });
   });
@@ -98,19 +100,20 @@ describe('email-service', () => {
 
     it('sends to admin email', async () => {
       await sendApprovalRequestEmail(approvalData);
-      expect(mocks.mockSend).toHaveBeenCalledWith(
-        expect.objectContaining({ to: 'admin@example.com' })
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({ to: 'admin@example.com' }),
+        expect.anything(),
       );
     });
 
     it('returns error on Resend failure', async () => {
-      mocks.mockSend.mockResolvedValue({ data: null, error: { message: 'fail' } });
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'fail' });
       const result = await sendApprovalRequestEmail(approvalData);
       expect(result.success).toBe(false);
     });
 
     it('handles thrown errors', async () => {
-      mocks.mockSend.mockRejectedValue(new Error('timeout'));
+      mocks.mockSendResendEmail.mockRejectedValue(new Error('timeout'));
       const result = await sendApprovalRequestEmail(approvalData);
       expect(result.success).toBe(false);
     });
@@ -132,13 +135,13 @@ describe('email-service', () => {
     });
 
     it('returns error on failure', async () => {
-      mocks.mockSend.mockResolvedValue({ data: null, error: { message: 'error' } });
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'error' });
       const result = await sendCreditExpirationEmail(expirationData);
       expect(result.success).toBe(false);
     });
 
     it('handles thrown errors', async () => {
-      mocks.mockSend.mockRejectedValue(new Error('crash'));
+      mocks.mockSendResendEmail.mockRejectedValue(new Error('crash'));
       const result = await sendCreditExpirationEmail(expirationData);
       expect(result.success).toBe(false);
     });
@@ -161,21 +164,22 @@ describe('email-service', () => {
 
     it('includes credits in subject line', async () => {
       await sendRedemptionConfirmationEmail(redemptionData);
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           subject: expect.stringContaining('75'),
-        })
+        }),
+        expect.anything(),
       );
     });
 
     it('returns error on Resend error', async () => {
-      mocks.mockSend.mockResolvedValue({ data: null, error: { message: 'blocked' } });
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'blocked' });
       const result = await sendRedemptionConfirmationEmail(redemptionData);
       expect(result.success).toBe(false);
     });
 
     it('handles thrown errors', async () => {
-      mocks.mockSend.mockRejectedValue(new Error('server error'));
+      mocks.mockSendResendEmail.mockRejectedValue(new Error('server error'));
       const result = await sendRedemptionConfirmationEmail(redemptionData);
       expect(result.success).toBe(false);
     });
@@ -219,7 +223,7 @@ describe('email-service', () => {
       });
       expect(result.success).toBe(true);
       // The HTML should contain "1 day" (singular), not "1 days"
-      const htmlArg = mocks.mockSend.mock.calls[0][0].html;
+      const htmlArg = mocks.mockSendResendEmail.mock.calls[0][0].html;
       expect(htmlArg).toContain('1 day');
       expect(htmlArg).not.toContain('1 days');
     });
@@ -242,7 +246,7 @@ describe('email-service', () => {
       };
       const result = await sendAwardReceivedEmail(dataWithIcon);
       expect(result.success).toBe(true);
-      const htmlArg = mocks.mockSend.mock.calls[0][0].html;
+      const htmlArg = mocks.mockSendResendEmail.mock.calls[0][0].html;
       expect(htmlArg).toContain('🏆');
     });
   });

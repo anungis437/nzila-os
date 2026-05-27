@@ -168,42 +168,42 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 
   if (experience === 'staff') {
     return [
-      { label: 'Casework Console', href: '/dashboard/work' },
-      { label: 'Representation Cases', href: '/dashboard/inbox?type=intake' },
-      { label: 'Commitments & Deadlines', href: '/dashboard/priorities' },
-      { label: 'Members', href: '/dashboard/members' },
-      { label: 'Documents', href: '/dashboard/documents' },
-      { label: 'Communications', href: '/dashboard/correspondence' },
-      { label: 'Organizational Reports', href: '/dashboard/reports' },
-      { label: 'Notifications', href: '/dashboard/notifications' },
-      { label: 'Profile & Settings', href: '/dashboard/settings' },
+      { label: 'Operations (Casework Console)', href: '/dashboard/work', group: 'Operations' },
+      { label: 'Operations Queue (Representation Cases)', href: '/dashboard/inbox?type=intake', group: 'Operations' },
+      { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/priorities', group: 'Operations' },
+      { label: 'Members', href: '/dashboard/members', group: 'Operations' },
+      { label: 'Documents', href: '/dashboard/documents', group: 'Operations' },
+      { label: 'Operations Communications', href: '/dashboard/correspondence', group: 'Operations' },
+      { label: 'Institutional Intelligence Reports', href: '/dashboard/reports', group: 'Institutional Intelligence' },
+      { label: 'Notifications', href: '/dashboard/notifications', group: 'Operations' },
+      { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
   }
 
   if (experience === 'executive') {
     return [
-      { label: 'Executive Overview', href: '/dashboard/intelligence?scope=executive' },
-      { label: 'Continuity Insights', href: '/dashboard/continuity-intelligence' },
-      { label: 'Continuity Operations', href: '/dashboard/executive-operating-intelligence' },
-      { label: 'Governance Visibility', href: '/dashboard/governance-center' },
-      { label: 'Member Outcomes Ledger', href: '/dashboard/outcomes' },
-      { label: 'Leadership Continuity', href: '/dashboard/leadership' },
-      { label: 'Reports', href: '/dashboard/reports' },
-      { label: 'Trust & Oversight', href: '/dashboard/trust' },
-      { label: 'Profile & Settings', href: '/dashboard/settings' },
+      { label: 'OCRA Intelligence (Executive Overview)', href: '/dashboard/intelligence?scope=executive', group: 'OCRA' },
+      { label: 'OCRA Signals (Continuity Insights)', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
+      { label: 'Operations Continuity', href: '/dashboard/executive-operating-intelligence', group: 'Operations' },
+      { label: 'Governance Continuity', href: '/dashboard/governance-center', group: 'Governance Continuity' },
+      { label: 'Operations Outcomes (Member Outcomes Ledger)', href: '/dashboard/outcomes', group: 'Operations' },
+      { label: 'Onboarding Survivability (Leadership Continuity)', href: '/dashboard/leadership', group: 'Operations' },
+      { label: 'Institutional Intelligence Reports', href: '/dashboard/reports', group: 'Institutional Intelligence' },
+      { label: 'Governance Trust & Oversight', href: '/dashboard/trust', group: 'Governance Continuity' },
+      { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
   }
 
   if (experience === 'governance') {
     return [
-      { label: 'Governance Overview', href: '/dashboard/governance' },
-      { label: 'Trust & Explainability', href: '/dashboard/trust' },
-      { label: 'Continuity Review', href: '/dashboard/workbench' },
-      { label: 'Policy Alignment', href: '/dashboard/governance' },
-      { label: 'Continuity Signals', href: '/dashboard/continuity-intelligence' },
-      { label: 'Audit & Evidence', href: '/dashboard/audits' },
-      { label: 'Reports', href: '/dashboard/reports' },
-      { label: 'Profile & Settings', href: '/dashboard/settings' },
+      { label: 'Governance Continuity Overview', href: '/dashboard/governance', group: 'Governance Continuity' },
+      { label: 'Governance Trust & Explainability', href: '/dashboard/trust', group: 'Governance Continuity' },
+      { label: 'Governance Continuity Review', href: '/dashboard/workbench', group: 'Governance Continuity' },
+      { label: 'Governance Policy Continuity', href: '/dashboard/governance', group: 'Governance Continuity' },
+      { label: 'OCRA Continuity Signals', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
+      { label: 'Governance Audit & Evidence', href: '/dashboard/audits', group: 'Governance Continuity' },
+      { label: 'Institutional Intelligence Reports', href: '/dashboard/reports', group: 'Institutional Intelligence' },
+      { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
   }
 
@@ -303,6 +303,10 @@ const PILOT_EXCLUDED_PREFIXES = [
   '/dashboard/data-source',
   '/dashboard/admin/ai-usage',
 ] as const;
+
+export function getAllowedPrefixesByExperience(): Record<DashboardExperience, string[]> {
+  return ALLOWED_PREFIXES_BY_EXPERIENCE;
+}
 
 export function canAccessDashboardPath(pathname: string, experience: DashboardExperience, isPilotMode: boolean): boolean {
   const allowedPrefixes = isCupe4373DemoRuntime()

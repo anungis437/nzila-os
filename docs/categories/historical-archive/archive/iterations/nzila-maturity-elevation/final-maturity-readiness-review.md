@@ -39,7 +39,7 @@
 
 ## 7. Convergence Maturity
 
-- Validator coverage: `pnpm validate:cognition`, `pnpm validate:labor-continuity`, `pnpm validate:maturity`, `pnpm validate:maturity-elevation`.
+- Validator coverage: `node tooling/scripts/validate-institutional-cognition-convergence.mjs`, `node tooling/scripts/validate-labor-continuity-governance.mjs`, `pnpm validate:maturity`, `node tooling/scripts/validate-maturity-convergence.mjs`.
 - Typecheck: PASS (full monorepo).
 - Targeted E2E: PASS (UE protected continuity route, entitlement-aware).
 

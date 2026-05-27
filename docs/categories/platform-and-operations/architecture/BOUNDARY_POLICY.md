@@ -101,10 +101,10 @@ import { createPayment } from '@nzila/payments-stripe'
 |------|--------|---------------|
 | Boundary ESLint | `pnpm lint` | ✅ Yes |
 | Contract Tests | `pnpm contract-tests` | ✅ Yes |
-| Control Manifests | `pnpm validate:control:manifests` | ✅ Yes |
+| Control Manifests | `pnpm exec tsx tooling/governance/validate-control-manifests.ts` | ✅ Yes |
 | Registry Alignment | `registry-alignment.test.ts` | ✅ Yes |
 | Org-Scope Check | `registry-org-scope.test.ts` | ✅ Yes |
-| Governance Gate | `pnpm validate:governance:gate` | ✅ Yes |
+| Governance Gate | `pnpm exec tsx tooling/governance/validate-governance-gate.ts` | ✅ Yes |
 
 ## Violation Remediation
 

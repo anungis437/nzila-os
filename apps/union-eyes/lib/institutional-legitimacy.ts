@@ -173,24 +173,24 @@ export const evidenceArchitecture = {
 export const deploymentWalkthrough = [
   {
     stage: 'Continuity Assessment',
-    safeguards: 'Review scope, risks, and organizational memory exposure before activation.',
-    continuity: 'Establishes the baseline that informs later rollout pacing.',
-    visibility: 'Leadership sees where the organization is most exposed.',
+    safeguards: 'Review scope, risks, and memory gaps before activation.',
+    continuity: 'Sets the baseline for rollout pacing.',
+    visibility: 'Shows where the organization is most exposed.',
     stakeholders: 'Executive sponsors, operations leads, and governance owners.',
     checkpoint: 'Confirm the assessment summary and evidence baseline.',
   },
   {
     stage: 'Governance Mapping',
-    safeguards: 'Map review responsibilities, sign-off paths, and oversight boundaries.',
-    continuity: 'Protects governance continuity during modernization decisions.',
+    safeguards: 'Map review owners, sign-off paths, and oversight boundaries.',
+    continuity: 'Protects governance continuity during modernization.',
     visibility: 'Shows who reviews what and when.',
     stakeholders: 'Governance teams, legal review, and procurement stakeholders.',
     checkpoint: 'Validate the review path before any pilot work begins.',
   },
   {
     stage: 'Pilot Alignment',
-    safeguards: 'Scope the pilot tightly and define what is intentionally out of scope.',
-    continuity: 'Prevents deployment creep from destabilizing the organization.',
+    safeguards: 'Keep pilot scope tight and define what is out of scope.',
+    continuity: 'Prevents rollout creep from destabilizing the organization.',
     visibility: 'Creates a bounded operational view for the pilot team.',
     stakeholders: 'Pilot sponsors, implementation leads, and frontline operators.',
     checkpoint: 'Approve pilot boundaries and success indicators.',
@@ -198,24 +198,24 @@ export const deploymentWalkthrough = [
   {
     stage: 'Controlled Rollout',
     safeguards: 'Release in phases with review windows and stabilization support.',
-    continuity: 'Reduces transition shock and preserves organizational discipline.',
+    continuity: 'Reduces transition shock and keeps operations stable.',
     visibility: 'Tracks adoption through measurable implementation milestones.',
     stakeholders: 'Change leads, support teams, and governance observers.',
     checkpoint: 'Review the rollout log and readiness status after each step.',
   },
   {
     stage: 'Operational Stabilization',
-    safeguards: 'Hold steady while teams settle into new operational routines.',
-    continuity: 'Confirms the new operating pattern is durable enough to rely on.',
-    visibility: 'Makes support demand and exception handling visible.',
+    safeguards: 'Hold steady while teams settle into new routines.',
+    continuity: 'Confirms the new operating pattern is reliable.',
+    visibility: 'Shows support demand and exception handling.',
     stakeholders: 'Operations, support, and executive oversight.',
     checkpoint: 'Validate support load, adoption consistency, and issue patterns.',
   },
   {
     stage: 'Organizational Resilience',
     safeguards: 'Document lessons, transfer ownership, and preserve continuity evidence.',
-    continuity: 'Ensures the organization can absorb leadership or process changes safely.',
-    visibility: 'Leaves a reviewable organizational record of what changed and why.',
+    continuity: 'Helps the organization absorb leadership or process changes safely.',
+    visibility: 'Leaves a clear record of what changed and why.',
     stakeholders: 'Executive sponsors and governance custodians.',
     checkpoint: 'Approve the resilience summary and archive the proof pack.',
   },
@@ -224,7 +224,7 @@ export const deploymentWalkthrough = [
 export const pilotSimulationArtifacts = [
   {
     title: 'Mid-Sized Labour Organization Pilot',
-    continuityProfile: 'Moderate continuity exposure with strong leadership sponsorship and a focused operational scope.',
+    continuityProfile: 'Moderate continuity risk with strong leadership support and focused scope.',
     fragmentationIndicators: ['Spreadsheet-based case tracking', 'Distributed document storage', 'Manual follow-up across teams'],
     governanceConcerns: ['No shared review pathway', 'Informal ownership boundaries', 'Slow visibility into exceptions'],
     rolloutScope: ['Case intake and tracking', 'Governance review logging', 'Continuity summary reporting'],
@@ -233,7 +233,7 @@ export const pilotSimulationArtifacts = [
   },
   {
     title: 'Multi-Jurisdiction Pilot',
-    continuityProfile: 'Higher coordination complexity with a need for phased rollout sequencing and stabilization windows.',
+    continuityProfile: 'Higher coordination complexity requiring phased rollout and stabilization windows.',
     fragmentationIndicators: ['Different local workflows', 'Inconsistent governance language', 'Multiple approval paths'],
     governanceConcerns: ['Cross-jurisdiction review alignment', 'Change pacing across teams', 'Consistency of implementation evidence'],
     rolloutScope: ['Single jurisdiction first', 'Governance mapping', 'Shared evidence and rollout logs'],
@@ -245,19 +245,19 @@ export const pilotSimulationArtifacts = [
 export const operationalContinuitySimulationArtifacts = [
   {
     title: 'Regional Labour Organization Continuity Review',
-    continuityPosture: 'Continuity depends on a small group of experienced coordinators with limited transfer documentation.',
-    governanceMaturityObservation: 'Governance review is active but unevenly documented across committees.',
-    fragmentationVisibility: 'Intake, review, and follow-up pathways are split across multiple tools.',
-    institutionalMemoryIndicator: 'High reliance on person-to-person handoffs during onboarding periods.',
+    continuityPosture: 'Continuity depends on a small group of experienced coordinators with limited handoff documentation.',
+    governanceMaturityObservation: 'Governance review is active but uneven across committees.',
+    fragmentationVisibility: 'Intake, review, and follow-up are split across multiple tools.',
+    institutionalMemoryIndicator: 'High reliance on person-to-person handoffs during onboarding.',
     rolloutGuidance: 'Begin with governance review harmonization and continuity capture checkpoints.',
     resilienceDirection: 'Stabilize committee review cadence before expanding rollout scope.',
   },
   {
     title: 'Cross-Committee Continuity Stabilization Review',
-    continuityPosture: 'Continuity posture is improving but remains vulnerable during leadership transitions.',
-    governanceMaturityObservation: 'Approval paths exist yet require clearer rationale documentation.',
+    continuityPosture: 'Continuity is improving but remains vulnerable during leadership transitions.',
+    governanceMaturityObservation: 'Approval paths exist but need clearer rationale records.',
     fragmentationVisibility: 'Coordination gaps appear between policy, operations, and procurement review stages.',
-    institutionalMemoryIndicator: 'Organizational context is partially captured with inconsistent archive discipline.',
+    institutionalMemoryIndicator: 'Organizational context is only partly captured and archived.',
     rolloutGuidance: 'Use phased rollout with explicit onboarding and review checkpoints.',
     resilienceDirection: 'Preserve decision rationale logs to support long-term governance continuity.',
   },
@@ -270,15 +270,15 @@ export const executiveScenarioModels = [
   },
   {
     title: 'Fragmented Governance Operations',
-    summary: 'Shows how review paths and ownership clarity reduce uncertainty when governance is spread across teams.',
+    summary: 'Shows how clear review paths and ownership reduce uncertainty across teams.',
   },
   {
     title: 'Onboarding Instability',
-    summary: 'Shows how controlled rollout artifacts keep new teams aligned during the first weeks of adoption.',
+    summary: 'Shows how controlled rollout artifacts keep new teams aligned early in adoption.',
   },
   {
     title: 'Organizational Memory Loss',
-    summary: 'Shows how evidence packs preserve reasoning, precedents, and context that would otherwise disappear.',
+    summary: 'Shows how evidence packs preserve reasoning, precedents, and context that might be lost.',
   },
   {
     title: 'Multi-Committee Coordination',
@@ -294,7 +294,7 @@ export const deploymentTimelines = [
   {
     title: 'Pilot timeline',
     purpose: 'Operational readiness',
-    detail: 'Assessment, scoped activation, and stabilization checkpoints for the initial deployment window.',
+    detail: 'Assessment, scoped activation, and stabilization checkpoints for the first deployment window.',
   },
   {
     title: 'Governance rollout',
@@ -304,12 +304,12 @@ export const deploymentTimelines = [
   {
     title: 'Continuity adoption',
     purpose: 'Organizational stabilization',
-    detail: 'Progressive adoption that protects continuity while teams adjust to new operating routines.',
+    detail: 'Progressive adoption that protects continuity while teams adjust to new routines.',
   },
   {
     title: 'Organizational alignment',
     purpose: 'Change pacing',
-    detail: 'The period where leadership, operations, and governance language converge around the new model.',
+    detail: 'The period where leadership, operations, and governance align around the new model.',
   },
   {
     title: 'Maturity progression',
@@ -329,20 +329,20 @@ export const institutionalRolloutSimulationFlow = [
 
 export const governanceOperationalWalkthroughs = {
   'en-CA': [
-    { type: 'Leadership transition', focus: 'Continuity preservation', narrative: 'Maintains organizational memory and governance continuity during executive or committee turnover.' },
-    { type: 'Governance review', focus: 'Explainability', narrative: 'Shows how decisions remain traceable through review checkpoints and rationale pathways.' },
-    { type: 'Committee coordination', focus: 'Operational coherence', narrative: 'Aligns committee roles and handoffs so operational decisions remain coordinated.' },
-    { type: 'Onboarding stabilization', focus: 'Organizational memory', narrative: 'Preserves continuity context while new teams inherit active operating responsibilities.' },
+    { type: 'Leadership transition', focus: 'Continuity preservation', narrative: 'Keeps organizational memory and governance continuity during executive or committee turnover.' },
+    { type: 'Governance review', focus: 'Explainability', narrative: 'Shows how decisions stay traceable through clear review checkpoints.' },
+    { type: 'Committee coordination', focus: 'Operational coherence', narrative: 'Aligns committee roles and handoffs so decisions stay coordinated.' },
+    { type: 'Onboarding stabilization', focus: 'Organizational memory', narrative: 'Keeps continuity context visible while new teams inherit active responsibilities.' },
     { type: 'Fragmentation reduction', focus: 'Alignment', narrative: 'Reduces siloed operations through shared governance language and review cadence.' },
-    { type: 'Procurement review', focus: 'Governance trust', narrative: 'Supports due diligence with implementation safeguards, boundaries, and evidence commitments.' },
+    { type: 'Procurement review', focus: 'Governance trust', narrative: 'Supports due diligence with clear safeguards, boundaries, and evidence.' },
   ],
   'fr-CA': [
-    { type: 'Transition de leadership', focus: 'Préservation de la continuité', narrative: 'Maintient la mémoire organisationnelle et la continuité de gouvernance pendant le roulement de direction ou de comité.' },
-    { type: 'Revue de gouvernance', focus: 'Explicabilité', narrative: 'Montre comment les décisions restent traçables via des points de contrôle et des parcours de justification.' },
-    { type: 'Coordination des comités', focus: 'Cohérence opérationnelle', narrative: 'Aligne les rôles des comités et les passations pour que les décisions opérationnelles restent coordonnées.' },
-    { type: 'Stabilisation de l\'intégration', focus: 'Mémoire organisationnelle', narrative: 'Préserve le contexte de continuité pendant que de nouvelles équipes héritent de responsabilités actives.' },
-    { type: 'Réduction de la fragmentation', focus: 'Alignement', narrative: 'Réduit les opérations en silos grâce à un langage de gouvernance partagé et une cadence de révision.' },
-    { type: 'Revue d\'approvisionnement', focus: 'Confiance de gouvernance', narrative: 'Soutient la diligence raisonnable avec des garde-fous, des limites et des engagements de preuve.' },
+    { type: 'Transition de leadership', focus: 'Preservation de la continuite', narrative: 'Maintient la memoire organisationnelle et la continuite de gouvernance pendant un roulement de direction ou de comite.' },
+    { type: 'Revue de gouvernance', focus: 'Explicabilite', narrative: 'Montre comment les decisions restent tracables avec des points de controle clairs.' },
+    { type: 'Coordination des comites', focus: 'Coherence operationnelle', narrative: 'Aligne les roles et les passations pour garder des decisions coordonnees.' },
+    { type: 'Stabilisation de l integration', focus: 'Memoire organisationnelle', narrative: 'Preserve le contexte de continuite pendant que de nouvelles equipes heritent de responsabilites actives.' },
+    { type: 'Reduction de la fragmentation', focus: 'Alignement', narrative: 'Reduit les operations en silos avec un langage de gouvernance partage et une cadence de revue.' },
+    { type: 'Revue d approvisionnement', focus: 'Confiance de gouvernance', narrative: 'Soutient la diligence raisonnable avec des garde-fous clairs, des limites et des preuves.' },
   ],
 } as const;
 
@@ -430,19 +430,19 @@ export const executiveDashboardSignals = [
   },
   {
     title: 'Governance coherence',
-    description: 'Summarizes review cadence reliability and oversight pathway completeness.',
+    description: 'Summarizes review cadence reliability and oversight coverage.',
   },
   {
     title: 'Operational alignment',
-    description: 'Tracks cross-team alignment through deployment stages and stabilization periods.',
+    description: 'Tracks cross-team alignment across deployment and stabilization stages.',
   },
   {
     title: 'Organizational resilience',
-    description: 'Highlights resilience direction under leadership transitions and operating pressure.',
+    description: 'Highlights resilience direction during leadership transitions and operating pressure.',
   },
   {
     title: 'Fragmentation awareness',
-    description: 'Surfaces silos, coordination risk, and onboarding fragility in narrative form.',
+    description: 'Shows silos, coordination risk, and onboarding fragility in plain language.',
   },
 ] as const;
 
@@ -1156,19 +1156,19 @@ export const objectionHandlingFramework = [
     concern: 'How mature is this?',
     handling: 'Operational proof systems',
     response:
-      'Maturity is demonstrated through proof packs, simulation artifacts, and governance review pathways.',
+      'Maturity is shown through proof packs, simulations, and review paths.',
   },
   {
     concern: 'How is continuity measured?',
     handling: 'Directional continuity intelligence',
     response:
-      'Continuity is measured directionally through resilience, coherence, onboarding stability, and memory transfer signals.',
+      'Continuity is measured through resilience, coherence, onboarding stability, and memory transfer signals.',
   },
   {
     concern: 'How does this scale?',
     handling: 'Federation continuity architecture',
     response:
-      'Scaling is managed through federation-aware governance pathways, shared frameworks, and regional alignment controls.',
+      'Scaling uses shared frameworks, regional alignment, and federation-aware review paths.',
   },
 ] as const;
 
@@ -1183,19 +1183,19 @@ export const pilotConversationPathway = [
 
 export const executiveBriefingPacks = [
   'Continuity modernization overview',
-  'Governance-safe modernization principles',
+  'Modernization principles',
   'Pilot pathway summary',
   'Operational legitimacy highlights',
-  'Organizational scenario intelligence examples',
+  'Scenario examples',
   'Deployment philosophy',
   'Trust-center orientation',
 ] as const;
 
 export const procurementFollowUpInfrastructure = [
-  'Procurement-safe summary pages',
+  'Summary pages',
   'Deployment reassurance sequences',
-  'Operational proof follow-ups',
-  'Governance review pathways',
+  'Proof follow-ups',
+  'Review paths',
   'Continuity assessment orientation',
   'Trust-center progression',
 ] as const;
@@ -1243,14 +1243,14 @@ export const organizationalTransformationExamples = [
 
 export const pilotFramework = {
   scopeDefinition: [
-    'What is evaluated: continuity workflows, governance coordination, onboarding resilience, and explainability quality.',
+    'What is evaluated: continuity workflows, governance coordination, onboarding resilience, and clear reasoning.',
     'What is not evaluated: worker behavior, workforce productivity, or individual performance analytics.',
-    'Governance boundaries: human oversight remains mandatory and review pathways remain active throughout pilot operation.',
-    'Operational expectations: phased adoption with documented checkpoints and stabilization windows.',
+    'Governance boundaries: human oversight stays mandatory and review paths stay active during the pilot.',
+    'Operational expectations: phased adoption with checkpoints and stabilization windows.',
   ],
   safetyLayer: [
     'Explainability for all operational recommendations.',
-    'Reviewability through governance checkpoints and audit-ready records.',
+    'Reviewability through governance checkpoints and records.',
     'Human oversight retained for organizational decisions.',
     'Operational transparency for implementation boundaries and handoffs.',
   ],
@@ -1441,24 +1441,24 @@ export function buildExecutiveReadinessOutputs(
 
   const governanceAlignmentSummary =
     profile.level === 'Operationally Mature'
-      ? 'Leadership sponsorship and operating patterns suggest a strong governance alignment baseline.'
+      ? 'Leadership support and operating patterns show strong governance alignment.'
       : profile.level === 'Stabilizing'
-        ? 'Governance alignment is present, with a need to maintain explicit review checkpoints during rollout.'
-        : 'Governance alignment should be strengthened before broader deployment proceeds.';
+        ? 'Governance alignment is present, but review checkpoints must stay explicit during rollout.'
+        : 'Governance alignment should be strengthened before broader deployment.';
 
   const institutionalResilienceDirection =
     profile.level === 'Operationally Mature'
-      ? 'Proceed with phased adoption and preserve evidence packs as part of the operating record.'
-      : 'Use a constrained pilot to deepen continuity discipline and capture implementation proof.';
+      ? 'Proceed with phased adoption and keep evidence packs in the operating record.'
+      : 'Use a constrained pilot to build continuity discipline and capture proof.';
 
   const rolloutRecommendation =
     profile.level === 'Foundational'
-      ? 'Begin with continuity assessment and governance mapping before any broader activation.'
+      ? 'Start with continuity assessment and governance mapping before broader activation.'
       : profile.level === 'Developing'
-        ? 'Run a bounded pilot with explicit stabilization checkpoints.'
+        ? 'Run a bounded pilot with clear stabilization checkpoints.'
         : profile.level === 'Stabilizing'
-          ? 'Proceed with controlled rollout and maintain executive review windows.'
-          : 'Advance to organizational stabilization and preserve the proof trail for future transitions.';
+          ? 'Proceed with rollout and keep review windows open.'
+          : 'Move to organizational stabilization and keep the proof trail for future transitions.';
 
   return {
     continuityProfile: profile.summary,

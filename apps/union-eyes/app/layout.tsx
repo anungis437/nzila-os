@@ -29,12 +29,12 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const site = getUnionEyesSiteTopology();
   const organizationalDescription =
-    'Institutional governance and continuity infrastructure for unions and democratic organizations — bylaw-aligned procedural cadence, institutional memory preservation, representational coordination, and audit-grade transparency. Canadian-hosted, bilingual-first, sovereignty-conscious.';
-  const institutionalTitle = `UnionEyes | Institutional Governance & Continuity Infrastructure for Unions${site.titleSuffix}`;
+    'UnionEyes helps unions and democratic organizations keep decisions, procedures, and organizational knowledge clear and traceable. Canadian-hosted, bilingual-first, and built for accountable operations.';
+  const organizationalTitle = `UnionEyes | Organizational Governance & Continuity Infrastructure for Unions${site.titleSuffix}`;
 
   return {
     title: {
-      default: institutionalTitle,
+      default: organizationalTitle,
       template: `%s | UnionEyes${site.titleSuffix}`,
     },
     description: organizationalDescription,
@@ -42,20 +42,20 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: 'website',
       siteName: 'UnionEyes',
-      title: institutionalTitle,
+      title: organizationalTitle,
       description: organizationalDescription,
       images: [
         {
           url: '/images/og-default.png',
           width: 1200,
           height: 630,
-          alt: 'UnionEyes — Institutional Governance & Continuity Infrastructure for Unions',
+          alt: 'UnionEyes — Organizational Governance & Continuity Infrastructure for Unions',
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: institutionalTitle,
+      title: organizationalTitle,
       description: organizationalDescription,
       images: ['/images/og-default.png'],
     },
@@ -81,16 +81,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'UnionEyes',
-    alternateName: 'UnionEyes Institutional Continuity Infrastructure',
+    alternateName: 'UnionEyes Organizational Continuity Infrastructure',
     url: site.marketingUrl,
     logo: `${site.marketingUrl}/icon.svg`,
     description:
-      'Institutional governance and continuity infrastructure for unions and democratic organizations — procedural coordination, institutional memory preservation, representational workflow, and audit-grade transparency. Canadian-hosted, bilingual-first.',
-    slogan: 'Institutional governance, continuity, and representational coordination for democratic organizations.',
+      'UnionEyes helps unions and democratic organizations keep procedures, decisions, and organizational knowledge clear and traceable. Canadian-hosted and bilingual-first.',
+    slogan: 'Organizational governance, continuity, and representational coordination for democratic organizations.',
     knowsAbout: [
-      'institutional governance',
-      'institutional continuity',
-      'institutional memory preservation',
+      'organizational governance',
+      'organizational continuity',
+      'organizational memory preservation',
       'procedural cadence',
       'bylaw-aligned compliance',
       'representational coordination',
@@ -108,7 +108,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     url: site.marketingUrl,
     inLanguage: locale,
     description:
-      'Institutional governance and continuity infrastructure for unions — procedural coordination, institutional memory, and audit-grade transparency.',
+      'UnionEyes helps unions keep procedures, decisions, and organizational knowledge clear and traceable.',
     publisher: {
       '@type': 'Organization',
       name: 'UnionEyes',
@@ -126,15 +126,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '@type': 'SoftwareApplication',
     name: 'UnionEyes',
     applicationCategory: 'BusinessApplication',
-    applicationSubCategory: 'Institutional Governance & Continuity Infrastructure',
+    applicationSubCategory: 'Organizational Governance & Continuity Infrastructure',
     operatingSystem: 'Web',
     url: site.marketingUrl,
     description:
-      'Operational infrastructure for institutional governance, continuity, and representational coordination — explainable, auditable, Canadian-hosted, bilingual-first.',
+      'Operational infrastructure for organizational governance, continuity, and representational coordination — explainable, auditable, Canadian-hosted, bilingual-first.',
     inLanguage: ['en-CA', 'fr-CA'],
     featureList: [
       'Procedural cadence aligned to bylaws',
-      'Institutional memory preservation across leadership transitions',
+      'Organizational memory preservation across leadership transitions',
       'Explainable assistive intelligence with full audit trails',
       'Anti-surveillance posture — no individual worker monitoring',
       'Canadian data residency — no cross-border egress',

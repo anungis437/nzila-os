@@ -12,9 +12,9 @@
  * Pass --run-smoke to execute a smoke check after reconciliation.
  *
  * Usage:
- *   pnpm release:staging:reconcile             # dry run — show plan
- *   pnpm release:staging:reconcile --execute   # apply commands (requires az login)
- *   pnpm release:staging:reconcile --run-smoke # dry run + post-smoke check
+ *   pnpm exec tsx scripts/release/staging-reconcile.ts --env staging             # dry run — show plan
+ *   pnpm exec tsx scripts/release/staging-reconcile.ts --env staging --execute   # apply commands (requires az login)
+ *   pnpm exec tsx scripts/release/staging-reconcile.ts --env staging --run-smoke # dry run + post-smoke check
  *
  * Output:
  *   ops/reconcile/staging-reconcile-plan-<timestamp>.json
@@ -145,10 +145,10 @@ async function main() {
   const smokeReport = readSmokeLatest()
 
   if (!versionDrift) {
-    console.warn('⚠  No version drift report found. Run: pnpm drift:version:staging')
+    console.warn('⚠  No version drift report found. Run: pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr')
   }
   if (!envDrift) {
-    console.warn('⚠  No env drift report found. Run: pnpm drift:env:staging')
+    console.warn('⚠  No env drift report found. Run: pnpm exec tsx scripts/release/drift-env.ts --env staging')
   }
 
   // ── Build per-app action map ───────────────────────────────────────────────
@@ -335,7 +335,7 @@ async function main() {
 
   if (dryRun && (appsNeedingRedeploy.length > 0 || appsWithEnvGaps.length > 0)) {
     console.log(
-      `\nTo execute: pnpm release:staging:reconcile --execute`,
+      `\nTo execute: pnpm exec tsx scripts/release/staging-reconcile.ts --env staging --execute`,
     )
     console.log(`Or trigger: gh workflow run gitops-deploy.yml`)
   }

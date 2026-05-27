@@ -1,5 +1,5 @@
 /**
- * release:verify-signature — Hard-block unsigned or malformed release tags.
+ * verify-signature.ts — Hard-block unsigned or malformed release tags.
  *
  * Production promotion MUST pass this gate. Warnings are hard failures.
  *
@@ -13,10 +13,10 @@
  *   7. Changelog entry present for this version
  *
  * Usage:
- *   pnpm release:verify-signature                # verify latest tag
- *   pnpm release:verify-signature --tag v1.2.0   # verify specific tag
- *   pnpm release:verify-signature --require-signed   # hard-fail on unsigned (default)
- *   pnpm release:verify-signature --warn-unsigned    # warn but don't fail on unsigned
+ *   pnpm exec tsx scripts/release/verify-signature.ts                # verify latest tag
+ *   pnpm exec tsx scripts/release/verify-signature.ts --tag v1.2.0   # verify specific tag
+ *   pnpm exec tsx scripts/release/verify-signature.ts --require-signed   # hard-fail on unsigned (default)
+ *   pnpm exec tsx scripts/release/verify-signature.ts --warn-unsigned    # warn but don't fail on unsigned
  *
  * Exit codes:
  *   0 = all checks pass — safe to promote
@@ -90,7 +90,7 @@ function resolveTag(): string {
   const { stdout } = exec('git tag --list "v*" --sort=-version:refname')
   const tags = stdout.split('\n').filter((t) => /^v\d+\.\d+\.\d+$/.test(t.trim()))
   if (tags.length === 0) {
-    console.error('✗ No semver tags found. Create a release first: pnpm release:tag')
+    console.error('✗ No semver tags found. Create a release first: pnpm exec tsx scripts/release/tag-release.ts')
     process.exit(1)
   }
   return tags[0].trim()

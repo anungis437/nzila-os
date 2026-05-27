@@ -23,7 +23,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
-import { InsightsHubSubmenu, insightsHubSections } from '@/components/marketing/insights-hub-navigation';
+import { InsightsHubSubmenu, getInsightsHubSections } from '@/components/marketing/insights-hub-navigation';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import {
   parseInstitutionalMode,
@@ -38,104 +38,120 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const insightsCopy = {
   'en-CA': {
-    title: 'Insights | Organizational Governance & Continuity Library — UnionEyes',
+    title: 'Insights | Practical guides for union teams | UnionEyes',
     description:
-      'A doctrine library for unions and democratic organizations: organizational governance, continuity preservation, representational coordination, and audit-grade transparency. Bilingual, sovereignty-conscious, executive-grade.',
-    heroHeading: <>Organizational continuity and governance-of-record intelligence</>,
+      'Practical UnionEyes guides for union teams: keep work moving, make better decisions, and stay ready for review.',
+    heroHeading: <>Clear guidance for union leaders</>,
     heroDescription:
-      'A doctrine publication movement for executive teams preserving organizational memory, reducing fragmentation risk, and operationalizing explainable modernization with continuity confidence.',
-    ctaPrimary: 'Start the free Continuity Reflection',
-    ctaSecondary: 'Receive Doctrine Updates',
-    doctrineSpine: 'Doctrine spine',
-    pillarsHeading: 'Four pillars organizing every publication',
+      'Use these plain-language guides to protect team knowledge, keep handoffs smooth, and make decisions faster.',
+    ctaPrimary: 'Start a review',
+    ctaSecondary: 'Get updates by email',
+    doctrineSpine: 'Library map',
+    pillarsHeading: 'Four themes in this library',
     pillarsBody:
-      'Every doctrine brief, methodology guide, and resonance essay is anchored in one of four organizational pillars. The library reads as a continuity instrument — not a content marketing surface.',
-    themeHeading: 'Move through the Insights system by theme',
+      'Every article fits into one of four themes so you can find what you need quickly.',
+    themeHeading: 'Browse by theme',
     themeBody:
-      'The hub is now the entry point. Use the submenu to move into doctrine, methodology, emotional resonance, or category browsing without scrolling through a single long page.',
-    featuredHeading: 'Executive publications in active use',
+      'Use the menu to jump between methods, themes, and categories.',
+    featuredHeading: 'Featured articles leaders are using',
     featuredBody:
-      'These publications are used in governance workshops, modernization committees, procurement reviews, and transition planning cycles.',
+      'Teams use these in planning sessions, leadership transitions, and review meetings.',
     read: 'read',
     bestFor: 'Best for: ',
-    trustLabel: 'Trust Reinforcement',
-    newsletterHeading: 'Keep your leadership team aligned',
+    trustLabel: 'Email updates',
+    newsletterHeading: 'Keep your leadership team in sync',
     newsletterBody:
-      'Receive new doctrine briefs, governance frameworks, and continuity implementation guides as they are published.',
-    newsletterCta: 'Stay Briefed',
+      'Get new guides and templates as soon as they are published.',
+    newsletterCta: 'Stay updated',
     pillars: [
       {
         eyebrow: 'Governance',
-        title: 'Bylaw-aligned procedural cadence',
-        body: 'Constitutional fidelity, motion lifecycle, quorum integrity, and decision provenance — modernization without rupture.',
+        title: 'Better decisions, simpler work',
+        body: 'Simple ways to run meetings, track decisions, and keep process clear.',
       },
       {
         eyebrow: 'Continuity',
-        title: 'Organizational memory preservation',
-        body: 'Succession-safe knowledge, doctrine archives, and representational lineage that survive turnover and political cycles.',
+        title: 'Keep knowledge through turnover',
+        body: 'Protect key know-how so new leaders can step in without losing context.',
       },
       {
         eyebrow: 'Coordination',
-        title: 'Representational workflow integrity',
-        body: 'Intake, casework, grievance lifecycle, and steward operations woven into a single coherent operational fabric.',
+        title: 'Make daily work easier to coordinate',
+        body: 'Practical patterns for intake, casework, and handoffs across your team.',
       },
       {
         eyebrow: 'Trust',
-        title: 'Audit-grade transparency',
-        body: 'Evidence trails, oversight ergonomics, and explainable assistive intelligence — every action operator-initiated and reviewable.',
+        title: 'Show your work clearly',
+        body: 'Keep clear records and review trails so decisions are easy to explain.',
       },
     ],
   },
   'fr-CA': {
-    title: 'Perspectives | Bibliothèque de gouvernance et continuité institutionnelles — UnionEyes',
+    title: 'Perspectives | Guides pratiques pour equipes syndicales | UnionEyes',
     description:
-      'Bibliothèque doctrinale pour syndicats et organisations démocratiques : gouvernance institutionnelle, préservation de la continuité, coordination représentationnelle et transparence vérifiable.',
-    heroHeading: <>Intelligence de continuité institutionnelle et de gouvernance officielle</>,
+      'Guides pratiques UnionEyes pour les equipes syndicales: proteger la memoire, faciliter les transitions et mieux decider.',
+    heroHeading: <>Des guides clairs pour les equipes syndicales</>,
     heroDescription:
-      'Un espace de publication doctrinale pour les équipes exécutives qui préservent la mémoire institutionnelle, réduisent la fragmentation et modernisent avec explicabilité.',
-    ctaPrimary: 'Commencer la réflexion de continuité (gratuite)',
-    ctaSecondary: 'Recevoir les mises à jour doctrinales',
-    doctrineSpine: 'Axe doctrinal',
-    pillarsHeading: 'Quatre piliers organisent chaque publication',
+      'Des ressources en langage simple pour garder le contexte, mieux transmettre le travail et avancer plus vite.',
+    ctaPrimary: 'Faire le bilan',
+    ctaSecondary: 'Recevoir les mises a jour',
+    doctrineSpine: 'Plan de la bibliotheque',
+    pillarsHeading: 'Quatre themes pour vous orienter',
     pillarsBody:
-      'Chaque note doctrinale, guide méthodologique et essai de résonance est ancré dans l’un de quatre piliers institutionnels. La bibliothèque agit comme instrument de continuité.',
-    themeHeading: 'Parcourir le système de perspectives par thème',
+      'Chaque publication est classee dans un theme pour trouver rapidement la bonne ressource.',
+    themeHeading: 'Parcourir par theme',
     themeBody:
-      'Le hub est le point d’entrée. Utilisez le sous-menu pour accéder à la doctrine, la méthodologie, la résonance ou les catégories sans parcourir une longue page.',
-    featuredHeading: 'Publications exécutives en usage actif',
+      'Utilisez le menu pour passer rapidement entre methodes, themes et categories.',
+    featuredHeading: 'Articles en vedette utilises sur le terrain',
     featuredBody:
-      'Ces publications soutiennent les ateliers de gouvernance, comités de modernisation, examens d’approvisionnement et cycles de planification de transition.',
+      'Ces ressources servent dans les ateliers, les transitions de direction et les revues de travail.',
     read: 'de lecture',
     bestFor: 'Utile pour : ',
-    trustLabel: 'Renforcement de confiance',
-    newsletterHeading: 'Gardez votre équipe de direction alignée',
+    trustLabel: 'Mises a jour email',
+    newsletterHeading: 'Gardez votre equipe de direction alignee',
     newsletterBody:
-      'Recevez les nouvelles notes doctrinales, cadres de gouvernance et guides de mise en œuvre de la continuité dès leur publication.',
-    newsletterCta: 'Rester informé',
+      'Recevez les nouveaux guides et modeles des leur publication.',
+    newsletterCta: 'Rester informe',
     pillars: [
       {
         eyebrow: 'Gouvernance',
-        title: 'Cadence procédurale alignée aux règlements',
-        body: 'Fidélité constitutionnelle, cycle des motions, quorum et provenance décisionnelle — modernisation sans rupture.',
+        title: 'Mieux decider, avec moins de friction',
+        body: 'Des pratiques simples pour les reunions, les decisions et le suivi.',
       },
       {
         eyebrow: 'Continuité',
-        title: 'Préservation de la mémoire institutionnelle',
-        body: 'Savoir transmissible, archives doctrinales et lignées de représentation qui survivent au roulement et aux cycles politiques.',
+        title: 'Conserver le savoir pendant les transitions',
+        body: 'Proteger le contexte essentiel pour que les nouveaux responsables prennent le relais rapidement.',
       },
       {
         eyebrow: 'Coordination',
-        title: 'Intégrité des flux de représentation',
-        body: 'Réception, dossiers, griefs et opérations des délégués organisés dans une structure opérationnelle cohérente.',
+        title: 'Mieux coordonner le travail quotidien',
+        body: 'Des modeles pratiques pour l intake, les dossiers et les transferts.',
       },
       {
         eyebrow: 'Confiance',
-        title: 'Transparence de niveau audit',
-        body: 'Pistes de preuve, ergonomie de supervision et intelligence assistive explicable — chaque action demeure initiée et révisable par des personnes.',
+        title: 'Montrer clairement ce qui a ete fait',
+        body: 'Des traces claires et verifiables pour expliquer chaque decision.',
       },
     ],
   },
 } as const;
+
+function getCategoryLabel(name: string, locale: string) {
+  if (locale !== 'fr-CA') return name;
+
+  const labels: Record<string, string> = {
+    'Organizational Continuity': 'Continuite organisationnelle',
+    'Governance Modernization': 'Modernisation de la gouvernance',
+    'Explainable Governance Reasoning': 'Raisonnement de gouvernance explicable',
+    'Labour-Safe AI': 'IA sure pour le travail',
+    'Organizational Memory': 'Memoire organisationnelle',
+    'Governance Resilience': 'Resilience de gouvernance',
+    'Operational Fragility': 'Fragilite operationnelle',
+  };
+
+  return labels[name] ?? name;
+}
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -150,8 +166,8 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
       'organizational continuity',
       'organizational memory',
       'representational coordination',
-      'union governance doctrine',
-      'audit-grade transparency',
+      'union leadership guides',
+      'transparent decision records',
       'explainable assistive intelligence',
       'bilingual continuity infrastructure',
     ],
@@ -180,8 +196,8 @@ export default async function InsightsPage({
   const { locale } = await params;
   const resolvedSearch = searchParams ? await searchParams : undefined;
   const contextMode = parseInstitutionalMode(resolvedSearch?.context);
-  const featuredInsights = getFeaturedInsights();
-  const quickLinks = insightsHubSections.filter((section) => section.key !== 'overview');
+  const featuredInsights = getFeaturedInsights(locale);
+  const quickLinks = getInsightsHubSections(locale).filter((section) => section.key !== 'overview');
   const copy = insightsCopy[locale as keyof typeof insightsCopy] ?? insightsCopy['en-CA'];
 
   const collectionLd = {
@@ -300,7 +316,7 @@ export default async function InsightsPage({
                 className="institution-panel calm-elevation block p-6 group"
               >
                 <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 mb-3">
-                  {insight.categoryName}
+                  {getCategoryLabel(insight.categoryName, locale)}
                 </span>
                 <h3 className="text-lg font-semibold text-navy mb-2 leading-snug group-hover:text-[#1f5b84] transition-colors">
                   {insight.title}

@@ -3,7 +3,7 @@
  * maps modules to architectural layers, and detects forbidden dependency
  * directions.
  *
- * Usage: pnpm architecture:layers:check
+ * Usage: pnpm exec tsx scripts/architecture-layer-check.ts
  *
  * Checks:
  * 1. App-to-app coupling (apps importing other apps)

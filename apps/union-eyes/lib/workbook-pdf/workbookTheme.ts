@@ -2,7 +2,7 @@
  * Workbook theme \u2014 re-exports the ICRA report design system and adds
  * workbook-specific tokens (chapter divider, locked-module styling).
  *
- * Same palette, type scale, and spacing as the Executive Continuity Brief
+ * Same palette, type scale, and spacing as the Leadership Briefing Report
  * to keep the OCI artefact family coherent.
  */
 

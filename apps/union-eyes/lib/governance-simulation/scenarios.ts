@@ -2,7 +2,7 @@
  * Governance simulation scenario catalog.
  *
  * Defines reusable, deterministic scenario contracts covering the
- * principal organizational governance stress cases for Union Eyes:
+ * principal organizational governance stress cases for UnionEyes:
  *
  *   - Federation conflict paths
  *   - Continuity stress

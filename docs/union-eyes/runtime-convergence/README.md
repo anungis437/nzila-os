@@ -31,7 +31,7 @@ This layer exists because the prior layers — doctrine, governance, cognition, 
 
 ## Validator
 
-- Script: `pnpm validate:runtime-convergence`
+- Script: `node tooling/scripts/validate-runtime-convergence.mjs`
 - Source: [tooling/scripts/validate-runtime-convergence.mjs](../../../tooling/scripts/validate-runtime-convergence.mjs)
 
 ## Doctrinal Posture

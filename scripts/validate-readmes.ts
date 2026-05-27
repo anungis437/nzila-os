@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * validate:readmes — Checks that production-critical packages have README.md.
+ * validate-readmes.ts — Checks that production-critical packages have README.md.
  *
  * Lists all packages under packages/, classifies them as critical or not,
  * and reports missing READMEs with a summary.

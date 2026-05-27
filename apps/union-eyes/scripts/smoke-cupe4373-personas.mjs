@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Persona E2E smoke for the Union Eyes demo instance.
+ * Persona E2E smoke for the UnionEyes demo instance.
  *
  * Validates the dual-persona authz contract end-to-end against a live URL:
  *   - member@cupe4373.demo  → can authenticate, cannot record decisions

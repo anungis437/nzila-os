@@ -41,7 +41,7 @@ This charter defines deterministic, bounded responsibilities for the internal Nz
 | Scope | Build and validate API/E2E coverage; validate RBAC matrix and decision/NAR expectations; enforce UE quality gate. |
 | Inputs | Current diff and impacted surfaces; `docs/union-eyes/qa/user-story-coverage-matrix.md`; `docs/union-eyes/qa/rbac-reality-map.md`; existing QA scripts/test projects. |
 | Outputs | Test additions/updates; QA gate result (`GO` or `NO-GO`) with evidence; coverage and gap report. |
-| Validation Requirements | Must run `pnpm ue:qa:gate`; fail on RBAC `UNKNOWN`; fail on unknown decision/NAR critical expectations. |
+| Validation Requirements | Must run `pnpm exec tsx scripts/ue-qa-gate.ts`; fail on RBAC `UNKNOWN`; fail on unknown decision/NAR critical expectations. |
 | Failure Conditions | Any QA gate step fails; missing critical-path API/E2E coverage; non-reproducible coverage report. |
 
 ## 4) Security/Governance Agent

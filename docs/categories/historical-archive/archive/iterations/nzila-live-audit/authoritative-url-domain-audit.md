@@ -150,7 +150,7 @@ agrimo, staging-agrimo, cora, staging-cora, trade, staging-trade, mobility, stag
 > probes from CI (network egress unavailable). Status is based on the most
 > recent verified state recorded in operational memory. The validator script
 > (§10) checks document existence; live URL traversal is the operator's
-> responsibility via `pnpm validate:web:readiness` and `pnpm validate:console:readiness`.
+> responsibility via `pnpm exec tsx scripts/validate-web-readiness.ts` and `pnpm exec tsx scripts/validate-console-readiness.ts`.
 
 ### 6.2 TLS
 

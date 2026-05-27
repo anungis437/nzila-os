@@ -2,7 +2,7 @@
  * Control Plane Route Check — verifies every page in the control-plane
  * dashboard has an entry in route.meta.json with a valid bucket.
  *
- * Usage: pnpm control-plane:check
+ * Usage: pnpm exec tsx scripts/control-plane-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

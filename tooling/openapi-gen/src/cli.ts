@@ -3,10 +3,10 @@
  * @nzila/openapi-gen — CLI entry point
  *
  * Usage:
- *   pnpm openapi:gen                 # generate all specs as JSON
- *   pnpm openapi:gen --format yaml   # YAML output
- *   pnpm openapi:gen --apps web,console  # specific apps only
- *   pnpm openapi:gen --no-combined   # skip combined spec
+ *   pnpm exec tsx tooling/openapi-gen/src/cli.ts                 # generate all specs as JSON
+ *   pnpm exec tsx tooling/openapi-gen/src/cli.ts --format yaml   # YAML output
+ *   pnpm exec tsx tooling/openapi-gen/src/cli.ts --apps web,console  # specific apps only
+ *   pnpm exec tsx tooling/openapi-gen/src/cli.ts --no-combined   # skip combined spec
  */
 
 import { resolve } from 'node:path';

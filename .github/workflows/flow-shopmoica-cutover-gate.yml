@@ -53,7 +53,7 @@ jobs:
             ARGS="$ARGS --check-dns"
           fi
 
-          pnpm flow:shopmoica:cutover:check $ARGS
+          pnpm exec tsx scripts/flow-shopmoica-cutover-check.ts $ARGS
 
       - uses: actions/upload-artifact@v4
         if: always()

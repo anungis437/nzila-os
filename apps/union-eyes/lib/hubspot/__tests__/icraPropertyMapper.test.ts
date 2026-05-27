@@ -98,8 +98,8 @@ describe('icraPropertyMapper — enum tables', () => {
   });
 
   it('has labels for all 3 report tiers', () => {
-    expect(REPORT_TIER_LABELS.continuity_reflection).toBe('Continuity Reflection');
-    expect(REPORT_TIER_LABELS.executive_continuity_brief).toBe('Executive Continuity Brief');
+    expect(REPORT_TIER_LABELS.continuity_reflection).toBe('Free Readiness Check');
+    expect(REPORT_TIER_LABELS.executive_continuity_brief).toBe('Leadership Briefing Report');
     expect(REPORT_TIER_LABELS.institutional_continuity_diagnostic).toBe(
       'Institutional Continuity Diagnostic',
     );

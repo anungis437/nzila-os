@@ -1,7 +1,7 @@
 /**
  * decision-seed-demo.ts — Seed demo decision records
  *
- * Usage: pnpm decision:seed-demo
+ * Usage: pnpm exec tsx scripts/decision-seed-demo.ts
  *
  * Creates 5 demo decision records in ops/decisions/:
  *   1. Grievance backlog spike (STAFFING / HIGH)

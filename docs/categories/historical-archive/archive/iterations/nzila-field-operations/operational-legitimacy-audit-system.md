@@ -32,7 +32,7 @@ Audit output is a calm interpretive summary, not a checklist score.
 
 ## 3. Audit cadence
 
-Audits run weekly via `pnpm field-ops:validate`. Output is recorded
+Audits run weekly via `node tooling/scripts/validate-field-operations-legitimacy.mjs`. Output is recorded
 to `proof-artifacts/field-operations-audits/audit-YYYY-MM-DD.json`.
 
 ---

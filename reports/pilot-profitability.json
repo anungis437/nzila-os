@@ -21,12 +21,12 @@
     "implementationHours": 69.5,
     "founderHours": 26.4,
     "supportHours": 30.2,
-    "infraCostUsd": 3081.6,
+    "infraCostUsd": 2.63,
     "paymentFeesUsd": 378,
     "customRequestsUsd": 1200,
-    "totalCostUsd": 17827.1,
+    "totalCostUsd": 14748.13,
     "opportunityValueUsd": 143640,
-    "expectedValueUsd": 125812.9,
+    "expectedValueUsd": 128891.87,
     "classification": "profitable-now"
   },
   {
@@ -36,12 +36,12 @@
     "implementationHours": 71.5,
     "founderHours": 24,
     "supportHours": 39.8,
-    "infraCostUsd": 2211.2,
+    "infraCostUsd": 2.63,
     "paymentFeesUsd": 144,
     "customRequestsUsd": 700,
-    "totalCostUsd": 16988.7,
+    "totalCostUsd": 14780.13,
     "opportunityValueUsd": 31680,
-    "expectedValueUsd": 14691.3,
+    "expectedValueUsd": 16899.87,
     "classification": "profitable-now"
   }
 ]

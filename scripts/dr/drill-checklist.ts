@@ -12,7 +12,7 @@
  *   6. pnpm available
  *
  * Usage:
- *   pnpm dr:drill:checklist
+ *   pnpm exec tsx scripts/dr/drill-checklist.ts
  *
  * Exit codes:
  *   0 — all required checks pass (warnings allowed)
@@ -143,7 +143,7 @@ if (hasDbReports) {
 if (hasDrReports) {
   pass('previous-evidence-dr', 'Previous drill reports found in reports/dr/', false)
 } else {
-  warn('previous-evidence-dr', 'No previous drill reports in reports/dr/ — run pnpm dr:drill:report after drill')
+  warn('previous-evidence-dr', 'No previous drill reports in reports/dr/ — run pnpm exec tsx scripts/dr/drill-report.ts after drill')
 }
 
 // 6. Azure CLI (informational)
@@ -224,8 +224,8 @@ if (failCount > 0) {
 } else {
   process.stdout.write(`  ✓ Pre-flight PASSED — safe to proceed with the drill.\n`)
   process.stdout.write(`\n  Run the drill:\n`)
-  process.stdout.write(`    pnpm db:restore-drill           # dry-run\n`)
-    process.stdout.write(`    pnpm db:restore-drill:execute   # live staging restore\n`)
+  process.stdout.write(`    pnpm exec tsx scripts/db/restore-drill.ts           # dry-run\n`)
+    process.stdout.write(`    pnpm exec tsx scripts/db/restore-drill.ts -- --execute   # live staging restore\n`)
     process.stdout.write(`\n  Live checklist mode:\n`)
-    process.stdout.write(`    pnpm dr:drill:checklist --live\n\n`)
+    process.stdout.write(`    pnpm exec tsx scripts/dr/drill-checklist.ts --live\n\n`)
 }

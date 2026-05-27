@@ -45,13 +45,13 @@ function main(): void {
   }
 
   if (issues.length > 0) {
-    console.log('\n[validate:canonical-truth] FAIL')
+    console.log('\n[validate-canonical-truth] FAIL')
     for (const issue of issues) console.log(` - ${issue}`)
     for (const warning of validation.warnings) console.log(` ! ${warning}`)
     process.exit(1)
   }
 
-  console.log('\n[validate:canonical-truth] PASS')
+  console.log('\n[validate-canonical-truth] PASS')
   console.log('Canonical truth is generated from the portfolio catalog and linked from README.')
   for (const warning of validation.warnings) console.log(` ! ${warning}`)
 }

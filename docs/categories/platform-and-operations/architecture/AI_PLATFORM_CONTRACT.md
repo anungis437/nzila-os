@@ -143,7 +143,7 @@ Apps may contain local AI code only if it is:
 
 ## Enforcement
 
-- Check script: `pnpm ai:contract:check` (`scripts/ai-contract-check.ts`)
+- Check script: `pnpm exec tsx scripts/ai-contract-check.ts` (`scripts/ai-contract-check.ts`)
 - Contract tests: `pnpm contract-tests`
 - CI: Runs on every PR
 

@@ -101,7 +101,7 @@ jobs:
           pnpm --filter @nzila/ai-registry test
 
       - name: Run AI contract checker
-        run: pnpm ai:contract:check
+        run: pnpm exec tsx scripts/ai-contract-check.ts
 
   # ── SDK Boundary Enforcement ──────────────────────────────────────────────
   sdk-boundary:

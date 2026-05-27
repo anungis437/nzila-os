@@ -28,7 +28,7 @@ it reverses.
 | Continuity window| 240 minutes                                          |
 | Log              | `proof-artifacts/operational-proving/rollback-pilot.log` |
 
-Recorded via `pnpm rollout:rollback:attest`.
+Recorded via `node tooling/scripts/record-rollback-attestation.mjs`.
 
 ---
 

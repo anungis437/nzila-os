@@ -2,7 +2,7 @@
 
 **Status:** CURRENT  
 **Last updated:** 2026-05-14  
-**Source of truth:** Live CI gates — `pnpm typecheck`, `pnpm governance:check-db-imports`, contract tests  
+**Source of truth:** Live CI gates — `pnpm typecheck`, `pnpm exec tsx scripts/check-ue-db-import-guard.ts`, contract tests  
 **Supersedes:** All pre-2026-05-14 versions  
 **Live-evidence dependencies:** Live environment health checks — see RUNTIME_EVIDENCE_PACK.md §B
 
@@ -46,13 +46,13 @@ Key fixes:
 ## 2. DB Import Guard — Zero Tolerance
 
 ```
-Command: pnpm governance:check-db-imports
-Result:  ✅ governance:check-db-imports — clean (0 violations)
+Command: pnpm exec tsx scripts/check-ue-db-import-guard.ts
+Result:  ✅ check-ue-db-import-guard — clean (0 violations)
 ```
 
 **Guard script:** `scripts/check-ue-db-import-guard.ts`  
 **ALLOWLIST:** `[]` (zero tolerance — no exceptions permitted)  
-**CI enforcement:** included in `pnpm governance:audit`
+**CI enforcement:** included in `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts`
 
 All 14 previously raw-db-import violation files migrated to `withRLSContext` / `withSystemRLSContext` in commit `5643972ef`.
 
@@ -181,7 +181,7 @@ The following evidence items require **live environment confirmation** before ex
 | Item | Command / Action | Where to store |
 |---|---|---|
 | Prod URL smoke test | `curl https://<pilot-url>/api/health` | `reports/runtime/smoke-test-prod-YYYYMMDD.json` |
-| Prod resource group confirmation | `pnpm proof:ingest:azure` | `reports/runtime/azure-runtime-latest.json` |
+| Prod resource group confirmation | `pnpm exec tsx scripts/proof/ingest-azure-runtime.ts` | `reports/runtime/azure-runtime-latest.json` |
 | Key Vault separation | Azure portal screenshot or CLI output | `reports/runtime/keyvault-separation-YYYYMMDD.txt` |
 | Azure Monitor workbook export | Portal → Workbooks → Export | `reports/runtime/monitor-workbook-YYYYMMDD.json` |
 | Restore drill evidence | Per `docs/union-eyes/dr/restore-drill-runbook.md` | `reports/runtime/restore-drill-YYYYMMDD.md` |

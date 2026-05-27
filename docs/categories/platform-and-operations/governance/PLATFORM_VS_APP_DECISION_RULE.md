@@ -3,7 +3,7 @@
 > Official rule for deciding whether a new capability belongs in a platform service,
 > a shared package, or an application.
 >
-> Enforced by: `pnpm platform:vs-app:check`
+> Enforced by: `pnpm exec tsx scripts/platform-vs-app-check.ts`
 > ADR template: `templates/architecture-decision-record.md`
 
 ---
@@ -126,7 +126,7 @@ The ADR does not need to be long. It must capture:
 
 ## Enforcement
 
-- **Automated check**: `pnpm platform:vs-app:check` flags:
+- **Automated check**: `pnpm exec tsx scripts/platform-vs-app-check.ts` flags:
   - New packages without registry/category metadata
   - New platform services without documentation
   - Suspicious app-local implementations of cross-app concerns

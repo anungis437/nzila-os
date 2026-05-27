@@ -28,7 +28,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Send weekly digest
-        run: pnpm console:digest:weekly:send
+          run: pnpm exec tsx scripts/console-weekly-digest.ts --send
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           WEEKLY_DIGEST_EMAIL_PROVIDER: ${{ vars.WEEKLY_DIGEST_EMAIL_PROVIDER }}

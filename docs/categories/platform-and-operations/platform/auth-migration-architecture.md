@@ -30,9 +30,9 @@ Legacy compatibility does not permit:
 
 CI gates:
 
-- `pnpm validate:auth-authority` blocks direct Clerk SDK adoption in protected surfaces.
-- `pnpm validate:truth-authority` enforces registry/document/runtime coherence.
-- `pnpm validate:ga-state` enforces certification state-machine claims.
+- `pnpm exec tsx scripts/validate-auth-authority.ts` blocks direct Clerk SDK adoption in protected surfaces.
+- `pnpm exec tsx scripts/validate-truth-authority.ts` enforces registry/document/runtime coherence.
+- `pnpm exec tsx scripts/validate-ga-state.ts` enforces certification state-machine claims.
 
 ## Migration Completion Criteria
 

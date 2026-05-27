@@ -2,7 +2,7 @@
  * AI governance classification layer.
  *
  * Provides risk classification, human-review gating, and audit requirements
- * for AI/ML operations in Union Eyes. This module is the runtime enforcement
+ * for AI/ML operations in UnionEyes. This module is the runtime enforcement
  * point for labour-safe AI governance.
  *
  * The three principles:
@@ -217,7 +217,7 @@ export function evaluateAIAction(
 // ── Built-in UE AI operation descriptors ──────────────────────────────────────
 
 /**
- * Registry of known Union Eyes AI operations.
+ * Registry of known UnionEyes AI operations.
  * Kept here for discoverability and CI validation.
  */
 export const UE_AI_OPERATIONS: AIActionDescriptor[] = [

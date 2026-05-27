@@ -32,6 +32,14 @@ pnpm typecheck         # Type check
 - Domain packages use the product name prefix (e.g., `agri-`, `zonga-`, `trade-`)
 - Use extensionless imports in packages consumed by Next.js apps (Turbopack constraint)
 
+## Script Policy
+
+- Keep root scripts for true entrypoints and meaningful composites.
+- Do not add thin wrapper aliases that only forward to a single executor command.
+- Avoid script definitions that start with direct wrappers such as `tsx ...`, `pnpm exec tsx ...`, `node scripts/...`, or `pnpm <other-script>`.
+- Put explicit commands directly in docs and workflows when practical.
+- CI enforces this via `node tooling/scripts/check-script-alias-regression.mjs`.
+
 ## Auth
 
 All apps use `@nzila/platform-auth`. Email/password with Argon2id is the default; Entra SSO is optional.
@@ -55,7 +63,7 @@ LEFTHOOK=0            # bash
 ## Creating a New App
 
 ```bash
-pnpm create-app       # Scaffolds a governed app with auth, telemetry, and contracts
+pnpm exec tsx scripts/create-nzila-app.ts       # Scaffolds a governed app with auth, telemetry, and contracts
 ```
 
 ## Creating a New Package
@@ -71,7 +79,7 @@ Follow the pattern in existing `packages/` directories. Ensure:
 - [ ] `pnpm lint` passes
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm test:fast` passes
-- [ ] No governance drift (`pnpm validate:governance`)
+- [ ] No governance drift (run the explicit Governance and Compliance chain from `docs/categories/platform-and-operations/platform/COMMAND_CATALOG.md`)
 - [ ] README updated if public API changed
 
 ## AI Workflow (gstack Pilot)

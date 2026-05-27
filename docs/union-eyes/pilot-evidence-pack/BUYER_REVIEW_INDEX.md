@@ -64,7 +64,7 @@ All materials are in `docs/union-eyes/pilot-evidence-pack/`.
 **Key code probes:**
 ```bash
 # Prove zero DB import violations
-pnpm governance:check-db-imports
+pnpm exec tsx scripts/check-ue-db-import-guard.ts
 
 # Prove TypeScript is clean under noImplicitAny
 pnpm typecheck --filter "@nzila/union-eyes"

@@ -31,7 +31,7 @@ Ensure policy and implementation remain aligned with evolving obligations (GDPR,
 ## Enforcement
 
 - Machine-readable registry: governance/foundations/resilience/regulatory-watchlist.json
-- Validation command: pnpm validate:strategic-resilience
+- Validation command: node tooling/scripts/validate-strategic-resilience.mjs --enforce
 - Governance gate: GOV-GATE-025 ensures the watchlist remains complete and current
 
 ---

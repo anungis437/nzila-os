@@ -24,9 +24,9 @@ Maturity is validated **operationally**, not only doctrinally. E2E coverage must
 ## 3. E2E Anchor Tests
 
 - `apps/union-eyes/e2e/cba-intelligence.spec.ts` — protected continuity route, entitlement-aware.
-- `pnpm validate:cognition` — cross-app cognition consistency.
-- `pnpm validate:labor-continuity` — UE labor continuity invariants.
-- `pnpm validate:maturity-elevation` — ecosystem convergence.
+- `node tooling/scripts/validate-institutional-cognition-convergence.mjs` — cross-app cognition consistency.
+- `node tooling/scripts/validate-labor-continuity-governance.mjs` — UE labor continuity invariants.
+- `node tooling/scripts/validate-maturity-convergence.mjs` — ecosystem convergence.
 - `pnpm validate:maturity` — app-level maturity contract tests.
 
 ## 4. Expansion Direction

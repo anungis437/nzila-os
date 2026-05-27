@@ -4,7 +4,7 @@
 **Series:** Nzila Ventures / Nzila OS Research Initiative
 **Document class:** Executive Whitepaper
 **Companion to:** OCI Methodology Whitepaper v1
-**Aligned to:** Union Eyes live platform positioning
+**Aligned to:** UnionEyes live platform positioning
 
 ---
 
@@ -21,7 +21,7 @@ Operational labour systems revealed a deeper organizational continuity problem �
 
 This edition does not begin from theory. It begins from work.
 
-Union Eyes was not designed in a research lab. It was built inside the operational reality of grievances, governance interpretation, evidence handling, committee continuity, leadership turnover, and the quiet labour of representation. The continuity category emerged from that work — not the other way around.
+UnionEyes was not designed in a research lab. It was built inside the operational reality of grievances, governance interpretation, evidence handling, committee continuity, leadership turnover, and the quiet labour of representation. The continuity category emerged from that work — not the other way around.
 
 Over time, recurring operational patterns made one fact undeniable: most labour and governance-heavy organizations are operationally capable but structurally forgetful. The records exist. The workflows exist. The dashboards exist. What disappears, repeatedly, is the organizational context that gives those records, workflows, and dashboards meaning.
 
@@ -35,7 +35,7 @@ This whitepaper is the public synthesis of that pattern.
 - Section 1 — Where Representation Actually Happens
 - Section 2 — The Hidden Problem Beneath Operational Work
 - Section 3 — Why Existing Systems Preserve Records but Not Continuity
-- Section 4 — How Union Eyes Discovered the Continuity Layer
+- Section 4 — How UnionEyes Discovered the Continuity Layer
 - Section 5 — Introducing OCI
 - Section 6 — Introducing OCRA
 - Section 7 — Continuity-Aware Operations
@@ -57,7 +57,7 @@ This whitepaper is the public synthesis of that pattern.
 
 Modern organizations have invested heavily in workflow software, case management, dashboards, and governance documentation. Operational throughput has improved. Operational visibility has improved. Yet the deeper organizational capability that allows organizations to remain themselves across leadership turnover, modernization, restructuring, and time has not improved at the same rate. In many organizations, it has measurably degraded.
 
-The pattern is most visible in operational labour environments where Union Eyes is deployed. Grievances are tracked, but the interpretive precedent behind them is held in a small number of people. Governance decisions are recorded, but the rationale for those decisions is rarely preserved in a form successors can inherit. Onboarding documentation exists, but new representatives still rely on long conversations with veterans to become operationally effective. Investigations close, but the operational lineage of evidence and reasoning rarely survives a reassignment intact.
+The pattern is most visible in operational labour environments where UnionEyes is deployed. Grievances are tracked, but the interpretive precedent behind them is held in a small number of people. Governance decisions are recorded, but the rationale for those decisions is rarely preserved in a form successors can inherit. Onboarding documentation exists, but new representatives still rely on long conversations with veterans to become operationally effective. Investigations close, but the operational lineage of evidence and reasoning rarely survives a reassignment intact.
 
 These are not anomalies. They are continuity fragility expressed through operational work.
 
@@ -88,7 +88,7 @@ Representation does not happen in dashboards. It happens in a grievance that arr
 
 It happens in onboarding conversations that begin with a binder and end, hours later, with the sentence: *"and here are the things the binder does not tell you."*
 
-The live Union Eyes platform was built around this operational surface. It captures grievances, governance interpretation, evidence trails, investigations, committee continuity, intelligence routing, and the workflows that hold democratic representation together day after day. It is, by design, operational software grounded in real labour practice — not an abstract platform looking for a problem to solve.
+The live UnionEyes platform was built around this operational surface. It captures grievances, governance interpretation, evidence trails, investigations, committee continuity, intelligence routing, and the workflows that hold democratic representation together day after day. It is, by design, operational software grounded in real labour practice — not an abstract platform looking for a problem to solve.
 
 ### 1.2 The realities the platform exposes daily
 
@@ -191,12 +191,12 @@ Visibility is not continuity. A dashboard can light up the right indicators whil
 ### 3.4 The objections this section answers
 
 - *Why not use our existing case-management system?* Because most operational tooling preserves records, tasks, and workflow states, but not operational interpretation, onboarding survivability, governance continuity, or organizational inheritance.
-- *Is this consulting or software?* Union Eyes combines continuity intelligence, continuity-aware operational infrastructure, governance continuity tooling, and longitudinal continuity support.
-- *Is this employee surveillance?* No. Union Eyes does not monitor productivity, score workers, conduct behavioural analysis, or rank individuals. It exists to stabilize organizational continuity.
+- *Is this consulting or software?* UnionEyes combines continuity intelligence, continuity-aware operational infrastructure, governance continuity tooling, and longitudinal continuity support.
+- *Is this employee surveillance?* No. UnionEyes does not monitor productivity, score workers, conduct behavioural analysis, or rank individuals. It exists to stabilize organizational continuity.
 
 ---
 
-## Section 4 — How Union Eyes Discovered the Continuity Layer
+## Section 4 — How UnionEyes Discovered the Continuity Layer
 
 ### 4.1 A category that emerged from work
 
@@ -342,7 +342,7 @@ Both paths converge into the same continuity-aware operational infrastructure. T
 
 ### 9.1 Anti-surveillance posture
 
-Union Eyes does not monitor productivity, rank workers, infer behaviour, score individuals, infer political alignment, or conduct workforce surveillance in any form. This is doctrine, not configuration.
+UnionEyes does not monitor productivity, rank workers, infer behaviour, score individuals, infer political alignment, or conduct workforce surveillance in any form. This is doctrine, not configuration.
 
 ### 9.2 Reviewer-led AI
 
@@ -489,7 +489,7 @@ OCI extends beyond workflow software, knowledge management, governance documenta
 
 The organizations that endure the next decade will not simply digitize faster. They will preserve operational memory, governance lineage, operational trust, and continuity intelligence more deliberately. They will treat continuity not as a project, not as a memo, not as a one-time audit, but as infrastructure — quiet, consistent, governance-safe, reviewer-led, and proportional.
 
-The Canadian evidence base now makes the continuity question impossible to defer. The operational evidence inside organizations deploying Union Eyes makes it impossible to abstract. The framework presented in this paper — OCI as structural layer, OCRA as interpretive layer, continuity-aware operations as convergence layer — is the synthesis of that operational and demographic reality.
+The Canadian evidence base now makes the continuity question impossible to defer. The operational evidence inside organizations deploying UnionEyes makes it impossible to abstract. The framework presented in this paper — OCI as structural layer, OCRA as interpretive layer, continuity-aware operations as convergence layer — is the synthesis of that operational and demographic reality.
 
 The future belongs to continuity-native organizations. Not because continuity is fashionable, but because the alternative — organizations that process activity beautifully while quietly forgetting themselves — is no longer survivable at the scale and speed at which organizational memory is now leaving.
 

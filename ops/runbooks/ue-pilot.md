@@ -119,6 +119,33 @@ customMetrics
 
 ## Resolution Steps
 
+### Pilot Django Sidecar Binding (R1)
+
+Use this flow when pilot governance APIs are degraded or `/api/auth_core/health/` is returning non-200.
+
+```bash
+# 1) Verify pilot sidecar app exists and revision health is green
+az containerapp revision list \
+  -g nzila-canada-pilot-rg \
+  -n nzila-os-union-eyes-django-pilot \
+  --query "[].{name:name,active:properties.active,health:properties.healthState,replicas:properties.replicas}" \
+  -o table
+
+# 2) Verify pilot ingress can reach Django health
+curl -si https://pilot.unioneyes.app/api/auth_core/health/
+
+# 3) Verify bounded degraded behavior by scaling sidecar to zero
+az containerapp update -g nzila-canada-pilot-rg -n nzila-os-union-eyes-django-pilot --min-replicas 0 --max-replicas 0
+curl -si https://pilot.unioneyes.app/api/auth_core/health/
+
+# 4) Restore sidecar scale
+az containerapp update -g nzila-canada-pilot-rg -n nzila-os-union-eyes-django-pilot --min-replicas 0 --max-replicas 2
+```
+
+Expected behavior:
+1. Healthy sidecar: `/api/auth_core/health/` returns `200`.
+2. Sidecar absent/unhealthy: `/api/auth_core/health/` returns `503` with bounded degraded copy.
+
 ### Pilot Onboarding (New Org)
 
 1. **Create organization** via platform-auth admin for the pilot entity

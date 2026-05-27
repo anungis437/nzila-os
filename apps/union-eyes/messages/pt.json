@@ -7212,6 +7212,36 @@
       "requestPilot": "Iniciar piloto",
       "signIn": "Entrar"
     },
+    "solutions": {
+      "index": {
+        "metaTitle": "Solucoes | UnionEyes",
+        "metaDescription": "Suporte pratico de continuidade e governanca para liderancas sindicais, governanca, operacoes, tecnologia, trabalho e compras."
+      },
+      "executive": {
+        "metaTitle": "Lideranca executiva sindical | Solucoes | UnionEyes",
+        "metaDescription": "Preserve a continuidade estrategica, lidere transicoes de lideranca e mantenha a coerencia organizacional com UnionEyes."
+      },
+      "governance": {
+        "metaTitle": "Lideranca de governanca | Solucoes | UnionEyes",
+        "metaDescription": "Modernize a governanca com inteligencia explicavel, salvaguardas de continuidade e contexto de decisao pronto para auditoria."
+      },
+      "labour": {
+        "metaTitle": "Lideranca de trabalho e politica | Solucoes | UnionEyes",
+        "metaDescription": "Apoie a lideranca sindical com coordenacao orientada a continuidade, orientacao explicavel e fluxos de governanca transparentes."
+      },
+      "operations": {
+        "metaTitle": "Lideranca de operacoes | Solucoes | UnionEyes",
+        "metaDescription": "Fortaleca a continuidade operacional com fluxos praticos, inteligencia revisavel por humanos e execucao alinhada a governanca."
+      },
+      "procurement": {
+        "metaTitle": "Partes interessadas em compras | Solucoes | UnionEyes",
+        "metaDescription": "Dê às equipes de compras escopo claro, confianca em rollout faseado e evidencias de governanca prontas para revisao."
+      },
+      "technology": {
+        "metaTitle": "Lideranca tecnologica | Solucoes | UnionEyes",
+        "metaDescription": "Equipe liderancas de tecnologia com clareza de integracao, governanca de IA delimitada e trilhas de implementacao auditaveis."
+      }
+    },
     "home": {
       "badge": "Um Sistema Operacional Governado para Sindicatos",
       "heroHeading": "Comande todas as dimensões do seu sindicato.",

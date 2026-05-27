@@ -66,5 +66,5 @@ All other areas across all certified environments are `PROVEN`.
 ## 5. Posture
 
 GO status is evidence-backed, not aspirational. The validator
-(`pnpm final:go`) refuses to emit certified status unless every
+(`node tooling/scripts/validate-final-go-status.mjs`) refuses to emit certified status unless every
 artifact is present and internally consistent.

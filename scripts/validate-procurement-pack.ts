@@ -11,8 +11,8 @@
  * If no ZIP file is provided, generates a fresh pack and validates it.
  *
  * Usage:
- *   pnpm validate:pack                   # generate + validate
- *   pnpm validate:pack path/to/pack.zip  # validate existing ZIP
+ *   pnpm exec tsx scripts/validate-procurement-pack.ts                   # generate + validate
+ *   pnpm exec tsx scripts/validate-procurement-pack.ts path/to/pack.zip  # validate existing ZIP
  *
  * Exit codes:
  *   0  — all checks pass

@@ -39,7 +39,7 @@ vi.mock('resend', () => ({
 }));
 
 vi.mock('@/lib/email-service', () => ({
-  getResendClient: () => ({ emails: { send: mocks.mockResendSend } }),
+  sendResendEmail: mocks.mockResendSend,
   getFromEmail: (label?: string) => label ? `${label} <noreply@unioneyes.app>` : 'noreply@unioneyes.app',
 }));
 
@@ -144,10 +144,10 @@ describe('ResendEmailProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.mockUuid.mockReturnValue('test-uuid-1');
+    mocks.mockResendSend.mockResolvedValue({ success: true, messageId: 'msg-1' });
   });
 
   it('sends email successfully', async () => {
-    mocks.mockResendSend.mockResolvedValue({ data: { id: 'msg-1' }, error: null });
     const provider = new ResendEmailProvider();
     const result = await provider.send({ ...emailPayload });
     expect(result.status).toBe('sent');
@@ -164,7 +164,7 @@ describe('ResendEmailProvider', () => {
   });
 
   it('returns failed when Resend returns error object', async () => {
-    mocks.mockResendSend.mockResolvedValue({ data: null, error: { message: 'Invalid domain' } });
+    mocks.mockResendSend.mockResolvedValue({ success: false, error: 'Invalid domain' });
     const provider = new ResendEmailProvider();
     const result = await provider.send({ ...emailPayload });
     expect(result.status).toBe('failed');
@@ -172,7 +172,7 @@ describe('ResendEmailProvider', () => {
   });
 
   it('generates uuid when data has no id', async () => {
-    mocks.mockResendSend.mockResolvedValue({ data: {}, error: null });
+    mocks.mockResendSend.mockResolvedValue({ success: true });
     const provider = new ResendEmailProvider();
     const result = await provider.send({ ...emailPayload });
     expect(result.status).toBe('sent');
@@ -192,7 +192,7 @@ describe('ResendEmailProvider', () => {
   });
 
   it('uses htmlBody when provided', async () => {
-    mocks.mockResendSend.mockResolvedValue({ data: { id: 'msg-2' }, error: null });
+    mocks.mockResendSend.mockResolvedValue({ success: true, messageId: 'msg-2' });
     const provider = new ResendEmailProvider();
     await provider.send({
       ...emailPayload,
@@ -200,6 +200,7 @@ describe('ResendEmailProvider', () => {
     });
     expect(mocks.mockResendSend).toHaveBeenCalledWith(
       expect.objectContaining({ html: '<h1>Hello</h1>' }),
+      expect.anything(),
     );
   });
 });

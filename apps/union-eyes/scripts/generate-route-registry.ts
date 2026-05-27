@@ -89,8 +89,9 @@ function exportedMethods(content: string): string[] {
   const methods: string[] = [];
   for (const m of HTTP_METHODS) {
     const direct = new RegExp(`export\\s+const\\s+${m}\\s*=`, "m").test(content);
+    const functionExport = new RegExp(`export\\s+(?:async\\s+)?function\\s+${m}\\s*\\(`, "m").test(content);
     const reExport = new RegExp(`export\\s*\\{[^}]*\\b${m}\\b[^}]*\\}`, "m").test(content);
-    if (direct || reExport) methods.push(m);
+    if (direct || functionExport || reExport) methods.push(m);
   }
   return methods;
 }

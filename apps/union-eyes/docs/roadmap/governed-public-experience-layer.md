@@ -3,7 +3,7 @@
 ## Status: Planned — primitives embedded, full build deferred
 
 The `lib/public-experience/` module contains the type and governance
-primitives that will underpin Union Eyes' governed public surface layer.
+primitives that will underpin UnionEyes' governed public surface layer.
 This doc describes the vision, what's already in the repo, and what
 remains to be built.
 
@@ -11,7 +11,7 @@ remains to be built.
 
 ## Why this layer exists
 
-Union Eyes currently serves authenticated users in three audience lanes:
+UnionEyes currently serves authenticated users in three audience lanes:
 
 - **Member** — self-service portal
 - **Staff / Steward** — casework surface

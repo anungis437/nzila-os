@@ -16,7 +16,7 @@ Registry source of truth: `platform/registry/apps.json`.
 Run:
 
 ```bash
-pnpm app:lifecycle:check
+pnpm exec tsx scripts/app-lifecycle-check.ts
 ```
 
 This validates:

@@ -66,4 +66,4 @@
 | Demo completed with stakeholder | Solutions | ☐ |
 | Runbooks accessible to on-call | Ops | ☐ |
 
-> Run `pnpm pilot:check` to validate technical readiness.
+> Run `pnpm exec tsx scripts/pilot-check.ts` to validate technical readiness.

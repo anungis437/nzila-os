@@ -71,7 +71,7 @@ function resolveDatabaseUrl(): string | undefined {
 }
 
 function runStep(name: string, command: string, args: string[], stepEnv: StepEnv = {}, mode: StepMode = 'default'): GateStep {
-  console.log(`\n[ue:qa:gate] ${name}`)
+  console.log(`\n[ue-qa-gate] ${name}`)
   const databaseUrl = resolveDatabaseUrl()
 
   const qaEnv = mode === 'ue-qa' || mode === 'ue-e2e'
@@ -233,17 +233,17 @@ function main(): void {
   const repoRoot = process.cwd()
   const staticViolations = runStaticAiChecks(repoRoot)
   if (staticViolations.length > 0) {
-    console.error('\n[ue:qa:gate] Static AI compliance check FAILED:')
+    console.error('\n[ue-qa-gate] Static AI compliance check FAILED:')
     for (const violation of staticViolations) {
       console.error(`  - ${violation}`)
     }
     process.exit(1)
   }
-  console.log('[ue:qa:gate] Static AI compliance checks passed.')
+  console.log('[ue-qa-gate] Static AI compliance checks passed.')
 
   steps.push(runStep('Seed deterministic UE test environment', cmd, ['ue:seed:test-env'], {}, 'ue-qa'))
-  steps.push(runStep('Run UE API QA suite', cmd, ['ue:qa:api'], {}, 'ue-qa'))
-  steps.push(runStep('Run UE E2E QA suite', cmd, ['ue:qa:e2e'], { PLAYWRIGHT_HTML_OPEN: 'never' }, 'ue-e2e'))
+  steps.push(runStep('Run UE API QA suite', cmd, ['--filter', '@nzila/union-eyes', 'test:qa:api'], {}, 'ue-qa'))
+  steps.push(runStep('Run UE E2E QA suite', cmd, ['--filter', '@nzila/union-eyes', 'test:qa:e2e'], { PLAYWRIGHT_HTML_OPEN: 'never' }, 'ue-e2e'))
   steps.push(runStep('Run control-plane pipeline dry-run', cmd, ['--filter', '@nzila/control-plane', 'job:aggregate-dry-run']))
   steps.push(runStep('Verify NAR chain job', cmd, ['--filter', '@nzila/control-plane', 'job:verify-nar-chain']))
 
@@ -268,8 +268,9 @@ function main(): void {
   )
 
   const report = runStep('Generate and enforce UE QA report', cmd, [
-    'ue:qa:report',
-    '--',
+    'exec',
+    'tsx',
+    'scripts/ue-qa-report.ts',
     `--results=${outPath}`,
     `--target=${target}`,
     '--enforce',
@@ -285,14 +286,14 @@ function main(): void {
   }
 
   if (finalFailures.length > 0) {
-    console.error(`\n[ue:qa:gate] NO_GO for target=${target}`)
+    console.error(`\n[ue-qa-gate] NO_GO for target=${target}`)
     for (const failure of finalFailures) {
       console.error(`- ${failure}`)
     }
     process.exit(1)
   }
 
-  console.log(`\n[ue:qa:gate] PASS target=${target}`)
+  console.log(`\n[ue-qa-gate] PASS target=${target}`)
 }
 
 main()

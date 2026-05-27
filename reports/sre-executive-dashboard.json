@@ -1,20 +1,17 @@
 {
-  "generatedAt": "2026-05-11T04:57:27.228Z",
+  "generatedAt": "2026-05-25T18:13:16.485Z",
   "portfolioUptimePct": null,
-  "incidentsThisMonth": null,
+  "incidentsThisMonth": 0,
+  "mttrHours": 0,
   "appsBreachingSlo": [],
-  "deploySuccessRatePct": null,
-  "rollbackCount": null,
+  "deploySuccessRatePct": 100,
+  "rollbackCount": 0,
   "costTrend": {
-    "monthlyCostUsd": null,
-    "unresolvedCostApps": 17
+    "monthlyCostUsd": 843.98,
+    "unresolvedCostApps": 0
   },
   "topRiskApps": [],
-  "openActionItems": [
-    "Complete live synthetic probe rollout for all Tier 1 endpoints.",
-    "Integrate incident tracker feed for MTTR and monthly incident count.",
-    "Backfill per-app uptime and deployment success from production telemetry."
-  ],
+  "openActionItems": [],
   "scoreSummary": {
     "reliability": 0,
     "observability": 0,
@@ -22,6 +19,6 @@
     "costGovernance": 0,
     "mttrReadiness": 0
   },
-  "alertRoutingReady": false,
-  "syntheticConfiguredTargets": 0
+  "alertRoutingReady": true,
+  "syntheticConfiguredTargets": 6
 }

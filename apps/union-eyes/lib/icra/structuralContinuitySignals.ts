@@ -33,6 +33,11 @@ export type StructuralPatternId =
   | 'modernization_continuity_preserving'
   | 'modernization_capability_first'
   | 'modernization_reactive'
+  // trust-sensitive authority pathways
+  | 'authority_documented_mandate'
+  | 'authority_committee_alignment'
+  | 'authority_executive_override'
+  | 'authority_ad_hoc_negotiation'
   // onboarding inheritance
   | 'onboarding_structured_inheritance'
   | 'onboarding_observational'
@@ -70,6 +75,11 @@ const PATTERN_ARCHETYPES: Record<StructuralPatternId, ContinuityArchetypeId[]> =
   modernization_continuity_preserving: ['operational_continuity'],
   modernization_capability_first: ['modernization_fragility'],
   modernization_reactive: ['modernization_fragility', 'institutional_memory_dependency'],
+
+  authority_documented_mandate: ['operational_continuity'],
+  authority_committee_alignment: ['operational_continuity'],
+  authority_executive_override: ['governance_fragmentation', 'stewardship_concentration'],
+  authority_ad_hoc_negotiation: ['governance_fragmentation', 'modernization_fragility'],
 
   onboarding_structured_inheritance: ['onboarding_survivability', 'operational_continuity'],
   onboarding_observational: ['onboarding_survivability'],
@@ -111,6 +121,12 @@ export const QUESTION_OPTION_PATTERNS: Record<string, Record<string, StructuralP
     structured: 'onboarding_structured_inheritance',
     observational: 'onboarding_observational',
     self_directed: 'onboarding_self_directed',
+  },
+  scs_06: {
+    documented_mandate: 'authority_documented_mandate',
+    committee_alignment: 'authority_committee_alignment',
+    executive_override: 'authority_executive_override',
+    ad_hoc_negotiation: 'authority_ad_hoc_negotiation',
   },
 };
 

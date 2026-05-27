@@ -10,7 +10,7 @@ persistent storage → metadata correlation back to originating request.
 ## Entrypoint
 
 ```bash
-pnpm proof:run event-contract-flow
+pnpm exec tsx scripts/proof/run-proof.ts event-contract-flow
 ```
 
 Or via the test runner:
@@ -75,12 +75,12 @@ proof-artifacts/event-contract-flow/
 ## How to Run Locally
 
 ```bash
-pnpm proof:run event-contract-flow
+pnpm exec tsx scripts/proof/run-proof.ts event-contract-flow
 ```
 
 ## How to Validate in CI
 
-Verified automatically by `pnpm proof:verify`.
+Verified automatically by `pnpm exec tsx scripts/proof/verify-artifacts.ts`.
 
 ## What "Pass" Means
 

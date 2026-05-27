@@ -89,12 +89,12 @@ Each app exports evidence via `GET /api/evidence/export`:
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm governance:check` | Validate app compliance (6-point check) |
-| `pnpm validate:pack` | Validate procurement pack completeness |
-| `pnpm validate:all` | Run all validation suites |
-| `pnpm generate:sbom` | Generate Software Bill of Materials |
-| `pnpm attest:build` | Create build attestation |
-| `pnpm reproduce:evidence` | Verify evidence reproducibility |
+| `pnpm exec tsx scripts/governance-check.ts` | Validate app compliance (6-point check) |
+| `pnpm exec tsx scripts/validate-procurement-pack.ts` | Validate procurement pack completeness |
+| `pnpm exec tsx packages/platform-validation/src/run-all.ts` | Run all validation suites |
+| `pnpm exec tsx scripts/generate-sbom.ts` | Generate Software Bill of Materials |
+| `pnpm exec tsx scripts/attest-build.ts` | Create build attestation |
+| `pnpm exec tsx scripts/reproduce-evidence.ts` | Verify evidence reproducibility |
 
 ## Per-App Evidence Endpoints
 
@@ -126,7 +126,7 @@ Each app exports evidence via `GET /api/evidence/export`:
 ### Procurement Pack Generation
 
 ```bash
-pnpm validate:pack
+pnpm exec tsx scripts/validate-procurement-pack.ts
 ```
 
 Generates a complete procurement evidence package suitable for enterprise vendor assessment.

@@ -25,9 +25,19 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const copy = locale === 'fr-CA'
+    ? {
+        title: 'Doctrine | Perspectives | UnionEyes',
+        description: 'Normes editoriales et architecture narrative pour les perspectives de continuite organisationnelle.',
+      }
+    : {
+        title: 'Doctrine | Insights | UnionEyes',
+        description: 'Editorial standards and narrative architecture for organizational continuity insights.',
+      };
+
   return {
-    title: `Doctrine | Insights | UnionEyes`,
-    description: `Editorial standards and narrative architecture for organizational continuity insights.`,
+    title: copy.title,
+    description: copy.description,
     alternates: buildLocaleAlternates(locale, '/insights/doctrine'),
   };
 }

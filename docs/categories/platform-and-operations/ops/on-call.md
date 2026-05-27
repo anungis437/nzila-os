@@ -79,7 +79,7 @@ P2 Flow:
    - Any known flaky alerts
 2. **Incoming** on-call acknowledges the handoff within 2 hours.
 3. Verify PagerDuty rotation has switched correctly.
-4. Run `pnpm pilot:check` (if applicable) to confirm system health.
+4. Run `pnpm exec tsx scripts/pilot-check.ts` (if applicable) to confirm system health.
 
 ---
 

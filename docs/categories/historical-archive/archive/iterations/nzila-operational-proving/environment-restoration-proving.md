@@ -19,7 +19,7 @@ the pilot tier following the rollback rehearsal.
 | Attestation ID   | `8a63bb7b-75eb-480c-934c-6e7c589d5393`                |
 | Log              | `proof-artifacts/operational-proving/restore-pilot.log` |
 
-Recorded via `pnpm rollout:rollback:attest -- --restore`.
+Recorded via `node tooling/scripts/record-rollback-attestation.mjs -- --restore`.
 
 ---
 

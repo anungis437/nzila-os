@@ -42,7 +42,7 @@ pnpm test:fast        # Fast tests (skip contract tests)
 ## Database
 
 ```bash
-pnpm db:doctor        # Check DB health
+pnpm exec tsx scripts/db/doctor.ts        # Check DB health
 ```
 
 For local development with Docker:

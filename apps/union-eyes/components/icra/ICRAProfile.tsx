@@ -5,8 +5,8 @@
  * ICRAProfile — results display for the Institutional Continuity Profile.
  *
  * Implements tiered output:
- *   - Continuity Reflection (free): band + insights + signals + burden index
- *   - Executive Continuity Brief: unlocks governance entropy, continuity debt,
+ *   - Free Readiness Check (free): band + insights + signals + burden index
+ *   - Leadership Briefing Report: unlocks governance entropy, continuity debt,
  *     dependency review, modernization risk, full recommendations
  *   - Institutional Continuity Diagnostic: full access
  *
@@ -582,13 +582,13 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
         <section className="space-y-6">
           <header className="space-y-3 border-b border-stone-200 pb-5">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-400">
-              Part IV · Executive Continuity Brief — chapter previews
+              Part IV · Leadership Briefing Report — chapter previews
             </p>
             <h2 className="font-sans text-2xl font-semibold leading-tight tracking-tight text-stone-900 md:text-[1.7rem]">
               The chapters of your full continuity analysis
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-stone-600">
-              The Reflection above names what is visible. The Executive Continuity Brief is
+              The Reflection above names what is visible. The Leadership Briefing Report is
               where the analysis becomes actionable — chapter by chapter, with the evidence
               traceable back to the questions you answered. Each chapter below is part of the
               same issued document.
@@ -761,7 +761,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
           {!visible('full_recommendations') && recommendations.length > 1 && (
             <ICRAReportGate
               sectionName="Continuity Transformation Sequence"
-              teaser="Additional recommendations — immediate, medium-term, and structural — are sequenced inside the Executive Continuity Brief so they reinforce rather than fragment one another."
+              teaser="Additional recommendations — immediate, medium-term, and structural — are sequenced inside the Leadership Briefing Report so they reinforce rather than fragment one another."
               requiredTier="executive_continuity_brief"
               assessmentId={assessmentId}
               chapterNumber={6}

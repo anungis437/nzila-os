@@ -21,7 +21,7 @@ import {
   inAppNotifications,
 } from '../db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { getResendClient, getFromEmail } from '@/lib/email-service';
+import { getFromEmail, sendResendEmail } from '@/lib/email-service';
 import twilio from 'twilio';
 import { logger } from '@/lib/logger';
 
@@ -318,18 +318,19 @@ async function sendEmail(
   }
 
   try {
-    // Use Resend for email delivery
-    const client = getResendClient();
-    if (!client) {
-      logger.warn('[EMAIL] Resend not configured, skipping email send');
-      return;
-    }
-    await client.emails.send({
+    const result = await sendResendEmail({
       from: getFromEmail('UnionEyes'),
       to: userEmail,
       subject,
       html: body,
+    }, {
+      feature: 'financial_service_notification',
+      organizationId: typeof data.organizationId === 'string' ? data.organizationId : undefined,
     });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to send notification email');
+    }
     
     logger.info('[EMAIL] Successfully sent', { userEmail, subject });
   } catch (error) {

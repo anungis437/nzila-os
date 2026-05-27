@@ -29,22 +29,22 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate canonical catalog schema
-        run: pnpm validate:product-catalog
+        run: pnpm exec tsx scripts/validate-product-catalog.ts
 
       - name: Enforce engine and product brand isolation
-        run: pnpm brand:leakage:check
+        run: pnpm exec tsx scripts/check-brand-leakage.ts
 
       - name: Check generated artifact freshness
-        run: pnpm generate:portfolio-artifacts -- --check
+        run: pnpm exec tsx scripts/generate-portfolio-artifacts.ts --check
 
       - name: Check platform product manifest drift
         run: pnpm tsx scripts/generate-platform-products.ts --check
 
       - name: Check portfolio drift
-        run: pnpm validate:portfolio
+        run: pnpm exec tsx scripts/validate-portfolio.ts
 
       - name: Check canonical truth surfaces
-        run: pnpm validate:canonical-truth && pnpm validate:truth-authority
+        run: pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts
 
       - name: Run portfolio governance tests
         run: pnpm exec vitest run --project contract-tests tooling/contract-tests/portfolio-governance.test.ts

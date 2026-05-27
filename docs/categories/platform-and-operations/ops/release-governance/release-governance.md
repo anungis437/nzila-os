@@ -21,17 +21,17 @@ tag → build → stage → validate → approve → promote → evidence → le
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm release:tag` | Create signed semantic version tag + manifest |
-| `pnpm release:staging:truth` | Validate staging is promotable |
-| `pnpm release:staging:truth --live` | + hit live staging endpoints |
-| `pnpm release:rollback --list` | List rollback candidates |
-| `pnpm release:rollback --tag vX.Y.Z` | Dry-run rollback plan |
-| `pnpm release:rollback --tag vX.Y.Z --execute` | Execute production rollback |
-| `pnpm release:hotfix` | Initiate governed hotfix |
-| `pnpm release:hotfix:sla` | Check hotfix normalization SLA |
-| `pnpm release:evidence --tag vX.Y.Z` | Record release evidence |
-| `pnpm release:evidence --list` | View evidence ledger |
-| `pnpm release:dashboard` | Portfolio version dashboard |
+| `pnpm exec tsx scripts/release/tag-release.ts` | Create signed semantic version tag + manifest |
+| `pnpm exec tsx scripts/release/staging-truth.ts` | Validate staging is promotable |
+| `pnpm exec tsx scripts/release/staging-truth.ts --live` | + hit live staging endpoints |
+| `pnpm exec tsx scripts/release/rollback-prod.ts --list` | List rollback candidates |
+| `pnpm exec tsx scripts/release/rollback-prod.ts --tag vX.Y.Z` | Dry-run rollback plan |
+| `pnpm exec tsx scripts/release/rollback-prod.ts --tag vX.Y.Z --execute` | Execute production rollback |
+| `pnpm exec tsx scripts/release/hotfix-initiate.ts` | Initiate governed hotfix |
+| `pnpm exec tsx scripts/release/hotfix-sla.ts` | Check hotfix normalization SLA |
+| `pnpm exec tsx scripts/release/release-ledger.ts --tag vX.Y.Z` | Record release evidence |
+| `pnpm exec tsx scripts/release/release-ledger.ts --list` | View evidence ledger |
+| `pnpm exec tsx scripts/release/portfolio-dashboard.ts` | Portfolio version dashboard |
 
 ## Signed Tags
 
@@ -75,19 +75,19 @@ Every production deploy appends to `reports/releases/release-ledger.jsonl`:
 
 ### Standard Release
 
-1. `pnpm release:tag` — creates tag + manifest in `ops/releases/`
+1. `pnpm exec tsx scripts/release/tag-release.ts` — creates tag + manifest in `ops/releases/`
 2. CI triggers `deploy-production.yml` → builds, stages, tests
-3. `pnpm release:staging:truth --live` — validates staging
+3. `pnpm exec tsx scripts/release/staging-truth.ts --live` — validates staging
 4. Human approval gate
 5. Production promotion (exact same artifact SHA)
 6. Post-deploy smoke
-7. `pnpm release:evidence` — appends to ledger
+7. `pnpm exec tsx scripts/release/release-ledger.ts` — appends to ledger
 
 ### Hotfix
 
-1. `pnpm release:hotfix` — creates hotfix branch + tracking record
+1. `pnpm exec tsx scripts/release/hotfix-initiate.ts` — creates hotfix branch + tracking record
 2. Minimal-diff fix on branch
-3. `pnpm release:tag` — creates hotfix tag
+3. `pnpm exec tsx scripts/release/tag-release.ts` — creates hotfix tag
 4. Expedited deploy (same pipeline, skips canary)
 5. 48h normalization deadline starts
-6. `pnpm release:hotfix:sla` — CI checks for overdue normalizations
+6. `pnpm exec tsx scripts/release/hotfix-sla.ts` — CI checks for overdue normalizations

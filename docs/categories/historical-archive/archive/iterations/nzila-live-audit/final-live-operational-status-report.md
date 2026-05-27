@@ -150,7 +150,7 @@ operational honesty under the doctrine.
 | Validation                       | Status                          |
 |----------------------------------|---------------------------------|
 | `pnpm typecheck`                 | (run as part of audit gate)     |
-| `pnpm validate:live-readiness`   | (run as part of audit gate)     |
-| `pnpm validate:cognition`        | LIVE (existing CI)              |
+| `node tooling/scripts/validate-live-operational-readiness.mjs`   | (run as part of audit gate)     |
+| `node tooling/scripts/validate-institutional-cognition-convergence.mjs`        | LIVE (existing CI)              |
 | `pnpm validate:rollout-legitimacy` | LIVE (existing CI)            |
 | All audit docs present in `docs/nzila-live-audit/` | LIVE          |

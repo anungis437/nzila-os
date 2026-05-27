@@ -100,16 +100,16 @@ jobs:
 
             \`\`\`bash
             # Step 1: Pre-flight check
-            pnpm dr:drill:checklist
+            pnpm exec tsx scripts/dr/drill-checklist.ts
 
             # Step 2: Dry-run (no live restore)
-            pnpm db:restore-drill
+            pnpm exec tsx scripts/db/restore-drill.ts
 
             # Step 3: Live staging restore (measures actual RTO)
-            pnpm db:restore-drill:execute
+            pnpm exec tsx scripts/db/restore-drill.ts -- --execute
 
             # Step 4: Generate evidence report
-            pnpm dr:drill:report
+            pnpm exec tsx scripts/dr/drill-report.ts
 
             # Step 5: Commit evidence artifacts
             git add reports/dr/ reports/db/
@@ -118,8 +118,8 @@ jobs:
 
             ### Acceptance Criteria
 
-            - [ ] \`pnpm dr:drill:checklist\` passes
-            - [ ] \`pnpm db:restore-drill:execute\` completes without error
+            - [ ] \`pnpm exec tsx scripts/dr/drill-checklist.ts\` passes
+            - [ ] \`pnpm exec tsx scripts/db/restore-drill.ts -- --execute\` completes without error
             - [ ] RTO actual recorded in \`reports/dr/restore-drill-${drillDate}.json\`
             - [ ] Evidence artifacts committed and pushed
             - [ ] \`apps/union-eyes/maturity.json\` updated with measured RTO

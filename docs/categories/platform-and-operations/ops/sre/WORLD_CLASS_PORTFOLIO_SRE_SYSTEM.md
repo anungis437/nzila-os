@@ -39,12 +39,12 @@ Nzila OS shared reliability layer for:
 
 ## Enforcement Commands
 
-- pnpm sre:health:contract
-- pnpm sre:synthetic:dry-run
-- pnpm sre:alerts:dry-run
-- pnpm sre:audit
-- pnpm sre:dashboard
-- pnpm sre:validate
+- pnpm exec tsx scripts/sre/validate-health-contract.ts
+- pnpm exec tsx scripts/sre/synthetic-dry-run.ts
+- pnpm exec tsx scripts/sre/alert-routing-dry-run.ts
+- pnpm exec tsx scripts/sre/audit-reliability.ts
+- pnpm exec tsx scripts/sre/generate-executive-dashboard.ts
+- pnpm exec tsx scripts/sre/validate-health-contract.ts && pnpm exec tsx scripts/sre/synthetic-dry-run.ts && pnpm exec tsx scripts/sre/alert-routing-dry-run.ts && pnpm exec tsx scripts/sre/audit-reliability.ts && pnpm exec tsx scripts/sre/generate-executive-dashboard.ts
 
 ## Reliability Workflow Gate
 

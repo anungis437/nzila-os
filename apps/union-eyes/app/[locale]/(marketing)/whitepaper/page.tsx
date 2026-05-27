@@ -15,6 +15,7 @@ const WHITEPAPER_COPY = {
     description:
       'The UnionEyes whitepaper outlines the Organizational Continuity Infrastructure (OCI) model, governance boundaries, deterministic AI doctrine, and deployment controls for labour organizations.',
     heading: 'UnionEyes Whitepaper',
+    heroHeading: 'The Continuity Gap',
     heroDescription:
       'An executive technical brief on Organizational Continuity Infrastructure, governed AI boundaries, and operational safeguards for labour leadership.',
     subtitle: 'Whitepaper article',
@@ -22,6 +23,8 @@ const WHITEPAPER_COPY = {
     ctaHref: '/insights',
     downloadLabel: 'Download Full PDF',
     tocLabel: 'On this page',
+    quickActionsLabel: 'Quick actions',
+    startReadingLabel: 'Start reading',
     articleMeta: {
       format: 'Evidence-Enhanced Whitepaper',
       version: 'v3.0',
@@ -49,6 +52,7 @@ const WHITEPAPER_COPY = {
     description:
       'Le livre blanc UnionEyes presente le modele d Infrastructure de continuite organisationnelle (OCI), les limites de gouvernance, la doctrine IA deterministe et les controles de deploiement pour les organisations syndicales.',
     heading: 'Livre blanc UnionEyes',
+    heroHeading: 'L’ecart de continuite',
     heroDescription:
       'Une note technique executive sur l Infrastructure de continuite organisationnelle, les limites d IA gouvernee et les garanties operationnelles pour la direction syndicale.',
     subtitle: 'Article livre blanc',
@@ -56,6 +60,8 @@ const WHITEPAPER_COPY = {
     ctaHref: '/insights',
     downloadLabel: 'Telecharger le PDF complet',
     tocLabel: 'Sommaire',
+    quickActionsLabel: 'Actions rapides',
+    startReadingLabel: 'Commencer la lecture',
     articleMeta: {
       format: 'Livre blanc renforce par preuves',
       version: 'v3.0',
@@ -69,11 +75,11 @@ const WHITEPAPER_COPY = {
     abstractLabel: 'Resume',
     abstractReadingTime: 'Lecture d environ 25 minutes',
     abstractBody:
-      'Les organisations syndicales canadiennes affrontent un ecart generationnel de continuite : 5,2 millions de baby-boomers ont deja quitte la population active, 2,7 millions supplementaires devraient partir d ici cinq ans, et le taux d activite devrait reculer de plus de deux points de pourcentage d ici 2030. La planification de la releve, la gestion des effectifs et la conservation documentaire ont ete concues pour une autre echelle de pertes et ne peuvent, a elles seules, preserver la memoire institutionnelle, la posture de gouvernance et la lignee des decisions sur lesquelles repose le mouvement syndical.',
+      'Les organisations syndicales canadiennes affrontent un ecart generationnel de continuite : 5,2 millions de baby-boomers ont deja quitte la population active, 2,7 millions supplementaires devraient partir d ici cinq ans, et le taux d activite devrait reculer de plus de deux points de pourcentage d ici 2030. La planification de la releve, la gestion des effectifs et la conservation documentaire ont ete concues pour une autre echelle de pertes et ne peuvent, a elles seules, preserver la memoire organisationnelle, la posture de gouvernance et la lignee des decisions sur lesquelles repose le mouvement syndical.',
     abstractBodyTwo:
-      'Ce livre blanc introduit l infrastructure de continuite institutionnelle comme une discipline distincte. Il definit l Indice de continuite institutionnelle (OCI) et l Analyse de risque de continuite institutionnelle (OCRA), decrit la doctrine d IA deterministe et les limites de gouvernance qui permettent aux outils de continuite de resister a un examen syndical rigoureux, et expose les controles de deploiement, le modele de preuve et l alignement juridique qui permettent aux syndicats, federations et organisations democratiques d operationnaliser la continuite sans renoncer a leur autorite sur leur propre memoire institutionnelle.',
+      'Ce livre blanc introduit l infrastructure de continuite organisationnelle comme une discipline distincte. Il definit l Indice de continuite organisationnelle (OCI) et l Analyse de risque de continuite organisationnelle (OCRA), decrit la doctrine d IA deterministe et les limites de gouvernance qui permettent aux outils de continuite de resister a un examen syndical rigoureux, et expose les controles de deploiement, le modele de preuve et l alignement juridique qui permettent aux syndicats, federations et organisations democratiques d operationnaliser la continuite sans renoncer a leur autorite sur leur propre memoire organisationnelle.',
     abstractCallouts: [
-      'Definit OCI et OCRA comme primitives de continuite institutionnelle.',
+      'Definit OCI et OCRA comme primitives de continuite organisationnelle.',
       'Enonce la doctrine d IA deterministe et les limites de gouvernance.',
       'Cartographie le deploiement, la preuve et l alignement juridique pour les organisations syndicales.',
     ],
@@ -1113,8 +1119,12 @@ export default async function LocaleWhitepaperPage({
         />
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-4xl font-semibold text-white drop-shadow-md sm:text-5xl lg:text-6xl">The Continuity Gap</h1>
-            <p className="mt-4 text-base text-white/90 drop-shadow sm:text-lg lg:text-xl">Organizational Memory, Organizational Resilience, and the Future of Operational Trust</p>
+            <h1 className="text-4xl font-semibold text-white drop-shadow-md sm:text-5xl lg:text-6xl">
+              {copy.heroHeading}
+            </h1>
+            <p className="mt-4 text-base text-white/90 drop-shadow sm:text-lg lg:text-xl">
+              {copy.subtitle}
+            </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center print:hidden">
               {/* PDF download temporarily hidden — see PrintPdfButton */}
@@ -1171,12 +1181,14 @@ export default async function LocaleWhitepaperPage({
               </ol>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Quick actions</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+                {copy.quickActionsLabel}
+              </h3>
               <div className="mt-3 space-y-2">
                 {/* PDF download temporarily hidden — see PrintPdfButton */}
                 {tocHeadings[0] ? (
                   <a href={`#${slugify(tocHeadings[0])}`} className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100">
-                    Start reading
+                    {copy.startReadingLabel}
                   </a>
                 ) : null}
               </div>
@@ -1432,6 +1444,16 @@ export default async function LocaleWhitepaperPage({
             })}
           </article>
         </section>
+
+        <div className="mt-12 flex justify-center border-t border-slate-200 pt-10">
+          <Link
+            href={`/${locale}/whitepapers`}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100"
+          >
+            <span aria-hidden="true">←</span>
+            Back to Whitepaper Library
+          </Link>
+        </div>
       </main>
     </div>
   );

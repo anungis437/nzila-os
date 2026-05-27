@@ -12,38 +12,52 @@ export type InsightsHubSection = {
   description: string;
 };
 
-export const insightsHubSections: InsightsHubSection[] = [
-  {
-    key: 'overview',
-    label: 'Overview',
-    href: (locale) => `/${locale}/insights`,
-    description: 'The executive hub and current doctrine highlights.',
-  },
-  {
-    key: 'doctrine',
-    label: 'Doctrine',
-    href: (locale) => `/${locale}/insights/doctrine`,
-    description: 'Editorial standards, storytelling, and featured publications.',
-  },
-  {
-    key: 'methodology',
-    label: 'Methodology',
-    href: (locale) => `/${locale}/insights/methodology`,
-    description: 'Canonical frameworks and continuity visualization.',
-  },
-  {
-    key: 'resonance',
-    label: 'Resonance',
-    href: (locale) => `/${locale}/insights/resonance`,
-    description: 'Emotional memory anchors and executive trust language.',
-  },
-  {
-    key: 'categories',
-    label: 'Categories',
-    href: (locale) => `/${locale}/insights/categories`,
-    description: 'Browse the governance domains and topic pathways.',
-  },
-];
+export function getInsightsHubSections(locale: string): InsightsHubSection[] {
+  const fr = locale === 'fr-CA';
+
+  return [
+    {
+      key: 'overview',
+      label: fr ? 'Apercu' : 'Overview',
+      href: (value) => `/${value}/insights`,
+      description: fr
+        ? 'Le carrefour executif et les points forts doctrinaux du moment.'
+        : 'The executive hub and current doctrine highlights.',
+    },
+    {
+      key: 'doctrine',
+      label: fr ? 'Doctrine' : 'Doctrine',
+      href: (value) => `/${value}/insights/doctrine`,
+      description: fr
+        ? 'Normes editoriales, narration et publications en vedette.'
+        : 'Editorial standards, storytelling, and featured publications.',
+    },
+    {
+      key: 'methodology',
+      label: fr ? 'Methodologie' : 'Methodology',
+      href: (value) => `/${value}/insights/methodology`,
+      description: fr
+        ? 'Cadres canoniques et visualisation de continuite.'
+        : 'Canonical frameworks and continuity visualization.',
+    },
+    {
+      key: 'resonance',
+      label: fr ? 'Resonance' : 'Resonance',
+      href: (value) => `/${value}/insights/resonance`,
+      description: fr
+        ? 'Ancrages de memoire emotionnelle et langage de confiance executive.'
+        : 'Emotional memory anchors and executive trust language.',
+    },
+    {
+      key: 'categories',
+      label: fr ? 'Categories' : 'Categories',
+      href: (value) => `/${value}/insights/categories`,
+      description: fr
+        ? 'Parcourir les domaines de gouvernance et les parcours thematiques.'
+        : 'Browse the governance domains and topic pathways.',
+    },
+  ];
+}
 
 type InsightsHubSubmenuProps = {
   locale: string;
@@ -56,11 +70,13 @@ export function InsightsHubSubmenu({
   active,
   contextMode = 'executive',
 }: InsightsHubSubmenuProps) {
+  const sections = getInsightsHubSections(locale);
+
   return (
     <nav className="border-b border-slate-200/70 bg-white/95 backdrop-blur-sm sticky top-0 z-30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {insightsHubSections.map((section) => {
+          {sections.map((section) => {
             const isActive = section.key === active;
 
             return (

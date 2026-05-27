@@ -50,7 +50,7 @@ Every external tester mutation must include actor id, org id, request id, route 
 2. Validate deterministic user exists: ue-qa-ux-tester-001.
 3. Validate org membership includes only ue-qa-ux-sandbox.
 4. Validate denied route list is active through API coverage.
-5. Run pnpm ue:qa:gate -- --target ux before issuing access.
+5. Run pnpm exec tsx scripts/ue-qa-gate.ts --target ux before issuing access.
 
 ## Access Window
 

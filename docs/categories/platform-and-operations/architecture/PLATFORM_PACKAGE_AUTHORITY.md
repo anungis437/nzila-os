@@ -10,8 +10,8 @@ Nzila OS adopts one authoritative package boundary per shared concern and constr
 
 The normative map is stored in governance/platform-package-authority.json and is enforced by:
 
-- pnpm platform:authority:check
-- pnpm platform:adoption:check
+- pnpm exec tsx scripts/platform-authority-check.ts
+- pnpm exec tsx scripts/platform-adoption-gate.ts
 
 ## Concern Authority Matrix
 

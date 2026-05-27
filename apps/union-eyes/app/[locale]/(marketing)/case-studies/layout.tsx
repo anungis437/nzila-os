@@ -9,7 +9,7 @@
  * not replacing. Operates alongside existing systems and respects existing tools.
  *
  * AI policy: assistive intelligence with human oversight, explainability, reviewability,
- * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ * and procedural transparency. Every action remains operator-initiated and operator-reviewable.
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * organizational trust for democratic infrastructure.
@@ -39,7 +39,7 @@ export async function generateMetadata({
   return {
     title: 'Case Studies | UnionEyes',
     description:
-      'Real labour-organization outcomes using governance-safe intelligence, organizational memory, and operational coherence — a Canadian-hosted, bilingual-first continuity layer that operates alongside existing systems, non-displacing and additive, with sovereignty-conscious organizational trust for democratic infrastructure.',
+      'Real labour-organization outcomes using organizational memory and operational coherence — a Canadian-hosted, bilingual-first continuity layer that operates alongside existing systems.',
     alternates: buildLocaleAlternates(locale, '/case-studies'),
   };
 }

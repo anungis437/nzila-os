@@ -18,7 +18,7 @@
  *  - fail-closed runtime gate is present and wired into instrumentation
  *  - required tone signals distributed across the layer
  *  - forbidden framings only inside negated/forbidden contexts
- *  - validator script registered in root package.json
+ *  - required validator executables exist in tooling/scripts
  *
  * Authority style: substrate hardening, not feature plumbing.  Continuity-safe,
  * governance-safe, anti-surveillance, evidence-anchored, stewardship cadence.
@@ -35,7 +35,6 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 const layerRoot = path.join(repoRoot, 'docs', 'nzila-tier2-hardening');
 const failClosedSrc = path.join(repoRoot, 'apps', 'union-eyes', 'lib', 'runtime', 'fail-closed.ts');
 const instrumentation = path.join(repoRoot, 'apps', 'union-eyes', 'instrumentation.ts');
-const rootPackageJson = path.join(repoRoot, 'package.json');
 
 const requiredDocs = [
   'README.md',
@@ -164,9 +163,9 @@ const forbiddenFramings = [
   'engagement gamification',
 ];
 
-const requiredScripts = [
-  'validate:runtime-integrity',
-  'validate:tier2-hardening',
+const requiredValidatorPaths = [
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-runtime-integrity.mjs'),
+  path.join(repoRoot, 'tooling', 'scripts', 'validate-tier2-hardening.mjs'),
 ];
 
 async function readText(filePath) {
@@ -294,25 +293,13 @@ async function main() {
     errors.push(`Forbidden framings appear unbounded in Tier 2 hardening layer:\n- ${forbiddenHits.join('\n- ')}`);
   }
 
-  // ── 13. Validator scripts registered in root package.json ────────
-  if (await exists(rootPackageJson)) {
-    const pkgRaw = await readText(rootPackageJson);
-    let pkg;
-    try {
-      pkg = JSON.parse(pkgRaw);
-    } catch (err) {
-      errors.push(`Could not parse root package.json: ${err instanceof Error ? err.message : String(err)}`);
-      pkg = null;
-    }
-    if (pkg && typeof pkg === 'object') {
-      const scripts = pkg.scripts ?? {};
-      const missingScripts = requiredScripts.filter((s) => !(s in scripts));
-      if (missingScripts.length > 0) {
-        errors.push(`Required validator scripts missing in root package.json:\n- ${missingScripts.join('\n- ')}`);
-      }
-    }
-  } else {
-    errors.push('Root package.json is missing.');
+  // ── 13. Required validator executables exist ─────────────────────
+  const missingValidators = [];
+  for (const validatorPath of requiredValidatorPaths) {
+    if (!(await exists(validatorPath))) missingValidators.push(rel(validatorPath));
+  }
+  if (missingValidators.length > 0) {
+    errors.push(`Required validator executables missing:\n- ${missingValidators.join('\n- ')}`);
   }
 
   if (errors.length > 0) {
@@ -324,7 +311,7 @@ async function main() {
   console.log('Tier 2 hardening validation passed.');
   console.log(`Validated docs: ${docPaths.length}`);
   console.log(`Validated fail-closed contracts: ${requiredFailClosedContracts.length}`);
-  console.log(`Validated required scripts: ${requiredScripts.length}`);
+  console.log(`Validated required executables: ${requiredValidatorPaths.length}`);
 }
 
 main().catch((error) => {

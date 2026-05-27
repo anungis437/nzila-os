@@ -8,7 +8,7 @@
  * - app-architecture.meta.json ↔ apps.json tier alignment
  * - Contract package existence validation
  *
- * Usage: pnpm registry:consistency:check
+ * Usage: pnpm exec tsx scripts/registry-consistency-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

@@ -14,8 +14,10 @@ import type { Answer, DimensionScore, Question } from './types';
 import {
   deriveConfidenceSignals,
   aggregateConfidenceByDomain,
+  aggregateConfidenceByDomainComposite,
   type ContinuityConfidenceSignal,
   type ContinuityConfidenceDomain,
+  type ContinuityConfidenceComposite,
 } from './continuityConfidenceSignals';
 import {
   deriveStructuralSignals,
@@ -35,6 +37,7 @@ export interface AssessmentSignalEnrichment {
   generatedAt: string;
   confidenceSignals: ContinuityConfidenceSignal[];
   confidenceByDomain: Record<ContinuityConfidenceDomain, number | null>;
+  confidenceByDomainComposite: Record<ContinuityConfidenceDomain, ContinuityConfidenceComposite>;
   structuralSignals: StructuralContinuitySignal[];
   archetypeReadings: ContinuityArchetypeReading[];
   institutionalPatterns: InstitutionalPattern[];
@@ -63,6 +66,7 @@ export function buildAssessmentSignalEnrichment(input: {
     generatedAt: new Date().toISOString(),
     confidenceSignals,
     confidenceByDomain: aggregateConfidenceByDomain(confidenceSignals),
+    confidenceByDomainComposite: aggregateConfidenceByDomainComposite(confidenceSignals),
     structuralSignals,
     archetypeReadings,
     institutionalPatterns,

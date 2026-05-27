@@ -2,7 +2,7 @@
 
 ## Executive Whitepaper + Methodology Whitepaper
 
-**Scope:** Union Eyes / Nzila OS
+**Scope:** UnionEyes / Nzila OS
 **Category:** Organizational Continuity Infrastructure
 **Version:** Master Draft Framework v2
 **Status:** Canonical architecture draft
@@ -79,7 +79,7 @@ The Executive Whitepaper is designed to:
 
 ### Live-site synthesis rule
 
-The Executive Whitepaper must start from operational reality already proven on Union Eyes surfaces
+The Executive Whitepaper must start from operational reality already proven on UnionEyes surfaces
 (grievance workflows, evidence continuity, outcomes tracking, governed intelligence, governance operations),
 then reveal continuity fragility as the hidden layer beneath those operations.
 
@@ -93,7 +93,7 @@ Do not draft the Executive Whitepaper as an abstract continuity manifesto.
 
 ### Required emotional outcome
 
-"Our organization is already experiencing continuity fragility, and Union Eyes understands it more deeply than traditional operational software."
+"Our organization is already experiencing continuity fragility, and UnionEyes understands it more deeply than traditional operational software."
 
 ### Operational credibility principle
 
@@ -191,7 +191,7 @@ Tone and structure should remain operational, labour-aware, governance-serious, 
 
 ### Anti-surveillance boundary
 
-Union Eyes does not:
+UnionEyes does not:
 
 - monitor productivity,
 - rank workers,
@@ -222,5 +222,5 @@ Together, this architecture establishes:
 
 - continuity as infrastructure,
 - OCI/OCRA as continuity architecture,
-- Union Eyes as continuity-aware operational infrastructure,
+- UnionEyes as continuity-aware operational infrastructure,
 - institutional survivability as an operational and governance imperative.

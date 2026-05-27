@@ -28,7 +28,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate PR branch naming policy
-        run: pnpm release:validate:refs --mode branch --ref "${{ github.head_ref }}"
+        run: pnpm exec tsx scripts/release/validate-branch-tag-policy.ts --mode branch --ref "${{ github.head_ref }}"
 
   tag-policy:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
@@ -50,4 +50,4 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate tag naming policy
-        run: pnpm release:validate:refs --mode tag --ref "${{ github.ref_name }}"
+        run: pnpm exec tsx scripts/release/validate-branch-tag-policy.ts --mode tag --ref "${{ github.ref_name }}"

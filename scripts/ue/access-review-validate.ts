@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * ue:access-review:validate — CI governance gate for quarterly access review.
+ * access-review-validate.ts — CI governance gate for quarterly access review.
  *
  * Validates that the current quarter's access review attestation exists and
  * is in a signed/attested state.
@@ -13,8 +13,8 @@
  *         This logs loudly and exits 0 (with a warning record).
  *
  * Usage:
- *   pnpm ue:access-review:validate
- *   ACCESS_REVIEW_BYPASS=true pnpm ue:access-review:validate
+ *   pnpm exec tsx scripts/ue/access-review-validate.ts
+ *   ACCESS_REVIEW_BYPASS=true pnpm exec tsx scripts/ue/access-review-validate.ts
  *
  * Exit codes:
  *   0 = attestation present and valid (or bypass active)
@@ -81,9 +81,9 @@ function main(): void {
     process.stdout.write(`  ✗ FAIL: No access review attestation found for ${quarter}.\n`)
     process.stdout.write(`\n  Required file: reports/compliance/access-review/${quarter}.json\n`)
     process.stdout.write('\n  To generate:\n')
-    process.stdout.write(`    pnpm ue:access-review:generate\n`)
+    process.stdout.write(`    pnpm exec tsx scripts/ue/access-review-generate.ts\n`)
     process.stdout.write('\n  To bypass (CISO approval required):\n')
-    process.stdout.write(`    ACCESS_REVIEW_BYPASS=true ACCESS_REVIEW_BYPASS_REASON="..." pnpm ue:access-review:validate\n\n`)
+    process.stdout.write(`    ACCESS_REVIEW_BYPASS=true ACCESS_REVIEW_BYPASS_REASON="..." pnpm exec tsx scripts/ue/access-review-validate.ts\n\n`)
     process.exit(1)
   }
 

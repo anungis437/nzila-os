@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-05-18T14:28:25.830Z",
+  "generatedAt": "2026-05-25T11:24:35.121Z",
   "generatedBy": "scripts/generate-route-registry.ts",
   "repository": "anungis437/nzila-os",
   "app": "@nzila/union-eyes",
   "summary": {
-    "totalRouteFiles": 867,
-    "totalRoutesWithExports": 800,
-    "governed": 636,
+    "totalRouteFiles": 932,
+    "totalRoutesWithExports": 931,
+    "governed": 649,
     "deprecated": 124,
-    "public": 28,
-    "cron": 12,
-    "ungoverned": 0,
+    "public": 44,
+    "cron": 13,
+    "ungoverned": 101,
     "coverage": {
       "audienceAnnotated": 0,
       "evidenceAnnotated": 0,
@@ -676,6 +676,29 @@
       }
     },
     {
+      "file": "app/api/admin/database/optimize/route.ts",
+      "routePath": "/api/admin/database/optimize",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/admin/dues/overview/route.ts",
       "routePath": "/api/admin/dues/overview",
       "methods": [
@@ -1320,6 +1343,29 @@
       }
     },
     {
+      "file": "app/api/admin/members/stats/route.ts",
+      "routePath": "/api/admin/members/stats",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/admin/organizations/route.ts",
       "routePath": "/api/admin/organizations",
       "methods": [
@@ -1841,6 +1887,29 @@
       }
     },
     {
+      "file": "app/api/admin/system/cache/route.ts",
+      "routePath": "/api/admin/system/cache",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/admin/system/settings/route.ts",
       "routePath": "/api/admin/system/settings",
       "methods": [
@@ -1903,6 +1972,30 @@
       "authStrategy": {
         "required": true,
         "minRole": "platform_lead"
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/admin/users/[userId]/route.ts",
+      "routePath": "/api/admin/users/[userId]",
+      "methods": [
+        "PUT",
+        "DELETE"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
       },
       "orgRequired": null,
       "entitlement": null,
@@ -3797,6 +3890,29 @@
       }
     },
     {
+      "file": "app/api/auth/forgot-password/route.ts",
+      "routePath": "/api/auth/forgot-password",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/auth/invite/accept/route.ts",
       "routePath": "/api/auth/invite/accept",
       "methods": [
@@ -3868,6 +3984,29 @@
     {
       "file": "app/api/auth/logout/route.ts",
       "routePath": "/api/auth/logout",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/auth/magic-link/request/route.ts",
+      "routePath": "/api/auth/magic-link/request",
       "methods": [
         "POST"
       ],
@@ -3961,6 +4100,98 @@
     {
       "file": "app/api/auth/mfa/challenge/route.ts",
       "routePath": "/api/auth/mfa/challenge",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/auth/mfa/disable/route.ts",
+      "routePath": "/api/auth/mfa/disable",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/auth/mfa/enroll/route.ts",
+      "routePath": "/api/auth/mfa/enroll",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/auth/mfa/status/route.ts",
+      "routePath": "/api/auth/mfa/status",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/auth/mfa/verify-enroll/route.ts",
+      "routePath": "/api/auth/mfa/verify-enroll",
       "methods": [
         "POST"
       ],
@@ -5153,6 +5384,75 @@
       }
     },
     {
+      "file": "app/api/cases/[caseId]/assign/route.ts",
+      "routePath": "/api/cases/[caseId]/assign",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/cases/[caseId]/audit/route.ts",
+      "routePath": "/api/cases/[caseId]/audit",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/cases/[caseId]/decision/route.ts",
+      "routePath": "/api/cases/[caseId]/decision",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/cases/[caseId]/escalate/route.ts",
       "routePath": "/api/cases/[caseId]/escalate",
       "methods": [
@@ -5205,6 +5505,99 @@
       }
     },
     {
+      "file": "app/api/cases/[caseId]/export/route.ts",
+      "routePath": "/api/cases/[caseId]/export",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/cases/[caseId]/next-actions/route.ts",
+      "routePath": "/api/cases/[caseId]/next-actions",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/cases/[caseId]/notes/route.ts",
+      "routePath": "/api/cases/[caseId]/notes",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/cases/[caseId]/proof-pack/route.ts",
+      "routePath": "/api/cases/[caseId]/proof-pack",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/cases/[caseId]/timeline/route.ts",
       "routePath": "/api/cases/[caseId]/timeline",
       "methods": [
@@ -5221,6 +5614,52 @@
       "tags": [
         "Claims"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/cases/[caseId]/transition/route.ts",
+      "routePath": "/api/cases/[caseId]/transition",
+      "methods": [
+        "PATCH"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/cases/bulk-import/route.ts",
+      "routePath": "/api/cases/bulk-import",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -5247,6 +5686,29 @@
       "tags": [
         "Claims"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/cases/intake/route.ts",
+      "routePath": "/api/cases/intake",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -5715,6 +6177,30 @@
       }
     },
     {
+      "file": "app/api/cbas/route.ts",
+      "routePath": "/api/cbas",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/cbas/[id]/route.ts",
       "routePath": "/api/cbas/[id]",
       "methods": [
@@ -5896,6 +6382,29 @@
       }
     },
     {
+      "file": "app/api/claims/[id]/evidence/route.ts",
+      "routePath": "/api/claims/[id]/evidence",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/claims/[id]/status/route.ts",
       "routePath": "/api/claims/[id]/status",
       "methods": [
@@ -5968,6 +6477,29 @@
       "tags": [
         "Claims"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/claims/[id]/workflow/history/route.ts",
+      "routePath": "/api/claims/[id]/workflow/history",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -7752,10 +8284,9 @@
       "file": "app/api/communications/track/click/route.ts",
       "routePath": "/api/communications/track/click",
       "methods": [
-        "GET",
-        "POST"
+        "GET"
       ],
-      "wrapper": "crudRoutes",
+      "wrapper": null,
       "governance": "public",
       "authStrategy": {
         "required": true,
@@ -7763,9 +8294,7 @@
       },
       "orgRequired": null,
       "entitlement": null,
-      "tags": [
-        "Notifications"
-      ],
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -7778,10 +8307,9 @@
       "file": "app/api/communications/track/open/[campaignId]/[recipientId]/route.ts",
       "routePath": "/api/communications/track/open/[campaignId]/[recipientId]",
       "methods": [
-        "GET",
-        "POST"
+        "GET"
       ],
-      "wrapper": "crudRoutes",
+      "wrapper": null,
       "governance": "public",
       "authStrategy": {
         "required": true,
@@ -7789,9 +8317,7 @@
       },
       "orgRequired": null,
       "entitlement": null,
-      "tags": [
-        "Notifications"
-      ],
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -7804,10 +8330,9 @@
       "file": "app/api/communications/unsubscribe/[recipientId]/route.ts",
       "routePath": "/api/communications/unsubscribe/[recipientId]",
       "methods": [
-        "GET",
-        "POST"
+        "GET"
       ],
-      "wrapper": "crudRoutes",
+      "wrapper": null,
       "governance": "public",
       "authStrategy": {
         "required": true,
@@ -7815,9 +8340,30 @@
       },
       "orgRequired": null,
       "entitlement": null,
-      "tags": [
-        "Notifications"
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/communications/webhooks/resend/route.ts",
+      "routePath": "/api/communications/webhooks/resend",
+      "methods": [
+        "POST"
       ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -7946,6 +8492,29 @@
       }
     },
     {
+      "file": "app/api/contact/route.ts",
+      "routePath": "/api/contact",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/content/stats/route.ts",
       "routePath": "/api/content/stats",
       "methods": [
@@ -8025,6 +8594,78 @@
       "authStrategy": {
         "required": true,
         "minRole": "member"
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/continuity/archives/route.ts",
+      "routePath": "/api/continuity/archives",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/continuity/docs/route.ts",
+      "routePath": "/api/continuity/docs",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/continuity/inheritance/route.ts",
+      "routePath": "/api/continuity/inheritance",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
       },
       "orgRequired": null,
       "entitlement": null,
@@ -8956,6 +9597,7 @@
       "file": "app/api/deadlines/upcoming/route.ts",
       "routePath": "/api/deadlines/upcoming",
       "methods": [
+        "GET",
         "POST"
       ],
       "wrapper": "crudRoutes",
@@ -9087,6 +9729,76 @@
         "minRole": null
       },
       "orgRequired": true,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/docs/route.ts",
+      "routePath": "/api/docs",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/docs/openapi/route.ts",
+      "routePath": "/api/docs/openapi",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/docs/openapi.json/route.ts",
+      "routePath": "/api/docs/openapi.json",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
       "entitlement": null,
       "tags": [],
       "registry": {
@@ -11042,6 +11754,29 @@
       }
     },
     {
+      "file": "app/api/evidence/export/route.ts",
+      "routePath": "/api/evidence/export",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/executive/dashboard/route.ts",
       "routePath": "/api/executive/dashboard",
       "methods": [
@@ -11749,31 +12484,8 @@
       "methods": [
         "GET"
       ],
-      "wrapper": "withApi",
-      "governance": "governed",
-      "authStrategy": {
-        "required": true,
-        "minRole": "officer"
-      },
-      "orgRequired": null,
-      "entitlement": "union_knowledge_suite",
-      "tags": [],
-      "registry": {
-        "audience": null,
-        "productionStatus": null,
-        "evidenceRequired": null,
-        "orgScoping": null,
-        "pilotEligible": null
-      }
-    },
-    {
-      "file": "app/api/exit-interviews/institutional-learning/route.ts",
-      "routePath": "/api/exit-interviews/institutional-learning",
-      "methods": [
-        "GET"
-      ],
       "wrapper": null,
-      "governance": "governed",
+      "governance": "ungoverned",
       "authStrategy": {
         "required": true,
         "minRole": null
@@ -11790,19 +12502,42 @@
       }
     },
     {
-      "file": "app/api/exit-interviews/organizational-narratives/route.ts",
-      "routePath": "/api/exit-interviews/organizational-narratives",
+      "file": "app/api/exit-interviews/institutional-learning/route.ts",
+      "routePath": "/api/exit-interviews/institutional-learning",
       "methods": [
         "GET"
       ],
-      "wrapper": "withApi",
-      "governance": "governed",
+      "wrapper": null,
+      "governance": "ungoverned",
       "authStrategy": {
         "required": true,
-        "minRole": "officer"
+        "minRole": null
       },
       "orgRequired": null,
-      "entitlement": "union_knowledge_suite",
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/exit-interviews/institutional-narratives/route.ts",
+      "routePath": "/api/exit-interviews/institutional-narratives",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
       "tags": [],
       "registry": {
         "audience": null,
@@ -11819,7 +12554,7 @@
         "GET"
       ],
       "wrapper": null,
-      "governance": "governed",
+      "governance": "ungoverned",
       "authStrategy": {
         "required": true,
         "minRole": null
@@ -12022,6 +12757,98 @@
     {
       "file": "app/api/exit-interviews/operational-trust/route.ts",
       "routePath": "/api/exit-interviews/operational-trust",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/exit-interviews/organizational-cognition/route.ts",
+      "routePath": "/api/exit-interviews/organizational-cognition",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "officer"
+      },
+      "orgRequired": null,
+      "entitlement": "union_knowledge_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/exit-interviews/organizational-learning/route.ts",
+      "routePath": "/api/exit-interviews/organizational-learning",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/exit-interviews/organizational-narratives/route.ts",
+      "routePath": "/api/exit-interviews/organizational-narratives",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "officer"
+      },
+      "orgRequired": null,
+      "entitlement": "union_knowledge_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/exit-interviews/organizational-precedent/route.ts",
+      "routePath": "/api/exit-interviews/organizational-precedent",
       "methods": [
         "GET"
       ],
@@ -13411,6 +14238,29 @@
       }
     },
     {
+      "file": "app/api/governance/route.ts",
+      "routePath": "/api/governance",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/governance/board-packets/route.ts",
       "routePath": "/api/governance/board-packets",
       "methods": [
@@ -13685,6 +14535,310 @@
       }
     },
     {
+      "file": "app/api/governance/lifecycle/conflicts/route.ts",
+      "routePath": "/api/governance/lifecycle/conflicts",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/conflicts/[conflictId]/route.ts",
+      "routePath": "/api/governance/lifecycle/conflicts/[conflictId]",
+      "methods": [
+        "PATCH"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/deprecation-watch/route.ts",
+      "routePath": "/api/governance/lifecycle/deprecation-watch",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/policies/route.ts",
+      "routePath": "/api/governance/lifecycle/policies",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/policies/[id]/route.ts",
+      "routePath": "/api/governance/lifecycle/policies/[id]",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/policies/[id]/approvals/route.ts",
+      "routePath": "/api/governance/lifecycle/policies/[id]/approvals",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/policies/[id]/conflicts/route.ts",
+      "routePath": "/api/governance/lifecycle/policies/[id]/conflicts",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/policies/[id]/lineage/route.ts",
+      "routePath": "/api/governance/lifecycle/policies/[id]/lineage",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/policies/[id]/replay/route.ts",
+      "routePath": "/api/governance/lifecycle/policies/[id]/replay",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/policies/[id]/versions/route.ts",
+      "routePath": "/api/governance/lifecycle/policies/[id]/versions",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/policy-events/route.ts",
+      "routePath": "/api/governance/lifecycle/policy-events",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/snapshots/route.ts",
+      "routePath": "/api/governance/lifecycle/snapshots",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/lifecycle/snapshots/[at]/route.ts",
+      "routePath": "/api/governance/lifecycle/snapshots/[at]",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": "withApi",
+      "governance": "governed",
+      "authStrategy": {
+        "required": true,
+        "minRole": "admin"
+      },
+      "orgRequired": null,
+      "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/governance/mission-audits/route.ts",
       "routePath": "/api/governance/mission-audits",
       "methods": [
@@ -13844,6 +14998,29 @@
       },
       "orgRequired": null,
       "entitlement": "governance_suite",
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/governance/telemetry/route.ts",
+      "routePath": "/api/governance/telemetry",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
       "tags": [],
       "registry": {
         "audience": null,
@@ -14206,6 +15383,29 @@
       }
     },
     {
+      "file": "app/api/health/route.ts",
+      "routePath": "/api/health",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/health-safety/dashboard/route.ts",
       "routePath": "/api/health-safety/dashboard",
       "methods": [
@@ -14441,6 +15641,29 @@
       }
     },
     {
+      "file": "app/api/health/liveness/route.ts",
+      "routePath": "/api/health/liveness",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/healthwelfare/plans/route.ts",
       "routePath": "/api/healthwelfare/plans",
       "methods": [
@@ -14467,6 +15690,283 @@
       }
     },
     {
+      "file": "app/api/icra/[assessmentId]/answer/route.ts",
+      "routePath": "/api/icra/[assessmentId]/answer",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/[assessmentId]/claim/route.ts",
+      "routePath": "/api/icra/[assessmentId]/claim",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/[assessmentId]/profile/route.ts",
+      "routePath": "/api/icra/[assessmentId]/profile",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/[assessmentId]/submit/route.ts",
+      "routePath": "/api/icra/[assessmentId]/submit",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/checkout/route.ts",
+      "routePath": "/api/icra/checkout",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/email-results/route.ts",
+      "routePath": "/api/icra/email-results",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/report/[assessmentId]/route.ts",
+      "routePath": "/api/icra/report/[assessmentId]",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/report/[assessmentId]/review/route.ts",
+      "routePath": "/api/icra/report/[assessmentId]/review",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/results/[id]/route.ts",
+      "routePath": "/api/icra/results/[id]",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/start/route.ts",
+      "routePath": "/api/icra/start",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/submit/route.ts",
+      "routePath": "/api/icra/submit",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/icra/telemetry/route.ts",
+      "routePath": "/api/icra/telemetry",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/integrations/api-keys/route.ts",
       "routePath": "/api/integrations/api-keys",
       "methods": [
@@ -14484,6 +15984,149 @@
       "tags": [
         "Integrations"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/integrations/shopify/webhooks/route.ts",
+      "routePath": "/api/integrations/shopify/webhooks",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/intelligence/route.ts",
+      "routePath": "/api/intelligence",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/investigations/route.ts",
+      "routePath": "/api/investigations",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/investigations/audit/route.ts",
+      "routePath": "/api/investigations/audit",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/investigations/evidence/route.ts",
+      "routePath": "/api/investigations/evidence",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/investigations/timeline/route.ts",
+      "routePath": "/api/investigations/timeline",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -15653,6 +17296,29 @@
       }
     },
     {
+      "file": "app/api/metrics/operational/route.ts",
+      "routePath": "/api/metrics/operational",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/ml/monitoring/alerts/route.ts",
       "routePath": "/api/ml/monitoring/alerts",
       "methods": [
@@ -16317,6 +17983,353 @@
       }
     },
     {
+      "file": "app/api/oci/assessment/route.ts",
+      "routePath": "/api/oci/assessment",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/oci/intake/route.ts",
+      "routePath": "/api/oci/intake",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/oci/report/[assessmentId]/route.ts",
+      "routePath": "/api/oci/report/[assessmentId]",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/oci/results/[id]/route.ts",
+      "routePath": "/api/oci/results/[id]",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/[assessmentId]/answer/route.ts",
+      "routePath": "/api/ocra/[assessmentId]/answer",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/[assessmentId]/claim/route.ts",
+      "routePath": "/api/ocra/[assessmentId]/claim",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/[assessmentId]/profile/route.ts",
+      "routePath": "/api/ocra/[assessmentId]/profile",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/[assessmentId]/submit/route.ts",
+      "routePath": "/api/ocra/[assessmentId]/submit",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/checkout/route.ts",
+      "routePath": "/api/ocra/checkout",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/email-results/route.ts",
+      "routePath": "/api/ocra/email-results",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/report/[assessmentId]/route.ts",
+      "routePath": "/api/ocra/report/[assessmentId]",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/results/[id]/route.ts",
+      "routePath": "/api/ocra/results/[id]",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/start/route.ts",
+      "routePath": "/api/ocra/start",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/submit/route.ts",
+      "routePath": "/api/ocra/submit",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ocra/telemetry/route.ts",
+      "routePath": "/api/ocra/telemetry",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/onboarding/route.ts",
       "routePath": "/api/onboarding",
       "methods": [
@@ -16412,6 +18425,30 @@
       }
     },
     {
+      "file": "app/api/onboarding/readiness/route.ts",
+      "routePath": "/api/onboarding/readiness",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/onboarding/smart-defaults/route.ts",
       "routePath": "/api/onboarding/smart-defaults",
       "methods": [
@@ -16442,6 +18479,29 @@
       ],
       "wrapper": "withRoleAuth",
       "governance": "deprecated",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/onboarding/transfers/route.ts",
+      "routePath": "/api/onboarding/transfers",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
       "authStrategy": {
         "required": true,
         "minRole": null
@@ -16556,6 +18616,55 @@
       }
     },
     {
+      "file": "app/api/organizations/route.ts",
+      "routePath": "/api/organizations",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/[id]/route.ts",
+      "routePath": "/api/organizations/[id]",
+      "methods": [
+        "GET",
+        "DELETE",
+        "PATCH"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/organizations/[id]/access-logs/route.ts",
       "routePath": "/api/organizations/[id]/access-logs",
       "methods": [
@@ -16583,6 +18692,145 @@
       }
     },
     {
+      "file": "app/api/organizations/[id]/analytics/route.ts",
+      "routePath": "/api/organizations/[id]/analytics",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/[id]/ancestors/route.ts",
+      "routePath": "/api/organizations/[id]/ancestors",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/[id]/children/route.ts",
+      "routePath": "/api/organizations/[id]/children",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/[id]/descendants/route.ts",
+      "routePath": "/api/organizations/[id]/descendants",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/[id]/members/route.ts",
+      "routePath": "/api/organizations/[id]/members",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/[id]/path/route.ts",
+      "routePath": "/api/organizations/[id]/path",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/organizations/[id]/sharing-settings/route.ts",
       "routePath": "/api/organizations/[id]/sharing-settings",
       "methods": [
@@ -16601,6 +18849,121 @@
       "tags": [
         "Organizations"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/hierarchy/route.ts",
+      "routePath": "/api/organizations/hierarchy",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/platform-id/route.ts",
+      "routePath": "/api/organizations/platform-id",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/search/route.ts",
+      "routePath": "/api/organizations/search",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/switch/route.ts",
+      "routePath": "/api/organizations/switch",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/organizations/tree/route.ts",
+      "routePath": "/api/organizations/tree",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -17030,6 +19393,98 @@
       }
     },
     {
+      "file": "app/api/payment/status/route.ts",
+      "routePath": "/api/payment/status",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/payments/checkout/create/route.ts",
+      "routePath": "/api/payments/checkout/create",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/payments/webhooks/paypal/route.ts",
+      "routePath": "/api/payments/webhooks/paypal",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/payments/webhooks/stripe/route.ts",
+      "routePath": "/api/payments/webhooks/stripe",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/pension/benefits/route.ts",
       "routePath": "/api/pension/benefits",
       "methods": [
@@ -17321,7 +19776,8 @@
       "file": "app/api/pilot/apply/route.ts",
       "routePath": "/api/pilot/apply",
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "wrapper": "crudRoutes",
       "governance": "governed",
@@ -17582,6 +20038,29 @@
       }
     },
     {
+      "file": "app/api/pilot/overview/route.ts",
+      "routePath": "/api/pilot/overview",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/pilot/readiness/route.ts",
       "routePath": "/api/pilot/readiness",
       "methods": [
@@ -17758,6 +20237,53 @@
       }
     },
     {
+      "file": "app/api/portal/dues/balance/route.ts",
+      "routePath": "/api/portal/dues/balance",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/portal/dues/pay/route.ts",
+      "routePath": "/api/portal/dues/pay",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/precedents/route.ts",
       "routePath": "/api/precedents",
       "methods": [
@@ -17884,6 +20410,31 @@
       }
     },
     {
+      "file": "app/api/privacy/consent/route.ts",
+      "routePath": "/api/privacy/consent",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/privacy/dsar/route.ts",
       "routePath": "/api/privacy/dsar",
       "methods": [
@@ -17936,6 +20487,29 @@
       }
     },
     {
+      "file": "app/api/profile/me/route.ts",
+      "routePath": "/api/profile/me",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/profile/roles/route.ts",
       "routePath": "/api/profile/roles",
       "methods": [
@@ -17953,6 +20527,29 @@
       "tags": [
         "Members"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/ready/route.ts",
+      "routePath": "/api/ready",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -18374,6 +20971,53 @@
       }
     },
     {
+      "file": "app/api/rewards/cron/route.ts",
+      "routePath": "/api/rewards/cron",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "cron",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/rewards/export/route.ts",
+      "routePath": "/api/rewards/export",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/rewards/redemptions/route.ts",
       "routePath": "/api/rewards/redemptions",
       "methods": [
@@ -18693,6 +21337,29 @@
       }
     },
     {
+      "file": "app/api/signatures/sign/route.ts",
+      "routePath": "/api/signatures/sign",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/social-media/accounts/route.ts",
       "routePath": "/api/social-media/accounts",
       "methods": [
@@ -18832,6 +21499,29 @@
       ],
       "wrapper": "withRoleAuth",
       "governance": "deprecated",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/status/route.ts",
+      "routePath": "/api/status",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "public",
       "authStrategy": {
         "required": true,
         "minRole": null
@@ -19538,6 +22228,29 @@
       }
     },
     {
+      "file": "app/api/test-auth/route.ts",
+      "routePath": "/api/test-auth",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/testimonials/[id]/route.ts",
       "routePath": "/api/testimonials/[id]",
       "methods": [
@@ -19556,6 +22269,29 @@
       "tags": [
         "Marketing"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/union-eyes/queue-status/route.ts",
+      "routePath": "/api/union-eyes/queue-status",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -19644,6 +22380,52 @@
       }
     },
     {
+      "file": "app/api/users/me/organizations/route.ts",
+      "routePath": "/api/users/me/organizations",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/users/me/profile/route.ts",
+      "routePath": "/api/users/me/profile",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/v2/[...path]/route.ts",
       "routePath": "/api/v2/[...path]",
       "methods": [
@@ -19664,6 +22446,29 @@
       "tags": [
         "Deprecated"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/version/route.ts",
+      "routePath": "/api/version",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
@@ -20092,6 +22897,52 @@
       }
     },
     {
+      "file": "app/api/whop/create-checkout/route.ts",
+      "routePath": "/api/whop/create-checkout",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/whop/unauthenticated-checkout/route.ts",
+      "routePath": "/api/whop/unauthenticated-checkout",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "public",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
       "file": "app/api/workbench/assign/route.ts",
       "routePath": "/api/workbench/assign",
       "methods": [
@@ -20133,6 +22984,192 @@
       "tags": [
         "Workbench"
       ],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/workbook/[id]/claim/route.ts",
+      "routePath": "/api/workbook/[id]/claim",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/workbook/[id]/export/route.ts",
+      "routePath": "/api/workbook/[id]/export",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/workbook/[id]/memory-holders/route.ts",
+      "routePath": "/api/workbook/[id]/memory-holders",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+      "routePath": "/api/workbook/[id]/memory-holders/[holderId]",
+      "methods": [
+        "DELETE",
+        "PATCH"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/workbook/checkout/route.ts",
+      "routePath": "/api/workbook/checkout",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/workbook/start/route.ts",
+      "routePath": "/api/workbook/start",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/workflow/overdue/route.ts",
+      "routePath": "/api/workflow/overdue",
+      "methods": [
+        "GET"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
+      "registry": {
+        "audience": null,
+        "productionStatus": null,
+        "evidenceRequired": null,
+        "orgScoping": null,
+        "pilotEligible": null
+      }
+    },
+    {
+      "file": "app/api/workflow/transition/route.ts",
+      "routePath": "/api/workflow/transition",
+      "methods": [
+        "POST"
+      ],
+      "wrapper": null,
+      "governance": "ungoverned",
+      "authStrategy": {
+        "required": true,
+        "minRole": null
+      },
+      "orgRequired": null,
+      "entitlement": null,
+      "tags": [],
       "registry": {
         "audience": null,
         "productionStatus": null,
