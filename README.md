@@ -104,6 +104,7 @@ Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tool
 
 | Command | Purpose |
 |---------|---------|
+| `pnpm db:local:up` | Start local PostgreSQL (docker-compose.automation.yml) |
 | `pnpm db:doctor` | Database health check |
 | `pnpm sre:validate` | Full SRE check (health, synthetics, alerts, audit) |
 | `pnpm finops:build` | FinOps portfolio report |

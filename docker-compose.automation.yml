@@ -17,10 +17,10 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-nzila}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nzila_local}
-      POSTGRES_DB: ${POSTGRES_DB:-nzila}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nzila_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-nzila_automation}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -45,7 +45,7 @@ services:
       NODE_ENV: production
       PORT: 4000
       LOG_LEVEL: info
-      DATABASE_URL: postgres://${POSTGRES_USER:-nzila}:${POSTGRES_PASSWORD:-nzila_local}@postgres:5432/${POSTGRES_DB:-nzila}
+      DATABASE_URL: postgres://${POSTGRES_USER:-nzila}:${POSTGRES_PASSWORD:-nzila_dev}@postgres:5432/${POSTGRES_DB:-nzila_automation}
       GITHUB_TOKEN: ${GITHUB_TOKEN}
       GITHUB_REPO_OWNER: ${GITHUB_REPO_OWNER:-anungis437}
       GITHUB_REPO_NAME: ${GITHUB_REPO_NAME:-nzila-automation}
