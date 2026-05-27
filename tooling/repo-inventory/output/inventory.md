@@ -21,7 +21,7 @@
 | abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 104 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 390 | Internal operations console — platform governance, compliance, analytics, integr |
+| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 391 | Internal operations console — platform governance, compliance, analytics, integr |
 | control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 322 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 39 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 346 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |

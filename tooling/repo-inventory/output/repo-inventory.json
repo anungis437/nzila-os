@@ -173,7 +173,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 390
+      "codeFileCount": 391
     },
     {
       "name": "control-plane",
