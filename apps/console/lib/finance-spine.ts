@@ -60,6 +60,13 @@ function isMissingRelationError(error: unknown, relationName: string): boolean {
   return typeof maybePg.message === 'string' && maybePg.message.includes(`relation \"${relationName}\" does not exist`)
 }
 
+function isMissingColumnError(error: unknown, columnName: string): boolean {
+  if (!error || typeof error !== 'object') return false
+  const maybePg = error as { code?: string; message?: string }
+  if (maybePg.code === '42703') return true
+  return typeof maybePg.message === 'string' && maybePg.message.includes(`column \"${columnName}\" does not exist`)
+}
+
 function loadCatalogProducts(): CatalogProduct[] {
   try {
     const catalogPath = path.join(process.cwd(), '../../governance/portfolio/product-catalog.json')
@@ -171,6 +178,10 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
     .catch((error) => {
       if (isMissingRelationError(error, 'platform_cost_rollups')) {
         logger.warn('platform_cost_rollups missing; using zero platform burn rows')
+        return []
+      }
+      if (isMissingColumnError(error, 'total_est_cost_usd') || isMissingColumnError(error, 'day') || isMissingColumnError(error, 'app_id')) {
+        logger.warn('platform_cost_rollups schema is incomplete; using zero platform burn rows')
         return []
       }
       throw error

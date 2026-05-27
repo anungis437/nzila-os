@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
 import fs from 'node:fs';
+import path from 'node:path';
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const scripts = pkg.scripts ?? {};
+const BASELINE_PATH = path.join('tooling', 'scripts', 'baselines', 'script-alias-regression-baseline.json');
+const WRITE_BASELINE = process.argv.includes('--write-baseline');
 
 // Guardrail: disallow thin wrapper aliases that only expose direct script executors.
 const forbiddenPatterns = [
@@ -37,15 +40,68 @@ for (const [name, command] of Object.entries(scripts)) {
   }
 }
 
-if (violations.length === 0) {
+function toBaselineKey(violation) {
+  return `${violation.name}::${violation.pattern}`;
+}
+
+function sortViolations(rows) {
+  return [...rows].sort((left, right) => {
+    const leftKey = toBaselineKey(left);
+    const rightKey = toBaselineKey(right);
+    return leftKey.localeCompare(rightKey);
+  });
+}
+
+function loadBaseline() {
+  if (!fs.existsSync(BASELINE_PATH)) {
+    return [];
+  }
+
+  const raw = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf8'));
+  if (!raw || !Array.isArray(raw.violations)) {
+    throw new Error(`Invalid baseline format in ${BASELINE_PATH}`);
+  }
+
+  return raw.violations
+    .filter((item) => item && typeof item.name === 'string' && typeof item.pattern === 'string')
+    .map((item) => ({ name: item.name, pattern: item.pattern }));
+}
+
+function writeBaseline(rows) {
+  const dir = path.dirname(BASELINE_PATH);
+  fs.mkdirSync(dir, { recursive: true });
+  const payload = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    violations: sortViolations(rows),
+  };
+  fs.writeFileSync(BASELINE_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+}
+
+if (WRITE_BASELINE) {
+  writeBaseline(violations.map(({ name, pattern }) => ({ name, pattern })));
+  console.log(`script-alias-guard: baseline written to ${BASELINE_PATH} (${violations.length} entries)`);
+  process.exit(0);
+}
+
+const baselineViolations = loadBaseline();
+const baselineKeys = new Set(baselineViolations.map(toBaselineKey));
+const currentViolations = violations.map(({ name, command, pattern }) => ({ name, command, pattern }));
+const newViolations = sortViolations(currentViolations).filter((violation) => !baselineKeys.has(toBaselineKey(violation)));
+
+if (newViolations.length === 0) {
   console.log('script-alias-guard: PASS (no thin wrapper aliases detected)');
+  if (currentViolations.length > 0) {
+    console.log(`script-alias-guard: baseline contains ${baselineViolations.length} known legacy aliases; no new regressions.`);
+  }
   process.exit(0);
 }
 
 console.error('script-alias-guard: FAIL');
-console.error('Detected thin wrapper aliases in package.json scripts:');
-for (const violation of violations) {
+console.error('Detected new thin wrapper aliases in package.json scripts:');
+for (const violation of newViolations) {
   console.error(`- ${violation.name} [${violation.pattern}] -> ${violation.command}`);
 }
 console.error('Use explicit commands directly in docs/workflows, and keep scripts for true entrypoints/composites only.');
+console.error(`If these are intentionally accepted, update baseline with: node tooling/scripts/check-script-alias-regression.mjs --write-baseline`);
 process.exit(1);

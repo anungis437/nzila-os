@@ -97,6 +97,13 @@ function isMissingRelationError(error: unknown, relationName: string): boolean {
   return typeof maybePg.message === 'string' && maybePg.message.includes(`relation \"${relationName}\" does not exist`)
 }
 
+function isSchemaCompatibilityError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const maybePg = error as { code?: string; message?: string }
+  if (maybePg.code === '42P01' || maybePg.code === '42703') return true
+  return typeof maybePg.message === 'string' && maybePg.message.includes('does not exist')
+}
+
 export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
   const stripeFreshnessPromise = platformDb
     .select({ last: stripeConnections.lastEventAt, connectedAt: stripeConnections.connectedAt })
@@ -154,6 +161,19 @@ export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
       throw error
     })
 
+  const costFreshnessPromise = platformDb
+    .select({ last: platformCostRollups.day })
+    .from(platformCostRollups)
+    .orderBy(desc(platformCostRollups.day))
+    .limit(1)
+    .catch((error) => {
+      if (isSchemaCompatibilityError(error)) {
+        logger.warn('platform_cost_rollups not available for freshness probe; using unknown state for Capital module')
+        return []
+      }
+      throw error
+    })
+
   const [
     latestCost,
     latestTreasury,
@@ -166,7 +186,7 @@ export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
     latestM365Validation,
     latestGoogleValidation,
   ] = await Promise.all([
-    platformDb.select({ last: platformCostRollups.day }).from(platformCostRollups).orderBy(desc(platformCostRollups.day)).limit(1),
+    costFreshnessPromise,
     platformDb.select({ last: treasurySnapshots.date }).from(treasurySnapshots).orderBy(desc(treasurySnapshots.date)).limit(1),
     platformDb.select({ last: commerceQuotes.createdAt }).from(commerceQuotes).orderBy(desc(commerceQuotes.createdAt)).limit(1),
     platformDb.select({ last: executionInitiatives.updatedAt }).from(executionInitiatives).orderBy(desc(executionInitiatives.updatedAt)).limit(1),

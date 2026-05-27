@@ -20,6 +20,13 @@ interface DigestBundle {
   orgId: string
 }
 
+function isSchemaCompatibilityError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const maybePg = error as { code?: string; message?: string }
+  if (maybePg.code === '42P01' || maybePg.code === '42703') return true
+  return typeof maybePg.message === 'string' && maybePg.message.includes('does not exist')
+}
+
 function getArgFlag(flag: string): boolean {
   return process.argv.slice(2).includes(flag)
 }
@@ -48,12 +55,41 @@ function splitCsv(value: string): string[] {
 }
 
 async function loadDigestBundle(): Promise<DigestBundle> {
-  const [briefing, recommendations, forecast, freshness] = await Promise.all([
-    getWeeklyBriefingData(),
+  const briefing = await getWeeklyBriefingData()
+
+  const [recommendationsResult, forecastResult, freshnessResult] = await Promise.allSettled([
     generateAutopilotRecommendations(),
     getForecastOutput(),
     getDataFreshnessSummary(),
   ])
+
+  const recommendations = recommendationsResult.status === 'fulfilled' ? recommendationsResult.value : []
+  if (recommendationsResult.status === 'rejected') {
+    console.warn('[console-weekly-digest] recommendations unavailable; continuing with empty recommendations list')
+  }
+
+  const forecast = forecastResult.status === 'fulfilled'
+    ? forecastResult.value
+    : {
+        generatedAt: new Date(),
+        pipelineWeightedUsd: 0,
+        closeSignals: { draft: 0, sent: 0, accepted: 0 },
+        scenarios: [],
+        rankingShiftSignals: [],
+      }
+  if (forecastResult.status === 'rejected') {
+    console.warn('[console-weekly-digest] forecast unavailable; continuing with fallback forecast values')
+  }
+
+  const freshness = freshnessResult.status === 'fulfilled'
+    ? freshnessResult.value
+    : {
+        overallScore: 0,
+        modules: [],
+      }
+  if (freshnessResult.status === 'rejected') {
+    console.warn('[console-weekly-digest] data freshness unavailable; continuing with unknown freshness state')
+  }
 
   if (!briefing.executiveOrgId) {
     throw new Error('Cannot generate weekly digest: no executive org id was resolved.')
@@ -67,6 +103,13 @@ async function loadDigestBundle(): Promise<DigestBundle> {
     })
     .from(decisionScorebacks)
     .where(eq(decisionScorebacks.orgId, briefing.executiveOrgId))
+    .catch((error) => {
+      if (isSchemaCompatibilityError(error)) {
+        console.warn('[console-weekly-digest] decision_scorebacks unavailable; continuing without scoreback metrics')
+        return []
+      }
+      throw error
+    })
 
   const scored = scorebacks.filter((row) => row.accuracyScore != null)
   const avgAccuracy = scored.length > 0

@@ -1,0 +1,838 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-27T17:02:05.144Z",
+  "violations": [
+    {
+      "name": "ai:analyze",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ai:contract:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ai:full-run",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ai:implement",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ai:qa",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ai:validate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "app:domain-core:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "app:gold-standard:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "app:lifecycle:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "arch:seed",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "architecture:layers:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "attest:build",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "audit:pack:verify",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "brand:leakage:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "build:baseline",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "build:baseline:save",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "capital:override:add",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "cash:calendar",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "change:seed-demo",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "change:validate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "collect:cost",
+      "pattern": "node-root"
+    },
+    {
+      "name": "collect:cost:enforce",
+      "pattern": "node-root"
+    },
+    {
+      "name": "collect:dora",
+      "pattern": "node-root"
+    },
+    {
+      "name": "collect:dora:enforce",
+      "pattern": "node-root"
+    },
+    {
+      "name": "collect:onboarding:kpis",
+      "pattern": "node-root"
+    },
+    {
+      "name": "control-plane:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "control-plane:coherence:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "control-plane:surface:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "coverage:dashboard",
+      "pattern": "node-root"
+    },
+    {
+      "name": "create-app",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "db:doctor",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "db:doctor:strict",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "db:drift:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "db:drift:check:staging",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "db:migration:safety",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "db:restore-drill",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "db:restore-drill:evidence",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "decision:coverage",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "decision:coverage:strict",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "decision:seed-demo",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "demo:golden",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "deploy:evidence",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "deploy:transactional",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "deps:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "dns:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "dns:cloudflare-ips",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "dns:health",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "dns:sync",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "dns:verify",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "docs:index",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "dr:drill:checklist",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "dr:drill:plan",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "dr:drill:report",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "drift:env:staging",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "drift:env:staging:live",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "drift:version:staging",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "env:health",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "evidence:pack:monthly",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "field-ops:validate",
+      "pattern": "node-root"
+    },
+    {
+      "name": "final:go",
+      "pattern": "node-root"
+    },
+    {
+      "name": "financial-service:health",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "finops:build",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "flow:shopmoica:cutover:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "flow:shopmoica:cutover:check:enforce",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ga-check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "generate:capital-allocation",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "generate:commercial-traction",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "generate:portfolio-artifacts",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "generate:sbom",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "governance:check-db-imports",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "governance:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "governance:cognition",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "governance:snapshot",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "health:report",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "help:commands",
+      "pattern": "node-root"
+    },
+    {
+      "name": "link-check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "openapi:gen",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "openapi:gen:yaml",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ops:evidence",
+      "pattern": "node-root"
+    },
+    {
+      "name": "ops:prove",
+      "pattern": "node-root"
+    },
+    {
+      "name": "ownership:audit",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "package:deprecation:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "package:ownership:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "pilot:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "platform:adoption:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "platform:authority:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "platform:contract:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "platform:surface:model:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "platform:vs-app:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "portfolio:validate",
+      "pattern": "pnpm-alias-forward"
+    },
+    {
+      "name": "prod:region:validate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:clean",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:health",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:ingest:azure",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:ingest:ci",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:release-ledger:validate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:run",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:runtime",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:runtime:export",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:runtime:gate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:runtime:quarter",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:security",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "proof:verify",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "redteam",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "redteam:abr",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "redteam:core",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "registry:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "registry:consistency:check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:audit",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:dashboard",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:dashboard:md",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:env-truth",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:env-truth:live",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:evidence",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:evidence:list",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:hotfix",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:hotfix:sla",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:hotfix:sla:strict",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:migration:safety",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:rollback",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:rollback:list",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:secrets:audit",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:smoke",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:staging:reconcile",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:staging:truth",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:staging:truth:live",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:tag",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:validate:refs",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:verify-signature",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "release:verify-signature:warn",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "repo:audit",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "reproduce:evidence",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "rfp:generate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "rollback",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "rollout:promote:attest",
+      "pattern": "node-root"
+    },
+    {
+      "name": "rollout:readiness",
+      "pattern": "node-root"
+    },
+    {
+      "name": "rollout:rollback:attest",
+      "pattern": "node-root"
+    },
+    {
+      "name": "rollout:validate",
+      "pattern": "node-root"
+    },
+    {
+      "name": "runtime:health:generate",
+      "pattern": "node-root"
+    },
+    {
+      "name": "runtime:health:validate",
+      "pattern": "node-root"
+    },
+    {
+      "name": "runway:model",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "scaffold:app",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "sre:alerts:dry-run",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "sre:audit",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "sre:dashboard",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "sre:health:contract",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "sre:staging:recovery",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "sre:synthetic:dry-run",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "staging:seed",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "strategic:quarterly",
+      "pattern": "node-root"
+    },
+    {
+      "name": "ue:access-review:generate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ue:access-review:validate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ue:docs:generate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ue:docs:preview",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ue:prod:canadacentral:dry-run",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ue:qa:gate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "ue:qa:gate:pilot",
+      "pattern": "pnpm-alias-forward"
+    },
+    {
+      "name": "ue:qa:gate:production",
+      "pattern": "pnpm-alias-forward"
+    },
+    {
+      "name": "ue:qa:gate:ux",
+      "pattern": "pnpm-alias-forward"
+    },
+    {
+      "name": "ue:qa:report",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:all",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:architecture",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:auth-authority",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:canonical-truth",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:capital-discipline",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:claims",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:cognition",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:console:readiness",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:control:manifests",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:docs",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:evidence:lifecycle",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:final-convergence",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:ga-state",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:governance:gate",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:governance:runtime-budget",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:infra-convergence",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:integrations:readiness",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:labor-continuity",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:live-readiness",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:maturity-elevation",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:navigation-monetization",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:operational-honesty-guardrail",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:org-resolver-guardrail",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:pack",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:packages",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:portfolio",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:product-catalog",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:readmes",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:release:strict",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:residual-closure",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:runtime-authority",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:runtime-convergence",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:runtime-integrity",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:runtime",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:sovereignty-proving",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:strategic-resilience",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:tier-focus",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:tier2-hardening",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:truth-authority",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:ue-infrastructure",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:web:i18n",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:web:readiness",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:workspace-links",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "verify:backup",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "verify:data-residency:runtime",
+      "pattern": "node-root"
+    },
+    {
+      "name": "verify:data-residency:runtime:enforce",
+      "pattern": "node-root"
+    },
+    {
+      "name": "verify:env",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "verify:security",
+      "pattern": "tsx-root"
+    }
+  ]
+}
