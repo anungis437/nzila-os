@@ -59,4 +59,4 @@ jobs:
         env:
           ACCESS_REVIEW_BYPASS: ${{ (github.event.inputs.bypass == 'true' || vars.ACCESS_REVIEW_BYPASS) && 'true' || 'false' }}
           ACCESS_REVIEW_BYPASS_REASON: ${{ github.event.inputs.bypass_reason || vars.ACCESS_REVIEW_BYPASS_REASON || '(no reason provided)' }}
-        run: pnpm ue:access-review:validate
+        run: pnpm exec tsx scripts/ue/access-review-validate.ts

@@ -228,3 +228,56 @@ verification passed, and what remains open. It does not inflate readiness.
   - Tier 2 verdict remains **CONDITIONAL GO** even after green probes — a
     single deploy is a binding event, not a stewardship cadence. The
     binding-log itself is the cadence artifact going forward.
+
+---
+
+## 2026-05-26T02:52Z — VERIFY (post-binding runtime check)
+
+- reviewer: anungis437
+- actions:
+  - VERIFIED pilot Azure substrate from operator shell (`az account show`,
+    `az containerapp list -g nzila-canada-pilot-rg`).
+  - VERIFIED pilot Django sidecar app presence:
+    `nzila-os-union-eyes-django-pilot` is present in the pilot resource group.
+  - VERIFIED sidecar revision health:
+    `nzila-os-union-eyes-django-pilot--tokrot-223353` is `Active=True`,
+    `Health=Healthy`, replicas present.
+- verification:
+  - Public probe `https://pilot.unioneyes.app/api/auth_core/health` →
+    **HTTP 200**.
+  - Response body includes `{"status":"ok", ... "checks":{"process":"ok","database":"ok","queue":"ok"}}`.
+- residual:
+  - Degraded-sidecar drill (scale to 0 → assert bounded 503 copy → restore)
+    was not replayed in this verifier pass; keep cadence requirement active.
+  - Aggregate doctrine rows that still mark R1 as deferred need explicit
+    reviewer-of-record refresh once the degraded drill replay artifact is
+    attached for this cycle.
+
+---
+
+## 2026-05-26T03:00Z — DRILL-ATTEMPT (bounded degraded path)
+
+- reviewer: anungis437
+- actions:
+  - ATTEMPTED sidecar scale-to-zero drill with
+    `az containerapp update ... --min-replicas 0 --max-replicas 0` on
+    `nzila-os-union-eyes-django-pilot`.
+  - Azure control-plane rejected the request with
+    `--max-replicas must be in the range [1,1000]`.
+  - ATTEMPTED equivalent fail-path drill by temporarily setting pilot app
+    `DJANGO_API_URL` to an unreachable host, probing
+    `https://pilot.unioneyes.app/api/auth_core/health`, then restoring.
+  - RESTORED pilot app env to pre-drill state:
+    `DJANGO_API_URL=http://nzila-os-union-eyes-django-pilot.internal.thankfulpebble-f9ca792c.canadacentral.azurecontainerapps.io`
+    and removed temporary `NEXT_PUBLIC_DJANGO_API_URL`.
+- verification:
+  - During fail-path attempt, public probe remained **HTTP 200** with
+    `{"status":"ok", ... "checks":{"process":"ok","database":"ok","queue":"ok"}}`.
+  - This indicates pilot is still serving the pre-fail-closed auth-core health
+    behavior (alias surface), not the new bounded-503 route implementation.
+- residual:
+  - Required next closure action is a pilot frontend rollout carrying
+    `apps/union-eyes/app/api/auth_core/health/route.ts` fail-closed logic,
+    followed by a replayed degraded drill artifact.
+  - Until that rollout happens, degraded-path verification for this cycle
+    cannot be certified as complete.

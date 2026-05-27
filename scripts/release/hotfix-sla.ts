@@ -1,5 +1,5 @@
 /**
- * release:hotfix:sla — Check hotfix SLA compliance.
+ * hotfix-sla.ts — Check hotfix SLA compliance.
  *
  * Scans ops/hotfixes/ for records where status !== 'normalized'
  * and normalizationDeadline has passed. Alerts on overdue items.
@@ -9,8 +9,8 @@
  * full governance compliance.
  *
  * Usage:
- *   pnpm release:hotfix:sla
- *   pnpm release:hotfix:sla --strict   # exit 1 on any overdue
+ *   pnpm exec tsx scripts/release/hotfix-sla.ts
+ *   pnpm exec tsx scripts/release/hotfix-sla.ts --strict   # exit 1 on any overdue
  *
  * Exit codes:
  *   0 = all hotfixes normalized or within SLA

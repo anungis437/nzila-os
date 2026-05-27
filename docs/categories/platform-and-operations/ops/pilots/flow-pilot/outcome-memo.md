@@ -16,7 +16,7 @@ Rationale:
 ## Verified Technical Evidence
 
 1. Root pilot gate passes:
-- Command: `pnpm pilot:check`
+- Command: `pnpm exec tsx scripts/pilot-check.ts`
 - Result: PASS
 - Artifact: `.pilot-check/attestation.json`
 
@@ -31,8 +31,8 @@ Rationale:
 
 4. Automated cutover gate:
 - Checklist source: `docs/ops/pilots/flow-pilot/shopmoica-cutover-checklist.json`
-- Local/CI gate: `pnpm flow:shopmoica:cutover:check`
-- Enforced mode: `pnpm flow:shopmoica:cutover:check:enforce`
+- Local/CI gate: `pnpm exec tsx scripts/flow-shopmoica-cutover-check.ts`
+- Enforced mode: `pnpm exec tsx scripts/flow-shopmoica-cutover-check.ts --enforce`
 - CI workflow: `.github/workflows/flow-shopmoica-cutover-gate.yml`
 
 ## Remaining Non-Code Blockers (Required Before Production Cutover)

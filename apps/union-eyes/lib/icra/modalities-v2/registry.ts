@@ -92,6 +92,66 @@ const CONTRADICTION_PAIRS: ContradictionPairQuestion[] = [
     },
   },
   {
+    id: 'v2_cp_undocumented_workflow_replacement',
+    modality: 'contradiction_pair',
+    section: 'sovereignty_governance',
+    pairId: 'pair_undocumented_workflow_replacement',
+    prompt:
+      'Comparing whether workflow replacement during modernization is documented with whether operational teams can execute the replacement without informal reconstruction.',
+    signalA: {
+      statement:
+        'Workflow replacements introduced by modernization are documented with institutional context and decision rationale.',
+      affirmIf: 'true',
+    },
+    signalB: {
+      statement:
+        'Operational teams can execute those replacements without relying on long-tenured staff for hidden procedural context.',
+      affirmIf: 'true',
+    },
+    contradictionSeverity: 'high',
+    weights: { institutional_continuity: 0.8, operational_memory: 0.8, trust_debt: 0.4 },
+    rationale:
+      'Documented replacement that still requires hidden reconstruction indicates modernization continuity debt.',
+    intelligence: {
+      modalityRole: 'inheritance_pattern',
+      intelligenceContribution: ['modernization_continuity', 'reconstruction_confidence'],
+      longitudinalValue: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: true,
+      deepens: ['modernization_fragility', 'contradiction_resolution', 'confidence_escalation'],
+    },
+  },
+  {
+    id: 'v2_cp_modernization_onboarding_burden',
+    modality: 'contradiction_pair',
+    section: 'transition_readiness',
+    pairId: 'pair_modernization_onboarding_burden',
+    prompt:
+      'Comparing whether modernization onboarding pathways are documented with whether successors can assume operational responsibility without prolonged shadow apprenticeship.',
+    signalA: {
+      statement:
+        'Modernization-era onboarding pathways for key roles are documented and maintained.',
+      affirmIf: 'true',
+    },
+    signalB: {
+      statement:
+        'Successors consistently assume operational responsibility without prolonged shadow apprenticeship after modernization changes.',
+      affirmIf: 'true',
+    },
+    contradictionSeverity: 'high',
+    weights: { transition_readiness: 0.9, institutional_continuity: 0.7, trust_debt: 0.4 },
+    rationale:
+      'Documented onboarding that still depends on long informal apprenticeship indicates modernization onboarding burden.',
+    intelligence: {
+      modalityRole: 'inheritance_pattern',
+      intelligenceContribution: ['onboarding_confidence', 'modernization_continuity'],
+      longitudinalValue: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: false,
+      deepens: ['modernization_fragility', 'onboarding_survivability', 'contradiction_resolution'],
+    },
+  },
+  {
     id: 'v2_cp_stewardship_recoverability',
     modality: 'contradiction_pair',
     section: 'operational_dependency',
@@ -150,6 +210,30 @@ const EVIDENCE_STRENGTHS: EvidenceStrengthQuestion[] = [
       confidenceSensitivity: true,
       governanceSensitivity: true,
       deepens: ['governance_fragility', 'confidence_escalation'],
+    },
+  },
+  {
+    id: 'v2_es_ownership_ambiguity',
+    modality: 'evidence_strength',
+    section: 'sovereignty_governance',
+    prompt:
+      'What is the strongest level of evidence your organization can show that continuity ownership is explicitly assigned during modernization decisions?',
+    subjectOfClaim:
+      'explicit continuity ownership assignment in modernization decisions',
+    branchOn: [
+      { minLevel: 'DOCUMENTED', enables: ['v2_es_ownership_ambiguity_operational_use'] },
+      { minLevel: 'OPERATIONAL', enables: ['v2_es_ownership_ambiguity_verification'] },
+    ],
+    weights: { institutional_continuity: 0.8, governance_fragility: 0.5, trust_debt: 0.5 },
+    rationale:
+      'Ownership ambiguity is a primary modernization fragility driver; evidence depth distinguishes declared ownership from operational ownership.',
+    intelligence: {
+      modalityRole: 'structural_pattern',
+      intelligenceContribution: ['governance_sophistication', 'modernization_continuity'],
+      longitudinalValue: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: true,
+      deepens: ['modernization_fragility', 'confidence_escalation'],
     },
   },
   {
@@ -218,6 +302,38 @@ const CONTINUITY_DISTRIBUTIONS: ContinuityDistributionQuestion[] = [
 
 const DEPENDENCY_MAPS: DependencyMappingQuestion[] = [
   {
+    id: 'v2_dm_platform_migration_dependency',
+    modality: 'dependency_mapping',
+    section: 'sovereignty_governance',
+    prompt:
+      'Declare the strongest dependencies introduced by platform migration between institutional functions.',
+    helpText:
+      'A dependency means continuity of the destination function now relies on migration outputs or controls from the source function. Up to six edges.',
+    fromNodes: [
+      { id: 'platform_program', label: 'Platform modernization program' },
+      { id: 'enterprise_architecture', label: 'Enterprise architecture' },
+      { id: 'vendor_management', label: 'Vendor and contract management' },
+    ],
+    toNodes: [
+      { id: 'governance_record', label: 'Governance record continuity' },
+      { id: 'operational_handover', label: 'Operational handover continuity' },
+      { id: 'member_service_integrity', label: 'Member service continuity' },
+      { id: 'policy_replay', label: 'Policy replay and interpretation continuity' },
+    ],
+    maxEdges: 6,
+    weights: { institutional_continuity: 0.7, governance_fragility: 0.7, trust_debt: 0.4 },
+    rationale:
+      'Platform migration introduces hidden continuity dependencies; mapping them is required to surface modernization fragility topology.',
+    intelligence: {
+      modalityRole: 'topology_pattern',
+      intelligenceContribution: ['structural_topology', 'modernization_continuity'],
+      longitudinalValue: 'high',
+      confidenceSensitivity: false,
+      governanceSensitivity: true,
+      deepens: ['modernization_fragility', 'federated_governance', 'continuity_dependency'],
+    },
+  },
+  {
     id: 'v2_dm_governance_operational_dependency',
     modality: 'dependency_mapping',
     section: 'governance_visibility',
@@ -284,6 +400,33 @@ const CONFIDENCE_MARKERS: ConfidenceMarkerQuestion[] = [
     },
   },
   {
+    id: 'v2_cm_shadow_operational_systems',
+    modality: 'confidence_marker',
+    section: 'operational_dependency',
+    prompt:
+      'How confident are you that shadow operational systems are not carrying critical continuity load outside governed pathways?',
+    statement:
+      'Shadow operational systems are not carrying critical continuity load outside governed pathways.',
+    scale: {
+      min: 1,
+      max: 5,
+      minLabel: 'Not at all confident',
+      maxLabel: 'Highly confident',
+    },
+    allowUncertaintyMarker: true,
+    weights: { institutional_continuity: 0.6, governance_fragility: 0.6, trust_debt: 0.5 },
+    rationale:
+      'Shadow systems are a high-signal modernization fragility marker and a common source of hidden trust debt.',
+    intelligence: {
+      modalityRole: 'confidence_sensing',
+      intelligenceContribution: ['modernization_continuity', 'operational_clarity'],
+      longitudinalValue: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: true,
+      deepens: ['modernization_fragility', 'confidence_escalation', 'continuity_dependency'],
+    },
+  },
+  {
     id: 'v2_cm_modernization_uncertainty',
     modality: 'confidence_marker',
     section: 'sovereignty_governance',
@@ -317,6 +460,45 @@ const CONFIDENCE_MARKERS: ConfidenceMarkerQuestion[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TOPOLOGY_MAPS: TopologyMappingQuestion[] = [
+  {
+    id: 'v2_tm_digital_continuity_fragmentation',
+    modality: 'topology_mapping',
+    section: 'sovereignty_governance',
+    prompt:
+      'Place each modernization domain by continuity-fragmentation risk (x) versus institutional integration depth (y).',
+    axes: {
+      x: {
+        id: 'fragmentation',
+        label: 'Digital continuity fragmentation risk',
+        minLabel: 'Low fragmentation',
+        maxLabel: 'High fragmentation',
+      },
+      y: {
+        id: 'integration_depth',
+        label: 'Institutional integration depth',
+        minLabel: 'Isolated',
+        maxLabel: 'Institutionally integrated',
+      },
+    },
+    nodes: [
+      { id: 'member_platforms', label: 'Member-facing platforms' },
+      { id: 'governance_systems', label: 'Governance systems' },
+      { id: 'operations_backbone', label: 'Operations backbone' },
+      { id: 'records_systems', label: 'Records and archive systems' },
+      { id: 'identity_access', label: 'Identity and access systems' },
+    ],
+    weights: { institutional_continuity: 0.7, operational_memory: 0.6, trust_debt: 0.3 },
+    rationale:
+      'Digital continuity fragmentation topology reveals modernization failure modes that maturity ladders flatten.',
+    intelligence: {
+      modalityRole: 'topology_pattern',
+      intelligenceContribution: ['structural_topology', 'modernization_continuity'],
+      longitudinalValue: 'high',
+      confidenceSensitivity: false,
+      governanceSensitivity: true,
+      deepens: ['modernization_fragility', 'continuity_dependency', 'federated_governance'],
+    },
+  },
   {
     id: 'v2_tm_continuity_centrality',
     modality: 'topology_mapping',
@@ -353,6 +535,32 @@ const TOPOLOGY_MAPS: TopologyMappingQuestion[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STABILITY_MARKERS: StabilityMarkerQuestion[] = [
+  {
+    id: 'v2_sm_continuity_debt_accumulation',
+    modality: 'stability_marker',
+    section: 'sovereignty_governance',
+    prompt:
+      'Across your most recent modernization cycle, did continuity debt decrease, hold, or accumulate?',
+    statement:
+      'Continuity debt decreased or remained controlled across the most recent modernization cycle.',
+    options: [
+      { value: 'held', label: 'Decreased or remained controlled', score: 1.0 },
+      { value: 'partially_held', label: 'Partially controlled with localized debt growth', score: 0.5 },
+      { value: 'broke', label: 'Accumulated significantly across multiple domains', score: 0.0 },
+      { value: 'no_recent_transition', label: 'No recent modernization cycle to assess', score: 0.5 },
+    ],
+    weights: { institutional_continuity: 0.7, trust_debt: 0.7 },
+    rationale:
+      'Continuity debt accumulation is a direct modernization fragility stability marker.',
+    intelligence: {
+      modalityRole: 'inheritance_pattern',
+      intelligenceContribution: ['modernization_continuity', 'survivability_perception'],
+      longitudinalValue: 'high',
+      confidenceSensitivity: true,
+      governanceSensitivity: true,
+      deepens: ['modernization_fragility', 'confidence_escalation', 'onboarding_survivability'],
+    },
+  },
   {
     id: 'v2_sm_governance_interpretation_through_transition',
     modality: 'stability_marker',
@@ -432,4 +640,4 @@ export const V2_QUESTIONS: readonly V2Question[] = [
   ...TRANSITION_EXPOSURES,
 ];
 
-export const V2_REGISTRY_VERSION = '1.2.0-foundation' as const;
+export const V2_REGISTRY_VERSION = '1.3.0-modernization-fragility' as const;

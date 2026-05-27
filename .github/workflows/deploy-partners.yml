@@ -54,7 +54,7 @@ jobs:
 
       - name: Run contract tests (fail closed)
         id: contract_tests
-        run: pnpm contract:test
+        run: pnpm contract-tests
 
       - name: SLO gate (fail closed)
         id: slo_gate

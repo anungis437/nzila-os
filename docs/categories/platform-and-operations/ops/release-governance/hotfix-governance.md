@@ -14,7 +14,7 @@ Incident → Hotfix branch → Minimal fix → Expedited deploy → 48h normaliz
 
 | Phase | Action | SLA |
 |-------|--------|-----|
-| Initiate | `pnpm release:hotfix` | Immediate |
+| Initiate | `pnpm exec tsx scripts/release/hotfix-initiate.ts` | Immediate |
 | Fix | Minimal-diff change on hotfix branch | < 2h |
 | Deploy | Same pipeline, skip canary | < 30 min |
 | Normalize | Full PR, tests, review, merge to main | 48h |
@@ -24,18 +24,18 @@ Incident → Hotfix branch → Minimal fix → Expedited deploy → 48h normaliz
 
 ```bash
 # Start a hotfix
-pnpm release:hotfix
+pnpm exec tsx scripts/release/hotfix-initiate.ts
 # → Creates branch hotfix/<tag>-<timestamp>
 # → Creates tracking record in ops/hotfixes/
 # → Sets 48h normalization deadline
 
 # Check SLA compliance
-pnpm release:hotfix:sla
+pnpm exec tsx scripts/release/hotfix-sla.ts
 # → Scans all hotfix records
 # → Reports overdue normalizations
 
 # Strict mode (CI — fails build if overdue)
-pnpm release:hotfix:sla --strict
+pnpm exec tsx scripts/release/hotfix-sla.ts --strict
 ```
 
 ## Hotfix Record Format
@@ -74,7 +74,7 @@ Stored in `ops/hotfixes/<id>.json`:
 
 ## SLA Enforcement
 
-The `release:hotfix:sla` script runs in CI (scheduled daily + pre-deploy):
+The `scripts/release/hotfix-sla.ts` script runs in CI (scheduled daily + pre-deploy):
 
 - **Warning (exit 2)**: Hotfix overdue but deployment allowed
 - **Strict failure (exit 1)**: Used in `--strict` mode, blocks further releases until normalized
@@ -84,7 +84,7 @@ The `release:hotfix:sla` script runs in CI (scheduled daily + pre-deploy):
 ```yaml
 # In deploy-production.yml pre-deploy gates:
 - name: Hotfix SLA Check
-  run: pnpm release:hotfix:sla --strict
+  run: pnpm exec tsx scripts/release/hotfix-sla.ts --strict
 ```
 
 ## Escalation

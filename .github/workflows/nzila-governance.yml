@@ -178,7 +178,7 @@ jobs:
         run: pnpm contract-tests
 
       - name: Enforce strict decision coverage
-        run: pnpm decision:coverage:strict
+        run: pnpm exec tsx scripts/check-decision-coverage.ts --strict
 
       - name: Run NAR chain and tamper tests
         run: pnpm --filter @nzila/nar test

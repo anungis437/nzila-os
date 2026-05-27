@@ -98,6 +98,53 @@ const MODULES = [
   { value: 'Outcomes', key: 'governanceOversight' },
 ] as const;
 
+const RESULTS_COPY = {
+  'en-CA': {
+    contextSuffix: 'context',
+    memberCountPlaceholder: 'e.g., 1200',
+    continuityProfileTitle: 'Continuity profile',
+    governanceAlignmentLabel: 'Governance alignment:',
+    resilienceTitle: 'Organizational resilience direction',
+    rolloutRecommendationLabel: 'Rollout recommendation:',
+    continuityOverviewTitle: 'Executive continuity overview',
+    continuityPosture: 'Continuity posture',
+    governanceCoherence: 'Governance coherence',
+    operationalStability: 'Operational stability',
+    organizationalMemoryHealth: 'Organizational memory health',
+    fragmentationTitle: 'Fragmentation observations',
+    riskNarrativesTitle: 'Continuity risk narratives',
+    pilotArtifactsTitle: 'Pilot simulation artifacts',
+    pilotArtifactsBody: 'Reviewable organizational examples for controlled modernization.',
+    proofArchitectureLink: 'View proof architecture',
+    stabilizationOutcomesLabel: 'Stabilization outcomes:',
+    executiveFlowTitle: 'Executive continuity flow',
+    readinessProfileTitle: 'Continuity and Governance Readiness Profile',
+    rolloutPathwayTitle: 'Recommended Organizational Rollout Pathway',
+  },
+  'fr-CA': {
+    contextSuffix: 'contexte',
+    memberCountPlaceholder: 'p. ex., 1200',
+    continuityProfileTitle: 'Profil de continuité',
+    governanceAlignmentLabel: 'Alignement de gouvernance :',
+    resilienceTitle: 'Orientation de la résilience organisationnelle',
+    rolloutRecommendationLabel: 'Recommandation de déploiement :',
+    continuityOverviewTitle: 'Vue exécutive de la continuité',
+    continuityPosture: 'Posture de continuité',
+    governanceCoherence: 'Cohérence de gouvernance',
+    operationalStability: 'Stabilité opérationnelle',
+    organizationalMemoryHealth: 'Santé de la mémoire organisationnelle',
+    fragmentationTitle: 'Observations sur la fragmentation',
+    riskNarrativesTitle: 'Récits de risque de continuité',
+    pilotArtifactsTitle: 'Artefacts de simulation pilote',
+    pilotArtifactsBody: 'Exemples organisationnels révisables pour une modernisation contrôlée.',
+    proofArchitectureLink: 'Voir l’architecture de preuve',
+    stabilizationOutcomesLabel: 'Résultats de stabilisation :',
+    executiveFlowTitle: 'Flux exécutif de continuité',
+    readinessProfileTitle: 'Profil de préparation en continuité et gouvernance',
+    rolloutPathwayTitle: 'Parcours recommandé de déploiement organisationnel',
+  },
+} as const;
+
 export default function LocalePilotRequestPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -125,6 +172,7 @@ export default function LocalePilotRequestPage() {
     executiveDecisionPathwaySystems['en-CA'];
   const t = useTranslations('marketing.pilotRequest');
   const tNote = useTranslations('continuityNotes.pilot');
+  const resultsCopy = RESULTS_COPY[locale as keyof typeof RESULTS_COPY] ?? RESULTS_COPY['en-CA'];
   const contextMode = parseInstitutionalMode(searchParams.get('context') ?? undefined);
   const contextProfile = getInstitutionalModeProfile(contextMode);
 
@@ -227,7 +275,7 @@ export default function LocalePilotRequestPage() {
         imageUrl={heroImagery.pilotRequest}
         heading={t('heroHeading')}
         description={t('heroDescription')}
-        contextKicker={`${contextProfile.label} context`}
+        contextKicker={`${contextProfile.label} ${resultsCopy.contextSuffix}`}
         contextNote={contextProfile.heroFraming}
       />
 
@@ -325,7 +373,7 @@ export default function LocalePilotRequestPage() {
                   value={formData.memberCount ?? ''}
                   onChange={(e) => set('memberCount', parseInt(e.target.value))}
                   className={inputCls}
-                  placeholder="e.g., 1200"
+                  placeholder={resultsCopy.memberCountPlaceholder}
                 />
               </Field>
 
@@ -557,42 +605,42 @@ export default function LocalePilotRequestPage() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <section className="p-5 rounded-lg border border-gray-200 bg-white">
-                  <h3 className="font-semibold text-gray-900 mb-3">Continuity profile</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">{resultsCopy.continuityProfileTitle}</h3>
                   <p className="text-sm text-gray-700 leading-relaxed mb-3">{assessment.continuityProfile}</p>
-                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">Governance alignment:</span> {assessment.governanceAlignmentSummary}</p>
+                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">{resultsCopy.governanceAlignmentLabel}</span> {assessment.governanceAlignmentSummary}</p>
                 </section>
 
                 <section className="p-5 rounded-lg border border-gray-200 bg-white">
-                  <h3 className="font-semibold text-gray-900 mb-3">Organizational resilience direction</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">{resultsCopy.resilienceTitle}</h3>
                   <p className="text-sm text-gray-700 leading-relaxed mb-3">{assessment.institutionalResilienceDirection}</p>
-                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">Rollout recommendation:</span> {assessment.rolloutRecommendation}</p>
+                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">{resultsCopy.rolloutRecommendationLabel}</span> {assessment.rolloutRecommendation}</p>
                 </section>
               </div>
 
               <section className="p-5 rounded-lg border border-gray-200 bg-white">
-                <h3 className="font-semibold text-gray-900 mb-3">Executive continuity overview</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{resultsCopy.continuityOverviewTitle}</h3>
                 <div className="grid md:grid-cols-2 gap-3 text-sm text-gray-700">
                   <article className="p-3 rounded bg-gray-50 border border-gray-100">
-                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Continuity posture</p>
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{resultsCopy.continuityPosture}</p>
                     <p>{assessment.continuityOverview.continuityPosture}</p>
                   </article>
                   <article className="p-3 rounded bg-gray-50 border border-gray-100">
-                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Governance coherence</p>
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{resultsCopy.governanceCoherence}</p>
                     <p>{assessment.continuityOverview.governanceCoherence}</p>
                   </article>
                   <article className="p-3 rounded bg-gray-50 border border-gray-100">
-                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Operational stability</p>
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{resultsCopy.operationalStability}</p>
                     <p>{assessment.continuityOverview.operationalStability}</p>
                   </article>
                   <article className="p-3 rounded bg-gray-50 border border-gray-100">
-                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Organizational memory health</p>
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{resultsCopy.organizationalMemoryHealth}</p>
                     <p>{assessment.continuityOverview.institutionalMemoryHealth}</p>
                   </article>
                 </div>
               </section>
 
               <section className="p-5 rounded-lg border border-gray-200 bg-gray-50">
-                <h3 className="font-semibold text-gray-900 mb-3">Fragmentation observations</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{resultsCopy.fragmentationTitle}</h3>
                 <ul className="space-y-2 text-sm text-gray-700">
                   {assessment.fragmentationObservations.map((observation) => (
                     <li key={observation} className="flex items-start gap-2">
@@ -604,7 +652,7 @@ export default function LocalePilotRequestPage() {
               </section>
 
               <section className="p-5 rounded-lg border border-gray-200 bg-navy text-white">
-                <h3 className="font-semibold mb-3">Continuity risk narratives</h3>
+                <h3 className="font-semibold mb-3">{resultsCopy.riskNarrativesTitle}</h3>
                 <ul className="space-y-2 text-sm text-white/85">
                   {assessment.continuityRiskNarratives.map((narrative) => (
                     <li key={narrative}>• {narrative}</li>
@@ -615,11 +663,11 @@ export default function LocalePilotRequestPage() {
               <section className="p-5 rounded-lg border border-gray-200 bg-white">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <div>
-                    <h3 className="font-semibold text-gray-900">Pilot simulation artifacts</h3>
-                    <p className="text-sm text-gray-600">Reviewable organizational examples for controlled modernization.</p>
+                    <h3 className="font-semibold text-gray-900">{resultsCopy.pilotArtifactsTitle}</h3>
+                    <p className="text-sm text-gray-600">{resultsCopy.pilotArtifactsBody}</p>
                   </div>
                   <Link href={withInstitutionalContext(`/${locale}/proof`, contextMode)} className="text-sm font-semibold text-blue-700 hover:text-blue-800 inline-flex items-center gap-1">
-                    View proof architecture <span aria-hidden>→</span>
+                    {resultsCopy.proofArchitectureLink} <span aria-hidden>→</span>
                   </Link>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
@@ -627,7 +675,7 @@ export default function LocalePilotRequestPage() {
                     <article key={artifact.title} className="p-4 rounded-lg bg-gray-50 border border-gray-100">
                       <h4 className="text-sm font-semibold text-gray-900 mb-2">{artifact.title}</h4>
                       <p className="text-xs text-gray-600 leading-relaxed mb-2">{artifact.continuityProfile}</p>
-                      <p className="text-xs text-gray-500">Stabilization outcomes: {artifact.stabilizationOutcomes[0]}</p>
+                      <p className="text-xs text-gray-500">{resultsCopy.stabilizationOutcomesLabel} {artifact.stabilizationOutcomes[0]}</p>
                     </article>
                   ))}
                 </div>
@@ -702,7 +750,7 @@ export default function LocalePilotRequestPage() {
               </section>
 
               <section className="p-5 rounded-lg border border-gray-200 bg-white">
-                <h3 className="font-semibold text-gray-900 mb-3">Executive continuity briefing flow</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{resultsCopy.executiveFlowTitle}</h3>
                 <div className="grid sm:grid-cols-2 gap-2 text-sm text-gray-700">
                   {executiveBriefingArr.map((item) => (
                     <div key={item} className="p-3 rounded bg-gray-50 border border-gray-100">{item}</div>
@@ -711,7 +759,7 @@ export default function LocalePilotRequestPage() {
               </section>
 
               <section className="p-5 rounded-lg border border-blue-100 bg-blue-50/70">
-                <h3 className="font-semibold text-blue-950 mb-2">Continuity and Governance Readiness Profile</h3>
+                <h3 className="font-semibold text-blue-950 mb-2">{resultsCopy.readinessProfileTitle}</h3>
                 <p className="text-sm text-blue-900 mb-4">
                   {continuityProfile.level}: {continuityProfile.summary}
                 </p>
@@ -729,7 +777,7 @@ export default function LocalePilotRequestPage() {
               </section>
 
               <section className="p-5 rounded-lg border border-gray-200 bg-white">
-                <h3 className="font-semibold text-gray-900 mb-3">Recommended Organizational Rollout Pathway</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{resultsCopy.rolloutPathwayTitle}</h3>
                 <div className="grid sm:grid-cols-2 gap-2">
                   {rolloutPathway.map((stage, index) => (
                     <div key={stage} className="text-sm text-gray-700 p-2 rounded bg-gray-50 border border-gray-100">

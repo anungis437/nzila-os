@@ -10,7 +10,7 @@
  * analysis, a short table of contents for that chapter, and a calm,
  * institutional invitation to obtain the full document.
  *
- * Tone: "This chapter belongs to the Executive Continuity Brief."
+ * Tone: "This chapter belongs to the Leadership Briefing Report."
  *       Calm. Confident. Worth what is being asked.
  */
 
@@ -43,7 +43,7 @@ const TIER_PRICE: Record<Exclude<ReportTierId, 'continuity_reflection'>, string>
 };
 
 const TIER_NAME: Record<Exclude<ReportTierId, 'continuity_reflection'>, string> = {
-  executive_continuity_brief: 'Executive Continuity Brief',
+  executive_continuity_brief: 'Leadership Briefing Report',
   institutional_continuity_diagnostic: 'Institutional Continuity Diagnostic',
 };
 

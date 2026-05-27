@@ -78,13 +78,13 @@ This means changing `README.md`, docs, or governance files **does not invalidate
 pnpm build                    # ~12 min cold, ~30s cached
 
 # Build a single app + its deps
-pnpm build:web                # ~60s cold
-pnpm build:console            # ~60s cold
-pnpm build:union-eyes         # ~5 min cold (webpack)
-pnpm build:partners           # ~45s cold
-pnpm build:abr                # ~45s cold
-pnpm build:trade              # ~30s cold
-pnpm build:cfo                # ~30s cold
+pnpm exec turbo build --filter=@nzila/web...          # ~60s cold
+pnpm exec turbo build --filter=@nzila/console...      # ~60s cold
+pnpm exec turbo build --filter=@nzila/union-eyes...   # ~5 min cold (webpack)
+pnpm exec turbo build --filter=@nzila/partners...     # ~45s cold
+pnpm exec turbo build --filter=@nzila/abr...          # ~45s cold
+pnpm exec turbo build --filter=@nzila/trade...        # ~30s cold
+pnpm exec turbo build --filter=@nzila/cfo...          # ~30s cold
 
 # Clean turbo cache (reset)
 pnpm clean
@@ -155,7 +155,7 @@ only compiles the app being deployed + its package dependencies.
 | `"concurrency": 4` | ✅ | Prevents CI OOM (12 apps × ~1GB each) |
 | `"inputs"` per task | ✅ | Only source changes invalidate cache |
 | `"env"` scoping | ✅ | Clerk/URL vars don't bust cache for non-Clerk apps |
-| Per-app `build:*` scripts | ✅ | `pnpm build:web` = ~60s vs `pnpm build` = ~12 min |
+| Per-app turbo filter commands | ✅ | `pnpm exec turbo build --filter=@nzila/web...` = ~60s vs `pnpm build` = ~12 min |
 | CI turbo cache | ✅ | Repeat builds cached across commits |
 | Docker `TURBO_FILTER` | ✅ (existing) | Deploy builds only target app |
 | union-eyes `ignoreWarnings` | ✅ | Suppresses OTel webpack noise → clean "Compiled successfully" |

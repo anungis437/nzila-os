@@ -5,7 +5,7 @@
  * the current repo HEAD, producing a per-app drift report with scores.
  *
  * Usage:
- *   pnpm drift:version:staging
+ *   pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
  *   pnpm tsx scripts/release/drift-version.ts [--env staging] [--apps web,console,...] [--timeout-ms 10000]
  *
  * Output:

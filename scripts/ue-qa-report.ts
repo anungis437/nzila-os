@@ -519,7 +519,7 @@ function main(): void {
     warnings,
     nextActions: [
       readinessStatus === 'GO_FOR_UX_TESTING'
-        ? 'Run pnpm ue:qa:gate -- --target pilot and close all pilot blockers.'
+        ? 'Run pnpm exec tsx scripts/ue-qa-gate.ts --target pilot and close all pilot blockers.'
         : 'Maintain evidence freshness and keep deterministic fixtures in sync.',
       'Record human approver evidence before pilot or production promotion.',
       'Review artifacts/ue-qa/readiness-summary.md before release decision.',

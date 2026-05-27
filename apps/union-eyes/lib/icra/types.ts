@@ -364,12 +364,12 @@ export interface StewardshipSignal {
  * Continuity Burden Index™ — measures how much continuity depends on
  * humans compensating manually. Higher score = more human-compensated continuity.
  * Score (0–100) and interpretation are free; full humanCompensationIndicators
- * are gated behind the Executive Continuity Brief.
+ * are gated behind the Leadership Briefing Report.
  */
 export interface ContinuityBurdenIndex {
   score: number; // 0–100, higher = more burden concentrated in people
   interpretation: string; // single-line calm observation
-  humanCompensationIndicators: string[]; // gated in Executive Continuity Brief
+  humanCompensationIndicators: string[]; // gated in Leadership Briefing Report
 }
 
 /**

@@ -4,7 +4,7 @@
  * Concern-based adoption validation that measures real app adoption of the
  * authoritative platform package map in governance/platform-package-authority.json.
  *
- * Usage: pnpm platform:adoption:check
+ * Usage: pnpm exec tsx scripts/platform-adoption-gate.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

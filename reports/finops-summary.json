@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-11T04:57:50.601Z",
+  "generatedAt": "2026-05-25T18:08:34.025Z",
   "tiersCovered": {
     "tier1": 6,
     "tier2": 5,
@@ -14,7 +14,7 @@
       "forecastingReadiness": 5.6
     },
     "new": {
-      "finops": 8,
+      "finops": 8.79,
       "unitEconomics": 8.9,
       "pricingReadiness": 8.4,
       "capitalAllocation": 9.1,
@@ -22,8 +22,8 @@
     }
   },
   "dataSources": {
-    "costAttribution": "template",
-    "costUnresolvedApps": 17,
+    "costAttribution": "azure-cost-management-api",
+    "costUnresolvedApps": 0,
     "pilots": "governance/commercial/pilots.json",
     "portfolioTruth": "governance/portfolio/product-catalog.json"
   },
@@ -35,69 +35,14 @@
         "deltaPct": 24.94
       },
       {
-        "app": "abr",
-        "budgetStatus": "approval-required",
-        "deltaPct": 23.5
-      },
-      {
-        "app": "flow",
-        "budgetStatus": "approval-required",
-        "deltaPct": 28.4
-      },
-      {
-        "app": "web",
-        "budgetStatus": "approval-required",
-        "deltaPct": 27.53
-      },
-      {
         "app": "partners",
         "budgetStatus": "warn",
         "deltaPct": 18.6
       },
       {
-        "app": "cfo",
-        "budgetStatus": "approval-required",
-        "deltaPct": 25.64
-      },
-      {
-        "app": "zonga",
-        "budgetStatus": "hard-stop",
-        "deltaPct": 35.25
-      },
-      {
-        "app": "agrimo",
-        "budgetStatus": "approval-required",
-        "deltaPct": 29.23
-      },
-      {
-        "app": "cora",
-        "budgetStatus": "approval-required",
-        "deltaPct": 23.67
-      },
-      {
-        "app": "trade",
-        "budgetStatus": "approval-required",
-        "deltaPct": 25.82
-      },
-      {
-        "app": "mobility",
-        "budgetStatus": "approval-required",
-        "deltaPct": 28.4
-      },
-      {
         "app": "console",
         "budgetStatus": "warn",
         "deltaPct": 16.47
-      },
-      {
-        "app": "control-plane",
-        "budgetStatus": "warn",
-        "deltaPct": 16.97
-      },
-      {
-        "app": "orchestrator-api",
-        "budgetStatus": "warn",
-        "deltaPct": 12.55
       }
     ],
     "persistentNegativeMarginBands": [
@@ -110,25 +55,9 @@
         "marginBand": "D"
       },
       {
-        "app": "abr",
-        "monthlyRevenueUsd": 18000,
-        "monthlyCostToServeUsd": 39520,
-        "supportIncidentsProxy": 4.59,
-        "customWorkBurdenProxy": "high",
-        "marginBand": "D"
-      },
-      {
-        "app": "flow",
-        "monthlyRevenueUsd": 21000,
-        "monthlyCostToServeUsd": 38520,
-        "supportIncidentsProxy": 95.2,
-        "customWorkBurdenProxy": "high",
-        "marginBand": "D"
-      },
-      {
         "app": "web",
         "monthlyRevenueUsd": 0,
-        "monthlyCostToServeUsd": 21680,
+        "monthlyCostToServeUsd": 32.91,
         "supportIncidentsProxy": 54.4,
         "customWorkBurdenProxy": "high",
         "marginBand": "D"
@@ -142,17 +71,9 @@
         "marginBand": "D"
       },
       {
-        "app": "cfo",
-        "monthlyRevenueUsd": 8000,
-        "monthlyCostToServeUsd": 27640,
-        "supportIncidentsProxy": 74.8,
-        "customWorkBurdenProxy": "high",
-        "marginBand": "D"
-      },
-      {
         "app": "zonga",
         "monthlyRevenueUsd": 0,
-        "monthlyCostToServeUsd": 21640,
+        "monthlyCostToServeUsd": 32.91,
         "supportIncidentsProxy": 27.2,
         "customWorkBurdenProxy": "medium",
         "marginBand": "D"
@@ -160,7 +81,7 @@
       {
         "app": "agrimo",
         "monthlyRevenueUsd": 0,
-        "monthlyCostToServeUsd": 16800,
+        "monthlyCostToServeUsd": 32.91,
         "supportIncidentsProxy": 27.2,
         "customWorkBurdenProxy": "medium",
         "marginBand": "D"
@@ -168,7 +89,7 @@
       {
         "app": "cora",
         "monthlyRevenueUsd": 0,
-        "monthlyCostToServeUsd": 14840,
+        "monthlyCostToServeUsd": 32.91,
         "supportIncidentsProxy": 27.2,
         "customWorkBurdenProxy": "medium",
         "marginBand": "D"
@@ -176,7 +97,7 @@
       {
         "app": "trade",
         "monthlyRevenueUsd": 0,
-        "monthlyCostToServeUsd": 13840,
+        "monthlyCostToServeUsd": 32.91,
         "supportIncidentsProxy": 27.2,
         "customWorkBurdenProxy": "medium",
         "marginBand": "D"
@@ -184,7 +105,7 @@
       {
         "app": "mobility",
         "monthlyRevenueUsd": 0,
-        "monthlyCostToServeUsd": 12840,
+        "monthlyCostToServeUsd": 32.91,
         "supportIncidentsProxy": 27.2,
         "customWorkBurdenProxy": "medium",
         "marginBand": "D"
@@ -200,7 +121,7 @@
       {
         "app": "control-plane",
         "monthlyRevenueUsd": 0,
-        "monthlyCostToServeUsd": 19300,
+        "monthlyCostToServeUsd": 32.91,
         "supportIncidentsProxy": 40.8,
         "customWorkBurdenProxy": "low",
         "marginBand": "D"
@@ -208,7 +129,7 @@
       {
         "app": "orchestrator-api",
         "monthlyRevenueUsd": 0,
-        "monthlyCostToServeUsd": 12380,
+        "monthlyCostToServeUsd": 32.91,
         "supportIncidentsProxy": 54.4,
         "customWorkBurdenProxy": "low",
         "marginBand": "D"
@@ -219,7 +140,7 @@
     {
       "leak": "Unresolved cloud cost attribution mappings",
       "impactUsdMonthly": 17000,
-      "evidence": "ops/outputs/cost-allocation.json unresolved_app_count=17"
+      "evidence": "ops/outputs/cost-allocation.json unresolved_app_count=0"
     },
     {
       "leak": "Tier1 support burden not reduced through premium support routing",
@@ -250,22 +171,16 @@
       "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
     },
     {
-      "app": "abr",
-      "currentSignal": "gross margin -99.8%",
-      "recommendation": "restructure_packaging",
-      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
-    },
-    {
       "app": "flow",
-      "currentSignal": "gross margin -61.42%",
-      "recommendation": "restructure_packaging",
-      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+      "currentSignal": "close rate 27% and gross margin 99.86%",
+      "recommendation": "raise_price",
+      "rationale": "Strong conversion with healthy margin indicates headroom for immediate list-price increase."
     },
     {
       "app": "cfo",
-      "currentSignal": "gross margin -176.4%",
-      "recommendation": "restructure_packaging",
-      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+      "currentSignal": "close rate 22% and gross margin 99.67%",
+      "recommendation": "raise_price",
+      "rationale": "Strong conversion with healthy margin indicates headroom for immediate list-price increase."
     },
     {
       "app": "partners",
@@ -278,41 +193,41 @@
   "next100kPlan": [
     {
       "rank": 1,
-      "app": "union-eyes",
+      "app": "abr",
       "allocationUsd": 24000,
-      "roiScore": 336.64
+      "roiScore": 806.81
     },
     {
       "rank": 2,
-      "app": "abr",
+      "app": "flow",
       "allocationUsd": 20000,
-      "roiScore": 332.96
+      "roiScore": 694.21
     },
     {
       "rank": 3,
-      "app": "flow",
+      "app": "cfo",
       "allocationUsd": 18000,
-      "roiScore": 232.36
+      "roiScore": 362.21
     },
     {
       "rank": 4,
-      "app": "cfo",
+      "app": "union-eyes",
       "allocationUsd": 14000,
-      "roiScore": 30.92
+      "roiScore": 336.64
     },
     {
       "rank": 5,
-      "app": "partners",
+      "app": "zonga",
       "allocationUsd": 13000,
-      "roiScore": -4.44
+      "roiScore": 123.81
     },
     {
       "rank": 6,
-      "app": "orchestrator-api",
+      "app": "web",
       "allocationUsd": 11000,
-      "roiScore": -56.76
+      "roiScore": 91.41
     }
   ],
-  "mostProfitableCurrentApp": "union-eyes",
+  "mostProfitableCurrentApp": "flow",
   "mostDangerousScalingApp": "zonga"
 }

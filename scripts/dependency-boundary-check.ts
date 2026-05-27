@@ -2,7 +2,7 @@
  * Dependency Boundary Check — builds the package dependency graph and
  * detects circular deps, forbidden directions, and deprecated usage.
  *
- * Usage: pnpm deps:check
+ * Usage: pnpm exec tsx scripts/dependency-boundary-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

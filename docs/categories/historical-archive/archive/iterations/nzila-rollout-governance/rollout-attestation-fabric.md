@@ -16,13 +16,13 @@ legitimacy.
 
 | Type                                | Emitted by                                     |
 |-------------------------------------|------------------------------------------------|
-| Promotion attestation               | `pnpm rollout:promote:attest`                  |
+| Promotion attestation               | `node tooling/scripts/record-promotion-attestation.mjs`                  |
 | Pilot legitimacy attestation        | Pilot governance workflow                      |
-| Rollout readiness attestation       | `pnpm rollout:readiness`                       |
+| Rollout readiness attestation       | `node tooling/scripts/run-rollout-readiness-review.mjs`                       |
 | Onboarding readiness attestation    | Institutional onboarding workflow              |
 | Deployment governance attestation   | Release pipeline + operator review             |
 | Continuity-safe rollout attestation | Continuity workflow on stabilization close     |
-| Rollback attestation                | `pnpm rollout:rollback:attest`                 |
+| Rollback attestation                | `node tooling/scripts/record-rollback-attestation.mjs`                 |
 | Demo session attestation            | Demo operator workflow                         |
 
 ## 3. Storage

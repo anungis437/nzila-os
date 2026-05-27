@@ -3,7 +3,7 @@
  * DOCTRINE_VERSION: 1.0.0
  * CHANGE CLASS: Commercial
  *
- * Executive Continuity Brief — PDF Document Template
+ * Leadership Briefing Report — PDF Document Template
  *
  * React-PDF document with full editorial institutional layout.
  * Cover → Executive Summary → Continuity Profile →
@@ -390,10 +390,10 @@ function PageFooter({
   return (
     <View style={S.pageFooter} fixed>
       <Text style={S.footerText}>
-        Executive Continuity Brief{institutionName ? ` · ${institutionName}` : ''}
+        Leadership Briefing Report{institutionName ? ` · ${institutionName}` : ''}
       </Text>
       <View style={S.footerCenter} />
-      <Text style={S.footerText}>Union Eyes / Nzila OS · {dateStr}</Text>
+      <Text style={S.footerText}>UnionEyes / Nzila OS · {dateStr}</Text>
     </View>
   );
 }
@@ -451,7 +451,7 @@ function CoverPage({ data }: { data: PdfReportData }) {
       {/* Footer */}
       <View style={S.coverFooter}>
         <Text style={S.coverFooterLeft}>
-          Prepared by Union Eyes / Nzila OS{'\n'}
+          Prepared by UnionEyes / Nzila OS{'\n'}
           Organizational Continuity Infrastructure Programme
         </Text>
         <Text style={S.coverFooterRight}>
@@ -874,7 +874,7 @@ function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
       <View style={S.divider} />
 
       <Text style={S.bodyPara}>
-        This Executive Continuity Brief was generated from the OCI Continuity Risk Assessment (ICRA), a structured self-assessment instrument designed to surface institutional continuity posture across five core dimensions: institutional continuity, governance fragility, evidence and traceability, operational memory, and transition readiness.
+        This Leadership Briefing Report was generated from the OCI Continuity Risk Assessment (ICRA), a structured self-assessment instrument designed to surface institutional continuity posture across five core dimensions: institutional continuity, governance fragility, evidence and traceability, operational memory, and transition readiness.
       </Text>
 
       <Text style={S.bodyPara}>
@@ -936,7 +936,7 @@ function AssessmentMetadataPage({ data }: { data: PdfReportData }) {
         ))}
 
       <Text style={[S.bodySmall, { marginTop: SPACE.xl, color: COLORS.ink40, lineHeight: 1.6 }]}>
-        This report was prepared by Union Eyes, a Nzila OS programme. The OCI Continuity Risk Assessment and the Organizational Continuity Infrastructure framework are proprietary analytical instruments. Results are intended for internal governance use. Union Eyes does not retain personally identifiable information beyond the pseudonymous assessment record.
+        This report was prepared by UnionEyes, a Nzila OS programme. The OCI Continuity Risk Assessment and the Organizational Continuity Infrastructure framework are proprietary analytical instruments. Results are intended for internal governance use. UnionEyes does not retain personally identifiable information beyond the pseudonymous assessment record.
       </Text>
 
       <PageFooter
@@ -960,12 +960,12 @@ export function ExecutiveContinuityBriefTemplate({
 }: ExecutiveContinuityBriefTemplateProps) {
   return (
     <Document
-      title={`Executive Continuity Brief${data.institutionName ? ` — ${data.institutionName}` : ''}`}
-      author="Union Eyes / Nzila OS"
-      subject="OCI Continuity Risk Assessment — Executive Continuity Brief"
+      title={`Leadership Briefing Report${data.institutionName ? ` — ${data.institutionName}` : ''}`}
+      author="UnionEyes / Nzila OS"
+      subject="OCI Continuity Risk Assessment — Leadership Briefing Report"
       keywords="OCI, institutional continuity, governance, continuity risk"
-      creator="Union Eyes ICRA Platform"
-      producer="Union Eyes / Nzila OS"
+      creator="UnionEyes ICRA Platform"
+      producer="UnionEyes / Nzila OS"
     >
       <CoverPage data={data} />
       <ExecutiveSummaryPage data={data} />

@@ -25,9 +25,19 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const copy = locale === 'fr-CA'
+    ? {
+        title: 'Categories | Perspectives | UnionEyes',
+        description: 'Parcourez les domaines de gouvernance et les parcours thematiques du systeme Perspectives UnionEyes.',
+      }
+    : {
+        title: 'Categories | Insights | UnionEyes',
+        description: 'Browse the governance domains and topic pathways in the UnionEyes Insights system.',
+      };
+
   return {
-    title: 'Categories | Insights | UnionEyes',
-    description: 'Browse the governance domains and topic pathways in the UnionEyes Insights system.',
+    title: copy.title,
+    description: copy.description,
     alternates: buildLocaleAlternates(locale, '/insights/categories'),
   };
 }

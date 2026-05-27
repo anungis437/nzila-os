@@ -52,7 +52,7 @@
 
 ### 3.1 Automated Verification
 
-Backup integrity is verified via `pnpm verify:backup`, which checks:
+Backup integrity is verified via `pnpm exec tsx scripts/backup-verify.ts`, which checks:
 
 1. **Lockfile integrity** — `pnpm-lock.yaml` hash consistency
 2. **Evidence system** — Evidence pack generation + verification
@@ -88,7 +88,7 @@ Backup integrity is verified via `pnpm verify:backup`, which checks:
 2. Deploy via infrastructure-as-code (revert to last good commit)
 3. Verify all health checks pass: `HealthChecker.run()`
 4. Re-generate evidence pack to confirm system integrity
-5. Run platform health report: `pnpm health:report`
+5. Run platform health report: `pnpm exec tsx scripts/platform-health-report.ts`
 
 ### 4.3 Full Environment Recovery
 
@@ -98,10 +98,10 @@ Backup integrity is verified via `pnpm verify:backup`, which checks:
 4. Restore configuration from Key Vault
 5. Verify all integrations operational
 6. Run full verification suite:
-   - `pnpm verify:env`
-   - `pnpm verify:security`
-   - `pnpm validate:pack`
-   - `pnpm health:report`
+   - `pnpm exec tsx tooling/build-env-check.ts`
+   - `pnpm exec tsx tooling/security-headers-check.ts`
+   - `pnpm exec tsx scripts/validate-procurement-pack.ts`
+   - `pnpm exec tsx scripts/platform-health-report.ts`
 
 ---
 

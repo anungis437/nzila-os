@@ -1,4 +1,5 @@
 import type * as React from 'react';
+import Image from 'next/image';
 
 /**
  * Lightweight markdown renderer used by the shared whitepaper route.
@@ -27,6 +28,16 @@ export type RenderedWhitepaper = {
   readonly nodes: ReadonlyArray<React.ReactNode>;
 };
 
+export type WhitepaperSectionImage = {
+  readonly sectionIndex: number;
+  readonly imageUrl: string;
+  readonly alt: string;
+};
+
+type RenderWhitepaperOptions = {
+  readonly sectionImages?: readonly WhitepaperSectionImage[];
+};
+
 type Block =
   | { kind: 'heading'; level: 1 | 2 | 3 | 4; text: string; slug: string }
   | { kind: 'paragraph'; text: string }
@@ -53,7 +64,9 @@ function stripMetadataPreamble(markdown: string): string {
   const head = markdown.slice(0, ruleIdx);
   if (!/^\s*#\s/.test(head)) return markdown.trim();
   // Only strip the preamble when it contains metadata-style key/value lines.
-  if (!/\n\*\*[A-Z][^*]+\*\*:/.test(head)) return markdown.trim();
+  // Accepts both `**Key:** value` (colon inside the bold) and `**Key**: value`
+  // (colon outside) to cover all known whitepaper sources.
+  if (!/\n\*\*[A-Z][^*\n]+?[:]?\*\*\s*:?\s*\S/.test(head)) return markdown.trim();
   return markdown.slice(ruleIdx + 4).trim();
 }
 
@@ -91,7 +104,13 @@ function parseMarkdown(markdown: string): Block[] {
     const headingMatch = line.match(/^(#{1,4})\s+(.+?)\s*#*\s*$/);
     if (headingMatch) {
       const level = headingMatch[1].length as 1 | 2 | 3 | 4;
-      const text = headingMatch[2].trim();
+      const rawText = headingMatch[2].trim();
+      // Strip "Section N — " / "Section N: " prefixes and numeric "N.N " /
+      // "N.N.N " subheading prefixes so headings read as plain prose.
+      const text = rawText
+        .replace(/^Section\s+\d+\s*[—–:-]\s*/i, '')
+        .replace(/^\d+(?:\.\d+)*\s+/, '')
+        .trim();
       blocks.push({ kind: 'heading', level, text, slug: makeSlug(text) });
       i++;
       continue;
@@ -317,10 +336,14 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
 
 const PULL_QUOTE_HEADING = new Set(['central thesis']);
 
-export function renderWhitepaperMarkdown(markdown: string): RenderedWhitepaper {
+export function renderWhitepaperMarkdown(
+  markdown: string,
+  options: RenderWhitepaperOptions = {},
+): RenderedWhitepaper {
   const blocks = parseMarkdown(markdown);
   const tocItems: Array<{ heading: string; slug: string }> = [];
   let title = '';
+  let level2HeadingCount = 0;
 
   const nodes: React.ReactNode[] = [];
   let centralThesisActive = false;
@@ -335,6 +358,7 @@ export function renderWhitepaperMarkdown(markdown: string): RenderedWhitepaper {
       }
       centralThesisActive = block.level === 2 && PULL_QUOTE_HEADING.has(block.text.toLowerCase());
       if (block.level === 2) {
+        const headingIndex = level2HeadingCount++;
         tocItems.push({ heading: block.text, slug: block.slug });
         nodes.push(
           <h2
@@ -345,6 +369,33 @@ export function renderWhitepaperMarkdown(markdown: string): RenderedWhitepaper {
             {renderInline(block.text, key)}
           </h2>,
         );
+
+        if (options.sectionImages?.length) {
+          const sectionImage = options.sectionImages.find(
+            (imageSpec) => imageSpec.sectionIndex === headingIndex,
+          );
+          if (!sectionImage) {
+            return;
+          }
+          nodes.push(
+            <div key={`${key}-section-image`} className="overflow-hidden rounded-xl border border-slate-200">
+              <div className="relative h-52 w-full">
+                <Image
+                  src={sectionImage.imageUrl}
+                  alt={sectionImage.alt}
+                  fill
+                  loading="lazy"
+                  sizes="(min-width: 1280px) 900px, 100vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#10263a]/70 via-[#10263a]/30 to-transparent" />
+                <div className="relative z-10 flex h-full items-end p-5">
+                  <p className="text-sm font-medium text-white/90">{renderInline(block.text, `${key}-img-title`)}</p>
+                </div>
+              </div>
+            </div>,
+          );
+        }
       } else if (block.level === 3) {
         nodes.push(
           <h3

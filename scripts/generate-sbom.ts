@@ -15,7 +15,7 @@
  *   - integrity hash (from lockfile)
  *
  * Usage:
- *   pnpm generate:sbom
+ *   pnpm exec tsx scripts/generate-sbom.ts
  *
  * @module scripts/generate-sbom
  */

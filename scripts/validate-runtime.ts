@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * validate:runtime — Checks all apps for runtime contract compliance.
+ * validate-runtime.ts — Checks all apps for runtime contract compliance.
  *
  * Verifies:
  *   1. middleware.ts exists and has rate limiting + request-ID propagation

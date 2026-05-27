@@ -52,6 +52,9 @@ jobs:
       - name: Verify schema snapshot (no drift)
         run: pnpm tsx tooling/db/schema-snapshot.ts verify
 
+      - name: Generate AI eval report (CI stub)
+        run: pnpm tsx tooling/ai-evals/run-evals-ci.ts
+
       - name: AI eval gate check (mandatory)
         run: |
           if [ ! -f tooling/ai-evals/report.json ]; then
@@ -61,10 +64,10 @@ jobs:
           pnpm tsx tooling/ai-evals/eval-gate.ts tooling/ai-evals/report.json
 
       - name: GA gate (master governance check)
-        run: pnpm ga-check
+        run: pnpm exec tsx tooling/ga-check/ga-check.ts
 
       - name: Validate release strict
-        run: pnpm validate:release:strict
+        run: pnpm exec tsx scripts/validate-release-strict.ts
 
   # ─── Gate 2: Security scans ───────────────────────────────────────────────
   security-gate:

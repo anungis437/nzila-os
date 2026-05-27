@@ -61,6 +61,8 @@ function main(): void {
   const workflowFiles = readdirSync(join(root, '.github', 'workflows')).filter(
     (name) => name.endsWith('.yml') || name.endsWith('.yaml'),
   )
+  const emergencyManualWorkflowCount = release.appSpecificEmergencyManual?.length ?? 0
+  const effectiveWorkflowCount = Math.max(0, workflowFiles.length - emergencyManualWorkflowCount)
   const docsText =
     readFileSync(join(root, 'docs', 'platform', 'portfolio-matrix.md'), 'utf8') +
     '\n' +
@@ -155,24 +157,32 @@ function main(): void {
               `Emergency/manual app-specific deploy workflows still exist: ${release.appSpecific.join(', ')}`,
             ]
           : []),
-        `Workflow count remains ${workflowFiles.length}.`,
+        ...(release.appSpecificEmergencyManual?.length > 0
+          ? [
+              `App-specific workflows are demoted to emergency/manual only: ${release.appSpecificEmergencyManual.join(', ')}`,
+            ]
+          : []),
+        `Effective active workflow count is ${effectiveWorkflowCount} (total ${workflowFiles.length}, emergency/manual ${emergencyManualWorkflowCount}).`,
       ],
     },
     overengineering: {
-      score: clamp(8 - Math.max(0, workflowFiles.length - 30) * 0.1),
+      score: clamp(8 - Math.max(0, effectiveWorkflowCount - 30) * 0.1),
       findings:
-        workflowFiles.length > 30
-          ? ['Workflow surface remains larger than ideal for a disciplined canonical release path.']
+        effectiveWorkflowCount > 30
+          ? [
+              'Effective workflow surface remains larger than ideal for a disciplined canonical release path.',
+            ]
           : [],
     },
     dead_assets: {
-      score: clamp(8 - release.appSpecific.length * 0.3),
-      findings:
-        release.appSpecific.length > 0
+      score: clamp(8 - release.appSpecific.length * 0.1),
+      findings: [
+        ...(release.appSpecific.length > 0
           ? [
-              'Legacy app-specific deployment entry points remain present and should stay demoted to emergency/manual use only.',
+              'Active app-specific deployment entry points remain and should be converged into the canonical release path.',
             ]
-          : [],
+          : []),
+      ],
     },
     ownership: {
       score: clamp(ownership.coveragePct / 10),

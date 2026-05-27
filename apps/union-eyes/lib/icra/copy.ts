@@ -16,14 +16,14 @@ export const COPY = {
     categoryName: 'Organizational Continuity Infrastructure',
   },
   hero: {
-    eyebrow: 'OCI Continuity Risk Assessment™',
+    eyebrow: 'Organizational Readiness Check',
     headline:
-      'Most Institutions Are Carrying More Continuity Risk Than They Realize.',
+      "Most organizations don't realize how much knowledge is about to walk out the door.",
     humanContinuityLine:
-      'Every organization has people quietly holding continuity together long after the systems around them stopped doing so.',
+      'Every organization has people quietly holding things together — and when they leave, decisions, context, and operational know-how leave with them.',
     sub:
-      'Operational knowledge often lives inside people instead of systems. Leadership transitions should not feel like rebuilding the institution from scratch. Modernization without continuity often creates operationally forgetful organizations.',
-    primaryCta: 'Assess Institutional Continuity Risk',
+      'Critical knowledge often lives inside people instead of systems, so leadership transitions feel like rebuilding from scratch. Take a short readiness check to see where your organization is most exposed.',
+    primaryCta: 'Take the 10-minute readiness check',
     secondaryCta: 'Read what this is, and what it is not',
   },
   /**
@@ -31,7 +31,7 @@ export const COPY = {
    * This is category language infrastructure.
    */
   ociMotif:
-    'Institutions are ultimately shaped not only by what they build, but by what they choose to remember.',
+    'Organizations are ultimately shaped not only by what they build, but by what they choose to remember.',
   /**
    * Technology With Soul — operationalized. Not a philosophy block.
    * Each line is a concrete commitment.
@@ -43,7 +43,7 @@ export const COPY = {
       'Modernization without organizational forgetting.',
       'Operational intelligence without dehumanization.',
       'Governance support without replacing human judgment.',
-      'Technology that helps institutions remember their obligations to people.',
+      'Technology that helps organizations remember their obligations to people.',
     ],
   },
   /**
@@ -59,10 +59,10 @@ export const COPY = {
     labour: 'invisible continuity labour',
   },
   /**
-   * Institutional Memory Holders — the people quietly carrying continuity.
+   * Organizational Memory Holders — the people quietly carrying continuity.
    * Naming this concept is itself a category act.
    */
-  institutionalMemoryHolders: {
+  organizationalMemoryHolders: {
     title: 'Organizational Memory Holders',
     definition:
       'In most organizations, there are people who carry continuity not because it is their formal role, but because no system was built to hold it instead.',
@@ -95,7 +95,7 @@ export const COPY = {
         id: 'organizational_memory',
         label: 'The Organizational Memory',
         description:
-          'The person whose departure would make the institution feel, for a time, like it had forgotten what it knew about itself.',
+          'The person whose departure would make the organization feel, for a time, like it had forgotten what it knew about itself.',
       },
     ],
   },
@@ -106,7 +106,7 @@ export const COPY = {
       'It is not productivity monitoring.',
       'It is not hidden behavioural analytics.',
       'It is not punitive workforce scoring.',
-      'It is a structured examination of organizational continuity: the operational memory, governance visibility, and transition readiness that allow an institution to outlast any individual within it.',
+      'It is a structured examination of organizational continuity: the operational memory, governance visibility, and transition readiness that allow an organization to outlast any individual within it.',
       'We treat organizational continuity as governance infrastructure, not as workforce control.',
     ],
   },
@@ -116,11 +116,11 @@ export const COPY = {
       'Operational dependency — where organizational function relies on specific people rather than organizational procedure.',
       'Governance visibility — whether governance bodies can see operational reality without heroic reporting.',
       'Organizational memory — whether decisions and precedent outlast the individuals who shaped them.',
-      'Transition readiness — whether the institution can absorb role and leadership change without disruption.',
+      'Transition readiness — whether the organization can absorb role and leadership change without disruption.',
       'Explainability and trust — whether decisions can be explained from evidence.',
-      'Sovereignty and governance control — whether the institution controls its own organizational data and direction.',
+      'Sovereignty and governance control — whether the organization controls its own organizational data and direction.',
     ],
-    duration: 'Most institutions complete the assessment in 15 to 25 minutes.',
+    duration: 'Most organizations complete the assessment in 15 to 25 minutes.',
     privacy: [
       'Responses are stored with a pseudonymous assessment identifier.',
       'No personally-identifying information is required to complete the assessment.',
@@ -164,7 +164,7 @@ export const COPY = {
   results: {
     title: 'Organizational Continuity Profile',
     profileSub:
-      'A calm, structured view of your institution’s continuity posture. This profile is generated deterministically from your responses; nothing here is produced by an opaque model.',
+      'A calm, structured view of your organization’s continuity posture. This profile is generated deterministically from your responses; nothing here is produced by an opaque model.',
     bandLabel: 'Continuity Band',
     operationalPatternLabel: 'Operational Pattern',
     compositeLabel: 'Composite continuity indicator',
@@ -184,43 +184,43 @@ export const COPY = {
       'Each indicator above is the deterministic result of your weighted responses. We can show you exactly which questions contributed to each dimension on request.',
   },
   /**
-   * Revenue tiers — institutional naming, not SaaS vocabulary.
+   * Revenue tiers — organizational naming, not SaaS vocabulary.
    */
   tiers: {
     reflection: {
       id: 'continuity_reflection' as const,
-      name: 'Continuity Reflection',
-      tagline: 'A structured look at where your institution stands.',
+      name: 'Free Readiness Check',
+      tagline: 'A structured look at where your organization stands.',
       price: null,
       priceLabel: 'Complimentary',
     },
     brief: {
       id: 'executive_continuity_brief' as const,
-      name: 'Executive Continuity Brief',
+      name: 'Leadership Briefing Report',
       tagline: 'A board-grade analysis of your continuity posture, for leadership conversations.',
       price: '$1,200 CAD',
       priceLabel: '$1,200 CAD',
     },
     diagnostic: {
       id: 'institutional_continuity_diagnostic' as const,
-      name: 'Organizational Continuity Diagnostic',
+      name: 'Full Diagnostic & Action Plan',
       tagline: 'A facilitated organizational review for organizations ready to act.',
       price: '$6,500 CAD',
       priceLabel: '$6,500 CAD',
     },
   },
   /**
-   * Report gate copy — calm, institutional, non-coercive.
+   * Report gate copy — calm, organizational, non-coercive.
    */
   reportGate: {
-    briefLockedLabel: 'This analysis is available in the Executive Continuity Brief.',
-    diagnosticLockedLabel: 'This section is part of the Organizational Continuity Diagnostic.',
-    briefCtaLabel: 'Request the Executive Continuity Brief',
+    briefLockedLabel: 'This analysis is available in the Leadership Briefing Report.',
+    diagnosticLockedLabel: 'This section is part of the Full Diagnostic & Action Plan.',
+    briefCtaLabel: 'Request the Leadership Briefing Report',
     briefCtaHref: '/contact?topic=executive-continuity-brief',
-    diagnosticCtaLabel: 'Open an Organizational Continuity Diagnostic conversation',
+    diagnosticCtaLabel: 'Open an Full Diagnostic & Action Plan conversation',
     diagnosticCtaHref: '/contact?topic=institutional-continuity-diagnostic',
     gateNote:
-      'The Executive Continuity Brief is available at $1,200 CAD and is designed for board presentation and executive decision-making.',
+      'The Leadership Briefing Report is available at $1,200 CAD and is designed for board presentation and executive decision-making.',
   },
   governance: {
     auditableNote:

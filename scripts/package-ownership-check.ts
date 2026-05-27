@@ -2,7 +2,7 @@
  * Package Ownership Check — verifies every package under packages/ has a valid
  * package.meta.json with all required fields.
  *
- * Usage: pnpm package:ownership:check
+ * Usage: pnpm exec tsx scripts/package-ownership-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

@@ -40,7 +40,7 @@ All converge to the same doctrine: **governance-safe institutional operational c
 
 ## 5. Validation
 
-Cross-app consistency is validator-enforced via `pnpm validate:cognition` and supplemented by `pnpm validate:labor-continuity` for the UE labor surface.
+Cross-app consistency is validator-enforced via `node tooling/scripts/validate-institutional-cognition-convergence.mjs` and supplemented by `node tooling/scripts/validate-labor-continuity-governance.mjs` for the UE labor surface.
 
 ## 6. Authority
 

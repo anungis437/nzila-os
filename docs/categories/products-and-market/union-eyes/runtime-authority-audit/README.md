@@ -40,9 +40,10 @@ strike-fund, employer-execution). E2E deny coverage extended in
 | 4 | Doctrine copy normalisation (sweep queue from doctrine doc) | Pending |
 | 5 | `full-live-runtime-traversal-audit.md` | Pending — requires live `pnpm dev` traversal |
 | 5 | `final-union-eyes-runtime-authority-review.md` | Pending — depends on all above |
+| 10 | `wave10-platform-ontology-stabilization-review.md` | Complete — canonical continuity architecture convergence review |
 
 ## Validator
 
-Run `pnpm validate:runtime-authority` to assert the Wave 1 docs exist and contain
+Run `node tooling/scripts/validate-runtime-authority-audit.mjs` to assert the Wave 1 docs exist and contain
 their mandatory sections. The validator returns a non-zero exit code if any
 required document or section is missing.

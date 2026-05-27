@@ -64,8 +64,8 @@ const CASE_STUDIES_COPY: Record<string, {
     jurisdiction: 'Jurisdiction',
     all: 'All',
     empty: 'No case studies match your filters. Try adjusting your selections.',
-    ctaBody: 'Your organization could be the next founding partner deployment.',
-    ctaButton: 'Join the Founding Partner Program',
+    ctaBody: 'Your organization could be the next guided rollout.',
+    ctaButton: 'Start a guided review',
   },
   'fr-CA': {
     loading: 'Chargement des etudes de cas...',
@@ -75,8 +75,8 @@ const CASE_STUDIES_COPY: Record<string, {
     jurisdiction: 'Juridiction',
     all: 'Toutes',
     empty: 'Aucune etude de cas ne correspond a vos filtres. Essayez dajuster vos selections.',
-    ctaBody: 'Votre organisation pourrait etre le prochain deploiement partenaire fondateur.',
-    ctaButton: 'Rejoindre le Programme partenaires fondateurs',
+    ctaBody: 'Votre organisation pourrait etre le prochain deploiement guide.',
+    ctaButton: 'Faire le bilan',
   },
   it: {
     loading: 'Caricamento dei casi studio...',

@@ -53,7 +53,7 @@ jobs:
             turbo-deploy-console-${{ runner.os }}-
 
       - name: Governance check
-        run: pnpm governance:check
+        run: pnpm exec tsx scripts/governance-check.ts
 
       - name: Sync change records from main
         run: |
@@ -65,7 +65,7 @@ jobs:
 
       - name: Run contract tests (fail closed)
         id: contract_tests
-        run: pnpm contract:test
+        run: pnpm contract-tests
 
       - name: SLO gate (fail closed)
         id: slo_gate

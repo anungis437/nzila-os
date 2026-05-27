@@ -1,11 +1,11 @@
 {
   "_schema": "1.0",
-  "collected_at": "2026-04-20T03:46:52.606Z",
+  "collected_at": "2026-05-25T18:08:32.081Z",
   "currency": "USD",
-  "period": "monthly",
-  "total_monthly_cost_usd": null,
-  "data_source": "template",
-  "unresolved_app_count": 17,
+  "period": "2026-05-01..2026-05-31",
+  "total_monthly_cost_usd": 843.98,
+  "data_source": "azure-cost-management-api",
+  "unresolved_app_count": 0,
   "errors": [],
   "apps": [
     {
@@ -28,14 +28,16 @@
       },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "in_scope_for_live_cost": false,
+      "scope_reason": "runtime-unverified",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "flow",
       "tier": "PRODUCTION",
       "domain": "commerce",
       "owner": "commerce",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -48,16 +50,18 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-flow",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "web",
       "tier": "PRODUCTION",
       "domain": "platform",
       "owner": "platform",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -70,9 +74,11 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
+      "azure_resource_group": "nzila-canada-staging-rg",
       "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "partners",
@@ -94,14 +100,16 @@
       },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "in_scope_for_live_cost": false,
+      "scope_reason": "runtime-unverified",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "cfo",
-      "tier": "PILOT",
+      "tier": "PRODUCTION",
       "domain": "finance",
       "owner": "finance",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -114,9 +122,11 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-cfo",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "console",
@@ -138,14 +148,16 @@
       },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "in_scope_for_live_cost": false,
+      "scope_reason": "runtime-unverified",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "control-plane",
       "tier": "PILOT",
       "domain": "platform",
       "owner": "platform",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -158,16 +170,18 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-control-plane",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "zonga",
       "tier": "INCUBATING",
       "domain": "media",
       "owner": "media",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -180,16 +194,18 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-zonga",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "abr",
       "tier": "INCUBATING",
       "domain": "audit",
       "owner": "platform",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -202,16 +218,18 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-abr",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "cora",
       "tier": "INCUBATING",
       "domain": "compliance",
       "owner": "platform",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -224,16 +242,18 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-cora",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "trade",
       "tier": "INCUBATING",
       "domain": "trade",
       "owner": "commerce",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -246,16 +266,18 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-trade",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "agrimo",
       "tier": "INCUBATING",
       "domain": "analytics",
       "owner": "platform",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -268,9 +290,11 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-agrimo",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "platform-admin",
@@ -292,13 +316,15 @@
       },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "in_scope_for_live_cost": false,
+      "scope_reason": "excluded:frozen",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
-      "app_id": "orchestrator-api",
-      "tier": "INCUBATING",
-      "domain": "platform",
-      "owner": "platform",
+      "app_id": "nzila-hq",
+      "tier": "EXPERIMENTAL",
+      "domain": "executive",
+      "owner": "founders",
       "monthly_cost_usd": null,
       "breakdown": {
         "compute_usd": null,
@@ -314,7 +340,33 @@
       },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "in_scope_for_live_cost": false,
+      "scope_reason": "excluded:not-deployed",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "orchestrator-api",
+      "tier": "INCUBATING",
+      "domain": "platform",
+      "owner": "platform",
+      "monthly_cost_usd": 32.91,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-orchestrator-api",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "nacp-exams",
@@ -336,14 +388,16 @@
       },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "in_scope_for_live_cost": false,
+      "scope_reason": "runtime-unverified",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "mobility",
       "tier": "EXPERIMENTAL",
       "domain": "mobility",
       "owner": "mobility",
-      "monthly_cost_usd": null,
+      "monthly_cost_usd": 32.91,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -356,9 +410,11 @@
         "estimated_energy_kwh": null,
         "estimated_carbon_kg_co2e": null
       },
-      "azure_resource_group": null,
-      "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "azure_resource_group": "nzila-canada-staging-rg",
+      "azure_container_app_name": "nzila-os-mobility",
+      "in_scope_for_live_cost": true,
+      "scope_reason": "deployment-inventory",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     },
     {
       "app_id": "mobility-client-portal",
@@ -380,7 +436,201 @@
       },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
+      "in_scope_for_live_cost": false,
+      "scope_reason": "excluded:frozen",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "veridian-admin",
+      "tier": "INCUBATING",
+      "domain": "health",
+      "owner": "health",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "in_scope_for_live_cost": false,
+      "scope_reason": "runtime-unverified",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "veridian-care",
+      "tier": "INCUBATING",
+      "domain": "health",
+      "owner": "health",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "in_scope_for_live_cost": false,
+      "scope_reason": "runtime-unverified",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "veridian-site",
+      "tier": "INCUBATING",
+      "domain": "health",
+      "owner": "health",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "in_scope_for_live_cost": false,
+      "scope_reason": "runtime-unverified",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "test-scaffold-gp",
+      "tier": "EXPERIMENTAL",
+      "domain": "testing",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "in_scope_for_live_cost": false,
+      "scope_reason": "excluded:deprecated",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "weekone",
+      "tier": "EXPERIMENTAL",
+      "domain": "testing",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "in_scope_for_live_cost": false,
+      "scope_reason": "excluded:frozen",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "maestria",
+      "tier": "EXPERIMENTAL",
+      "domain": "education",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "in_scope_for_live_cost": false,
+      "scope_reason": "excluded:not-deployed",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "trustcore",
+      "tier": "EXPERIMENTAL",
+      "domain": "trust",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "in_scope_for_live_cost": false,
+      "scope_reason": "excluded:not-deployed",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
+    },
+    {
+      "app_id": "trustcore-trustops",
+      "tier": "EXPERIMENTAL",
+      "domain": "trust",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "in_scope_for_live_cost": false,
+      "scope_reason": "excluded:not-deployed",
+      "note": "Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps"
     }
   ],
   "_instructions": [

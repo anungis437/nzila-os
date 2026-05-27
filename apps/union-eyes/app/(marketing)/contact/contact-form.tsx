@@ -187,8 +187,8 @@ export function ContactForm() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="general">General question</SelectItem>
-              <SelectItem value="demo">Continuity Reflection</SelectItem>
-              <SelectItem value="pilot">Founding Partner Program inquiry</SelectItem>
+              <SelectItem value="demo">Free Readiness Check</SelectItem>
+              <SelectItem value="pilot">Guided rollout inquiry</SelectItem>
               <SelectItem value="pricing">Pricing information</SelectItem>
               <SelectItem value="support">Technical support</SelectItem>
               <SelectItem value="partnership">Partnership opportunity</SelectItem>

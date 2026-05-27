@@ -53,7 +53,7 @@ jobs:
         run: pnpm test:fast
 
       - name: Governance check
-        run: pnpm governance:check
+        run: pnpm exec tsx scripts/governance-check.ts
 
       - name: Sync change records from main
         run: |
@@ -65,10 +65,10 @@ jobs:
 
       - name: Contract tests
         id: contract_tests
-        run: pnpm contract:test
+        run: pnpm contract-tests
 
       - name: Migration safety gate
-        run: pnpm release:migration:safety
+        run: pnpm exec tsx scripts/release/validate-migration-safety.ts
 
       - name: SLO gate
         id: slo_gate
@@ -187,12 +187,12 @@ jobs:
       - name: Ingest GitHub Actions CI evidence
         env:
           CI_CONCLUSION: ${{ job.status }}
-        run: pnpm proof:ingest:ci
+        run: pnpm exec tsx scripts/proof/ingest-github-actions.ts
 
       - name: Ingest Azure runtime evidence (live)
         env:
           AZ_LIVE_INGEST: 'true'
-        run: pnpm proof:ingest:azure
+        run: pnpm exec tsx scripts/proof/ingest-azure-runtime.ts
 
       - name: Record governance snapshot
         run: |

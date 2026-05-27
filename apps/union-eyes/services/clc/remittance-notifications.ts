@@ -38,7 +38,7 @@ import {
   organizationContacts 
 } from '@/db/schema';
 import { eq, and, lte, isNull } from 'drizzle-orm';
-import { getResendClient as getCanonicalResendClient, getFromEmail } from '@/lib/email-service';
+import { getFromEmail, sendResendEmail } from '@/lib/email-service';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -836,27 +836,25 @@ async function sendEmail(
   html: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
-    const client = getCanonicalResendClient();
-    if (!client) {
-      return { success: false, error: 'Resend not configured' };
-    }
-    const result = await client.emails.send({
+    const result = await sendResendEmail({
       from: FROM_EMAIL,
       to,
       subject,
       html
+    }, {
+      feature: 'clc_remittance_notifications',
     });
 
-    if (result.error) {
+    if (!result.success) {
       return {
         success: false,
-        error: result.error.message
+        error: result.error
       };
     }
 
     return {
       success: true,
-      messageId: result.data?.id
+      messageId: result.messageId
     };
   } catch (error) {
 return {

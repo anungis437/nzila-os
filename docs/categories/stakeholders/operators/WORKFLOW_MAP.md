@@ -52,7 +52,7 @@ All 41 GitHub Actions workflows classified by category, trigger, and canonical s
 
 ```
 Normal deploy:    merge to main → gitops-deploy.yml (automatic)
-Production:       pnpm release:tag → release-train.yml → deploy-production.yml
+Production:       pnpm exec tsx scripts/release/tag-release.ts → release-train.yml → deploy-production.yml
 Emergency staging: workflow_dispatch → deploy-staging.yml (EMERGENCY ack required)
 Single-app:       Use gitops-deploy.yml with --apps filter (NOT legacy per-app workflows)
 ```

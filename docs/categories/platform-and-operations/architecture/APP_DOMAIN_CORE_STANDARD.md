@@ -5,7 +5,7 @@
 > feels like one product family.
 >
 > Machine-readable: `apps/<app>/app-architecture.meta.json`
-> Compliance check: `pnpm app:domain-core:check`
+> Compliance check: `pnpm exec tsx scripts/app-domain-core-check.ts`
 
 ---
 
@@ -245,5 +245,5 @@ Apps are **not** required to move every file immediately. The migration approach
 ## Compliance
 
 - Machine-readable: `apps/<app>/app-architecture.meta.json`
-- Check: `pnpm app:domain-core:check`
+- Check: `pnpm exec tsx scripts/app-domain-core-check.ts`
 - See also: [ARCHITECTURE_GOVERNANCE_INDEX.md](ARCHITECTURE_GOVERNANCE_INDEX.md)

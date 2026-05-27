@@ -56,9 +56,9 @@ Ventures institutional rollout governance program.
 
 | Validator                  | Result    |
 | -------------------------- | --------- |
-| `pnpm rollout:validate`    | 12/12 OK  |
-| `pnpm field-ops:validate`  | 7/7 OK    |
-| `pnpm ops:prove`           | OK        |
+| `node tooling/scripts/validate-rollout-legitimacy.mjs`    | 12/12 OK  |
+| `node tooling/scripts/validate-field-operations-legitimacy.mjs`  | 7/7 OK    |
+| `node tooling/scripts/validate-operational-proving.mjs`           | OK        |
 | Control Plane typecheck    | clean     |
 | Console typecheck          | clean     |
 | Union Eyes typecheck       | clean     |

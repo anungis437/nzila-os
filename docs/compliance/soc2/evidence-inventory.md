@@ -17,8 +17,8 @@
 | Lifecycle CI test (audit → seal → verify) | `apps/union-eyes/lib/__tests__/evidence-export.lifecycle.test.ts` | CC7.3 | Every PR |
 | FSM transition tests | `apps/union-eyes/lib/workflow/__tests__/case-lifecycle.test.ts` | CC5.1, CC8.1 | Every PR |
 | Django observability parity tests | `apps/union-eyes/backend/observability/tests/test_correlation_parity.py` | CC7.2 | Every PR |
-| Governance audit | `pnpm governance:audit` | CC4.1 | Every PR |
-| Docs validation | `pnpm validate:docs` | CC2.1, CC4.1 | Every PR |
+| Governance audit | `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts` | CC4.1 | Every PR |
+| Docs validation | `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts` | CC2.1, CC4.1 | Every PR |
 
 ## B. CI / CD evidence (GitHub Actions)
 
@@ -61,7 +61,7 @@ available via the Microsoft Service Trust Portal.
 
 ## How to refresh this inventory
 
-1. After each major release, run `pnpm governance:audit` and link the report.
+1. After each major release, run `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts` and link the report.
 2. Re-export branch protection rules to `governance/branch-protection.json`.
 3. Pull Azure backup attestations and store under `governance/inherited/`.
 4. Update [`gap-log.md`](./gap-log.md) with any closed or newly-discovered gaps.

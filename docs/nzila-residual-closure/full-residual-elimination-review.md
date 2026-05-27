@@ -29,7 +29,7 @@ This PR ships **real**, not symbolic, action:
 1. **R5 — fixed in code** — `apps/union-eyes/proxy.ts` locale alias normalization block: `_localeAliasMap = { en: 'en-CA', fr: 'fr-CA' }`, single-hop 308, anchored regex. Verified no errors. Post-deploy probe is part of the standard staging/demo/pilot validation cadence.
 2. **R9 — audit completed in code** — 40+ call-sites enumerated under `apps/union-eyes/**/*.{ts,tsx}`; structural offender named with line number; categories of acceptable patterns bounded.
 3. **R1/R2/R3/R4/R6/R7/R8 — runbooks shipped** — every deferred residual has a fully specified procedure with acceptance criteria, anti-pattern enumeration, cadence, reviewer-of-record contract.
-4. **Validator** — `tooling/scripts/validate-residual-closure.mjs` registered as `pnpm validate:residual-closure`.
+4. **Validator** — `tooling/scripts/validate-residual-closure.mjs` registered as `node tooling/scripts/validate-residual-closure.mjs`.
 
 ## 3. Final Tier 2 verdict
 

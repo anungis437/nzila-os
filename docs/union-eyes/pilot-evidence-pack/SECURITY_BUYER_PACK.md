@@ -41,7 +41,7 @@ export async function withRLSContext<T>(
 }
 ```
 
-**CI guard:** `pnpm governance:check-db-imports` — 0 violations (ALLOWLIST = `[]`)
+**CI guard:** `pnpm exec tsx scripts/check-ue-db-import-guard.ts` — 0 violations (ALLOWLIST = `[]`)
 
 **PostgreSQL RLS:** 238 row-level security policies enforce org boundary at the database level. Even if application-layer isolation were bypassed, the DB would block cross-org reads.
 
@@ -135,7 +135,7 @@ Now:
 | No training on customer data | AI boundary enforced by eslint gates + contract test |
 | No shadow AI/ML | `platform-ai-contract-coverage` CI gate |
 | ML models | Deployed in `os-core` control plane; Union Eyes calls via SDK only |
-| No direct DB access from AI layer | eslint import boundary + governance:check-db-imports guard |
+| No direct DB access from AI layer | eslint import boundary + check-ue-db-import-guard guard |
 
 ---
 

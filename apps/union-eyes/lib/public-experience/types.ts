@@ -1,7 +1,7 @@
 /**
  * Public experience type primitives.
  *
- * These types govern how Union Eyes surfaces can be classified for
+ * These types govern how UnionEyes surfaces can be classified for
  * audience, visibility, governance level, and lifecycle status.
  * They feed the public-experience registry and are enforced at the
  * route-policy layer before any content is published or promoted.

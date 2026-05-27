@@ -2,18 +2,18 @@
 
 ## SRE Practices
 
-- **Health contracts**: Every app exposes standardized health endpoints, validated by `pnpm sre:health:contract` and documented in `docs/ops/HEALTH_CHECK_STANDARD.md`
+- **Health contracts**: Every app exposes standardized health endpoints, validated by `pnpm exec tsx scripts/sre/validate-health-contract.ts` and documented in `docs/ops/HEALTH_CHECK_STANDARD.md`
 - **SLO policy**: Defined in `ops/slo-policy.yml`, enforced by contract tests
-- **Alert routing**: Dry-run validated via `pnpm sre:alerts:dry-run`
-- **Synthetic monitoring**: Dry-run validated via `pnpm sre:synthetic:dry-run`
-- **Executive dashboard**: Generated via `pnpm sre:dashboard`
+- **Alert routing**: Dry-run validated via `pnpm exec tsx scripts/sre/alert-routing-dry-run.ts`
+- **Synthetic monitoring**: Dry-run validated via `pnpm exec tsx scripts/sre/synthetic-dry-run.ts`
+- **Executive dashboard**: Generated via `pnpm exec tsx scripts/sre/generate-executive-dashboard.ts`
 
 ## Deployment Safety
 
 - **Staging → Production promotion**: Governed release gates at every step
-- **Rollback**: One-command production rollback (`pnpm release:rollback`)
-- **Hotfix SLA**: Tracked and enforced (`pnpm release:hotfix:sla`)
-- **Migration safety**: Pre-deploy validation (`pnpm release:migration:safety`)
+- **Rollback**: One-command production rollback (`pnpm exec tsx scripts/release/rollback-prod.ts`)
+- **Hotfix SLA**: Tracked and enforced (`pnpm exec tsx scripts/release/hotfix-sla.ts`)
+- **Migration safety**: Pre-deploy validation (`pnpm exec tsx scripts/release/validate-migration-safety.ts`)
 - **Smoke tests**: Automated post-deploy validation
 - **Canary deployments**: Progressive rollout with auto-rollback (`canary-deploy.yml`)
 
@@ -22,7 +22,7 @@
 - **DR playbooks**: `docs/ops/disaster-recovery.md`, `docs/platform/DISASTER_RECOVERY_PLAYBOOK_*.md`
 - **Business continuity**: `ops/business-continuity/`
 - **Staging recovery**: Dashboard and runbook available
-- **Database backups**: Verified via `pnpm verify:backup`
+- **Database backups**: Verified via `pnpm exec tsx scripts/backup-verify.ts`
 
 ## Observability
 

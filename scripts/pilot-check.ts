@@ -9,7 +9,7 @@
  *   5. Generate local release attestation
  *
  * Usage:
- *   pnpm pilot:check
+ *   pnpm exec tsx scripts/pilot-check.ts
  *   npx tsx scripts/pilot-check.ts
  *
  * Exit codes:
@@ -78,7 +78,7 @@ async function main() {
 
   // Step 3: Contract tests
   console.log('📜 Step 3/5: Contract Tests')
-  results.push(runStep('contract:test', 'pnpm contract:test'))
+  results.push(runStep('contract-tests', 'pnpm contract-tests'))
 
   // Step 4: SLO gate (pilot) — dry run
   console.log('📊 Step 4/5: SLO Gate (pilot)')
@@ -93,7 +93,7 @@ async function main() {
   // Step 5: Generate local attestation
   console.log('🔏 Step 5/5: Local Attestation')
   const sha = getCommitSha()
-  const contractPassed = results.find((r) => r.name === 'contract:test')?.status === 'pass'
+  const contractPassed = results.find((r) => r.name === 'contract-tests')?.status === 'pass'
   const sloPassed = results.find((r) => r.name === 'slo-gate')?.status !== 'fail'
 
   const attestation = {

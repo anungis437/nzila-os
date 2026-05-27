@@ -53,13 +53,13 @@ function main(): void {
   }
 
   if (errors.length > 0) {
-    console.log('\n[validate:capital-discipline] FAIL')
+    console.log('\n[validate-capital-discipline] FAIL')
     for (const error of errors) console.log(` - ${error}`)
     for (const warning of warnings) console.log(` ! ${warning}`)
     process.exit(1)
   }
 
-  console.log('\n[validate:capital-discipline] PASS')
+  console.log('\n[validate-capital-discipline] PASS')
   console.log(`Validated capital discipline across ${scores.length} products.`)
   for (const warning of warnings) console.log(` ! ${warning}`)
 }

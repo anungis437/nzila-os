@@ -3,7 +3,7 @@
  * in platform/registry/apps.json with a lifecycle tier, and that
  * PRODUCTION/PILOT apps meet required capability thresholds.
  *
- * Usage: pnpm app:lifecycle:check
+ * Usage: pnpm exec tsx scripts/app-lifecycle-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

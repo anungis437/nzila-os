@@ -5,9 +5,9 @@
  * failed promotions, and hotfix frequency.
  *
  * Usage:
- *   pnpm release:dashboard
- *   pnpm release:dashboard --output json          # machine-readable
- *   pnpm release:dashboard --output markdown      # docs/ops/release-status.md
+ *   pnpm exec tsx scripts/release/portfolio-dashboard.ts
+ *   pnpm exec tsx scripts/release/portfolio-dashboard.ts --output json          # machine-readable
+ *   pnpm exec tsx scripts/release/portfolio-dashboard.ts --output markdown      # docs/ops/release-status.md
  *
  * Data sources:
  *   ops/releases/             — release manifests (one per tag)
@@ -348,15 +348,15 @@ function renderMarkdown(entries: AppDashboardEntry[]): string {
     '',
     '## Rollback Procedure',
     '```bash',
-    'pnpm release:rollback --list',
-    'pnpm release:rollback --tag v1.2.0 --dry-run',
-    'pnpm release:rollback --tag v1.2.0 --execute',
+    'pnpm exec tsx scripts/release/rollback-prod.ts --list',
+    'pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.2.0 --dry-run',
+    'pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.2.0 --execute',
     '```',
     '',
     '## Tag a New Release',
     '```bash',
-    'pnpm release:tag --bump patch',
-    'pnpm release:tag --bump minor',
+    'pnpm exec tsx scripts/release/tag-release.ts --bump patch',
+    'pnpm exec tsx scripts/release/tag-release.ts --bump minor',
     '```',
   ].join('\n')
 }

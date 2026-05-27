@@ -50,23 +50,26 @@ describe('Question Architecture Audit™ — confidence generation coverage', ()
       expect(n).toBeGreaterThanOrEqual(5);
     });
 
-    // Finding C-3: `trust_debt` has no likert_5 input in v1.1.0. Roadmap R-C3
-    // closes this in v1.2.0 — until then, keep the assertion as a tracked
-    // `.todo` for that single dimension so the build signal remains green.
-    if (dim === 'trust_debt') {
-      it.todo(`dimension ${dim} has >= 1 confidence-sensitive (likert_5) input (Roadmap R-C3)`);
-    } else {
-      it(`dimension ${dim} has >= 1 confidence-sensitive (likert_5) input`, () => {
-        const n = ALL_QUESTIONS.filter((q) => {
-          if (q.type !== 'likert_5') return false;
-          const w = dimensionWeights(q)[dim];
-          return typeof w === 'number' && w > 0;
-        }).length;
-        expect(n).toBeGreaterThanOrEqual(1);
-      });
-    }
+    it(`dimension ${dim} has >= 1 confidence-sensitive (likert_5) input`, () => {
+      const n = ALL_QUESTIONS.filter((q) => {
+        if (q.type !== 'likert_5') return false;
+        const w = dimensionWeights(q)[dim];
+        return typeof w === 'number' && w > 0;
+      }).length;
+      expect(n).toBeGreaterThanOrEqual(1);
+    });
   }
 
-  // v1.2.0 — once R-C3 ships:
-  it.todo('dimension trust_debt reaches modality-diversity = 3 (maturity + likert + multiple_choice)');
+  it('dimension trust_debt reaches modality-diversity = 3 (maturity + likert + multiple_choice)', () => {
+    const modalities = new Set(
+      ALL_QUESTIONS.filter((q) => {
+        const w = dimensionWeights(q).trust_debt;
+        return typeof w === 'number' && w > 0;
+      }).map((q) => q.type),
+    );
+    expect(modalities.has('maturity_select')).toBe(true);
+    expect(modalities.has('likert_5')).toBe(true);
+    expect(modalities.has('multiple_choice')).toBe(true);
+    expect(modalities.size).toBeGreaterThanOrEqual(3);
+  });
 });

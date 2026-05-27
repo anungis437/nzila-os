@@ -17,4 +17,4 @@ This index tracks all generated proof artifacts for the Nzila OS portfolio.
 
 Portfolio proof flows from `nzila-truth-manifest.json` → generated reports → this index.
 
-All portfolio artifacts are regenerated via `pnpm generate:portfolio-artifacts`.
+All portfolio artifacts are regenerated via `pnpm exec tsx scripts/generate-portfolio-artifacts.ts`.

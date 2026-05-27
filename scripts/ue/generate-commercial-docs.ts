@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * ue:docs:generate — Generate buyer-facing commercial documents for Union Eyes.
+ * generate-commercial-docs.ts — Generate buyer-facing commercial documents for Union Eyes.
  *
  * Reads source-of-truth from:
  *   - apps/union-eyes/maturity.json
@@ -11,9 +11,9 @@
  *   artifacts/commercial/
  *
  * Usage:
- *   pnpm ue:docs:generate
- *   pnpm ue:docs:generate --preview      (print to stdout, no write)
- *   pnpm ue:docs:generate --doc=procurement-pack
+ *   pnpm exec tsx scripts/ue/generate-commercial-docs.ts
+ *   pnpm exec tsx scripts/ue/generate-commercial-docs.ts --preview      (print to stdout, no write)
+ *   pnpm exec tsx scripts/ue/generate-commercial-docs.ts --doc=procurement-pack
  *
  * Exit codes:
  *   0 = success

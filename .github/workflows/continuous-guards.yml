@@ -41,27 +41,27 @@ jobs:
 
       # ── Drift Detection ── [ADVISORY] ───────────────────────
       - name: Version drift
-        run: pnpm drift:version:staging || echo "::warning::Version drift detected"
+        run: pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr || echo "::warning::Version drift detected"
 
       - name: Env drift
-        run: pnpm drift:env:staging || echo "::warning::Env drift detected"
+        run: pnpm exec tsx scripts/release/drift-env.ts --env staging || echo "::warning::Env drift detected"
 
       # ── Environment Truth Crosscheck ── [ADVISORY] ──────────
       - name: Environment truth (structural)
-        run: pnpm release:env-truth || echo "::warning::Environment truth check failed"
+        run: pnpm exec tsx scripts/release/env-truth.ts || echo "::warning::Environment truth check failed"
 
       # ── Runtime Proof Generation ── [BLOCKING] ──────────────
       - name: Ingest GitHub Actions CI evidence
         env:
           CI_CONCLUSION: ${{ job.status }}
-        run: pnpm proof:ingest:ci
+        run: pnpm exec tsx scripts/proof/ingest-github-actions.ts
 
       - name: Generate runtime proof
-        run: pnpm proof:runtime
+        run: pnpm exec tsx scripts/proof/run-proof.tstime
 
       # ── DB Health ── [ADVISORY] ─────────────────────────────
       - name: DB doctor
-        run: pnpm db:doctor || echo "::warning::DB doctor reported issues"
+        run: pnpm exec tsx scripts/db/doctor.ts || echo "::warning::DB doctor reported issues"
 
       # ── Migration Safety ── [ADVISORY] ──────────────────────
       - name: Migration safety
@@ -74,7 +74,7 @@ jobs:
           if [ -d "proof-artifacts/evidence-packs/$MONTH" ]; then
             echo "✓ Evidence pack exists for $MONTH"
           else
-            echo "::warning::No evidence pack for $MONTH — run: pnpm evidence:pack:monthly"
+            echo "::warning::No evidence pack for $MONTH — run: pnpm exec tsx scripts/proof/build-monthly-evidence-pack.ts"
           fi
 
       # ── Job Summary ─────────────────────────────────────────

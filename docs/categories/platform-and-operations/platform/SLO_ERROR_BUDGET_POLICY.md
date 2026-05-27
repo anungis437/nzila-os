@@ -150,12 +150,12 @@ When the error budget for a production-tier app is exhausted (100% burned):
 |---|---|
 | Weekly | Review burn rate dashboards; triage Sev 3 tickets |
 | Monthly | Review 30-day budget consumption per app; adjust capacity if needed |
-| Quarterly | Review SLO targets during strategic scorecard (`pnpm strategic:quarterly`) |
+| Quarterly | Review SLO targets during strategic scorecard (`node tooling/scripts/generate-quarterly-strategic-scorecard.mjs`) |
 | Post-incident | Review affected app SLO after every Sev 1/2 incident |
 
 ## Runtime Enforcement
 
-- CI enforcement: `pnpm collect:dora:enforce` blocks when thresholds fail.
+- CI enforcement: `node tooling/scripts/collect-dora-metrics.mjs -- --enforce` blocks when thresholds fail.
 - Deployment guardrails: production/pilot releases must pass SLO gate + predictive trend check.
 - Threshold tuning authority: platform governance with domain lead sign-off.
 

@@ -12,10 +12,10 @@ common procurement questions across 8 domains with evidence references.
 
 ```bash
 # Default: writes to docs/rfp/answers.md
-pnpm rfp:generate
+pnpm exec tsx scripts/rfp-generate.ts --out docs/rfp/answers.md
 
 # Custom output path
-pnpm rfp:generate -- --out path/to/output.md
+pnpm exec tsx scripts/rfp-generate.ts --out path/to/output.md
 ```
 
 ## Output

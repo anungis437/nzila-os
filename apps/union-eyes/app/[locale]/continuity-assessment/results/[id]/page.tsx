@@ -26,8 +26,8 @@ interface PageProps {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Empty boardroom — institutional, deliberate, not marketing-y. Reused from
-// the institutional-continuity-risk landing so the visual language is coherent
+// Empty boardroom — organizational, deliberate, not marketing-y. Reused from
+// the organizational-continuity-risk landing so the visual language is coherent
 // from intake → assessment → results.
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1497366216548-37526070297c?w=2400&q=80&auto=format';
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 const COPY = {
   'en-CA': {
     overline: 'Institutional Continuity Profile',
-    headline: 'Your Continuity Reflection',
+    headline: 'Your Free Readiness Check',
     subhead:
       'A calm, explainable read of your institution\u2019s continuity posture. Every number traces to a question, a weight, and a published doctrine.',
     generated: 'Issued',
@@ -73,7 +73,7 @@ const COPY = {
 
 const TIER_LABEL: Record<string, { 'en-CA': string; 'fr-CA': string }> = {
   executive_continuity_brief: {
-    'en-CA': 'Executive Continuity Brief',
+    'en-CA': 'Leadership Briefing Report',
     'fr-CA': 'Note exécutive de continuité',
   },
   institutional_continuity_diagnostic: {

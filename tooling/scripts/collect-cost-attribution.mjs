@@ -24,6 +24,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '../..');
 const REGISTRY = resolve(ROOT, 'platform/registry/apps.json');
+const DEPLOYMENT_INVENTORY = resolve(ROOT, 'governance/release/deployment-inventory.json');
 const OUTPUT = resolve(
   ROOT,
   process.env.COST_OUTPUT_PATH ?? 'ops/outputs/cost-allocation.json',
@@ -60,6 +61,21 @@ function parseJsonFile() {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to parse JSON file ${REGISTRY}: ${message}`);
+  }
+}
+
+function parseJsonFileOptional(path) {
+  if (!isWithinRoot(path)) {
+    throw new Error(`Refusing to read untrusted path outside repository root: ${path}`);
+  }
+  if (!existsSync(path)) {
+    return null;
+  }
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse JSON file ${path}: ${message}`);
   }
 }
 
@@ -138,6 +154,54 @@ function queryAzureCostByResourceGroup(subscriptionId) {
 
 const registry = parseJsonFile();
 const apps = Array.isArray(registry) ? registry : registry.apps ?? [];
+const deploymentInventory = parseJsonFileOptional(DEPLOYMENT_INVENTORY);
+
+const deploymentApps = deploymentInventory?.apps ?? {};
+const sharedResourceGroup =
+  deploymentInventory?.topology?.staging?.resourceGroup ??
+  deploymentInventory?.topology?.production?.resourceGroup ??
+  null;
+
+const OUT_OF_SCOPE_RELEASE_STATUSES = new Set(['not-deployed', 'deprecated', 'frozen']);
+
+function resolveDeploymentMetadata(appName) {
+  const meta = deploymentApps?.[appName] ?? null;
+  if (!meta) {
+    return {
+      inScopeForLiveCost: true,
+      scopeReason: 'registry-only',
+      inferredResourceGroup: null,
+      inferredContainerAppName: null,
+    };
+  }
+
+  const releaseStatus = String(meta.releaseStatus ?? '').toLowerCase();
+  const outOfScope =
+    meta.outOfScopeForRuntimeChecks === true || OUT_OF_SCOPE_RELEASE_STATUSES.has(releaseStatus);
+  if (outOfScope) {
+    return {
+      inScopeForLiveCost: false,
+      scopeReason: `excluded:${releaseStatus || 'out-of-scope'}`,
+      inferredResourceGroup: null,
+      inferredContainerAppName: meta.containerAppName ?? null,
+    };
+  }
+
+  const hasRuntimeSignal =
+    meta.stagingDeployed === true ||
+    typeof meta.containerAppName === 'string' ||
+    typeof meta.routing?.stagingFallback === 'string';
+
+  const inferredResourceGroup = hasRuntimeSignal ? sharedResourceGroup : null;
+  const scopeReason = hasRuntimeSignal ? 'deployment-inventory' : 'runtime-unverified';
+
+  return {
+    inScopeForLiveCost: hasRuntimeSignal,
+    scopeReason,
+    inferredResourceGroup,
+    inferredContainerAppName: meta.containerAppName ?? null,
+  };
+}
 
 let apiCostData = null;
 let dataSource = 'template';
@@ -156,36 +220,74 @@ if (ENABLE_AZURE_API) {
   }
 }
 
-const costEntries = apps.map((app) => ({
-  app_id: app.id ?? app.name,
-  tier: app.tier ?? 'STANDARD',
-  domain: app.domain ?? null,
-  owner: app.owner ?? null,
-  monthly_cost_usd:
-    apiCostData && app.azure_resource_group
-      ? (apiCostData.byResourceGroup.get(app.azure_resource_group) ?? null)
-      : null,
-  breakdown: {
-    compute_usd: null,
-    database_usd: null,
-    storage_usd: null,
-    networking_usd: null,
-    ai_inference_usd: null,
-    other_usd: null,
-  },
-  sustainability: {
-    estimated_energy_kwh: null,
-    estimated_carbon_kg_co2e: null,
-  },
-  azure_resource_group: app.azure_resource_group ?? null,
-  azure_container_app_name: null,
-  note:
-    dataSource === 'azure-cost-management-api'
-      ? 'Populated from Azure Cost Management API where app.azure_resource_group is defined'
-      : 'Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate',
-}));
+const mappedApps = apps.map((app) => {
+  const appName = app.id ?? app.name;
+  const deploymentMeta = resolveDeploymentMetadata(appName);
+  const azureResourceGroup = app.azure_resource_group ?? deploymentMeta.inferredResourceGroup;
+  const azureContainerAppName = app.azure_container_app_name ?? deploymentMeta.inferredContainerAppName;
 
-const unresolvedAppCount = costEntries.filter((entry) => entry.monthly_cost_usd === null).length;
+  return {
+    app,
+    appName,
+    inScopeForLiveCost: deploymentMeta.inScopeForLiveCost,
+    scopeReason: deploymentMeta.scopeReason,
+    azureResourceGroup,
+    azureContainerAppName,
+  };
+});
+
+const resourceGroupAppCounts = new Map();
+for (const mapped of mappedApps) {
+  if (!mapped.inScopeForLiveCost || !mapped.azureResourceGroup) continue;
+  const current = resourceGroupAppCounts.get(mapped.azureResourceGroup) ?? 0;
+  resourceGroupAppCounts.set(mapped.azureResourceGroup, current + 1);
+}
+
+const costEntries = mappedApps.map((mapped) => {
+  const groupCost =
+    apiCostData && mapped.azureResourceGroup
+      ? (apiCostData.byResourceGroup.get(mapped.azureResourceGroup) ?? null)
+      : null;
+  const appCountForGroup = mapped.azureResourceGroup
+    ? (resourceGroupAppCounts.get(mapped.azureResourceGroup) ?? 1)
+    : 1;
+  const monthlyCostUsd =
+    groupCost === null || !mapped.inScopeForLiveCost
+      ? null
+      : Number((groupCost / Math.max(1, appCountForGroup)).toFixed(2));
+
+  return {
+    app_id: mapped.appName,
+    tier: mapped.app.tier ?? 'STANDARD',
+    domain: mapped.app.domain ?? null,
+    owner: mapped.app.owner ?? null,
+    monthly_cost_usd: monthlyCostUsd,
+    breakdown: {
+      compute_usd: null,
+      database_usd: null,
+      storage_usd: null,
+      networking_usd: null,
+      ai_inference_usd: null,
+      other_usd: null,
+    },
+    sustainability: {
+      estimated_energy_kwh: null,
+      estimated_carbon_kg_co2e: null,
+    },
+    azure_resource_group: mapped.azureResourceGroup ?? null,
+    azure_container_app_name: mapped.azureContainerAppName ?? null,
+    in_scope_for_live_cost: mapped.inScopeForLiveCost,
+    scope_reason: mapped.scopeReason,
+    note:
+      dataSource === 'azure-cost-management-api'
+        ? 'Populated from Azure Cost Management API; shared RG cost is apportioned across mapped in-scope apps'
+        : 'Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate',
+  };
+});
+
+const unresolvedAppCount = costEntries.filter(
+  (entry) => entry.in_scope_for_live_cost && entry.monthly_cost_usd === null,
+).length;
 
 const output = {
   _schema: '1.0',

@@ -35,10 +35,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check internal links
-        run: pnpm link-check
+        run: pnpm exec tsx scripts/link-check.ts
 
       - name: Validate READMEs
-        run: pnpm validate:readmes
+        run: pnpm exec tsx scripts/validate-readmes.ts
 
       - name: Build docs index (stale detection)
-        run: pnpm docs:index
+        run: pnpm exec tsx scripts/docs/build-docs-index.ts

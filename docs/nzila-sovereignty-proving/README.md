@@ -23,7 +23,7 @@ The proving cadence is governance-safe, continuity-safe, anti-surveillance, evid
 
 ## Validator
 
-Run: `pnpm validate:sovereignty-proving`
+Run: `node tooling/scripts/validate-sovereignty-proving.mjs`
 
 Backed by [`tooling/scripts/validate-sovereignty-proving.mjs`](../../tooling/scripts/validate-sovereignty-proving.mjs).
 

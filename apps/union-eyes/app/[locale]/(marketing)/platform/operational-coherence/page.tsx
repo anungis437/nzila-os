@@ -26,9 +26,18 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
+  const copy = locale === 'fr-CA'
+    ? {
+        title: 'Redirection | Plateforme UnionEyes',
+        description: 'Cette page redirige vers la section canonique de la plateforme.',
+      }
+    : {
+        title: 'Redirecting | UnionEyes Platform',
+        description: 'This route redirects to the canonical platform section.',
+      };
   return {
-    title: 'Redirecting | UnionEyes Platform',
-    description: 'This route redirects to the canonical platform section.',
+    title: copy.title,
+    description: copy.description,
     robots: {
       index: false,
       follow: false,

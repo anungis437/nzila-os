@@ -67,7 +67,7 @@ Available under NDA for procurement review.
 | Geo-redundant storage (RA-GRS) | ✅ Implemented |
 | IaC for environment rebuild | ✅ `infrastructure/bicep/` |
 | DR runbooks | ✅ 5 runbooks published |
-| Reproducible drill procedure | ✅ `pnpm db:restore-drill` |
+| Reproducible drill procedure | ✅ `pnpm exec tsx scripts/db/restore-drill.ts` |
 | Quarterly drill cadence | ✅ Automated |
 | Credential rotation procedure | ✅ `docs/union-eyes/dr/continuity-matrix.md` |
 | Live RTO measurement | ⏳ {{BACKUP_TARGET}} |

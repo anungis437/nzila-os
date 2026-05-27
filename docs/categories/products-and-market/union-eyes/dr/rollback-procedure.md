@@ -12,7 +12,7 @@
 
 Union Eyes deployments are container-based on Azure Container Apps. All container
 images are signed and recorded in `ops/artifacts/` via the CI pipeline. The
-rollback script at `scripts/rollback.ts` (invoked via `pnpm release:rollback`)
+rollback script at `scripts/release/rollback-prod.ts` (invoked via `pnpm exec tsx scripts/release/rollback-prod.ts`)
 validates that the target artifact exists before writing a rollback record.
 
 ---
@@ -39,7 +39,7 @@ validates that the target artifact exists before writing a rollback record.
 
 ```bash
 # List available rollback targets
-pnpm release:rollback:list
+pnpm exec tsx scripts/release/rollback-prod.ts --list
 
 # Example output:
 # Available artifacts in ops/artifacts/:
@@ -53,7 +53,7 @@ pnpm release:rollback:list
 
 ```bash
 # Write rollback record (audit trail) and print the az command
-pnpm release:rollback -- <artifact_digest>
+pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.1.0 --execute
 
 # Output will include the exact az command to run:
 # az containerapp update --name nzila-union-eyes --image <acr>/<repo>@sha256:abc123

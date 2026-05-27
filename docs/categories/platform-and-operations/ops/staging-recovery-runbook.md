@@ -11,19 +11,19 @@ Make staging a truthful pre-production signal where green means ready for produc
 1. Build governance and smoke artifacts.
 
 ```bash
-pnpm release:staging
+pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/validate-migration-safety.ts && pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
 ```
 
 2. Generate recovery dashboard from latest smoke output.
 
 ```bash
-pnpm sre:staging:recovery
+pnpm exec tsx scripts/sre/generate-staging-recovery-dashboard.ts
 ```
 
 3. Rebuild SRE validation bundle.
 
 ```bash
-pnpm sre:validate
+pnpm exec tsx scripts/sre/validate-health-contract.ts && pnpm exec tsx scripts/sre/synthetic-dry-run.ts && pnpm exec tsx scripts/sre/alert-routing-dry-run.ts && pnpm exec tsx scripts/sre/audit-reliability.ts && pnpm exec tsx scripts/sre/generate-executive-dashboard.ts
 ```
 
 ## Triad Contract

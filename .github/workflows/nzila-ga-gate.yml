@@ -43,7 +43,10 @@ jobs:
         run: pnpm validate:runtime-truth
 
       - name: Run GA check
-        run: pnpm ga-check
+        run: pnpm exec tsx tooling/ga-check/ga-check.ts
 
       - name: Generate SBOM
-        run: pnpm generate:sbom
+        run: pnpm exec tsx scripts/generate-sbom.ts
+
+      - name: Validate Tier 3 operating infrastructure
+        run: node tooling/scripts/validate-tier3-operating-infrastructure.mjs

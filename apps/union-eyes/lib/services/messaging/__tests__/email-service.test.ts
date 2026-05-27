@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mockResendSend = vi.hoisted(() => vi.fn());
+const mockSendResendEmail = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
 vi.mock('@/lib/email-service', () => ({
-  getResendClient: () => ({ emails: { send: mockResendSend } }),
+  sendResendEmail: mockSendResendEmail,
   getFromEmail: (label?: string) => label ? `${label} <noreply@unioneyes.app>` : 'noreply@unioneyes.app',
 }));
 
@@ -131,7 +131,7 @@ describe('ResendAdapter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     adapter = new ResendAdapter(undefined, 'from@test.com');
-    mockResendSend.mockResolvedValue({ data: { id: 'resend-msg-1' }, error: null });
+    mockSendResendEmail.mockResolvedValue({ success: true, messageId: 'resend-msg-1' });
   });
 
   it('has name "resend"', () => {
@@ -146,7 +146,7 @@ describe('ResendAdapter', () => {
   });
 
   it('returns error on SDK error', async () => {
-    mockResendSend.mockResolvedValue({ data: null, error: { message: 'Invalid recipient' } });
+    mockSendResendEmail.mockResolvedValue({ success: false, error: 'Invalid recipient' });
 
     const result = await adapter.send(testMessage);
     expect(result.success).toBe(false);
@@ -154,7 +154,7 @@ describe('ResendAdapter', () => {
   });
 
   it('handles send exceptions', async () => {
-    mockResendSend.mockRejectedValue(new Error('Network error'));
+    mockSendResendEmail.mockRejectedValue(new Error('Network error'));
 
     const result = await adapter.send(testMessage);
     expect(result.success).toBe(false);

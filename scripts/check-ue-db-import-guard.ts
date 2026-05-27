@@ -9,7 +9,7 @@
  * Exit 1 — violations found (CI-blocking)
  *
  * Usage:
- *   pnpm governance:check-db-imports
+ *   pnpm exec tsx scripts/check-ue-db-import-guard.ts
  *   tsx scripts/check-ue-db-import-guard.ts
  */
 
@@ -112,11 +112,11 @@ function main() {
   }
 
   if (allViolations.length === 0) {
-    console.log('✅ governance:check-db-imports — clean (0 violations)');
+    console.log('✅ check-ue-db-import-guard — clean (0 violations)');
     process.exit(0);
   }
 
-  console.error(`\n❌ governance:check-db-imports — ${allViolations.length} violation(s) found\n`);
+  console.error(`\n❌ check-ue-db-import-guard — ${allViolations.length} violation(s) found\n`);
   console.error('Direct raw DB imports are not permitted in Union Eyes case/claim modules.');
   console.error('Use withRLSContext() or an approved scoped DB wrapper instead.\n');
 

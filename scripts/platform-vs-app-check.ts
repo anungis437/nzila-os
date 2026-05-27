@@ -2,7 +2,7 @@
  * Platform vs App Decision Check — validates that new packages and platform
  * services are properly registered, documented, and classified.
  *
- * Usage: pnpm platform:vs-app:check
+ * Usage: pnpm exec tsx scripts/platform-vs-app-check.ts
  *
  * Checks:
  * 1. Every package in packages/ has a package.meta.json

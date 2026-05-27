@@ -1,6 +1,6 @@
 {
   "_schema": "1.0",
-  "collected_at": "2026-04-17T01:23:11.458Z",
+  "collected_at": "2026-05-25T18:13:14.264Z",
   "window_days": 30,
   "source": {
     "requested_branch": "main",
@@ -9,15 +9,15 @@
   },
   "metrics": {
     "deployment_frequency": {
-      "value": 10.47,
+      "value": 9.3,
       "unit": "deploys_per_week",
-      "raw_count_30d": 45,
+      "raw_count_30d": 40,
       "tier": "elite"
     },
     "lead_time_for_change": {
-      "value": 1349.3,
+      "value": 116.6,
       "unit": "hours",
-      "tier": "low"
+      "tier": "high"
     },
     "change_failure_rate": {
       "value": 0,
@@ -26,30 +26,36 @@
       "tier": "elite"
     },
     "mttr": {
-      "value": null,
+      "value": 0,
       "unit": "hours",
-      "tier": "unknown",
-      "note": "Requires incident tracker integration (e.g. PagerDuty API)"
+      "tier": "elite",
+      "source": "ops/compliance/mttr-dashboard.json",
+      "note": "Fallback source: vulnerability remediation MTTR dashboard (not runtime incident tracker feed)."
+    },
+    "incidents_last_30d": {
+      "value": 0,
+      "unit": "count",
+      "source": "ops/compliance/mttr-dashboard.json"
     },
     "predictive_signal": {
-      "value": "normal",
+      "value": "elevated",
       "unit": "state",
-      "slope_per_week": 0.87,
-      "trailing_4_week_average": 7.75,
-      "projected_next_week_deploys": 21.87,
+      "slope_per_week": -0.51,
+      "trailing_4_week_average": 9.75,
+      "projected_next_week_deploys": 0,
       "weekly_deploy_series": [
-        0,
-        0,
-        0,
-        11,
-        18,
-        17,
         19,
         18,
         2,
         6,
         2,
-        21
+        32,
+        14,
+        1,
+        2,
+        26,
+        11,
+        0
       ]
     }
   }

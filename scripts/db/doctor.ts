@@ -10,9 +10,9 @@
  *   6. No raw credentials in migration files
  *
  * Usage:
- *   pnpm db:doctor
- *   pnpm db:doctor --strict     # fail on warnings too
- *   pnpm db:doctor --verbose    # show all file checks
+ *   pnpm exec tsx scripts/db/doctor.ts
+ *   pnpm exec tsx scripts/db/doctor.ts --strict     # fail on warnings too
+ *   pnpm exec tsx scripts/db/doctor.ts --verbose    # show all file checks
  *
  * Exit codes:
  *   0 = all checks pass

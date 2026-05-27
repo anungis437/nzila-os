@@ -7,20 +7,20 @@
 Every deployment runs 3 checks in order:
 
 ```
-db:doctor → db:migration:safety → db:drift:check
+db:doctor → migration-safety.ts → drift-check.ts
 ```
 
 ## Commands
 
 | Command | Purpose | Exit Codes |
 |---------|---------|------------|
-| `pnpm db:doctor` | Health check (ordering, extensions, rollback scripts) | 0=pass, 1=critical, 2=warnings |
-| `pnpm db:doctor --strict` | Same, but warnings become failures | 0=pass, 1=fail |
-| `pnpm db:migration:safety` | Destructive DDL scan | 0=safe, 1=blocking, 2=review |
-| `pnpm db:migration:safety --since v1.0.0` | Only check since tag | Same |
-| `pnpm db:migration:safety --file path.sql` | Single file | Same |
-| `pnpm db:drift:check` | Schema drift between journal and files | 0=clean, 1=critical, 2=minor |
-| `pnpm db:drift:check --env staging` | With environment context | Same |
+| `pnpm exec tsx scripts/db/doctor.ts` | Health check (ordering, extensions, rollback scripts) | 0=pass, 1=critical, 2=warnings |
+| `pnpm exec tsx scripts/db/doctor.ts --strict` | Same, but warnings become failures | 0=pass, 1=fail |
+| `pnpm exec tsx scripts/db/migration-safety.ts` | Destructive DDL scan | 0=safe, 1=blocking, 2=review |
+| `pnpm exec tsx scripts/db/migration-safety.ts --since v1.0.0` | Only check since tag | Same |
+| `pnpm exec tsx scripts/db/migration-safety.ts --file path.sql` | Single file | Same |
+| `pnpm exec tsx scripts/db/drift-check.ts` | Schema drift between journal and files | 0=clean, 1=critical, 2=minor |
+| `pnpm exec tsx scripts/db/drift-check.ts --env staging` | With environment context | Same |
 
 ## What Each Check Does
 
@@ -33,7 +33,7 @@ db:doctor → db:migration:safety → db:drift:check
 5. **Journal consistency** — Drizzle journal matches SQL file count
 6. **Credential scan** — no passwords/connection strings in SQL
 
-### db:migration:safety
+### Migration Safety Script
 
 10 rules with severity levels:
 
@@ -55,7 +55,7 @@ Additional checks:
 - **NO_TRANSACTION** — destructive ops without BEGIN/COMMIT
 - **INDEX_NOT_CONCURRENT** — CREATE INDEX without CONCURRENTLY
 
-### db:drift:check
+### Drift Check Script
 
 1. Journal entry count vs SQL file count
 2. Journal tag ↔ filename consistency
@@ -103,9 +103,9 @@ The `deploy-production.yml` workflow runs DB gates as a pre-deploy step:
 ```yaml
 - name: DB Safety Gate
   run: |
-    pnpm db:doctor --strict
-    pnpm db:migration:safety --since ${{ github.event.inputs.previous_tag }}
-    pnpm db:drift:check --env staging
+    pnpm exec tsx scripts/db/doctor.ts --strict
+    pnpm exec tsx scripts/db/migration-safety.ts --since ${{ github.event.inputs.previous_tag }}
+    pnpm exec tsx scripts/db/drift-check.ts --env staging
 ```
 
 If any check exits non-zero, deployment is halted.

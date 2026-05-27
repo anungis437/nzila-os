@@ -47,16 +47,16 @@ Derived from `docs/governance/APP_LIFECYCLE_MATRIX.md` and `docs/ops/ownership-r
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 1.1 | Select and record the Wave 1 deployment model (Managed Cloud / Canada Central is the current canonical option) | `docs/buyers/deployment-models.md` | Platform Owner | Decision recorded in `docs/deploy/active-profile.md` | Written record committed to `main` |
-| 1.2 | Confirm infrastructure is provisioned and healthy (ACR, Container Apps env, DB, Key Vault, Blob) | `docs/buyers/deployment-models.md` § Infrastructure Stack | <team-platform-ops@nzila.ai> | All 5 Container Apps return HTTP 200 | `pnpm release:smoke` passes for `web,console,union-eyes` |
-| 1.3 | Confirm Entra auth and session model is live for all pilot-eligible apps | `docs/platform/auth-migration-final.md` | <team-platform-admin@nzila.ai> | Auth health check passes on staging | `pnpm sre:health:contract` passes |
+| 1.2 | Confirm infrastructure is provisioned and healthy (ACR, Container Apps env, DB, Key Vault, Blob) | `docs/buyers/deployment-models.md` § Infrastructure Stack | <team-platform-ops@nzila.ai> | All 5 Container Apps return HTTP 200 | `pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr` passes for `web,console,union-eyes` |
+| 1.3 | Confirm Entra auth and session model is live for all pilot-eligible apps | `docs/platform/auth-migration-final.md` | <team-platform-admin@nzila.ai> | Auth health check passes on staging | `pnpm exec tsx scripts/sre/validate-health-contract.ts` passes |
 
 ### Track 1B — Environment Model Freeze
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 1.4 | Document the environment set in use: `local → staging → production` | `docs/ops/ENVIRONMENT_OPERATIONS.md` | Platform Owner | Env model confirmed, no preview layer needed for Wave 1 | Written in ops register |
-| 1.5 | Freeze the pilot-approved app list: Wave 1–4 classification above is the record | `docs/governance/APP_LIFECYCLE_MATRIX.md` | Platform Owner | `platform/registry/apps.json` updated to reflect wave assignment | `pnpm app:lifecycle:check` passes |
-| 1.6 | Confirm staging drift is clean before any pilot onboarding | `docs/ops/staging-runtime-drift-runbook.md` | <team-platform-ops@nzila.ai> | Zero version and env drift on staging | `pnpm drift:full:staging` passes |
+| 1.5 | Freeze the pilot-approved app list: Wave 1–4 classification above is the record | `docs/governance/APP_LIFECYCLE_MATRIX.md` | Platform Owner | `platform/registry/apps.json` updated to reflect wave assignment | `pnpm exec tsx scripts/app-lifecycle-check.ts` passes |
+| 1.6 | Confirm staging drift is clean before any pilot onboarding | `docs/ops/staging-runtime-drift-runbook.md` | <team-platform-ops@nzila.ai> | Zero version and env drift on staging | `pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr; pnpm exec tsx scripts/release/drift-env.ts --env staging; pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr` passes |
 
 ### Track 1C — Release Gate Freeze
 
@@ -64,7 +64,7 @@ Derived from `docs/governance/APP_LIFECYCLE_MATRIX.md` and `docs/ops/ownership-r
 |---|------|-----------|-------|--------|------|
 | 1.7 | Ratify the mandatory pre-pilot release gate set (see table below) | `docs/ops/release-governance/release-governance.md` | Platform Owner | Gate sequence documented; no bypasses permitted | Reviewed and signed by platform owner |
 | 1.8 | Confirm all gates currently pass on `main` | Multiple scripts (see gate set below) | <team-platform-admin@nzila.ai> | All gates green on `main` | CI clean; gate run logged |
-| 1.9 | Confirm signed tag policy is enforced | `docs/ops/release-governance/release-governance.md` § Signed Tags | <team-platform-admin@nzila.ai> | GPG or SSH signing configured; `pnpm release:verify-signature` passes | `pnpm release:verify-signature` passes |
+| 1.9 | Confirm signed tag policy is enforced | `docs/ops/release-governance/release-governance.md` § Signed Tags | <team-platform-admin@nzila.ai> | GPG or SSH signing configured; `pnpm exec tsx scripts/release/verify-signature.ts` passes | `pnpm exec tsx scripts/release/verify-signature.ts` passes |
 
 **Mandatory Release Gate Set (frozen at Phase 1)**
 
@@ -74,12 +74,12 @@ Derived from `docs/governance/APP_LIFECYCLE_MATRIX.md` and `docs/ops/ownership-r
 | 2 | `pnpm typecheck` | No TypeScript errors |
 | 3 | `pnpm test:fast` | Unit tests excluding slow contracts |
 | 4 | `pnpm contract-tests` | 129+ contract invariants (org isolation, audit, evidence, etc.) |
-| 5 | `pnpm pilot:check` | Pilot technical readiness gate |
-| 6 | `pnpm release:audit` | Governance snapshot and change audit |
-| 7 | `pnpm release:migration:safety` | DB migration safety check |
-| 8 | `pnpm sre:validate` | SRE health contract, synthetic dry-run, alert routing |
-| 9 | `pnpm drift:full:staging` | Version + env drift checks against staging |
-| 10 | `pnpm deploy:evidence` | Deploy evidence package generated |
+| 5 | `pnpm exec tsx scripts/pilot-check.ts` | Pilot technical readiness gate |
+| 6 | `pnpm exec tsx scripts/release/generate-governance-audit.ts` | Governance snapshot and change audit |
+| 7 | `pnpm exec tsx scripts/release/validate-migration-safety.ts` | DB migration safety check |
+| 8 | `pnpm exec tsx scripts/sre/validate-health-contract.ts && pnpm exec tsx scripts/sre/synthetic-dry-run.ts && pnpm exec tsx scripts/sre/alert-routing-dry-run.ts && pnpm exec tsx scripts/sre/audit-reliability.ts && pnpm exec tsx scripts/sre/generate-executive-dashboard.ts` | SRE health contract, synthetic dry-run, alert routing |
+| 9 | `pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr; pnpm exec tsx scripts/release/drift-env.ts --env staging; pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr` | Version + env drift checks against staging |
+| 10 | `pnpm exec tsx scripts/release/build-deploy-evidence.ts --env staging` | Deploy evidence package generated |
 
 ---
 
@@ -95,23 +95,23 @@ Derived from `docs/governance/APP_LIFECYCLE_MATRIX.md` and `docs/ops/ownership-r
 | 2.1 | Define and document the canonical org provisioning sequence (8 steps) | `docs/pilot/01-scope-checklist.md` § Customer & Org Setup | <team-platform-admin@nzila.ai> | SOP written and linked from pilot checklist | SOP committed and reviewed |
 | 2.2 | Walk through org creation end-to-end in staging Console | `apps/console` · `apps/control-plane` | <team-platform-admin@nzila.ai> | Org provisioned, isolated, admin user active | Console → Isolation check passes |
 | 2.3 | Verify org isolation runtime invariants | `tooling/contract-tests/org-isolation-runtime.test.ts` · `tooling/contract-tests/org-isolation-stress.test.ts` | <team-platform-admin@nzila.ai> | Zero cross-org leaks recorded in stress run | Both contract tests green |
-| 2.4 | Confirm proof pack generation works for a new org | `apps/console` → Proof Pack · `scripts/proof/generate-runtime-proof.ts` | <team-platform-admin@nzila.ai> | Proof pack PDF/JSON generated and sealed for demo org | `pnpm proof:runtime` exits clean; artifact in blob storage |
+| 2.4 | Confirm proof pack generation works for a new org | `apps/console` → Proof Pack · `scripts/proof/generate-runtime-proof.ts` | <team-platform-admin@nzila.ai> | Proof pack PDF/JSON generated and sealed for demo org | `pnpm exec tsx scripts/proof/run-proof.tstime` exits clean; artifact in blob storage |
 
 ### Track 2B — Pilot Metrics Activation
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 2.5 | Confirm `@nzila/platform-pilot-metrics` is emitting for `union-eyes` in staging | `docs/control-plane/pilot-metrics-operator-guide.md` · `apps/control-plane` | <team-union-eyes-engineering@nzila.ai> | Pilot metric events appear in Control Plane `/pilots` dashboard | Dashboard non-empty for demo org |
-| 2.6 | Confirm alert routing is functional for pilot org signals | `docs/platform/ALERTING_RUNBOOK.md` · `pnpm sre:alerts:dry-run` | <team-platform-ops@nzila.ai> | Alert routes confirmed for: adoption low, SLA spike, error spike, dead letters high | `pnpm sre:alerts:dry-run` passes |
+| 2.6 | Confirm alert routing is functional for pilot org signals | `docs/platform/ALERTING_RUNBOOK.md` · `pnpm exec tsx scripts/sre/alert-routing-dry-run.ts` | <team-platform-ops@nzila.ai> | Alert routes confirmed for: adoption low, SLA spike, error spike, dead letters high | `pnpm exec tsx scripts/sre/alert-routing-dry-run.ts` passes |
 | 2.7 | Confirm pilot metrics export works for a demo org | Control Plane `/api/control-plane/pilot-metrics/{pilotId}/export` | <team-platform-admin@nzila.ai> | Export returns valid JSON and Markdown for demo pilot | Export endpoint returns 200 with valid payload |
 
 ### Track 2C — Governance Snapshot Baseline
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 2.8 | Run full governance audit and record as the Phase 2 baseline | `pnpm governance:audit` | <team-platform-admin@nzila.ai> | Governance audit output committed to `ops/governance-snapshots/` | `pnpm governance:audit` exits 0 |
-| 2.9 | Run architecture checks to confirm no boundary violations | `pnpm architecture:check` | <team-platform-admin@nzila.ai> | All architecture checks pass | `pnpm architecture:check` exits 0 |
-| 2.10 | Confirm app lifecycle registry is accurate | `pnpm app:lifecycle:check` · `pnpm registry:check` | <team-platform-admin@nzila.ai> | Registry is consistent with code reality | Both checks exit 0 |
+| 2.8 | Run full governance audit and record as the Phase 2 baseline | `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts` | <team-platform-admin@nzila.ai> | Governance audit output committed to `ops/governance-snapshots/` | `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts` exits 0 |
+| 2.9 | Run architecture checks to confirm no boundary violations | `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` | <team-platform-admin@nzila.ai> | All architecture checks pass | `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` exits 0 |
+| 2.10 | Confirm app lifecycle registry is accurate | `pnpm exec tsx scripts/app-lifecycle-check.ts` · `pnpm exec tsx scripts/platform-registry-check.ts` | <team-platform-admin@nzila.ai> | Registry is consistent with code reality | Both checks exit 0 |
 
 ---
 
@@ -130,9 +130,9 @@ This is compulsory. No external pilot launches without a completed internal dry 
 | 3.2 | Onboard sample data following the data onboarding protocol | `docs/pilot/02-data-onboarding.md` | Pilot Captain + Engineering | Sample data in org; import validated | `docs/pilot/02-data-onboarding.md` checklist complete |
 | 3.3 | Assign roles and verify RBAC is scoped correctly | `docs/governance/GOVERNANCE_ARCHITECTURE.md` | Pilot Captain | Admin and user roles assigned; cross-role access tested | No RBAC bypass observed |
 | 3.4 | Run primary workflow (case creation → assignment → resolution in union-eyes) | `apps/union-eyes` · `docs/pilot/05-demo-script.md` | Pilot Captain | Workflow completes without errors | Demo script passes end-to-end |
-| 3.5 | Generate proof pack and evidence export for the demo org | `apps/console` → Proof Pack · `pnpm proof:runtime` | Pilot Captain | Sealed proof artifact exists for demo org | Artifact SHA-256 hash recorded |
-| 3.6 | Trigger a test health alert and follow the response runbook | `docs/ops/incident-response.md` · `pnpm sre:alerts:dry-run` | Pilot Captain + Ops | Alert triggered → received → runbook executed → resolved | Resolution documented in incident log |
-| 3.7 | Simulate a rollback scenario | `docs/ops/release-governance/rollback-runbook.md` · `pnpm release:rollback --list` | Pilot Captain + Ops | Rollback candidate identified; dry-run executed successfully | `pnpm release:rollback --tag <tag>` (dry-run) passes |
+| 3.5 | Generate proof pack and evidence export for the demo org | `apps/console` → Proof Pack · `pnpm exec tsx scripts/proof/run-proof.tstime` | Pilot Captain | Sealed proof artifact exists for demo org | Artifact SHA-256 hash recorded |
+| 3.6 | Trigger a test health alert and follow the response runbook | `docs/ops/incident-response.md` · `pnpm exec tsx scripts/sre/alert-routing-dry-run.ts` | Pilot Captain + Ops | Alert triggered → received → runbook executed → resolved | Resolution documented in incident log |
+| 3.7 | Simulate a rollback scenario | `docs/ops/release-governance/rollback-runbook.md` · `pnpm exec tsx scripts/release/rollback-prod.ts --list` | Pilot Captain + Ops | Rollback candidate identified; dry-run executed successfully | `pnpm exec tsx scripts/release/rollback-prod.ts --tag <tag>` (dry-run) passes |
 | 3.8 | Export evidence and produce pilot summary memo | `apps/console` → Evidence Export · `docs/control-plane/pilot-metrics-operator-guide.md` | Pilot Captain | Written pilot summary memo with outcomes and friction log | Memo committed to `docs/ops/pilots/mock-pilot-summary.md` |
 
 ### Track 3B — Friction and Gap Log
@@ -157,11 +157,11 @@ This is compulsory. No external pilot launches without a completed internal dry 
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 4.1 | Complete all 7 gates in pilot readiness checklist for union-eyes | `docs/buyers/pilot-readiness-checklist.md` | Pilot Captain | All gates checked ✅; checklist committed | `pnpm pilot:check` passes for `union-eyes` |
+| 4.1 | Complete all 7 gates in pilot readiness checklist for union-eyes | `docs/buyers/pilot-readiness-checklist.md` | Pilot Captain | All gates checked ✅; checklist committed | `pnpm exec tsx scripts/pilot-check.ts` passes for `union-eyes` |
 | 4.2 | Deliver security and privacy packet to buyer | `docs/pilot/03-security-privacy-packet.md` · `docs/governance/security-overview.md` · `docs/governance/procurement-pack.md` | CISO / Platform Owner | Packet delivered and acknowledged by buyer | Buyer sign-off recorded |
 | 4.3 | Confirm SLO policy and perf budgets are acceptable for pilot duration | `docs/pilot/04-monitoring-and-slos.md` · `ops/perf-budgets.yml` · `docs/platform/SLO_ERROR_BUDGET_POLICY.md` | <team-platform-ops@nzila.ai> | SLO thresholds reviewed and acknowledged | SLO review written record |
 | 4.4 | Provision pilot org, roles, and admin user | `docs/pilot/01-scope-checklist.md` §1 | <team-platform-admin@nzila.ai> | Org active in Console; buyer admin user confirmed | Console → Isolation check passes for pilot org |
-| 4.5 | Run release gate set (Phase 1 frozen gates) against current `main` | All gates in Phase 1 gate set | <team-platform-admin@nzila.ai> | All 10 gates pass | CI log and `pnpm deploy:evidence` artifact recorded |
+| 4.5 | Run release gate set (Phase 1 frozen gates) against current `main` | All gates in Phase 1 gate set | <team-platform-admin@nzila.ai> | All 10 gates pass | CI log and `pnpm exec tsx scripts/release/build-deploy-evidence.ts --env staging` artifact recorded |
 | 4.6 | Execute on-call rotation check — pilot org is covered | `docs/ops/on-call.md` | <team-platform-ops@nzila.ai> | On-call schedule confirmed; escalation path tested | <oncall-union-eyes@nzila.ai> paged successfully in test |
 
 ### Track 4B — Data Onboarding (Weeks 5–6)
@@ -195,7 +195,7 @@ This is compulsory. No external pilot launches without a completed internal dry 
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 4.19 | Generate final evidence pack and proof pack for pilot org | `pnpm proof:runtime` · `pnpm evidence:pack:monthly` | <team-platform-admin@nzila.ai> | Evidence pack sealed and stored in blob | SHA-256 hash recorded in pilot ledger |
+| 4.19 | Generate final evidence pack and proof pack for pilot org | `pnpm exec tsx scripts/proof/run-proof.tstime` · `pnpm exec tsx scripts/proof/build-monthly-evidence-pack.ts` | <team-platform-admin@nzila.ai> | Evidence pack sealed and stored in blob | SHA-256 hash recorded in pilot ledger |
 | 4.20 | Produce pilot outcome memo | (New file: `docs/ops/pilots/ue-pilot/outcome-memo.md`) | Pilot Captain | Memo covers: KPIs vs targets, friction log, incident count, conversion recommendation | Memo committed before exit decision |
 | 4.21 | Make the exit decision: convert / extend / pause / reshape | `docs/buyers/union-eyes-revenue-playbook.md` | Platform Owner + Business Owner | Decision documented with rationale | Decision recorded and communicated to buyer |
 
@@ -210,9 +210,9 @@ This is compulsory. No external pilot launches without a completed internal dry 
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 5.1 | Confirm the artifact immutability policy is enforced | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` | <team-platform-admin@nzila.ai> | Artifact digest verification passes on last staging deploy | `pnpm release:verify-signature` and digest check pass |
+| 5.1 | Confirm the artifact immutability policy is enforced | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` | <team-platform-admin@nzila.ai> | Artifact digest verification passes on last staging deploy | `pnpm exec tsx scripts/release/verify-signature.ts` and digest check pass |
 | 5.2 | Confirm SBOM and attestation exist for all Wave 1–2 images | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` § Artifact Manifest | <team-platform-admin@nzila.ai> | SBOM and attestation references recorded in artifact manifests | `ops/artifacts/*.json` all have `sbom_hash` and `attestation_ref` |
-| 5.3 | Validate DB promotion safety for any pending migrations | `docs/ops/release-governance/db-promotion-safety.md` · `pnpm db:doctor:strict` | <team-platform-admin@nzila.ai> | No unsafe migrations pending | `pnpm db:migration:safety` exits 0 |
+| 5.3 | Validate DB promotion safety for any pending migrations | `docs/ops/release-governance/db-promotion-safety.md` · `pnpm exec tsx scripts/db/doctor.ts -- --strict` | <team-platform-admin@nzila.ai> | No unsafe migrations pending | `pnpm exec tsx scripts/db/migration-safety.ts` exits 0 |
 | 5.4 | Document the production promotion sequence as a named SOP | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` | Platform Owner | SOP: 9-step production promotion sequence committed | SOP reviewed and approved |
 
 **Canonical Production Promotion Sequence (frozen)**
@@ -222,12 +222,12 @@ This is compulsory. No external pilot launches without a completed internal dry 
 | 1 | Feature complete on app branch | App team |
 | 2 | `pnpm lint && pnpm typecheck && pnpm test:fast && pnpm contract-tests` | App team |
 | 3 | Merge to `main`; staging deploy via `gitops-deploy.yml` | CI / App team |
-| 4 | `pnpm drift:full:staging` | Ops |
-| 5 | `pnpm release:staging` (audit + migration safety + smoke) | Ops |
-| 6 | `pnpm sre:validate` | Ops |
-| 7 | `pnpm release:tag` (signed) | Platform Owner |
+| 4 | `pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr; pnpm exec tsx scripts/release/drift-env.ts --env staging; pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr` | Ops |
+| 5 | `pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/validate-migration-safety.ts && pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr` (audit + migration safety + smoke) | Ops |
+| 6 | `pnpm exec tsx scripts/sre/validate-health-contract.ts && pnpm exec tsx scripts/sre/synthetic-dry-run.ts && pnpm exec tsx scripts/sre/alert-routing-dry-run.ts && pnpm exec tsx scripts/sre/audit-reliability.ts && pnpm exec tsx scripts/sre/generate-executive-dashboard.ts` | Ops |
+| 7 | `pnpm exec tsx scripts/release/tag-release.ts` (signed) | Platform Owner |
 | 8 | Production deploy via `deploy-production.yml` with digest verification | CI / Ops |
-| 9 | `pnpm deploy:evidence` + `pnpm release:evidence --tag <tag>` | Ops |
+| 9 | `pnpm exec tsx scripts/release/build-deploy-evidence.ts --env staging` + `pnpm exec tsx scripts/release/release-ledger.ts --tag <tag>` | Ops |
 
 ### Track 5B — App-Class Production Standards
 
@@ -242,7 +242,7 @@ This is compulsory. No external pilot launches without a completed internal dry 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 5.5 | Confirm on-call coverage exists for every Wave 1–2 app | `docs/ops/on-call.md` · `docs/ops/ownership-registry.md` | <team-platform-ops@nzila.ai> | All pilot apps have named on-call and escalation path | Ownership registry 100% coverage (already at 100%) |
-| 5.6 | Schedule quarterly DR drill | `docs/ops/disaster-recovery.md` · `pnpm db:restore-drill` | <team-platform-ops@nzila.ai> | DR drill scheduled; runbook accessible | First drill date committed in ops calendar |
+| 5.6 | Schedule quarterly DR drill | `docs/ops/disaster-recovery.md` · `pnpm exec tsx scripts/db/restore-drill.ts` | <team-platform-ops@nzila.ai> | DR drill scheduled; runbook accessible | First drill date committed in ops calendar |
 | 5.7 | Confirm SLA tiers are defined and communicated to pilot buyers | `docs/buyers/sla-support-model.md` | Platform Owner + Business | SLA tier doc delivered to buyer | Buyer acknowledgement on file |
 
 ---
@@ -256,11 +256,11 @@ This is compulsory. No external pilot launches without a completed internal dry 
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 6.1 | Confirm `flow` meets pilot readiness gates | `docs/buyers/pilot-readiness-checklist.md` | Pilot Captain (Flow) | All 7 checklist gates pass | `pnpm pilot:check` passes for `flow` |
+| 6.1 | Confirm `flow` meets pilot readiness gates | `docs/buyers/pilot-readiness-checklist.md` | Pilot Captain (Flow) | All 7 checklist gates pass | `pnpm exec tsx scripts/pilot-check.ts` passes for `flow` |
 | 6.2 | Deliver flow buyer pack and security packet | `docs/buyers/flow-buyer-pack.md` · `docs/pilot/03-security-privacy-packet.md` | CISO / Platform Owner | Packet delivered and acknowledged | Buyer sign-off |
 | 6.3 | Provision flow org through same Console provisioning SOP | Org provisioning SOP (from Task 2.1) | <team-platform-admin@nzila.ai> | Org active; roles assigned | Console shows org isolated |
 | 6.4 | Execute same 4-track pilot motion (pre-launch → data → soft-launch → operations) | All `docs/pilot/*` assets | Pilot Captain (Flow) | Flow pilot running with daily monitoring | Daily health green |
-| 6.5 | Maintain shared services discipline — do not let flow bypass platform packages | `docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md` · `pnpm platform:adoption:check` | <team-platform-admin@nzila.ai> | Platform adoption check passes | `pnpm platform:adoption:check` exits 0 |
+| 6.5 | Maintain shared services discipline — do not let flow bypass platform packages | `docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md` · `pnpm exec tsx scripts/platform-adoption-gate.ts` | <team-platform-admin@nzila.ai> | Platform adoption check passes | `pnpm exec tsx scripts/platform-adoption-gate.ts` exits 0 |
 | 6.6 | Produce flow pilot outcome memo | (New file: `docs/ops/pilots/flow-pilot/outcome-memo.md`) | Pilot Captain (Flow) | Exit decision documented | Decision recorded and communicated |
 
 ---
@@ -274,9 +274,9 @@ This is compulsory. No external pilot launches without a completed internal dry 
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 7.1 | Confirm `zonga` has graduated from INCUBATING to PILOT tier | `docs/governance/APP_LIFECYCLE_MATRIX.md` § Tier Graduation | Platform Owner | `app:lifecycle:check` shows `zonga` at PILOT or higher | `pnpm app:lifecycle:check` passes |
+| 7.1 | Confirm `zonga` has graduated from INCUBATING to PILOT tier | `docs/governance/APP_LIFECYCLE_MATRIX.md` § Tier Graduation | Platform Owner | Lifecycle check shows `zonga` at PILOT or higher | `pnpm exec tsx scripts/app-lifecycle-check.ts` passes |
 | 7.2 | Confirm billing and payout integrity is validated | `docs/platform/revenue-architecture.md` · `docs/platform/revenue-system.md` | <team-zonga-engineering@nzila.ai> | Billing pipeline test passes; no revenue attribution gaps | Billing contract test passes |
-| 7.3 | Confirm media pipeline reliability meets perf budgets | `ops/perf-budgets.yml` · `pnpm sre:validate` | <team-zonga-engineering@nzila.ai> | Perf budget check passes for zonga | `pnpm sre:validate` passes for `zonga` |
+| 7.3 | Confirm media pipeline reliability meets perf budgets | `ops/perf-budgets.yml` · `pnpm exec tsx scripts/sre/validate-health-contract.ts && pnpm exec tsx scripts/sre/synthetic-dry-run.ts && pnpm exec tsx scripts/sre/alert-routing-dry-run.ts && pnpm exec tsx scripts/sre/audit-reliability.ts && pnpm exec tsx scripts/sre/generate-executive-dashboard.ts` | <team-zonga-engineering@nzila.ai> | Perf budget check passes for zonga | `pnpm exec tsx scripts/sre/validate-health-contract.ts && pnpm exec tsx scripts/sre/synthetic-dry-run.ts && pnpm exec tsx scripts/sre/alert-routing-dry-run.ts && pnpm exec tsx scripts/sre/audit-reliability.ts && pnpm exec tsx scripts/sre/generate-executive-dashboard.ts` passes for `zonga` |
 | 7.4 | Execute pilot motion (same 4-track pattern) | All `docs/pilot/*` assets | Pilot Captain (Zonga) | Zonga pilot running with daily monitoring | Daily health green |
 
 ---

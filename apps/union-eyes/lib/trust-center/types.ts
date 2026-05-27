@@ -50,7 +50,7 @@ export interface EvidenceArtifact {
 // ── Trust claim ───────────────────────────────────────────────────────────────
 
 /**
- * A single verifiable trust claim made about the Union Eyes platform.
+ * A single verifiable trust claim made about the UnionEyes platform.
  *
  * Claims map to procurement questions, security reviews, and buyer diligence.
  */

@@ -1,6 +1,6 @@
 # Executive Reliability Dashboard
 
-Generated: 2026-05-11T04:57:27.228Z
+Generated: 2026-05-25T18:13:16.485Z
 
 ## Score Summary (0-10)
 
@@ -13,9 +13,9 @@ Generated: 2026-05-11T04:57:27.228Z
 ## Portfolio Signals
 
 - Apps breaching SLO contract: 0
-- Synthetic configured targets: 0
-- Alert routing ready: false
-- Unresolved app cost mapping: 17
+- Synthetic configured targets: 6
+- Alert routing ready: true
+- Unresolved app cost mapping: 0
 
 ## Top Risk Apps
 

@@ -2,7 +2,7 @@
  * Core type vocabulary for the governance-observability layer.
  *
  * These types classify, correlate, and retain every observable governance
- * event in Union Eyes. They are the shared language across:
+ * event in UnionEyes. They are the shared language across:
  *
  *   - classification.ts  — classifying telemetry sensitivity + category
  *   - correlation.ts     — governance correlation ID chains

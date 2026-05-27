@@ -41,9 +41,9 @@ defined in `apps/union-eyes/maturity.json` under `maturity_gaps.backup_restore`.
 
 ## Pre-Drill Checklist
 
-Before starting any drill, confirm the following. Run `pnpm dr:drill:checklist`
+Before starting any drill, confirm the following. Run `pnpm exec tsx scripts/dr/drill-checklist.ts`
 to generate a printable version. For live staging drills, run
-`pnpm dr:drill:checklist --live`.
+`pnpm exec tsx scripts/dr/drill-checklist.ts --live`.
 
 - [ ] Confirmed drill is on staging or isolated environment (NEVER production)
 - [ ] Informed on-call team via ops channel
@@ -74,7 +74,7 @@ This drill is triggered by any of the following:
 ### Step 1 — Generate dry-run evidence (no DB required)
 
 ```bash
-pnpm db:restore-drill
+pnpm exec tsx scripts/db/restore-drill.ts
 # or explicitly:
 npx tsx scripts/db/restore-drill.ts
 ```
@@ -85,7 +85,7 @@ This checks:
 2. Migration file integrity (count + checksum)
 3. DR documentation completeness (RTO/RPO present)
 4. `db:doctor` pass (migration ordering, destructive DDL audit)
-5. `db:migration:safety` pass
+5. `pnpm exec tsx scripts/db/migration-safety.ts` pass
 
 Evidence output: `reports/db/restore-drill-YYYY-MM.json`
 
@@ -94,7 +94,7 @@ Evidence output: `reports/db/restore-drill-YYYY-MM.json`
 > Requires: access to staging PostgreSQL and a scratch database slot.
 
 ```bash
-pnpm db:restore-drill:execute
+pnpm exec tsx scripts/db/restore-drill.ts -- --execute
 # or with custom scratch DB:
 npx tsx scripts/db/restore-drill.ts --execute --scratch-db ue_drill_$(date +%Y%m%d)
 # with explicit staging DB/ready endpoint:
@@ -119,7 +119,7 @@ This additionally:
 ### Step 3 — Generate markdown evidence report
 
 ```bash
-pnpm dr:drill:report
+pnpm exec tsx scripts/dr/drill-report.ts
 ```
 
 Reads the latest `reports/db/restore-drill-YYYY-MM.json` and produces a

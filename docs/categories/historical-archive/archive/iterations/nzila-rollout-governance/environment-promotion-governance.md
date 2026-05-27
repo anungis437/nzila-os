@@ -56,7 +56,7 @@ Every promotion must satisfy, in order:
 ## 5. Attestation Requirements
 
 Promotions to `staging`, `demo`, `pilot`, `prod` MUST emit a promotion
-attestation via `pnpm rollout:promote:attest`. The attestation records:
+attestation via `node tooling/scripts/record-promotion-attestation.mjs`. The attestation records:
 
 - `release_id`, `git_sha`, `from`, `to`, `reviewer`, `reason`,
   `timestamp`, `legitimacy_review_ref`, `continuity_window_satisfied`.

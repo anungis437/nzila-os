@@ -529,7 +529,7 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
           transition={{ delay: 1.2, duration: 0.6 }}
           className="mt-20 text-center text-xs text-white/12"
         >
-          Union Eyes · Governance-safe organizational intelligence for Canadian labour
+          UnionEyes · Governance-safe organizational intelligence for Canadian labour
         </motion.p>
       </main>
     </div>

@@ -84,30 +84,30 @@
 
 | Script | Command | Purpose |
 |---|---|---|
-| `scripts/architecture-layer-check.ts` | `pnpm architecture:layers:check` | Validate dependency directions across architectural layers |
-| `scripts/app-lifecycle-check.ts` | `pnpm app:lifecycle:check` | Validate app registration and tier-specific requirements |
-| `scripts/platform-registry-check.ts` | `pnpm registry:check` | Validate platform-registry.json shape and path existence |
-| `scripts/control-plane-surface-check.ts` | `pnpm control-plane:surface:check` | Validate control-plane routes against surface responsibilities |
-| `scripts/platform-vs-app-check.ts` | `pnpm platform:vs-app:check` | Validate platform vs app classification and registry coverage |
-| `scripts/platform-authority-check.ts` | `pnpm platform:authority:check` | Enforce concern authority map and detect package overlap drift |
-| `scripts/package-ownership-check.ts` | `pnpm package:ownership:check` | Validate `package.meta.json` schema across all packages |
-| `scripts/dependency-boundary-check.ts` | `pnpm deps:check` | Detect circular deps, cross-vertical deps, deprecated usage |
-| `scripts/ai-contract-check.ts` | `pnpm ai:contract:check` | Scan apps for prohibited AI patterns |
-| `scripts/control-plane-check.ts` | `pnpm control-plane:check` | Validate control plane routes against `route.meta.json` |
-| `scripts/app-gold-standard-check.ts` | `pnpm app:gold-standard:check` | Check app compliance with gold standard |
-| `scripts/package-deprecation-check.ts` | `pnpm package:deprecation:check` | Validate deprecation metadata consistency |
-| `scripts/governance-check.ts` | `pnpm governance:check` | Existing: SBOM, evidence, policy engine validation |
-| `scripts/platform-surface-model-check.ts` | `pnpm platform:surface:model:check` | Validate route feature classes against surface capabilities |
-| `scripts/app-domain-core-check.ts` | `pnpm app:domain-core:check` | Validate app internal architecture (domain-core standard) |
-| `scripts/platform-contract-check.ts` | `pnpm platform:contract:check` | Validate platform contract package and app adapter scaffolds |
-| `scripts/control-plane-coherence-check.ts` | `pnpm control-plane:coherence:check` | Cross-surface coherence: duplication detection, contract alignment |
-| `scripts/registry-consistency-check.ts` | `pnpm registry:consistency:check` | Registry cross-validation: surfaces, environments, tiers |
+| `scripts/architecture-layer-check.ts` | `pnpm exec tsx scripts/architecture-layer-check.ts` | Validate dependency directions across architectural layers |
+| `scripts/app-lifecycle-check.ts` | `pnpm exec tsx scripts/app-lifecycle-check.ts` | Validate app registration and tier-specific requirements |
+| `scripts/platform-registry-check.ts` | `pnpm exec tsx scripts/platform-registry-check.ts` | Validate platform-registry.json shape and path existence |
+| `scripts/control-plane-surface-check.ts` | `pnpm exec tsx scripts/control-plane-surface-check.ts` | Validate control-plane routes against surface responsibilities |
+| `scripts/platform-vs-app-check.ts` | `pnpm exec tsx scripts/platform-vs-app-check.ts` | Validate platform vs app classification and registry coverage |
+| `scripts/platform-authority-check.ts` | `pnpm exec tsx scripts/platform-authority-check.ts` | Enforce concern authority map and detect package overlap drift |
+| `scripts/package-ownership-check.ts` | `pnpm exec tsx scripts/package-ownership-check.ts` | Validate `package.meta.json` schema across all packages |
+| `scripts/dependency-boundary-check.ts` | `pnpm exec tsx scripts/dependency-boundary-check.ts` | Detect circular deps, cross-vertical deps, deprecated usage |
+| `scripts/ai-contract-check.ts` | `pnpm exec tsx scripts/ai-contract-check.ts` | Scan apps for prohibited AI patterns |
+| `scripts/control-plane-check.ts` | `pnpm exec tsx scripts/control-plane-check.ts` | Validate control plane routes against `route.meta.json` |
+| `scripts/app-gold-standard-check.ts` | `pnpm exec tsx scripts/app-gold-standard-check.ts` | Check app compliance with gold standard |
+| `scripts/package-deprecation-check.ts` | `pnpm exec tsx scripts/package-deprecation-check.ts` | Validate deprecation metadata consistency |
+| `scripts/governance-check.ts` | `pnpm exec tsx scripts/governance-check.ts` | Existing: SBOM, evidence, policy engine validation |
+| `scripts/platform-surface-model-check.ts` | `pnpm exec tsx scripts/platform-surface-model-check.ts` | Validate route feature classes against surface capabilities |
+| `scripts/app-domain-core-check.ts` | `pnpm exec tsx scripts/app-domain-core-check.ts` | Validate app internal architecture (domain-core standard) |
+| `scripts/platform-contract-check.ts` | `pnpm exec tsx scripts/platform-contract-check.ts` | Validate platform contract package and app adapter scaffolds |
+| `scripts/control-plane-coherence-check.ts` | `pnpm exec tsx scripts/control-plane-coherence-check.ts` | Cross-surface coherence: duplication detection, contract alignment |
+| `scripts/registry-consistency-check.ts` | `pnpm exec tsx scripts/registry-consistency-check.ts` | Registry cross-validation: surfaces, environments, tiers |
 
 ## Aggregate Commands
 
 | Command | Purpose |
 |---|---|
-| `pnpm architecture:check` | Run architecture checks: layers, domain-core, surface model, package authority, contracts, registry, coherence, and adoption |
+| `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` | Run architecture checks: layers, domain-core, surface model, package authority, contracts, registry, coherence, and adoption |
 
 ## Contract Tests
 
@@ -133,7 +133,7 @@
 
 | Script | Command | Purpose |
 |---|---|---|
-| `scripts/seed-architecture-demo.ts` | `pnpm arch:seed` | Generate static architecture snapshot to `demo-output/` |
+| `scripts/seed-architecture-demo.ts` | `pnpm exec tsx scripts/seed-architecture-demo.ts` | Generate static architecture snapshot to `demo-output/` |
 
 ---
 

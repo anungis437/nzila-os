@@ -114,8 +114,8 @@ export const PERSONA_LABELS: Record<ExecutivePersonaId, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const REPORT_TIER_LABELS: Record<ReportTierId, string> = {
-  continuity_reflection: 'Continuity Reflection',
-  executive_continuity_brief: 'Executive Continuity Brief',
+  continuity_reflection: 'Free Readiness Check',
+  executive_continuity_brief: 'Leadership Briefing Report',
   institutional_continuity_diagnostic: 'Institutional Continuity Diagnostic',
 };
 
@@ -310,7 +310,7 @@ export const ICRA_DEAL_STAGES = {
 } as const;
 
 export const ICRA_DEAL_STAGE_LABELS: Record<keyof typeof ICRA_DEAL_STAGES, string> = {
-  reflection_completed: 'Continuity Reflection Completed',
+  reflection_completed: 'Free Readiness Check Completed',
   brief_purchased: 'Executive Brief Purchased',
   diagnostic_interest: 'Executive Diagnostic Interest',
   oci_discovery: 'OCI Discovery',

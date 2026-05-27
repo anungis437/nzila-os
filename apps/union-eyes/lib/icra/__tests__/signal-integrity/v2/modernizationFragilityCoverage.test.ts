@@ -31,12 +31,45 @@ describe('v2 Foundation — modernization fragility coverage', () => {
     expect(q?.weights.institutional_continuity).toBeDefined();
   });
 
-  // Scheduled for v1.3.0 per MODERNIZATION_INSTABILITY_SIGNAL_MODEL.md:
-  it.todo('ownership ambiguity has dedicated evidence_strength probe (v1.3.0)');
-  it.todo('platform migration dependency has dedicated dependency_mapping probe (v1.3.0)');
-  it.todo('undocumented workflow replacement has dedicated contradiction_pair (v1.3.0)');
-  it.todo('shadow operational systems have dedicated confidence_marker (v1.3.0)');
-  it.todo('digital continuity fragmentation has dedicated topology_mapping (v1.3.0)');
-  it.todo('modernization onboarding burden has dedicated contradiction_pair (v1.3.0)');
-  it.todo('continuity debt accumulation has dedicated stability_marker (v1.3.0)');
+  it('ownership ambiguity has dedicated evidence_strength probe (v1.3.0)', () => {
+    const q = V2_QUESTIONS.find((q) => q.id === 'v2_es_ownership_ambiguity');
+    expect(q).toBeDefined();
+    expect(q?.modality).toBe('evidence_strength');
+  });
+
+  it('platform migration dependency has dedicated dependency_mapping probe (v1.3.0)', () => {
+    const q = V2_QUESTIONS.find((q) => q.id === 'v2_dm_platform_migration_dependency');
+    expect(q).toBeDefined();
+    expect(q?.modality).toBe('dependency_mapping');
+  });
+
+  it('undocumented workflow replacement has dedicated contradiction_pair (v1.3.0)', () => {
+    const q = V2_QUESTIONS.find((q) => q.id === 'v2_cp_undocumented_workflow_replacement');
+    expect(q).toBeDefined();
+    expect(q?.modality).toBe('contradiction_pair');
+  });
+
+  it('shadow operational systems have dedicated confidence_marker (v1.3.0)', () => {
+    const q = V2_QUESTIONS.find((q) => q.id === 'v2_cm_shadow_operational_systems');
+    expect(q).toBeDefined();
+    expect(q?.modality).toBe('confidence_marker');
+  });
+
+  it('digital continuity fragmentation has dedicated topology_mapping (v1.3.0)', () => {
+    const q = V2_QUESTIONS.find((q) => q.id === 'v2_tm_digital_continuity_fragmentation');
+    expect(q).toBeDefined();
+    expect(q?.modality).toBe('topology_mapping');
+  });
+
+  it('modernization onboarding burden has dedicated contradiction_pair (v1.3.0)', () => {
+    const q = V2_QUESTIONS.find((q) => q.id === 'v2_cp_modernization_onboarding_burden');
+    expect(q).toBeDefined();
+    expect(q?.modality).toBe('contradiction_pair');
+  });
+
+  it('continuity debt accumulation has dedicated stability_marker (v1.3.0)', () => {
+    const q = V2_QUESTIONS.find((q) => q.id === 'v2_sm_continuity_debt_accumulation');
+    expect(q).toBeDefined();
+    expect(q?.modality).toBe('stability_marker');
+  });
 });

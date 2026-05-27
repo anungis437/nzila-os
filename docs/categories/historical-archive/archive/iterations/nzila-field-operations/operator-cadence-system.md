@@ -57,7 +57,7 @@ A weekly deep cadence reviews:
 - onboarding pacing (Onboarding Readiness panel)
 
 Weekly cadence outputs a recorded readiness attestation via
-`pnpm rollout:readiness`.
+`node tooling/scripts/run-rollout-readiness-review.mjs`.
 
 ---
 

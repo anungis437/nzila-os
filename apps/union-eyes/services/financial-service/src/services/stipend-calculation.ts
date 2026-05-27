@@ -156,7 +156,7 @@ export async function createDisbursement(
       success: true,
       disbursementId: disbursement.id,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Failed to create disbursement',
@@ -204,7 +204,7 @@ export async function approveDisbursement(
       .where(eq(schema.stipendDisbursements.id, approval.disbursementId));
 
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Failed to approve disbursement',
@@ -252,7 +252,7 @@ export async function markDisbursementPaid(
       .where(eq(schema.stipendDisbursements.id, disbursementId));
 
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Failed to mark disbursement as paid',

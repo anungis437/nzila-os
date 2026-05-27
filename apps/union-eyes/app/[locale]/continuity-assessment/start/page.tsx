@@ -17,12 +17,12 @@ interface PageProps {
 
 const METADATA_COPY = {
   'en-CA': {
-    title: 'Begin Assessment | OCI Continuity Risk Assessment | Union Eyes',
+    title: 'Begin Assessment | OCI Continuity Risk Assessment | UnionEyes',
     description:
       'Complete your OCI Continuity Risk Assessment. Takes 15-25 minutes. No account required.',
   },
   'fr-CA': {
-    title: "Commencer l'évaluation | Évaluation du risque de continuité institutionnelle | Union Eyes",
+    title: "Commencer l'évaluation | Évaluation du risque de continuité institutionnelle | UnionEyes",
     description:
       "Complétez votre évaluation du risque de continuité institutionnelle. Prévoir 15 à 25 minutes. Aucun compte requis.",
   },

@@ -4,7 +4,7 @@
 > Each app is assigned a tier, owner, domain, and maturity notes.
 >
 > Machine-readable source: `platform/registry/apps.json`
-> Enforced by: `pnpm app:lifecycle:check`
+> Enforced by: `pnpm exec tsx scripts/app-lifecycle-check.ts`
 
 ---
 

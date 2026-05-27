@@ -116,12 +116,12 @@ const md = `# Governed Observability Overview
 
 ## Summary
 
-Union Eyes correlates governance decisions, operational telemetry, federation inheritance,
+UnionEyes correlates governance decisions, operational telemetry, federation inheritance,
 publication workflows, and AI-assisted actions into an evidence-aware institutional governance graph.
 
 ## Telemetry Classification
 
-All observable events in Union Eyes are classified by:
+All observable events in UnionEyes are classified by:
 
 | Category | Sensitivity Baseline | Retention Class | Description |
 |---|---|---|---|

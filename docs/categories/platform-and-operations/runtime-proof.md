@@ -31,7 +31,7 @@ check-health.ts             ─┤                           control-plane dashb
 collect-security-proof.ts   ─┘
 ```
 
-All scripts live under `scripts/proof/`. They are invoked via `pnpm proof:*` scripts defined in the root `package.json`.
+All scripts live under `scripts/proof/` and can be invoked directly via `pnpm exec tsx`.
 
 ---
 
@@ -82,7 +82,7 @@ The `bootstrapSources` array in the proof document lists the affected dimensions
 
 ## Script Reference
 
-### `pnpm proof:release-ledger:validate`
+### `pnpm exec tsx scripts/proof/validate-release-ledger.ts`
 
 ```bash
 # Validates release-ledger.jsonl schema + signatures
@@ -94,7 +94,7 @@ tsx scripts/proof/validate-release-ledger.ts
 
 ---
 
-### `pnpm proof:ingest:ci`
+### `pnpm exec tsx scripts/proof/ingest-github-actions.ts`
 
 ```bash
 tsx scripts/proof/ingest-github-actions.ts
@@ -105,7 +105,7 @@ tsx scripts/proof/ingest-github-actions.ts
 
 ---
 
-### `pnpm proof:ingest:azure`
+### `pnpm exec tsx scripts/proof/ingest-azure-runtime.ts`
 
 ```bash
 tsx scripts/proof/ingest-azure-runtime.ts
@@ -116,7 +116,7 @@ tsx scripts/proof/ingest-azure-runtime.ts
 
 ---
 
-### `pnpm proof:health`
+### `pnpm exec tsx scripts/proof/check-health.ts`
 
 ```bash
 tsx scripts/proof/check-health.ts
@@ -138,7 +138,7 @@ Configure endpoints in `health-config.json`:
 
 ---
 
-### `pnpm proof:runtime`
+### `pnpm exec tsx scripts/proof/run-proof.tstime`
 
 ```bash
 tsx scripts/proof/generate-runtime-proof.ts [--period YYYY-MM]
@@ -151,7 +151,7 @@ tsx scripts/proof/generate-runtime-proof.ts [--period YYYY-MM]
 
 ---
 
-### `pnpm proof:runtime:gate`
+### `pnpm exec tsx scripts/proof/runtime-proof-gate.ts`
 
 ```bash
 tsx scripts/proof/runtime-proof-gate.ts [--env staging|production]
@@ -166,7 +166,7 @@ tsx scripts/proof/runtime-proof-gate.ts [--env staging|production]
 
 ---
 
-### `pnpm proof:runtime:export`
+### `pnpm exec tsx scripts/proof/export-runtime-proof.ts`
 
 ```bash
 tsx scripts/proof/export-runtime-proof.ts [--period YYYY-MM]
@@ -230,10 +230,10 @@ Add to your GitHub Actions workflow after the proof generation step:
 
 ```yaml
 - name: Runtime proof gate (staging)
-  run: pnpm proof:runtime:gate --env staging
+  run: pnpm exec tsx scripts/proof/runtime-proof-gate.ts --env staging
 
 - name: Runtime proof gate (production)
-  run: pnpm proof:runtime:gate --env production
+  run: pnpm exec tsx scripts/proof/runtime-proof-gate.ts --env production
   if: github.ref == 'refs/heads/main'
 ```
 
@@ -244,7 +244,7 @@ A non-zero exit code will fail the workflow step.
 ## Export for Buyers
 
 ```bash
-pnpm proof:runtime:export
+pnpm exec tsx scripts/proof/export-runtime-proof.ts
 ```
 
 This produces two files in `reports/runtime/export/`:
@@ -261,7 +261,7 @@ This produces two files in `reports/runtime/export/`:
 
 Run the release ingestion + validation:
 ```bash
-pnpm proof:release-ledger:validate
+pnpm exec tsx scripts/proof/validate-release-ledger.ts
 ```
 Ensure at least one release is tagged and pushed within the period.
 
@@ -269,13 +269,13 @@ Ensure at least one release is tagged and pushed within the period.
 
 Run CI ingestion:
 ```bash
-pnpm proof:ingest:ci
+pnpm exec tsx scripts/proof/ingest-github-actions.ts
 ```
 Ensure `GITHUB_TOKEN` is set and the deployment workflow ran within the period.
 
 ### "Health check failed for N endpoints"
 
-Check `reports/runtime/health-latest.json` for failing endpoints. Resolve the underlying service issue, then re-run `pnpm proof:health`.
+Check `reports/runtime/health-latest.json` for failing endpoints. Resolve the underlying service issue, then re-run `pnpm exec tsx scripts/proof/check-health.ts`.
 
 ### "Drift report missing for period YYYY-MM"
 
@@ -288,7 +288,7 @@ Perform a restore drill, document it, and write the result to `reports/db/restor
 ### "Security findings: N critical" or "N high (unwaived)"
 
 Review `reports/runtime/security-proof-latest.json`. Either:
-- Patch the vulnerable dependency and re-run `pnpm proof:security`
+- Patch the vulnerable dependency and re-run `pnpm exec tsx scripts/proof/collect-security-proof.ts`
 - Add a waiver to `ACTIVE_WAIVERS` in `tooling/security/supply-chain-policy.ts` if the finding is a false positive
 
 ### Grade is B with bootstrap cap but all dimensions score well

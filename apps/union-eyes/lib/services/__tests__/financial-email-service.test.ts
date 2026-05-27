@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  mockSend: vi.fn(),
+  mockSendResendEmail: vi.fn(),
 }));
 
 vi.mock('@/lib/email-service', () => ({
-  getResendClient: () => ({ emails: { send: mocks.mockSend } }),
+  sendResendEmail: mocks.mockSendResendEmail,
   getFromEmail: (label?: string) => label ? `${label} <noreply@unioneyes.app>` : 'noreply@unioneyes.app',
 }));
 
@@ -19,7 +19,7 @@ import { Decimal } from 'decimal.js';
 describe('FinancialEmailService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.mockSend.mockResolvedValue({ id: 'email-1' });
+    mocks.mockSendResendEmail.mockResolvedValue({ success: true, messageId: 'email-1' });
   });
 
   describe('sendPaymentConfirmation', () => {
@@ -35,22 +35,23 @@ describe('FinancialEmailService', () => {
 
     it('sends payment confirmation email', async () => {
       await FinancialEmailService.sendPaymentConfirmation(params);
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'member@test.com',
           subject: expect.stringContaining('Payment Confirmed'),
         }),
+        expect.anything(),
       );
     });
 
     it('includes amount in subject', async () => {
       await FinancialEmailService.sendPaymentConfirmation(params);
-      const call = mocks.mockSend.mock.calls[0][0];
+      const call = mocks.mockSendResendEmail.mock.calls[0][0];
       expect(call.subject).toContain('150.00');
     });
 
     it('throws on send failure', async () => {
-      mocks.mockSend.mockRejectedValue(new Error('Send failed'));
+      mocks.mockSendResendEmail.mockRejectedValue(new Error('Send failed'));
       await expect(FinancialEmailService.sendPaymentConfirmation(params)).rejects.toThrow('Send failed');
     });
   });
@@ -68,16 +69,17 @@ describe('FinancialEmailService', () => {
 
     it('sends payment failure email', async () => {
       await FinancialEmailService.sendPaymentFailure(params);
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'member@test.com',
           subject: expect.stringContaining('Payment Failed'),
         }),
+        expect.anything(),
       );
     });
 
     it('throws on send failure', async () => {
-      mocks.mockSend.mockRejectedValue(new Error('API error'));
+      mocks.mockSendResendEmail.mockRejectedValue(new Error('API error'));
       await expect(FinancialEmailService.sendPaymentFailure(params)).rejects.toThrow('API error');
     });
   });
@@ -96,19 +98,20 @@ describe('FinancialEmailService', () => {
 
     it('sends invoice email with PDF attachment', async () => {
       await FinancialEmailService.sendInvoice(params);
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           attachments: expect.arrayContaining([
             expect.objectContaining({ filename: 'invoice-INV-2026-001.pdf' }),
           ]),
         }),
+        expect.anything(),
       );
     });
 
     it('sends without attachment when no PDF url', async () => {
       const noAttach = { ...params, invoicePdfUrl: '' };
       await FinancialEmailService.sendInvoice(noAttach);
-      expect(mocks.mockSend).toHaveBeenCalled();
+      expect(mocks.mockSendResendEmail).toHaveBeenCalled();
     });
   });
 
@@ -122,8 +125,9 @@ describe('FinancialEmailService', () => {
         currency: 'CAD',
         paymentDate: new Date('2026-03-01'),
       });
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({ subject: 'Receipt #REC-001' }),
+        expect.anything(),
       );
     });
   });
@@ -139,10 +143,11 @@ describe('FinancialEmailService', () => {
         daysOverdue: 15,
         paymentUrl: 'https://pay.example.com/pay',
       });
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           subject: expect.stringContaining('Overdue'),
         }),
+        expect.anything(),
       );
     });
 
@@ -156,10 +161,11 @@ describe('FinancialEmailService', () => {
         daysOverdue: -5,
         paymentUrl: 'https://pay.example.com/pay',
       });
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           subject: expect.stringContaining('Reminder'),
         }),
+        expect.anything(),
       );
     });
   });
@@ -174,10 +180,11 @@ describe('FinancialEmailService', () => {
         currency: 'CAD',
         nextChargeDate: new Date('2026-04-01'),
       });
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           subject: expect.stringContaining('AutoPay'),
         }),
+        expect.anything(),
       );
     });
   });
@@ -191,10 +198,11 @@ describe('FinancialEmailService', () => {
         lastFailureReason: 'Card expired',
         updatePaymentUrl: 'https://pay.example.com/update',
       });
-      expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           subject: expect.stringContaining('AutoPay Disabled'),
         }),
+        expect.anything(),
       );
     });
   });

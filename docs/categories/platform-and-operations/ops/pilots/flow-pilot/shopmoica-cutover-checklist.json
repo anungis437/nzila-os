@@ -16,7 +16,7 @@
       "owner": "team-platform-ops@nzila.ai",
       "status": "pending",
       "required": true,
-      "evidence": "Run pnpm dns:verify with production DNS credentials"
+      "evidence": "Run pnpm exec tsx scripts/dns/verify.ts with production DNS credentials"
     },
     {
       "id": "tls_certificate",
@@ -64,7 +64,7 @@
       "owner": "team-platform-admin@nzila.ai",
       "status": "complete",
       "required": true,
-      "evidence": "Validated via pnpm pilot:check"
+      "evidence": "Validated via pnpm exec tsx scripts/pilot-check.ts"
     },
     {
       "id": "flow_lockdown_pass",

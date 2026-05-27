@@ -3,7 +3,7 @@
  * Sends email notifications for award events, redemptions, and more
  */
 
-import { getResendClient, getFromEmail } from '@/lib/email-service';
+import { getFromEmail, sendResendEmail } from '@/lib/email-service';
 import { logger } from '@/lib/logger';
 
 interface _EmailRecipient {
@@ -57,25 +57,23 @@ interface RedemptionNotificationData {
  */
 export async function sendAwardReceivedEmail(data: AwardNotificationData) {
   try {
-    const client = getResendClient();
-    if (!client) {
-      logger.warn('[Email] Resend not configured, skipping award notification');
-      return { success: false, error: 'Email not configured' };
-    }
-    const { error } = await client.emails.send({
+    const result = await sendResendEmail({
       from: getFromEmail(`${data.orgName} Rewards`),
       to: data.recipientEmail,
       subject: `🎉 You've been recognized by ${data.issuerName}!`,
       html: generateAwardReceivedHTML(data),
+    }, {
+      feature: 'rewards_email',
+      templateId: 'award_received',
     });
 
-    if (error) {
+    if (!result.success) {
       logger.error('[Email] Failed to send award notification', {
-        error,
+        error: result.error,
         recipientEmail: data.recipientEmail,
         awardId: data.awardId,
       });
-      return { success: false, error };
+      return { success: false, error: result.error };
     }
 
     return { success: true };
@@ -94,25 +92,23 @@ export async function sendAwardReceivedEmail(data: AwardNotificationData) {
  */
 export async function sendApprovalRequestEmail(data: ApprovalNotificationData) {
   try {
-    const client = getResendClient();
-    if (!client) {
-      logger.warn('[Email] Resend not configured, skipping approval request');
-      return { success: false, error: 'Email not configured' };
-    }
-    const { error } = await client.emails.send({
+    const result = await sendResendEmail({
       from: getFromEmail(`${data.orgName} Rewards`),
       to: data.adminEmail,
       subject: `⚡ Award Pending Approval: ${data.awardTypeName}`,
       html: generateApprovalRequestHTML(data),
+    }, {
+      feature: 'rewards_email',
+      templateId: 'approval_request',
     });
 
-    if (error) {
+    if (!result.success) {
       logger.error('[Email] Failed to send approval request', {
-        error,
+        error: result.error,
         adminEmail: data.adminEmail,
         awardId: data.awardId,
       });
-      return { success: false, error };
+      return { success: false, error: result.error };
     }
 
     return { success: true };
@@ -131,24 +127,22 @@ export async function sendApprovalRequestEmail(data: ApprovalNotificationData) {
  */
 export async function sendCreditExpirationEmail(data: ExpirationNotificationData) {
   try {
-    const client = getResendClient();
-    if (!client) {
-      logger.warn('[Email] Resend not configured, skipping expiration warning');
-      return { success: false, error: 'Email not configured' };
-    }
-    const { error } = await client.emails.send({
+    const result = await sendResendEmail({
       from: getFromEmail(`${data.orgName} Rewards`),
       to: data.recipientEmail,
       subject: `⚠️ Your credits are expiring soon!`,
       html: generateExpirationWarningHTML(data),
+    }, {
+      feature: 'rewards_email',
+      templateId: 'credit_expiration',
     });
 
-    if (error) {
+    if (!result.success) {
       logger.error('[Email] Failed to send expiration warning', {
-        error,
+        error: result.error,
         recipientEmail: data.recipientEmail,
       });
-      return { success: false, error };
+      return { success: false, error: result.error };
     }
 
     return { success: true };
@@ -166,25 +160,23 @@ export async function sendCreditExpirationEmail(data: ExpirationNotificationData
  */
 export async function sendRedemptionConfirmationEmail(data: RedemptionNotificationData) {
   try {
-    const client = getResendClient();
-    if (!client) {
-      logger.warn('[Email] Resend not configured, skipping redemption confirmation');
-      return { success: false, error: 'Email not configured' };
-    }
-    const { error } = await client.emails.send({
+    const result = await sendResendEmail({
       from: getFromEmail(`${data.orgName} Rewards`),
       to: data.recipientEmail,
       subject: `✅ Redemption Confirmed: ${data.creditsRedeemed} credits`,
       html: generateRedemptionConfirmationHTML(data),
+    }, {
+      feature: 'rewards_email',
+      templateId: 'redemption_confirmation',
     });
 
-    if (error) {
+    if (!result.success) {
       logger.error('[Email] Failed to send redemption confirmation', {
-        error,
+        error: result.error,
         recipientEmail: data.recipientEmail,
         redemptionId: data.redemptionId,
       });
-      return { success: false, error };
+      return { success: false, error: result.error };
     }
 
     return { success: true };

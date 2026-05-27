@@ -39,16 +39,16 @@ jobs:
         run: pnpm build
 
       - name: Health contract
-        run: pnpm sre:health:contract
+        run: pnpm exec tsx scripts/sre/validate-health-contract.ts
 
       - name: Synthetic dry-run
-        run: pnpm sre:synthetic:dry-run
+        run: pnpm exec tsx scripts/sre/synthetic-dry-run.ts
 
       - name: Alert routing dry-run
-        run: pnpm sre:alerts:dry-run
+        run: pnpm exec tsx scripts/sre/alert-routing-dry-run.ts
 
       - name: Reliability audit
-        run: pnpm sre:audit
+        run: pnpm exec tsx scripts/sre/audit-reliability.ts
 
       - name: Executive dashboard
-        run: pnpm sre:dashboard
+        run: pnpm exec tsx scripts/sre/generate-executive-dashboard.ts

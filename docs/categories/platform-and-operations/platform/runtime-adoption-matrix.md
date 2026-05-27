@@ -4,7 +4,7 @@ This matrix tracks concern-level adoption of the authoritative platform package 
 
 - Authority source: governance/platform-package-authority.json
 - Exception source: governance/exceptions/platform-concern-adoption-exceptions.json
-- Validation command: pnpm platform:adoption:check
+- Validation command: pnpm exec tsx scripts/platform-adoption-gate.ts
 - Machine report: governance/reports/platform-concern-adoption-report.json
 
 Last updated: 2026-04-14

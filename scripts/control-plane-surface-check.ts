@@ -5,7 +5,7 @@
  * This extends the existing control-plane-check.ts with additional surface
  * responsibility validation.
  *
- * Usage: pnpm control-plane:surface:check
+ * Usage: pnpm exec tsx scripts/control-plane-surface-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

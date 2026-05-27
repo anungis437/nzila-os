@@ -44,7 +44,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
     title: isFr ? 'Continuité organisationnelle | UnionEyes' : 'Organizational Continuity | UnionEyes',
     description: isFr
       ? 'Préservez la mémoire organisationnelle, renforcez la résilience organisationnelle et maintenez la continuité à travers les transitions de leadership.'
-      : 'Preserve organizational memory, strengthen organizational resilience, and maintain continuity through leadership transitions. UnionEyes Organizational Continuity substrate.',
+      : 'Preserve organizational memory, strengthen organizational resilience, and maintain continuity through leadership transitions with UnionEyes.',
     alternates: buildLocaleAlternates(locale, '/organizational-continuity'),
   };
 }
@@ -58,17 +58,17 @@ const englishPillars = [
   {
     icon: RefreshCw,
     title: 'Continuity Through Transition',
-    desc: 'Maintain operational coherence and strategic continuity during succession, reorganization, or expansion — without losing organizational context.',
+    desc: 'Maintain operational coherence and strategic continuity during succession, reorganization, or growth.',
   },
   {
     icon: Network,
     title: 'Longitudinal Organizational Visibility',
-    desc: 'Surface the historical and relational context that informs present decisions — from collective agreements to governance evolution over time.',
+    desc: 'Surface the historical and relational context that informs present decisions.',
   },
   {
     icon: Users,
     title: 'Continuity Planning',
-    desc: 'Proactively identify continuity risks and build resilience pathways before they become vulnerabilities.',
+    desc: 'Identify continuity risks early and build resilience pathways.',
   },
   {
     icon: ShieldCheck,
@@ -78,15 +78,15 @@ const englishPillars = [
   {
     icon: BarChart3,
     title: 'Explainable Intelligence',
-    desc: 'Every organizational insight is traceable to its source evidence — no black box outputs, no unexplained recommendations.',
+    desc: 'Every organizational insight is traceable to its source evidence — no opaque outputs or unexplained recommendations.',
   },
 ];
 
 const englishJourneySteps = [
   { step: '01', label: 'Fragmentation Problem',     desc: 'Knowledge fragmentation and continuity risk become visible across the organization.' },
   { step: '02', label: 'Organizational Memory',          desc: 'Organizational memory is captured, preserved, and made operationally accessible at scale.' },
-  { step: '03', label: 'Continuity Visibility',      desc: 'Leadership gains a longitudinal view of organizational context and resilience status.' },
-  { step: '04', label: 'Explainable Intelligence',   desc: 'Every continuity insight is traceable, human-readable, and governance-safe.' },
+   { step: '03', label: 'Continuity Visibility',      desc: 'Leadership gains a clear view of context and resilience status.' },
+   { step: '04', label: 'Explainable Intelligence',   desc: 'Every continuity insight is traceable and human-readable.' },
   { step: '05', label: 'Governance Continuity',      desc: 'Governance structures are preserved and modernized without losing organizational coherence.' },
   { step: '06', label: 'Resilience Outcome',         desc: 'The organization emerges stronger, more resilient, and strategically coherent through change.' },
 ];
@@ -109,11 +109,11 @@ const pageCopy = {
     problemBody1:
       'Labour organizations face a persistent continuity crisis: decades of organizational knowledge — negotiation history, relationship maps, governance decisions, operational precedents — lives in people, not in systems. When leaders leave, retire, or transition, that knowledge walks out with them.',
     problemBody2:
-      'UnionEyes Organizational Continuity transforms fragmented organizational knowledge into governed, accessible, and explainable continuity-aware structures — so your organization is stronger through every leadership transition.',
+      'UnionEyes Organizational Continuity turns fragmented knowledge into governed, accessible, and explainable records so your organization stays stronger through every leadership transition.',
     journeyHeading: 'From fragmentation to organizational resilience',
     pillarsHeading: 'Six continuity capabilities. One integrated system.',
     pillarsBody:
-      'Each capability is modular and deployable independently — or together as a unified organizational continuity substrate.',
+      'Each capability is modular and can be deployed independently — or together as one integrated continuity system.',
     trustSignals: [
       { label: 'Labour-safe by design', sub: 'Zero individual conduct grading or monitoring' },
       { label: 'Human oversight required', sub: 'All intelligence is human-reviewed' },
@@ -121,7 +121,7 @@ const pageCopy = {
     ],
     finalHeading: 'Ready to strengthen organizational continuity?',
     finalBody:
-      'See how UnionEyes preserves organizational memory and builds resilience through your leadership transitions.',
+      'See how UnionEyes preserves organizational memory and builds resilience through leadership transitions.',
     finalSecondary: 'Explore Organizational Memory',
     journeySteps: englishJourneySteps,
     pillars: englishPillars,
@@ -147,9 +147,9 @@ const pageCopy = {
     journeyHeading: 'De la fragmentation à la résilience organisationnelle',
     pillarsHeading: 'Six capacités de continuité. Un système intégré.',
     pillarsBody:
-      'Chaque capacité peut être déployée seule ou avec les autres comme substrat unifié de continuité organisationnelle.',
+      'Chaque capacité peut être déployée seule ou avec les autres comme système unifié de continuité organisationnelle.',
     trustSignals: [
-      { label: 'Respectueux du travail par conception', sub: 'Aucune notation ou surveillance de conduite individuelle' },
+      { label: 'Respectueux du travail par conception', sub: 'Aucune notation ni surveillance individuelle' },
       { label: 'Supervision humaine requise', sub: 'Toute intelligence est revue par des humains' },
       { label: 'Intelligence explicable', sub: 'Chaque signal est traçable à ses preuves' },
     ],
@@ -456,7 +456,7 @@ export default async function OrganizationalContinuityPage({
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8">
-            <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational continuity as a gradual, governance-safe pathway</h2>
+            <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational continuity as a gradual path</h2>
               <div className="space-y-2">
                 {institutionalBeforeAfterMap.map((stage, index) => (
                   <article key={stage} className="p-3 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-between">

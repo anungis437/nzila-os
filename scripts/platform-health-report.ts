@@ -9,7 +9,7 @@
  *   ops/outputs/platform-health.json
  *
  * Usage:
- *   pnpm health:report
+ *   pnpm exec tsx scripts/platform-health-report.ts
  *
  * Exit codes:
  *   0 — all subsystems healthy

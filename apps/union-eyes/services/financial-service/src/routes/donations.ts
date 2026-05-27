@@ -291,7 +291,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
         recentDonations: recentDonations,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -337,7 +337,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
       success: true,
       data: donations[0],
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',

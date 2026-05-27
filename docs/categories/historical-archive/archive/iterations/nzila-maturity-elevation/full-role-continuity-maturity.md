@@ -33,9 +33,9 @@ For every role, the ecosystem must deliver:
 
 Validated via:
 
-- `pnpm validate:cognition` — bounded interpretation distribution
-- `pnpm validate:labor-continuity` — UE-specific continuity invariants
-- `pnpm validate:maturity-elevation` — cross-app convergence
+- `node tooling/scripts/validate-institutional-cognition-convergence.mjs` — bounded interpretation distribution
+- `node tooling/scripts/validate-labor-continuity-governance.mjs` — UE-specific continuity invariants
+- `node tooling/scripts/validate-maturity-convergence.mjs` — cross-app convergence
 
 ## 5. Authority
 

@@ -15,7 +15,7 @@ pnpm install
 pnpm dev --filter @nzila/my-app
 
 # Validate governance compliance
-pnpm validate:control:manifests
+pnpm exec tsx tooling/governance/validate-control-manifests.ts
 ```
 
 ## What Gets Created
@@ -95,8 +95,8 @@ auditLayer({
 Your app is automatically covered by:
 
 - **Contract tests** — `pnpm contract-tests` validates structural invariants
-- **Control manifest validation** — `pnpm validate:control:manifests` checks CM-001..CM-009
-- **Governance gates** — CI runs `pnpm validate:governance:gate` with fail-closed checks
+- **Control manifest validation** — `pnpm exec tsx tooling/governance/validate-control-manifests.ts` checks CM-001..CM-009
+- **Governance gates** — CI runs `pnpm exec tsx tooling/governance/validate-governance-gate.ts` with fail-closed checks
 
 ## Policy Profiles
 
@@ -136,7 +136,7 @@ If a control cannot be immediately adopted, declare an exception with an expiry:
 - [ ] Scaffold app with `scaffold-governed-app.ts`
 - [ ] Customize `lib/enforcement.ts` with real auth/governance/audit
 - [ ] Add app to `governance/runtime-adoption-matrix.json`
-- [ ] Run `pnpm validate:control:manifests` — all checks pass
+- [ ] Run `pnpm exec tsx tooling/governance/validate-control-manifests.ts` — all checks pass
 - [ ] Run `pnpm contract-tests` — all tests pass
-- [ ] Run `pnpm validate:governance:gate` — all gates pass
+- [ ] Run `pnpm exec tsx tooling/governance/validate-governance-gate.ts` — all gates pass
 - [ ] Create PR, CI green, merge

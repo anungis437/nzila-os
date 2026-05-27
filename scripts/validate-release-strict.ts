@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * validate:release:strict — Strict release gate for NzilaOS.
+ * validate-release-strict.ts — Strict release gate for NzilaOS.
  *
  * Runs all validation audits and fails the gate if:
  *   - Any architecture errors exist

@@ -14,7 +14,7 @@
 - [ ] Pilot org is provisioned with sample data
 - [ ] Integrations configured (at least one active)
 - [ ] Proof pack generated for the pilot org
-- [ ] SLO gate passing (`pnpm pilot:check`)
+- [ ] SLO gate passing (`pnpm exec tsx scripts/pilot-check.ts`)
 
 ---
 

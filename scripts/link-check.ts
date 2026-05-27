@@ -4,8 +4,8 @@
  * link-check.ts — Validate internal links across Markdown docs
  *
  * Usage:
- *   pnpm link-check              # check all docs
- *   pnpm link-check docs/        # check specific directory
+ *   pnpm exec tsx scripts/link-check.ts              # check all docs
+ *   pnpm exec tsx scripts/link-check.ts docs/        # check specific directory
  *
  * Checks:
  *   - Relative markdown links ([text](relative/path.md))

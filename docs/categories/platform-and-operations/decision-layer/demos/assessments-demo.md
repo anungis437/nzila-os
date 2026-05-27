@@ -5,7 +5,7 @@
 Run the demo seed to populate decision records:
 
 ```bash
-pnpm decision:seed-demo
+pnpm exec tsx scripts/decision-seed-demo.ts
 ```
 
 For assessment-specific scenarios, the following seeded decisions are illustrative of the patterns used. The assessment vertical extends the same engine with domain-specific signals.

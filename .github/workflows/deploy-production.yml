@@ -67,7 +67,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Governance check
-        run: pnpm governance:check
+        run: pnpm exec tsx scripts/governance-check.ts
 
       - name: Sync change records from main
         run: |
@@ -79,13 +79,13 @@ jobs:
 
       - name: Contract tests
         id: contract_tests
-        run: pnpm contract:test
+        run: pnpm contract-tests
 
       - name: Migration safety gate
-        run: pnpm release:migration:safety
+        run: pnpm exec tsx scripts/release/validate-migration-safety.ts
 
       - name: Release governance audit
-        run: pnpm release:audit
+        run: pnpm exec tsx scripts/release/generate-governance-audit.ts
 
       - name: SLO gate
         id: slo_gate
@@ -289,7 +289,7 @@ jobs:
             )
           ' staging-artifacts/artifact-manifest.json > staging-artifacts/artifact-manifest.filtered.json
 
-          pnpm deploy:transactional \
+          pnpm exec tsx scripts/deploy-transactional.ts \
             --manifest staging-artifacts/artifact-manifest.filtered.json \
             --resource-group "nzila-canada-prod-rg" \
             --health-attempts 10 \
@@ -305,12 +305,12 @@ jobs:
       - name: Ingest GitHub Actions CI evidence
         env:
           CI_CONCLUSION: ${{ job.status }}
-        run: pnpm proof:ingest:ci
+        run: pnpm exec tsx scripts/proof/ingest-github-actions.ts
 
       - name: Ingest Azure runtime evidence (live)
         env:
           AZ_LIVE_INGEST: 'true'
-        run: pnpm proof:ingest:azure
+        run: pnpm exec tsx scripts/proof/ingest-azure-runtime.ts
 
       - name: Record governance snapshot + release manifest
         run: |
@@ -401,7 +401,7 @@ jobs:
         continue-on-error: true
 
       - name: Generate portfolio release dashboard
-        run: pnpm release:dashboard --output markdown
+        run: pnpm exec tsx scripts/release/portfolio-dashboard.ts --output markdown
 
       - name: Commit post-deploy artifacts
         run: |

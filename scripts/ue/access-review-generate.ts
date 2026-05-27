@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * ue:access-review:generate — Generate a quarterly access review attestation stub
+ * access-review-generate.ts — Generate a quarterly access review attestation stub
  *   for Union Eyes.
  *
  * This script:
@@ -20,9 +20,9 @@
  * correct and honest about what was and was not checked.
  *
  * Usage:
- *   pnpm ue:access-review:generate
- *   pnpm ue:access-review:generate --quarter 2026-Q3   # generate specific quarter
- *   pnpm ue:access-review:generate --operator sre-team
+ *   pnpm exec tsx scripts/ue/access-review-generate.ts
+ *   pnpm exec tsx scripts/ue/access-review-generate.ts --quarter 2026-Q3   # generate specific quarter
+ *   pnpm exec tsx scripts/ue/access-review-generate.ts --operator sre-team
  *
  * Output:
  *   reports/compliance/access-review/YYYY-QX.json
@@ -215,8 +215,8 @@ None recorded for ${quarter}.
 **Due:** ${nextQuarter}
 
 \`\`\`bash
-pnpm ue:access-review:generate --quarter ${nextQuarter}
-pnpm ue:access-review:validate
+pnpm exec tsx scripts/ue/access-review-generate.ts --quarter ${nextQuarter}
+pnpm exec tsx scripts/ue/access-review-validate.ts
 \`\`\`
 
 ---

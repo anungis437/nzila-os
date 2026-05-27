@@ -11,7 +11,7 @@
 
 import { Decimal } from 'decimal.js';
 import { logger } from '@/lib/logger';
-import { getResendClient, getFromEmail } from '@/lib/email-service';
+import { getFromEmail, sendResendEmail } from '@/lib/email-service';
 
 export interface PaymentConfirmationEmail {
   to: string;
@@ -54,14 +54,19 @@ export class FinancialEmailService {
    */
   static async sendPaymentConfirmation(params: PaymentConfirmationEmail): Promise<void> {
     try {
-      const client = getResendClient();
-      if (!client) { logger.warn('Resend not configured – payment confirmation email skipped'); return; }
-      await client.emails.send({
+      const result = await sendResendEmail({
         from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: `Payment Confirmed - ${params.currency} ${params.amount.toFixed(2)}`,
         html: this.generatePaymentConfirmationHTML(params),
+      }, {
+        feature: 'financial_notifications',
+        templateId: 'payment_confirmation',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send payment confirmation email');
+      }
 
       logger.info('Payment confirmation email sent', {
         to: params.to,
@@ -78,14 +83,19 @@ export class FinancialEmailService {
    */
   static async sendPaymentFailure(params: PaymentFailureEmail): Promise<void> {
     try {
-      const client = getResendClient();
-      if (!client) { logger.warn('Resend not configured – payment failure email skipped'); return; }
-      await client.emails.send({
+      const result = await sendResendEmail({
         from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: `Payment Failed - Action Required`,
         html: this.generatePaymentFailureHTML(params),
+      }, {
+        feature: 'financial_notifications',
+        templateId: 'payment_failure',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send payment failure email');
+      }
 
       logger.info('Payment failure email sent', { to: params.to });
     } catch (error) {
@@ -99,9 +109,7 @@ export class FinancialEmailService {
    */
   static async sendInvoice(params: InvoiceEmail): Promise<void> {
     try {
-      const client = getResendClient();
-      if (!client) { logger.warn('Resend not configured – invoice email skipped'); return; }
-      await client.emails.send({
+      const result = await sendResendEmail({
         from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: `Invoice ${params.invoiceNumber} - Due ${params.dueDate.toLocaleDateString()}`,
@@ -110,7 +118,14 @@ export class FinancialEmailService {
           filename: `invoice-${params.invoiceNumber}.pdf`,
           path: params.invoicePdfUrl,
         }] : undefined,
+      }, {
+        feature: 'financial_notifications',
+        templateId: 'invoice',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send invoice email');
+      }
 
       logger.info('Invoice email sent', { to: params.to, invoiceNumber: params.invoiceNumber });
     } catch (error) {
@@ -132,9 +147,7 @@ export class FinancialEmailService {
     receiptPdfUrl?: string;
   }): Promise<void> {
     try {
-      const client = getResendClient();
-      if (!client) { logger.warn('Resend not configured – receipt email skipped'); return; }
-      await client.emails.send({
+      const result = await sendResendEmail({
         from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: `Receipt #${params.receiptNumber}`,
@@ -153,7 +166,14 @@ export class FinancialEmailService {
           filename: `receipt-${params.receiptNumber}.pdf`,
           path: params.receiptPdfUrl,
         }] : undefined,
+      }, {
+        feature: 'financial_notifications',
+        templateId: 'receipt',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send receipt email');
+      }
     } catch (error) {
       logger.error('Failed to send receipt email', { error });
       throw error;
@@ -177,9 +197,7 @@ export class FinancialEmailService {
         ? `Payment Overdue: ${params.daysOverdue} days - Action Required`
         : `Payment Reminder - Due in ${Math.abs(params.daysOverdue)} days`;
 
-      const client = getResendClient();
-      if (!client) { logger.warn('Resend not configured – payment reminder skipped'); return; }
-      await client.emails.send({
+      const result = await sendResendEmail({
         from: getFromEmail('UnionEyes'),
         to: params.to,
         subject,
@@ -197,7 +215,14 @@ export class FinancialEmailService {
           <p><a href="${params.paymentUrl}" style="background: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 16px;">Pay Now</a></p>
           <p style="margin-top: 24px; color: #666; font-size: 14px;">If you have already made this payment, please disregard this message.</p>
         `,
+      }, {
+        feature: 'financial_notifications',
+        templateId: 'payment_reminder',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send payment reminder email');
+      }
     } catch (error) {
       logger.error('Failed to send payment reminder email', { error });
       throw error;
@@ -216,9 +241,7 @@ export class FinancialEmailService {
     nextChargeDate: Date;
   }): Promise<void> {
     try {
-      const client = getResendClient();
-      if (!client) { logger.warn('Resend not configured – autopay confirmation skipped'); return; }
-      await client.emails.send({
+      const result = await sendResendEmail({
         from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: 'AutoPay Successfully Set Up',
@@ -233,7 +256,14 @@ export class FinancialEmailService {
           </table>
           <p>You can manage your AutoPay settings at any time through your member portal.</p>
         `,
+      }, {
+        feature: 'financial_notifications',
+        templateId: 'autopay_confirmation',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send autopay confirmation email');
+      }
     } catch (error) {
       logger.error('Failed to send autopay confirmation email', { error });
       throw error;
@@ -251,9 +281,7 @@ export class FinancialEmailService {
     updatePaymentUrl: string;
   }): Promise<void> {
     try {
-      const client = getResendClient();
-      if (!client) { logger.warn('Resend not configured – autopay disabled email skipped'); return; }
-      await client.emails.send({
+      const result = await sendResendEmail({
         from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: 'AutoPay Disabled - Action Required',
@@ -265,7 +293,14 @@ export class FinancialEmailService {
           <p>To resume automatic payments, please update your payment method and re-enable AutoPay.</p>
           <p><a href="${params.updatePaymentUrl}" style="background: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 16px;">Update Payment Method</a></p>
         `,
+      }, {
+        feature: 'financial_notifications',
+        templateId: 'autopay_disabled',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send autopay disabled email');
+      }
     } catch (error) {
       logger.error('Failed to send autopay disabled email', { error });
       throw error;

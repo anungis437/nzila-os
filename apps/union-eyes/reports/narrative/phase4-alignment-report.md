@@ -1,4 +1,4 @@
-# Phase 4 Alignment Report — Union Eyes Marketing Ecosystem
+# Phase 4 Alignment Report — UnionEyes Marketing Ecosystem
 
 **Branch:** `chore/post-delta-7-orchestrator-image-fix-2026-05-12`
 **Last shipped commit (Phase 3):** `bcc8c3a3e`
@@ -9,7 +9,7 @@
 
 ## 1. Mandate Recap
 
-> Complete the transition of Union Eyes from "advanced labour operations software with governance themes" into a fully coherent **institutional governance & continuity infrastructure** ecosystem.
+> Complete the transition of UnionEyes from "advanced labour operations software with governance themes" into a fully coherent **institutional governance & continuity infrastructure** ecosystem.
 >
 > **Inversion:** the platform must read as *institutional infrastructure with operational modules*, not the inverse.
 
@@ -189,7 +189,7 @@ From `apps/union-eyes/reports/narrative/narrative-audit.json` (87 files):
 
 5 surveillance-ai hard-fails persist (see §8). Tokens triggering: `worker scoring`, `workforce surveillance`. Replace with the pre-approved disclaimer pattern already used in conventions/page.tsx:
 
-> *"Union Eyes does not score workers. Models surface institutional patterns — never individual behavioural ratings."*
+> *"UnionEyes does not score workers. Models surface institutional patterns — never individual behavioural ratings."*
 
 ---
 

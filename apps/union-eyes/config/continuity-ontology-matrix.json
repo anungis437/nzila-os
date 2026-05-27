@@ -1,0 +1,430 @@
+{
+  "version": "1.4.2",
+  "lastUpdated": "2026-05-25",
+  "governanceDomains": [
+    "routes",
+    "apis",
+    "navLabels",
+    "featureGates",
+    "pricingTiers",
+    "docsReferences",
+    "procurementLanguage",
+    "visibilityRules",
+    "semanticDictionary",
+    "navComposition",
+    "antiPatternIntelligence",
+    "constitutionalAmendments"
+  ],
+  "layers": [
+    {
+      "layer": "OCI Foundations",
+      "canonicalRoutes": [
+        "/[locale]/oci"
+      ],
+      "runtimeRoutes": [
+        "/[locale]/organizational-continuity-risk",
+        "/[locale]/continuity-assessment/start"
+      ],
+      "canonicalApis": [
+        "/api/oci/intake",
+        "/api/oci/assessment",
+        "/api/oci/results/[id]",
+        "/api/oci/report/[assessmentId]"
+      ],
+      "navLabels": [
+        "OCI",
+        "OCI Foundations"
+      ],
+      "runtimeApis": [
+        "/api/ocra/start",
+        "/api/ocra/submit",
+        "/api/ocra/results/[id]",
+        "/api/ocra/report/[assessmentId]"
+      ]
+    },
+    {
+      "layer": "OCRA Intelligence",
+      "canonicalRoutes": [
+        "/[locale]/ocra"
+      ],
+      "runtimeRoutes": [
+        "/[locale]/organizational-continuity-risk",
+        "/[locale]/dashboard/intelligence",
+        "/[locale]/dashboard/continuity-intelligence"
+      ],
+      "canonicalApis": [
+        "/api/ocra/start",
+        "/api/ocra/submit",
+        "/api/ocra/results/[id]",
+        "/api/ocra/report/[assessmentId]"
+      ],
+      "navLabels": [
+        "OCRA",
+        "OCRA Intelligence"
+      ],
+      "runtimeApis": [
+        "/api/icra/start",
+        "/api/icra/submit",
+        "/api/icra/results/[id]",
+        "/api/icra/report/[assessmentId]"
+      ]
+    },
+    {
+      "layer": "Operations Core",
+      "canonicalRoutes": [
+        "/[locale]/operations/grievances",
+        "/[locale]/operations/investigations",
+        "/[locale]/continuity/docs",
+        "/[locale]/continuity/inheritance",
+        "/[locale]/continuity/archives",
+        "/[locale]/onboarding",
+        "/[locale]/onboarding/survivability",
+        "/[locale]/onboarding/transfers"
+      ],
+      "runtimeRoutes": [
+        "/[locale]/dashboard/work",
+        "/[locale]/dashboard/grievances",
+        "/[locale]/dashboard/cases",
+        "/[locale]/dashboard/documents",
+        "/[locale]/dashboard/institutional-memory",
+        "/[locale]/dashboard/admin/onboarding",
+        "/[locale]/dashboard/pilot/onboarding"
+      ],
+      "canonicalApis": [
+        "/api/grievances",
+        "/api/cases",
+        "/api/investigations",
+        "/api/investigations/evidence",
+        "/api/investigations/timeline",
+        "/api/investigations/audit",
+        "/api/continuity/docs",
+        "/api/continuity/inheritance",
+        "/api/continuity/archives",
+        "/api/onboarding",
+        "/api/onboarding/transfers",
+        "/api/onboarding/readiness"
+      ],
+      "navLabels": [
+        "Operations",
+        "Operations Continuity"
+      ],
+      "runtimeApis": [
+        "/api/grievances",
+        "/api/cases",
+        "/api/cases/evidence",
+        "/api/cases/timeline",
+        "/api/audits",
+        "/api/documents",
+        "/api/documents/repository",
+        "/api/onboarding",
+        "/api/onboarding/events"
+      ]
+    },
+    {
+      "layer": "Governance Continuity",
+      "canonicalRoutes": [
+        "/[locale]/governance-continuity"
+      ],
+      "runtimeRoutes": [
+        "/[locale]/dashboard/governance"
+      ],
+      "canonicalApis": [
+        "/api/governance"
+      ],
+      "navLabels": [
+        "Governance Continuity",
+        "Governance Trust & Oversight"
+      ],
+      "runtimeApis": [
+        "/api/governance"
+      ]
+    },
+    {
+      "layer": "Institutional Intelligence",
+      "canonicalRoutes": [
+        "/[locale]/intelligence"
+      ],
+      "runtimeRoutes": [
+        "/[locale]/dashboard/intelligence",
+        "/[locale]/dashboard/institutional-intelligence"
+      ],
+      "canonicalApis": [
+        "/api/intelligence"
+      ],
+      "navLabels": [
+        "Institutional Intelligence",
+        "Institutional Intelligence Reports"
+      ],
+      "runtimeApis": [
+        "/api/analytics/insights"
+      ]
+    }
+  ],
+  "pricingTiers": [
+    "Institutional Continuity Core",
+    "Governance & Continuity Operations",
+    "Institutional Operating Infrastructure",
+    "Institutional Sovereignty Layer"
+  ],
+  "featureGates": [
+    "runtimeRoleGate",
+    "moduleGate",
+    "pilotModeGate",
+    "sovereigntyGate"
+  ],
+  "docsReferences": [
+    {
+      "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/wave10-platform-ontology-stabilization-review.md",
+      "requiredTerms": [
+        "OCI",
+        "OCRA",
+        "Operations",
+        "Governance Continuity",
+        "Institutional Intelligence"
+      ]
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/full-procurement-sales-motion-refactor.md",
+      "requiredTerms": [
+        "procurement",
+        "governance",
+        "continuity"
+      ]
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/full-monetization-rearchitecture.md",
+      "requiredTerms": [
+        "Institutional Continuity Core",
+        "Governance & Continuity Operations",
+        "Institutional Operating Infrastructure",
+        "Institutional Sovereignty Layer"
+      ]
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/constitutional-semantic-dictionary.md",
+      "requiredTerms": [
+        "Continuity",
+        "Governance Continuity",
+        "Institutional Intelligence",
+        "Survivability",
+        "Operational Inheritance",
+        "Stewardship Concentration"
+      ]
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/ontology-constitution-v1.md",
+      "requiredTerms": [
+        "Ontology Constitution v1.0",
+        "constitutional amendment",
+        "frozen domains",
+        "governance proportionality"
+      ]
+    }
+  ],
+  "gatingPolicy": [
+    {
+      "domain": "OCI",
+      "allowedExperiences": ["member", "staff", "executive", "governance", "admin"],
+      "routePrefixes": [
+        "/dashboard/inbox",
+        "/dashboard/work"
+      ]
+    },
+    {
+      "domain": "OCRA",
+      "allowedExperiences": ["executive", "governance", "admin"],
+      "routePrefixes": [
+        "/dashboard/intelligence",
+        "/dashboard/continuity-intelligence"
+      ]
+    },
+    {
+      "domain": "Operations",
+      "allowedExperiences": ["staff", "executive", "governance", "admin"],
+      "routePrefixes": [
+        "/dashboard/work",
+        "/dashboard/cases",
+        "/dashboard/documents"
+      ]
+    },
+    {
+      "domain": "Governance Continuity",
+      "allowedExperiences": ["governance", "admin", "executive"],
+      "routePrefixes": [
+        "/dashboard/governance",
+        "/dashboard/governance-center",
+        "/dashboard/trust"
+      ]
+    },
+    {
+      "domain": "Institutional Intelligence",
+      "allowedExperiences": ["staff", "executive", "governance", "admin"],
+      "routePrefixes": [
+        "/dashboard/reports"
+      ]
+    }
+  ],
+  "semanticDictionaryDoc": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/constitutional-semantic-dictionary.md",
+  "semanticDictionary": [
+    {
+      "term": "continuity",
+      "canonicalLabel": "Continuity",
+      "definition": "The system capacity to preserve institutional function and public trust across leadership, operational, or environmental disruption.",
+      "synonyms": [
+        "institutional continuity",
+        "continuity-aware"
+      ]
+    },
+    {
+      "term": "governance-continuity",
+      "canonicalLabel": "Governance Continuity",
+      "definition": "Governance operation that maintains accountable decision rights, policy traceability, and constitutional oversight during change.",
+      "synonyms": [
+        "governance-safe operations",
+        "trust and oversight continuity"
+      ]
+    },
+    {
+      "term": "institutional-intelligence",
+      "canonicalLabel": "Institutional Intelligence",
+      "definition": "Longitudinal evidence and insight layer that informs continuity decisions without detaching from operational reality.",
+      "synonyms": [
+        "continuity intelligence",
+        "institutional observatory"
+      ]
+    },
+    {
+      "term": "survivability",
+      "canonicalLabel": "Survivability",
+      "definition": "Ability to maintain mission-critical service and stewardship capability through stress, transition, and constrained-resource periods.",
+      "synonyms": [
+        "resilience",
+        "operational survivability"
+      ]
+    },
+    {
+      "term": "continuity-aware-operations",
+      "canonicalLabel": "Continuity-aware Operations",
+      "definition": "Operational execution model in which workflows, priorities, and evidence chains are explicitly aligned to continuity outcomes.",
+      "synonyms": [
+        "operations continuity",
+        "continuity operations"
+      ]
+    },
+    {
+      "term": "governance-safe-ai",
+      "canonicalLabel": "Governance-safe AI",
+      "definition": "AI capability constrained by governance controls, explainability, and auditability to protect institutional legitimacy.",
+      "synonyms": [
+        "constitutional AI governance",
+        "trust-bounded AI"
+      ]
+    },
+    {
+      "term": "operational-inheritance",
+      "canonicalLabel": "Operational Inheritance",
+      "definition": "Transferability of process knowledge, obligations, and supporting evidence between roles without reconstruction failure.",
+      "synonyms": [
+        "institutional handoff continuity",
+        "knowledge transfer continuity"
+      ]
+    },
+    {
+      "term": "reconstruction-burden",
+      "canonicalLabel": "Reconstruction Burden",
+      "definition": "Cost of reassembling context, evidence, and intent when continuity systems fail or stewardship transitions are weak.",
+      "synonyms": [
+        "context reconstruction cost",
+        "institutional relearning burden"
+      ]
+    },
+    {
+      "term": "stewardship-concentration",
+      "canonicalLabel": "Stewardship Concentration",
+      "definition": "Risk condition where critical institutional knowledge or control is held by too few actors, increasing continuity fragility.",
+      "synonyms": [
+        "key-person governance risk",
+        "stewardship bottleneck"
+      ]
+    }
+  ],
+  "navComposition": {
+    "ignoredGroups": [
+      "Settings"
+    ],
+    "domainAliases": {
+      "OCI": "OCI",
+      "OCI Foundations": "OCI",
+      "OCRA": "OCRA",
+      "OCRA Intelligence": "OCRA",
+      "Operations": "Operations",
+      "Operations Continuity": "Operations",
+      "Governance Continuity": "Governance Continuity",
+      "Governance Trust & Oversight": "Governance Continuity",
+      "Institutional Intelligence": "Institutional Intelligence",
+      "Institutional Intelligence Reports": "Institutional Intelligence"
+    }
+  },
+  "constitution": {
+    "version": "1.0.0",
+    "status": "active",
+    "effectiveDate": "2026-05-25",
+    "frozenDomains": [
+      "layers",
+      "semanticDictionary",
+      "navComposition",
+      "pricingTiers",
+      "routeFamilies",
+      "procurementSemantics"
+    ],
+    "amendmentPolicy": "constitutional-amendment-required"
+  },
+  "antiPatternIntelligence": {
+    "mode": "warn",
+    "calibrationClasses": [
+      "harmless-legacy-language",
+      "transitional-acceptable-language",
+      "risky-saas-drift",
+      "surveillance-adjacent-language",
+      "doctrine-violation"
+    ],
+    "rules": [
+      {
+        "id": "surveillance-framing",
+        "phrase": "surveillance tooling",
+        "classification": "surveillance-adjacent-language",
+        "severity": "medium",
+        "enforcementPhase": "A",
+        "reason": "Avoid reducing Union Eyes to surveillance semantics.",
+        "appliesTo": ["docs", "navLabels"]
+      },
+      {
+        "id": "generic-saas-framing",
+        "phrase": "generic workflow saas",
+        "classification": "risky-saas-drift",
+        "severity": "medium",
+        "enforcementPhase": "A",
+        "reason": "Protect continuity-aware institutional positioning.",
+        "appliesTo": ["docs", "pricing"]
+      },
+      {
+        "id": "ai-autonomy-without-governance",
+        "phrase": "fully autonomous ai decisions",
+        "classification": "doctrine-violation",
+        "severity": "high",
+        "enforcementPhase": "A",
+        "reason": "AI capability must remain governance-safe and accountable.",
+        "appliesTo": ["docs", "navLabels", "procurement"]
+      },
+      {
+        "id": "productivity-monitoring",
+        "phrase": "employee productivity monitoring",
+        "classification": "surveillance-adjacent-language",
+        "severity": "high",
+        "enforcementPhase": "A",
+        "reason": "Prohibit worker-monitoring framing drift.",
+        "appliesTo": ["docs", "procurement"]
+      }
+    ]
+  }
+}

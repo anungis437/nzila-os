@@ -68,30 +68,30 @@ In the active environment vaults, store:
 4. Validate API access:
 
 ```bash
-pnpm dns:check
+pnpm exec tsx scripts/dns/check.ts
 ```
 
 5. Dry-run sync:
 
 ```bash
-pnpm dns:sync -- --dry-run
+pnpm exec tsx scripts/dns/sync.ts --dry-run
 ```
 
 6. Apply sync:
 
 ```bash
-pnpm dns:sync
+pnpm exec tsx scripts/dns/sync.ts
 ```
 
 7. Verify DNS and HTTPS:
 
 ```bash
-pnpm dns:verify
-pnpm dns:health
+pnpm exec tsx scripts/dns/verify.ts
+pnpm exec tsx scripts/dns/health.ts
 ```
 
 8. Update nameservers in GoDaddy to the two Cloudflare-assigned nameservers.
-9. Monitor propagation using dns:verify every 2-5 minutes until green.
+9. Monitor propagation using `pnpm exec tsx scripts/dns/verify.ts` every 2-5 minutes until green.
 10. Keep Azure default hostnames as break-glass fallback.
 
 ## Origin Firewall Guidance
@@ -101,7 +101,7 @@ For VM or bare-metal origins behind Cloudflare proxy, allowlist Cloudflare IP ra
 Generate current ranges and helper rules:
 
 ```bash
-pnpm dns:cloudflare-ips
+pnpm exec tsx scripts/dns/cloudflare-ips.ts
 ```
 
 Outputs:

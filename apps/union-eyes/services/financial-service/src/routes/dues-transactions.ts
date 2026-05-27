@@ -373,7 +373,7 @@ router.get('/', async (req: Request, res: Response) => {
       success: true,
       data: transactions,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -413,7 +413,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       success: true,
       data: transaction,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',

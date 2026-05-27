@@ -39,7 +39,7 @@
 
 ## Section 1 — NzilaOS GA Gate v2 Required Checks
 
-All 20 checks run via `pnpm ga-check` against commit `5979ae7` on 2026-02-22.
+All 20 checks run via `pnpm exec tsx tooling/ga-check/ga-check.ts` against commit `5979ae7` on 2026-02-22.
 
 | Gate ID | Check Name | Status | Details |
 |---------|-----------|--------|---------|
@@ -258,6 +258,6 @@ Both UnionEyes and ABR Insights are held to the **same NzilaOS GA Gate v2 bar**.
 
 ---
 
-*GA Gate v2 run: `pnpm ga-check` — commit `5979ae7` — 2026-02-22T01:17:05.225Z — 20/20 PASS*  
+*GA Gate v2 run: `pnpm exec tsx tooling/ga-check/ga-check.ts` — commit `5979ae7` — 2026-02-22T01:17:05.225Z — 20/20 PASS*  
 *Report managed in: `docs/platform/GA_READINESS.md`*  
 *Authoritative gate source: `tooling/ga-check/ga-check.ts` — `governance/ga/GA_CHECK_REPORT.md`*

@@ -15,10 +15,10 @@
  *   --evidence    Generate evidence record only (for CI without DB access)
  *
  * Usage:
- *   pnpm db:restore-drill                        # dry-run (default)
- *   pnpm db:restore-drill --execute              # full drill
- *   pnpm db:restore-drill --execute --scratch-db nzila_drill
- *   pnpm db:restore-drill --evidence             # evidence-only (CI)
+ *   pnpm exec tsx scripts/db/restore-drill.ts                        # dry-run (default)
+ *   pnpm exec tsx scripts/db/restore-drill.ts --execute              # full drill
+ *   pnpm exec tsx scripts/db/restore-drill.ts --execute --scratch-db nzila_drill
+ *   pnpm exec tsx scripts/db/restore-drill.ts --evidence             # evidence-only (CI)
  *
  * Evidence output:
  *   reports/db/restore-drill-YYYY-MM.json         (structured drill record)

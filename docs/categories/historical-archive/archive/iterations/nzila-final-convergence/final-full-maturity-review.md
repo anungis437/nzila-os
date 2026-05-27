@@ -53,10 +53,10 @@
 
 ## 7. Validator Coverage
 
-- `pnpm validate:cognition`: PASS
-- `pnpm validate:labor-continuity`: PASS
-- `pnpm validate:maturity-elevation`: PASS
-- `pnpm validate:final-convergence`: PASS
+- `node tooling/scripts/validate-institutional-cognition-convergence.mjs`: PASS
+- `node tooling/scripts/validate-labor-continuity-governance.mjs`: PASS
+- `node tooling/scripts/validate-maturity-convergence.mjs`: PASS
+- `node tooling/scripts/validate-final-convergence.mjs`: PASS
 - `pnpm validate:maturity`: app-maturity contract tests (separate semantic domain)
 
 ## 8. Unresolved Realism Risks

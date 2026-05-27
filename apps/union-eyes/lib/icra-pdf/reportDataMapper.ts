@@ -3,7 +3,7 @@
  * DOCTRINE_VERSION: 1.0.0
  * CHANGE CLASS: Commercial
  *
- * Executive Continuity Brief — Report Data Mapper
+ * Leadership Briefing Report — Report Data Mapper
  *
  * Maps InstitutionalContinuityProfile + OrganizationContext to PdfReportData.
  * Calls the narrative engine for each section and assembles the full data

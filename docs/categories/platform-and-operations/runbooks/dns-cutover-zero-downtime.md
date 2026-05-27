@@ -27,21 +27,21 @@ Cut over authoritative DNS with no customer-visible downtime and no loss of stag
 1. Run API and configuration preflight:
 
 ```bash
-pnpm dns:check
-pnpm dns:sync -- --dry-run
+pnpm exec tsx scripts/dns/check.ts
+pnpm exec tsx scripts/dns/sync.ts --dry-run
 ```
 
 2. Apply desired DNS records:
 
 ```bash
-pnpm dns:sync
+pnpm exec tsx scripts/dns/sync.ts
 ```
 
 3. Validate target state:
 
 ```bash
-pnpm dns:verify
-pnpm dns:health
+pnpm exec tsx scripts/dns/verify.ts
+pnpm exec tsx scripts/dns/health.ts
 ```
 
 ### T-0
@@ -50,7 +50,7 @@ pnpm dns:health
 2. Start propagation watch loop:
 
 ```bash
-while true; do pnpm dns:verify && break; sleep 120; done
+while true; do pnpm exec tsx scripts/dns/verify.ts && break; sleep 120; done
 ```
 
 3. Confirm workflow smoke checks are green in both staging and production deploy pipelines.
@@ -78,7 +78,7 @@ while true; do pnpm dns:verify && break; sleep 120; done
 
 Trigger rollback if any condition persists for more than 15 minutes:
 
-- dns:verify failing for required hosts
+- DNS verify command failing for required hosts
 - TLS errors on production hostnames
 - Persistent 5xx responses on custom domains
 
@@ -86,4 +86,4 @@ Trigger rollback if any condition persists for more than 15 minutes:
 
 1. Revert registrar nameservers to previous authoritative DNS.
 2. Keep Azure default hostnames available for operational access.
-3. Pause deployments until dns:verify is green.
+3. Pause deployments until DNS verify is green.

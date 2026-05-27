@@ -10,7 +10,7 @@ Coverage artifacts already exist in the repo root:
 Run:
 
 ```bash
-pnpm coverage:dashboard
+node tooling/scripts/generate-coverage-dashboard.mjs
 ```
 
 Outputs:
@@ -27,7 +27,7 @@ The dashboard includes:
 ## Suggested CI Integration
 
 1. Run tests that produce `coverage.xml`.
-2. Run `pnpm coverage:dashboard`.
+2. Run `node tooling/scripts/generate-coverage-dashboard.mjs`.
 3. Upload `reports/coverage/dashboard.md` and `reports/coverage/dashboard.json` as artifacts.
 4. Optionally publish markdown summary in PR comments.
 

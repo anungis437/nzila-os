@@ -1,17 +1,17 @@
-# Union Eyes — AI Governance and Human Oversight
+# UnionEyes — AI Governance and Human Oversight
 
 > **Audience:** Procurement reviewers, ethics committees, institutional buyers.
-> **Scope:** Public-safe summary of Union Eyes AI governance controls and human oversight mechanisms.
+> **Scope:** Public-safe summary of UnionEyes AI governance controls and human oversight mechanisms.
 > **Caveats:** Claims use language such as "is designed to," "supports," and "provides evidence of."
-> Union Eyes does not make autonomous decisions about member rights, employment status, or
+> UnionEyes does not make autonomous decisions about member rights, employment status, or
 > grievance outcomes.
 
 ---
 
 ## 1. AI Governance Philosophy
 
-Union Eyes is designed with the principle that AI operations are advisory tools in service
-of human decision-making. No AI operation in Union Eyes makes binding decisions about
+UnionEyes is designed with the principle that AI operations are advisory tools in service
+of human decision-making. No AI operation in UnionEyes makes binding decisions about
 member matters, grievances, or labour relations outcomes.
 
 **Core principles:**
@@ -70,7 +70,7 @@ AI governance is federation-aware. Each federation tier can declare:
 
 ## 5. AI Governance Simulation
 
-Union Eyes provides shadow-mode AI governance simulations that model:
+UnionEyes provides shadow-mode AI governance simulations that model:
 
 - Sensitive AI escalation scenarios
 - Human review failure paths
@@ -85,9 +85,9 @@ These simulations produce evidence without affecting production runtime.
 
 ---
 
-## 6. What AI Does Not Do in Union Eyes
+## 6. What AI Does Not Do in UnionEyes
 
-Union Eyes AI features are explicitly constrained:
+UnionEyes AI features are explicitly constrained:
 
 | AI does NOT do this |
 |---------------------|

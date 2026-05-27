@@ -1,7 +1,7 @@
 /**
  * Rollback — reverts a protected environment to a previous known-good artifact.
  *
- * Usage: pnpm rollback <STAGING|PRODUCTION> <artifact_digest>
+ * Usage: pnpm exec tsx scripts/rollback.ts <STAGING|PRODUCTION> <artifact_digest>
  *
  * The script verifies the artifact exists in ops/artifacts/, prints the
  * rollback plan, and writes a rollback record for audit purposes.
@@ -56,7 +56,7 @@ function main() {
   const [env, digest] = process.argv.slice(2)
 
   if (!env || !digest) {
-    console.error('Usage: pnpm rollback <STAGING|PRODUCTION> <artifact_digest>')
+    console.error('Usage: pnpm exec tsx scripts/rollback.ts <STAGING|PRODUCTION> <artifact_digest>')
     process.exit(1)
   }
 

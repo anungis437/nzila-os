@@ -117,15 +117,15 @@ Automation entrypoint:
 
 Commands:
 
-- `pnpm ai:analyze`
+- `pnpm exec tsx scripts/ai-agent-runner.ts --phase=analyze`
 
-- `pnpm ai:implement`
+- `pnpm exec tsx scripts/ai-agent-runner.ts --phase=implement`
 
-- `pnpm ai:qa`
+- `pnpm exec tsx scripts/ai-agent-runner.ts --phase=qa`
 
-- `pnpm ai:validate`
+- `pnpm exec tsx scripts/ai-agent-runner.ts --phase=validate`
 
-- `pnpm ai:full-run`
+- `pnpm exec tsx scripts/ai-agent-runner.ts --phase=full-run`
 
 ## GO / NO-GO Logic
 

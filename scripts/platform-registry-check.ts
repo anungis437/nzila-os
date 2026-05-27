@@ -3,7 +3,7 @@
  * JSON shape, ensures all referenced paths exist, and verifies that
  * production apps/services have required metadata.
  *
- * Usage: pnpm registry:check
+ * Usage: pnpm exec tsx scripts/platform-registry-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

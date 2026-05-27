@@ -2,8 +2,8 @@
  * validate-change-window.ts — CLI deployment gating script
  *
  * Usage:
- *   pnpm change:validate --env=STAGING --service=union-eyes
- *   pnpm change:validate --env=PROD --service=web --commit=abc123
+ *   pnpm exec tsx scripts/validate-change-window.ts --env=STAGING --service=union-eyes
+ *   pnpm exec tsx scripts/validate-change-window.ts --env=PROD --service=web --commit=abc123
  *
  * Exits with code 0 if deployment is allowed, 1 if blocked.
  */
@@ -27,7 +27,7 @@ function parseArgs(): { env: Environment; service: string; commit?: string; pr?:
   }
 
   if (!env || !service) {
-    console.error('Usage: pnpm change:validate --env=STAGING|PROD --service=<service-name>')
+    console.error('Usage: pnpm exec tsx scripts/validate-change-window.ts --env=STAGING|PROD --service=<service-name>')
     process.exit(1)
   }
 

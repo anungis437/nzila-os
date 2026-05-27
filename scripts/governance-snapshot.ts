@@ -2,7 +2,7 @@
  * Governance Snapshot — captures a post-deploy governance snapshot.
  * Records environment state, artifact digest, policy status, and change record.
  *
- * Usage: pnpm governance:snapshot <STAGING|PRODUCTION> <commit> <digest> <sbom_hash> [change_ref]
+ * Usage: pnpm exec tsx scripts/governance-snapshot.ts <STAGING|PRODUCTION> <commit> <digest> <sbom_hash> [change_ref]
  */
 
 import * as fs from 'node:fs'
@@ -29,7 +29,7 @@ function main() {
   const [env, commit, digest, sbomHash, changeRef] = process.argv.slice(2)
 
   if (!env || !commit || !digest || !sbomHash) {
-    console.error('Usage: pnpm governance:snapshot <STAGING|PRODUCTION> <commit> <digest> <sbom_hash> [change_ref]')
+    console.error('Usage: pnpm exec tsx scripts/governance-snapshot.ts <STAGING|PRODUCTION> <commit> <digest> <sbom_hash> [change_ref]')
     process.exit(1)
   }
 

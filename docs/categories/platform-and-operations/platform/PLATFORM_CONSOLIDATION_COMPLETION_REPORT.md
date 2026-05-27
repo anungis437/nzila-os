@@ -57,14 +57,14 @@ Current gate snapshot:
 Added:
 
 - scripts/platform-authority-check.ts
-- package script: pnpm platform:authority:check
+- package script: pnpm exec tsx scripts/platform-authority-check.ts
 
 Extended:
 
 - scripts/platform-adoption-gate.ts (moved from shell/schema/workflow checks to concern authority adoption checks)
 - scripts/platform-vs-app-check.ts (now validates governance/platform-package-authority.json)
 - scripts/platform-contract-check.ts (removed stale non-existent shop-quoter target)
-- package script architecture:check includes platform:authority:check
+- package script architecture:check includes `pnpm exec tsx scripts/platform-authority-check.ts`
 
 ## 5) Docs Updated
 
@@ -126,16 +126,16 @@ Package README ownership boundaries:
 
 Commands executed:
 
-- pnpm platform:authority:check
-- pnpm platform:adoption:check
-- pnpm platform:contract:check
-- pnpm architecture:check
+- pnpm exec tsx scripts/platform-authority-check.ts
+- pnpm exec tsx scripts/platform-adoption-gate.ts
+- pnpm exec tsx scripts/platform-contract-check.ts
+- pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts
 
 Outcome:
 
 - architecture:check passes
-- non-blocking warnings remain in platform:surface:model:check and control-plane:coherence:check
-- platform:authority:check passes with one warning (control-plane observability overlap)
+- non-blocking warnings remain in `pnpm exec tsx scripts/platform-surface-model-check.ts` and `pnpm exec tsx scripts/control-plane-coherence-check.ts`
+- `pnpm exec tsx scripts/platform-authority-check.ts` passes with one warning (control-plane observability overlap)
 
 ## 9) Honest Remaining Risks
 

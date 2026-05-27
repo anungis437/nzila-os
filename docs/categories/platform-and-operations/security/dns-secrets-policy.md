@@ -34,8 +34,8 @@ Define required secret handling controls for DNS automation and cutover workflow
 - After rotation, run:
 
 ```bash
-pnpm dns:check
-pnpm dns:verify
+pnpm exec tsx scripts/dns/check.ts
+pnpm exec tsx scripts/dns/verify.ts
 ```
 
 ## Legacy Registrar Credentials
@@ -57,5 +57,5 @@ pnpm dns:verify
 - Refresh allowlists when Cloudflare ranges change. Use:
 
 ```bash
-pnpm dns:cloudflare-ips
+pnpm exec tsx scripts/dns/cloudflare-ips.ts
 ```

@@ -3,10 +3,10 @@
  * DOCTRINE_VERSION: 1.0.0
  * CHANGE CLASS: Commercial
  *
- * ICRA Revenue Tiers — institutional naming, not SaaS vocabulary.
+ * ICRA Revenue Tiers — organizational naming, not SaaS vocabulary.
  *
- * Three tiers reflect institutional seriousness rather than feature ladders.
- * The free tier (Continuity Reflection) is designed to awaken, not to satisfy.
+ * Three tiers reflect organizational seriousness rather than feature ladders.
+ * The free tier (Free Readiness Check) is designed to awaken, not to satisfy.
  * Gating is calm and non-coercive. No scarcity language. No urgency tactics.
  *
  * Report delivery is via conversation (contact form) in this sprint.
@@ -31,9 +31,9 @@ export interface ReportTierDefinition {
 export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
   continuity_reflection: {
     id: 'continuity_reflection',
-    name: 'Continuity Reflection',
-    tagline: 'A structured look at where your institution stands.',
-    priceLabel: 'Complimentary',
+    name: 'Free Readiness Check',
+    tagline: 'A structured look at where your organization stands.',
+    priceLabel: 'Free',
     includes: [
       'Continuity Band (OCI level) and Operational Pattern sublabel',
       'Composite Continuity Indicator',
@@ -54,18 +54,18 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
       'Executive Stewardship Reflections',
       'Full Continuity Burden Index — human compensation indicators',
     ],
-    ctaLabel: 'Assess Institutional Continuity Risk',
+    ctaLabel: 'Take the 10-minute readiness check',
     ctaHref: '/continuity-assessment/start',
   },
 
   executive_continuity_brief: {
     id: 'executive_continuity_brief',
-    name: 'Executive Continuity Brief',
+    name: 'Leadership Briefing Report',
     tagline:
-      'A board-grade analysis of your continuity posture, for leadership conversations that require evidence.',
+      'An evidence-backed report for leadership conversations that need more than a gut feel.',
     priceLabel: '$1,200 CAD',
     includes: [
-      'Everything in the Continuity Reflection',
+      'Everything in the Free Readiness Check',
       'Governance Entropy Analysis — continuity drift indicators and governance inconsistency patterns',
       'Continuity Debt Analysis — invisible continuity burden and reconstruction risk',
       'Organizational Dependency Review — operational dependency concentration and knowledge holder map',
@@ -78,21 +78,21 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
       'Facilitated leadership review session',
       'Governance continuity workshop',
       'Operational lineage mapping',
-      'Institutional dependency interviews',
+      'Organizational dependency interviews',
       'Executive continuity briefing presentation',
     ],
-    ctaLabel: 'Request the Executive Continuity Brief',
+    ctaLabel: 'Request the Leadership Briefing Report',
     ctaHref: '/contact?topic=executive-continuity-brief',
   },
 
   institutional_continuity_diagnostic: {
     id: 'institutional_continuity_diagnostic',
-    name: 'Organizational Continuity Diagnostic',
+    name: 'Full Diagnostic & Action Plan',
     tagline:
-      'A facilitated organizational review for organizations ready to act on what they have learned.',
+      'A guided review for organizations ready to act on what they’ve learned.',
     priceLabel: '$6,500 CAD',
     includes: [
-      'Everything in the Executive Continuity Brief',
+      'Everything in the Leadership Briefing Report',
       'Facilitated leadership continuity review session',
       'Governance continuity workshop with governance body',
       'Operational lineage mapping — organizational memory and continuity chain',
@@ -100,7 +100,7 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
       'Executive continuity briefing — deliverable for board presentation',
     ],
     excludes: [],
-    ctaLabel: 'Open an Organizational Continuity Diagnostic conversation',
+    ctaLabel: 'Start a Full Diagnostic conversation',
     ctaHref: '/contact?topic=institutional-continuity-diagnostic',
   },
 };
@@ -134,7 +134,7 @@ export const WORKBOOK_TIERS: Record<WorkbookTierId, WorkbookTierDefinition> = {
     id: 'workbook_self_guided',
     name: 'Governance Entropy Workbook — Self-Guided',
     tagline:
-      'Map your institution\u2019s continuity terrain at your own pace. Begins with the people who carry the institution.',
+      'Map your organization\u2019s continuity terrain at your own pace. Begins with the people who carry the organization.',
     priceLabel: '$2,400 CAD',
     amountCents: 240000,
     currency: 'CAD',
@@ -177,7 +177,7 @@ export const WORKBOOK_TIERS: Record<WorkbookTierId, WorkbookTierDefinition> = {
     id: 'workbook_enterprise',
     name: 'Governance Entropy Workbook — Enterprise Continuity Mapping',
     tagline:
-      'A full continuity mapping engagement for institutions with federated structures or distributed stewardship.',
+      'A full continuity mapping engagement for organizations with federated structures or distributed stewardship.',
     priceLabel: '$18,000 \u2013 $45,000 CAD',
     amountCents: null,
     currency: 'CAD',
@@ -199,7 +199,7 @@ export const WORKBOOK_TIERS: Record<WorkbookTierId, WorkbookTierDefinition> = {
 // Gating helpers — used by ICRAProfile and ICRAReportGate
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Section IDs visible in Continuity Reflection (free) */
+/** Section IDs visible in Free Readiness Check (free) */
 export const REFLECTION_SECTIONS = [
   'insights',
   'continuity_signals',
@@ -210,7 +210,7 @@ export const REFLECTION_SECTIONS = [
   'first_recommendation',
 ] as const;
 
-/** Sections unlocked in Executive Continuity Brief */
+/** Sections unlocked in Leadership Briefing Report */
 export const BRIEF_SECTIONS = [
   ...REFLECTION_SECTIONS,
   'governance_entropy',

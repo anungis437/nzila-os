@@ -45,6 +45,7 @@ interface DistributionList {
 
 export default function DistributionListsPage() {
   const t = useTranslations('distributionListsPage');
+  const tMarketing = useTranslations('marketing.distributionLists');
   const router = useRouter();
   const [lists, setLists] = useState<DistributionList[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +90,7 @@ export default function DistributionListsPage() {
   }, [page]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -106,7 +107,7 @@ export default function DistributionListsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Distribution Lists</h1>
+          <h1 className="text-3xl font-bold">{tMarketing('title')}</h1>
           <p className="text-muted-foreground">
             {t('header.description')}
           </p>

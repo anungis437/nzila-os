@@ -514,7 +514,7 @@ function computeBurdenIndex(
   const sizeSuffix = sizeFrame(orgContext?.ctx_membership_size, score);
   if (sizeSuffix) interpretation += sizeSuffix;
 
-  // These are gated in Executive Continuity Brief
+  // These are gated in Leadership Briefing Report
   const humanCompensationIndicators: string[] = [];
 
   if (ic < T.NOTABLE_LOW)

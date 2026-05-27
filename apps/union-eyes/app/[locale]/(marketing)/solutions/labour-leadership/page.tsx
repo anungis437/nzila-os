@@ -36,10 +36,10 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 const PAGE_COPY = {
   'en-CA': {
     badge: 'Solutions · Policy & Labour Leadership',
-    heading: 'Labour-safe modernization without compromise.',
+    heading: 'Labour-safe modernization made clear.',
     description:
-      'UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform.',
-    primaryCta: 'Start the free Continuity Reflection',
+      'UnionEyes gives policy and labour leaders a clear path to modernization: explainable outputs, human oversight, and anti-surveillance protections built in.',
+    primaryCta: 'Start a review',
     secondaryCta: 'View Governance & Trust',
     challengeHeading: 'The policy challenge',
     challenges: [
@@ -50,22 +50,22 @@ const PAGE_COPY = {
     ],
     outcomesHeading: 'What policy and labour leaders gain',
     outcomes: [
-      { icon: ShieldCheck, title: 'Labour-safe modernization by design', desc: 'Modernize operations without opening a surveillance pathway or weakening member protections.' },
-      { icon: Eye, title: 'Human oversight enforced', desc: 'No automated decision path bypasses elected leadership, policy review, or representation judgment.' },
-      { icon: Scale, title: 'Democratic accountability preserved', desc: 'Governance controls keep strategic decisions with people, not opaque systems.' },
-      { icon: Users, title: 'Member trust strengthened', desc: 'Clear safeguards and explainable outputs increase confidence from members and frontline reps.' },
-      { icon: HeartHandshake, title: 'Policy coherence across teams', desc: 'Policy, governance, and operations stay aligned through leadership transitions and organizational change.' },
+      { icon: ShieldCheck, title: 'Built for labour safety', desc: 'Modernize without opening a surveillance path or weakening member protections.' },
+      { icon: Eye, title: 'Human oversight stays in place', desc: 'No automated path bypasses elected leadership, policy review, or representation judgment.' },
+      { icon: Scale, title: 'Democratic accountability kept', desc: 'Governance controls keep key decisions with people, not opaque systems.' },
+      { icon: Users, title: 'Member trust grows', desc: 'Clear safeguards and explainable outputs increase confidence from members and reps.' },
+      { icon: HeartHandshake, title: 'Teams stay aligned', desc: 'Policy, governance, and operations stay aligned through change.' },
     ],
     relatedHeading: 'Explore related solutions',
     finalHeading: 'Build member trust into modernization',
-    finalBody: 'See a labour-safe implementation path in a guided demo.',
+    finalBody: 'See a clear labour-safe implementation path in a guided demo.',
   },
   'fr-CA': {
     badge: 'Solutions · Leadership politique et syndical',
-    heading: 'Modernisation sûre pour le travail, sans compromis.',
+    heading: 'Modernisation sûre et claire pour le travail.',
     description:
-      'UnionEyes donne aux responsables politiques et syndicaux une voie de modernisation sûre pour la gouvernance : résultats explicables, surveillance humaine et protections anti-surveillance intégrées à la plateforme.',
-    primaryCta: 'Commencer la réflexion de continuité (gratuite)',
+      'UnionEyes donne aux responsables politiques et syndicaux une voie claire de modernisation : résultats explicables, surveillance humaine et protections anti-surveillance intégrées.',
+    primaryCta: 'Faire le bilan',
     secondaryCta: 'Voir gouvernance et confiance',
     challengeHeading: 'Le défi politique',
     challenges: [
@@ -76,15 +76,15 @@ const PAGE_COPY = {
     ],
     outcomesHeading: 'Ce que les responsables politiques et syndicaux gagnent',
     outcomes: [
-      { icon: ShieldCheck, title: 'Modernisation sûre pour le travail par conception', desc: 'Modernisez les opérations sans ouvrir de voie de surveillance ni affaiblir les protections des membres.' },
-      { icon: Eye, title: 'Surveillance humaine imposée', desc: 'Aucun chemin de décision automatisé ne contourne le leadership élu, la revue politique ou le jugement de représentation.' },
-      { icon: Scale, title: 'Responsabilité démocratique préservée', desc: 'Les contrôles de gouvernance gardent les décisions stratégiques entre les mains des personnes, pas de systèmes opaques.' },
-      { icon: Users, title: 'Confiance des membres renforcée', desc: 'Des garanties claires et des résultats explicables renforcent la confiance des membres et des représentantes et représentants.' },
-      { icon: HeartHandshake, title: 'Cohérence politique entre les équipes', desc: 'La politique, la gouvernance et les opérations restent alignées pendant les transitions et les changements organisationnels.' },
+      { icon: ShieldCheck, title: 'Conçu pour la sécurité syndicale', desc: 'Modernisez les opérations sans ouvrir de voie de surveillance ni affaiblir les protections.' },
+      { icon: Eye, title: 'La supervision humaine reste en place', desc: 'Aucun chemin automatisé ne contourne le leadership élu, la revue politique ou la représentation.' },
+      { icon: Scale, title: 'Responsabilité démocratique gardée', desc: 'Les contrôles de gouvernance gardent les décisions stratégiques entre les mains des personnes.' },
+      { icon: Users, title: 'La confiance des membres augmente', desc: 'Des garanties claires et des résultats explicables renforcent la confiance des membres et des représentants.' },
+      { icon: HeartHandshake, title: 'Les équipes restent alignées', desc: 'La politique, la gouvernance et les opérations restent alignées pendant les changements.' },
     ],
     relatedHeading: 'Explorer les solutions connexes',
     finalHeading: 'Intégrez la confiance des membres à la modernisation',
-    finalBody: 'Voyez un parcours de mise en œuvre sûr pour le travail dans une démonstration guidée.',
+    finalBody: 'Voyez un parcours de mise en œuvre clair pour le travail dans une démonstration guidée.',
   },
 };
 

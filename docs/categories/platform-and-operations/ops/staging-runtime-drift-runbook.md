@@ -26,25 +26,25 @@ Staging drift is any condition where the running staging environment does not tr
 
 ```bash
 # Check which apps have stale image SHAs vs HEAD
-pnpm drift:version:staging
+pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
 
 # Check which apps have missing/deprecated env vars (static staging.yml)
-pnpm drift:env:staging
+pnpm exec tsx scripts/release/drift-env.ts --env staging
 
 # Same but queries live Container Apps (requires az login)
-pnpm drift:env:staging:live
+pnpm exec tsx scripts/release/drift-env.ts --env staging --live
 
 # Full drift check + smoke
-pnpm drift:full:staging
+pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr; pnpm exec tsx scripts/release/drift-env.ts --env staging; pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
 
 # Generate reconcile plan (dry run)
-pnpm release:staging:reconcile
+pnpm exec tsx scripts/release/staging-reconcile.ts --env staging
 
 # Execute reconcile plan (requires az login)
-pnpm release:staging:reconcile --execute
+pnpm exec tsx scripts/release/staging-reconcile.ts --env staging --execute
 
 # Build evidence pack (reads latest drift/smoke reports)
-pnpm deploy:evidence
+pnpm exec tsx scripts/release/build-deploy-evidence.ts --env staging
 ```
 
 Reports are written to:
@@ -75,7 +75,7 @@ git rev-parse HEAD
 
 If `/api/version` returns `gitSha: "local"` or a short SHA that doesn't match HEAD,
 the container is running an old build that predates the `/api/version` endpoint.
-**Resolution**: trigger a redeploy via `gitops-deploy.yml` or run `pnpm release:staging:reconcile --execute`.
+**Resolution**: trigger a redeploy via `gitops-deploy.yml` or run `pnpm exec tsx scripts/release/staging-reconcile.ts --env staging --execute`.
 
 ### Step 2: Check AZ Container App logs
 
@@ -167,14 +167,14 @@ workflow failures), use the reconcile command:
 
 ```bash
 # See which apps are stale
-pnpm drift:version:staging
+pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
 
 # Generate reconcile plan
-pnpm release:staging:reconcile
+pnpm exec tsx scripts/release/staging-reconcile.ts --env staging
 
 # Review plan in ops/reconcile/staging-reconcile-plan-latest.json
 # then execute
-pnpm release:staging:reconcile --execute
+pnpm exec tsx scripts/release/staging-reconcile.ts --env staging --execute
 ```
 
 The reconcile command only updates apps that are actually stale — it does NOT
@@ -189,7 +189,7 @@ images, env vars corrupted):
 
 ```bash
 # 1. Verify the problem
-pnpm drift:full:staging
+pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr; pnpm exec tsx scripts/release/drift-env.ts --env staging; pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
 
 # 2. Rebuild ALL images from HEAD and push to ACR
 # Trigger the deploy workflow for all apps:
@@ -200,8 +200,8 @@ gh workflow run gitops-deploy.yml \
 gh run list --workflow=gitops-deploy.yml --limit=5
 
 # 4. Post-reset verification
-pnpm drift:version:staging
-pnpm release:smoke
+pnpm exec tsx scripts/release/drift-version.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
+pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
 ```
 
 ---

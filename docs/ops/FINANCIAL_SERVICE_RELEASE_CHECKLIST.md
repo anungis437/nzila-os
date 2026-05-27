@@ -5,9 +5,9 @@
 - [ ] `pnpm --filter financial-service typecheck`
 - [ ] `pnpm --filter financial-service lint`
 - [ ] `pnpm --filter financial-service test`
-- [ ] `pnpm financial-service:health`
-- [ ] `pnpm validate:docs`
-- [ ] `pnpm governance:audit`
+- [ ] `pnpm exec tsx scripts/financial-service-health.ts`
+- [ ] `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts`
+- [ ] `pnpm exec tsx packages/platform-validation/src/doc-consistency.ts && tsx scripts/build-ownership-registry.ts && pnpm exec tsx scripts/docs/build-docs-index.ts && pnpm exec tsx scripts/release/generate-governance-audit.ts && pnpm exec tsx scripts/release/audit-secrets.ts && pnpm exec tsx scripts/repo/build-excellence-audit.ts && pnpm exec tsx scripts/check-ue-db-import-guard.ts && pnpm exec tsx scripts/financial-service-health.ts`
 - [ ] `pnpm test:fast`
 
 ## Runtime Safety

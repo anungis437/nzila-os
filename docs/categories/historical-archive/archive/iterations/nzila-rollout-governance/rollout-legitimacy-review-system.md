@@ -44,7 +44,7 @@ There is no implicit pass. No outcome means the review did not occur.
 
 | Workflow                       | Triggered by                                        |
 |--------------------------------|-----------------------------------------------------|
-| Promotion review               | Operator initiates `pnpm rollout:promote:attest`.   |
+| Promotion review               | Operator initiates `node tooling/scripts/record-promotion-attestation.mjs`.   |
 | Pre-pilot review               | Pilot onboarding intent.                            |
 | Per-release pilot review       | Pilot release window opens.                         |
 | Demo pre-session review        | Demo session scheduled.                             |

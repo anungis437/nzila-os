@@ -87,7 +87,7 @@ enforces the existence and structural integrity of every document in this layer.
 Run via:
 
 ```sh
-pnpm validate:live-readiness
+node tooling/scripts/validate-live-operational-readiness.mjs
 ```
 
 Exit code `0` means the operational truth layer is structurally complete.

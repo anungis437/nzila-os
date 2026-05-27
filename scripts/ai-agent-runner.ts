@@ -135,7 +135,7 @@ function requiresDatabaseEnv(command: string): boolean {
     command.includes('nar:chain:verify') ||
     command.includes('intelligence:pipeline-health') ||
     command.includes('validate:claims') ||
-    command.includes('ue:qa:gate')
+    command.includes('scripts/ue-qa-gate.ts')
   )
 }
 
@@ -231,10 +231,10 @@ function inferRemainingGaps(stages: StageResult[]): string[] {
 
   const gaps: string[] = [`Failed command: ${failedCommand.command}`]
 
-  if (failedCommand.command.includes('ue:qa:gate')) {
+  if (failedCommand.command.includes('scripts/ue-qa-gate.ts')) {
     gaps.push('Resolve UE QA gate blockers (RBAC gaps, decision/NAR expectation gaps, containment failures, or pipeline failures).')
   }
-  if (failedCommand.command.includes('decision:coverage:strict')) {
+  if (failedCommand.command.includes('check-decision-coverage.ts --strict')) {
     gaps.push('Resolve missing strict decision coverage or proofRequired enforcement failures.')
   }
   if (failedCommand.command.includes('nar:chain:verify')) {
@@ -275,7 +275,7 @@ function selectStages(phase: RunnerPhase): StageDefinition[] {
   const repoAnalyst: StageDefinition = {
     name: 'repo-analyst',
     description: 'Read-only analysis against existing governance and decision coverage contracts.',
-    commands: [`${cmd} governance:check`, `${cmd} decision:coverage:strict`],
+    commands: [`${cmd} governance:check`, `${cmd} exec tsx scripts/check-decision-coverage.ts --strict`],
   }
 
   const implementation: StageDefinition = {
@@ -295,7 +295,7 @@ function selectStages(phase: RunnerPhase): StageDefinition[] {
     description: 'RBAC, org isolation, decision/NAR, and pipeline integrity enforcement.',
     commands: [
       `${cmd} governance:check`,
-      `${cmd} decision:coverage:strict`,
+      `${cmd} exec tsx scripts/check-decision-coverage.ts --strict`,
       `${cmd} intelligence:pipeline-health`,
       `${cmd} nar:chain:verify`,
       `${cmd} validate:claims`,
@@ -312,7 +312,7 @@ function selectStages(phase: RunnerPhase): StageDefinition[] {
   const qaGateAuthority: StageDefinition = {
     name: 'qa-gate-authority',
     description: 'Final authority gate; GO/NO-GO decision source.',
-    commands: [`${cmd} ue:qa:gate -- --target ux`],
+    commands: [`${cmd} exec tsx scripts/ue-qa-gate.ts --target ux`],
   }
 
   if (phase === 'analyze') return [repoAnalyst]
@@ -324,13 +324,13 @@ function selectStages(phase: RunnerPhase): StageDefinition[] {
       {
         ...securityGovernance,
         commands: [
-          `${cmd} prod:region:validate`,
+          `${cmd} exec tsx scripts/validate-prod-region.ts`,
           `${cmd} typecheck`,
           `${cmd} lint`,
           `${cmd} test:fast`,
           `${cmd} governance:check`,
-          `${cmd} decision:coverage:strict`,
-          `${cmd} ue:qa:gate -- --target ux`,
+          `${cmd} exec tsx scripts/check-decision-coverage.ts --strict`,
+          `${cmd} exec tsx scripts/ue-qa-gate.ts --target ux`,
           `${cmd} intelligence:pipeline-health`,
           `${cmd} nar:chain:verify`,
           `${cmd} validate:claims`,

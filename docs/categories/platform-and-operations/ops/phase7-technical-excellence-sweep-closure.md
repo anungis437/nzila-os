@@ -21,7 +21,7 @@
 
 ### Build-Baseline Profiling
 
-The `build:baseline` script timed out during the local sweep due to Turborepo attempting to clean build artefacts across workspace paths with special characters (brackets in `app/[locale]/`). This is a known Windows PowerShell wildcard expansion issue documented in user memory — not a regression in build logic. The build itself compiles cleanly (`pnpm build` exits 0 in CI). Profiling baseline will be captured in the next scheduled CI pipeline run where the clean step is skipped.
+The `pnpm exec tsx scripts/build-baseline.ts` command timed out during the local sweep due to Turborepo attempting to clean build artefacts across workspace paths with special characters (brackets in `app/[locale]/`). This is a known Windows PowerShell wildcard expansion issue documented in user memory — not a regression in build logic. The build itself compiles cleanly (`pnpm build` exits 0 in CI). Profiling baseline will be captured in the next scheduled CI pipeline run where the clean step is skipped.
 
 ### Metadata Generator Patch
 

@@ -7212,6 +7212,36 @@
       "requestPilot": "Avvia un pilota",
       "signIn": "Accedi"
     },
+    "solutions": {
+      "index": {
+        "metaTitle": "Soluzioni | UnionEyes",
+        "metaDescription": "Supporto pratico per continuita e governance a dirigenti sindacali, governance, operazioni, tecnologia, lavoro e acquisti."
+      },
+      "executive": {
+        "metaTitle": "Leadership esecutiva sindacale | Soluzioni | UnionEyes",
+        "metaDescription": "Preserva la continuita strategica, guida le transizioni di leadership e mantieni la coerenza organizzativa con UnionEyes."
+      },
+      "governance": {
+        "metaTitle": "Leadership di governance | Soluzioni | UnionEyes",
+        "metaDescription": "Modernizza la governance con intelligenza spiegabile, salvaguardie di continuita e contesto decisionale pronto per audit."
+      },
+      "labour": {
+        "metaTitle": "Leadership lavoro e politiche | Soluzioni | UnionEyes",
+        "metaDescription": "Supporta la leadership del lavoro con coordinamento orientato alla continuita, guida spiegabile e flussi di governance trasparenti."
+      },
+      "operations": {
+        "metaTitle": "Leadership operativa | Soluzioni | UnionEyes",
+        "metaDescription": "Rafforza la continuita operativa con flussi pratici, intelligenza rivedibile da umani e supporto esecutivo allineato alla governance."
+      },
+      "procurement": {
+        "metaTitle": "Stakeholder acquisti | Soluzioni | UnionEyes",
+        "metaDescription": "Offri ai team acquisti ambito chiaro, fiducia nel rollout graduale e prove di governance pronte per la revisione."
+      },
+      "technology": {
+        "metaTitle": "Leadership tecnologica | Soluzioni | UnionEyes",
+        "metaDescription": "Dai ai leader tecnologici chiarezza d integrazione, governance IA delimitata e percorsi di implementazione auditabili."
+      }
+    },
     "home": {
       "badge": "Un Sistema Operativo Governato per i Sindacati",
       "heroHeading": "Comanda ogni dimensione del tuo sindacato.",
@@ -7317,7 +7347,7 @@
       "ctaBody": "Non eseguiamo demo generiche. Conduciamo sessioni strutturate adattate al profilo di continuità della tua organizzazione. Raccontaci delle tue sfide. Saremo onesti sul fatto che UnionEyes possa aiutarti — o se qualcos'altro ti servirebbe meglio.",
       "ctaPilot": "Richiedi un programma pilota",
       "ctaContact": "Inizia una conversazione",
-      "foundersHeading": "Chi sta costruendo Union Eyes",
+      "foundersHeading": "Chi sta costruendo UnionEyes",
       "foundersIntro": "UnionEyes non è stato assemblato da un team software generalista che ha scoperto il settore sindacale. È costruito da due persone nominate, con esperienza settoriale complementare e attestabile.",
       "founderMichelName": "Michel Nungisa",
       "founderMichelRole": "Cofondatore · Dominio e dottrina",

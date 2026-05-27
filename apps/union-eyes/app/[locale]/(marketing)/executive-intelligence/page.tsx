@@ -58,18 +58,18 @@ const surfaces = {
     },
     {
       icon: BarChart3,
-      title: 'Governance-of-Record Intelligence Briefings',
-      desc: 'Governance modernization progress, explainability audit status, and continuity oversight summaries — built for board-level review.',
+      title: 'Executive intelligence briefings',
+      desc: 'Governance modernization progress, explainability status, and continuity summaries for leadership review.',
     },
     {
       icon: ShieldCheck,
       title: 'Trust & Compliance Dashboards',
-      desc: 'Operational trust posture, governance compliance status, and organizational audit readiness — all in one executive surface.',
+      desc: 'Operational trust posture, compliance status, and audit readiness in one executive surface.',
     },
     {
       icon: Layers,
       title: 'Organizational Memory Snapshots',
-      desc: 'Point-in-time views of organizational knowledge, historical precedents, and organizational context available for executive review.',
+      desc: 'Point-in-time views of organizational knowledge and precedents.',
     },
   ],
   'fr-CA': [
@@ -113,7 +113,7 @@ const principles = {
     { label: 'Explainable',       desc: 'Every summary traces back to evidence' },
     { label: 'Governance-safe',   desc: 'Full human oversight at all decision points' },
     { label: 'Labour-safe',       desc: 'Zero individual monitoring or worker conduct grading' },
-    { label: 'Enterprise-grade',  desc: 'Built for organizational trust, not startup dashboards' },
+    { label: 'Enterprise-grade',  desc: 'Built for organizational trust, not lightweight tools' },
   ],
   'fr-CA': [
     { label: 'Calme',              desc: 'Aucune complexité technique exposée aux surfaces directionnelles' },
@@ -127,7 +127,7 @@ const principles = {
 
 export default async function ExecutiveIntelligencePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Demander un breffage organisationnel' : 'Request an Organizational Briefing';
+  const briefingCta = locale === 'fr-CA' ? 'Demander une revue' : 'Request a review';
   const surfacesArr = surfaces[locale as keyof typeof surfaces] ?? surfaces['en-CA'];
   const principlesArr = principles[locale as keyof typeof principles] ?? principles['en-CA'];
   const stakeholderJourney = {
@@ -135,7 +135,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
       'See continuity risks before they become crises',
       'Lead governance modernization with explainable intelligence',
       'Maintain strategic coherence through succession and change',
-      'Communicate organizational health to boards with confidence',
+      'Share organizational health with boards',
     ],
     'fr-CA': [
       'Voir les risques de continuité avant qu’ils ne deviennent des crises',
@@ -148,7 +148,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
   const faqs = {
     'en-CA': [
       { q: 'Does this feel strategically trustworthy?',  a: 'Executive Intelligence is built to earn organizational trust through transparency and explainability.' },
-      { q: 'Does this feel operationally mature?',       a: 'Calm, modular, and enterprise-grade — not startup dashboards or AI admin panels.' },
+      { q: 'Does this feel operationally mature?',       a: 'Calm, modular, and enterprise-grade — not lightweight tools or AI admin panels.' },
       { q: 'Does this feel labour-safe?',                a: 'Zero worker surveillance. Human oversight built into every intelligence output.' },
     ],
     'fr-CA': [
@@ -170,7 +170,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
           </span>
         }
         heading={<>Strategic clarity.<br />Without technical complexity.</>}
-        description="Executive Intelligence surfaces organizational continuity, governance modernization status, and organizational health — in calm, executive-readable formats designed for leadership decision-making."
+        description="Executive Intelligence surfaces continuity, modernization status, and organizational health in calm, executive-readable formats."
         cta={
           <Link
             href={`/${locale}/organizational-continuity-risk`}
@@ -206,7 +206,7 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Not analytics dashboards. Not engineering tools. Executive Intelligence surfaces
-              are purpose-built for the strategic clarity that union leaders need.
+              are purpose-built for the clarity that union leaders need.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -232,9 +232,8 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
                 Executive Intelligence is designed for the president, secretary-treasurer,
-                or regional director who needs to lead through leadership transitions, governance
-                modernization, and strategic continuity challenges — without wading through
-                technical reports or fragmented operational data.
+                or regional director who needs to lead through transitions, modernization,
+                and continuity challenges without technical reports or fragmented data.
               </p>
               <ul className="space-y-3">
                 {stakeholderJourneyArr.map((item) => (
@@ -265,8 +264,8 @@ export default async function ExecutiveIntelligencePage({ params }: { params: Pr
           </h2>
           <p className="text-white/70 mb-8">
             {locale === 'fr-CA'
-              ? 'Commencez par une réflexion de continuité gratuite pour voir l’intelligence exécutive en action dans votre organisation.'
-              : 'Start with a free Continuity Reflection to see Executive Intelligence in action for your organization.'}
+              ? 'Commencez par une revue pour voir l’intelligence exécutive en action.'
+                : 'Start with a review to see Executive Intelligence in action.'}
           </p>
           <Link
             href={`/${locale}/organizational-continuity-risk`}

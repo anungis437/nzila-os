@@ -8,11 +8,11 @@
  * Target: rollback completes in < 10 minutes for stateless apps.
  *
  * Usage:
- *   pnpm release:rollback --list                     # List rollback candidates
- *   pnpm release:rollback --tag v1.2.0               # Rollback all prod apps
- *   pnpm release:rollback --tag v1.2.0 --apps web,console
- *   pnpm release:rollback --tag v1.2.0 --dry-run
- *   pnpm release:rollback --tag v1.2.0 --execute     # Execute az commands
+ *   pnpm exec tsx scripts/release/rollback-prod.ts --list                     # List rollback candidates
+ *   pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.2.0               # Rollback all prod apps
+ *   pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.2.0 --apps web,console
+ *   pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.2.0 --dry-run
+ *   pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.2.0 --execute     # Execute az commands
  *
  * Requires:
  *   - Azure CLI authenticated (az login or OIDC in CI)
@@ -134,7 +134,7 @@ function listRollbackCandidates(): void {
 
   console.log('\n── Rollback Candidates (latest first) ──────────────────')
   if (tags.length === 0) {
-    console.log('  No versioned tags found. Run pnpm release:tag first.')
+    console.log('  No versioned tags found. Run pnpm exec tsx scripts/release/tag-release.ts first.')
     return
   }
 
@@ -235,8 +235,8 @@ function main(): void {
 
   const targetTag = parseArg('--tag')
   if (!targetTag) {
-    console.error('Usage: pnpm release:rollback --tag v1.2.0')
-    console.error('       pnpm release:rollback --list')
+    console.error('Usage: pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.2.0')
+    console.error('       pnpm exec tsx scripts/release/rollback-prod.ts --list')
     process.exit(1)
   }
 
@@ -250,7 +250,7 @@ function main(): void {
   const targetSha = getShaForTag(targetTag)
   if (!targetSha) {
     console.error(`✗ Tag not found: ${targetTag}`)
-    console.error('  Run: pnpm release:rollback --list')
+    console.error('  Run: pnpm exec tsx scripts/release/rollback-prod.ts --list')
     process.exit(1)
   }
 

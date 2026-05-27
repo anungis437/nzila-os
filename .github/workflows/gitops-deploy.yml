@@ -129,13 +129,13 @@ jobs:
         run: pnpm test:fast
 
       - name: Migration safety check
-        run: pnpm release:migration:safety
+        run: pnpm exec tsx scripts/release/validate-migration-safety.ts
 
       - name: Run contract tests
         run: pnpm contract-tests
 
       - name: Release governance audit
-        run: pnpm release:audit
+        run: pnpm exec tsx scripts/release/generate-governance-audit.ts
 
       - name: Validate deployment readiness
         run: |

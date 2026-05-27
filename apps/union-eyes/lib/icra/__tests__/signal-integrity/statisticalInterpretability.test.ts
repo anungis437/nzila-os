@@ -17,6 +17,12 @@
 import { describe, it, expect } from 'vitest';
 import { ALL_QUESTIONS } from '../../questions';
 import type { QuestionOption } from '../../types';
+import { getQuestionIntelligenceMetadata } from '../../questionIntelligenceMetadata';
+import { buildAnswer } from '../../scoring';
+import {
+  aggregateConfidenceByDomainComposite,
+  deriveConfidenceSignals,
+} from '../../continuityConfidenceSignals';
 
 function options(q: { options?: ReadonlyArray<QuestionOption> }): readonly QuestionOption[] {
   return q.options ?? [];
@@ -83,7 +89,40 @@ describe('Question Architecture Audit™ — statistical interpretability', () =
     }
   });
 
-  // v1.2.0 — Roadmap R-H5:
-  it.todo('governance-authority HHI is composed from >= 3 declared inputs');
-  it.todo('every composite score in confidence emission carries explicit `sampleSize`');
+  it('governance-authority HHI is composed from >= 3 declared inputs', () => {
+    const contributors = ALL_QUESTIONS.filter((q) => {
+      const m = getQuestionIntelligenceMetadata(q);
+      return m.intelligenceContribution.includes('governance_sophistication');
+    });
+    expect(contributors.length).toBeGreaterThanOrEqual(3);
+
+    // Normalize to 1.0 and compute classic HHI concentration index.
+    const total = contributors.reduce(
+      (acc, q) => acc + (q.weights.governance_fragility ?? q.weights.institutional_continuity ?? 0),
+      0,
+    );
+    expect(total).toBeGreaterThan(0);
+    const hhi = contributors
+      .map((q) => (q.weights.governance_fragility ?? q.weights.institutional_continuity ?? 0) / total)
+      .reduce((acc, share) => acc + share * share, 0);
+    expect(hhi).toBeGreaterThan(0);
+    expect(hhi).toBeLessThanOrEqual(1);
+  });
+
+  it('every confidence-domain composite carries explicit sampleSize', () => {
+    const likertQuestions = ALL_QUESTIONS.filter((q) => q.type === 'likert_5');
+    const answers = likertQuestions.map((q) => buildAnswer(q, 4));
+    const signals = deriveConfidenceSignals(answers, ALL_QUESTIONS);
+    const composite = aggregateConfidenceByDomainComposite(signals);
+
+    for (const [domain, entry] of Object.entries(composite)) {
+      expect(Number.isInteger(entry.sampleSize), `${domain}: sampleSize must be integer`).toBe(true);
+      expect(entry.sampleSize, `${domain}: sampleSize must be >= 0`).toBeGreaterThanOrEqual(0);
+      if (entry.sampleSize === 0) {
+        expect(entry.score, `${domain}: score must be null when sampleSize = 0`).toBeNull();
+      } else {
+        expect(typeof entry.score === 'number', `${domain}: score required when sampleSize > 0`).toBe(true);
+      }
+    }
+  });
 });

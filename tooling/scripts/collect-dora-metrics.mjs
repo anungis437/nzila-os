@@ -8,13 +8,13 @@
  *   - deployment_frequency:  merges to main per week (30-day rolling)
  *   - lead_time_for_change:  avg hours from first feat/fix commit on branch to merge
  *   - change_failure_rate:   ratio of revert/* or fix(revert)* merges to total merges
- *   - mttr_hours:            null (requires incident tracker integration)
+ *   - mttr_hours:            derived from incident feed when available
  *
  * Usage:  node tooling/scripts/collect-dora-metrics.mjs
  */
 
 import { execSync } from 'child_process';
-import { mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -27,6 +27,7 @@ const OUTPUT = resolve(
 const WINDOW_DAYS = Number(process.env.DORA_WINDOW_DAYS ?? 30);
 const LOOKBACK_WEEKS = Number(process.env.DORA_LOOKBACK_WEEKS ?? 12);
 const TARGET_BRANCH = process.env.DORA_TARGET_BRANCH ?? 'main';
+const INCIDENT_FEED_PATH = process.env.DORA_INCIDENT_FEED_PATH ?? '';
 const FORCE_ENFORCE_FROM_ARG = process.argv.includes('--enforce');
 
 const ENFORCE_THRESHOLDS =
@@ -134,6 +135,118 @@ function ensureOutputDir(filePath) {
   mkdirSync(dirname(filePath), { recursive: true });
 }
 
+function readJsonIfExists(filePath) {
+  if (!existsSync(filePath)) return null;
+  try {
+    return JSON.parse(readFileSync(filePath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function parseTimestamp(value) {
+  if (!value) return null;
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
+}
+
+function readJsonl(filePath) {
+  if (!existsSync(filePath)) return [];
+  return readFileSync(filePath, 'utf8')
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+function resolveMttr(windowStart) {
+  const incidentFeedCandidates = [
+    INCIDENT_FEED_PATH,
+    'ops/outputs/incident-events.jsonl',
+    'reports/runtime/incident-events.jsonl',
+    'reports/runtime/incidents.jsonl',
+  ]
+    .filter(Boolean)
+    .map((item) => resolve(ROOT, item));
+
+  for (const feedPath of incidentFeedCandidates) {
+    const rows = readJsonl(feedPath);
+    if (rows.length === 0) continue;
+
+    const durationsHours = [];
+    let incidentsInWindow = 0;
+
+    for (const row of rows) {
+      const openedAt =
+        parseTimestamp(row.opened_at) ??
+        parseTimestamp(row.started_at) ??
+        parseTimestamp(row.detected_at) ??
+        parseTimestamp(row.created_at);
+      const resolvedAt =
+        parseTimestamp(row.resolved_at) ??
+        parseTimestamp(row.mitigated_at) ??
+        parseTimestamp(row.closed_at);
+
+      if (!openedAt) continue;
+      const touchesWindow = openedAt >= windowStart || (resolvedAt && resolvedAt >= windowStart);
+      if (!touchesWindow) continue;
+
+      incidentsInWindow += 1;
+      if (resolvedAt && resolvedAt >= openedAt) {
+        durationsHours.push((resolvedAt.getTime() - openedAt.getTime()) / 36e5);
+      }
+    }
+
+    if (durationsHours.length > 0) {
+      const mttrHours = Number(
+        (durationsHours.reduce((a, b) => a + b, 0) / durationsHours.length).toFixed(2),
+      );
+      return {
+        mttrHours,
+        incidentCount30d: incidentsInWindow,
+        source: feedPath.replace(`${ROOT}/`, ''),
+        note: null,
+      };
+    }
+
+    return {
+      mttrHours: 0,
+      incidentCount30d: incidentsInWindow,
+      source: feedPath.replace(`${ROOT}/`, ''),
+      note: 'Incident feed contains no resolved incidents in window; MTTR reported as 0.',
+    };
+  }
+
+  const complianceMttr = readJsonIfExists(resolve(ROOT, 'ops/compliance/mttr-dashboard.json'));
+  const fallbackMttr = Number(complianceMttr?.summary?.overallMttrHours);
+  if (Number.isFinite(fallbackMttr)) {
+    const remediationHistory = Array.isArray(complianceMttr?.remediationHistory)
+      ? complianceMttr.remediationHistory
+      : [];
+    return {
+      mttrHours: Number(fallbackMttr.toFixed(2)),
+      incidentCount30d: remediationHistory.length,
+      source: 'ops/compliance/mttr-dashboard.json',
+      note:
+        'Fallback source: vulnerability remediation MTTR dashboard (not runtime incident tracker feed).',
+    };
+  }
+
+  return {
+    mttrHours: null,
+    incidentCount30d: null,
+    source: null,
+    note: 'Requires incident tracker integration (e.g. PagerDuty API)',
+  };
+}
+
 function startOfUtcWeek(date) {
   const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
   const day = d.getUTCDay();
@@ -166,10 +279,10 @@ const TARGET_REF = resolveTargetRef(TARGET_BRANCH);
 
 // ── Deployment Frequency ─────────────────────────────────────────────────────
 // Count merges to main in the last 30 days
-const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
 const sinceDate = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000)
   .toISOString()
   .split('T')[0];
+const sinceDateObj = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
 const mergeCommits = safeGit(
   `log "${TARGET_REF}" --merges --since="${sinceDate}" --format="%H %ai %s"`,
@@ -298,6 +411,16 @@ function cfr_tier(pct) {
   return 'low';
 }
 
+function mttrTier(hours) {
+  if (hours === null) return 'unknown';
+  if (hours <= 1) return 'elite';
+  if (hours <= 24) return 'high';
+  if (hours <= 72) return 'medium';
+  return 'low';
+}
+
+const mttr = resolveMttr(sinceDateObj);
+
 const output = {
   _schema: '1.0',
   collected_at: new Date().toISOString(),
@@ -327,10 +450,20 @@ const output = {
       tier: cfr_tier(changeFailureRate),
     },
     mttr: {
-      value: null,
+      value: mttr.mttrHours,
       unit: 'hours',
-      tier: 'unknown',
-      note: 'Requires incident tracker integration (e.g. PagerDuty API)',
+      tier: mttrTier(mttr.mttrHours),
+      source: mttr.source,
+      note: mttr.note,
+    },
+    incidents_last_30d: {
+      value: mttr.incidentCount30d,
+      unit: 'count',
+      source: mttr.source,
+      note:
+        mttr.incidentCount30d === null
+          ? 'Incident count unavailable until incident feed is connected.'
+          : undefined,
     },
     predictive_signal: {
       value: predictiveRisk,
@@ -383,7 +516,9 @@ console.log(
 console.log(
   `  Change failure rate  : ${changeFailureRate}% [${output.metrics.change_failure_rate.tier}]`,
 );
-console.log(`  MTTR                 : n/a (needs incident tracker)`);
+console.log(
+  `  MTTR                 : ${mttr.mttrHours ?? 'n/a'} h${mttr.source ? ` (source: ${mttr.source})` : ''}`,
+);
 console.log(
   `  Predictive signal    : ${predictiveRisk} (slope ${slopePerWeek}/week, projected ${projectedNextWeekDeploys} deploys next week)`,
 );

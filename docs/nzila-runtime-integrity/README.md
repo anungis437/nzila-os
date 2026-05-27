@@ -44,7 +44,7 @@ The runtime must increasingly feel:
 
 ## Validator
 
-- Script: `pnpm validate:runtime-integrity`
+- Script: `node tooling/scripts/validate-runtime-integrity.mjs`
 - Source: [tooling/scripts/validate-runtime-integrity.mjs](../../tooling/scripts/validate-runtime-integrity.mjs)
 
 ## Doctrinal Posture

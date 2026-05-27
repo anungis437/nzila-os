@@ -5,8 +5,8 @@
  * No cowboy deploys.
  *
  * Usage:
- *   pnpm release:hotfix --incident INC-0042 --apps web,console --reason "Critical auth bypass"
- *   pnpm release:hotfix --incident INC-0042 --apps web --dry-run
+ *   pnpm exec tsx scripts/release/hotfix-initiate.ts --incident INC-0042 --apps web,console --reason "Critical auth bypass"
+ *   pnpm exec tsx scripts/release/hotfix-initiate.ts --incident INC-0042 --apps web --dry-run
  *
  * Flow:
  *   1. Validates incident reference and reason
@@ -93,7 +93,7 @@ function main(): void {
   const override = hasFlag('--override')
 
   if (!incidentRef || !reason || !appsArg) {
-    console.error('Usage: pnpm release:hotfix --incident INC-0042 --apps web,console --reason "description"')
+    console.error('Usage: pnpm exec tsx scripts/release/hotfix-initiate.ts --incident INC-0042 --apps web,console --reason "description"')
     console.error()
     console.error('Options:')
     console.error('  --incident   Incident reference (INC-XXXX, SEC-XXXX, CVE-XXXX-XXXXX)')

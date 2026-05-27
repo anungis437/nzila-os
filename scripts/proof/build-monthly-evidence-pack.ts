@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 
 import { createHash } from 'node:crypto'
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 
 import { findRepoRoot } from '../lib/portfolio-governance'
@@ -16,6 +16,10 @@ function getMonthArg(): string {
   const explicit = process.argv.find((arg) => arg.startsWith('--month='))
   if (explicit) return explicit.slice('--month='.length)
   return new Date().toISOString().slice(0, 7)
+}
+
+function shouldImportRuntimeMonthly(): boolean {
+  return process.argv.includes('--import-runtime-monthly')
 }
 
 function sha256(value: string): string {
@@ -45,11 +49,146 @@ function safeJoin(root: string, relativePath: string): string {
   return absolutePath
 }
 
+function collectHistoryMonths(historyPath: string): Set<string> {
+  if (!existsSync(historyPath)) return new Set()
+  const lines = readFileSync(historyPath, 'utf8').split('\n').filter(Boolean)
+  const months = new Set<string>()
+  for (const line of lines) {
+    try {
+      const record = JSON.parse(line) as { month?: string }
+      if (record.month) months.add(record.month)
+    } catch {
+      // Ignore malformed historical rows; keep import resilient.
+    }
+  }
+  return months
+}
+
+function writeEvidenceIndexReadme(root: string, historyPath: string): void {
+  const lines = existsSync(historyPath)
+    ? readFileSync(historyPath, 'utf8').split('\n').filter(Boolean)
+    : []
+  const historyForReadme = lines
+    .map((line) => {
+      try {
+        return JSON.parse(line) as { month?: string }
+      } catch {
+        return { month: undefined }
+      }
+    })
+    .filter((item): item is { month: string } => Boolean(item.month))
+    .sort((left, right) => left.month.localeCompare(right.month))
+
+  writeText(root, 'proof-artifacts/evidence-packs/README.md', [
+    '# Monthly Evidence Packs',
+    '',
+    'Append-only monthly evidence snapshots generated from live repo artifacts.',
+    '',
+    ...historyForReadme.map((item) => `- [${item.month}](./${item.month}/README.md)`),
+    '',
+  ].join('\n'))
+}
+
+function importRuntimeMonthlyBackfill(root: string, historyPath: string): number {
+  const runtimeMonthlyDir = safeJoin(root, 'reports/runtime/monthly')
+  if (!existsSync(runtimeMonthlyDir)) return 0
+
+  const imported = [] as string[]
+  const knownMonths = collectHistoryMonths(historyPath)
+  const candidates = readdirSync(runtimeMonthlyDir)
+    .filter((name) => /^runtime-\d{4}-\d{2}\.json$/.test(name))
+    .sort()
+
+  for (const fileName of candidates) {
+    const month = fileName.slice('runtime-'.length, 'runtime-YYYY-MM'.length)
+    const packDir = safeJoin(root, `proof-artifacts/evidence-packs/${month}`)
+    if (knownMonths.has(month) || existsSync(packDir)) continue
+
+    const sourcePath = `reports/runtime/monthly/${fileName}`
+    const runtime = readJsonIfExists<any>(root, sourcePath)
+    if (!runtime) continue
+
+    const metricByName = new Map<string, any>()
+    const runtimeMetrics = Array.isArray(runtime.metrics) ? runtime.metrics : []
+    for (const item of runtimeMetrics) {
+      if (item && typeof item.name === 'string') metricByName.set(item.name, item.value)
+    }
+
+    const sourceContent = readFileSync(safeJoin(root, sourcePath), 'utf8')
+    const snapshot = {
+      month,
+      generatedAt: runtime.timestamp ?? new Date().toISOString(),
+      importMode: 'runtime-monthly-backfill',
+      metrics: {
+        deploymentFrequencyPerWeek: null,
+        leadTimeHours: null,
+        changeFailureRatePct: null,
+        mttrHours: null,
+        unresolvedCostApps: null,
+        totalMonthlyCostUsd: null,
+        incidentsThisMonth: null,
+        deploySuccessRatePct: metricByName.get('ci_success_rate') ?? null,
+        rollbackCount: metricByName.get('rollback_count') ?? null,
+        sellNowApps: [],
+        workflowSprawlScore: null,
+        releaseGovernanceScore: null,
+      },
+      sources: [
+        {
+          key: 'runtime-monthly',
+          path: sourcePath,
+          present: true,
+          sha256: sha256(sourceContent),
+          bytes: Buffer.byteLength(sourceContent),
+        },
+      ],
+    }
+
+    mkdirSync(packDir, { recursive: true })
+    writeText(root, `proof-artifacts/evidence-packs/${month}/snapshot.json`, `${JSON.stringify(snapshot, null, 2)}\n`)
+    writeText(
+      root,
+      `proof-artifacts/evidence-packs/${month}/README.md`,
+      [
+        `# Evidence Pack ${month}`,
+        '',
+        `Generated: ${snapshot.generatedAt}`,
+        '',
+        '## Import Mode',
+        '',
+        '- Source: reports/runtime/monthly runtime proof artifact',
+        '- Method: append-only runtime-monthly backfill',
+        '- Note: Finance/DORA rollups are unavailable in imported runtime-only months and remain null.',
+        '',
+      ].join('\n') + '\n',
+    )
+    appendFileSync(historyPath, `${JSON.stringify({ month, generatedAt: snapshot.generatedAt, metrics: snapshot.metrics, importMode: snapshot.importMode })}\n`)
+    imported.push(month)
+    knownMonths.add(month)
+  }
+
+  if (imported.length > 0) {
+    writeEvidenceIndexReadme(root, historyPath)
+    console.log(`Imported runtime-monthly evidence months: ${imported.join(', ')}`)
+  }
+
+  return imported.length
+}
+
 function main(): void {
   const root = findRepoRoot()
+  const importRuntimeMonthly = shouldImportRuntimeMonthly()
   const month = getMonthArg()
   const packDir = join(root, 'proof-artifacts', 'evidence-packs', month)
   const historyPath = join(root, 'proof-artifacts', 'evidence-packs', 'history.jsonl')
+
+  if (importRuntimeMonthly) {
+    const importedCount = importRuntimeMonthlyBackfill(root, historyPath)
+    if (importedCount === 0) {
+      console.log('No runtime-monthly history was imported (no new months detected).')
+    }
+    return
+  }
 
   if (existsSync(packDir)) {
     throw new Error(`Evidence pack for ${month} already exists. Monthly packs are append-only.`)
@@ -154,17 +293,7 @@ function main(): void {
   mkdirSync(dirname(historyPath), { recursive: true })
   appendFileSync(historyPath, `${JSON.stringify(historyRecord)}\n`)
 
-  const readmePath = 'proof-artifacts/evidence-packs/README.md'
-  const historyForReadme = [...existingHistory.map((line) => JSON.parse(line) as { month: string }), { month }]
-    .sort((left, right) => left.month.localeCompare(right.month))
-  writeText(root, readmePath, [
-    '# Monthly Evidence Packs',
-    '',
-    'Append-only monthly evidence snapshots generated from live repo artifacts.',
-    '',
-    ...historyForReadme.map((item) => `- [${item.month}](./${item.month}/README.md)`),
-    '',
-  ].join('\n'))
+  writeEvidenceIndexReadme(root, historyPath)
 
   console.log(summary)
 }

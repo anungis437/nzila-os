@@ -41,7 +41,7 @@ All finalization evidence lives under
 `proof-artifacts/finalization/`, anchored by
 `finalization-manifest.json`. Per-environment GO certifications are
 in `proof-artifacts/finalization/certifications/`. The validator
-(`pnpm final:go`) emits the formal GO status only when every
+(`node tooling/scripts/validate-final-go-status.mjs`) emits the formal GO status only when every
 certification, every audit, and every proving anchor is present and
 internally consistent.
 

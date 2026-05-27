@@ -237,7 +237,7 @@ export function runRuntimeProofExport(period?: string): { exportDir: string; pro
 
   if (!fs.existsSync(sourcePath)) {
     console.error(`✗ Source proof not found: ${sourcePath}`)
-    console.error('  Run "pnpm proof:runtime" first, or specify --period YYYY-MM')
+    console.error('  Run "pnpm exec tsx scripts/proof/run-proof.tstime" first, or specify --period YYYY-MM')
     process.exit(1)
   }
 

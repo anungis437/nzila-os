@@ -17,7 +17,7 @@
 - **Container scanning**: Trivy (weekly + on every PR)
 - **DAST**: OWASP ZAP (weekly + on PR)
 - **Secret detection**: Gitleaks on every push
-- **SBOM**: Auto-generated on release (`pnpm generate:sbom`)
+- **SBOM**: Auto-generated on release (`pnpm exec tsx scripts/generate-sbom.ts`)
 
 ## Supply Chain
 

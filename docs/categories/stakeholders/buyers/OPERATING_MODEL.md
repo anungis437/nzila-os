@@ -50,9 +50,9 @@ All operational actions produce tamper-evident evidence:
 
 | Report | Frequency | Command |
 |--------|-----------|---------|
-| Portfolio status | On-demand | `pnpm generate:portfolio-artifacts` |
-| Capital allocation | On-demand | `pnpm generate:capital-allocation` |
-| SRE dashboard | On-demand | `pnpm sre:dashboard` |
-| FinOps report | On-demand | `pnpm finops:build` |
-| Evidence pack | Monthly | `pnpm evidence:pack:monthly` |
-| DORA metrics | On-demand | `pnpm collect:dora` |
+| Portfolio status | On-demand | `pnpm exec tsx scripts/generate-portfolio-artifacts.ts` |
+| Capital allocation | On-demand | `pnpm exec tsx scripts/generate-capital-allocation.ts` |
+| SRE dashboard | On-demand | `pnpm exec tsx scripts/sre/generate-executive-dashboard.ts` |
+| FinOps report | On-demand | `pnpm exec tsx scripts/finops/build-portfolio-finops.ts` |
+| Evidence pack | Monthly | `pnpm exec tsx scripts/proof/build-monthly-evidence-pack.ts` |
+| DORA metrics | On-demand | `node tooling/scripts/collect-dora-metrics.mjs` |

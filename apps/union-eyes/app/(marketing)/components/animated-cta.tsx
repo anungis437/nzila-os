@@ -23,7 +23,7 @@ export default function AnimatedCTA() {
       </h3>
       <p className="text-white text-lg mb-8 max-w-xl mx-auto">
         See how UnionEyes turns day-to-day casework into
-        confident, data-backed decisions. Start with a free Continuity Reflection or join the Founding Partner Program.
+        confident, data-backed decisions. Start with a free readiness check or request a guided rollout review.
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -33,7 +33,7 @@ export default function AnimatedCTA() {
             className="rounded-xl bg-electric hover:bg-electric/90 text-white px-8 shadow-lg shadow-electric/25"
             asChild
           >
-            <Link href="/organizational-continuity-risk">Start the free Continuity Reflection</Link>
+            <Link href="/organizational-continuity-risk">Start the free readiness check</Link>
           </Button>
         </motion.div>
 
@@ -44,7 +44,7 @@ export default function AnimatedCTA() {
             className="rounded-xl border-white/30 text-white hover:bg-white/10 px-8"
             asChild
           >
-            <Link href="/contact">Founding Partner Program</Link>
+            <Link href="/contact">Request a guided rollout review</Link>
           </Button>
         </motion.div>
       </div>

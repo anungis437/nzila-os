@@ -19,7 +19,7 @@
 ### Step 2 — Run the Full Proof Suite (60 seconds)
 
 ```bash
-pnpm proof:run
+pnpm exec tsx scripts/proof/run-proof.ts
 ```
 
 **What to show:**
@@ -88,7 +88,7 @@ cat proof-artifacts/compliance-sensitive-action/governance.json
 ### Step 6 — Verify Artifacts Programmatically (30 seconds)
 
 ```bash
-pnpm proof:verify
+pnpm exec tsx scripts/proof/verify-artifacts.ts
 ```
 
 > "Machine verification confirms every expected artifact exists and is valid

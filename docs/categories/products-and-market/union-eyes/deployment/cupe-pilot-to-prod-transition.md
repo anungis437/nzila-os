@@ -61,12 +61,12 @@ fallback environment for pre-prod testing. **Do not choose this option.**
 
 | # | Gate | Command / Check | Owner |
 |---|------|-----------------|-------|
-| 1 | Region validation | `pnpm prod:region:validate` | Platform Eng |
-| 2 | Production readiness dry-run | `pnpm ue:prod:canadacentral:dry-run` | Platform Eng |
-| 3 | QA gate | `pnpm ue:qa:gate -- --target production` | QA |
-| 4 | AI validation | `pnpm ai:validate` | Platform Eng |
+| 1 | Region validation | `pnpm exec tsx scripts/validate-prod-region.ts` | Platform Eng |
+| 2 | Production readiness dry-run | `pnpm exec tsx scripts/ue-prod-canadacentral-dry-run.ts` | Platform Eng |
+| 3 | QA gate | `pnpm exec tsx scripts/ue-qa-gate.ts --target production` | QA |
+| 4 | AI validation | `pnpm exec tsx scripts/ai-agent-runner.ts --phase=validate` | Platform Eng |
 | 5 | NAR chain verify | `pnpm nar:chain:verify` | Compliance |
-| 6 | SRE validation | `pnpm sre:validate` | SRE |
+| 6 | SRE validation | `pnpm exec tsx scripts/sre/validate-health-contract.ts && pnpm exec tsx scripts/sre/synthetic-dry-run.ts && pnpm exec tsx scripts/sre/alert-routing-dry-run.ts && pnpm exec tsx scripts/sre/audit-reliability.ts && pnpm exec tsx scripts/sre/generate-executive-dashboard.ts` | SRE |
 
 All six gates must exit `0` before any production deployment proceeds.
 

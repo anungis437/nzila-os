@@ -4,7 +4,7 @@
  * Scans target apps for suspicious AI implementations that bypass
  * the platform-ai-* package architecture.
  *
- * Usage: pnpm ai:contract:check
+ * Usage: pnpm exec tsx scripts/ai-contract-check.ts
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'

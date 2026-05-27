@@ -1,7 +1,7 @@
-# Union Eyes — Federation and Sovereignty Overview
+# UnionEyes — Federation and Sovereignty Overview
 
 > **Audience:** Multi-tier union buyers, federation officers, procurement reviewers.
-> **Scope:** Public-safe summary of Union Eyes federation governance architecture and
+> **Scope:** Public-safe summary of UnionEyes federation governance architecture and
 > institutional sovereignty modeling.
 > **Caveats:** Claims use language such as "is designed to," "supports," and "provides evidence of."
 
@@ -9,7 +9,7 @@
 
 ## 1. Federation Architecture Philosophy
 
-Union Eyes is designed to support labour organisations that operate across multiple
+UnionEyes is designed to support labour organisations that operate across multiple
 governance tiers. The federation sovereignty layer models how:
 
 - National, regional, local, affiliate, and coalition units coexist.
@@ -23,7 +23,7 @@ structures or create new legal relationships.
 
 ## 2. Sovereignty Tiers
 
-Union Eyes recognises five sovereignty tiers:
+UnionEyes recognises five sovereignty tiers:
 
 | Tier | Description |
 |------|-------------|
@@ -46,7 +46,7 @@ Each tier can operate in one of four sovereignty modes:
 
 ## 3. Delegated Authority
 
-Union Eyes supports explicit delegation of the following authorities between tiers:
+UnionEyes supports explicit delegation of the following authorities between tiers:
 
 - `publication` — Authority to publish content to federation surfaces
 - `policy-enforcement` — Authority to enforce federation policies locally
@@ -65,7 +65,7 @@ Delegation chains are evaluated deterministically and ledgered for governance ev
 
 ## 4. Sovereignty Conflict Resolution
 
-When governance conflicts arise between tiers, Union Eyes:
+When governance conflicts arise between tiers, UnionEyes:
 
 1. **Classifies** the conflict type (policy divergence, authority override, publication
    dispute, AI autonomy conflict, audit visibility disagreement, escalation deadlock)
@@ -81,7 +81,7 @@ When governance conflicts arise between tiers, Union Eyes:
 
 ## 5. Continuity Sharing
 
-Union Eyes supports governance-aware continuity sharing between federation tiers:
+UnionEyes supports governance-aware continuity sharing between federation tiers:
 
 - National can observe continuity health trends without accessing private local operational details.
 - Continuity jurisdiction gaps (e.g., steward turnover) are detected and classified.

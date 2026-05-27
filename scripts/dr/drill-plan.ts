@@ -1,14 +1,14 @@
 #!/usr/bin/env tsx
 /**
- * dr:drill:plan — Generate a printable DR drill plan and pre-drill checklist.
+ * drill-plan.ts — Generate a printable DR drill plan and pre-drill checklist.
  *
  * Produces a markdown drill plan for the upcoming quarterly restore drill,
  * pre-populated with the current migration count, RTO/RPO targets, and
  * environment details.
  *
  * Usage:
- *   pnpm dr:drill:plan
- *   pnpm dr:drill:plan --out docs/union-eyes/dr/drill-plan-Q2-2026.md
+ *   pnpm exec tsx scripts/dr/drill-plan.ts
+ *   pnpm exec tsx scripts/dr/drill-plan.ts --out docs/union-eyes/dr/drill-plan-Q2-2026.md
  *
  * Output:
  *   Prints checklist to stdout.
@@ -110,13 +110,13 @@ Complete every item before starting. Mark each with ✅ or ❌.
 
 \`\`\`bash
 # 1. Dry-run first (no live restore)
-pnpm db:restore-drill
+pnpm exec tsx scripts/db/restore-drill.ts
 
 # 2. Full live restore (record timing)
-pnpm db:restore-drill:execute
+pnpm exec tsx scripts/db/restore-drill.ts -- --execute
 
 # 3. Post-drill: generate evidence report
-pnpm dr:drill:report
+pnpm exec tsx scripts/dr/drill-report.ts
 
 # 4. Post-drill: verify app health
 curl -s https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready | jq .

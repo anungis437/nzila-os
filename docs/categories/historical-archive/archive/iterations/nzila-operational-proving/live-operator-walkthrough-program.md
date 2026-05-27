@@ -43,7 +43,7 @@ traversal in [full-environment-traversal-rehearsal.md](./full-environment-traver
 
 ### Promotion review
 - Authority reference visible per edge.
-- CLI command surfaced as `pnpm rollout:promote:attest`.
+- CLI command surfaced as `node tooling/scripts/record-promotion-attestation.mjs`.
 
 ### Rollback review
 - Surface: Control Plane → Governance → Rollout · Rollback Posture

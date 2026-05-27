@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-05-11T04:57:50.600Z",
+  "generatedAt": "2026-05-25T18:08:34.025Z",
   "totalMrrUsd": 78000,
   "arrRunRateUsd": 936000,
-  "burnRateUsd": 247000,
-  "runwayEstimateMonths": 3.44,
-  "portfolioGrossMarginPct": -316.67,
-  "bestAppByMargin": "union-eyes",
+  "burnRateUsd": 8362.01,
+  "runwayEstimateMonths": 101.65,
+  "portfolioGrossMarginPct": -10.72,
+  "bestAppByMargin": "flow",
   "fastestGrowingApp": "abr",
   "highestSupportBurdenApp": "flow",
   "top5CostLeaks": [
     {
       "leak": "Unresolved cloud cost attribution mappings",
       "impactUsdMonthly": 17000,
-      "evidence": "ops/outputs/cost-allocation.json unresolved_app_count=17"
+      "evidence": "ops/outputs/cost-allocation.json unresolved_app_count=0"
     },
     {
       "leak": "Tier1 support burden not reduced through premium support routing",
@@ -43,22 +43,16 @@
       "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
     },
     {
-      "app": "abr",
-      "currentSignal": "gross margin -99.8%",
-      "recommendation": "restructure_packaging",
-      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
-    },
-    {
       "app": "flow",
-      "currentSignal": "gross margin -61.42%",
-      "recommendation": "restructure_packaging",
-      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+      "currentSignal": "close rate 27% and gross margin 99.86%",
+      "recommendation": "raise_price",
+      "rationale": "Strong conversion with healthy margin indicates headroom for immediate list-price increase."
     },
     {
       "app": "cfo",
-      "currentSignal": "gross margin -176.4%",
-      "recommendation": "restructure_packaging",
-      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+      "currentSignal": "close rate 22% and gross margin 99.67%",
+      "recommendation": "raise_price",
+      "rationale": "Strong conversion with healthy margin indicates headroom for immediate list-price increase."
     },
     {
       "app": "partners",
@@ -90,12 +84,12 @@
       "implementationHours": 69.5,
       "founderHours": 26.4,
       "supportHours": 30.2,
-      "infraCostUsd": 3081.6,
+      "infraCostUsd": 2.63,
       "paymentFeesUsd": 378,
       "customRequestsUsd": 1200,
-      "totalCostUsd": 17827.1,
+      "totalCostUsd": 14748.13,
       "opportunityValueUsd": 143640,
-      "expectedValueUsd": 125812.9,
+      "expectedValueUsd": 128891.87,
       "classification": "profitable-now"
     },
     {
@@ -105,12 +99,12 @@
       "implementationHours": 71.5,
       "founderHours": 24,
       "supportHours": 39.8,
-      "infraCostUsd": 2211.2,
+      "infraCostUsd": 2.63,
       "paymentFeesUsd": 144,
       "customRequestsUsd": 700,
-      "totalCostUsd": 16988.7,
+      "totalCostUsd": 14780.13,
       "opportunityValueUsd": 31680,
-      "expectedValueUsd": 14691.3,
+      "expectedValueUsd": 16899.87,
       "classification": "profitable-now"
     }
   ]

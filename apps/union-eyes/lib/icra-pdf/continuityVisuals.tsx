@@ -3,7 +3,7 @@
  * DOCTRINE_VERSION: 1.0.0
  * CHANGE CLASS: Commercial
  *
- * Executive Continuity Brief — Continuity Visuals
+ * Leadership Briefing Report — Continuity Visuals
  *
  * React-PDF visual components: dimensional spectrums, burden index,
  * maturity band indicator, signal lists.

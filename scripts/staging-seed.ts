@@ -2,7 +2,7 @@
  * Staging Seed — generates deterministic seed data for the staging environment.
  * Ensures staging always starts from a reproducible, known-good state.
  *
- * Usage: pnpm staging:seed
+ * Usage: pnpm exec tsx scripts/staging-seed.ts
  */
 
 import * as fs from 'node:fs'

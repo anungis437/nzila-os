@@ -70,16 +70,16 @@ After each deployment to STAGING or PRODUCTION, a governance snapshot is recorde
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm governance:snapshot <env> <commit> <digest> <sbom>` | Record post-deploy governance snapshot |
-| `pnpm rollback <env> <digest>` | Initiate rollback to a previous artifact |
-| `pnpm env:health [env]` | Check environment health |
+| `pnpm exec tsx scripts/governance-snapshot.ts <env> <commit> <digest> <sbom>` | Record post-deploy governance snapshot |
+| `pnpm exec tsx scripts/rollback.ts <env> <digest>` | Initiate rollback to a previous artifact |
+| `pnpm exec tsx scripts/environment-health.ts [env]` | Check environment health |
 
 ## Rollback
 
 To rollback a protected environment:
 
 ```sh
-pnpm rollback STAGING sha256:abc123...
+pnpm exec tsx scripts/rollback.ts STAGING sha256:abc123...
 ```
 
 This verifies the target artifact exists, records a rollback audit record in `ops/rollbacks/`, and prints the `az containerapp update` command needed to complete the rollback.

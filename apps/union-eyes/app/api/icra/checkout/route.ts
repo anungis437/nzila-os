@@ -8,7 +8,7 @@
  * which upgrades icraAssessments.reportTierId and the stored profile payload.
  *
  * Env vars:
- *   STRIPE_PRICE_ICRA_BRIEF        — Stripe Price ID for Executive Continuity Brief (optional)
+ *   STRIPE_PRICE_ICRA_BRIEF        — Stripe Price ID for Leadership Briefing Report (optional)
  *   STRIPE_PRICE_ICRA_DIAGNOSTIC   — Stripe Price ID for Institutional Continuity Diagnostic (optional)
  *   NEXT_PUBLIC_APP_URL            — Base URL used for success/cancel redirect (fallback: http://localhost:3000)
  */
@@ -51,7 +51,7 @@ function buildLineItems(
       {
         price_data: {
           currency,
-          product_data: { name: 'Executive Continuity Brief' },
+          product_data: { name: 'Leadership Briefing Report' },
           unit_amount: BRIEF_AMOUNT_CENTS,
         },
         quantity: 1,

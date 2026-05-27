@@ -35,6 +35,8 @@ describe('Question Architecture Audit™ — maturity_select ceiling', () => {
     expect(total).toBeGreaterThan(0);
   });
 
-  // v1.2.0 — Roadmap R-H1 closes Finding M-1:
-  it.todo('maturity_select share within doctrine band 0.65..0.75');
+  it('maturity_select share within doctrine band 0.65..0.75', () => {
+    expect(share).toBeGreaterThanOrEqual(0.65);
+    expect(share).toBeLessThanOrEqual(0.75);
+  });
 });

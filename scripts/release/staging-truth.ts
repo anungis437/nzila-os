@@ -1,5 +1,5 @@
 /**
- * release:staging:truth — Validate that staging is a trustworthy promotion source.
+ * staging-truth.ts — Validate that staging is a trustworthy promotion source.
  *
  * Validates:
  *   1. All prod-approved apps are deployed and healthy
@@ -9,9 +9,9 @@
  *   5. Evidence pack is writable
  *
  * Usage:
- *   pnpm release:staging:truth
- *   pnpm release:staging:truth --live    # actually hit staging endpoints
- *   pnpm release:staging:truth --dry-run
+ *   pnpm exec tsx scripts/release/staging-truth.ts
+ *   pnpm exec tsx scripts/release/staging-truth.ts --live    # actually hit staging endpoints
+ *   pnpm exec tsx scripts/release/staging-truth.ts --dry-run
  *
  * Exit codes:
  *   0 = staging is trustworthy — safe to promote

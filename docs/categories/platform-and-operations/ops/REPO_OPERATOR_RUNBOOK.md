@@ -9,33 +9,33 @@
 ### Run All Architecture Checks
 
 ```bash
-pnpm architecture:check
+pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts
 ```
 
 This runs (in sequence):
 
-1. `architecture:layers:check` — dependency direction validation
-2. `app:domain-core:check` — app internal architecture compliance
-3. `platform:surface:model:check` — route ↔ surface capability alignment
-4. `platform:contract:check` — contract package and adapter scaffolds
-5. `registry:consistency:check` — cross-registry validation
-6. `control-plane:coherence:check` — cross-surface duplication detection
+1. `pnpm exec tsx scripts/architecture-layer-check.ts` — dependency direction validation
+2. `pnpm exec tsx scripts/app-domain-core-check.ts` — app internal architecture compliance
+3. `pnpm exec tsx scripts/platform-surface-model-check.ts` — route ↔ surface capability alignment
+4. `pnpm exec tsx scripts/platform-contract-check.ts` — contract package and adapter scaffolds
+5. `pnpm exec tsx scripts/registry-consistency-check.ts` — cross-registry validation
+6. `pnpm exec tsx scripts/control-plane-coherence-check.ts` — cross-surface duplication detection
 
 ### Individual Checks
 
 | Command | What It Validates |
 |---|---|
-| `pnpm architecture:layers:check` | Apps don't import from other apps; layers respect dependency rules |
-| `pnpm app:domain-core:check` | Target apps have domain/services/workflows/queries/events layers |
-| `pnpm platform:surface:model:check` | Route feature classes match surface capabilities |
-| `pnpm platform:contract:check` | platform-contracts package exists; apps have adapter scaffolds |
-| `pnpm control-plane:coherence:check` | No route duplication across surfaces; bucket balance |
-| `pnpm registry:consistency:check` | All registry files exist; app tiers match; env apps valid |
-| `pnpm control-plane:check` | Control plane routes match manifest |
-| `pnpm control-plane:surface:check` | Control plane surface governance |
-| `pnpm registry:check` | Platform registry structure |
-| `pnpm governance:check` | SBOM, evidence, policy engine |
-| `pnpm ai:contract:check` | AI output patterns |
+| `pnpm exec tsx scripts/architecture-layer-check.ts` | Apps don't import from other apps; layers respect dependency rules |
+| `pnpm exec tsx scripts/app-domain-core-check.ts` | Target apps have domain/services/workflows/queries/events layers |
+| `pnpm exec tsx scripts/platform-surface-model-check.ts` | Route feature classes match surface capabilities |
+| `pnpm exec tsx scripts/platform-contract-check.ts` | platform-contracts package exists; apps have adapter scaffolds |
+| `pnpm exec tsx scripts/control-plane-coherence-check.ts` | No route duplication across surfaces; bucket balance |
+| `pnpm exec tsx scripts/registry-consistency-check.ts` | All registry files exist; app tiers match; env apps valid |
+| `pnpm exec tsx scripts/control-plane-check.ts` | Control plane routes match manifest |
+| `pnpm exec tsx scripts/control-plane-surface-check.ts` | Control plane surface governance |
+| `pnpm exec tsx scripts/platform-registry-check.ts` | Platform registry structure |
+| `pnpm exec tsx scripts/governance-check.ts` | SBOM, evidence, policy engine |
+| `pnpm exec tsx scripts/ai-contract-check.ts` | AI output patterns |
 
 ---
 
@@ -49,21 +49,21 @@ This runs (in sequence):
 4. Create `docs/ARCHITECTURE_SHAPE.md`
 5. Create canonical layer directories (`domain/`, `services/`, etc.)
 6. Create `lib/platform-adapters/index.ts`
-7. Run `pnpm architecture:check` to validate
+7. Run `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` to validate
 
 ### Adding a New Route to a Surface
 
 1. Add the route page under the surface app's `app/` directory
 2. Add entry to the surface's `route.meta.json`
 3. Ensure `feature_class` is in the surface's `allowed_capabilities` (see `platform/registry/platform-surfaces.json`)
-4. Run `pnpm platform:surface:model:check`
-5. Run `pnpm control-plane:coherence:check` to detect cross-surface overlap
+4. Run `pnpm exec tsx scripts/platform-surface-model-check.ts`
+5. Run `pnpm exec tsx scripts/control-plane-coherence-check.ts` to detect cross-surface overlap
 
 ### Promoting an App Tier
 
 1. Update `tier` in `platform/registry/apps.json`
 2. Update `app_tier` in the app's `app-architecture.meta.json`
-3. Run `pnpm registry:consistency:check` to verify alignment
+3. Run `pnpm exec tsx scripts/registry-consistency-check.ts` to verify alignment
 4. For PRODUCTION promotion: ensure all domain-core layers are populated
 
 ### Creating a Platform Contract Adapter

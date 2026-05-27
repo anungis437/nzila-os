@@ -48,7 +48,7 @@ export interface SendResult {
 }
 
 import { logger } from '@/lib/logger';
-import { getResendClient, getFromEmail } from '@/lib/email-service';
+import { getFromEmail, sendResendEmail } from '@/lib/email-service';
 
 export interface EmailProvider {
   name: string;
@@ -146,12 +146,7 @@ export class ResendAdapter implements EmailProvider {
 
   async send(message: EmailMessage): Promise<SendResult> {
     try {
-      const client = getResendClient();
-      if (!client) {
-        return { success: false, error: 'Resend not configured', provider: this.name };
-      }
-
-      const { data, error } = await client.emails.send({
+      const result = await sendResendEmail({
         from: message.from || this.defaultFrom,
         to: Array.isArray(message.to) ? message.to : [message.to],
         subject: message.subject,
@@ -165,13 +160,15 @@ export class ResendAdapter implements EmailProvider {
           content: att.content,
         })),
         headers: message.headers,
+      }, {
+        feature: 'messaging_service',
       });
 
-      if (error) {
-        return { success: false, error: error.message || 'Resend send error', provider: this.name };
+      if (!result.success) {
+        return { success: false, error: result.error || 'Resend not configured', provider: this.name };
       }
 
-      return { success: true, messageId: data?.id, provider: this.name };
+      return { success: true, messageId: result.messageId, provider: this.name };
     } catch (error) {
       return {
         success: false,
@@ -191,7 +188,7 @@ export class ResendAdapter implements EmailProvider {
   }
 
   async verifyConnection(): Promise<boolean> {
-    return getResendClient() !== null;
+    return true;
   }
 }
 

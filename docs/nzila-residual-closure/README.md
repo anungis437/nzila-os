@@ -22,7 +22,7 @@ Final review: [full-residual-elimination-review.md](./full-residual-elimination-
 
 ## Validator
 
-`pnpm validate:residual-closure` → [tooling/scripts/validate-residual-closure.mjs](../../tooling/scripts/validate-residual-closure.mjs)
+`node tooling/scripts/validate-residual-closure.mjs` → [tooling/scripts/validate-residual-closure.mjs](../../tooling/scripts/validate-residual-closure.mjs)
 
 ## Operational honesty preface
 

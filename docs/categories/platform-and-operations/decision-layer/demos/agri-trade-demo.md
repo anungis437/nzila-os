@@ -5,7 +5,7 @@
 Run the demo seed to populate decision records:
 
 ```bash
-pnpm decision:seed-demo
+pnpm exec tsx scripts/decision-seed-demo.ts
 ```
 
 Relevant seeded decisions for the agri/trade vertical:

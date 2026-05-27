@@ -13,7 +13,7 @@
  *   5. Critical configuration files
  *
  * Usage:
- *   pnpm verify:backup
+ *   pnpm exec tsx scripts/backup-verify.ts
  *
  * Exit codes:
  *   0 — all checks pass
@@ -112,7 +112,7 @@ function checkBuildAttestation(): void {
 function checkSbomPresence(): void {
   const path = resolve(ROOT, 'ops', 'security', 'sbom.json')
   if (!existsSync(path)) {
-    warn('SBOM not found (run: pnpm generate:sbom)')
+    warn('SBOM not found (run: pnpm exec tsx scripts/generate-sbom.ts)')
     return
   }
   try {

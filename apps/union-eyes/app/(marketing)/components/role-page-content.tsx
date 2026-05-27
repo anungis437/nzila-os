@@ -244,7 +244,7 @@ export default function RolePageContent({ role }: { role: RoleKey }) {
               href="/organizational-continuity-risk"
               className="inline-flex items-center gap-2 px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
             >
-              Start the free Continuity Reflection <ArrowRight className="w-5 h-5" />
+              Start the free readiness check <ArrowRight className="w-5 h-5" />
             </Link>
           </ScrollReveal>
         </div>

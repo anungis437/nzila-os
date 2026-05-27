@@ -49,5 +49,5 @@ They must **never**:
 Run repo-wide doctrine convergence checks:
 
 ```bash
-pnpm validate:cognition
+node tooling/scripts/validate-institutional-cognition-convergence.mjs
 ```

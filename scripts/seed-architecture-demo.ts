@@ -2,7 +2,7 @@
  * Seed Architecture Demo — generates a static JSON snapshot of architecture
  * governance data that the control plane can consume without live filesystem access.
  *
- * Usage: pnpm arch:seed
+ * Usage: pnpm exec tsx scripts/seed-architecture-demo.ts
  * Output: demo-output/architecture-summary.json
  */
 import * as fs from 'node:fs'

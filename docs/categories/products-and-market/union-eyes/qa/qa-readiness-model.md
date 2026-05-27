@@ -39,12 +39,12 @@ NO_GO:
 
 ## Gate Commands
 
-- pnpm ue:qa:gate -- --target ux
-- pnpm ue:qa:gate -- --target pilot
-- pnpm ue:qa:gate -- --target production
+- pnpm exec tsx scripts/ue-qa-gate.ts --target ux
+- pnpm exec tsx scripts/ue-qa-gate.ts --target pilot
+- pnpm exec tsx scripts/ue-qa-gate.ts --target production
 
 Default behavior:
-- pnpm ue:qa:gate (no target) evaluates against ux target.
+- pnpm exec tsx scripts/ue-qa-gate.ts (no target) evaluates against ux target.
 
 ## Artifact Locations
 

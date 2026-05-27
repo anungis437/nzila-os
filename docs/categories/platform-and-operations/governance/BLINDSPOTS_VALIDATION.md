@@ -171,7 +171,7 @@
 
 - ✅ **Contract tests extensive**: 5k+ architectural invariants prevent breaking changes; flagged in CI as `contract-tests` project.
 - ✅ **Drizzle schema migrations**: `@nzila/db` package.json exports db:generate, db:migrate, db:push scripts.
-- ✅ **Changeset versioning**: Root package.json contains `release` and `version-packages` scripts (uses `@changesets/cli` convention).
+- ✅ **Changeset versioning**: Root package.json keeps `release` script and uses direct `changeset version` via `@changesets/cli`.
 - ✅ **Workspace monorepo**: pnpm-workspace.yaml + turbo.json provide isolated dependency resolution.
 - ⚠️ **Semantic versioning enforcement**: No lock-in visible (packages can theoretically use any range; pre-release 0.x convention used but not enforced).
 - ❌ **Migration scripts**: No `scripts/migrate-*` or `packages/*/migrations/` directories found (Drizzle handles DB schema; package API breaking changes depend on contract tests + review).

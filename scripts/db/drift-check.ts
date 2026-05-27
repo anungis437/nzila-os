@@ -1,5 +1,5 @@
 /**
- * db:drift:check — Detect schema drift between local definitions and deployed state.
+ * drift-check.ts — Detect schema drift between local definitions and deployed state.
  *
  * Compares:
  *   - Drizzle schema definitions vs. latest migration snapshot
@@ -7,9 +7,9 @@
  *   - Staging vs. production schema versions (from evidence ledger)
  *
  * Usage:
- *   pnpm db:drift:check
- *   pnpm db:drift:check --env staging
- *   pnpm db:drift:check --env production
+ *   pnpm exec tsx scripts/db/drift-check.ts
+ *   pnpm exec tsx scripts/db/drift-check.ts --env staging
+ *   pnpm exec tsx scripts/db/drift-check.ts --env production
  *
  * Exit codes:
  *   0 = no drift detected

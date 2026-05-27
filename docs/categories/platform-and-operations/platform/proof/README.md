@@ -17,16 +17,16 @@
 
 ```bash
 # Run all proof scenarios
-pnpm proof:run
+pnpm exec tsx scripts/proof/run-proof.ts
 
 # Run a single scenario
-pnpm proof:run ue-governed-mutation
+pnpm exec tsx scripts/proof/run-proof.ts ue-governed-mutation
 
 # Verify artifact completeness
-pnpm proof:verify
+pnpm exec tsx scripts/proof/verify-artifacts.ts
 
 # Clean generated artifacts
-pnpm proof:clean
+pnpm exec tsx scripts/proof/clean-proof-artifacts.ts
 ```
 
 ## Architecture

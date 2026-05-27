@@ -84,5 +84,5 @@ require a Post Implementation Review before closure.
 
 | Script | Command | Purpose |
 |---|---|---|
-| `validate-change-window.ts` | `pnpm change:validate --env=STAGING --service=web` | Pre-deploy gate |
-| `change-seed-demo.ts` | `pnpm change:seed-demo` | Seed 5 example records |
+| `validate-change-window.ts` | `pnpm exec tsx scripts/validate-change-window.ts --env=STAGING --service=web` | Pre-deploy gate |
+| `change-seed-demo.ts` | `pnpm exec tsx scripts/change-seed-demo.ts` | Seed 5 example records |

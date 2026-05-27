@@ -26,7 +26,7 @@ Track whether governance and platform investments are improving adoption, cost a
 Run:
 
 ```bash
-pnpm strategic:quarterly
+node tooling/scripts/generate-quarterly-strategic-scorecard.mjs
 ```
 
 Outputs:

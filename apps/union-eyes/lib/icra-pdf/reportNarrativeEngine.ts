@@ -3,7 +3,7 @@
  * DOCTRINE_VERSION: 1.0.0
  * CHANGE CLASS: Commercial
  *
- * Executive Continuity Brief — Report Narrative Engine
+ * Leadership Briefing Report — Report Narrative Engine
  *
  * The heart of the PDF system.
  *
@@ -190,7 +190,7 @@ export function generateExecutiveSummary(
   // ── Paragraph 4: Brief orientation ───────────────────────────────────────
 
   const p4Variants = [
-    `This Executive Continuity Brief provides a full dimensional analysis of the ${inst}'s continuity posture, including governance entropy patterns, institutional memory and dependency analysis, modernization risk considerations, and a structured set of recommendations organized by planning horizon. It is intended as a governance document — to be read, discussed, and acted upon by the ${lead}.`,
+    `This Leadership Briefing Report provides a full dimensional analysis of the ${inst}'s continuity posture, including governance entropy patterns, institutional memory and dependency analysis, modernization risk considerations, and a structured set of recommendations organized by planning horizon. It is intended as a governance document — to be read, discussed, and acted upon by the ${lead}.`,
     `The brief organizes its findings across six dimensions of institutional continuity infrastructure, from governance coherence to operational memory, transition preparedness, and modernization risk. Each section draws directly from the data provided, interpreted through a continuity-native analytical framework built for institutions rather than for technology organizations. The ${lead} of this ${inst} may find it useful as a structured basis for a continuity planning conversation.`,
     `The pages that follow present a full analysis: dimensional scores, governance patterns, memory and dependency analysis, modernization risk, and recommendations calibrated to this ${inst}'s specific situation. These findings are a starting point for governance dialogue, not a definitive verdict. Institutional continuity is a process, not a destination.`,
   ];
@@ -582,7 +582,7 @@ export function generateExecutiveReflection(
   // duplicated here. Let p3 hand the reader gently toward it.
 
   const p3 =
-    `This briefing was prepared by Union Eyes as a contribution to the practice of institutional continuity. It is offered in the belief that organizations do their best work when they can see their own patterns clearly, name what they are carrying, and choose with intention how to move forward. The Organizational Continuity Infrastructure framework exists to make that clarity possible.`;
+    `This briefing was prepared by UnionEyes as a contribution to the practice of institutional continuity. It is offered in the belief that organizations do their best work when they can see their own patterns clearly, name what they are carrying, and choose with intention how to move forward. The Organizational Continuity Infrastructure framework exists to make that clarity possible.`;
 
   return [p1, p2, p3];
 }
@@ -593,7 +593,7 @@ export function generateExecutiveReflection(
 //
 // These builders read the executive stabilization model output and produce
 // short, observational paragraphs for the optional Stabilization Movement
-// appendix in the Executive Continuity Brief PDF. They are facilitated-edition
+// appendix in the Leadership Briefing Report PDF. They are facilitated-edition
 // only: the appendix is gated on the presence of an ExecutiveStabilizationResult
 // being supplied to the data mapper.
 //

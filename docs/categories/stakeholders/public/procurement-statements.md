@@ -23,7 +23,7 @@ Requests for supporting evidence should be directed to partnership@.
 > **Statement BC-01:**
 > Union Eyes maintains a quarterly disaster recovery drill cadence with
 > published runbooks (`docs/union-eyes/dr/`), a reproducible drill script
-> (`pnpm db:restore-drill`), and a structured evidence artifact program
+> (`pnpm exec tsx scripts/db/restore-drill.ts`), and a structured evidence artifact program
 > (`reports/dr/`). The first evidence-mode drill was completed on 2026-04-24.
 >
 > **Statement BC-02:**

@@ -241,8 +241,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Script alias regression guard
+        run: node tooling/scripts/check-script-alias-regression.mjs
+
       - name: Enforce tier focus labels
-        run: pnpm validate:tier-focus
+        run: pnpm exec tsx scripts/validate-tier-focus.ts
 
       - name: Start governance runtime timer
         run: echo "GOVERNANCE_JOB_START_TS=$(date +%s)" >> "$GITHUB_ENV"
@@ -275,50 +278,50 @@ jobs:
           echo "> **Note:** \`contracts_complete: false\` in any Tier 1 app is a blocker for GA. This gate will hard-fail once contracts are complete." >> $GITHUB_STEP_SUMMARY
 
       - name: GA gate check
-        run: pnpm ga-check
+        run: pnpm exec tsx tooling/ga-check/ga-check.ts
 
       - name: Governance fail-closed gate
-        run: pnpm validate:governance:gate
+        run: pnpm exec tsx tooling/governance/validate-governance-gate.ts
 
       - name: Evidence lifecycle policy gate
-        run: pnpm validate:evidence:lifecycle
+        run: pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts
 
       - name: Collect DORA metrics
-        run: pnpm collect:dora:enforce
+        run: node tooling/scripts/collect-dora-metrics.mjs -- --enforce
         env:
           DORA_MIN_DEPLOYS_PER_WEEK: "1"
           DORA_MAX_LEAD_TIME_HOURS: "720"
           DORA_MAX_CHANGE_FAILURE_RATE_PCT: "15"
 
       - name: Collect cost attribution
-        run: pnpm collect:cost
+        run: node tooling/scripts/collect-cost-attribution.mjs
         env:
           COST_ENABLE_AZURE_API: "${{ vars.COST_ENABLE_AZURE_API || '0' }}"
           AZURE_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
       - name: Collect onboarding KPIs
-        run: pnpm collect:onboarding:kpis
+        run: node tooling/scripts/collect-onboarding-kpis.mjs
 
       - name: Validate strategic resilience
-        run: pnpm validate:strategic-resilience
+        run: node tooling/scripts/validate-strategic-resilience.mjs --enforce
 
       - name: Verify runtime data residency (report)
-        run: pnpm verify:data-residency:runtime
+        run: node tooling/scripts/verify-data-residency-runtime.mjs
         env:
           AZURE_RESIDENCY_RESOURCE_GROUP: "${{ vars.AZURE_RESIDENCY_RESOURCE_GROUP || '' }}"
           RESIDENCY_ALLOWED_REGIONS: "${{ vars.RESIDENCY_ALLOWED_REGIONS || 'canadacentral,canadaeast' }}"
 
       - name: Truth authority validation
-        run: pnpm validate:truth-authority
+        run: pnpm exec tsx scripts/validate-truth-authority.ts
 
       - name: Auth authority validation
-        run: pnpm validate:auth-authority
+        run: pnpm exec tsx scripts/validate-auth-authority.ts
 
       - name: GA state machine validation
-        run: pnpm validate:ga-state
+        run: pnpm exec tsx scripts/validate-ga-state.ts
 
       - name: Workspace dependency integrity
-        run: pnpm validate:workspace-links
+        run: pnpm exec tsx scripts/validate-workspace-links.ts
 
       - name: Regenerate inventory
         run: pnpm inventory:generate
@@ -335,19 +338,19 @@ jobs:
           echo "Inventory check passed (date-stamp differences ignored)"
 
       - name: Control manifest validation
-        run: pnpm validate:control:manifests
+        run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
 
       - name: Validate release strict
-        run: pnpm validate:release:strict
+        run: pnpm exec tsx scripts/validate-release-strict.ts
 
       - name: Platform proof tests
-        run: pnpm proof:run
+        run: pnpm exec tsx scripts/proof/run-proof.ts
 
       - name: Verify proof artifacts
-        run: pnpm proof:verify
+        run: pnpm exec tsx scripts/proof/verify-artifacts.ts
 
       - name: Enforce governance runtime budget
-        run: pnpm validate:governance:runtime-budget
+        run: node tooling/scripts/check-governance-runtime-budget.mjs --enforce
         env:
           GOVERNANCE_JOB_START_TS: "${{ env.GOVERNANCE_JOB_START_TS }}"
           GOVERNANCE_MAX_RUNTIME_MINUTES: "${{ vars.GOVERNANCE_MAX_RUNTIME_MINUTES || '55' }}"
@@ -610,27 +613,27 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify build environment
-        run: pnpm verify:env
+        run: pnpm exec tsx tooling/build-env-check.ts
         env:
           NODE_ENV: production
 
       - name: Generate SBOM
-        run: pnpm generate:sbom
+        run: pnpm exec tsx scripts/generate-sbom.ts
 
       - name: Validate procurement pack
-        run: pnpm validate:pack
+        run: pnpm exec tsx scripts/validate-procurement-pack.ts
 
       - name: Verify security headers
-        run: pnpm verify:security
+        run: pnpm exec tsx tooling/security-headers-check.ts
 
       - name: Generate platform health report
-        run: pnpm health:report
+        run: pnpm exec tsx scripts/platform-health-report.ts
 
       - name: Generate quarterly strategic scorecard
-        run: pnpm strategic:quarterly
+        run: node tooling/scripts/generate-quarterly-strategic-scorecard.mjs
 
       - name: Generate build attestation
-        run: pnpm attest:build
+        run: pnpm exec tsx scripts/attest-build.ts
 
       - name: Upload attestation artifacts
         if: always()

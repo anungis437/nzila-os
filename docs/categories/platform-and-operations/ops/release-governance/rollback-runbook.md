@@ -6,16 +6,16 @@
 
 ```bash
 # List available rollback targets
-pnpm release:rollback --list
+pnpm exec tsx scripts/release/rollback-prod.ts --list
 
 # Dry-run (see what would happen)
-pnpm release:rollback --tag v1.1.0
+pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.1.0
 
 # Execute rollback (all prod apps)
-pnpm release:rollback --tag v1.1.0 --execute
+pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.1.0 --execute
 
 # Rollback specific apps only
-pnpm release:rollback --tag v1.1.0 --apps web,console --execute
+pnpm exec tsx scripts/release/rollback-prod.ts --tag v1.1.0 --apps web,console --execute
 ```
 
 ## Decision Tree
@@ -92,9 +92,9 @@ Every rollback (including dry-runs) writes to `ops/rollbacks/`:
 
 ## Post-Rollback Checklist
 
-- [ ] Verify all apps healthy: `pnpm release:staging:truth --live`
+- [ ] Verify all apps healthy: `pnpm exec tsx scripts/release/staging-truth.ts --live`
 - [ ] Check evidence written: `ls ops/rollbacks/`
-- [ ] Update release ledger: `pnpm release:evidence --tag <previous> --smoke pass`
+- [ ] Update release ledger: `pnpm exec tsx scripts/release/release-ledger.ts --tag <previous> --smoke pass`
 - [ ] Create incident record in `ops/incidents/`
 - [ ] Notify stakeholders
 - [ ] Root cause analysis within 24h

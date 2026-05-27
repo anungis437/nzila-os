@@ -37,7 +37,7 @@ All prompts are reusable templates grounded in existing NzilaOS structure.
 
 ### Q2 - UE Gate Enforcement
 
-"Run `pnpm ue:qa:gate` and report the exact failing stage(s) if any. Treat any RBAC `UNKNOWN`, missing decision expectation, or missing NAR expectation as blocking."
+"Run `pnpm exec tsx scripts/ue-qa-gate.ts` and report the exact failing stage(s) if any. Treat any RBAC `UNKNOWN`, missing decision expectation, or missing NAR expectation as blocking."
 
 ## 4) RBAC Discovery Prompts
 
@@ -63,7 +63,7 @@ All prompts are reusable templates grounded in existing NzilaOS structure.
 
 ### P1 - Full Gate Validation
 
-"Execute required validation gates in strict order: `pnpm typecheck`, `pnpm lint`, `pnpm test:fast`, `pnpm governance:check`, `pnpm decision:coverage:strict`, `pnpm ue:qa:gate`, plus pipeline/integrity/alert checks. Stop on first failure."
+"Execute required validation gates in strict order: `pnpm typecheck`, `pnpm lint`, `pnpm test:fast`, `pnpm exec tsx scripts/governance-check.ts`, `pnpm exec tsx scripts/check-decision-coverage.ts --strict`, `pnpm exec tsx scripts/ue-qa-gate.ts`, plus pipeline/integrity/alert checks. Stop on first failure."
 
 ### P2 - Final GO/NO-GO Report
 

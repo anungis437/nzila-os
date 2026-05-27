@@ -6,10 +6,10 @@
  * Detects regressions (>20% slower) and improvements (>20% faster).
  *
  * Usage:
- *   pnpm build:baseline                 # measure + compare
- *   pnpm build:baseline --save          # measure + save as new baseline
- *   pnpm build:baseline --ci            # CI mode: fail on regression
- *   pnpm build:baseline --dry           # show current baseline without building
+ *   pnpm exec tsx scripts/build-baseline.ts                 # measure + compare
+ *   pnpm exec tsx scripts/build-baseline.ts --save          # measure + save as new baseline
+ *   pnpm exec tsx scripts/build-baseline.ts --ci            # CI mode: fail on regression
+ *   pnpm exec tsx scripts/build-baseline.ts --dry           # show current baseline without building
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';

@@ -58,7 +58,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'route-governance',
     'Runtime route governance registry',
-    'Union Eyes maintains a generated registry of governed API and page routes, ' +
+    'UnionEyes maintains a generated registry of governed API and page routes, ' +
     'providing auditable coverage of role-based access control assignments across ' +
     'the application surface.',
     [
@@ -73,7 +73,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'api-governance-validation',
     'API governance CI validation',
-    'An automated validation script checks that Union Eyes API routes conform to ' +
+    'An automated validation script checks that UnionEyes API routes conform to ' +
     'governance policy contracts on every change. This provides continuous evidence ' +
     'that API access controls have not drifted from declared policy.',
     [
@@ -88,7 +88,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'middleware-activation',
     'Middleware layer activation and rate limiting',
-    'Union Eyes activates a runtime middleware layer that enforces IP-based and ' +
+    'UnionEyes activates a runtime middleware layer that enforces IP-based and ' +
     'role-based rate limiting, ensuring that sensitive operations are protected ' +
     'against abuse at the infrastructure boundary.',
     [
@@ -103,7 +103,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'org-isolation',
     'Organisation isolation hardening',
-    'All data-access paths in Union Eyes are gated through organisation-scope guards. ' +
+    'All data-access paths in UnionEyes are gated through organisation-scope guards. ' +
     'An automated check verifies that no route auto-provisions a new organisation without ' +
     'explicit governance approval, preventing cross-tenant data leakage.',
     [
@@ -118,7 +118,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'migration-lineage',
     'Database migration lineage and manifest',
-    'Union Eyes maintains a migration lineage manifest that records the SHA-256 ' +
+    'UnionEyes maintains a migration lineage manifest that records the SHA-256 ' +
     'hash of every applied database migration, enabling independent verification ' +
     'that the deployed schema matches declared history.',
     [
@@ -133,7 +133,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'rbac-role-auth',
     'Role-based access control and dashboard auth parity',
-    'Union Eyes enforces role-based access control through server-side auth wrappers ' +
+    'UnionEyes enforces role-based access control through server-side auth wrappers ' +
     'applied consistently across dashboard routes. Roles include member, steward, ' +
     'staff, executive, governance, and admin, each with a defined experience lane.',
     [
@@ -148,7 +148,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'policy-orchestration',
     'Governance policy orchestration and federation inheritance',
-    'Union Eyes includes a policy orchestration layer that evaluates governance ' +
+    'UnionEyes includes a policy orchestration layer that evaluates governance ' +
     'contracts, resolves federation-level policy inheritance, and classifies ' +
     'AI operations against declared risk thresholds before they execute.',
     [
@@ -182,7 +182,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'governance-simulation',
     'Governance digital twin and operational simulation',
-    'Union Eyes provides a shadow-mode governance simulation layer that models ' +
+    'UnionEyes provides a shadow-mode governance simulation layer that models ' +
     'federation conflicts, continuity stress, AI escalation scenarios, and ' +
     'policy inheritance outcomes before they affect production operations. ' +
     'Simulations are replayable and ledgered for governance preparedness evidence.',
@@ -200,7 +200,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'federation-sovereignty',
     'Sovereign federation execution fabric',
-    'Union Eyes models governance-aware institutional autonomy across federation ' +
+    'UnionEyes models governance-aware institutional autonomy across federation ' +
     'tiers (national, regional, local, affiliate, coalition). Delegation chains, ' +
     'sovereignty conflicts, continuity sharing, AI governance jurisdiction, and ' +
     'replayable federation simulations are all supported in shadow mode.',
@@ -220,7 +220,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'ai-governance',
     'AI governance and human oversight controls',
-    'All AI operations within Union Eyes are classified by risk level before execution. ' +
+    'All AI operations within UnionEyes are classified by risk level before execution. ' +
     'Sensitive and restricted AI operations require explicit human review. ' +
     'Federation-level AI autonomy boundaries are declared and enforced through ' +
     'shadow-mode governance contracts.',
@@ -240,7 +240,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'public-experience-governance',
     'Public-experience governance primitives',
-    'Content published to public-facing surfaces in Union Eyes is classified ' +
+    'Content published to public-facing surfaces in UnionEyes is classified ' +
     'through a governance lifecycle (draft → review → approved → published → archived). ' +
     'Federation sovereignty metadata is tracked in shadow mode for all public surfaces.',
     [
@@ -255,7 +255,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'narrative-governance',
     'Narrative governance and terminology alignment',
-    'Union Eyes enforces vocabulary alignment through a narrative audit CI check. ' +
+    'UnionEyes enforces vocabulary alignment through a narrative audit CI check. ' +
     'Marketing language, product claims, and documentation are continuously validated ' +
     'against a terminology contract to prevent claim drift.',
     [
@@ -270,7 +270,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'security-auth-audit',
     'Security and authentication audit evidence',
-    'Union Eyes includes documented authentication audit findings, secret management ' +
+    'UnionEyes includes documented authentication audit findings, secret management ' +
     'validation evidence, an incident drill report, and backup/restore validation. ' +
     'These provide a foundation for independent security review.',
     [
@@ -289,7 +289,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'business-continuity',
     'Business continuity and rollback evidence',
-    'Union Eyes provides documented rollback procedures, production cutover checklists, ' +
+    'UnionEyes provides documented rollback procedures, production cutover checklists, ' +
     'and deployment rehearsal evidence. These support institutional buyers\' continuity ' +
     'and recovery requirements.',
     [
@@ -306,7 +306,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'pilot-evidence',
     'Pilot readiness and procurement documentation',
-    'Union Eyes includes a pilot scope document, pilot validation results, a product ' +
+    'UnionEyes includes a pilot scope document, pilot validation results, a product ' +
     'readiness report, and a final readiness sign-off. These provide a documented ' +
     'procurement evidence trail for controlled pilot deployments.',
     [
@@ -325,7 +325,7 @@ const RAW_CLAIMS: TrustClaim[] = [
   buildClaim(
     'docs-hygiene',
     'Documentation hygiene and evidence organisation',
-    'Union Eyes maintains a structured documentation index covering architecture, ' +
+    'UnionEyes maintains a structured documentation index covering architecture, ' +
     'security, operations, governance, and procurement. Documentation is organised ' +
     'for traceability and is referenced from a central index.',
     [

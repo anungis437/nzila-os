@@ -11,11 +11,11 @@
 |------|---------------|
 | Start all apps locally | `pnpm dev` |
 | Run full test suite | `pnpm test` |
-| Run architecture checks | `pnpm architecture:check` |
-| Run governance checks | `pnpm governance:check` |
-| Run platform adoption gate | `pnpm platform:adoption:check` |
+| Run architecture checks | `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` |
+| Run governance checks | `pnpm exec tsx scripts/governance-check.ts` |
+| Run platform adoption gate | `pnpm exec tsx scripts/platform-adoption-gate.ts` |
 | Deploy to staging | [gitops-deploy.yml](../../.github/workflows/gitops-deploy.yml) |
-| Validate release | `pnpm validate:governance` |
+| Validate release | `pnpm exec tsx tooling/ga-check/ga-check.ts && pnpm contract-tests && pnpm inventory:check && pnpm exec tsx scripts/check-brand-leakage.ts && pnpm exec tsx scripts/validate-product-catalog.ts && pnpm exec tsx scripts/validate-portfolio.ts && pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts && pnpm exec tsx scripts/validate-auth-authority.ts && pnpm exec tsx scripts/validate-ga-state.ts && pnpm exec tsx scripts/validate-workspace-links.ts && pnpm exec tsx scripts/validate-release-strict.ts && pnpm exec tsx scripts/generate-commercial-traction.ts` |
 
 ---
 
@@ -64,7 +64,7 @@ Every governed app **must** adopt these four platform packages (enforced by CI):
    `instrumentation.ts`. Canonical boot sequence: OpenTelemetry → metrics →
    env validation → boot invariants.
 
-**Adoption gate**: `pnpm platform:adoption:check` — 60/60 checks passing.
+**Adoption gate**: `pnpm exec tsx scripts/platform-adoption-gate.ts` — 60/60 checks passing.
 
 ### Exceptions
 
@@ -124,18 +124,18 @@ Boot sequence per app: `createAppBoot(appName, options?)` →
 
 | Gate | Command | Blocks Deploy? |
 |------|---------|---------------|
-| Architecture layers | `pnpm architecture:layers:check` | Yes |
-| Domain-core boundaries | `pnpm app:domain-core:check` | Yes |
-| Platform surface model | `pnpm platform:surface:model:check` | Yes |
-| Platform contracts | `pnpm platform:contract:check` | Yes |
-| Registry consistency | `pnpm registry:consistency:check` | Yes |
-| Control-plane coherence | `pnpm control-plane:coherence:check` | Yes |
-| **Platform adoption** | `pnpm platform:adoption:check` | **Yes** |
-| Governance gate | `pnpm validate:governance:gate` | Yes (fail-closed, no skip flags) |
-| App gold standard | `pnpm app:gold-standard:check` | Warning (50% threshold) |
-| Dependency boundaries | `pnpm deps:check` | Yes |
+| Architecture layers | `pnpm exec tsx scripts/architecture-layer-check.ts` | Yes |
+| Domain-core boundaries | `pnpm exec tsx scripts/app-domain-core-check.ts` | Yes |
+| Platform surface model | `pnpm exec tsx scripts/platform-surface-model-check.ts` | Yes |
+| Platform contracts | `pnpm exec tsx scripts/platform-contract-check.ts` | Yes |
+| Registry consistency | `pnpm exec tsx scripts/registry-consistency-check.ts` | Yes |
+| Control-plane coherence | `pnpm exec tsx scripts/control-plane-coherence-check.ts` | Yes |
+| **Platform adoption** | `pnpm exec tsx scripts/platform-adoption-gate.ts` | **Yes** |
+| Governance gate | `pnpm exec tsx tooling/governance/validate-governance-gate.ts` | Yes (fail-closed, no skip flags) |
+| App gold standard | `pnpm exec tsx scripts/app-gold-standard-check.ts` | Warning (50% threshold) |
+| Dependency boundaries | `pnpm exec tsx scripts/dependency-boundary-check.ts` | Yes |
 
-Composite: `pnpm architecture:check` runs all architecture gates in sequence.
+Composite: `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` runs all architecture gates in sequence.
 
 ---
 

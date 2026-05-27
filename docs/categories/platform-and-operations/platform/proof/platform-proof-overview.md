@@ -122,7 +122,7 @@ all scenario results:
 ### Automated
 
 ```bash
-pnpm proof:verify
+pnpm exec tsx scripts/proof/verify-artifacts.ts
 ```
 
 Checks:
@@ -134,7 +134,7 @@ Checks:
 
 ### Manual
 
-1. Run `pnpm proof:run` to generate fresh artifacts
+1. Run `pnpm exec tsx scripts/proof/run-proof.ts` to generate fresh artifacts
 2. Open any `proof-artifacts/<scenario>/summary.json`
 3. Verify `"status": "pass"`
 4. Cross-reference `trace_id` across all artifacts in the scenario

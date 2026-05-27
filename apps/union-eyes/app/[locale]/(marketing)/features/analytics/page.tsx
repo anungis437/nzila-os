@@ -39,7 +39,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   return {
     title: 'Outcomes | UnionEyes',
     description:
-      'Track resolutions, follow-through, and reporting so union leadership can see what representation delivered and what still needs action.',
+      'Track resolutions, follow-through, and reporting so union leadership can see what representation delivered.',
     alternates: buildLocaleAlternates(locale, '/features/analytics'),
   };
 }
@@ -49,43 +49,43 @@ const features = [
     icon: BarChart3,
     title: 'Resolution tracking',
     description:
-      'Capture how matters close, what was secured, and what the union still needs to watch after the case itself is resolved.',
+      'Capture how matters close and what was secured.',
   },
   {
     icon: TrendingUp,
     title: 'Pattern reporting',
     description:
-      'See repeat issues across employers, locals, categories, or representatives so leadership can act on trends instead of anecdotes.',
+      'See repeat issues across employers, locals, categories, or representatives so leadership can act on trends.',
   },
   {
     icon: DollarSign,
     title: 'Commitment visibility',
     description:
-      'Track monetary commitments, remediation steps, and other concrete outcomes that matter to members and leadership.',
+      'Track monetary commitments, remediation steps, and other concrete outcomes.',
   },
   {
     icon: PieChart,
     title: 'Outcome categories that mean something',
     description:
-      'Separate withdrawn, settled, escalated, remedied, and unresolved matters so reporting reflects reality instead of vanity metrics.',
+      'Separate withdrawn, settled, escalated, remedied, and unresolved matters so reporting reflects reality.',
   },
   {
     icon: Share2,
     title: 'Follow-through across teams',
     description:
-      'Outcomes stay visible to the people who must complete next actions after the formal case work is done.',
+      'Outcomes stay visible to the people who must complete next actions after case work is done.',
   },
   {
     icon: Calendar,
     title: 'Post-resolution deadlines',
     description:
-      'Surface deadlines tied to commitments, settlements, and monitoring so outcomes do not disappear once the meeting ends.',
+      'Surface deadlines tied to commitments and settlements so outcomes do not disappear once the meeting ends.',
   },
   {
     icon: Download,
     title: 'Leadership-ready exports',
     description:
-      'Share structured reporting with officers and executives who need a clear picture of what representation delivered.',
+      'Share structured reporting with officers and executives who need a clear picture of results.',
   },
 ];
 
@@ -95,7 +95,7 @@ export default async function LocaleAnalyticsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const briefingCta = locale === 'fr-CA' ? 'Commencer la réflexion de continuité (gratuite)' : 'Start the free Continuity Reflection';
+  const briefingCta = locale === 'fr-CA' ? 'Faire le bilan' : 'Start a review';
 
   return (
     <div className="min-h-screen bg-white">
@@ -158,7 +158,7 @@ export default async function LocaleAnalyticsPage({
             See how Outcomes closes the loop
           </h2>
           <p className="text-slate-600 mb-6 max-w-lg mx-auto">
-            Outcomes makes sense because it is connected to Work and Intelligence, not because it is just another analytics dashboard.
+            Outcomes makes sense because it is connected to Work and Intelligence, not because it is a standalone dashboard.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link

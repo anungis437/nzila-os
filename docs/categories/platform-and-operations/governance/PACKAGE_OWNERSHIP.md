@@ -202,7 +202,7 @@ Every package under `packages/` must contain a `package.meta.json` file with the
 
 ## Validation
 
-Run `pnpm package:ownership:check` to verify all packages have valid metadata.
+Run `pnpm exec tsx scripts/package-ownership-check.ts` to verify all packages have valid metadata.
 
 ## Change Process
 

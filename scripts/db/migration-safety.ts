@@ -1,5 +1,5 @@
 /**
- * db:migration:safety — Pre-deploy migration safety analysis.
+ * migration-safety.ts — Pre-deploy migration safety analysis.
  *
  * Scans pending/recent migrations for:
  *   - destructive operations (DROP, TRUNCATE, ALTER TYPE)
@@ -10,9 +10,9 @@
  *   - rollback script availability
  *
  * Usage:
- *   pnpm db:migration:safety
- *   pnpm db:migration:safety --since v1.2.0    # only check since tag
- *   pnpm db:migration:safety --file <path>     # check single file
+ *   pnpm exec tsx scripts/db/migration-safety.ts
+ *   pnpm exec tsx scripts/db/migration-safety.ts --since v1.2.0    # only check since tag
+ *   pnpm exec tsx scripts/db/migration-safety.ts --file <path>     # check single file
  *
  * Exit codes:
  *   0 = safe to proceed

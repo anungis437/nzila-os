@@ -16,13 +16,13 @@ Canonical deployment paths:
 Run health checks across all environments:
 
 ```sh
-pnpm env:health
+pnpm exec tsx scripts/environment-health.ts
 ```
 
 Check a specific environment:
 
 ```sh
-pnpm env:health STAGING
+pnpm exec tsx scripts/environment-health.ts STAGING
 ```
 
 Health checks verify:
@@ -39,7 +39,7 @@ Health checks verify:
 Generate deterministic seed data for staging:
 
 ```sh
-pnpm staging:seed
+pnpm exec tsx scripts/staging-seed.ts
 ```
 
 Produces seed files in `ops/seed/`:
@@ -56,7 +56,7 @@ All seed data uses deterministic IDs (`org-seed-0001`, `user-seed-0001`, etc.) f
 Record a post-deploy governance snapshot:
 
 ```sh
-pnpm governance:snapshot STAGING abc1234 sha256:digest sha256:sbom CHG-001
+pnpm exec tsx scripts/governance-snapshot.ts STAGING abc1234 sha256:digest sha256:sbom CHG-001
 ```
 
 Arguments:
@@ -74,25 +74,25 @@ Snapshots are saved in `ops/governance-snapshots/`.
 Generate governance scorecards and workflow-sprawl audit:
 
 ```sh
-pnpm release:audit
+pnpm exec tsx scripts/release/generate-governance-audit.ts
 ```
 
 Run secret inventory audit over all GitHub workflows:
 
 ```sh
-pnpm release:secrets:audit
+pnpm exec tsx scripts/release/audit-secrets.ts
 ```
 
 Run policy-aware smoke tests using deployment inventory:
 
 ```sh
-pnpm release:smoke
+pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,partners,union-eyes,cfo,flow,abr
 ```
 
 Validate migration safety before promotion:
 
 ```sh
-pnpm release:migration:safety
+pnpm exec tsx scripts/release/validate-migration-safety.ts
 ```
 
 ## Rollback
@@ -100,7 +100,7 @@ pnpm release:migration:safety
 Initiate a rollback to a previous artifact:
 
 ```sh
-pnpm rollback STAGING sha256:abc123...
+pnpm exec tsx scripts/rollback.ts STAGING sha256:abc123...
 ```
 
 The script:

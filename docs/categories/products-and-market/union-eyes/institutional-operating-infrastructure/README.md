@@ -40,16 +40,16 @@ It is:
 ## Validator
 
 ```bash
-pnpm validate:ue-infrastructure
+node tooling/scripts/validate-ue-infrastructure.mjs
 ```
 
 Coexists with — does not replace:
 
-- `pnpm validate:cognition`
-- `pnpm validate:labor-continuity`
+- `node tooling/scripts/validate-institutional-cognition-convergence.mjs`
+- `node tooling/scripts/validate-labor-continuity-governance.mjs`
 - `pnpm validate:maturity`
-- `pnpm validate:maturity-elevation`
-- `pnpm validate:final-convergence`
+- `node tooling/scripts/validate-maturity-convergence.mjs`
+- `node tooling/scripts/validate-final-convergence.mjs`
 
 ## Authority Anchors
 

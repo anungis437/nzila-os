@@ -46,7 +46,7 @@
 2. **Mark deprecated routes** in `route.meta.json` with `"deprecated": true`
 3. **Provide migration path** — where should users go instead?
 4. **Timeline** — deprecations should have a target removal date (typically 2 release cycles)
-5. **Update check scripts** — `pnpm platform:surface:model:check` should flag deprecated routes as warnings
+5. **Update check scripts** — `pnpm exec tsx scripts/platform-surface-model-check.ts` should flag deprecated routes as warnings
 
 ---
 

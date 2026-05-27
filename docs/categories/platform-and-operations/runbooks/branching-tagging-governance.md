@@ -47,18 +47,18 @@ Rules:
 
 Validate refs locally:
 
-- pnpm release:validate:refs --mode branch --ref feat/example
-- pnpm release:validate:refs --mode tag --ref v1.2.3
+- pnpm exec tsx scripts/release/validate-branch-tag-policy.ts --mode branch --ref feat/example
+- pnpm exec tsx scripts/release/validate-branch-tag-policy.ts --mode tag --ref v1.2.3
 
 Create a release tag (recommended flow):
 
-- pnpm release:tag --bump patch
-- pnpm release:tag --bump minor
-- pnpm release:tag --bump major
+- pnpm exec tsx scripts/release/tag-release.ts --bump patch
+- pnpm exec tsx scripts/release/tag-release.ts --bump minor
+- pnpm exec tsx scripts/release/tag-release.ts --bump major
 
 Dry-run without creating a tag:
 
-- pnpm release:tag --bump patch --dry-run --allow-non-main
+- pnpm exec tsx scripts/release/tag-release.ts --bump patch --dry-run --allow-non-main
 
 ## CI Enforcement
 

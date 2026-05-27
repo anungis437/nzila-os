@@ -12,9 +12,21 @@ function listWorkflowFiles(): string[] {
     .filter((name) => name.endsWith('.yml') || name.endsWith('.yaml'))
 }
 
+function isEmergencyManualWorkflow(workflowFile: string): boolean {
+  const fullPath = path.join(WORKFLOWS_DIR, workflowFile)
+  if (!fs.existsSync(fullPath)) return false
+  const content = fs.readFileSync(fullPath, 'utf8')
+  const dispatchOnly = /\bon:\s*\n\s*workflow_dispatch\s*:/m.test(content)
+  const emergencyAckInput = /\bemergency_ack\s*:/m.test(content)
+  const emergencyPhrase = /Type EMERGENCY to run this fallback workflow/m.test(content)
+  return dispatchOnly && emergencyAckInput && emergencyPhrase
+}
+
 function score(workflowFiles: string[], inventoryAppCount: number) {
   const canonical = ['gitops-deploy.yml', 'deploy-production.yml']
-  const appSpecific = workflowFiles.filter((name) => /^deploy-(web|console|partners|union-eyes)\.yml$/.test(name))
+  const appSpecificAll = workflowFiles.filter((name) => /^deploy-(web|console|partners|union-eyes)\.yml$/.test(name))
+  const appSpecificEmergencyManual = appSpecificAll.filter((name) => isEmergencyManualWorkflow(name))
+  const appSpecific = appSpecificAll.filter((name) => !appSpecificEmergencyManual.includes(name))
 
   const workflowSprawlScore = Math.max(0, 10 - appSpecific.length)
   const deploymentRiskScore = Math.max(1, 10 - Math.floor(appSpecific.length / 2))
@@ -24,6 +36,7 @@ function score(workflowFiles: string[], inventoryAppCount: number) {
   return {
     canonical,
     appSpecific,
+    appSpecificEmergencyManual,
     workflowSprawlScore,
     deploymentRiskScore,
     environmentDriftScore,
@@ -44,7 +57,7 @@ function main() {
     ...result,
   }
 
-  const markdown = `# Release Governance Audit\n\nGenerated: ${jsonReport.generatedAt}\n\n## Scores\n\n- Release Governance Score: ${result.releaseGovernanceScore}/10\n- Deployment Risk Score: ${result.deploymentRiskScore}/10\n- Workflow Sprawl Score: ${result.workflowSprawlScore}/10\n- Environment Drift Score: ${result.environmentDriftScore}/10\n\n## Canonical Workflows\n\n- ${result.canonical.join('\n- ')}\n\n## App-Specific Deployment Workflows (Demoted to Emergency/Manual)\n\n- ${result.appSpecific.join('\n- ') || 'None'}\n\n## Inventory Coverage\n\n- Governed applications: ${inventoryAppCount}\n- Active workflow files discovered: ${workflows.length}\n\n## Risk Notes\n\n- Production path is locked to immutable artifact promotion from staging workflow output.\n- Staging remains canonical via gitops-deploy with policy-based app eligibility.\n- Zonga requires explicit production override and is excluded by default.\n`
+  const markdown = `# Release Governance Audit\n\nGenerated: ${jsonReport.generatedAt}\n\n## Scores\n\n- Release Governance Score: ${result.releaseGovernanceScore}/10\n- Deployment Risk Score: ${result.deploymentRiskScore}/10\n- Workflow Sprawl Score: ${result.workflowSprawlScore}/10\n- Environment Drift Score: ${result.environmentDriftScore}/10\n\n## Canonical Workflows\n\n- ${result.canonical.join('\n- ')}\n\n## App-Specific Deployment Workflows (Active)\n\n- ${result.appSpecific.join('\n- ') || 'None'}\n\n## App-Specific Deployment Workflows (Demoted to Emergency/Manual)\n\n- ${result.appSpecificEmergencyManual.join('\n- ') || 'None'}\n\n## Inventory Coverage\n\n- Governed applications: ${inventoryAppCount}\n- Active workflow files discovered: ${workflows.length}\n\n## Risk Notes\n\n- Production path is locked to immutable artifact promotion from staging workflow output.\n- Staging remains canonical via gitops-deploy with policy-based app eligibility.\n- Zonga requires explicit production override and is excluded by default.\n`
 
   fs.mkdirSync(path.dirname(OUT_MD), { recursive: true })
   fs.mkdirSync(path.dirname(OUT_JSON), { recursive: true })

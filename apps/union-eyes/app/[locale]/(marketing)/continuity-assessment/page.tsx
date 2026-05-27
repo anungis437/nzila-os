@@ -19,7 +19,7 @@ interface PageProps {
 
 const PAGE_COPY = {
   'en-CA': {
-    metadataTitle: 'OCI Continuity Risk Assessment | Union Eyes',
+    metadataTitle: 'OCI Continuity Risk Assessment | UnionEyes',
     metadataDescription:
       "Assess your labour organization's organizational continuity maturity. Identify governance fragility, operational dependencies, and transition readiness with a fully explainable, no-AI assessment.",
     badge: 'Organizational Assessment',
@@ -84,7 +84,7 @@ const PAGE_COPY = {
     ],
   },
   'fr-CA': {
-    metadataTitle: 'Évaluation du risque de continuité organisationnelle | Union Eyes',
+    metadataTitle: 'Évaluation du risque de continuité organisationnelle | UnionEyes',
     metadataDescription:
       "Évaluez la maturité de continuité organisationnelle de votre organisation syndicale. Repérez la fragilité de gouvernance, les dépendances opérationnelles et la préparation aux transitions avec une évaluation entièrement explicable, sans notation par IA.",
     badge: 'Évaluation organisationnelle',

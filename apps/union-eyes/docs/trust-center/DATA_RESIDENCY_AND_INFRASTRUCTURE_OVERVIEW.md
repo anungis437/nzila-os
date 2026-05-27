@@ -1,7 +1,7 @@
-# Union Eyes — Data Residency and Infrastructure Overview
+# UnionEyes — Data Residency and Infrastructure Overview
 
 > **Audience:** Procurement reviewers, privacy officers, institutional buyers.
-> **Scope:** Public-safe summary of Union Eyes infrastructure topology and data residency posture.
+> **Scope:** Public-safe summary of UnionEyes infrastructure topology and data residency posture.
 > **Caveats:** Claims use language such as "is designed to," "supports," and "provides evidence of."
 > Specific infrastructure provider details are available under NDA to qualified buyers.
 
@@ -9,7 +9,7 @@
 
 ## 1. Infrastructure Architecture
 
-Union Eyes is a Next.js application built on a PostgreSQL-backed data layer, deployed within
+UnionEyes is a Next.js application built on a PostgreSQL-backed data layer, deployed within
 a managed cloud infrastructure. The platform is designed for single-tenant or controlled
 multi-tenant deployments in pilot mode.
 
@@ -31,7 +31,7 @@ multi-tenant deployments in pilot mode.
 
 ## 2. Data Residency
 
-Union Eyes is designed to support data residency configurations appropriate for Canadian
+UnionEyes is designed to support data residency configurations appropriate for Canadian
 labour organisations.
 
 - Database deployment is configurable to Canadian cloud regions.

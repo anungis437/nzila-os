@@ -148,7 +148,7 @@ ${results
 
 ## Architecture
 
-Union Eyes governance simulation infrastructure provides:
+UnionEyes governance simulation infrastructure provides:
 
 - **Deterministic scenario execution** — identical inputs produce identical outcomes
 - **Federation inheritance modeling** — national → regional → local conflict resolution

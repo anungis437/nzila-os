@@ -119,9 +119,9 @@ Canonical Next.js boot function: initOtel → initMetrics → validateEnv → as
 
 ## CI Gate
 
-**`pnpm platform:adoption:check`** — 60/60 checks passing.
+**`pnpm exec tsx scripts/platform-adoption-gate.ts`** — 60/60 checks passing.
 
-Wired into `pnpm architecture:check` composite. Fail-closed — any regression
+Wired into `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` composite. Fail-closed — any regression
 blocks deployment.
 
 Checks per app (4):

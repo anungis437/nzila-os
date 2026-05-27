@@ -60,13 +60,13 @@ function buildIndexMd(manifest: TrustCenterManifest): string {
       .join('\n') + '\n';
   })();
 
-  return `# Union Eyes — Trust Center Index
+  return `# UnionEyes — Trust Center Index
 
 > **Audience:** Procurement reviewers, institutional buyers, governance auditors.
 > **Generated:** ${generatedAt}
 > **Coverage score:** ${summary?.coverageScore ?? '–'}%
 
-This index provides a buyer-readable summary of Union Eyes governance, security,
+This index provides a buyer-readable summary of UnionEyes governance, security,
 and operational evidence. All claims are grounded in repository artifacts and
 generated automatically from the evidence manifest.
 
