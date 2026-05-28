@@ -680,6 +680,67 @@ jobs:
             fi
           done
 
+      - name: Version identity checks (fail closed)
+        if: ${{ secrets.UE_CUSTOM_DOMAIN_ACTIVE == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          DEPLOYED_SHA="${{ github.sha }}"
+          SOFT_HOSTS="${{ vars.UE_SOFT_SMOKE_HOSTS != '' && vars.UE_SOFT_SMOKE_HOSTS || 'app.unioneyes.app' }}"
+
+          host_is_soft() {
+            local host="$1"
+            for soft in $SOFT_HOSTS; do
+              if [ "$host" = "$soft" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          check_version_identity() {
+            local base_url="$1"
+            local host
+            host="$(echo "$base_url" | awk -F/ '{print $3}')"
+
+            local payload
+            if ! payload=$(curl -fsS --max-time 20 "$base_url/api/version" 2>/dev/null); then
+              if host_is_soft "$host"; then
+                echo "::warning::Soft host $base_url failed /api/version probe; not failing deploy."
+                return 0
+              fi
+              echo "::error::Version probe failed for $base_url/api/version"
+              return 1
+            fi
+
+            local live_sha
+            live_sha=$(echo "$payload" | jq -r '.gitSha // empty')
+            if [ -z "$live_sha" ]; then
+              if host_is_soft "$host"; then
+                echo "::warning::Soft host $base_url returned no gitSha in /api/version; not failing deploy."
+                return 0
+              fi
+              echo "::error::$base_url/api/version did not return gitSha"
+              return 1
+            fi
+
+            if [ "$live_sha" != "$DEPLOYED_SHA" ]; then
+              if host_is_soft "$host"; then
+                echo "::warning::Soft host $base_url serving stale gitSha=$live_sha expected=$DEPLOYED_SHA; not failing deploy."
+                return 0
+              fi
+              echo "::error::$base_url is serving stale gitSha=$live_sha expected=$DEPLOYED_SHA"
+              return 1
+            fi
+
+            echo "✅ $base_url/api/version gitSha matches deployed sha ${DEPLOYED_SHA}"
+          }
+
+          for URL in ${{ needs.plan.outputs.smoke_urls }}; do
+            check_version_identity "$URL"
+          done
+
       - name: Persona authz smoke (demo only, soft)
         if: ${{ needs.plan.outputs.demo_profile != '' }}
         shell: bash
