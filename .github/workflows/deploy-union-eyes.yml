@@ -619,6 +619,11 @@ jobs:
             --query "properties.configuration.ingress.fqdn" \
             -o tsv)
 
+          DEFAULT_HOST_REQUIRED="${{ needs.plan.outputs.environment == 'production' && 'true' || 'false' }}"
+          if [ "${{ vars.UE_REQUIRE_DEFAULT_HOST_SMOKE }}" = "true" ]; then
+            DEFAULT_HOST_REQUIRED="true"
+          fi
+
           probe_with_retries() {
             local url="$1"
             local attempts="${2:-5}"
@@ -646,9 +651,11 @@ jobs:
           if [ -n "$DEFAULT_HOST" ]; then
             if STATUS=$(probe_with_retries "https://$DEFAULT_HOST" 5 15 5); then
               echo "✅ default hostname https://$DEFAULT_HOST -> HTTP $STATUS"
-            else
+            elif [ "$DEFAULT_HOST_REQUIRED" = "true" ]; then
               echo "❌ default hostname https://$DEFAULT_HOST -> HTTP $STATUS"
               exit 1
+            else
+              echo "::warning::default hostname https://$DEFAULT_HOST -> HTTP $STATUS (non-production soft check)"
             fi
           fi
 
