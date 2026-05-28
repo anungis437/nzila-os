@@ -4,7 +4,6 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { createLogger } from '@nzila/os-core/telemetry';
 
 import { locales } from '@/i18n';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
@@ -106,8 +105,6 @@ const ARTICLE_COPY = {
 
 type Params = { params: Promise<{ locale: string; slug: string }> };
 
-const logger = createLogger('union-eyes:whitepaper-page');
-
 export function generateStaticParams() {
   const entries = WHITEPAPER_LIBRARY.filter((entry) => entry.localized['en-CA'].sourceFile);
   return locales.flatMap((locale) =>
@@ -162,12 +159,6 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
     // Keep the canonical whitepaper URL stable even when source markdown
     // is missing in a runtime revision; this avoids redirect regressions
     // and lets smoke checks catch degraded content without route drift.
-    logger.error('[whitepaper] markdown render fallback', {
-      slug: entry.slug,
-      locale,
-      sourceFile,
-      error,
-    });
     rendered = renderWhitepaperMarkdown(
       `# ${entryCopy.title}\n\nThe full whitepaper content is temporarily unavailable in this runtime revision. Please retry shortly.`,
     );
