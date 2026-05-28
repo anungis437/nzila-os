@@ -105,6 +105,23 @@ function getClientIp(req: Pick<NextRequest, 'headers'>): string {
   return 'unknown';
 }
 
+function getPreferredLocaleFromRequest(req: Pick<NextRequest, 'headers'>): string {
+  const cookieHeader = req.headers.get('cookie') ?? '';
+  const localeCookie = cookieHeader.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/i)?.[1];
+  const normalizedCookie = localeCookie?.toLowerCase();
+  if (normalizedCookie?.startsWith('fr')) return 'fr-CA';
+  if (normalizedCookie?.startsWith('en')) return 'en-CA';
+
+  const acceptLanguage = req.headers.get('accept-language') ?? '';
+  const firstLang = acceptLanguage
+    .split(',')
+    .map((part) => part.split(';')[0]?.trim().toLowerCase())
+    .find(Boolean);
+  if (firstLang?.startsWith('fr')) return 'fr-CA';
+
+  return defaultLocale;
+}
+
 const _isProtectedRoute = createRouteMatcher([
   "/:locale/dashboard(.*)"
 ]);
@@ -436,6 +453,33 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   // Auth paths (/sign-in, /sign-up, /api/auth) must NOT be locale-redirected.
   if (isAuthPath(req)) {
     return withRequestId(NextResponse.next(), requestId);
+  }
+
+  // Whitepaper marketing links are intentionally surfaced without locale
+  // prefixes in some contexts. Force a relative locale redirect at the edge
+  // so Location headers do not leak internal host/port values.
+  if (req.nextUrl.pathname === '/whitepaper' || req.nextUrl.pathname === '/whitepaper/') {
+    const locale = getPreferredLocaleFromRequest(req);
+    return withRequestId(new NextResponse(null, {
+      status: 307,
+      headers: { location: `/${locale}/whitepaper` },
+    }), requestId);
+  }
+
+  if (req.nextUrl.pathname === '/whitepapers' || req.nextUrl.pathname === '/whitepapers/') {
+    const locale = getPreferredLocaleFromRequest(req);
+    return withRequestId(new NextResponse(null, {
+      status: 307,
+      headers: { location: `/${locale}/whitepapers` },
+    }), requestId);
+  }
+
+  if (req.nextUrl.pathname.startsWith('/whitepapers/')) {
+    const locale = getPreferredLocaleFromRequest(req);
+    return withRequestId(new NextResponse(null, {
+      status: 307,
+      headers: { location: `/${locale}${req.nextUrl.pathname}` },
+    }), requestId);
   }
 
   // Marketing pages live at root without locale prefix (/, /story, /pricing, etc.)
