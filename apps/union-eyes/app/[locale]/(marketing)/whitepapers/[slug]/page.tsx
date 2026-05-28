@@ -155,10 +155,19 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
         alt: image.alt[locale === 'fr-CA' ? 'fr-CA' : 'en-CA'],
       })),
     });
-  } catch {
-    // If the source markdown is unavailable in this runtime bundle,
-    // degrade to the whitepaper hub instead of surfacing a 500.
-    redirect(`/${locale}/whitepapers`);
+  } catch (error) {
+    // Keep the canonical whitepaper URL stable even when source markdown
+    // is missing in a runtime revision; this avoids redirect regressions
+    // and lets smoke checks catch degraded content without route drift.
+    console.error('[whitepaper] markdown render fallback', {
+      slug: entry.slug,
+      locale,
+      sourceFile,
+      error,
+    });
+    rendered = renderWhitepaperMarkdown(
+      `# ${entryCopy.title}\n\nThe full whitepaper content is temporarily unavailable in this runtime revision. Please retry shortly.`,
+    );
   }
 
   return (
