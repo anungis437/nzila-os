@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation';
 
-import { getPreferredLocaleForRedirect } from '@/lib/locale-routing';
+import { getPreferredLocaleForRedirect, getPublicOriginForRedirect } from '@/lib/locale-routing';
 
 export const dynamic = 'force-dynamic';
 
 export default async function WhitepaperPage() {
   const locale = await getPreferredLocaleForRedirect();
-  redirect(`/${locale}/whitepaper`);
+  const publicOrigin = await getPublicOriginForRedirect();
+  const targetPath = `/${locale}/whitepaper`;
+  redirect(publicOrigin ? `${publicOrigin}${targetPath}` : targetPath);
 }

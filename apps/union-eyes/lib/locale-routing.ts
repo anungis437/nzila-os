@@ -51,3 +51,21 @@ export async function getPreferredLocaleForRedirect(): Promise<Locale> {
 
   return defaultLocale;
 }
+
+export async function getPublicOriginForRedirect(): Promise<string | null> {
+  const requestHeaders = await headers();
+
+  const forwardedHost = requestHeaders.get('x-forwarded-host')?.split(',')[0]?.trim();
+  const host = forwardedHost || requestHeaders.get('host') || '';
+  const hostWithoutPort = host.replace(/:\d+$/, '');
+  if (!hostWithoutPort) return null;
+
+  const forwardedProto = requestHeaders
+    .get('x-forwarded-proto')
+    ?.split(',')[0]
+    ?.trim()
+    .toLowerCase();
+  const protocol = forwardedProto || 'https';
+
+  return `${protocol}://${hostWithoutPort}`;
+}
