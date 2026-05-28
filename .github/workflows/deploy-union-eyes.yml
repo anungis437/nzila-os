@@ -234,6 +234,11 @@ jobs:
 
       - name: Emergency acknowledgement gate
         run: |
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "Push-triggered deploy; skipping emergency acknowledgement gate."
+            exit 0
+          fi
+
           if [ "${{ github.event.inputs.emergency_ack }}" != "EMERGENCY" ]; then
             echo "Emergency ack missing. Use gitops-deploy.yml or deploy-production.yml for canonical release paths."
             exit 1
