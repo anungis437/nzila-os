@@ -723,9 +723,14 @@ jobs:
             headers=$(curl -sS -o /dev/null -D - \
               --max-time 20 --retry 3 --retry-delay 5 \
               -H "Accept-Language: $accept_language" \
-              "$BASE_URL$path")
+              "$BASE_URL$path" || true)
             status=$(printf '%s\n' "$headers" | awk 'toupper($1) ~ /^HTTP/ { code=$2 } END { print code }')
             location=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1} /^location:/ { print $2 }' | tr -d '\r' | tail -n1)
+
+            if [ -z "$status" ] || [ "$status" = "000" ]; then
+              echo "::error::Failed to probe redirect for $path; empty/invalid status. headers=$headers"
+              exit 1
+            fi
 
             if [[ "$location" == *":3000/"* ]]; then
               if [ "$IS_PRODUCTION_ENV" = "true" ]; then
@@ -760,9 +765,14 @@ jobs:
 
             result=$(curl -sS -o /dev/null -w '%{http_code} %{url_effective}' \
               --max-time 20 --retry 3 --retry-delay 5 \
-              "$BASE_URL$path")
+              "$BASE_URL$path" || true)
             status=${result%% *}
             final_url=${result#* }
+
+            if [ -z "$status" ] || [ "$status" = "000" ]; then
+              echo "::error::Failed to probe final URL for $path; raw_result=$result"
+              exit 1
+            fi
 
             if [ "$status" != "200" ] || [ "$final_url" != "$expected_final_url" ]; then
               echo "::error::Expected $path to finish at $expected_final_url with HTTP 200; got HTTP $status final=$final_url"
