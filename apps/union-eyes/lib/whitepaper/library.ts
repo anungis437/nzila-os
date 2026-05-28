@@ -1,5 +1,3 @@
-import nodePath from 'node:path';
-
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 
 export type WhitepaperLocale = 'en-CA' | 'fr-CA';
@@ -31,12 +29,6 @@ export type WhitepaperEntry = {
   readonly href: string;
   readonly localized: Readonly<Record<WhitepaperLocale, WhitepaperLocalizedContent>>;
 };
-
-const DOCS_RELATIVE = ['..', '..', 'docs', 'oci', 'whitepapers'] as const;
-
-export function resolveWhitepaperSourcePath(sourceFile: string): string {
-  return nodePath.resolve(process.cwd(), ...DOCS_RELATIVE, sourceFile);
-}
 
 function normalizeWhitepaperLocale(locale: string): WhitepaperLocale {
   return locale === 'fr-CA' ? 'fr-CA' : 'en-CA';

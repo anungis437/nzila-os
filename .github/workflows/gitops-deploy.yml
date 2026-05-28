@@ -523,6 +523,80 @@ jobs:
             fi
           done
 
+      - name: Union Eyes whitepaper smoke
+        if: contains(needs.deploy.outputs.deployed_apps, 'union-eyes')
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ENV="${{ needs.plan.outputs.environment }}"
+          DEFAULT_DOMAIN=$(az containerapp env show \
+            --name "nzila-canada-${ENV}-env" \
+            --resource-group "nzila-canada-${ENV}-rg" \
+            --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "jollydune-88c1e97f.canadacentral.azurecontainerapps.io")
+          BASE_URL="https://nzila-os-union-eyes.${DEFAULT_DOMAIN}"
+
+          if [ "$ENV" = "production" ]; then
+            BASE_URL="https://unioneyes.app"
+          elif [ "$ENV" = "staging" ] && [ "${{ secrets.UE_CUSTOM_DOMAIN_ACTIVE }}" = "true" ]; then
+            BASE_URL="https://staging.unioneyes.app"
+          fi
+
+          echo "Running Union Eyes whitepaper smoke against $BASE_URL"
+
+          assert_redirect() {
+            local path="$1"
+            local accept_language="$2"
+            local expected_location="$3"
+            local headers
+            local status
+            local location
+
+            headers=$(curl -sS -o /dev/null -D - \
+              --max-time 20 --retry 3 --retry-delay 5 \
+              -H "Accept-Language: $accept_language" \
+              "$BASE_URL$path")
+            status=$(printf '%s\n' "$headers" | awk 'toupper($1) ~ /^HTTP/ { code=$2 } END { print code }')
+            location=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1} /^location:/ { print $2 }' | tr -d '\r' | tail -n1)
+
+            if [ "$status" != "307" ] || [ "$location" != "$expected_location" ]; then
+              echo "::error::Expected $path to redirect to $expected_location (HTTP 307); got HTTP $status location=$location"
+              exit 1
+            fi
+
+            echo "  ✅ $path -> $location"
+          }
+
+          assert_final() {
+            local path="$1"
+            local expected_final_url="$2"
+            local result
+            local status
+            local final_url
+
+            result=$(curl -sS -L -o /dev/null -w '%{http_code} %{url_effective}' \
+              --max-time 20 --retry 3 --retry-delay 5 \
+              "$BASE_URL$path")
+            status=${result%% *}
+            final_url=${result#* }
+
+            if [ "$status" != "200" ] || [ "$final_url" != "$expected_final_url" ]; then
+              echo "::error::Expected $path to finish at $expected_final_url with HTTP 200; got HTTP $status final=$final_url"
+              exit 1
+            fi
+
+            echo "  ✅ $path -> $final_url"
+          }
+
+          assert_redirect "/whitepaper" "fr-CA,fr;q=0.9,en;q=0.7" "/fr-CA/whitepaper"
+          assert_redirect "/whitepapers" "en-CA,en;q=0.9" "/en-CA/whitepapers"
+
+          assert_final "/fr-CA/whitepaper" "$BASE_URL/fr-CA/whitepaper"
+          assert_final "/en-CA/whitepaper" "$BASE_URL/en-CA/whitepaper"
+          assert_final "/fr-CA/whitepapers/operational-reality-edition" "$BASE_URL/fr-CA/whitepapers/operational-reality-edition"
+          assert_final "/en-CA/whitepapers/oci-method-companion" "$BASE_URL/en-CA/whitepapers/oci-method-companion"
+          assert_final "/fr-CA/whitepapers/oci-method-canonical" "$BASE_URL/fr-CA/whitepapers/oci-method-canonical"
+
       - name: Smoke tests
         run: |
           APPS="${{ needs.deploy.outputs.deployed_apps }}"

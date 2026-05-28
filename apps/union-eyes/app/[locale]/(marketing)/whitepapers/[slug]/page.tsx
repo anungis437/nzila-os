@@ -12,9 +12,9 @@ import {
   getWhitepaperBySlug,
   getWhitepaperLocaleContent,
   getWhitepaperSourceFile,
-  resolveWhitepaperSourcePath,
 } from '@/lib/whitepaper/library';
 import { renderWhitepaperMarkdown } from '@/lib/whitepaper/markdown-renderer';
+import { resolveRuntimeWhitepaperSourcePath } from '@/lib/whitepaper/source-path';
 
 const SHARED_WHITEPAPER_SECTION_IMAGES: Record<
   string,
@@ -147,7 +147,7 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
 
   let rendered;
   try {
-    const markdown = await fs.readFile(resolveWhitepaperSourcePath(sourceFile), 'utf8');
+    const markdown = await fs.readFile(resolveRuntimeWhitepaperSourcePath(sourceFile), 'utf8');
     rendered = renderWhitepaperMarkdown(markdown, {
       sectionImages: SHARED_WHITEPAPER_SECTION_IMAGES[entry.slug]?.map((image) => ({
         sectionIndex: image.sectionIndex,

@@ -234,6 +234,7 @@ COPY --from=builder /app/apps/union-eyes/.next/standalone ./
 COPY --from=builder /app/apps/union-eyes/.next/static ./apps/union-eyes/.next/static
 COPY --from=builder /app/apps/union-eyes/public ./apps/union-eyes/public
 COPY --from=builder /app/apps/union-eyes/messages ./apps/union-eyes/messages
+COPY --from=builder /app/docs/oci/whitepapers ./docs/oci/whitepapers
 COPY --from=builder /app/content ./content
 
 # Create non-root user
