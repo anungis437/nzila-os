@@ -1,6 +1,9 @@
 name: Deploy Union Eyes (Azure Container Apps)
 
 on:
+  push:
+    branches:
+      - hotfix/fr-cta-locale-redirect
   workflow_dispatch:
     inputs:
       emergency_ack:
