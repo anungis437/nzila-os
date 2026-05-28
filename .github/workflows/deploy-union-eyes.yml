@@ -709,6 +709,10 @@ jobs:
           SOFT_HOSTS="${{ vars.UE_SOFT_SMOKE_HOSTS != '' && vars.UE_SOFT_SMOKE_HOSTS || 'app.unioneyes.app' }}"
           MAX_ATTEMPTS=12
           SLEEP_SECONDS=30
+          VERSION_IDENTITY_REQUIRED="${{ needs.plan.outputs.environment == 'production' && 'true' || 'false' }}"
+          if [ "${{ vars.UE_REQUIRE_VERSION_IDENTITY_SMOKE }}" = "true" ]; then
+            VERSION_IDENTITY_REQUIRED="true"
+          fi
 
           host_is_soft() {
             local host="$1"
@@ -727,6 +731,10 @@ jobs:
 
             local payload
             if ! payload=$(curl -fsS --max-time 20 "$base_url/api/version" 2>/dev/null); then
+              if [ "$VERSION_IDENTITY_REQUIRED" != "true" ]; then
+                echo "::warning::$base_url /api/version probe failed (non-production soft check)."
+                return 0
+              fi
               if host_is_soft "$host"; then
                 echo "::warning::Soft host $base_url failed /api/version probe; not failing deploy."
                 return 0
@@ -738,6 +746,10 @@ jobs:
             local live_sha
             live_sha=$(echo "$payload" | jq -r '.gitSha // empty')
             if [ -z "$live_sha" ]; then
+              if [ "$VERSION_IDENTITY_REQUIRED" != "true" ]; then
+                echo "::warning::$base_url/api/version returned no gitSha (non-production soft check)."
+                return 0
+              fi
               if host_is_soft "$host"; then
                 echo "::warning::Soft host $base_url returned no gitSha in /api/version; not failing deploy."
                 return 0
@@ -747,6 +759,10 @@ jobs:
             fi
 
             if [ "$live_sha" != "$DEPLOYED_SHA" ]; then
+              if [ "$VERSION_IDENTITY_REQUIRED" != "true" ]; then
+                echo "::warning::$base_url serving stale gitSha=$live_sha expected=$DEPLOYED_SHA (non-production soft check)."
+                return 0
+              fi
               if host_is_soft "$host"; then
                 echo "::warning::Soft host $base_url serving stale gitSha=$live_sha expected=$DEPLOYED_SHA; not failing deploy."
                 return 0
