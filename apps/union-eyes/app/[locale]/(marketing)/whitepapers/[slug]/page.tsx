@@ -145,14 +145,21 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
     redirect(`/${locale}${entry.href}`);
   }
 
-  const markdown = await fs.readFile(resolveWhitepaperSourcePath(sourceFile), 'utf8');
-  const rendered = renderWhitepaperMarkdown(markdown, {
-    sectionImages: SHARED_WHITEPAPER_SECTION_IMAGES[entry.slug]?.map((image) => ({
-      sectionIndex: image.sectionIndex,
-      imageUrl: image.imageUrl,
-      alt: image.alt[locale === 'fr-CA' ? 'fr-CA' : 'en-CA'],
-    })),
-  });
+  let rendered;
+  try {
+    const markdown = await fs.readFile(resolveWhitepaperSourcePath(sourceFile), 'utf8');
+    rendered = renderWhitepaperMarkdown(markdown, {
+      sectionImages: SHARED_WHITEPAPER_SECTION_IMAGES[entry.slug]?.map((image) => ({
+        sectionIndex: image.sectionIndex,
+        imageUrl: image.imageUrl,
+        alt: image.alt[locale === 'fr-CA' ? 'fr-CA' : 'en-CA'],
+      })),
+    });
+  } catch {
+    // If the source markdown is unavailable in this runtime bundle,
+    // degrade to the whitepaper hub instead of surfacing a 500.
+    redirect(`/${locale}/whitepapers`);
+  }
 
   return (
     <div className="min-h-screen bg-white">
