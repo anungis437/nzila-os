@@ -457,26 +457,26 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   // so Location headers do not leak internal host/port values.
   if (req.nextUrl.pathname === '/whitepaper' || req.nextUrl.pathname === '/whitepaper/') {
     const locale = getPreferredLocaleFromRequest(req);
-    return withRequestId(new NextResponse(null, {
-      status: 307,
-      headers: { location: `/${locale}/whitepaper` },
-    }), requestId);
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = `/${locale}/whitepaper`;
+    redirectUrl.search = '';
+    return withRequestId(NextResponse.redirect(redirectUrl, 307), requestId);
   }
 
   if (req.nextUrl.pathname === '/whitepapers' || req.nextUrl.pathname === '/whitepapers/') {
     const locale = getPreferredLocaleFromRequest(req);
-    return withRequestId(new NextResponse(null, {
-      status: 307,
-      headers: { location: `/${locale}/whitepapers` },
-    }), requestId);
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = `/${locale}/whitepapers`;
+    redirectUrl.search = '';
+    return withRequestId(NextResponse.redirect(redirectUrl, 307), requestId);
   }
 
   if (req.nextUrl.pathname.startsWith('/whitepapers/')) {
     const locale = getPreferredLocaleFromRequest(req);
-    return withRequestId(new NextResponse(null, {
-      status: 307,
-      headers: { location: `/${locale}${req.nextUrl.pathname}` },
-    }), requestId);
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = `/${locale}${req.nextUrl.pathname}`;
+    redirectUrl.search = '';
+    return withRequestId(NextResponse.redirect(redirectUrl, 307), requestId);
   }
 
   // Marketing pages live at root without locale prefix (/, /story, /pricing, etc.)
