@@ -692,6 +692,8 @@ jobs:
 
           DEPLOYED_SHA="${{ github.sha }}"
           SOFT_HOSTS="${{ vars.UE_SOFT_SMOKE_HOSTS != '' && vars.UE_SOFT_SMOKE_HOSTS || 'app.unioneyes.app' }}"
+          MAX_ATTEMPTS=12
+          SLEEP_SECONDS=30
 
           host_is_soft() {
             local host="$1"
@@ -739,11 +741,30 @@ jobs:
             fi
 
             echo "✅ $base_url/api/version gitSha matches deployed sha ${DEPLOYED_SHA}"
+            return 0
           }
 
-          for URL in ${{ needs.plan.outputs.smoke_urls }}; do
-            check_version_identity "$URL"
+          for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
+            all_ok=true
+
+            for URL in ${{ needs.plan.outputs.smoke_urls }}; do
+              if ! check_version_identity "$URL"; then
+                all_ok=false
+              fi
+            done
+
+            if [ "$all_ok" = "true" ]; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
+              echo "::notice::Version identity checks attempt $attempt/$MAX_ATTEMPTS did not match deployed sha yet; retrying in ${SLEEP_SECONDS}s."
+              sleep "$SLEEP_SECONDS"
+            fi
           done
+
+          echo "::error::Version identity checks never converged to deployed sha $DEPLOYED_SHA after ${MAX_ATTEMPTS} attempts."
+          exit 1
 
       - name: Persona authz smoke (demo only, soft)
         if: ${{ needs.plan.outputs.demo_profile != '' }}
