@@ -119,6 +119,23 @@ function getPreferredLocaleFromRequest(req: Pick<NextRequest, 'headers'>): strin
   return defaultLocale;
 }
 
+function buildPublicRedirectLocation(
+  req: Pick<NextRequest, 'headers' | 'nextUrl'>,
+  targetPath: string,
+): string {
+  const forwardedHost = req.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
+  const host = forwardedHost || req.headers.get('host') || '';
+  const hostWithoutPort = host.replace(/:\d+$/, '');
+  const forwardedProto = req.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  const protocol = (forwardedProto || req.nextUrl.protocol.replace(':', '') || 'https').toLowerCase();
+
+  if (!hostWithoutPort) {
+    return targetPath;
+  }
+
+  return `${protocol}://${hostWithoutPort}${targetPath}`;
+}
+
 const _isProtectedRoute = createRouteMatcher([
   "/:locale/dashboard(.*)"
 ]);
@@ -457,27 +474,30 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   // so Location headers do not leak internal host/port values.
   if (req.nextUrl.pathname === '/whitepaper' || req.nextUrl.pathname === '/whitepaper/') {
     const locale = getPreferredLocaleFromRequest(req);
+    const targetPath = `/${locale}/whitepaper`;
     const redirectResponse = new NextResponse(null, {
       status: 307,
-      headers: { location: `/${locale}/whitepaper` },
+      headers: { location: buildPublicRedirectLocation(req, targetPath) },
     });
     return withRequestId(redirectResponse, requestId);
   }
 
   if (req.nextUrl.pathname === '/whitepapers' || req.nextUrl.pathname === '/whitepapers/') {
     const locale = getPreferredLocaleFromRequest(req);
+    const targetPath = `/${locale}/whitepapers`;
     const redirectResponse = new NextResponse(null, {
       status: 307,
-      headers: { location: `/${locale}/whitepapers` },
+      headers: { location: buildPublicRedirectLocation(req, targetPath) },
     });
     return withRequestId(redirectResponse, requestId);
   }
 
   if (req.nextUrl.pathname.startsWith('/whitepapers/')) {
     const locale = getPreferredLocaleFromRequest(req);
+    const targetPath = `/${locale}${req.nextUrl.pathname}`;
     const redirectResponse = new NextResponse(null, {
       status: 307,
-      headers: { location: `/${locale}${req.nextUrl.pathname}` },
+      headers: { location: buildPublicRedirectLocation(req, targetPath) },
     });
     return withRequestId(redirectResponse, requestId);
   }
