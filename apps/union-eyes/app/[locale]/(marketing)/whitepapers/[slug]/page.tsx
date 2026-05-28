@@ -13,7 +13,7 @@ import {
   getWhitepaperLocaleContent,
   getWhitepaperSourceFile,
 } from '@/lib/whitepaper/library';
-import { renderWhitepaperMarkdown } from '@/lib/whitepaper/markdown-renderer';
+import type { RenderedWhitepaper } from '@/lib/whitepaper/markdown-renderer';
 import { resolveRuntimeWhitepaperSourcePath } from '@/lib/whitepaper/source-path';
 
 const ARTICLE_COPY = {
@@ -81,17 +81,31 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
     redirect(`/${locale}${entry.href}`);
   }
 
-  let rendered;
+  let rendered: RenderedWhitepaper;
   try {
     const markdown = await fs.readFile(resolveRuntimeWhitepaperSourcePath(sourceFile), 'utf8');
-    rendered = renderWhitepaperMarkdown(markdown);
-  } catch (error) {
+    rendered = {
+      title: entryCopy.title,
+      tocItems: [],
+      nodes: [
+        <div key="whitepaper-markdown" className="whitespace-pre-wrap text-[1.02rem] leading-8 text-slate-700">
+          {markdown}
+        </div>,
+      ],
+    };
+  } catch {
     // Keep the canonical whitepaper URL stable even when source markdown
     // is missing in a runtime revision; this avoids redirect regressions
     // and lets smoke checks catch degraded content without route drift.
-    rendered = renderWhitepaperMarkdown(
-      `# ${entryCopy.title}\n\nThe full whitepaper content is temporarily unavailable in this runtime revision. Please retry shortly.`,
-    );
+    rendered = {
+      title: entryCopy.title,
+      tocItems: [],
+      nodes: [
+        <p key="whitepaper-unavailable" className="text-[1.02rem] leading-8 text-slate-700">
+          The full whitepaper content is temporarily unavailable in this runtime revision. Please retry shortly.
+        </p>,
+      ],
+    };
   }
 
   return (
