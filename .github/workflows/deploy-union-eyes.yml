@@ -681,10 +681,14 @@ jobs:
           done
 
       - name: Version identity checks (fail closed)
-        if: ${{ secrets.UE_CUSTOM_DOMAIN_ACTIVE == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ "${{ secrets.UE_CUSTOM_DOMAIN_ACTIVE }}" != "true" ]; then
+            echo "::notice::Version identity checks skipped for ${{ needs.plan.outputs.environment }}; UE_CUSTOM_DOMAIN_ACTIVE is not true in this GitHub environment."
+            exit 0
+          fi
 
           DEPLOYED_SHA="${{ github.sha }}"
           SOFT_HOSTS="${{ vars.UE_SOFT_SMOKE_HOSTS != '' && vars.UE_SOFT_SMOKE_HOSTS || 'app.unioneyes.app' }}"
