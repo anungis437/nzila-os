@@ -758,7 +758,7 @@ jobs:
             local status
             local final_url
 
-            result=$(curl -sS -L -o /dev/null -w '%{http_code} %{url_effective}' \
+            result=$(curl -sS -o /dev/null -w '%{http_code} %{url_effective}' \
               --max-time 20 --retry 3 --retry-delay 5 \
               "$BASE_URL$path")
             status=${result%% *}
