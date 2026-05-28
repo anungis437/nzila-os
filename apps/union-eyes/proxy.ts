@@ -458,6 +458,8 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   if (req.nextUrl.pathname === '/whitepaper' || req.nextUrl.pathname === '/whitepaper/') {
     const locale = getPreferredLocaleFromRequest(req);
     const redirectUrl = req.nextUrl.clone();
+    // Edge runtime can preserve internal origin port (e.g. :3000); clear it for public redirects.
+    redirectUrl.port = '';
     redirectUrl.pathname = `/${locale}/whitepaper`;
     redirectUrl.search = '';
     return withRequestId(NextResponse.redirect(redirectUrl, 307), requestId);
@@ -466,6 +468,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   if (req.nextUrl.pathname === '/whitepapers' || req.nextUrl.pathname === '/whitepapers/') {
     const locale = getPreferredLocaleFromRequest(req);
     const redirectUrl = req.nextUrl.clone();
+    redirectUrl.port = '';
     redirectUrl.pathname = `/${locale}/whitepapers`;
     redirectUrl.search = '';
     return withRequestId(NextResponse.redirect(redirectUrl, 307), requestId);
@@ -474,6 +477,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   if (req.nextUrl.pathname.startsWith('/whitepapers/')) {
     const locale = getPreferredLocaleFromRequest(req);
     const redirectUrl = req.nextUrl.clone();
+    redirectUrl.port = '';
     redirectUrl.pathname = `/${locale}${req.nextUrl.pathname}`;
     redirectUrl.search = '';
     return withRequestId(NextResponse.redirect(redirectUrl, 307), requestId);
