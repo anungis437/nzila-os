@@ -16,70 +16,6 @@ import {
 import { renderWhitepaperMarkdown } from '@/lib/whitepaper/markdown-renderer';
 import { resolveRuntimeWhitepaperSourcePath } from '@/lib/whitepaper/source-path';
 
-const SHARED_WHITEPAPER_SECTION_IMAGES: Record<
-  string,
-  ReadonlyArray<{
-    sectionIndex: number;
-    imageUrl: string;
-    alt: { 'en-CA': string; 'fr-CA': string };
-  }>
-> = {
-  'operational-reality-edition': [
-    {
-      sectionIndex: 3,
-      imageUrl: 'https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=1920&q=80&auto=format',
-      alt: {
-        'en-CA': 'Union operations team coordinating active casework and representation tasks',
-        'fr-CA': 'Équipe syndicale coordonnant les dossiers actifs et les tâches de représentation',
-      },
-    },
-    {
-      sectionIndex: 7,
-      imageUrl: 'https://images.unsplash.com/photo-1521791055366-0d553872125f?w=1920&q=80&auto=format',
-      alt: {
-        'en-CA': 'Leadership transition briefing during continuity handoff',
-        'fr-CA': 'Séance de transition de leadership pendant un transfert de continuité',
-      },
-    },
-  ],
-  'oci-method-companion': [
-    {
-      sectionIndex: 5,
-      imageUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1920&q=80&auto=format',
-      alt: {
-        'en-CA': 'Structured system architecture and methodology design planning',
-        'fr-CA': 'Architecture structurée et planification de conception méthodologique',
-      },
-    },
-    {
-      sectionIndex: 14,
-      imageUrl: 'https://images.unsplash.com/photo-1556155092-490a1ba16284?w=1920&q=80&auto=format',
-      alt: {
-        'en-CA': 'Procurement review session evaluating continuity method criteria',
-        'fr-CA': 'Séance d’approvisionnement évaluant les critères de la méthode de continuité',
-      },
-    },
-  ],
-  'oci-method-canonical': [
-    {
-      sectionIndex: 1,
-      imageUrl: 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1920&q=80&auto=format',
-      alt: {
-        'en-CA': 'Governance committee session defining canonical policy language',
-        'fr-CA': 'Comité de gouvernance définissant le langage canonique des politiques',
-      },
-    },
-    {
-      sectionIndex: 11,
-      imageUrl: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=1920&q=80&auto=format',
-      alt: {
-        'en-CA': 'Authority and enforcement review for standards conformance',
-        'fr-CA': 'Revue d’autorité et d’application pour la conformité aux normes',
-      },
-    },
-  ],
-};
-
 const ARTICLE_COPY = {
   'en-CA': {
     backToHub: 'Whitepapers',
@@ -148,13 +84,7 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
   let rendered;
   try {
     const markdown = await fs.readFile(resolveRuntimeWhitepaperSourcePath(sourceFile), 'utf8');
-    rendered = renderWhitepaperMarkdown(markdown, {
-      sectionImages: SHARED_WHITEPAPER_SECTION_IMAGES[entry.slug]?.map((image) => ({
-        sectionIndex: image.sectionIndex,
-        imageUrl: image.imageUrl,
-        alt: image.alt[locale === 'fr-CA' ? 'fr-CA' : 'en-CA'],
-      })),
-    });
+    rendered = renderWhitepaperMarkdown(markdown);
   } catch (error) {
     // Keep the canonical whitepaper URL stable even when source markdown
     // is missing in a runtime revision; this avoids redirect regressions
