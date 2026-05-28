@@ -696,10 +696,16 @@ jobs:
           done
 
       - name: Whitepaper route smoke checks
-        if: ${{ secrets.UE_CUSTOM_DOMAIN_ACTIVE == 'true' }}
         shell: bash
+        env:
+          UE_CUSTOM_DOMAIN_ACTIVE: ${{ secrets.UE_CUSTOM_DOMAIN_ACTIVE }}
         run: |
           set -euo pipefail
+
+          if [ "${UE_CUSTOM_DOMAIN_ACTIVE:-}" != "true" ]; then
+            echo "::notice::Whitepaper smoke checks skipped for ${{ needs.plan.outputs.environment }}; UE_CUSTOM_DOMAIN_ACTIVE is not true in this GitHub environment."
+            exit 0
+          fi
 
           BASE_URL="${{ needs.plan.outputs.marketing_url }}"
           echo "Running whitepaper smoke checks against $BASE_URL"
