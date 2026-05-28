@@ -4,7 +4,13 @@ import { getPreferredLocaleForRedirect } from '@/lib/locale-routing';
 
 export const dynamic = 'force-dynamic';
 
-export default async function WhitepapersHubRedirect() {
+export default async function WhitepaperSlugRedirect({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const locale = await getPreferredLocaleForRedirect();
-  redirect(`/${locale}/whitepapers`);
+  const { slug } = await params;
+
+  redirect(`/${locale}/whitepapers/${slug}`);
 }
