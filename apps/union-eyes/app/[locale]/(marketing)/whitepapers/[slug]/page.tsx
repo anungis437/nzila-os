@@ -13,7 +13,10 @@ import {
   getWhitepaperLocaleContent,
   getWhitepaperSourceFile,
 } from '@/lib/whitepaper/library';
-import type { RenderedWhitepaper } from '@/lib/whitepaper/markdown-renderer';
+import {
+  renderWhitepaperMarkdown,
+  type RenderedWhitepaper,
+} from '@/lib/whitepaper/markdown-renderer';
 import { resolveRuntimeWhitepaperSourcePath } from '@/lib/whitepaper/source-path';
 
 const ARTICLE_COPY = {
@@ -84,15 +87,7 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
   let rendered: RenderedWhitepaper;
   try {
     const markdown = await fs.readFile(resolveRuntimeWhitepaperSourcePath(sourceFile), 'utf8');
-    rendered = {
-      title: entryCopy.title,
-      tocItems: [],
-      nodes: [
-        <div key="whitepaper-markdown" className="whitespace-pre-wrap text-[1.02rem] leading-8 text-slate-700">
-          {markdown}
-        </div>,
-      ],
-    };
+    rendered = renderWhitepaperMarkdown(markdown);
   } catch {
     // Keep the canonical whitepaper URL stable even when source markdown
     // is missing in a runtime revision; this avoids redirect regressions
