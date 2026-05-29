@@ -1,14 +1,14 @@
 {
   "_meta": {
     "schema_version": "2.0.0",
-    "generated_at": "2026-05-22T21:45:10.910Z",
+    "generated_at": "2026-05-29T22:57:45.059Z",
     "generator": "tooling/scripts/generate-ops-evidence.mjs",
     "freshness_days": 7,
     "window_days": 30
   },
   "metrics": {
     "deploy_frequency_30d": {
-      "value": 10.47,
+      "value": 10.7,
       "source": "ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week)",
       "source_needed": null
     },
@@ -28,9 +28,9 @@
       "source_needed": null
     },
     "mttr_minutes": {
-      "value": null,
+      "value": 0,
       "source": "ops/outputs/dora-metrics.json: metrics.mttr.value (hours -> minutes)",
-      "source_needed": "Incident tracker integration required; dora-metrics currently reports null mttr."
+      "source_needed": null
     },
     "uptime_30d": {
       "value": null,

@@ -231,12 +231,9 @@ jobs:
             --target "$APP" \
             --tag "$IMAGE" \
             --tag "${{ env.ACR_NAME }}.azurecr.io/nzila/${APP}:latest" \
-            --load \
+            --push \
             ${BUILD_ARGS} \
             .
-
-          docker push "$IMAGE"
-          docker push "${{ env.ACR_NAME }}.azurecr.io/nzila/${APP}:latest"
 
           echo "Built and pushed: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
 
