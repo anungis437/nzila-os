@@ -28,6 +28,7 @@ permissions:
 env:
   IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes
   BACKEND_IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   plan:
@@ -284,7 +285,7 @@ jobs:
             "https://api.cloudflare.com/client/v4/zones/$DNS_ZONE_ID" || true)
 
           if [ "$HTTP_STATUS" = "401" ] || [ "$HTTP_STATUS" = "403" ]; then
-            echo "::warning::Cloudflare preflight returned HTTP $HTTP_STATUS. Continuing deploy; DNS post-deploy checks remain enforced."
+            echo "::notice::Cloudflare preflight returned HTTP $HTTP_STATUS. Continuing deploy; DNS post-deploy checks remain enforced."
             exit 0
           fi
 
@@ -374,7 +375,7 @@ jobs:
         with:
           name: release-attestation-union-eyes
           path: release-attestation.json
-          retention-days: 365
+          retention-days: 90
 
   build-and-deploy:
     runs-on: ubuntu-latest
