@@ -21,7 +21,7 @@ pre-commit:
 
     lint-staged:
       glob: "*.{ts,tsx,js,jsx,mjs}"
-      run: pnpm lint --filter "...[HEAD]" --output-logs errors-only
+      run: node scripts/lint-staged-eslint.mjs {staged_files}
       fail_text: "Lint errors found. Run `pnpm lint` to see details."
 
     typecheck-staged:

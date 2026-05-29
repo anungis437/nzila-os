@@ -103,9 +103,8 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
     };
   }
 
-  try {
-    return (
-      <div className="min-h-screen bg-white">
+  return (
+    <div className="min-h-screen bg-white">
       <section className="relative overflow-hidden border-b border-slate-200 bg-[#0f2133]">
         <Image
           aria-hidden="true"
@@ -239,33 +238,6 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
           </Link>
         </div>
       </main>
-      </div>
-    );
-  } catch {
-    return (
-      <div className="min-h-screen bg-white">
-        <section className="border-b border-slate-200 bg-[#0f2133]">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-4xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
-                {entryCopy.format} · {entry.version}
-              </p>
-              <h1 className="mt-3 text-4xl font-semibold text-white sm:text-5xl lg:text-6xl">
-                {entryCopy.title}
-              </h1>
-              <p className="mt-4 text-base text-white/90 sm:text-lg lg:text-xl">
-                {entryCopy.subtitle}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <main className="mx-auto w-full max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
-          <article className="rounded-2xl border border-slate-200 bg-white p-7 text-[1.05rem] leading-8 text-slate-700 sm:p-10">
-            The full whitepaper content is temporarily unavailable in this runtime revision. Please retry shortly.
-          </article>
-        </main>
-      </div>
-    );
-  }
+    </div>
+  );
 }
