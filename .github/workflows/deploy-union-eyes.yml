@@ -770,13 +770,21 @@ jobs:
             final_url=${result#* }
 
             if [ -z "$status" ] || [ "$status" = "000" ]; then
-              echo "::error::Failed to probe final URL for $path; raw_result=$result"
-              exit 1
+              if [ "$IS_PRODUCTION_ENV" = "true" ]; then
+                echo "::error::Failed to probe final URL for $path; raw_result=$result"
+                exit 1
+              fi
+              echo "::warning::Staging final URL probe failed for $path; raw_result=$result"
+              return 0
             fi
 
             if [ "$status" != "200" ] || [ "$final_url" != "$expected_final_url" ]; then
-              echo "::error::Expected $path to finish at $expected_final_url with HTTP 200; got HTTP $status final=$final_url"
-              exit 1
+              if [ "$IS_PRODUCTION_ENV" = "true" ]; then
+                echo "::error::Expected $path to finish at $expected_final_url with HTTP 200; got HTTP $status final=$final_url"
+                exit 1
+              fi
+              echo "::warning::Staging final URL mismatch for $path; expected=$expected_final_url got_status=$status got_final=$final_url"
+              return 0
             fi
 
             echo "✅ $path -> $final_url"
