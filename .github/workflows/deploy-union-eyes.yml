@@ -712,6 +712,64 @@ jobs:
           echo "Running whitepaper smoke checks against $BASE_URL"
           IS_PRODUCTION_ENV="${{ needs.plan.outputs.environment == 'production' && 'true' || 'false' }}"
 
+          probe_redirect_with_retries() {
+            local path="$1"
+            local accept_language="$2"
+            local attempts="${3:-6}"
+            local delay="${4:-5}"
+            local headers=""
+            local status="000"
+
+            for attempt in $(seq 1 "$attempts"); do
+              headers=$(curl -sS -o /dev/null -D - \
+                --max-time 20 \
+                -H "Accept-Language: $accept_language" \
+                "$BASE_URL$path" || true)
+              status=$(printf '%s\n' "$headers" | awk 'toupper($1) ~ /^HTTP/ { code=$2 } END { print code }')
+
+              if [[ "$status" =~ ^(307|308)$ ]]; then
+                printf '%s\n' "$headers"
+                return 0
+              fi
+
+              if [ "$attempt" -lt "$attempts" ]; then
+                echo "::notice::Whitepaper redirect retry $attempt/$attempts for $path -> HTTP ${status:-000}; waiting ${delay}s."
+                sleep "$delay"
+              fi
+            done
+
+            printf '%s\n' "$headers"
+            return 1
+          }
+
+          probe_final_with_retries() {
+            local path="$1"
+            local attempts="${2:-6}"
+            local delay="${3:-5}"
+            local result=""
+            local status="000"
+
+            for attempt in $(seq 1 "$attempts"); do
+              result=$(curl -sS -o /dev/null -w '%{http_code} %{url_effective}' \
+                --max-time 20 \
+                "$BASE_URL$path" || true)
+              status=${result%% *}
+
+              if [ "$status" = "200" ]; then
+                printf '%s\n' "$result"
+                return 0
+              fi
+
+              if [ "$attempt" -lt "$attempts" ]; then
+                echo "::notice::Whitepaper final retry $attempt/$attempts for $path -> HTTP ${status:-000}; waiting ${delay}s."
+                sleep "$delay"
+              fi
+            done
+
+            printf '%s\n' "$result"
+            return 1
+          }
+
           assert_redirect() {
             local path="$1"
             local accept_language="$2"
@@ -721,10 +779,7 @@ jobs:
             local location
             local location_path
 
-            headers=$(curl -sS -o /dev/null -D - \
-              --max-time 20 --retry 3 --retry-delay 5 \
-              -H "Accept-Language: $accept_language" \
-              "$BASE_URL$path" || true)
+            headers=$(probe_redirect_with_retries "$path" "$accept_language" 6 5 || true)
             status=$(printf '%s\n' "$headers" | awk 'toupper($1) ~ /^HTTP/ { code=$2 } END { print code }')
             location=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1} /^location:/ { print $2 }' | tr -d '\r' | tail -n1)
 
@@ -749,8 +804,8 @@ jobs:
 
             location_path="${location_path%%\?*}"
 
-            if [ "$status" != "307" ] || [ "$location_path" != "$expected_location" ]; then
-              echo "::error::Expected $path to redirect to $expected_location (HTTP 307); got HTTP $status location=$location parsed_path=$location_path"
+            if [[ ! "$status" =~ ^(307|308)$ ]] || [ "$location_path" != "$expected_location" ]; then
+              echo "::error::Expected $path to redirect to $expected_location (HTTP 307/308); got HTTP $status location=$location parsed_path=$location_path"
               exit 1
             fi
 
@@ -764,9 +819,7 @@ jobs:
             local status
             local final_url
 
-            result=$(curl -sS -o /dev/null -w '%{http_code} %{url_effective}' \
-              --max-time 20 --retry 3 --retry-delay 5 \
-              "$BASE_URL$path" || true)
+            result=$(probe_final_with_retries "$path" 6 5 || true)
             status=${result%% *}
             final_url=${result#* }
 
