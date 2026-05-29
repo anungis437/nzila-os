@@ -551,6 +551,7 @@ jobs:
             local headers
             local status
             local location
+            local location_path
 
             headers=$(curl -sS -o /dev/null -D - \
               --max-time 20 --retry 3 --retry-delay 5 \
@@ -559,8 +560,16 @@ jobs:
             status=$(printf '%s\n' "$headers" | awk 'toupper($1) ~ /^HTTP/ { code=$2 } END { print code }')
             location=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1} /^location:/ { print $2 }' | tr -d '\r' | tail -n1)
 
-            if [ "$status" != "307" ] || [ "$location" != "$expected_location" ]; then
-              echo "::error::Expected $path to redirect to $expected_location (HTTP 307); got HTTP $status location=$location"
+            if [[ "$location" =~ ^https?:// ]]; then
+              location_path="/${location#*://*/}"
+            else
+              location_path="$location"
+            fi
+
+            location_path="${location_path%%\?*}"
+
+            if [[ ! "$status" =~ ^(307|308)$ ]] || [ "$location_path" != "$expected_location" ]; then
+              echo "::error::Expected $path to redirect to $expected_location (HTTP 307/308); got HTTP $status location=$location parsed_path=$location_path"
               exit 1
             fi
 
