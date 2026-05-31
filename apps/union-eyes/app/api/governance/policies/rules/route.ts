@@ -22,7 +22,6 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'steward' },
-    entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'List governance policies' },
   },
   async ({ request, organizationId }) => {

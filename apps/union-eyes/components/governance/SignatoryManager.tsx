@@ -31,7 +31,7 @@ export default function SignatoryManager({ organizationId, canManage = false }: 
   const fetchSignatories = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/v2/governance/signatories?organizationId=${encodeURIComponent(organizationId)}`);
+      const res = await fetch(`/api/governance/signatories?organizationId=${encodeURIComponent(organizationId)}`);
       if (res.ok) {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
