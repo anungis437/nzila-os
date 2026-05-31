@@ -370,23 +370,37 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
         !process.env.CI &&
         (req.nextUrl.pathname.startsWith('/api/auth/') || req.nextUrl.pathname === '/api/auth')
       ) {
+        const pathname = req.nextUrl.pathname;
+        const isAuthStatusEndpoint =
+          req.method === 'GET' &&
+          (pathname === '/api/auth/me' ||
+            pathname === '/api/auth/methods' ||
+            pathname === '/api/auth/session' ||
+            pathname.startsWith('/api/auth/session/'));
+        const authRateLimit = isAuthStatusEndpoint ? RATE_LIMITS.AUTH_STATUS_IP : RATE_LIMITS.AUTH_IP;
+
         const clientIp = getClientIp(req);
         try {
           const ipRl = await checkRateLimit(
             `ip:${clientIp}`,
-            RATE_LIMITS.AUTH_IP,
+            authRateLimit,
           );
           if (!ipRl.allowed) {
             logger.warn('Auth endpoint IP rate limit exceeded', {
               ip: clientIp,
-              pathname: req.nextUrl.pathname,
+              pathname,
+              rateLimitIdentifier: authRateLimit.identifier,
               requestId,
             });
             return withRequestId(NextResponse.json(
               {
                 error: 'Too Many Requests',
-                message: 'Authentication rate limit exceeded. Please try again later.',
-                code: 'AUTH_IP_RATE_LIMIT_EXCEEDED',
+                message: isAuthStatusEndpoint
+                  ? 'Authentication status rate limit exceeded. Please try again shortly.'
+                  : 'Authentication rate limit exceeded. Please try again later.',
+                code: isAuthStatusEndpoint
+                  ? 'AUTH_STATUS_IP_RATE_LIMIT_EXCEEDED'
+                  : 'AUTH_IP_RATE_LIMIT_EXCEEDED',
                 retryAfter: ipRl.resetIn,
               },
               {
@@ -405,7 +419,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
           // Log for monitoring but allow the request through.
           logger.error('Auth IP rate limit check failed — allowing request', {
             ip: clientIp,
-            pathname: req.nextUrl.pathname,
+            pathname,
             error: (rlError as Error).message,
             requestId,
           });

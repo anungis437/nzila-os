@@ -950,6 +950,24 @@ export const RATE_LIMITS = {
     identifier: 'auth-ip',
     failOpen: false,
   },
+
+  /**
+   * IP-based rate limit for auth status/session read endpoints.
+   *
+   * Applied to low-risk GET endpoints like /api/auth/me and
+   * /api/auth/methods that may be called repeatedly by multiple mounted
+   * components or tabs during normal app usage.
+   *
+   * 120 requests per 15 minutes per IP address.
+   * Keeps abuse protection in place while preventing noisy false positives
+   * for authenticated demo and production browsing patterns.
+   */
+  AUTH_STATUS_IP: {
+    limit: 120,
+    window: 900, // 15 minutes
+    identifier: 'auth-status-ip',
+    failOpen: false,
+  },
 } as const;
 
 /**

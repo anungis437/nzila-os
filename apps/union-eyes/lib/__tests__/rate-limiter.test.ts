@@ -433,6 +433,7 @@ describe('rate-limiter', () => {
       expect(RATE_LIMITS.AI_QUERY.limit).toBe(20);
       expect(RATE_LIMITS.AI_QUERY.window).toBe(3600);
       expect(RATE_LIMITS.AUTH).toBeDefined();
+      expect(RATE_LIMITS.AUTH_STATUS_IP).toBeDefined();
       expect(RATE_LIMITS.EXPORTS).toBeDefined();
       expect(RATE_LIMITS.GENERAL_API.limit).toBe(1000);
     });
