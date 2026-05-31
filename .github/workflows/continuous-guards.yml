@@ -57,7 +57,7 @@ jobs:
         run: pnpm exec tsx scripts/proof/ingest-github-actions.ts
 
       - name: Generate runtime proof
-        run: pnpm exec tsx scripts/proof/run-proof.tstime
+        run: pnpm exec tsx scripts/proof/run-proof.ts
 
       # ── DB Health ── [ADVISORY] ─────────────────────────────
       - name: DB doctor
