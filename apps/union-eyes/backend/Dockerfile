@@ -43,4 +43,4 @@ EXPOSE 8000
 # WEB_CONCURRENCY: set via env var per deployment (default 17 = 2×CPUs+1 for E8 SKU).
 # --keep-alive 5: reuse HTTP connections from the reverse proxy.
 # --max-requests 1000 + jitter: recycle workers to prevent memory leaks.
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn --bind 0.0.0.0:8000 --workers ${WEB_CONCURRENCY:-17} --timeout 120 --graceful-timeout 30 --keep-alive 5 --max-requests 1000 --max-requests-jitter 50 config.wsgi:application"]
+CMD ["sh", "-c", "python manage.py migrate --noinput ${DJANGO_MIGRATE_EXTRA_ARGS:-} && gunicorn --bind 0.0.0.0:8000 --workers ${WEB_CONCURRENCY:-17} --timeout 120 --graceful-timeout 30 --keep-alive 5 --max-requests 1000 --max-requests-jitter 50 config.wsgi:application"]

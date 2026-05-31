@@ -627,6 +627,11 @@ jobs:
             PGPASSWORD_SECRET="db-password"
           fi
 
+          DJANGO_MIGRATE_EXTRA_ARGS=""
+          if [ "${{ needs.plan.outputs.environment }}" = "demo" ]; then
+            DJANGO_MIGRATE_EXTRA_ARGS="--fake-initial"
+          fi
+
           # Backend runs migrations automatically on startup (Dockerfile CMD)
           az containerapp update \
             --name "$TARGET_APP" \
@@ -643,6 +648,7 @@ jobs:
               "PGPORT=$PGPORT_VAL" \
               "PGSSLMODE=$PGSSLMODE_VAL" \
               "PGPASSWORD=secretref:$PGPASSWORD_SECRET" \
+              "DJANGO_MIGRATE_EXTRA_ARGS=$DJANGO_MIGRATE_EXTRA_ARGS" \
             --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
       - name: Custom domain smoke checks
