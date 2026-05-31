@@ -68,6 +68,11 @@ async function checkRedis(): Promise<{ state: HealthCheckState; ms?: number; not
 }
 
 async function checkBackend(): Promise<{ state: HealthCheckState; ms?: number; note?: string }> {
+  const demoProfile = process.env.UE_DEMO_PROFILE ?? process.env.NEXT_PUBLIC_UE_DEMO_PROFILE ?? ''
+  if (demoProfile) {
+    return { state: 'ok', note: `Django probe skipped in demo profile (${demoProfile})` }
+  }
+
   const djangoUrl = process.env.DJANGO_API_URL ?? process.env.NEXT_PUBLIC_DJANGO_API_URL ?? ''
   if (!djangoUrl) return { state: 'ok', note: 'Django backend not configured — optional' }
 

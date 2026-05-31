@@ -539,8 +539,8 @@ jobs:
             )
           else
             FRONTEND_ENV_VARS+=(
-              "DJANGO_API_URL=http://localhost:8000"
-              "NEXT_PUBLIC_DJANGO_API_URL=http://localhost:8000"
+              "DJANGO_API_URL=http://127.0.0.1:8000"
+              "NEXT_PUBLIC_DJANGO_API_URL=http://127.0.0.1:8000"
               "READY_REQUIRE_QUEUE=false"
             )
           fi
