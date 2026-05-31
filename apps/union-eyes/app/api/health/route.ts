@@ -69,8 +69,20 @@ async function checkRedis(): Promise<{ state: HealthCheckState; ms?: number; not
 
 async function checkBackend(): Promise<{ state: HealthCheckState; ms?: number; note?: string }> {
   const demoProfile = process.env.UE_DEMO_PROFILE ?? process.env.NEXT_PUBLIC_UE_DEMO_PROFILE ?? ''
-  if (demoProfile) {
-    return { state: 'ok', note: `Django probe skipped in demo profile (${demoProfile})` }
+  const mode = (process.env.NZILA_MODE ?? process.env.UE_ENVIRONMENT ?? '').toLowerCase()
+  const deploymentType = (process.env.NZILA_DEPLOYMENT_TYPE ?? '').toLowerCase()
+  const featureProfile = (process.env.FEATURE_PROFILE ?? '').toLowerCase()
+
+  const isDemoRuntime =
+    Boolean(demoProfile) ||
+    mode === 'demo' ||
+    deploymentType.includes('demo') ||
+    featureProfile.includes('demo') ||
+    featureProfile.includes('cupe4373')
+
+  if (isDemoRuntime) {
+    const reason = demoProfile || deploymentType || mode || featureProfile || 'demo-runtime'
+    return { state: 'ok', note: `Django probe skipped for demo runtime (${reason})` }
   }
 
   const djangoUrl = process.env.DJANGO_API_URL ?? process.env.NEXT_PUBLIC_DJANGO_API_URL ?? ''
