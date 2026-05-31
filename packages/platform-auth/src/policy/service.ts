@@ -39,27 +39,31 @@ const DEFAULT_POLICY: OrgAuthPolicy = {
 export async function getOrgAuthPolicy(
   organizationId: string | null | undefined,
 ): Promise<OrgAuthPolicy> {
-  if (!organizationId) return DEFAULT_POLICY
-  const [row] = await db
-    .select()
-    .from(authOrgPolicies)
-    .where(eq(authOrgPolicies.organizationId, organizationId))
-    .limit(1)
-  if (!row) return { ...DEFAULT_POLICY, organizationId }
-  return {
-    organizationId,
-    allowLocalAuth: row.allowLocalAuth,
-    allowMagicLink: row.allowMagicLink,
-    allowSso: row.allowSso,
-    requireSso: row.requireSso,
-    requireInvite: row.requireInvite,
-    passwordResetAllowed: row.passwordResetAllowed,
-    allowedEmailDomains: Array.isArray(row.allowedEmailDomains)
-      ? (row.allowedEmailDomains as unknown as string[])
-      : [],
-    mfaRequiredForRoles: Array.isArray(row.mfaRequiredForRoles)
-      ? (row.mfaRequiredForRoles as unknown as string[])
-      : [],
+  try {
+    if (!organizationId) return DEFAULT_POLICY
+    const [row] = await db
+      .select()
+      .from(authOrgPolicies)
+      .where(eq(authOrgPolicies.organizationId, organizationId))
+      .limit(1)
+    if (!row) return { ...DEFAULT_POLICY, organizationId }
+    return {
+      organizationId,
+      allowLocalAuth: row.allowLocalAuth,
+      allowMagicLink: row.allowMagicLink,
+      allowSso: row.allowSso,
+      requireSso: row.requireSso,
+      requireInvite: row.requireInvite,
+      passwordResetAllowed: row.passwordResetAllowed,
+      allowedEmailDomains: Array.isArray(row.allowedEmailDomains)
+        ? (row.allowedEmailDomains as unknown as string[])
+        : [],
+      mfaRequiredForRoles: Array.isArray(row.mfaRequiredForRoles)
+        ? (row.mfaRequiredForRoles as unknown as string[])
+        : [],
+    }
+  } catch {
+    return { ...DEFAULT_POLICY, organizationId: organizationId ?? null }
   }
 }
 
@@ -91,13 +95,17 @@ export async function getAuthMethodAvailability(
 
   let userExists: boolean | null = null
   if (email && email.includes('@')) {
-    const normalised = email.toLowerCase().trim()
-    const [row] = await db
-      .select({ id: authUsers.userId })
-      .from(authUsers)
-      .where(sql`lower(${authUsers.email}) = ${normalised}`)
-      .limit(1)
-    userExists = Boolean(row)
+    try {
+      const normalised = email.toLowerCase().trim()
+      const [row] = await db
+        .select({ id: authUsers.userId })
+        .from(authUsers)
+        .where(sql`lower(${authUsers.email}) = ${normalised}`)
+        .limit(1)
+      userExists = Boolean(row)
+    } catch {
+      userExists = null
+    }
   }
 
   if (policy.requireSso) {
