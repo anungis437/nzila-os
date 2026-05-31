@@ -272,7 +272,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Officer-level pages (level 60) ─────────────────────────────────────
   { path: 'audits/page.tsx',                             minRole: 'officer',              description: 'Audits & compliance' },
-  { path: 'governance/page.tsx',                         minRole: 'officer',              description: 'Governance dashboard' },
+  { path: 'governance/page.tsx',                         minRole: 'steward',              description: 'Governance dashboard' },
   { path: 'pilot/page.tsx',                              minRole: 'officer',              description: 'Pilot program health metrics' },
   { path: 'trust/page.tsx',                              minRole: 'officer',              description: 'Trust & system integrity dashboard' },
 
