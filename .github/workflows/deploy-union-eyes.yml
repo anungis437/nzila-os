@@ -594,6 +594,39 @@ jobs:
             fi
           done
 
+          # Keep backend DB wiring aligned with the frontend container.
+          # Django backend reads PG* vars and defaults to localhost if missing,
+          # which makes revisions fail even when frontend is healthy.
+          FRONTEND_ENV_JSON=$(az containerapp show \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "properties.template.containers[?name=='$TARGET_APP'].env | [0]" \
+            -o json)
+
+          PGHOST_VAL=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGHOST") | .value // empty' | head -n1)
+          PGUSER_VAL=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGUSER") | .value // empty' | head -n1)
+          PGDATABASE_VAL=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGDATABASE") | .value // empty' | head -n1)
+          PGPORT_VAL=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGPORT") | .value // empty' | head -n1)
+          PGSSLMODE_VAL=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGSSLMODE") | .value // empty' | head -n1)
+          PGPASSWORD_SECRET=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGPASSWORD") | .secretRef // empty' | head -n1)
+
+          if [ -z "$PGHOST_VAL" ] || [ -z "$PGUSER_VAL" ] || [ -z "$PGDATABASE_VAL" ]; then
+            echo "::error::Missing PGHOST/PGUSER/PGDATABASE on frontend container env; refusing backend update to avoid localhost DB fallback."
+            exit 1
+          fi
+
+          if [ -z "$PGPORT_VAL" ]; then
+            PGPORT_VAL="5432"
+          fi
+
+          if [ -z "$PGSSLMODE_VAL" ]; then
+            PGSSLMODE_VAL="require"
+          fi
+
+          if [ -z "$PGPASSWORD_SECRET" ]; then
+            PGPASSWORD_SECRET="db-password"
+          fi
+
           # Backend runs migrations automatically on startup (Dockerfile CMD)
           az containerapp update \
             --name "$TARGET_APP" \
@@ -604,6 +637,12 @@ jobs:
               "AUTH_WEBHOOK_SECRET=secretref:auth-webhook-secret" \
               "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" \
               "CORS_ALLOWED_ORIGINS=${{ needs.plan.outputs.marketing_url }},${{ needs.plan.outputs.app_url }}" \
+              "PGHOST=$PGHOST_VAL" \
+              "PGUSER=$PGUSER_VAL" \
+              "PGDATABASE=$PGDATABASE_VAL" \
+              "PGPORT=$PGPORT_VAL" \
+              "PGSSLMODE=$PGSSLMODE_VAL" \
+              "PGPASSWORD=secretref:$PGPASSWORD_SECRET" \
             --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
       - name: Custom domain smoke checks
