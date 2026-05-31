@@ -29,7 +29,7 @@ export default function PolicyManager({ organizationId, canManage = false }: Pol
   const fetchPolicies = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/v2/governance/policies/rules?organizationId=${encodeURIComponent(organizationId)}`);
+      const res = await fetch(`/api/governance/policies/rules?organizationId=${encodeURIComponent(organizationId)}`);
       if (res.ok) {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];

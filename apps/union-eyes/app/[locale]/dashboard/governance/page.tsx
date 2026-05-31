@@ -33,8 +33,8 @@ export default async function GovernancePage({ params }: PageProps) {
     return <Cupe4373GovernancePage />;
   }
 
-  // Require at least officer level (60) to view governance
-  const hasAccess = await hasMinRole("officer");
+  // Require at least steward level to view governance
+  const hasAccess = await hasMinRole("steward");
   
   if (!hasAccess) {
     redirect("/dashboard");
