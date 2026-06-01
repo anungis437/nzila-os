@@ -931,7 +931,7 @@ export const inboxItems: InboxItem[] = [
   {
     id: "IN-4373-001",
     channel: "member-message",
-    subject: "Mandatory overtime on stat holiday",
+    subject: "Mandatory overtime on stat holiday [BUILD-MARKER-SANI-2026-06-01]",
     from: "Maya B.",
     fromContext: "Registered Practical Nurse · Acute care services",
     received: "2026-05-18T07:42:00-04:00",
