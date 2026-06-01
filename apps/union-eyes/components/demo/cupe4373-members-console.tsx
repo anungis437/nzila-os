@@ -232,7 +232,15 @@ function memberCaseMatches(memberName: string) {
   });
 }
 
-export function Cupe4373MembersConsole({ members = [], locale = "en" }: { members?: MemberRow[]; locale?: string }) {
+export function Cupe4373MembersConsole({
+  members = [],
+  locale = "en",
+  dataSource = 'live',
+}: {
+  members?: MemberRow[];
+  locale?: string;
+  dataSource?: 'live' | 'fallback';
+}) {
   const [query, setQuery]               = useState("");
   const [roleFilter, setRoleFilter]     = useState("all");
   const [deptFilter, setDeptFilter]     = useState("all");
@@ -293,6 +301,11 @@ export function Cupe4373MembersConsole({ members = [], locale = "en" }: { member
         <Badge variant="outline" className="mb-3 border-blue-200 bg-blue-50 text-blue-800">
           Member directory
         </Badge>
+        {dataSource === 'fallback' && (
+          <Badge variant="outline" className="mb-3 ml-2 border-amber-200 bg-amber-50 text-amber-800">
+            Demo data mode
+          </Badge>
+        )}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Members</h1>

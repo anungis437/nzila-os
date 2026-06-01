@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import MembersConsole from '@/components/members/members-console';
 import { Cupe4373MembersConsole, type MemberRow } from '@/components/demo/cupe4373-members-console';
+import { cupe4373FallbackMembers } from '@/lib/demo/cupe4373-members';
 import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
@@ -46,6 +47,7 @@ export default async function MembersPage({ params }: PageProps) {
 
   if (isCupe4373DemoRuntime()) {
     let members: MemberRow[] = [];
+    let dataSource: 'live' | 'fallback' = 'live';
     try {
       const rows = await db
         .select({
@@ -90,8 +92,19 @@ export default async function MembersPage({ params }: PageProps) {
       }));
     } catch (err) {
       log.error('DB query failed', { error: err });
+      dataSource = 'fallback';
     }
-    return <Cupe4373MembersConsole members={members} locale={locale} />;
+
+    if (members.length === 0) {
+      members = cupe4373FallbackMembers;
+      dataSource = 'fallback';
+      log.warn('Using demo fallback roster for members page', {
+        reason: 'empty_member_directory',
+        organizationId: CUPE4373_ORG_ID,
+      });
+    }
+
+    return <Cupe4373MembersConsole members={members} locale={locale} dataSource={dataSource} />;
   }
 
   return <MembersConsole />;
