@@ -338,7 +338,11 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
     // ── Org-scoped rate limiting (per-org + route-group buckets) ─────────
     if (process.env.NODE_ENV !== 'development') {
       const orgId = req.headers.get('x-org-id');
-      if (orgId && req.nextUrl.pathname.startsWith('/api')) {
+      if (
+        orgId &&
+        req.nextUrl.pathname.startsWith('/api') &&
+        !(req.nextUrl.pathname.startsWith('/api/auth/') || req.nextUrl.pathname === '/api/auth')
+      ) {
         const orgRl = checkOrgRateLimit(
           orgId,
           req.nextUrl.pathname,
