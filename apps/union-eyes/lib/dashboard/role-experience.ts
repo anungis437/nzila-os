@@ -84,7 +84,19 @@ const CUPE4373_DEMO_GROUPS: NavigationGroup[] = [
   { key: 'oversight', label: 'Oversight & Comms' },
 ];
 
-export function getCupe4373DemoNavigation(): NavigationItem[] {
+// Member-scoped demo navigation: intake-focused, limited to surfaces a rank-and-file
+// member can legitimately access (their own inbox, their own cases, documents shared
+// with them). Stewards/officers/admins see the full demo navigation above.
+const CUPE4373_DEMO_MEMBER_NAVIGATION: NavigationItem[] = [
+  { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', group: 'daily' },
+  { label: 'Inbox', href: '/dashboard/inbox', icon: 'inbox', group: 'daily' },
+  { label: 'My Cases', href: '/dashboard/cases', icon: 'cases', group: 'casework' },
+  { label: 'Documents', href: '/dashboard/documents', icon: 'documents', group: 'records' },
+];
+
+export function getCupe4373DemoNavigation(role?: string | null): NavigationItem[] {
+  const experience = getDashboardExperience(role);
+  if (experience === 'member') return CUPE4373_DEMO_MEMBER_NAVIGATION;
   return CUPE4373_DEMO_NAVIGATION;
 }
 
@@ -151,6 +163,7 @@ export function getRoleLandingPath(role?: string | null): string {
 
 export function getNavigationForExperience(experience: DashboardExperience): NavigationItem[] {
   if (isCupe4373DemoRuntime()) {
+    if (experience === 'member') return CUPE4373_DEMO_MEMBER_NAVIGATION;
     return CUPE4373_DEMO_NAVIGATION;
   }
 

@@ -124,12 +124,12 @@ export default function Sidebar({
   const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
 
   const items = useMemo<NavigationItem[]>(() => {
-    if (isCupeDemo) return getCupe4373DemoNavigation();
+    if (isCupeDemo) return getCupe4373DemoNavigation(userRole);
     const nav = getNavigationForExperience(experience);
     if (!isPilotMode) return nav;
     const pilotAllowed = new Set(nav.map((entry) => entry.href));
     return nav.filter((entry) => pilotAllowed.has(entry.href));
-  }, [experience, isPilotMode, isCupeDemo]);
+  }, [experience, isPilotMode, isCupeDemo, userRole]);
 
   // Build ordered groups from the nav. Use demo-defined order when available;
   // otherwise derive groups from the items themselves in encounter order.
