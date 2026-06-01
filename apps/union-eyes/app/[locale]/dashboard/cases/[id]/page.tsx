@@ -31,7 +31,19 @@ import {
   getOrComputePriorityScoreForCase,
 } from "@/lib/demo/server/cupe4373-cognition";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+import {
+  isCupe4373DemoRuntime,
+  getDashboardExperience,
+} from "@/lib/dashboard/role-experience";
+import { auth, currentUser } from "@nzila/platform-auth/entra/server";
+import { getUserRole } from "@/lib/auth/rbac-server";
+import { UserRole } from "@/lib/auth/roles";
+import {
+  getOrganizationIdForUser,
+  DEFAULT_ORGANIZATION_ID,
+} from "@/lib/organization-utils";
+import { resolveDemoMemberPersona } from "@/lib/demo/cupe4373-member-view";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +89,41 @@ export default async function CaseDetailPage({ params }: PageProps) {
   const demoCase = await getDemoCaseFromDb(id);
   if (!demoCase) {
     notFound();
+  }
+
+  // In demo mode, gate the detail page so members can only see cases where
+  // they are the affected worker. Stewards / officers / admins keep full view.
+  if (isCupe4373DemoRuntime()) {
+    const { userId } = await auth();
+    let demoOrgId: string = DEFAULT_ORGANIZATION_ID;
+    try {
+      if (userId) demoOrgId = await getOrganizationIdForUser(userId);
+    } catch (error) {
+      logger.warn("[dashboard:case-detail] demo getOrganizationIdForUser threw", {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+    let role: UserRole = UserRole.MEMBER;
+    try {
+      if (userId) role = await getUserRole(userId, demoOrgId);
+    } catch (error) {
+      logger.warn("[dashboard:case-detail] demo getUserRole threw — defaulting to member", {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+    if (getDashboardExperience(role) === "member") {
+      const user = await currentUser();
+      const persona = resolveDemoMemberPersona({
+        fullName: user?.fullName ?? null,
+        firstName: user?.firstName ?? null,
+        email: user?.emailAddresses?.[0]?.emailAddress ?? null,
+      });
+      if (demoCase.worker !== persona.displayName) {
+        redirect(`/${locale}/dashboard/cases`);
+      }
+    }
   }
   const chronology = demoCase.timeline;
   const linkedInbox = inboxItems.filter((item) => item.linkedCaseId === demoCase.id);

@@ -14,9 +14,23 @@ import { requireUser } from "@/lib/api-auth-guard";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { auth, currentUser } from "@nzila/platform-auth/entra/server";
 import { InboxConsole } from "@/components/inbox/inbox-console";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+import {
+  isCupe4373DemoRuntime,
+  getDashboardExperience,
+} from "@/lib/dashboard/role-experience";
 import { Cupe4373InboxPage } from "@/components/demo/cupe4373-inbox-page";
+import { Cupe4373MemberInboxPage } from "@/components/demo/cupe4373-member-views";
+import {
+  resolveDemoMemberPersona,
+  getMemberInboxItems,
+  getMemberCases,
+} from "@/lib/demo/cupe4373-member-view";
+import { getUserRole } from "@/lib/auth/rbac-server";
+import { UserRole } from "@/lib/auth/roles";
+import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
+import { logger } from "@/lib/logger";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -39,6 +53,43 @@ export default async function InboxPage() {
   }
 
   if (isCupe4373DemoRuntime()) {
+    // Scope inbox by role in demo mode: members see only their own messages
+    // and case-update alerts; stewards / officers / admins see the full
+    // organizational intake console.
+    const { userId } = await auth();
+    let demoOrgId: string = DEFAULT_ORGANIZATION_ID;
+    try {
+      if (userId) demoOrgId = await getOrganizationIdForUser(userId);
+    } catch (error) {
+      logger.warn("[dashboard:inbox] demo getOrganizationIdForUser threw", {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+    let role: UserRole = UserRole.MEMBER;
+    try {
+      if (userId) role = await getUserRole(userId, demoOrgId);
+    } catch (error) {
+      logger.warn("[dashboard:inbox] demo getUserRole threw — defaulting to member", {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+    if (getDashboardExperience(role) === "member") {
+      const user = await currentUser();
+      const persona = resolveDemoMemberPersona({
+        fullName: user?.fullName ?? null,
+        firstName: user?.firstName ?? null,
+        email: user?.emailAddresses?.[0]?.emailAddress ?? null,
+      });
+      return (
+        <Cupe4373MemberInboxPage
+          persona={persona}
+          items={getMemberInboxItems(persona)}
+          memberCases={getMemberCases(persona)}
+        />
+      );
+    }
     return <Cupe4373InboxPage />;
   }
 
