@@ -37,7 +37,7 @@ export default async function GovernancePage({ params }: PageProps) {
   const hasAccess = await hasMinRole("steward");
   
   if (!hasAccess) {
-    redirect("/dashboard");
+    redirect(`/${locale}/dashboard`);
   }
 
   // Check if user can manage governance (president or above)
