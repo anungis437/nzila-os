@@ -375,6 +375,14 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
         (req.nextUrl.pathname.startsWith('/api/auth/') || req.nextUrl.pathname === '/api/auth')
       ) {
         const pathname = req.nextUrl.pathname;
+
+        // All GET auth requests are read-only session/state probes and can be
+        // triggered frequently by mounted providers, tabs, and retries.
+        // Brute-force protection is enforced on mutating auth endpoints.
+        if (req.method === 'GET') {
+          return withRequestId(NextResponse.next(), requestId);
+        }
+
         const isAuthStatusEndpoint =
           req.method === 'GET' &&
           (pathname === '/api/auth/me' ||
