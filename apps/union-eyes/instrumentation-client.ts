@@ -8,30 +8,38 @@ import { initializeConsoleWrapper } from './lib/console-wrapper';
 // Initialize console wrapper for production logging control
 initializeConsoleWrapper();
 
-Sentry.init({
-  dsn: "https://3a27b790762b741291334c39f6e330bb@o4509395283542016.ingest.de.sentry.io/4510423943544912",
+const clientDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const sentryEnabled = process.env.NEXT_PUBLIC_SENTRY_ENABLED !== 'false';
+const allowSentryOnDemoHosts = process.env.NEXT_PUBLIC_SENTRY_ENABLE_ON_DEMO === 'true';
+const hostname = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+const isDemoLikeHost = hostname === 'demo.unioneyes.app' || hostname === 'staging.unioneyes.app';
 
-  // Add optional integrations for additional features
-  integrations: [
-    Sentry.replayIntegration(),
-  ],
+if (clientDsn && sentryEnabled && (!isDemoLikeHost || allowSentryOnDemoHosts)) {
+  Sentry.init({
+    dsn: clientDsn,
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1,
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+    // Add optional integrations for additional features
+    integrations: [
+      Sentry.replayIntegration(),
+    ],
 
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: process.env.NODE_ENV === 'production' ? 0.02 : 0.1,
+    // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1,
+    // Enable logs to be sent to Sentry
+    enableLogs: true,
 
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    // Define how likely Replay events are sampled.
+    // This sets the sample rate to be 10%. You may want this to be 100% while
+    // in development and sample at a lower rate in production
+    replaysSessionSampleRate: process.env.NODE_ENV === 'production' ? 0.02 : 0.1,
 
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: process.env.NODE_ENV !== 'production',
-});
+    // Define how likely Replay events are sampled when an error occurs.
+    replaysOnErrorSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+
+    // Enable sending user PII (Personally Identifiable Information)
+    // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
+    sendDefaultPii: process.env.NODE_ENV !== 'production',
+  });
+}
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
