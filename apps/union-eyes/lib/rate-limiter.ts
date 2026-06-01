@@ -935,9 +935,9 @@ export const RATE_LIMITS = {
    * Protects against brute-force credential attacks even before a session
    * is established (no org header available at this point).
    *
-   * 20 requests per 15 minutes per IP address.
-   * This allows legitimate auth flows (sign-in, token refresh, MFA) while
-   * blocking repeated automated attack attempts.
+   * 600 requests per 15 minutes per IP address.
+   * This keeps brute-force protection on mutating auth endpoints while
+   * tolerating noisy session polling from tabs and auth providers.
    *
    * failOpen: false — brute-force protection must be enforced even on Redis
    * outages. The proxy falls back gracefully (logs + passes request) when
@@ -945,9 +945,9 @@ export const RATE_LIMITS = {
    * 429 for safety.
    */
   AUTH_IP: {
-    limit: 20,
+    limit: 600,
     window: 900, // 15 minutes
-    identifier: 'auth-ip',
+    identifier: 'auth-ip-v2',
     failOpen: false,
   },
 
