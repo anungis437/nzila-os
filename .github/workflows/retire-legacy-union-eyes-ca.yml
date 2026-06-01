@@ -53,8 +53,8 @@ env:
   AFD_PROFILE: nzila-ue-afd-prod
   AFD_PROFILE_RG: nzila-canada-prod-rg
   AFD_ENDPOINT: ue-prod
-  AFD_ROUTE: ue-default-route
-  AFD_ORIGIN_GROUP: ue-aca-prod
+  AFD_ROUTE: ue-prod-route
+  AFD_ORIGIN_GROUP: ue-aca-origins
   AFD_WWW_DOMAIN_NAME: ue-www-unioneyes
   LEGACY_CA: nzila-os-union-eyes
   LEGACY_RG: nzila-canada-staging-rg
@@ -237,14 +237,16 @@ jobs:
           else
             NEW_IDS="$EXISTING_IDS $WWW_ID"
             echo "Associating ids: $NEW_IDS"
-            az afd route update \
-              --profile-name "$AFD_PROFILE" \
-              --resource-group "$AFD_PROFILE_RG" \
-              --endpoint-name "$AFD_ENDPOINT" \
-              --route-name "$AFD_ROUTE" \
-              --custom-domains $NEW_IDS \
-              --output none
-            echo "Route updated."
+            # NOTE: `az afd route update --custom-domains` has a CLI bug that produces
+            # customDomains:[] regardless of args. We must use REST PATCH instead.
+            SUB_ID=$(az account show --query id -o tsv)
+            ROUTE_URI="https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$AFD_PROFILE_RG/providers/Microsoft.Cdn/profiles/$AFD_PROFILE/afdEndpoints/$AFD_ENDPOINT/routes/$AFD_ROUTE?api-version=2024-02-01"
+            ORIGIN_GROUP_ID="/subscriptions/$SUB_ID/resourceGroups/$AFD_PROFILE_RG/providers/Microsoft.Cdn/profiles/$AFD_PROFILE/originGroups/$AFD_ORIGIN_GROUP"
+            DOMAINS_JSON=$(printf '%s\n' $NEW_IDS | jq -R '{id: .}' | jq -s '.')
+            PATCH_BODY=$(jq -n --argjson cd "$DOMAINS_JSON" --arg og "$ORIGIN_GROUP_ID" '{properties:{customDomains:$cd, originGroup:{id:$og}, linkToDefaultDomain:"Enabled", httpsRedirect:"Enabled", supportedProtocols:["Http","Https"], patternsToMatch:["/*"], forwardingProtocol:"HttpsOnly"}}')
+            echo "$PATCH_BODY" > /tmp/route-patch.json
+            az rest --method patch --uri "$ROUTE_URI" --body @/tmp/route-patch.json --output none
+            echo "Route updated via REST PATCH."
           fi
 
       # ──────────────────────────────────────────────────────────────
