@@ -256,6 +256,25 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   // os-core: generate / forward a request-id for distributed tracing
   const requestId = ensureRequestId(req);
 
+  // EARLY DASHBOARD GUARD — must run before any other branch.
+  // When the i18n framework redirect builds an absolute URL from `request.url`,
+  // it inherits Next.js's bound PORT (3000) and leaks `:3000` through Front
+  // Door's response-Location rewrite. Intercept all non-localised dashboard
+  // paths here and emit a public-host, port-stripped redirect with a marker
+  // header so we can confirm this branch fires in production logs.
+  if (req.nextUrl.pathname === '/dashboard' || req.nextUrl.pathname.startsWith('/dashboard/')) {
+    const dashLocale = getPreferredLocaleFromRequest(req);
+    const dashTarget = `/${dashLocale}${req.nextUrl.pathname}`;
+    const dashResp = new NextResponse(null, {
+      status: 307,
+      headers: {
+        location: buildPublicRedirectLocation(req, dashTarget),
+        'x-ue-edge-redirect': 'dashboard-early',
+      },
+    });
+    return withRequestId(dashResp, requestId);
+  }
+
   if (req.nextUrl.pathname.startsWith('/api')) {
     // PR #4: Use centralized public route checker from api-auth-guard.ts
     if (isPublicApiRoute(req.nextUrl.pathname)) {
