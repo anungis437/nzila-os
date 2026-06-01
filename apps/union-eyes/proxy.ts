@@ -377,7 +377,14 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
             pathname === '/api/auth/methods' ||
             pathname === '/api/auth/session' ||
             pathname.startsWith('/api/auth/session/'));
-        const authRateLimit = isAuthStatusEndpoint ? RATE_LIMITS.AUTH_STATUS_IP : RATE_LIMITS.AUTH_IP;
+
+        // Status/session reads are high-frequency and low-risk; do not apply
+        // brute-force IP throttling intended for credential mutation endpoints.
+        if (isAuthStatusEndpoint) {
+          return withRequestId(NextResponse.next(), requestId);
+        }
+
+        const authRateLimit = RATE_LIMITS.AUTH_IP;
 
         const clientIp = getClientIp(req);
         try {
@@ -395,12 +402,8 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
             return withRequestId(NextResponse.json(
               {
                 error: 'Too Many Requests',
-                message: isAuthStatusEndpoint
-                  ? 'Authentication status rate limit exceeded. Please try again shortly.'
-                  : 'Authentication rate limit exceeded. Please try again later.',
-                code: isAuthStatusEndpoint
-                  ? 'AUTH_STATUS_IP_RATE_LIMIT_EXCEEDED'
-                  : 'AUTH_IP_RATE_LIMIT_EXCEEDED',
+                message: 'Authentication rate limit exceeded. Please try again later.',
+                code: 'AUTH_IP_RATE_LIMIT_EXCEEDED',
                 retryAfter: ipRl.resetIn,
               },
               {
