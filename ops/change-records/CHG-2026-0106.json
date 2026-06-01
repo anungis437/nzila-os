@@ -1,7 +1,7 @@
 {
   "change_id": "CHG-2026-0106",
   "title": "Deploy union-eyes to production",
-  "description": "Approved production deployment for Union Eyes release commits edd3495ec60a5ca25c5f34dd9d80ff052b2888f9 and 2a1b50c858b87fe5d26b91de54b9e0decda2b8df.",
+  "description": "Approved production deployment for Union Eyes release. Window extended through CUPE4373 live-demo readiness period (sanitization, governance redirect fix, sentry gating, demo content integrity).",
   "service": "union-eyes",
   "environment": "PROD",
   "change_type": "STANDARD",
@@ -12,7 +12,7 @@
   "approved_by": [],
   "approval_status": "APPROVED",
   "implementation_window_start": "2026-04-22T00:00:00.000Z",
-  "implementation_window_end": "2026-05-31T23:59:59.000Z",
+  "implementation_window_end": "2026-06-30T23:59:59.000Z",
   "rollback_plan": "Revert to previous stable container image and rerun smoke checks.",
   "test_evidence_refs": [
     "evidence/union-eyes-contract-gates-2026-04-22.json"
@@ -22,9 +22,13 @@
   ],
   "linked_commits": [
     "edd3495ec60a5ca25c5f34dd9d80ff052b2888f9",
-    "2a1b50c858b87fe5d26b91de54b9e0decda2b8df"
+    "2a1b50c858b87fe5d26b91de54b9e0decda2b8df",
+    "7784569eef2e02ad6286b1a87a4ddfd122624070",
+    "df434432d1bc3fbec5401f3218536787ab0304d2",
+    "0acd279adbc9b5532ecec4345ef0e399646733b0",
+    "d3203460d6d787a18b604a5d27142533097dea28"
   ],
   "status": "APPROVED",
   "created_at": "2026-04-22T00:00:00.000Z",
-  "updated_at": "2026-05-01T00:00:00.000Z"
+  "updated_at": "2026-06-01T17:30:00.000Z"
 }
