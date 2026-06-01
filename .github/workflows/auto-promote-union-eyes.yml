@@ -1,0 +1,54 @@
+##
+# Auto-promote Union Eyes to all real environments on push to main.
+#
+# Closes the gap where `gitops-deploy.yml` only updates the legacy
+# `nzila-os-union-eyes` CA in staging-rg, leaving the four real
+# environments (`-prod`, `-demo`, `-pilot`, `-staging`) drifting
+# until someone manually dispatches `deploy-union-eyes.yml`.
+#
+# This workflow fans out to all four environments by calling the
+# canonical deploy workflow once per environment. Each downstream
+# run carries its own plan + smoke gates.
+##
+
+name: Auto-promote Union Eyes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/union-eyes/**'
+      - 'packages/**'
+      - 'platform/**'
+      - 'Dockerfile'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-union-eyes.yml'
+      - '.github/workflows/auto-promote-union-eyes.yml'
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  fanout:
+    name: Dispatch deploy-union-eyes for ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        environment: [production, demo, pilot, staging]
+    steps:
+      - name: Dispatch deploy-union-eyes (${{ matrix.environment }})
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "Promoting commit ${GITHUB_SHA} to ${{ matrix.environment }} via deploy-union-eyes.yml"
+          gh workflow run deploy-union-eyes.yml \
+            --repo "${GITHUB_REPOSITORY}" \
+            --ref "${GITHUB_REF_NAME}" \
+            -f emergency_ack=EMERGENCY \
+            -f environment="${{ matrix.environment }}"
