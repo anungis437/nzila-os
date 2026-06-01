@@ -23,8 +23,11 @@ export interface DnsConfig {
   stagingTarget: string;
 }
 
-const DEFAULT_PROD_TARGET = 'nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
-const DEFAULT_STAGING_TARGET = 'nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
+// Canonical Union Eyes targets after retiring the legacy `nzila-os-union-eyes` CA.
+// Prod traffic now terminates at Azure Front Door (ue-prod endpoint).
+// Staging traffic terminates at the dedicated `nzila-os-union-eyes-staging` CA.
+const DEFAULT_PROD_TARGET = 'ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net';
+const DEFAULT_STAGING_TARGET = 'nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
 
 function parseBoolean(value: string | undefined, defaultValue = false): boolean {
   if (!value) return defaultValue;

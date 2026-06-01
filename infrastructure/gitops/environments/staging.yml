@@ -59,42 +59,9 @@ apps:
       - name: NEXT_PUBLIC_APP_ENV
         value: staging
 
-  union-eyes:
-    image_tag: "${VERSION}"
-    port: 3000
-    cpu: 1.0
-    memory: 2Gi
-    scale_rules:
-      - name: http-requests
-        type: http
-        metadata:
-          concurrentRequests: "40"
-      - name: cpu-utilization
-        type: cpu
-        metadata:
-          type: Utilization
-          value: "70"
-    env:
-      - name: NODE_ENV
-        value: production
-      - name: NEXT_PUBLIC_APP_ENV
-        value: staging
-      - name: WEB_CONCURRENCY
-        value: "5"
-      - name: CONN_MAX_AGE
-        value: "600"
-      - name: DATABASE_POOL_SIZE
-        value: "50"
-      - name: OTEL_ENABLED
-        value: "true"
-      - name: OTEL_SERVICE_NAME
-        value: nzila-union-eyes
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: "${OTEL_COLLECTOR_ENDPOINT}"
-      - name: OTEL_TRACES_SAMPLER
-        value: parentbased_traceidratio
-      - name: OTEL_TRACES_SAMPLER_ARG
-        value: "0.5"
+  # union-eyes is deployed via .github/workflows/auto-promote-union-eyes.yml
+  # which fans out to the dedicated `-prod`, `-demo`, `-pilot`, `-staging` CAs.
+  # Do not re-introduce a union-eyes block here.
 
   abr:
     image_tag: "${VERSION}"

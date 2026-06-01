@@ -151,7 +151,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [web, console, partners, union-eyes, orchestrator-api, cfo, zonga, abr, flow, agrimo, cora, trade, mobility, mobility-client-portal, control-plane, platform-admin, nacp-exams]
+        # union-eyes is owned by .github/workflows/auto-promote-union-eyes.yml
+        # (fanout to -prod / -demo / -pilot / -staging CAs). Do not add it here.
+        app: [web, console, partners, orchestrator-api, cfo, zonga, abr, flow, agrimo, cora, trade, mobility, mobility-client-portal, control-plane, platform-admin, nacp-exams]
 
     steps:
       - uses: actions/checkout@v5
@@ -324,23 +326,13 @@ jobs:
             # Build runtime env var overrides (upserted, not replacing existing secret refs)
             ENV_VARS="NODE_ENV=production NEXT_PUBLIC_APP_ENV=${ENV}"
 
-            # union-eyes has multiple containers; specify container name
-            if [ "$APP" = "union-eyes" ]; then
-              az containerapp update \
-                --name "$CA_NAME" \
-                --resource-group "$RG" \
-                --container-name "nzila-os-union-eyes" \
-                --image "$IMAGE" \
-                --set-env-vars "$ENV_VARS" \
-                --output none 2>&1 || FAILED+=("$APP")
-            else
-              az containerapp update \
-                --name "$CA_NAME" \
-                --resource-group "$RG" \
-                --image "$IMAGE" \
-                --set-env-vars "$ENV_VARS" \
-                --output none 2>&1 || FAILED+=("$APP")
-            fi
+            # union-eyes is owned by auto-promote-union-eyes.yml — do not handle here.
+            az containerapp update \
+              --name "$CA_NAME" \
+              --resource-group "$RG" \
+              --image "$IMAGE" \
+              --set-env-vars "$ENV_VARS" \
+              --output none 2>&1 || FAILED+=("$APP")
 
             if ! printf '%s\n' "${FAILED[@]}" | grep -Fxq "$APP"; then
               DEPLOYED+=("$APP")

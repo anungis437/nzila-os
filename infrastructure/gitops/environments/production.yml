@@ -74,28 +74,9 @@ apps:
       - name: NODE_ENV
         value: production
 
-  union-eyes:
-    image_tag: "${VERSION}"
-    port: 3000
-    cpu: 2.0
-    memory: 4Gi
-    scale_rules:
-      - name: http-requests
-        type: http
-        metadata:
-          concurrentRequests: "40"
-      - name: cpu-utilization
-        type: cpu
-        metadata:
-          type: Utilization
-          value: "70"
-    env:
-      - name: NODE_ENV
-        value: production
-      - name: DB_POOL_MAX
-        value: "100"            # connection pool per replica (fronted by PgBouncer)
-      - name: DATABASE_READ_URL
-        value: "${DATABASE_READ_URL}"  # read replica for analytics/reporting
+  # union-eyes is deployed via .github/workflows/auto-promote-union-eyes.yml
+  # which fans out to the dedicated `-prod`, `-demo`, `-pilot`, `-staging` CAs.
+  # Do not re-introduce a union-eyes block here.
 
   abr:
     image_tag: "${VERSION}"

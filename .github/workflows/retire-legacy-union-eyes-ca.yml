@@ -1,0 +1,448 @@
+##
+# Retire legacy Union Eyes Container App
+#
+# One-shot migration that:
+#   1. Provisions www.unioneyes.app on AFD prod
+#   2. Adds DNS TXT validation in Cloudflare
+#   3. Waits for AFD validation + route binding
+#   4. Re-binds staging.unioneyes.app + staging-app.unioneyes.app
+#      to the canonical `nzila-os-union-eyes-staging` CA
+#   5. Updates Cloudflare CNAMEs:
+#      - www -> AFD endpoint
+#      - staging, staging-app -> canonical staging CA FQDN
+#   6. Waits for DNS propagation + smoke-tests all hostnames
+#   7. Deletes the legacy `nzila-os-union-eyes` CA
+#   8. Deletes the legacy ACR repo `nzila/union-eyes`
+#
+# Each phase has fail-fast verification. The destructive teardown
+# phase (delete-legacy) only runs when `confirm=DELETE-LEGACY` is
+# passed AND the smoke phase has succeeded in the same run.
+##
+
+name: Retire Legacy Union Eyes CA
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'Which phase to run'
+        required: true
+        type: choice
+        default: prepare
+        options:
+          - prepare           # AFD setup + TXT validation only (non-destructive)
+          - cutover           # Move ACA bindings + swap DNS + smoke (reversible up to teardown)
+          - teardown          # Delete legacy CA + ACR repo (DESTRUCTIVE)
+          - all               # prepare -> cutover -> teardown in one run
+      confirm:
+        description: 'Type DELETE-LEGACY to authorize teardown'
+        required: false
+        type: string
+        default: ''
+
+concurrency:
+  group: retire-legacy-union-eyes
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
+env:
+  AFD_PROFILE: nzila-ue-afd-prod
+  AFD_PROFILE_RG: nzila-canada-prod-rg
+  AFD_ENDPOINT: ue-prod
+  AFD_ROUTE: ue-default-route
+  AFD_ORIGIN_GROUP: ue-aca-prod
+  AFD_WWW_DOMAIN_NAME: ue-www-unioneyes
+  LEGACY_CA: nzila-os-union-eyes
+  LEGACY_RG: nzila-canada-staging-rg
+  CANONICAL_STAGING_CA: nzila-os-union-eyes-staging
+  CANONICAL_STAGING_ENV: nzila-canada-staging-env
+  CANONICAL_STAGING_FQDN: nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+  AFD_ENDPOINT_FQDN: ue-prod-a7cah9hhf9dycxcc.z02.azurefd.net
+  ACR_LEGACY_REPO: nzila/union-eyes
+  ACR_NAME: nzilacanadaacr
+
+jobs:
+  retire:
+    name: Retire legacy CA (${{ inputs.phase }})
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        if: env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure Login (Credentials Fallback)
+        uses: azure/login@v3
+        if: ${{ env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == '' }}
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install ACA + AFD CLI extensions
+        run: |
+          az extension add --name containerapp --yes 2>/dev/null || az extension update --name containerapp
+          az extension add --name front-door --yes 2>/dev/null || true
+
+      - name: Resolve Cloudflare zone id
+        id: cf
+        env:
+          DNS_API_TOKEN: ${{ secrets.DNS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          ZONE_JSON=$(curl -sS -H "Authorization: Bearer ${DNS_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/zones?name=unioneyes.app")
+          ZONE_ID=$(echo "$ZONE_JSON" | jq -r '.result[0].id // empty')
+          if [ -z "$ZONE_ID" ]; then
+            echo "::error::Cloudflare zone for unioneyes.app not found. Verify DNS_API_TOKEN."
+            echo "$ZONE_JSON" | jq .
+            exit 1
+          fi
+          echo "zone_id=$ZONE_ID" >> "$GITHUB_OUTPUT"
+          echo "Cloudflare zone id: $ZONE_ID"
+
+      # ──────────────────────────────────────────────────────────────
+      # PHASE: PREPARE — provision AFD custom domain for www
+      # ──────────────────────────────────────────────────────────────
+      - name: PREPARE — Create AFD custom domain for www.unioneyes.app
+        if: inputs.phase == 'prepare' || inputs.phase == 'all' || inputs.phase == 'cutover'
+        run: |
+          set -euo pipefail
+          if az afd custom-domain show \
+              --profile-name "$AFD_PROFILE" \
+              --resource-group "$AFD_PROFILE_RG" \
+              --custom-domain-name "$AFD_WWW_DOMAIN_NAME" >/dev/null 2>&1; then
+            echo "AFD custom domain $AFD_WWW_DOMAIN_NAME already exists."
+          else
+            az afd custom-domain create \
+              --profile-name "$AFD_PROFILE" \
+              --resource-group "$AFD_PROFILE_RG" \
+              --custom-domain-name "$AFD_WWW_DOMAIN_NAME" \
+              --host-name www.unioneyes.app \
+              --minimum-tls-version TLS12 \
+              --certificate-type ManagedCertificate \
+              --output none
+            echo "Created AFD custom domain $AFD_WWW_DOMAIN_NAME for www.unioneyes.app"
+          fi
+
+      - name: PREPARE — Capture AFD validation token + place TXT in Cloudflare
+        id: afd_validation
+        if: inputs.phase == 'prepare' || inputs.phase == 'all' || inputs.phase == 'cutover'
+        env:
+          DNS_API_TOKEN: ${{ secrets.DNS_API_TOKEN }}
+          ZONE_ID: ${{ steps.cf.outputs.zone_id }}
+        run: |
+          set -euo pipefail
+          DOMAIN_JSON=$(az afd custom-domain show \
+            --profile-name "$AFD_PROFILE" \
+            --resource-group "$AFD_PROFILE_RG" \
+            --custom-domain-name "$AFD_WWW_DOMAIN_NAME" -o json)
+          TOKEN=$(echo "$DOMAIN_JSON" | jq -r '.validationProperties.validationToken // empty')
+          STATE=$(echo "$DOMAIN_JSON" | jq -r '.domainValidationState // empty')
+
+          echo "AFD domain state: $STATE"
+          echo "AFD validation token: $TOKEN"
+
+          if [ "$STATE" = "Approved" ]; then
+            echo "Already approved."
+            exit 0
+          fi
+
+          if [ -z "$TOKEN" ]; then
+            echo "::error::No validation token returned by AFD."
+            exit 1
+          fi
+
+          TXT_NAME="_dnsauth.www"
+          EXISTING=$(curl -sS -H "Authorization: Bearer ${DNS_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?type=TXT&name=_dnsauth.www.unioneyes.app")
+          REC_ID=$(echo "$EXISTING" | jq -r '.result[0].id // empty')
+
+          if [ -n "$REC_ID" ]; then
+            echo "Updating existing TXT record $REC_ID"
+            curl -sS -X PUT -H "Authorization: Bearer ${DNS_API_TOKEN}" -H "Content-Type: application/json" \
+              "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${REC_ID}" \
+              -d "{\"type\":\"TXT\",\"name\":\"${TXT_NAME}\",\"content\":\"${TOKEN}\",\"ttl\":300,\"comment\":\"AFD validation for www.unioneyes.app\"}" \
+              | jq '{success:.success, errors:.errors}'
+          else
+            echo "Creating TXT record"
+            curl -sS -X POST -H "Authorization: Bearer ${DNS_API_TOKEN}" -H "Content-Type: application/json" \
+              "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records" \
+              -d "{\"type\":\"TXT\",\"name\":\"${TXT_NAME}\",\"content\":\"${TOKEN}\",\"ttl\":300,\"comment\":\"AFD validation for www.unioneyes.app\"}" \
+              | jq '{success:.success, errors:.errors}'
+          fi
+
+      - name: PREPARE — Wait for AFD domain validation
+        if: inputs.phase == 'prepare' || inputs.phase == 'all' || inputs.phase == 'cutover'
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 40); do
+            STATE=$(az afd custom-domain show \
+              --profile-name "$AFD_PROFILE" \
+              --resource-group "$AFD_PROFILE_RG" \
+              --custom-domain-name "$AFD_WWW_DOMAIN_NAME" \
+              --query domainValidationState -o tsv)
+            echo "[$i/40] AFD validation state: $STATE"
+            if [ "$STATE" = "Approved" ]; then
+              echo "AFD validation approved."
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "::error::AFD domain validation did not reach Approved within timeout."
+          exit 1
+
+      - name: PREPARE — Associate www custom domain with AFD route
+        if: inputs.phase == 'prepare' || inputs.phase == 'all' || inputs.phase == 'cutover'
+        run: |
+          set -euo pipefail
+          # Read existing custom-domain IDs on the route, append www, then update.
+          ROUTE_JSON=$(az afd route show \
+            --profile-name "$AFD_PROFILE" \
+            --resource-group "$AFD_PROFILE_RG" \
+            --endpoint-name "$AFD_ENDPOINT" \
+            --route-name "$AFD_ROUTE" -o json)
+          EXISTING_IDS=$(echo "$ROUTE_JSON" | jq -r '[.customDomains[]?.id] | join(" ")')
+          WWW_ID=$(az afd custom-domain show \
+            --profile-name "$AFD_PROFILE" \
+            --resource-group "$AFD_PROFILE_RG" \
+            --custom-domain-name "$AFD_WWW_DOMAIN_NAME" --query id -o tsv)
+
+          if echo " $EXISTING_IDS " | grep -q " $WWW_ID "; then
+            echo "www custom domain already associated with route $AFD_ROUTE."
+          else
+            NEW_IDS="$EXISTING_IDS $WWW_ID"
+            echo "Associating ids: $NEW_IDS"
+            az afd route update \
+              --profile-name "$AFD_PROFILE" \
+              --resource-group "$AFD_PROFILE_RG" \
+              --endpoint-name "$AFD_ENDPOINT" \
+              --route-name "$AFD_ROUTE" \
+              --custom-domains $NEW_IDS \
+              --output none
+            echo "Route updated."
+          fi
+
+      # ──────────────────────────────────────────────────────────────
+      # PHASE: CUTOVER — move ACA hostname bindings + swap DNS
+      # ──────────────────────────────────────────────────────────────
+      - name: CUTOVER — Move staging.unioneyes.app to canonical staging CA
+        if: inputs.phase == 'cutover' || inputs.phase == 'all'
+        env:
+          HOST: staging.unioneyes.app
+        run: |
+          set -euo pipefail
+          echo "Removing $HOST from $LEGACY_CA ..."
+          az containerapp hostname delete \
+            --name "$LEGACY_CA" \
+            --resource-group "$LEGACY_RG" \
+            --hostname "$HOST" \
+            --yes --output none 2>&1 || echo "(already removed)"
+
+          echo "Adding $HOST to $CANONICAL_STAGING_CA ..."
+          az containerapp hostname add \
+            --name "$CANONICAL_STAGING_CA" \
+            --resource-group "$LEGACY_RG" \
+            --hostname "$HOST" --output none
+
+          echo "Binding env-managed cert for $HOST on $CANONICAL_STAGING_CA ..."
+          az containerapp hostname bind \
+            --name "$CANONICAL_STAGING_CA" \
+            --resource-group "$LEGACY_RG" \
+            --hostname "$HOST" \
+            --environment "$CANONICAL_STAGING_ENV" \
+            --validation-method CNAME \
+            --output none
+
+      - name: CUTOVER — Move staging-app.unioneyes.app to canonical staging CA
+        if: inputs.phase == 'cutover' || inputs.phase == 'all'
+        env:
+          HOST: staging-app.unioneyes.app
+        run: |
+          set -euo pipefail
+          az containerapp hostname delete \
+            --name "$LEGACY_CA" \
+            --resource-group "$LEGACY_RG" \
+            --hostname "$HOST" \
+            --yes --output none 2>&1 || echo "(already removed)"
+
+          az containerapp hostname add \
+            --name "$CANONICAL_STAGING_CA" \
+            --resource-group "$LEGACY_RG" \
+            --hostname "$HOST" --output none
+
+          az containerapp hostname bind \
+            --name "$CANONICAL_STAGING_CA" \
+            --resource-group "$LEGACY_RG" \
+            --hostname "$HOST" \
+            --environment "$CANONICAL_STAGING_ENV" \
+            --validation-method CNAME \
+            --output none
+
+      - name: CUTOVER — Update Cloudflare CNAMEs
+        id: cnames
+        if: inputs.phase == 'cutover' || inputs.phase == 'all'
+        env:
+          DNS_API_TOKEN: ${{ secrets.DNS_API_TOKEN }}
+          ZONE_ID: ${{ steps.cf.outputs.zone_id }}
+        run: |
+          set -euo pipefail
+          upsert_cname() {
+            local NAME="$1" TARGET="$2"
+            local FULL_NAME="${NAME}.unioneyes.app"
+            if [ "$NAME" = "@" ]; then FULL_NAME="unioneyes.app"; fi
+
+            local EXISTING
+            EXISTING=$(curl -sS -H "Authorization: Bearer ${DNS_API_TOKEN}" \
+              "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?type=CNAME&name=${FULL_NAME}")
+            local REC_ID
+            REC_ID=$(echo "$EXISTING" | jq -r '.result[0].id // empty')
+
+            local BODY
+            BODY=$(jq -n --arg name "$NAME" --arg target "$TARGET" \
+              '{type:"CNAME", name:$name, content:$target, ttl:300, proxied:false, comment:"managed-by=retire-legacy-union-eyes-ca"}')
+
+            if [ -n "$REC_ID" ]; then
+              echo "Updating CNAME $FULL_NAME -> $TARGET (id=$REC_ID)"
+              curl -sS -X PUT -H "Authorization: Bearer ${DNS_API_TOKEN}" -H "Content-Type: application/json" \
+                "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${REC_ID}" \
+                -d "$BODY" | jq '{success:.success, errors:.errors, name:.result.name, content:.result.content}'
+            else
+              echo "Creating CNAME $FULL_NAME -> $TARGET"
+              curl -sS -X POST -H "Authorization: Bearer ${DNS_API_TOKEN}" -H "Content-Type: application/json" \
+                "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records" \
+                -d "$BODY" | jq '{success:.success, errors:.errors, name:.result.name, content:.result.content}'
+            fi
+          }
+
+          upsert_cname "www" "$AFD_ENDPOINT_FQDN"
+          upsert_cname "staging" "$CANONICAL_STAGING_FQDN"
+          upsert_cname "staging-app" "$CANONICAL_STAGING_FQDN"
+
+      - name: CUTOVER — Wait for DNS propagation
+        if: inputs.phase == 'cutover' || inputs.phase == 'all'
+        run: |
+          set -euo pipefail
+          check() {
+            local HOST="$1" EXPECTED_SUFFIX="$2"
+            for i in $(seq 1 30); do
+              local CN
+              CN=$(dig +short "$HOST" CNAME @1.1.1.1 | head -1)
+              echo "[$i/30] $HOST CNAME -> $CN"
+              if echo "$CN" | grep -q "$EXPECTED_SUFFIX"; then
+                return 0
+              fi
+              sleep 10
+            done
+            echo "::error::$HOST did not propagate to $EXPECTED_SUFFIX"
+            return 1
+          }
+          check "www.unioneyes.app" "azurefd.net"
+          check "staging.unioneyes.app" "nzila-os-union-eyes-staging"
+          check "staging-app.unioneyes.app" "nzila-os-union-eyes-staging"
+
+      - name: CUTOVER — Smoke test all hostnames
+        id: smoke
+        if: inputs.phase == 'cutover' || inputs.phase == 'all'
+        run: |
+          set -euo pipefail
+          fail=0
+          for HOST in unioneyes.app www.unioneyes.app app.unioneyes.app staging.unioneyes.app staging-app.unioneyes.app demo.unioneyes.app pilot.unioneyes.app; do
+            CODE=$(curl -sS -o /dev/null -w "%{http_code}" -L --max-time 30 "https://$HOST" || echo "000")
+            echo "$HOST -> HTTP $CODE"
+            if [ "$CODE" != "200" ] && [ "$CODE" != "301" ] && [ "$CODE" != "302" ] && [ "$CODE" != "307" ] && [ "$CODE" != "308" ]; then
+              echo "::warning::$HOST returned $CODE"
+              fail=$((fail + 1))
+            fi
+          done
+          if [ "$fail" -gt 0 ]; then
+            echo "::error::$fail hostname(s) failed smoke test."
+            exit 1
+          fi
+          echo "smoke=pass" >> "$GITHUB_OUTPUT"
+
+      # ──────────────────────────────────────────────────────────────
+      # PHASE: TEARDOWN — delete legacy CA + ACR repo
+      # ──────────────────────────────────────────────────────────────
+      - name: TEARDOWN — Guard
+        if: inputs.phase == 'teardown' || inputs.phase == 'all'
+        run: |
+          if [ "${{ inputs.confirm }}" != "DELETE-LEGACY" ]; then
+            echo "::error::Refusing destructive teardown without confirm=DELETE-LEGACY"
+            exit 1
+          fi
+          echo "Teardown authorized."
+
+      - name: TEARDOWN — Remove remaining hostname bindings on legacy CA
+        if: inputs.phase == 'teardown' || inputs.phase == 'all'
+        run: |
+          set -euo pipefail
+          for HOST in www.unioneyes.app unioneyes.app app.unioneyes.app staging.unioneyes.app staging-app.unioneyes.app; do
+            az containerapp hostname delete \
+              --name "$LEGACY_CA" \
+              --resource-group "$LEGACY_RG" \
+              --hostname "$HOST" \
+              --yes --output none 2>&1 || echo "(no binding for $HOST)"
+          done
+
+      - name: TEARDOWN — Delete legacy Container App
+        if: inputs.phase == 'teardown' || inputs.phase == 'all'
+        run: |
+          set -euo pipefail
+          if az containerapp show --name "$LEGACY_CA" --resource-group "$LEGACY_RG" >/dev/null 2>&1; then
+            echo "Deleting legacy CA $LEGACY_CA in $LEGACY_RG ..."
+            az containerapp delete \
+              --name "$LEGACY_CA" \
+              --resource-group "$LEGACY_RG" \
+              --yes --output none
+            echo "Deleted."
+          else
+            echo "Legacy CA already absent."
+          fi
+
+      - name: TEARDOWN — Delete legacy ACR repository
+        if: inputs.phase == 'teardown' || inputs.phase == 'all'
+        run: |
+          set -euo pipefail
+          if az acr repository show --name "$ACR_NAME" --repository "$ACR_LEGACY_REPO" >/dev/null 2>&1; then
+            echo "Deleting ACR repo $ACR_LEGACY_REPO from $ACR_NAME ..."
+            az acr repository delete \
+              --name "$ACR_NAME" \
+              --repository "$ACR_LEGACY_REPO" \
+              --yes --output none
+            echo "Deleted."
+          else
+            echo "ACR repo $ACR_LEGACY_REPO already absent."
+          fi
+
+      - name: Final state report
+        if: always()
+        run: |
+          set +e
+          echo "### Post-migration state" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "#### Container Apps" >> "$GITHUB_STEP_SUMMARY"
+          az containerapp list \
+            --query "[?contains(name,'union-eyes')].{name:name, rg:resourceGroup, image:properties.template.containers[0].image}" \
+            -o table >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "#### DNS" >> "$GITHUB_STEP_SUMMARY"
+          for H in unioneyes.app www.unioneyes.app app.unioneyes.app staging.unioneyes.app staging-app.unioneyes.app demo.unioneyes.app pilot.unioneyes.app; do
+            echo "- $H -> $(dig +short "$H" CNAME @1.1.1.1 | head -1) $(dig +short "$H" A @1.1.1.1 | head -1)" >> "$GITHUB_STEP_SUMMARY"
+          done
