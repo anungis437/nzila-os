@@ -104,18 +104,26 @@ jobs:
         id: cf
         env:
           DNS_API_TOKEN: ${{ secrets.DNS_API_TOKEN }}
+          DNS_ZONE_ID: ${{ vars.DNS_ZONE_ID }}
         run: |
           set -euo pipefail
-          ZONE_JSON=$(curl -sS -H "Authorization: Bearer ${DNS_API_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/zones?name=unioneyes.app")
-          ZONE_ID=$(echo "$ZONE_JSON" | jq -r '.result[0].id // empty')
-          if [ -z "$ZONE_ID" ]; then
-            echo "::error::Cloudflare zone for unioneyes.app not found. Verify DNS_API_TOKEN."
-            echo "$ZONE_JSON" | jq .
+          if [ -z "${DNS_ZONE_ID:-}" ]; then
+            echo "::error::vars.DNS_ZONE_ID is not set on the repository."
             exit 1
           fi
-          echo "zone_id=$ZONE_ID" >> "$GITHUB_OUTPUT"
-          echo "Cloudflare zone id: $ZONE_ID"
+          # Verify the token can read the zone directly (zone-scoped tokens cannot
+          # list /zones, but can read a specific zone they have access to).
+          VERIFY=$(curl -sS -H "Authorization: Bearer ${DNS_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/zones/${DNS_ZONE_ID}")
+          OK=$(echo "$VERIFY" | jq -r '.success')
+          NAME=$(echo "$VERIFY" | jq -r '.result.name // empty')
+          if [ "$OK" != "true" ] || [ -z "$NAME" ]; then
+            echo "::error::Cannot read Cloudflare zone ${DNS_ZONE_ID} with DNS_API_TOKEN."
+            echo "$VERIFY" | jq .
+            exit 1
+          fi
+          echo "zone_id=${DNS_ZONE_ID}" >> "$GITHUB_OUTPUT"
+          echo "Cloudflare zone confirmed: ${NAME} (${DNS_ZONE_ID})"
 
       # ──────────────────────────────────────────────────────────────
       # PHASE: PREPARE — provision AFD custom domain for www
