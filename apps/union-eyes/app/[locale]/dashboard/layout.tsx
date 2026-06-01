@@ -134,8 +134,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       .limit(1);
 
     // If this Entra user has no membership yet, try linking seeded/demo rows
-    // by email so users like alice.johnson@city.toronto.ca resolve to Local 123
-    // instead of being auto-provisioned into the default org.
+    // by email so seeded pilot users resolve to their demo org instead of being
+    // auto-provisioned into the default org.
     if (localMemberships.length === 0 && userEmail) {
       const emailMemberships = await db
         .select({ id: organizationMembers.id })

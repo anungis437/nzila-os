@@ -2,7 +2,7 @@
  * API Route: Load CUPE Pilot Fixtures
  * POST /api/admin/seed-cupe-pilot
  *
- * Allows admins to load CUPE Local 123 demo data for pilot readiness testing.
+ * Allows admins to load CUPE pilot demo data for readiness testing.
  * Supports both regular load and reset modes.
  */
 
@@ -43,7 +43,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     const jsonContent = await readFile(CUPE_PILOT_JSON, 'utf-8');
     const fixture = JSON.parse(jsonContent);
 
-    // Find or create the CUPE Local 123 organization
+    // Find or create the configured CUPE pilot organization
     const existingOrg = await db
       .select()
       .from(organizations)

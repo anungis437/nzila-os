@@ -21,7 +21,7 @@ export const GET = withApiAuth(async (request: NextRequest, _context: BaseAuthCo
   }
 
   // Resolve org IDs to query — include the user's org AND its parent org
-  // so locals see national-level documents (e.g. CUPE Local 123 sees CUPE national docs)
+  // so locals see national-level documents from their parent federation.
   const parentRow = await withSystemContext(() => db.execute(
     sql`SELECT parent_id::text FROM organizations WHERE id = ${orgId}::uuid`,
   ));

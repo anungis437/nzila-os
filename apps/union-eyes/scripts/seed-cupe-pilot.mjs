@@ -198,7 +198,7 @@ async function main() {
 
   if (resetMode) {
     console.log('⚠️  Running in RESET mode (--reset flag detected)');
-    console.log('   All CUPE Local 123 data will be deleted.\n');
+    console.log('   All CUPE pilot demo data will be deleted.\n');
   }
 
   try {

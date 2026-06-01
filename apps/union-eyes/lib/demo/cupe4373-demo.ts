@@ -83,7 +83,7 @@ export const demoCases: DemoCase[] = [
     caseworkStream: "grievance",
     worker: "Maya B.",
     unit: "Registered Practical Nurses",
-    location: "7 West Medicine, Grand River Hospital",
+    location: "Acute care services, Sioux Lookout Meno Ya Win Health Centre",
     status: "Follow-up due",
     urgency: "urgent",
     assignedSteward: "Denise Laurent",
@@ -102,7 +102,7 @@ export const demoCases: DemoCase[] = [
     flags: ["Employer response due", "Payroll correction unresolved"],
     notes: [
       "Chief Steward requested that all communication stay in writing.",
-      "Similar notice issue occurred on 7 West in March.",
+      "Similar notice issue was logged in another acute care area in March.",
     ],
     timeline: [
       {
@@ -933,7 +933,7 @@ export const inboxItems: InboxItem[] = [
     channel: "member-message",
     subject: "Mandatory overtime on stat holiday",
     from: "Maya B.",
-    fromContext: "Registered Practical Nurse · 7 West Medicine",
+    fromContext: "Registered Practical Nurse · Acute care services",
     received: "2026-05-18T07:42:00-04:00",
     body:
       "I was told at 6am that I had to stay for a double on Victoria Day. No notice, no relief offered. This is the third time in six weeks. What can the union do?",
@@ -1208,7 +1208,7 @@ export const broadcastHistory: BroadcastMessage[] = [
   {
     id: "BR-2026-016",
     sent: "2026-05-11T18:45:00-04:00",
-    audience: "7 West Medicine",
+    audience: "Acute care services",
     audienceCount: 38,
     subject: "Reminder — overtime self-tracking template",
     body:

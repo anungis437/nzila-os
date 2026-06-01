@@ -56,7 +56,7 @@ const channelIcons: Record<BroadcastMessage["channel"], typeof Mail> = {
 const audienceSizes: Record<string, number> = {
   "All members": 612,
   "Stewards only": 14,
-  "7 West Medicine": 38,
+  "Acute care services": 38,
   "Long-Term Care": 95,
   "5 East": 32,
   "Emergency Department": 47,

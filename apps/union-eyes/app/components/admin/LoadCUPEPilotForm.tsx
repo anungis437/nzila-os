@@ -1,9 +1,9 @@
 /**
  * Admin Form Component: Load CUPE Pilot Dataset
- * 
- * Allows platform administrators to load CUPE Local 123 demo data
+ *
+ * Allows platform administrators to load CUPE demo data
  * via the admin console for testing and pilot readiness validation.
- * 
+ *
  * v0.1: Manual button-based loading with confirmation
  * v0.2+: Scheduled seeding, multi-org support
  */
@@ -85,7 +85,7 @@ export function LoadCUPEPilotForm() {
       <div>
         <h3 className="text-lg font-semibold text-gray-900">CUPE Pilot Data</h3>
         <p className="mt-1 text-sm text-gray-600">
-          Load or reset CUPE Local 123 demo fixtures for pilot readiness testing.
+          Load or reset CUPE demo fixtures for pilot readiness testing.
         </p>
       </div>
 
@@ -164,7 +164,7 @@ export function LoadCUPEPilotForm() {
       {showConfirm && (
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
           <p className="text-sm text-yellow-900">
-            Load CUPE Local 123 fixtures? This will create:
+            Load CUPE demo fixtures? This will create:
           </p>
           <ul className="mt-2 space-y-1 text-xs text-yellow-800">
             <li>✓ 1 pilot organization</li>
@@ -197,7 +197,7 @@ export function LoadCUPEPilotForm() {
             • Click <strong>Load Pilot Data</strong> to populate demo fixtures
           </li>
           <li>
-            • Click <strong>Reset Data</strong> to delete all CUPE Local 123 data
+            • Click <strong>Reset Data</strong> to delete all CUPE demo data
           </li>
           <li>
             • A CLI script is also available:{' '}

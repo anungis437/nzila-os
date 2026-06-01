@@ -193,7 +193,7 @@ export function Cupe4373NewCaseButton({
                   id="nc-unit"
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
-                  placeholder="e.g. RPNs, 7 West"
+                  placeholder="e.g. RPNs, acute care services"
                   className="mt-1.5 h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 />
               </div>

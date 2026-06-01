@@ -813,7 +813,7 @@ const FIRST_NAMES = [
   'James','Sarah','Michael','Jennifer','David','Amanda','Robert','Melissa','William','Jessica',
   'Christopher','Ashley','Matthew','Emily','Daniel','Samantha','Andrew','Rachel','Joshua','Lauren',
   'Kevin','Stephanie','Brian','Nicole','Jason','Elizabeth','Ryan','Heather','Justin','Amber',
-  'Brandon','Michelle','Tyler','Christina','Aaron','Brittany','Adam','Danielle','Nathan','Rebecca',
+  'Brennan','Michelle','Tyler','Christina','Aaron','Brittany','Adam','Danielle','Nathan','Rebecca',
   // West African
   'Kofi','Adaeze','Kwame','Chidinma','Olusegun','Emeka','Blessing','Chukwudi','Ngozi','Yaw',
   'Ama','Abena','Kweku','Akosua','Efua','Kojo','Adjoa','Kwabena','Ama','Nana',

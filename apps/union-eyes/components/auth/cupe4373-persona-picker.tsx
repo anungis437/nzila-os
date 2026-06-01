@@ -26,8 +26,8 @@ const PERSONAS: Persona[] = [
     role: 'steward',
     email: 'steward@cupe4373.demo',
     displayName: 'Denise Laurent',
-    position: 'Chief Steward — 7 West',
-    description: 'Steward view: triage caseload, add notes, escalate.',
+    position: 'Chief Steward',
+    description: 'Steward view: triage casework, protect continuity, manage handoffs.',
   },
   {
     role: 'officer',
@@ -83,8 +83,9 @@ export function Cupe4373PersonaPicker({ postLoginPath }: Props) {
       <p className="mb-3 text-amber-800 dark:text-amber-300">
         Pick a persona below — the system will sign you in with the demo
         password <code className="font-mono">{DEMO_PASSWORD}</code> and route
-        you into the role-scoped dashboard. Each persona has real Argon2id
-        credentials and a real org-scoped role binding.
+        you into the role-scoped dashboard. Each persona opens the same
+        continuity-safe demo workspace with casework, grievances, documents,
+        communications, and leadership views enabled.
       </p>
       <div className="grid gap-2 sm:grid-cols-3">
         {PERSONAS.map((p) => {

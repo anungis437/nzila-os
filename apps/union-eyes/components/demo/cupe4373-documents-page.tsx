@@ -338,7 +338,7 @@ function buildDocPreview(doc: DemoDocument): string {
       return (
         header +
         body +
-        `Agenda Items\n------------\n1. Casework updates (open files, urgency review, handoff coverage)\n2. New member intake summary\n3. Scheduling audit findings (Unit 7 West)\n4. Upcoming labour-management dates\n5. Steward training refresher (chronology integrity)\n\nDecisions\n---------\n• Marc to cover UE-4373-026 if Denise unavailable May 23\n• Chief Steward to send formal letter on Unit 4B staffing pattern\n• Next meeting: same time, two weeks out`
+        `Agenda Items\n------------\n1. Casework updates (open files, urgency review, handoff coverage)\n2. New member intake summary\n3. Scheduling audit findings (acute care services)\n4. Upcoming labour-management dates\n5. Steward training refresher (chronology integrity)\n\nDecisions\n---------\n• Marc to cover UE-4373-026 if Denise unavailable May 23\n• Chief Steward to send formal letter on recurring staffing pattern concerns\n• Next meeting: same time, two weeks out`
       );
     case "policy":
       return (
@@ -350,7 +350,7 @@ function buildDocPreview(doc: DemoDocument): string {
       return (
         header +
         body +
-        `Letter Excerpt\n--------------\nTo: Unit Manager, 7 West Medicine\nFrom: CUPE Local 4373 Steward Team\nDate: ${doc.lastUpdated}\n\nThis letter formalizes our concern regarding recurring understaffing on overnight\nshifts. The chronology of incidents from the prior six weeks has been compiled and\nis attached. We request a written response within ten (10) business days outlining\nthe staffing review plan and any interim relief measures.\n\nRespectfully,\nCUPE Local 4373 Steward Team`
+        `Letter Excerpt\n--------------\nTo: Operations Leadership\nFrom: CUPE Local 4373 Steward Team\nDate: ${doc.lastUpdated}\n\nThis letter formalizes our concern regarding recurring understaffing on overnight\nshifts. The chronology of incidents from the prior six weeks has been compiled and\nis attached. We request a written response within ten (10) business days outlining\nthe staffing review plan, continuity coverage, and any interim relief measures.\n\nRespectfully,\nCUPE Local 4373 Steward Team`
       );
     default:
       return header + body;
