@@ -23,7 +23,20 @@ function normalizeUrl(value: string | undefined, fallback: string): string {
   }
 
   try {
-    return new URL(value).toString().replace(/\/$/, '');
+    const normalized = new URL(value);
+
+    // Guard against production/staging misconfiguration where a public host is
+    // accidentally set with a local dev port (e.g. :3000). Keep port 3000 only
+    // for localhost-style hosts.
+    if (
+      normalized.port === '3000' &&
+      normalized.hostname !== 'localhost' &&
+      normalized.hostname !== '127.0.0.1'
+    ) {
+      normalized.port = '';
+    }
+
+    return normalized.toString().replace(/\/$/, '');
   } catch {
     return fallback;
   }
