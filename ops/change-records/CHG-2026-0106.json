@@ -12,7 +12,7 @@
   "approved_by": [],
   "approval_status": "APPROVED",
   "implementation_window_start": "2026-04-22T00:00:00.000Z",
-  "implementation_window_end": "2026-06-30T23:59:59.000Z",
+  "implementation_window_end": "2026-06-27T23:59:59.000Z",
   "rollback_plan": "Revert to previous stable container image and rerun smoke checks.",
   "test_evidence_refs": [
     "evidence/union-eyes-contract-gates-2026-04-22.json"
@@ -26,7 +26,8 @@
     "7784569eef2e02ad6286b1a87a4ddfd122624070",
     "df434432d1bc3fbec5401f3218536787ab0304d2",
     "0acd279adbc9b5532ecec4345ef0e399646733b0",
-    "d3203460d6d787a18b604a5d27142533097dea28"
+    "d3203460d6d787a18b604a5d27142533097dea28",
+    "dbbdb2ba8"
   ],
   "status": "APPROVED",
   "created_at": "2026-04-22T00:00:00.000Z",
