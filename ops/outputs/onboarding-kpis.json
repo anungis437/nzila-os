@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-01T12:16:59.844Z",
+  "timestamp": "2026-06-01T12:20:52.379Z",
   "period": "quarterly",
   "population_size": 1,
   "metrics": {
@@ -15,8 +15,8 @@
   "source_file": "ops/inputs/onboarding-metrics.json",
   "github_enrichment": {
     "repo": "anungis437/nzila-os",
-    "window_days": 90,
-    "window_start": "2026-03-03",
+    "window_days": 30,
+    "window_start": "2026-05-02",
     "records_with_api_data": 1,
     "records": [
       {

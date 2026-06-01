@@ -77,7 +77,7 @@ export const cupe4373FallbackMembers: MemberRow[] = [
     role: 'member',
     status: 'active',
     department: 'Emergency Department Clerical',
-    position: 'Unit Clerk',
+    position: 'Unit Coordinator',
     location: 'Emergency Department',
     seniority: 7,
     membershipNumber: '4373-10005',
