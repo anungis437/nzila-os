@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@nzila/trade-core": "workspace:*",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "zod": "^3.24.0"
   },
   "devDependencies": {
