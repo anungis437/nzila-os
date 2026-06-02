@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-25T22:20:07.237Z",
-  "totalDocuments": 1177,
+  "generatedAt": "2026-06-02T14:54:34.999Z",
+  "totalDocuments": 1179,
   "staleDocuments": 0,
   "categories": [
     {
@@ -86,6 +86,11 @@
     {
       "category": "nzila-tier2-hardening",
       "count": 9,
+      "staleCount": 0
+    },
+    {
+      "category": "nzila-tier3-operating-infrastructure",
+      "count": 2,
       "staleCount": 0
     },
     {
@@ -277,7 +282,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-cognition-doctrine/cross-app-cognition-consistency.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -295,13 +300,13 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-cognition-doctrine/final-cognition-convergence-readiness-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-cognition-doctrine/global-anti-surveillance-enforcement.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -337,7 +342,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-cognition-doctrine/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -415,7 +420,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-field-operations/operational-legitimacy-audit-system.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -427,7 +432,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-field-operations/operator-cadence-system.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -445,7 +450,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-final-convergence/cross-app-live-e2e-realism-matrix.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -463,7 +468,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-final-convergence/final-full-maturity-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -493,7 +498,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-final-convergence/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -529,7 +534,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-finalization/final-operating-system-readiness-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -547,7 +552,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-finalization/full-environment-go-certification-program.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -565,7 +570,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-finalization/master-finalization-index.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1075,13 +1080,13 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-live-audit/authoritative-url-domain-audit.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-live-audit/final-live-operational-status-report.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1123,7 +1128,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-live-audit/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1141,7 +1146,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-maturity-elevation/cross-app-e2e-maturity-matrix.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1159,19 +1164,19 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-maturity-elevation/final-maturity-readiness-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-maturity-elevation/full-maturity-gap-audit.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-maturity-elevation/full-role-continuity-maturity.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1201,7 +1206,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-maturity-elevation/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1315,13 +1320,13 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-operational-proving/cross-app-operational-convergence-proving.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-operational-proving/environment-restoration-proving.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1345,7 +1350,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-operational-proving/live-operator-walkthrough-program.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1357,19 +1362,19 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-operational-proving/live-rollback-proving.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-operational-proving/master-operational-proving-index.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-operational-proving/phase-c-final-readiness-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1387,7 +1392,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-rollout-governance/cross-environment-governance-fabric.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1405,7 +1410,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-rollout-governance/environment-promotion-governance.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1423,19 +1428,19 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-rollout-governance/master-rollout-governance-index.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-rollout-governance/operational-rollout-workflows.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-rollout-governance/operator-rollout-workflows.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1453,19 +1458,19 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-rollout-governance/rollout-attestation-fabric.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-rollout-governance/rollout-governance-readiness-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-rollout-governance/rollout-legitimacy-review-system.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1663,7 +1668,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/plans/MASTER_ROLLOUT_PLAN.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1699,7 +1704,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/platform-surface-migrations/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1723,13 +1728,13 @@
     {
       "path": "docs/categories/platform-and-operations/ai-dev-agents/agent-charters.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ai-dev-agents/agent-operating-model.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1741,13 +1746,13 @@
     {
       "path": "docs/categories/platform-and-operations/ai-dev-agents/prompt-library.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ai-dev-agents/validation-gates.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1759,31 +1764,31 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/AI_PLATFORM_CONTRACT.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/architecture/APP_DOMAIN_CORE_STANDARD.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/architecture/ARCHITECTURAL_BOUNDARIES.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/architecture/ARCHITECTURAL_LAYERS.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1813,13 +1818,13 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/BOUNDARY_POLICY.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/architecture/build-strategy.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -1837,7 +1842,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/CONTROL_PLANE_PRINCIPLES.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2053,7 +2058,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/PLATFORM_PACKAGE_AUTHORITY.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2125,19 +2130,19 @@
     {
       "path": "docs/categories/platform-and-operations/decision-layer/demos/agri-trade-demo.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/decision-layer/demos/assessments-demo.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/decision-layer/demos/unions-demo.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2239,13 +2244,13 @@
     {
       "path": "docs/categories/platform-and-operations/governance/APP_GOLD_STANDARD.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/governance/APP_LIFECYCLE_MATRIX.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2269,7 +2274,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/BLINDSPOTS_VALIDATION.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2293,7 +2298,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/CHANGE_ENABLEMENT_ARCHITECTURE.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2305,7 +2310,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/contracts.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2329,7 +2334,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/decision-coverage-inventory.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2341,7 +2346,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/enterprise-readiness.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2353,7 +2358,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/GOVERNANCE_ARCHITECTURE.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2371,7 +2376,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/PACKAGE_OWNERSHIP.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2389,7 +2394,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/PLATFORM_VS_APP_DECISION_RULE.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2401,7 +2406,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/PROCUREMENT_EVIDENCE_SYSTEM.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2413,19 +2418,19 @@
     {
       "path": "docs/categories/platform-and-operations/governance/procurement-pack.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/governance/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/governance/rfp-generator.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2545,7 +2550,7 @@
     {
       "path": "docs/categories/platform-and-operations/hardening/secrets.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2581,7 +2586,7 @@
     {
       "path": "docs/categories/platform-and-operations/intelligence/decision-pipeline-operations.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2695,19 +2700,19 @@
     {
       "path": "docs/categories/platform-and-operations/ops/DEPLOYMENT_PROMOTION_MODEL.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/disaster-recovery.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/ENVIRONMENT_OPERATIONS.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2743,7 +2748,7 @@
     {
       "path": "docs/categories/platform-and-operations/ops/incident-response.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2791,7 +2796,7 @@
     {
       "path": "docs/categories/platform-and-operations/ops/on-call.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2803,25 +2808,25 @@
     {
       "path": "docs/categories/platform-and-operations/ops/phase7-technical-excellence-sweep-closure.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/pilots/flow-pilot/outcome-memo.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/release-governance/db-promotion-safety.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/release-governance/hotfix-governance.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2839,13 +2844,13 @@
     {
       "path": "docs/categories/platform-and-operations/ops/release-governance/release-governance.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/release-governance/rollback-runbook.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2857,7 +2862,7 @@
     {
       "path": "docs/categories/platform-and-operations/ops/REPO_OPERATOR_RUNBOOK.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2887,25 +2892,25 @@
     {
       "path": "docs/categories/platform-and-operations/ops/sre/WORLD_CLASS_PORTFOLIO_SRE_SYSTEM.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/staging-recovery-runbook.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/staging-runtime-drift-runbook.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/acceptance-matrix.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2977,7 +2982,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/APP_LIFECYCLE_PROCESS.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -2989,7 +2994,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/auth-migration-architecture.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3001,13 +3006,13 @@
     {
       "path": "docs/categories/platform-and-operations/platform/COMMAND_CATALOG.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/CONSOLIDATION_CLOSEOUT.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3019,13 +3024,13 @@
     {
       "path": "docs/categories/platform-and-operations/platform/COVERAGE_REPORTING.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/DATA_RESIDENCY_POLICY.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3037,19 +3042,19 @@
     {
       "path": "docs/categories/platform-and-operations/platform/DOMAIN_EXPERTISE_MAP.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/dominance-train.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/EMERGING_THREAT_MODEL.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3061,7 +3066,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/GA_READINESS.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3103,7 +3108,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/ONBOARDING.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3115,7 +3120,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/PACKAGE_OWNERSHIP_MATRIX.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3127,7 +3132,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/PLATFORM_CONSOLIDATION_COMPLETION_REPORT.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3139,7 +3144,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/PLATFORM_SURFACE_MODEL.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3157,49 +3162,49 @@
     {
       "path": "docs/categories/platform-and-operations/platform/proof/ai-controlled-request.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/proof/compliance-sensitive-action.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/proof/demo-script.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/proof/event-contract-flow.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/proof/platform-proof-overview.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/proof/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/proof/ue-governed-mutation.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/REGULATORY_CHANGE_MONITORING.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3223,7 +3228,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3253,19 +3258,19 @@
     {
       "path": "docs/categories/platform-and-operations/platform/SLO_ERROR_BUDGET_POLICY.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/STATUS_AUTHORITY_MODEL.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/STRATEGIC_TELEMETRY.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3283,13 +3288,13 @@
     {
       "path": "docs/categories/platform-and-operations/platform/VENDOR_DIVERSIFICATION_STRATEGY.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/platform/what-is-nzila.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3397,13 +3402,13 @@
     {
       "path": "docs/categories/platform-and-operations/runbooks/branching-tagging-governance.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/runbooks/cloudflare-dns-migration.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3427,7 +3432,7 @@
     {
       "path": "docs/categories/platform-and-operations/runbooks/dns-cutover-zero-downtime.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3529,19 +3534,19 @@
     {
       "path": "docs/categories/platform-and-operations/runtime-proof.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/security/ai-security-overview.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/security/dns-secrets-policy.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3589,13 +3594,13 @@
     {
       "path": "docs/categories/platform-and-operations/stress-test/ENTERPRISE_STRESS_TEST.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/stress-test/EVIDENCE_INDEX.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3613,7 +3618,7 @@
     {
       "path": "docs/categories/platform-and-operations/templates/business-continuity-summary.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -3727,7 +3732,7 @@
     {
       "path": "docs/categories/products-and-market/commerce/ADR/ADR-PE-002-engine-product-separation.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4117,7 +4122,7 @@
     {
       "path": "docs/categories/products-and-market/pilot/01-scope-checklist.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4141,7 +4146,7 @@
     {
       "path": "docs/categories/products-and-market/pilot/05-demo-script.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4315,7 +4320,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/deployment/cupe-pilot-to-prod-transition.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4327,25 +4332,25 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/dr/continuity-matrix.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/products-and-market/union-eyes/dr/database-restore.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/products-and-market/union-eyes/dr/restore-drill-runbook.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/products-and-market/union-eyes/dr/rollback-procedure.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4423,7 +4428,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/final-ue-operating-infrastructure-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4483,7 +4488,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4591,7 +4596,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-navigation-monetization-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4615,7 +4620,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4663,13 +4668,13 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4747,7 +4752,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/constitutional-semantic-dictionary.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4795,13 +4800,13 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/ontology-constitution-v1.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/README.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4813,13 +4818,13 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/semantic-observability-baseline.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/wave10-platform-ontology-stabilization-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4873,7 +4878,7 @@
     {
       "path": "docs/categories/products-and-market/zonga/dr/restore-drill-runbook.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4927,19 +4932,19 @@
     {
       "path": "docs/categories/stakeholders/builders/COMMANDS.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/stakeholders/builders/CONTRIBUTING.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/stakeholders/builders/QUICKSTART.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4975,7 +4980,7 @@
     {
       "path": "docs/categories/stakeholders/buyers/OPERATING_MODEL.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -4999,13 +5004,13 @@
     {
       "path": "docs/categories/stakeholders/buyers/RELIABILITY_SUMMARY.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/stakeholders/buyers/SECURITY_SUMMARY.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5449,7 +5454,7 @@
     {
       "path": "docs/categories/stakeholders/GOLDEN_PATH_DEVELOPER_GUIDE.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5581,7 +5586,7 @@
     {
       "path": "docs/categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5647,7 +5652,7 @@
     {
       "path": "docs/categories/stakeholders/operators/WORKFLOW_MAP.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5659,25 +5664,25 @@
     {
       "path": "docs/categories/stakeholders/personas/02-operator.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/stakeholders/personas/03-auditor.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/stakeholders/public/procurement-statements.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/categories/stakeholders/public/restore-readiness-summary.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5719,13 +5724,13 @@
     {
       "path": "docs/compliance/soc2/control-mapping.md",
       "category": "compliance",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/compliance/soc2/evidence-inventory.md",
       "category": "compliance",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5833,19 +5838,19 @@
     {
       "path": "docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/doctrine/whitepapers/README.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-02",
       "stale": false
     },
     {
@@ -5875,7 +5880,7 @@
     {
       "path": "docs/INDEX.md",
       "category": "INDEX.md",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5893,7 +5898,7 @@
     {
       "path": "docs/nzila-residual-closure/full-residual-elimination-review.md",
       "category": "nzila-residual-closure",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5905,7 +5910,7 @@
     {
       "path": "docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md",
       "category": "nzila-residual-closure",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5959,7 +5964,7 @@
     {
       "path": "docs/nzila-residual-closure/README.md",
       "category": "nzila-residual-closure",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -5995,7 +6000,7 @@
     {
       "path": "docs/nzila-runtime-integrity/full-governance-noise-reduction.md",
       "category": "nzila-runtime-integrity",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6031,7 +6036,7 @@
     {
       "path": "docs/nzila-runtime-integrity/README.md",
       "category": "nzila-runtime-integrity",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6055,7 +6060,7 @@
     {
       "path": "docs/nzila-sovereignty-proving/full-fail-closed-runtime-proof.md",
       "category": "nzila-sovereignty-proving",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6085,7 +6090,7 @@
     {
       "path": "docs/nzila-sovereignty-proving/README.md",
       "category": "nzila-sovereignty-proving",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6140,6 +6145,18 @@
       "path": "docs/nzila-tier2-hardening/README.md",
       "category": "nzila-tier2-hardening",
       "lastValidated": "2026-05-25",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-tier3-operating-infrastructure/full-tier3-operating-infrastructure-review.md",
+      "category": "nzila-tier3-operating-infrastructure",
+      "lastValidated": "2026-05-27",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-tier3-operating-infrastructure/README.md",
+      "category": "nzila-tier3-operating-infrastructure",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6853,7 +6870,7 @@
     {
       "path": "docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER_fr-CA.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6871,7 +6888,7 @@
     {
       "path": "docs/oci/whitepapers/OCI_METHOD_WHITEPAPER_v1_fr-CA.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6883,31 +6900,31 @@
     {
       "path": "docs/oci/whitepapers/OCI_OCRA_EXECUTIVE_WHITEPAPER_STRUCTURE.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/oci/whitepapers/OCI_OCRA_WHITEPAPER_ARCHITECTURE_v2.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md",
       "category": "ops",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6919,7 +6936,7 @@
     {
       "path": "docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md",
       "category": "ops",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6931,25 +6948,25 @@
     {
       "path": "docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
       "category": "ops",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-02",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-02",
       "stale": false
     },
     {
       "path": "docs/ops/sre/executive-reliability-dashboard.md",
       "category": "ops",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -6985,7 +7002,7 @@
     {
       "path": "docs/proof-center/portfolio-proof-index.md",
       "category": "proof-center",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -7003,19 +7020,19 @@
     {
       "path": "docs/union-eyes/dr/restore-drill-runbook.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -7045,7 +7062,7 @@
     {
       "path": "docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -7063,7 +7080,7 @@
     {
       "path": "docs/union-eyes/pilot-evidence-pack/READINESS_COMMANDS.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -7075,13 +7092,13 @@
     {
       "path": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -7165,13 +7182,13 @@
     {
       "path": "docs/union-eyes/runtime-convergence/README.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
       "path": "docs/zonga/dr/restore-drill-runbook.md",
       "category": "zonga",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {
@@ -7183,7 +7200,7 @@
     {
       "path": "README.md",
       "category": "root",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-05-27",
       "stale": false
     },
     {

@@ -207,7 +207,7 @@ export default async function OrganizationalContinuityPage({
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/pilot/apply`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
             >
               {copy.primaryCta}
@@ -495,7 +495,7 @@ export default async function OrganizationalContinuityPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${locale}/pilot-request`}
+              href={`/${locale}/pilot/apply`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
               {copy.primaryCta}

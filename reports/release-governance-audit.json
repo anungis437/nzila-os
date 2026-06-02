@@ -1,19 +1,20 @@
 {
-  "generatedAt": "2026-05-25T22:20:07.866Z",
-  "workflowCount": 48,
+  "generatedAt": "2026-06-02T14:54:35.566Z",
+  "workflowCount": 50,
   "inventoryAppCount": 27,
   "canonical": [
     "gitops-deploy.yml",
     "deploy-production.yml"
   ],
-  "appSpecific": [],
+  "appSpecific": [
+    "deploy-union-eyes.yml"
+  ],
   "appSpecificEmergencyManual": [
     "deploy-console.yml",
     "deploy-partners.yml",
-    "deploy-union-eyes.yml",
     "deploy-web.yml"
   ],
-  "workflowSprawlScore": 10,
+  "workflowSprawlScore": 9,
   "deploymentRiskScore": 10,
   "environmentDriftScore": 8,
   "releaseGovernanceScore": 9

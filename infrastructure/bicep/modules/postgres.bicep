@@ -80,7 +80,32 @@ param adminLogin string = 'nzilaadmin'
 @description('Administrator password')
 param adminPassword string
 
+@description('Application database name created on the server')
+param appDatabaseName string = 'nzila'
+
+@description('Resource ID of the delegated subnet for VNet integration. Required for private deployments.')
+param delegatedSubnetResourceId string = ''
+
+@description('Resource ID of the private DNS zone for the PostgreSQL server. Required when delegatedSubnetResourceId is set.')
+param privateDnsZoneResourceId string = ''
+
+@description('Object ID of an Entra ID principal to add as PostgreSQL AAD administrator. Leave empty to skip AAD admin setup.')
+param aadAdminObjectId string = ''
+
+@description('Principal name for the AAD administrator (e.g. user UPN or SP display name).')
+param aadAdminPrincipalName string = ''
+
+@description('Principal type for AAD administrator')
+@allowed(['User', 'Group', 'ServicePrincipal'])
+param aadAdminPrincipalType string = 'ServicePrincipal'
+
 param tags object = {}
+
+// Computed: Burstable SKUs do not support zone-redundant HA or geo-redundant backups.
+var isBurstable = startsWith(sku, 'B_')
+var effectiveHa = highAvailability && !isBurstable
+var effectiveGeoBackup = geoRedundantBackup && !isBurstable
+var useVnet = !empty(delegatedSubnetResourceId)
 
 // ── Primary Server ────────────────────────────────────────────────────────
 
@@ -107,14 +132,26 @@ resource server 'Microsoft.DBforPostgreSQL/flexibleServers@2023-12-01-preview' =
     }
     backup: {
       backupRetentionDays: backupRetentionDays
-      geoRedundantBackup: geoRedundantBackup ? 'Enabled' : 'Disabled'
+      geoRedundantBackup: effectiveGeoBackup ? 'Enabled' : 'Disabled'
     }
     highAvailability: {
-      mode: highAvailability ? 'ZoneRedundant' : 'Disabled'
-      standbyAvailabilityZone: highAvailability ? standbyZone : ''
+      mode: effectiveHa ? 'ZoneRedundant' : 'Disabled'
+      standbyAvailabilityZone: effectiveHa ? standbyZone : ''
     }
-    network: {
+    network: useVnet ? {
+      delegatedSubnetResourceId: delegatedSubnetResourceId
+      privateDnsZoneArmResourceId: privateDnsZoneResourceId
       publicNetworkAccess: 'Disabled'
+    } : {
+      publicNetworkAccess: 'Disabled'
+    }
+    authConfig: empty(aadAdminObjectId) ? {
+      activeDirectoryAuth: 'Disabled'
+      passwordAuth: 'Enabled'
+    } : {
+      activeDirectoryAuth: 'Enabled'
+      passwordAuth: 'Enabled'
+      tenantId: subscription().tenantId
     }
     maintenanceWindow: {
       dayOfWeek: 0    // Sunday
@@ -180,29 +217,30 @@ resource pgBouncerPoolModeConfig 'Microsoft.DBforPostgreSQL/flexibleServers/conf
 }
 
 // ── Performance tuning ───────────────────────────────────────────────────
+// Skip explicit overrides on Burstable SKUs — Azure already auto-tunes them and
+// applying large values to a B1ms instance prevents the server from starting.
 
-resource sharedBuffers 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-12-01-preview' = {
+resource sharedBuffers 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-12-01-preview' = if (!isBurstable) {
   parent: server
   name: 'shared_buffers'
   properties: {
-    // 25% of instance memory — Azure auto-calculates based on SKU
-    value: '4194304'  // 4GB in 8KB pages (for E8+; will auto-adjust)
+    // 25% of instance memory — sized for E8+. Smaller GP SKUs will still accept it.
+    value: '4194304'  // 4GB in 8KB pages
     source: 'user-override'
   }
 }
 
-resource effectiveCacheSize 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-12-01-preview' = {
+resource effectiveCacheSize 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-12-01-preview' = if (!isBurstable) {
   parent: server
   name: 'effective_cache_size'
   properties: {
-    // 75% of instance memory
     value: '12582912'  // 12GB in 8KB pages
     source: 'user-override'
   }
   dependsOn: [sharedBuffers]
 }
 
-resource workMem 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-12-01-preview' = {
+resource workMem 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-12-01-preview' = if (!isBurstable) {
   parent: server
   name: 'work_mem'
   properties: {
@@ -220,7 +258,29 @@ resource maxConnections 'Microsoft.DBforPostgreSQL/flexibleServers/configuration
     value: enablePgBouncer ? '500' : '200'
     source: 'user-override'
   }
-  dependsOn: [workMem]
+}
+
+// ── Application database ─────────────────────────────────────────────────
+// Apps connect to this database; without it, `psql ... /nzila` would fail.
+
+resource appDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-12-01-preview' = {
+  parent: server
+  name: appDatabaseName
+  properties: {
+    charset: 'UTF8'
+    collation: 'en_US.utf8'
+  }
+}
+
+// ── AAD administrator (passwordless auth path) ───────────────────────────
+resource aadAdmin 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2023-12-01-preview' = if (!empty(aadAdminObjectId)) {
+  parent: server
+  name: aadAdminObjectId
+  properties: {
+    principalType: aadAdminPrincipalType
+    principalName: aadAdminPrincipalName
+    tenantId: subscription().tenantId
+  }
 }
 
 // ── Read Replicas ────────────────────────────────────────────────────────
@@ -255,6 +315,8 @@ output serverId string = server.id
 output serverFqdn string = server.properties.fullyQualifiedDomainName
 // PgBouncer port: 6432 (standard); direct port: 5432
 output connectionPort int = enablePgBouncer ? 6432 : 5432
+output adminLogin string = adminLogin
+output databaseName string = appDatabaseName
 output replicaFqdns array = [
   for i in range(0, readReplicaCount): readReplicas[i].properties.fullyQualifiedDomainName
 ]

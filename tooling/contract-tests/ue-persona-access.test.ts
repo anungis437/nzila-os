@@ -177,6 +177,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'admin/migrations/page.tsx',                   minRole: 'admin',                description: 'Migration observability dashboard' },
   { path: 'admin/migrations/[id]/page.tsx',              minRole: 'admin',                description: 'Migration batch detail view' },
   { path: 'admin/duplicates/page.tsx',                   minRole: 'admin',                description: 'Duplicate review panel' },
+  { path: 'admin/pilots/page.tsx',                       minRole: 'admin',                description: 'Pilot commercialization operations' },
 
   // ── Admin rewards (layout gates admin, each sub-page also checks admin) ─
   { path: 'admin/rewards/page.tsx',                      minRole: 'admin',                description: 'Recognition & rewards admin overview' },

@@ -1,29 +1,29 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-05-25T22:20:05.844Z
+> Generated: 2026-06-02T14:54:33.879Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1827 |
-| Total Findings | 2570 |
+| Files Scanned | 1829 |
+| Total Findings | 2574 |
 | Errors | 0 |
-| Warnings | 1214 |
-| Info | 1356 |
+| Warnings | 1212 |
+| Info | 1362 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1349 |
-| stale-reference | 1043 |
+| naming-inconsistency | 1355 |
+| stale-reference | 1041 |
 | missing-package-readme | 105 |
 | stale-package-ref | 63 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1043)
+## stale-reference (1041)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -37,11 +37,11 @@
 - 🟡 `CONTRIBUTING.md:87` — Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)
 - 🟡 `CONTRIBUTING.md:88` — Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:89` — Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
-- 🟡 `README.md:151` — Possible broken link: [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md)
-- 🟡 `README.md:151` — Possible broken link: [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md)
-- 🟡 `README.md:171` — Possible broken link: [docs/builders/](docs/builders/)
-- 🟡 `README.md:173` — Possible broken link: [docs/buyers/](docs/buyers/)
-- 🟡 `README.md:175` — Possible broken link: [docs/investor/](docs/investor/)
+- 🟡 `README.md:152` — Possible broken link: [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md)
+- 🟡 `README.md:152` — Possible broken link: [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md)
+- 🟡 `README.md:172` — Possible broken link: [docs/builders/](docs/builders/)
+- 🟡 `README.md:174` — Possible broken link: [docs/buyers/](docs/buyers/)
+- 🟡 `README.md:176` — Possible broken link: [docs/investor/](docs/investor/)
 - 🟡 `docs/INDEX.md:5` — Possible broken link: [archive/iterations](archive/iterations/)
 - 🟡 `docs/INDEX.md:21` — Possible broken link: [docs/builders/QUICKSTART.md](builders/QUICKSTART.md)
 - 🟡 `docs/INDEX.md:22` — Possible broken link: [docs/builders/CONTRIBUTING.md](builders/CONTRIBUTING.md)
@@ -835,8 +835,6 @@
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:137` — Possible broken link: [Reference: AI Gateway](../reference/ai-gateway.md)
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:138` — Possible broken link: [Explanation: AI Risk Management](../explanation/ai-risk-management.md)
 - 🟡 `docs/categories/stakeholders/tutorials/first-app.md:135` — Possible broken link: [Reference: Package Catalogue](../reference/packages.md)
-- 🟡 `docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md:22` — Possible broken link: [infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf](../../../infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf)
-- 🟡 `docs/doctrine/whitepapers/README.md:22` — Possible broken link: [infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf](../../../infotech/The_Continuity_Gap_Master_Whitepaper_Evidence_Enhanced_v3.pdf)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 - 🟡 `governance/business/README.md:158` — Possible broken link: [Portfolio Deep Dive Analysis](../PORTFOLIO_DEEP_DIVE.md)
 - 🟡 `governance/business/README.md:159` — Possible broken link: [Migration Plan](../MIGRATION_PLAN.md)
@@ -1135,7 +1133,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1349)
+## naming-inconsistency (1355)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2242,7 +2240,7 @@
 - ℹ️ `docs/doctrine/whitepapers/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:960` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:961` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2266,6 +2264,10 @@
 - ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md:107` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md:123` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md:226` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md:241` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md:243` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md:264` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md:271` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/r2-cognition-degradation-drill-corpus.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/r3-continuity-degradation-drill-corpus.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/r4-notification-degradation-drill-corpus.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2348,6 +2350,8 @@
 - ℹ️ `docs/nzila-tier2-hardening/full-pilot-fabric-legitimacy.md:145` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:126` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier2-hardening/full-secret-topology-sovereignty.md:127` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-tier3-operating-infrastructure/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-tier3-operating-infrastructure/full-tier3-operating-infrastructure-review.md:62` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/OCI_METHOD.md:321` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md:107` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2489,13 +2493,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 97 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 97 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 97 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 97 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 97 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 97 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 97 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 105 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 105 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 105 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 105 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 105 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 105 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 105 days old — may be stale
 
 ## missing-required-doc (3)
 

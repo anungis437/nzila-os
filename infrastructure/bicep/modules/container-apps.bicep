@@ -27,6 +27,36 @@ param httpConcurrency string = '50'
 @description('CPU utilization % threshold for scale-out (0 = disabled)')
 param cpuScaleThreshold int = 70
 
+@description('Resource ID of the infrastructure subnet for the Container Apps Environment. Required for VNet-integrated PostgreSQL access.')
+param infrastructureSubnetId string = ''
+
+@description('Use internal-only ingress (no public IP). Keep false to let Front Door / WAF terminate externally.')
+param internalOnly bool = false
+
+@description('Resource ID of the user-assigned managed identity used by all Container Apps for Key Vault secret resolution.')
+param userAssignedIdentityId string = ''
+
+@description('Key Vault URI (e.g. https://nzila-prod-kv.vault.azure.net/) used to build secret URLs.')
+param keyVaultUri string = ''
+
+@description('Name of the Key Vault secret containing the full DATABASE_URL connection string.')
+param databaseUrlSecretName string = 'database-url'
+
+@description('Name of the Key Vault secret containing the DATABASE_READ_URL connection string. Leave empty to skip.')
+param databaseReadUrlSecretName string = 'database-read-url'
+
+@description('ACR login server (e.g. nzilaprodacr.azurecr.io). When set, the user-assigned identity is used for AcrPull and image refs are prefixed.')
+param acrLoginServer string = ''
+
+@description('Image tag applied to every app container. Override per-environment / per-deploy.')
+param imageTag string = 'latest'
+
+var hasVnet = !empty(infrastructureSubnetId)
+var hasKvSecrets = !empty(keyVaultUri) && !empty(userAssignedIdentityId)
+var hasAcr = !empty(acrLoginServer) && !empty(userAssignedIdentityId)
+var databaseUrlKvUrl = hasKvSecrets ? '${keyVaultUri}secrets/${databaseUrlSecretName}' : ''
+var databaseReadUrlKvUrl = hasKvSecrets && !empty(databaseReadUrlSecretName) ? '${keyVaultUri}secrets/${databaseReadUrlSecretName}' : ''
+
 resource containerEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: envName
   location: location
@@ -43,6 +73,10 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
         enabled: enableMtls  // W1-1: enforce mTLS between all services
       }
     }
+    vnetConfiguration: hasVnet ? {
+      infrastructureSubnetId: infrastructureSubnetId
+      internal: internalOnly
+    } : null
     workloadProfiles: [
       {
         name: 'Consumption'
@@ -54,7 +88,7 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
 
 // ── App template (parameterized per service) ──────────────────────────────
 
-@description('Container app definitions for each Nzila service')
+@description('Container app definitions for each Nzila service. `image` is the repository path within the ACR (or fully qualified if acrLoginServer is empty).')
 param apps array = [
   { name: 'nzila-os-web', image: 'nzila/web', port: 3000 }
   { name: 'nzila-os-console', image: 'nzila/console', port: 3001 }
@@ -66,6 +100,14 @@ resource containerApps 'Microsoft.App/containerApps@2024-03-01' = [
   for app in apps: {
     name: app.name
     location: location
+    identity: hasKvSecrets ? {
+      type: 'UserAssigned'
+      userAssignedIdentities: {
+        '${userAssignedIdentityId}': {}
+      }
+    } : {
+      type: 'None'
+    }
     properties: {
       managedEnvironmentId: containerEnv.id
       configuration: {
@@ -75,17 +117,46 @@ resource containerApps 'Microsoft.App/containerApps@2024-03-01' = [
           transport: 'http'
           clientCertificateMode: enableMtls ? 'require' : 'ignore'
         }
-        registries: []
+        registries: hasAcr ? [
+          {
+            server: acrLoginServer
+            identity: userAssignedIdentityId
+          }
+        ] : []
+        secrets: hasKvSecrets ? concat([
+          {
+            name: databaseUrlSecretName
+            keyVaultUrl: databaseUrlKvUrl
+            identity: userAssignedIdentityId
+          }
+        ], !empty(databaseReadUrlKvUrl) ? [
+          {
+            name: databaseReadUrlSecretName
+            keyVaultUrl: databaseReadUrlKvUrl
+            identity: userAssignedIdentityId
+          }
+        ] : []) : []
       }
       template: {
         containers: [
           {
             name: app.name
-            image: '${app.image}:latest'
+            image: hasAcr ? '${acrLoginServer}/${app.image}:${imageTag}' : '${app.image}:${imageTag}'
             resources: {
               cpu: json(containerCpu)
               memory: containerMemory
             }
+            env: hasKvSecrets ? concat([
+              {
+                name: 'DATABASE_URL'
+                secretRef: databaseUrlSecretName
+              }
+            ], !empty(databaseReadUrlKvUrl) ? [
+              {
+                name: 'DATABASE_READ_URL'
+                secretRef: databaseReadUrlSecretName
+              }
+            ] : []) : []
             probes: [
               {
                 type: 'Liveness'

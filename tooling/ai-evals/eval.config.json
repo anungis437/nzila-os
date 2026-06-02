@@ -1,0 +1,13 @@
+{
+  "$schema": "./eval.config.schema.json",
+  "_doc": "Thresholds for tooling/ai-evals/eval-gate.ts. Overrides DEFAULT_THRESHOLDS in eval-gate.ts. Edit here instead of in code so non-engineers can tune CI gates.",
+  "minPassRate": 90,
+  "maxRefusalRate": 5,
+  "maxAvgLatencyMs": 5000,
+  "maxTotalCostUsd": 10,
+  "perApp": {
+    "console": { "minPassRate": 95 },
+    "union-eyes": { "minPassRate": 95 },
+    "memora": { "minPassRate": 90 }
+  }
+}
