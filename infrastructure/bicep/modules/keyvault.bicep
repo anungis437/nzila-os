@@ -9,6 +9,9 @@ param location string
 param enableAutoRotation bool = true
 param rotationIntervalDays int = 90
 
+@description('Subnet resource IDs allowed to reach Key Vault via service endpoint. Used so Container Apps can resolve KV-backed secrets while the vault stays firewalled.')
+param allowedSubnetIds array = []
+
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: name
   location: location
@@ -25,6 +28,10 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     networkAcls: {
       defaultAction: 'Deny'
       bypass: 'AzureServices'
+      virtualNetworkRules: [for sid in allowedSubnetIds: {
+        id: sid
+        ignoreMissingVnetServiceEndpoint: false
+      }]
     }
   }
 }
@@ -88,3 +95,4 @@ resource diagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' 
 
 output vaultUri string = keyVault.properties.vaultUri
 output vaultId string = keyVault.id
+output vaultName string = keyVault.name
