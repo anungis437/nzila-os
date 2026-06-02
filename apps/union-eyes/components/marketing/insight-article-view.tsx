@@ -374,7 +374,7 @@ export function InsightArticleView({
           </ScrollReveal>
           <div className="flex flex-col sm:flex-row gap-4 justify-center narrative-sequence">
             <Link
-              href="/pilot-request"
+              href="/pilot/apply"
               className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all"
             >
               {copy.briefingCta}
