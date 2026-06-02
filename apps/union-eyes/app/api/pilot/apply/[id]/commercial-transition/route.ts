@@ -20,6 +20,7 @@ import {
   normalizeCommercialState,
   type CommercialState,
 } from '@/lib/pilot/commercialization-wave1';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -152,7 +153,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       subscriptionId?: string;
     } = { notes: [] };
 
-    await db.transaction(async (tx) => {
+    await withSystemContext(async () =>
+      db.transaction(async (tx) => {
       const organizationId =
         typeof responses.organizationId === 'string' && responses.organizationId.trim().length > 0
           ? responses.organizationId
@@ -424,7 +426,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         .update(pilotApplications)
         .set(updatePayload)
         .where(eq(pilotApplications.id, application.id));
-    });
+      }),
+    );
 
     return NextResponse.json({
       data: {
