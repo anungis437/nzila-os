@@ -97,6 +97,18 @@
   "mssql.linting.enable": false,
   "vitest.disableWorkspaceWarning": true,
 
+  // ── Vitest Explorer ────────────────────────────────────
+  // Monorepo has 90+ projects in vitest.config.ts. Defaults stop discovery.
+  // Point the extension at the single root config and lift its safety caps.
+  "vitest.rootConfig": "./vitest.config.ts",
+  "vitest.maximumConfigs": 200,
+  "vitest.configSearchPatternExclude": "{**/node_modules/**,**/.*/**,**/dist/**,**/.next/**,**/.turbo/**,**/coverage/**,**/.venv/**}",
+  // Vitest spawns a worker per project — give Node enough heap or the
+  // extension's child process silently dies and the tree shows empty.
+  "vitest.nodeExecArgv": ["--max-old-space-size=8192"],
+  // Cleaner UI: hide passing tests on load so the tree is navigable.
+  "vitest.showFullTestNames": false,
+
   // ── Spell Checker ──────────────────────────────────────
   "cSpell.words": [
     "CUPE"
