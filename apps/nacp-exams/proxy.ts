@@ -73,19 +73,20 @@ const intlMiddleware = createIntlMiddleware({
 
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
+type ProxyRequest = NextRequest & { auth?: unknown }
 
 // ── Main middleware ─────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = auth((req: any) => {
-  const requestId = ensureRequestId(req)
-  const { pathname } = req.nextUrl
+export const proxy = auth((req: unknown) => {
+  const request = req as ProxyRequest
+  const requestId = ensureRequestId(request)
+  const { pathname } = request.nextUrl
 
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
-      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      req.headers.get('x-real-ip') ??
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
       'unknown'
     const rl = checkRateLimit(ip, {
       max: RATE_LIMIT_MAX,
@@ -105,14 +106,14 @@ export const proxy = auth((req: any) => {
   // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
   if (process.env.NODE_ENV !== 'development') {
     if (
-      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
       pathname.startsWith('/api') &&
       !pathname.startsWith('/api/auth') &&
       !pathname.startsWith('/api/webhooks') &&
       !pathname.startsWith('/api/health') &&
       !pathname.startsWith('/api/cron')
     ) {
-      if (!req.headers.get('idempotency-key')) {
+      if (!request.headers.get('idempotency-key')) {
         return NextResponse.json(
           {
             error: 'Missing Idempotency-Key header',
@@ -127,8 +128,8 @@ export const proxy = auth((req: any) => {
   }
 
   // ── Auth protection — redirect unauthenticated users ──────────────────
-  if (!isPublicPath(pathname) && !req.auth) {
-    return NextResponse.redirect(new URL('/sign-in', req.url))
+  if (!isPublicPath(pathname) && !request.auth) {
+    return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
   // API routes — pass through after auth check
@@ -152,7 +153,7 @@ export const proxy = auth((req: any) => {
   }
 
   // Run i18n middleware for locale-prefixed routes
-  const intlResponse = intlMiddleware(req)
+  const intlResponse = intlMiddleware(request)
   if (intlResponse instanceof NextResponse) {
     return withRequestId(intlResponse, requestId)
   }

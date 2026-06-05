@@ -1,7 +1,10 @@
 import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from "next/server";
+import type { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from "@nzila/os-core/rateLimit";
 import { checkOrgRateLimit, orgRateLimitHeaders } from "@nzila/os-core/orgRateLimit";
+
+type ProxyRequest = NextRequest & { auth?: unknown }
 
 /* ── Public paths ── */
 const publicPaths = [
@@ -27,15 +30,15 @@ const RATE_LIMIT_WINDOW_MS = Number(
   process.env.RATE_LIMIT_WINDOW_MS ?? "60000",
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = auth((req: any) => {
-  const { pathname } = req.nextUrl
+export const proxy = auth((req: unknown) => {
+  const request = req as ProxyRequest
+  const { pathname } = request.nextUrl
 
   /* ── Layer 2 — Rate limiting (skip in dev — HMR triggers too many requests) ── */
   if (process.env.NODE_ENV !== "development") {
     const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      req.headers.get("x-real-ip") ??
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
       "unknown";
     const rl = checkRateLimit(ip, {
       max: RATE_LIMIT_MAX,
@@ -55,14 +58,14 @@ export const proxy = auth((req: any) => {
   // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
   if (process.env.NODE_ENV !== 'development') {
     if (
-      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
       pathname.startsWith('/api') &&
       !pathname.startsWith('/api/auth') &&
       !pathname.startsWith('/api/webhooks') &&
       !pathname.startsWith('/api/health') &&
       !pathname.startsWith('/api/cron')
     ) {
-      if (!req.headers.get('idempotency-key')) {
+      if (!request.headers.get('idempotency-key')) {
         return NextResponse.json(
           {
             error: 'Missing Idempotency-Key header',
@@ -77,18 +80,18 @@ export const proxy = auth((req: any) => {
   }
 
   /* ── Layer 3 — Auth protection ── */
-  if (!isPublicPath(pathname) && !req.auth) {
-    return NextResponse.redirect(new URL('/sign-in', req.url))
+  if (!isPublicPath(pathname) && !request.auth) {
+    return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
   /* ── Layer 3b — Org-scoped rate limiting (per-org + route-group buckets) ── */
   if (process.env.NODE_ENV !== "development") {
-    const orgId = req.headers.get("x-org-id");
+    const orgId = request.headers.get("x-org-id");
     if (orgId && pathname.startsWith("/api")) {
       const orgRl = checkOrgRateLimit(
         orgId,
         pathname,
-        req.method,
+        request.method,
       );
       if (!orgRl.allowed) {
         return NextResponse.json(
@@ -108,7 +111,7 @@ export const proxy = auth((req: any) => {
 
   /* ── Layer 4 — Request-ID propagation ── */
   const requestId =
-    req.headers.get("x-request-id") ?? crypto.randomUUID();
+    request.headers.get("x-request-id") ?? crypto.randomUUID();
   const response = NextResponse.next();
   response.headers.set("x-request-id", requestId);
   return response;

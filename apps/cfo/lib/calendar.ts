@@ -31,6 +31,11 @@ interface CalendarClient {
   healthCheck(): Promise<{ ok: boolean; provider: string }>
 }
 
+type GraphCalendarsResult = Awaited<ReturnType<BaseGraphCalendarTransport['listCalendars']>>
+type GraphEventsResult = Awaited<ReturnType<BaseGraphCalendarTransport['listEvents']>>
+type GoogleCalendarsResult = Awaited<ReturnType<BaseGoogleCalendarTransport['listCalendars']>>
+type GoogleEventsResult = Awaited<ReturnType<BaseGoogleCalendarTransport['listEvents']>>
+
 function mapCalendar(cal: { externalId: string; calendarName: string }): CalendarEntry {
   return { externalId: cal.externalId, name: cal.calendarName }
 }
@@ -63,7 +68,7 @@ function createOutlookTransport(config: GraphCalendarTransport): BaseGraphCalend
       }
 
       const json = (await response.json()) as { value?: unknown[] }
-      return Array.isArray(json.value) ? (json.value as any[]) : []
+      return Array.isArray(json.value) ? (json.value as GraphCalendarsResult) : []
     },
     async listEvents(userId: string, calendarId: string, since?: string) {
       const target = userId ? `users/${encodeURIComponent(userId)}` : 'me'
@@ -86,7 +91,7 @@ function createOutlookTransport(config: GraphCalendarTransport): BaseGraphCalend
       }
 
       const json = (await response.json()) as { value?: unknown[] }
-      return Array.isArray(json.value) ? (json.value as any[]) : []
+      return Array.isArray(json.value) ? (json.value as GraphEventsResult) : []
     },
   }
 }
@@ -109,7 +114,7 @@ function createGoogleTransport(config: GoogleCalendarTransport): BaseGoogleCalen
       }
 
       const json = (await response.json()) as { items?: unknown[] }
-      return Array.isArray(json.items) ? (json.items as any[]) : []
+      return Array.isArray(json.items) ? (json.items as GoogleCalendarsResult) : []
     },
     async listEvents(calendarId: string, since?: string) {
       const params = new URLSearchParams()
@@ -132,7 +137,7 @@ function createGoogleTransport(config: GoogleCalendarTransport): BaseGoogleCalen
       }
 
       const json = (await response.json()) as { items?: unknown[] }
-      return Array.isArray(json.items) ? (json.items as any[]) : []
+      return Array.isArray(json.items) ? (json.items as GoogleEventsResult) : []
     },
   }
 }

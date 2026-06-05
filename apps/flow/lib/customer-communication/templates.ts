@@ -241,14 +241,14 @@ const TEMPLATE_CONFIG = {
  */
 export function renderTemplate(
   templateName: TemplateName,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: Record<string, any>,
+  data: Record<string, unknown>,
 ): RenderedTemplate {
-  const config = TEMPLATE_CONFIG[templateName]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const parsed = (config.schema as any).parse(data)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (config.render as any)(parsed)
+  const config = TEMPLATE_CONFIG[templateName] as {
+    schema: z.ZodTypeAny
+    render: (parsed: unknown) => RenderedTemplate
+  }
+  const parsed = config.schema.parse(data)
+  return config.render(parsed)
 }
 
 /**

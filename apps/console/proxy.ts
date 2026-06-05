@@ -15,30 +15,31 @@ const intlMiddleware = createIntlMiddleware({
 
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
+type ProxyRequest = NextRequest & { auth?: unknown }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = auth((request: any) => {
+export const proxy = auth((request: unknown) => {
+  const req = request as ProxyRequest
   // ── Legacy route redirects (entity → org migration) ──────────────────
-  const pathname = request.nextUrl.pathname
+  const pathname = req.nextUrl.pathname
   if (pathname.startsWith('/business/orgs')) {
     const newPath = pathname.replace(/^\/business\/orgs/, '/orgs')
     if (newPath.startsWith('/')) {
-      return NextResponse.rewrite(new URL(newPath, request.url))
+      return NextResponse.rewrite(new URL(newPath, req.url))
     }
   }
   // Legacy /api/entities → /api/orgs redirect
   if (pathname.startsWith('/api/entities')) {
     const newPath = pathname.replace(/^\/api\/entities/, '/api/orgs')
     if (newPath.startsWith('/')) {
-      return NextResponse.rewrite(new URL(newPath, request.url))
+      return NextResponse.rewrite(new URL(newPath, req.url))
     }
   }
 
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      req.headers.get('x-real-ip') ??
       'unknown'
     const rl = checkRateLimit(ip, {
       max: RATE_LIMIT_MAX,
@@ -57,9 +58,9 @@ export const proxy = auth((request: any) => {
 
   // ── Org-scoped rate limiting (per-org + route-group buckets) ────────
   if (process.env.NODE_ENV !== 'development') {
-    const orgId = request.headers.get('x-org-id')
-    if (orgId && request.nextUrl.pathname.startsWith('/api')) {
-      const orgRl = checkOrgRateLimit(orgId, request.nextUrl.pathname, request.method)
+    const orgId = req.headers.get('x-org-id')
+    if (orgId && req.nextUrl.pathname.startsWith('/api')) {
+      const orgRl = checkOrgRateLimit(orgId, req.nextUrl.pathname, req.method)
       if (!orgRl.allowed) {
         return NextResponse.json(
           {
@@ -79,14 +80,14 @@ export const proxy = auth((request: any) => {
   // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
   if (process.env.NODE_ENV !== 'development') {
     if (
-      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
-      request.nextUrl.pathname.startsWith('/api') &&
-      !request.nextUrl.pathname.startsWith('/api/auth') &&
-      !request.nextUrl.pathname.startsWith('/api/webhooks') &&
-      !request.nextUrl.pathname.startsWith('/api/health') &&
-      !request.nextUrl.pathname.startsWith('/api/cron')
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
+      req.nextUrl.pathname.startsWith('/api') &&
+      !req.nextUrl.pathname.startsWith('/api/auth') &&
+      !req.nextUrl.pathname.startsWith('/api/webhooks') &&
+      !req.nextUrl.pathname.startsWith('/api/health') &&
+      !req.nextUrl.pathname.startsWith('/api/cron')
     ) {
-      if (!request.headers.get('idempotency-key')) {
+      if (!req.headers.get('idempotency-key')) {
         return NextResponse.json(
           {
             error: 'Missing Idempotency-Key header',
@@ -101,13 +102,13 @@ export const proxy = auth((request: any) => {
   }
 
   // ── Cost budget enforcement (denial-of-wallet) ────────────────────────
-  if (process.env.NODE_ENV !== 'development' && request.nextUrl.pathname.startsWith('/api')) {
-    const orgId = request.headers.get('x-org-id')
+  if (process.env.NODE_ENV !== 'development' && req.nextUrl.pathname.startsWith('/api')) {
+    const orgId = req.headers.get('x-org-id')
     if (orgId) {
       const budgetExemptRoutes = ['/api/admin/', '/api/export/', '/api/proof/', '/api/health']
-      const isExempt = budgetExemptRoutes.some((r) => request.nextUrl.pathname.startsWith(r))
+      const isExempt = budgetExemptRoutes.some((r) => req.nextUrl.pathname.startsWith(r))
       if (!isExempt) {
-        const budgetState = request.headers.get('x-budget-state')
+        const budgetState = req.headers.get('x-budget-state')
         if (budgetState === 'exceeded') {
           return NextResponse.json(
             {
@@ -126,12 +127,12 @@ export const proxy = auth((request: any) => {
   // ── Sovereign egress enforcement (block unapproved outbound hosts) ──
   if (
     process.env.SOVEREIGN_EGRESS_ENFORCED === 'true' &&
-    request.nextUrl.pathname.startsWith('/api') &&
-    (request.nextUrl.pathname.includes('/integrations') ||
-      request.nextUrl.pathname.includes('/webhooks') ||
-      request.nextUrl.pathname.includes('/connect'))
+    req.nextUrl.pathname.startsWith('/api') &&
+    (req.nextUrl.pathname.includes('/integrations') ||
+      req.nextUrl.pathname.includes('/webhooks') ||
+      req.nextUrl.pathname.includes('/connect'))
   ) {
-    const targetHost = request.headers.get('x-egress-host')
+    const targetHost = req.headers.get('x-egress-host')
     if (targetHost) {
       const allowed = (process.env.SOVEREIGN_EGRESS_ALLOWLIST ?? '')
         .split(',')
@@ -159,14 +160,14 @@ export const proxy = auth((request: any) => {
   }
 
   // ── Request-ID + Correlation-ID propagation ───────────────────────────
-  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
-  const correlationId = request.headers.get('x-correlation-id') ?? requestId
+  const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
+  const correlationId = req.headers.get('x-correlation-id') ?? requestId
 
   // ── i18n locale detection (cookie / Accept-Language) ─────────────────
-  if (!request.nextUrl.pathname.startsWith('/api')) {
-    const intlResponse = intlMiddleware(request)
+  if (!req.nextUrl.pathname.startsWith('/api')) {
+    const intlResponse = intlMiddleware(req)
     const response = NextResponse.next({
-      request: { headers: new Headers(request.headers) },
+      request: { headers: new Headers(req.headers) },
     })
     intlResponse.cookies.getAll().forEach((c) => response.cookies.set(c))
     response.headers.set('x-request-id', requestId)
@@ -178,7 +179,7 @@ export const proxy = auth((request: any) => {
   response.headers.set('x-request-id', requestId)
   response.headers.set('x-correlation-id', correlationId)
   return response
-}) as (request: NextRequest) => Promise<NextResponse>
+})
 
 export const config = {
   matcher: [

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import createIntlMiddleware from 'next-intl/middleware'
 import { locales, defaultLocale } from './lib/locales'
+
+type ProxyRequest = NextRequest & { auth?: unknown }
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -8,14 +11,14 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'never',
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = (req: any) => {
-  const { pathname } = req.nextUrl
+export const proxy = (req: unknown) => {
+  const request = req as ProxyRequest
+  const { pathname } = request.nextUrl
 
   // -- Idempotency-Key enforcement (fail-closed in pilot/prod) --
   if (process.env.NODE_ENV !== 'development') {
     if (
-      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
       pathname.startsWith('/api') &&
       !pathname.startsWith('/api/auth') &&
       !pathname.startsWith('/api/webhooks') &&
@@ -23,7 +26,7 @@ export const proxy = (req: any) => {
       !pathname.startsWith('/api/cron') &&
       !pathname.startsWith('/api/policies/replay')
     ) {
-      if (!req.headers.get('idempotency-key')) {
+      if (!request.headers.get('idempotency-key')) {
         return NextResponse.json(
           {
             error: 'Missing Idempotency-Key header',
@@ -38,12 +41,12 @@ export const proxy = (req: any) => {
   }
 
   // -- Request-ID + Correlation-ID propagation --
-  const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
-  const correlationId = req.headers.get('x-correlation-id') ?? requestId
+  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+  const correlationId = request.headers.get('x-correlation-id') ?? requestId
 
   // -- Internationalisation --
   if (!pathname.startsWith('/api')) {
-    const intlResponse = intlMiddleware(req)
+    const intlResponse = intlMiddleware(request)
     intlResponse.headers.set('x-request-id', requestId)
     intlResponse.headers.set('x-correlation-id', correlationId)
     return intlResponse
