@@ -8,10 +8,10 @@
 | ID | Gap | Criteria | Owner | Target |
 |----|-----|----------|-------|--------|
 | SOC2-001 | No third-party penetration test completed | CC4.1 | Security Lead | Before pilot GA |
-| SOC2-002 | No formal access review cadence (quarterly attestation) | CC6.2, CC6.3 | Eng Lead | Before pilot GA |
+| SOC2-002 | Live Entra-backed quarterly access recertification evidence incomplete (framework exists; full account enumeration pending) | CC6.2, CC6.3 | Eng Lead | Before pilot GA |
 | SOC2-003 | No documented capacity / scaling thresholds | A1.1 | Platform Lead | Pre-audit |
 | SOC2-004 | Vendor SOC 2 reports not aggregated (Azure, OpenAI, GitHub, Vercel, etc.) | CC9.2 | Compliance PM | Pre-audit |
-| SOC2-005 | Disaster Recovery runbook not exercised | CC7.5, CC9.1 | Platform Lead | Pre-audit |
+| SOC2-005 | Measured live DR exercise with proven RTO/RPO not completed (local evidence drill exists) | CC7.5, CC9.1 | Platform Lead | Pre-audit |
 | SOC2-006 | Formal incident response training records | CC7.4 | Security Lead | Pre-audit |
 
 ## Priority 2 — Type II readiness (after Type I)
