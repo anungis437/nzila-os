@@ -25,7 +25,8 @@ function resolveBaseUrl(): string {
     throw new Error('NEXT_PUBLIC_CONSOLE_URL is required in production for ML server routes')
   }
 
-  throw new Error('NEXT_PUBLIC_CONSOLE_URL is required to use ML server routes')
+  // Local dogfooding default for Console dev server.
+  return 'http://localhost:3001'
 }
 
 /**

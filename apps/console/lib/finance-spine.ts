@@ -113,6 +113,14 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
         logger.warn('treasury_snapshots missing; falling back to environment treasury values')
         return []
       }
+      if (
+        isMissingColumnError(error, 'cash_on_hand') ||
+        isMissingColumnError(error, 'restricted_cash') ||
+        isMissingColumnError(error, 'liabilities_due_30d')
+      ) {
+        logger.warn('treasury_snapshots schema is incomplete; falling back to environment treasury values')
+        return []
+      }
       throw error
     })
 
