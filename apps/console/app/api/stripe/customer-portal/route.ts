@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createPortalSession } from '@nzila/payments-stripe/primitives'
 import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
+import { isAllowedBillingRedirect } from '@/lib/server-redirects'
 import { platformDb } from '@nzila/db/platform'
 import { stripeSubscriptions } from '@nzila/db/schema'
 import { and, eq } from 'drizzle-orm'
@@ -37,6 +38,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const { orgId, customerId, returnUrl } = parsed.data
+
+  if (!isAllowedBillingRedirect(returnUrl, req.nextUrl.origin)) {
+    return NextResponse.json(
+      { error: 'Invalid returnUrl: must be same-origin or allowlisted' },
+      { status: 400 },
+    )
+  }
 
   const orgAccess = await requireOrgAccess(orgId, {
     platformBypass: ['platform_admin', 'studio_admin'],

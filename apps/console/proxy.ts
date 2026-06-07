@@ -21,6 +21,19 @@ type ProxyRequest = NextRequest & { auth?: unknown }
 export const proxy = auth((request: unknown) => {
   const req = request as ProxyRequest
   const trustedSecurityContext = hasTrustedSecurityContext(req)
+  const hasInternalBudgetHeader = req.headers.has('x-budget-state')
+  const hasInternalEgressHeader = req.headers.has('x-egress-host')
+
+  // Block spoofing of internal-only headers unless the trusted context secret validates.
+  if (!trustedSecurityContext && (hasInternalBudgetHeader || hasInternalEgressHeader)) {
+    return NextResponse.json(
+      {
+        error: 'Forbidden: invalid internal security context',
+        code: 'INVALID_SECURITY_CONTEXT',
+      },
+      { status: 403 },
+    )
+  }
   // ── Legacy route redirects (entity → org migration) ──────────────────
   const pathname = req.nextUrl.pathname
   if (pathname.startsWith('/business/orgs')) {
@@ -59,7 +72,7 @@ export const proxy = auth((request: unknown) => {
   }
 
   // ── Org-scoped rate limiting (per-org + route-group buckets) ────────
-  if (process.env.NODE_ENV !== 'development' && trustedSecurityContext) {
+  if (process.env.NODE_ENV !== 'development') {
     const orgId = req.headers.get('x-org-id')
     if (orgId && req.nextUrl.pathname.startsWith('/api')) {
       const orgRl = checkOrgRateLimit(orgId, req.nextUrl.pathname, req.method)
@@ -106,7 +119,6 @@ export const proxy = auth((request: unknown) => {
   // ── Cost budget enforcement (denial-of-wallet) ────────────────────────
   if (
     process.env.NODE_ENV !== 'development' &&
-    trustedSecurityContext &&
     req.nextUrl.pathname.startsWith('/api')
   ) {
     const orgId = req.headers.get('x-org-id')
@@ -114,6 +126,15 @@ export const proxy = auth((request: unknown) => {
       const budgetExemptRoutes = ['/api/admin/', '/api/export/', '/api/proof/', '/api/health']
       const isExempt = budgetExemptRoutes.some((r) => req.nextUrl.pathname.startsWith(r))
       if (!isExempt) {
+        if (!trustedSecurityContext && process.env.INTERNAL_CONTEXT_SHARED_SECRET) {
+          return NextResponse.json(
+            {
+              error: 'Security context unavailable for budget enforcement',
+              code: 'SECURITY_CONTEXT_REQUIRED',
+            },
+            { status: 503 },
+          )
+        }
         const budgetState = req.headers.get('x-budget-state')
         if (budgetState === 'exceeded') {
           return NextResponse.json(
@@ -132,13 +153,22 @@ export const proxy = auth((request: unknown) => {
 
   // ── Sovereign egress enforcement (block unapproved outbound hosts) ──
   if (
-    trustedSecurityContext &&
     process.env.SOVEREIGN_EGRESS_ENFORCED === 'true' &&
     req.nextUrl.pathname.startsWith('/api') &&
     (req.nextUrl.pathname.includes('/integrations') ||
       req.nextUrl.pathname.includes('/webhooks') ||
       req.nextUrl.pathname.includes('/connect'))
   ) {
+    if (!trustedSecurityContext) {
+      return NextResponse.json(
+        {
+          error: 'Security context unavailable for sovereign egress enforcement',
+          code: 'SECURITY_CONTEXT_REQUIRED',
+        },
+        { status: 503 },
+      )
+    }
+
     const targetHost = req.headers.get('x-egress-host')
     if (targetHost) {
       const allowed = (process.env.SOVEREIGN_EGRESS_ALLOWLIST ?? '')

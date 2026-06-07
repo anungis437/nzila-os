@@ -2,7 +2,8 @@
 /**
  * POST /api/stripe/refunds/approve — Approve a pending refund
  *
- * Only finance_approver or org_admin roles can approve.
+ * Org admins can approve pending refunds.
+ * Platform admins/studio admins can approve via platform bypass.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -25,14 +26,6 @@ const ApproveRefundSchema = z.object({
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const auth = await authenticateUser()
   if (!auth.ok) return auth.response
-
-  // Role check: only finance_approver or platform_admin
-  if (!['platform_admin', 'studio_admin'].includes(auth.platformRole)) {
-    return NextResponse.json(
-      { error: 'Forbidden: finance_approver role required' },
-      { status: 403 },
-    )
-  }
 
   const body = await req.json()
   const parsed = ApproveRefundSchema.safeParse(body)

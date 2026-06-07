@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { createCheckoutSession } from '@nzila/payments-stripe/primitives'
 import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
+import { isAllowedBillingRedirect } from '@/lib/server-redirects'
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('stripe:checkout:session')
@@ -39,6 +40,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const input = parsed.data
+
+  if (!isAllowedBillingRedirect(input.successUrl, req.nextUrl.origin)) {
+    return NextResponse.json(
+      { error: 'Invalid successUrl: must be same-origin or allowlisted' },
+      { status: 400 },
+    )
+  }
+
+  if (!isAllowedBillingRedirect(input.cancelUrl, req.nextUrl.origin)) {
+    return NextResponse.json(
+      { error: 'Invalid cancelUrl: must be same-origin or allowlisted' },
+      { status: 400 },
+    )
+  }
 
   const orgAccess = await requireOrgAccess(input.orgId, {
     minRole: 'org_secretary',
