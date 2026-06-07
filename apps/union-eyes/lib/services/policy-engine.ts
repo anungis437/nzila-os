@@ -18,10 +18,8 @@ import { logger } from '@/lib/logger';
 interface EvaluationContext {
   subjectType: 'member' | 'user' | 'organization' | 'action';
   subjectId: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputData: Record<string, any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context?: Record<string, any>;
+  inputData: Record<string, unknown>;
+  context?: Record<string, unknown>;
 }
 
 interface EvaluationResult {
@@ -29,6 +27,50 @@ interface EvaluationResult {
   failureReason?: string;
   actionTaken: 'allowed' | 'denied' | 'warning' | 'escalated';
   applicableRules: string[];
+}
+
+interface PolicyCondition {
+  field: string;
+  operator: string;
+  value: unknown;
+}
+
+interface PolicyRuleRecord {
+  conditions: PolicyCondition | PolicyCondition[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isPolicyCondition(value: unknown): value is PolicyCondition {
+  return isRecord(value)
+    && typeof value.field === 'string'
+    && typeof value.operator === 'string'
+    && 'value' in value;
+}
+
+function toPolicyRuleRecord(value: unknown): PolicyRuleRecord {
+  const record = isRecord(value) ? value : {};
+  const conditions = Array.isArray(record.conditions)
+    ? record.conditions.filter(isPolicyCondition)
+    : isPolicyCondition(record.conditions)
+    ? record.conditions
+    : [];
+
+  return { conditions };
+}
+
+function compareValues(left: unknown, right: unknown): number | null {
+  if (typeof left === 'number' && typeof right === 'number') {
+    return left - right;
+  }
+
+  if (typeof left === 'string' && typeof right === 'string') {
+    return left.localeCompare(right);
+  }
+
+  return null;
 }
 
 export class PolicyEngine {
@@ -121,12 +163,11 @@ export class PolicyEngine {
    * Evaluate a single rule against context
    */
   private async evaluateRule(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rule: unknown,
     context: EvaluationContext
   ): Promise<{ passed: boolean; failureReason?: string }> {
     try {
-      const conditions = rule.conditions;
+      const { conditions } = toPolicyRuleRecord(rule);
       
       // Simple condition evaluation (can be extended for complex logic)
       if (Array.isArray(conditions)) {
@@ -161,8 +202,7 @@ export class PolicyEngine {
   /**
    * Evaluate a single condition
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private evaluateCondition(condition: unknown, data: Record<string, any>): boolean {
+  private evaluateCondition(condition: PolicyCondition, data: Record<string, unknown>): boolean {
     const fieldValue = data[condition.field];
     const expectedValue = condition.value;
     
@@ -177,19 +217,19 @@ export class PolicyEngine {
       
       case '>':
       case 'greater_than':
-        return fieldValue > expectedValue;
+        return (compareValues(fieldValue, expectedValue) ?? -1) > 0;
       
       case '>=':
       case 'greater_or_equal':
-        return fieldValue >= expectedValue;
+        return (compareValues(fieldValue, expectedValue) ?? -1) >= 0;
       
       case '<':
       case 'less_than':
-        return fieldValue < expectedValue;
+        return (compareValues(fieldValue, expectedValue) ?? 1) < 0;
       
       case '<=':
       case 'less_or_equal':
-        return fieldValue <= expectedValue;
+        return (compareValues(fieldValue, expectedValue) ?? 1) <= 0;
       
       case 'in':
       case 'contains':

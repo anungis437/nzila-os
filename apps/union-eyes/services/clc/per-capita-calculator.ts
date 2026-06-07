@@ -50,6 +50,11 @@ export interface MemberStanding {
   duesOwing: number;
 }
 
+type OrganizationSettings = Partial<{
+  perCapitaRate: string | number;
+  remittanceDay: string | number;
+}>;
+
 // =====================================================================================
 // CONFIGURATION
 // =====================================================================================
@@ -186,9 +191,11 @@ return null;
   }
 
   // Get per-capita rate from organization settings
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orgSettings = (org.settings as unknown) || {};
-  const perCapitaRate = parseFloat(orgSettings.perCapitaRate || '1.0');
+  const orgSettings: OrganizationSettings =
+    typeof org.settings === 'object' && org.settings !== null
+      ? (org.settings as OrganizationSettings)
+      : {};
+  const perCapitaRate = parseFloat(String(orgSettings.perCapitaRate ?? '1.0'));
   
   if (perCapitaRate <= 0) {
 return null;
@@ -201,7 +208,7 @@ return null;
   const totalAmount = memberCounts.remittable * perCapitaRate;
 
   // Calculate due date using remittanceDay from settings or default
-  const remittanceDay = parseInt(orgSettings.remittanceDay || DEFAULT_REMITTANCE_DAY.toString());
+  const remittanceDay = parseInt(String(orgSettings.remittanceDay ?? DEFAULT_REMITTANCE_DAY));
   const dueDate = new Date(remittanceYear, remittanceMonth, remittanceDay);
 
   // Get CLC account code (or use default)
@@ -244,9 +251,11 @@ export async function calculateAllPerCapita(
 
   // Filter to those with per-capita rate in settings
   const orgsWithRate = orgsWithParent.filter(org => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const settings = (org.settings as unknown) || {};
-    return settings.perCapitaRate && parseFloat(settings.perCapitaRate) > 0;
+    const settings: OrganizationSettings =
+      typeof org.settings === 'object' && org.settings !== null
+        ? (org.settings as OrganizationSettings)
+        : {};
+    return settings.perCapitaRate !== undefined && parseFloat(String(settings.perCapitaRate)) > 0;
   });
 const calculations: PerCapitaCalculation[] = [];
 

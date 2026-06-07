@@ -18,6 +18,7 @@ import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { Document, Page, StyleSheet, Text, pdf } from '@react-pdf/renderer';
+import { Readable } from 'node:stream';
 import React from 'react';
 // Platform Stripe integration via @nzila/payments-stripe
 import { getStripeClient } from '@nzila/payments-stripe';
@@ -77,6 +78,20 @@ export interface ReceiptData {
   memberName: string;
   memberEmail: string;
   organizationName: string;
+}
+
+function isReadable(value: unknown): value is Readable {
+  return value instanceof Readable;
+}
+
+async function streamToBuffer(stream: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  return Buffer.concat(chunks);
 }
 
 // =============================================================================
@@ -261,9 +276,16 @@ export class PaymentService {
       )
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const buffer = await (pdf(doc) as unknown).toBuffer();
-    const base64 = buffer.toString('base64');
+    const rendered = await pdf(doc).toBuffer();
+    const pdfBuffer = Buffer.isBuffer(rendered)
+      ? rendered
+      : rendered instanceof Uint8Array
+      ? Buffer.from(rendered)
+      : isReadable(rendered)
+      ? await streamToBuffer(rendered)
+      : Buffer.from(String(rendered));
+
+    const base64 = pdfBuffer.toString('base64');
     return `data:application/pdf;base64,${base64}`;
   }
 

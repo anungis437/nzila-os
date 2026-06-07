@@ -69,6 +69,21 @@ export interface EnvelopeResponse {
   createdAt: Date;
 }
 
+type DocuSignRecipient = {
+  recipientId: string;
+  email: string;
+  status?: string;
+  signedDateTime?: string;
+  deliveredDateTime?: string;
+  declinedReason?: string;
+}
+
+type HelloSignSignature = {
+  signer_email_address: string;
+  signature_id: string;
+  status_code: string;
+}
+
 export interface EnvelopeStatus {
   envelopeId: string;
   status: "sent" | "delivered" | "signed" | "completed" | "declined" | "voided";
@@ -221,8 +236,7 @@ export class DocuSignProvider implements SignatureProvider {
       return {
         envelopeId: data.envelopeId,
         status: data.status?.toLowerCase() || "sent",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: (data.recipients?.signers || []).map((signer: unknown) => ({
+        signers: ((data.recipients?.signers as DocuSignRecipient[] | undefined) || []).map((signer) => ({
           signerId: signer.recipientId,
           email: signer.email,
           status: signer.status?.toLowerCase() || "sent",
@@ -405,8 +419,7 @@ export class HelloSignProvider implements SignatureProvider {
       return {
         envelopeId: signatureRequest.signature_request_id,
         status: this.mapHelloSignStatus(signatureRequest.is_complete, signatureRequest.is_declined),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: signatureRequest.signatures.map((sig: unknown) => ({
+        signers: (signatureRequest.signatures as HelloSignSignature[]).map((sig) => ({
           email: sig.signer_email_address,
           signerId: sig.signature_id,
           status: this.mapSignerStatus(sig.status_code),
@@ -462,8 +475,7 @@ export class HelloSignProvider implements SignatureProvider {
       return {
         envelopeId,
         status: this.mapHelloSignStatus(signatureRequest.is_complete, signatureRequest.is_declined),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: signatureRequest.signatures.map((sig: unknown) => ({
+        signers: (signatureRequest.signatures as HelloSignSignature[]).map((sig) => ({
           email: sig.signer_email_address,
           signerId: sig.signature_id,
           status: this.mapSignerStatus(sig.status_code),

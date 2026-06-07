@@ -62,8 +62,7 @@ export async function initializeTracing(): Promise<void> {
   try {
     // Dynamic import to gracefully handle missing packages
     const { NodeSDK } = await import('@opentelemetry/sdk-node');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { Resource } = await import('@opentelemetry/resources') as unknown;
+    const { Resource }: typeof import('@opentelemetry/resources') = await import('@opentelemetry/resources');
     const { 
       SEMRESATTRS_SERVICE_NAME,
       SEMRESATTRS_SERVICE_VERSION,
@@ -103,8 +102,7 @@ export async function initializeTracing(): Promise<void> {
           },
           '@opentelemetry/instrumentation-http': {
             enabled: true,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ignoreIncomingRequestHook: (request: unknown) => {
+            ignoreIncomingRequestHook: (request: { url?: string }) => {
               // Ignore health checks and static assets
               const url: string = request.url || '';
               return url.includes('/health') || 

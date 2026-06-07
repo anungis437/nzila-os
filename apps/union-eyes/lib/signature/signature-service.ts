@@ -17,6 +17,10 @@ import { createHash } from "crypto";
 import { NotificationService } from "@/lib/services/notification-service";
 import DocumentStorageService from "@/lib/services/document-storage-service";
 
+type SignatureDocumentInsert = typeof signatureDocuments.$inferInsert;
+type SignatureAuditTrailInsert = typeof signatureAuditTrail.$inferInsert;
+type DocumentSignerInsert = typeof documentSigners.$inferInsert;
+
 /**
  * Signature Document Service
  */
@@ -107,9 +111,7 @@ export class SignatureService {
     });
 
     // Create document record
-    const [document] = await db
-      .insert(signatureDocuments)
-      .values({
+    const documentInsert: SignatureDocumentInsert = {
         organizationId: data.organizationId,
         title: data.title,
         description: data.description,
@@ -127,9 +129,12 @@ export class SignatureService {
         expiresAt,
         requireAuthentication: data.requireAuthentication || false,
         sequentialSigning: data.sequentialSigning || false,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        metadata: data.metadata as unknown,
-      })
+        metadata: (data.metadata ?? null) as SignatureDocumentInsert['metadata'],
+      };
+
+    const [document] = await db
+      .insert(signatureDocuments)
+      .values(documentInsert)
       .returning();
 
     // Create signer records
@@ -283,8 +288,7 @@ return false;
         await db
           .update(signatureDocuments)
           .set({
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            status: status.status as unknown,
+            status: status.status as SignatureDocumentInsert['status'],
             updatedAt: new Date(),
             completedAt:
               status.status === "completed" ? new Date() : undefined,
@@ -303,7 +307,7 @@ return false;
       if (status.signers?.length) {
         for (const signer of status.signers) {
           const signerStatus = this.mapProviderSignerStatus(signer.status);
-          const updateData: Partial<typeof documentSigners.$inferInsert> = {
+          const updateData: Partial<DocumentSignerInsert> = {
             status: signerStatus,
             signedAt: signer.signedAt,
             viewedAt: signer.viewedAt,
@@ -388,8 +392,7 @@ return false;
         signatureImageUrl: data.signatureImageUrl,
         ipAddress: data.ipAddress,
         userAgent: data.userAgent,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        geolocation: data.geolocation as unknown,
+        geolocation: (data.geolocation ?? null) as DocumentSignerInsert['geolocation'],
         updatedAt: new Date(),
       })
       .where(eq(documentSigners.id, data.signerId))
@@ -610,11 +613,11 @@ export class AuditTrailService {
     geolocation?: unknown;
     metadata?: unknown;
   }) {
-    await db.insert(signatureAuditTrail).values({
+    const auditData: SignatureAuditTrailInsert = {
       ...data,
       timestamp: new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as unknown);
+    };
+    await db.insert(signatureAuditTrail).values(auditData);
   }
 
   static async getDocumentAudit(documentId: string) {

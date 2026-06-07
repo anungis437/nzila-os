@@ -26,6 +26,22 @@ export type NewArbitrationDecision = typeof arbitrationDecisions.$inferInsert;
 export type ArbitrationDecision = typeof arbitrationDecisions.$inferSelect;
 export type NewArbitratorProfile = typeof arbitratorProfiles.$inferInsert;
 export type ArbitratorProfile = typeof arbitratorProfiles.$inferSelect;
+export type ArbitrationDecisionSummary = Omit<ArbitrationDecision, 'fullText'> & {
+  fullText?: string;
+};
+
+type TribunalFilter = ArbitrationDecision['tribunal'];
+type DecisionTypeFilter = ArbitrationDecision['decisionType'];
+type OutcomeFilter = ArbitrationDecision['outcome'];
+type PrecedentValueFilter = ArbitrationDecision['precedentValue'];
+
+function getMonetaryAward(
+  remedy: ArbitrationDecision['remedy']
+): number | undefined {
+  return typeof remedy?.monetaryAward === 'number'
+    ? remedy.monetaryAward
+    : undefined;
+}
 
 export interface PrecedentFilters {
   tribunal?: string[];
@@ -64,7 +80,7 @@ export interface PrecedentComparisonRequest {
 export async function getPrecedentById(
   id: string,
   options: PrecedentSearchOptions = {}
-): Promise<ArbitrationDecision | null> {
+): Promise<ArbitrationDecisionSummary | null> {
   try {
     const decision = await db.query.arbitrationDecisions.findFirst({
       where: eq(arbitrationDecisions.id, id),
@@ -83,8 +99,8 @@ export async function getPrecedentById(
 
     // Optionally exclude full text if not needed
     if (!options.includeFullText) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return { ...decision, fullText: undefined } as unknown;
+      const { fullText: _fullText, ...summary } = decision;
+      return summary;
     }
 
     return decision;
@@ -133,23 +149,26 @@ export async function listPrecedents(
     const conditions: SQL[] = [];
 
     if (filters.tribunal && filters.tribunal.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as unknown));
+      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as TribunalFilter[]));
     }
 
     if (filters.decisionType && filters.decisionType.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.decisionType, filters.decisionType as unknown));
+      conditions.push(
+        inArray(arbitrationDecisions.decisionType, filters.decisionType as DecisionTypeFilter[])
+      );
     }
 
     if (filters.outcome && filters.outcome.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.outcome, filters.outcome as unknown));
+      conditions.push(inArray(arbitrationDecisions.outcome, filters.outcome as OutcomeFilter[]));
     }
 
     if (filters.precedentValue && filters.precedentValue.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.precedentValue, filters.precedentValue as unknown));
+      conditions.push(
+        inArray(
+          arbitrationDecisions.precedentValue,
+          filters.precedentValue as PrecedentValueFilter[]
+        )
+      );
     }
 
     if (filters.arbitrator) {
@@ -209,27 +228,7 @@ export async function listPrecedents(
     const orderByClause = sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
 
     const precedents = await db
-      .select({
-        id: arbitrationDecisions.id,
-        caseNumber: arbitrationDecisions.caseNumber,
-        caseTitle: arbitrationDecisions.caseTitle,
-        tribunal: arbitrationDecisions.tribunal,
-        decisionType: arbitrationDecisions.decisionType,
-        decisionDate: arbitrationDecisions.decisionDate,
-        arbitrator: arbitrationDecisions.arbitrator,
-        union: arbitrationDecisions.union,
-        employer: arbitrationDecisions.employer,
-        outcome: arbitrationDecisions.outcome,
-        precedentValue: arbitrationDecisions.precedentValue,
-        summary: arbitrationDecisions.summary,
-        headnote: arbitrationDecisions.headnote,
-        issueTypes: arbitrationDecisions.issueTypes,
-        jurisdiction: arbitrationDecisions.jurisdiction,
-        sector: arbitrationDecisions.sector,
-        citationCount: arbitrationDecisions.citationCount,
-        viewCount: arbitrationDecisions.viewCount,
-        createdAt: arbitrationDecisions.createdAt,
-      })
+      .select()
       .from(arbitrationDecisions)
       .where(whereClause)
       .orderBy(orderByClause)
@@ -237,8 +236,7 @@ export async function listPrecedents(
       .offset(offset);
 
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      precedents: precedents as unknown,
+      precedents,
       total: count,
       page,
       limit
@@ -339,43 +337,26 @@ export async function searchPrecedents(
     ];
 
     if (filters.precedentValue && filters.precedentValue.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.precedentValue, filters.precedentValue as unknown));
+      conditions.push(
+        inArray(
+          arbitrationDecisions.precedentValue,
+          filters.precedentValue as PrecedentValueFilter[]
+        )
+      );
     }
 
     if (filters.tribunal && filters.tribunal.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as unknown));
+      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as TribunalFilter[]));
     }
 
     const results = await db
-      .select({
-        id: arbitrationDecisions.id,
-        caseNumber: arbitrationDecisions.caseNumber,
-        caseTitle: arbitrationDecisions.caseTitle,
-        tribunal: arbitrationDecisions.tribunal,
-        decisionType: arbitrationDecisions.decisionType,
-        decisionDate: arbitrationDecisions.decisionDate,
-        arbitrator: arbitrationDecisions.arbitrator,
-        union: arbitrationDecisions.union,
-        employer: arbitrationDecisions.employer,
-        outcome: arbitrationDecisions.outcome,
-        precedentValue: arbitrationDecisions.precedentValue,
-        summary: arbitrationDecisions.summary,
-        headnote: arbitrationDecisions.headnote,
-        issueTypes: arbitrationDecisions.issueTypes,
-        jurisdiction: arbitrationDecisions.jurisdiction,
-        sector: arbitrationDecisions.sector,
-        citationCount: arbitrationDecisions.citationCount,
-        viewCount: arbitrationDecisions.viewCount,
-      })
+      .select()
       .from(arbitrationDecisions)
       .where(and(...conditions))
       .orderBy(desc(arbitrationDecisions.precedentValue), desc(arbitrationDecisions.citationCount))
       .limit(limit);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return results as unknown;
+    return results;
   } catch (error) {
     logger.error("Error searching precedents", { error, query, filters, limit });
     throw new Error("Failed to search precedents");
@@ -433,23 +414,13 @@ export async function getRelatedPrecedents(
     conditions.push(sql`${arbitrationDecisions.id} != ${decisionId}`);
 
     const related = await db
-      .select({
-        id: arbitrationDecisions.id,
-        caseNumber: arbitrationDecisions.caseNumber,
-        caseTitle: arbitrationDecisions.caseTitle,
-        decisionDate: arbitrationDecisions.decisionDate,
-        arbitrator: arbitrationDecisions.arbitrator,
-        outcome: arbitrationDecisions.outcome,
-        precedentValue: arbitrationDecisions.precedentValue,
-        summary: arbitrationDecisions.summary,
-      })
+      .select()
       .from(arbitrationDecisions)
       .where(and(...conditions))
       .orderBy(desc(arbitrationDecisions.precedentValue))
       .limit(limit);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return related as unknown;
+    return related;
   } catch (error) {
     logger.error("Error fetching related precedents", { error, decisionId, limit });
     throw new Error("Failed to fetch related precedents");
@@ -504,10 +475,8 @@ export async function updateArbitratorStats(arbitratorName: string): Promise<voi
 
     // Calculate monetary awards
     const monetaryAwards = decisions
-      .filter(d => d.remedy && typeof d.remedy === 'object' && 'monetaryAward' in d.remedy)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map(d => (d.remedy as unknown).monetaryAward)
-      .filter(a => typeof a === 'number');
+      .map((decision) => getMonetaryAward(decision.remedy))
+      .filter((award): award is number => typeof award === 'number');
 
     const averageAward = monetaryAwards.length > 0
       ? (monetaryAwards.reduce((a, b) => a + b, 0) / monetaryAwards.length).toFixed(2)

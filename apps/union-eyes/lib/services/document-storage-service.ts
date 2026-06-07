@@ -13,6 +13,19 @@
 import { logger } from "@/lib/logger";
 import crypto from "crypto";
 
+type AzureStorageBlobModule = typeof import("@azure/storage-blob");
+type BlobServiceClientInstance = InstanceType<AzureStorageBlobModule["BlobServiceClient"]>;
+type S3Module = typeof import("@aws-sdk/client-s3");
+type S3ClientInstance = InstanceType<S3Module["S3Client"]>;
+type S3PresignerModule = typeof import("@aws-sdk/s3-request-presigner");
+
+interface S3Sdk {
+  PutObjectCommand: S3Module["PutObjectCommand"];
+  GetObjectCommand: S3Module["GetObjectCommand"];
+  DeleteObjectCommand: S3Module["DeleteObjectCommand"];
+  getSignedUrl: S3PresignerModule["getSignedUrl"];
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -54,20 +67,9 @@ export interface StorageResult {
 class DocumentStorageService {
   private backend: StorageBackend;
   private bucket: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private s3Client?: unknown;
-  private s3Sdk?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    PutObjectCommand: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    GetObjectCommand: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    DeleteObjectCommand: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getSignedUrl: unknown;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private blobServiceClient?: unknown;
+  private s3Client?: S3ClientInstance;
+  private s3Sdk?: S3Sdk;
+  private blobServiceClient?: BlobServiceClientInstance;
   private azureConnectionString?: string;
   private r2Endpoint?: string;
 
@@ -91,15 +93,14 @@ class DocumentStorageService {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async ensureAzureClient(): Promise<unknown> {
+  private async ensureAzureClient(): Promise<BlobServiceClientInstance> {
     if (this.blobServiceClient) {
       return this.blobServiceClient;
     }
 
     const moduleLoader = await import("module");
     const require = moduleLoader.createRequire(import.meta.url);
-    const azureModule = require("@azure/storage-blob");
+    const azureModule = require("@azure/storage-blob") as AzureStorageBlobModule;
 
     this.blobServiceClient = azureModule.BlobServiceClient.fromConnectionString(
       this.azureConnectionString!
@@ -108,24 +109,15 @@ class DocumentStorageService {
     return this.blobServiceClient;
   }
 
-  private async ensureS3Client(): Promise<{
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    PutObjectCommand: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    GetObjectCommand: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    DeleteObjectCommand: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getSignedUrl: unknown;
-  }> {
+  private async ensureS3Client(): Promise<S3Sdk> {
     if (this.s3Client && this.s3Sdk) {
       return this.s3Sdk;
     }
 
     const moduleLoader = await import("module");
     const require = moduleLoader.createRequire(import.meta.url);
-    const s3Module = require("@aws-sdk/client-s3");
-    const presignerModule = require("@aws-sdk/s3-request-presigner");
+    const s3Module = require("@aws-sdk/client-s3") as S3Module;
+    const presignerModule = require("@aws-sdk/s3-request-presigner") as S3PresignerModule;
 
     this.s3Sdk = {
       PutObjectCommand: s3Module.PutObjectCommand,
@@ -351,6 +343,15 @@ async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
     stream.on("end", () => resolve(Buffer.concat(chunks)));
     stream.on("error", reject);
   });
+}
+
+function isReadableStream(value: unknown): value is NodeJS.ReadableStream {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "on" in value &&
+    typeof value.on === "function"
+  );
 }
 
 // ============================================================================

@@ -82,6 +82,21 @@ export interface ParsedRemittanceFile {
   warnings: string[];
 }
 
+interface ManualEntryRow {
+  employeeId?: string;
+  employeeName?: string;
+  periodStart?: string | Date;
+  periodEnd?: string | Date;
+  grossWages?: number | string;
+  duesAmount?: number | string;
+  copeAmount?: number | string;
+}
+
+interface ManualEntryPayload {
+  employerName?: string;
+  rows?: ManualEntryRow[];
+}
+
 /** Result of processing a remittance file */
 export interface RemittanceProcessingResult {
   remittanceId: string;
@@ -213,16 +228,15 @@ export class ManualEntryConnector implements PayrollConnector {
   readonly vendorName = 'Manual Entry';
 
   async parseFile(data: Buffer | string): Promise<ParsedRemittanceFile> {
-    const json = JSON.parse(typeof data === 'string' ? data : data.toString('utf-8'));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: PayrollDeductionRow[] = (json.rows ?? []).map((r: unknown) => ({
-      employeeId: r.employeeId ?? '',
-      employeeName: r.employeeName ?? '',
-      periodStart: new Date(r.periodStart),
-      periodEnd: new Date(r.periodEnd),
-      grossWages: r.grossWages,
-      duesAmount: moneyToNumber(r.duesAmount) || 0,
-      copeAmount: moneyToNumber(r.copeAmount) || 0,
+    const json = JSON.parse(typeof data === 'string' ? data : data.toString('utf-8')) as ManualEntryPayload;
+    const rows: PayrollDeductionRow[] = (json.rows ?? []).map((row) => ({
+      employeeId: row.employeeId ?? '',
+      employeeName: row.employeeName ?? '',
+      periodStart: new Date(row.periodStart ?? new Date()),
+      periodEnd: new Date(row.periodEnd ?? new Date()),
+      grossWages: row.grossWages !== undefined ? moneyToNumber(row.grossWages) : undefined,
+      duesAmount: moneyToNumber(row.duesAmount ?? 0) || 0,
+      copeAmount: moneyToNumber(row.copeAmount ?? 0) || 0,
     }));
 
     const total = rows.reduce((sum: number, r: PayrollDeductionRow) => sum + r.duesAmount, 0);

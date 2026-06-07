@@ -80,11 +80,21 @@ export interface Tracer {
   startActiveSpan<T>(name: string, fn: (span: Span) => Promise<T>): Promise<T>;
   startActiveSpan<T>(name: string, options: unknown, fn: (span: Span) => Promise<T>): Promise<T>;
 }
+
+interface OTelAPI {
+  trace: {
+    getTracer(name: string, version?: string): Tracer;
+    getSpan(context: unknown): { spanContext(): { traceId: string; spanId: string } } | undefined;
+  };
+  context: {
+    active(): unknown;
+  };
+  SpanStatusCode: typeof SpanStatusCode;
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Lazy-loaded OpenTelemetry API
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let otelApi: unknown = null;
+let otelApi: OTelAPI | null = null;
 
 /**
  * Get OpenTelemetry API (lazy-loaded)
@@ -96,7 +106,7 @@ function getOTelAPI() {
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    otelApi = require('@opentelemetry/api');
+    otelApi = require('@opentelemetry/api') as OTelAPI;
     return otelApi;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
@@ -339,7 +349,10 @@ function createNoOpTracer(): Tracer {
     startSpan: () => createNoOpSpan(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     startActiveSpan: async <T>(nameOrOptions: unknown, fnOrOptions?: unknown, fn?: unknown): Promise<T> => {
-      const actualFn = typeof fnOrOptions === 'function' ? fnOrOptions : fn;
+      const actualFn = (typeof fnOrOptions === 'function' ? fnOrOptions : fn) as ((span: Span) => Promise<T>) | undefined;
+      if (!actualFn) {
+        throw new Error('No-op tracer requires a callback');
+      }
       return await actualFn(createNoOpSpan());
     },
   };

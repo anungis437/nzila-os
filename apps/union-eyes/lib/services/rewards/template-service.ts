@@ -11,6 +11,8 @@ import { eq, and, desc, sql, asc, ne } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 
+type StoredAwardTemplate = typeof awardTemplates.$inferSelect;
+
 export interface AwardTemplateInput {
   name: string;
   description?: string;
@@ -446,26 +448,25 @@ export async function cloneTemplate(
       return { success: false, error: 'Original template not found' };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const template = original.data as unknown;
+    const template = original.data as StoredAwardTemplate;
     const cloned = await createAwardTemplate(
       newOrganizationId,
       {
         name: `${template.name} (Copy)`,
-        description: template.description,
+        description: template.description ?? undefined,
         message: template.message,
         category: template.category,
         type: template.type,
-        pointsValue: template.pointsValue,
-        monetaryValue: template.monetaryValue,
-        badgeName: template.badgeName,
-        badgeIcon: template.badgeIcon,
-        badgeColor: template.badgeColor,
-        tags: template.tags,
-        maxUses: template.maxUses,
-        perUserLimit: template.perUserLimit,
-        requiresApproval: template.requiresApproval,
-        approverRoles: template.approverRoles,
+        pointsValue: template.pointsValue ?? undefined,
+        monetaryValue: template.monetaryValue ?? undefined,
+        badgeName: template.badgeName ?? undefined,
+        badgeIcon: template.badgeIcon ?? undefined,
+        badgeColor: template.badgeColor ?? undefined,
+        tags: template.tags ?? undefined,
+        maxUses: template.maxUses ?? undefined,
+        perUserLimit: template.perUserLimit ?? undefined,
+        requiresApproval: template.requiresApproval ?? undefined,
+        approverRoles: template.approverRoles ?? undefined,
       },
       createdBy
     );
@@ -528,8 +529,15 @@ export async function archiveOldTemplates(organizationId: string, olderThanDays 
         sql`${awardTemplates.createdAt} < ${cutoffDate}`
       ));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return { success: true, archivedCount: (result as unknown).rowCount };
+    const archivedCount =
+      typeof result === 'object' &&
+      result !== null &&
+      'rowCount' in result &&
+      typeof result.rowCount === 'number'
+        ? result.rowCount
+        : 0;
+
+    return { success: true, archivedCount };
   } catch (error) {
     logger.error('[Templates] Error archiving old templates', {
       error,
