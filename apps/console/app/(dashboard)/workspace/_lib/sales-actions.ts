@@ -15,7 +15,7 @@ import { eq } from 'drizzle-orm'
 import { currentUser } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { deals as dealsTable } from '@nzila/db/schema'
-import { requireWorkspaceUser, resolveWorkspaceOrgIdForUser } from './workspace-auth'
+import { requireWorkspaceUser, requireWorkspaceOrgIdForUser } from './workspace-auth'
 import { getHousePartnerId } from './house-partner'
 import { pushDealToHubspot, pullHubspotDeals, toPushInput, type PullSummary } from './hubspot-sync'
 import { PARTNER_STAGES, type PartnerStage } from './sales'
@@ -48,7 +48,7 @@ function revalidateSales() {
 export async function createDeal(formData: FormData): Promise<void> {
   await currentUser()
   const userId = await requireWorkspaceUser()
-  const orgId = await resolveWorkspaceOrgIdForUser(userId)
+  const orgId = await requireWorkspaceOrgIdForUser(userId)
 
   const accountName = str(formData, 'accountName')
   const contactName = str(formData, 'contactName')
@@ -87,7 +87,7 @@ export async function createDeal(formData: FormData): Promise<void> {
 export async function updateDeal(formData: FormData): Promise<void> {
   await currentUser()
   const userId = await requireWorkspaceUser()
-  const orgId = await resolveWorkspaceOrgIdForUser(userId)
+  const orgId = await requireWorkspaceOrgIdForUser(userId)
 
   const dealId = str(formData, 'dealId')
   if (!dealId) return
@@ -123,7 +123,8 @@ export async function updateDeal(formData: FormData): Promise<void> {
 /** Delete a deal. */
 export async function deleteDeal(formData: FormData): Promise<void> {
   await currentUser()
-  await requireWorkspaceUser()
+  const userId = await requireWorkspaceUser()
+  await requireWorkspaceOrgIdForUser(userId)
 
   const dealId = str(formData, 'dealId')
   if (!dealId) return
@@ -144,7 +145,7 @@ export async function deleteDeal(formData: FormData): Promise<void> {
 export async function syncDealsFromHubspot(): Promise<PullSummary> {
   await currentUser()
   const userId = await requireWorkspaceUser()
-  const orgId = await resolveWorkspaceOrgIdForUser(userId)
+  const orgId = await requireWorkspaceOrgIdForUser(userId)
   const summary = await pullHubspotDeals({ orgId })
   revalidateSales()
   return summary

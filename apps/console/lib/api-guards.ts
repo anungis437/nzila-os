@@ -17,7 +17,7 @@ import { orgMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { headers } from 'next/headers'
-import { getUserRole, type NzilaRole } from '@/lib/rbac'
+import { getUserRole, isOperatorRole, type NzilaRole } from '@/lib/rbac'
 import { createRequestContext, runWithContext } from '@nzila/os-core'
 
 // ── Re-exports for route convenience ────────────────────────────────────────
@@ -68,6 +68,12 @@ export async function authenticateUser(): Promise<
     }
   }
   const platformRole = await getUserRole()
+  if (!isOperatorRole(platformRole)) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Forbidden: operator role required' }, { status: 403 }),
+    }
+  }
   return { ok: true, userId, platformRole }
 }
 

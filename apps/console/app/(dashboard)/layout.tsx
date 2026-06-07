@@ -13,6 +13,7 @@ import { SignOutButton } from '@/components/auth/sign-out-button'
 import { navGroups, appLinks } from '@/lib/nav-config'
 import { buildPaletteItems } from '@/lib/palette'
 import { resolveUserIdWithDevPreview } from '@/lib/dev-preview-auth'
+import { requireOperatorRole } from '@/lib/rbac'
 
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
   // Server-side auth gate — runs on Node.js (not Edge) so crypto.subtle works.
@@ -21,6 +22,15 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
   // so the Console can be validated locally; production still redirects.
   const userId = await resolveUserIdWithDevPreview()
   if (!userId) redirect('/sign-in')
+
+  // Console is internal-only. Keep local no-auth preview available for UI work.
+  if (userId !== 'dev-preview') {
+    try {
+      await requireOperatorRole()
+    } catch {
+      redirect('/sign-in')
+    }
+  }
 
   const paletteItems = buildPaletteItems()
 

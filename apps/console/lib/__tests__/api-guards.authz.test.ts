@@ -4,6 +4,7 @@ const h = vi.hoisted(() => {
   const authMock = vi.fn()
   const headersMock = vi.fn()
   const getUserRoleMock = vi.fn()
+  const isOperatorRoleMock = vi.fn((role: string) => ['platform_admin', 'studio_admin', 'ops', 'analyst', 'viewer'].includes(role))
 
   const eqMock = vi.fn((...args: unknown[]) => ({ op: 'eq', args }))
   const andMock = vi.fn((...args: unknown[]) => ({ op: 'and', args }))
@@ -16,6 +17,7 @@ const h = vi.hoisted(() => {
     authMock,
     headersMock,
     getUserRoleMock,
+    isOperatorRoleMock,
     eqMock,
     andMock,
     platformDbMock,
@@ -55,6 +57,7 @@ vi.mock('next/headers', () => ({
 
 vi.mock('@/lib/rbac', () => ({
   getUserRole: h.getUserRoleMock,
+  isOperatorRole: h.isOperatorRoleMock,
 }))
 
 vi.mock('@nzila/os-core', () => ({
@@ -107,7 +110,7 @@ describe('api-guards authz boundaries', () => {
 
   it('denies org access when membership is missing', async () => {
     h.authMock.mockResolvedValueOnce({ userId: 'user_1' })
-    h.getUserRoleMock.mockResolvedValueOnce('org_member')
+    h.getUserRoleMock.mockResolvedValueOnce('ops')
     h.platformDbMock.select.mockImplementationOnce(() => membershipSelectChain([]))
 
     const result = await requireOrgAccess('org_1')
@@ -119,7 +122,7 @@ describe('api-guards authz boundaries', () => {
 
   it('allows org access with active membership and sufficient role', async () => {
     h.authMock.mockResolvedValueOnce({ userId: 'user_1' })
-    h.getUserRoleMock.mockResolvedValueOnce('org_member')
+    h.getUserRoleMock.mockResolvedValueOnce('ops')
     h.platformDbMock.select.mockImplementationOnce(() =>
       membershipSelectChain([
         {
@@ -138,7 +141,7 @@ describe('api-guards authz boundaries', () => {
 
   it('denies org access when member role is below required minimum', async () => {
     h.authMock.mockResolvedValueOnce({ userId: 'user_1' })
-    h.getUserRoleMock.mockResolvedValueOnce('org_member')
+    h.getUserRoleMock.mockResolvedValueOnce('ops')
     h.platformDbMock.select.mockImplementationOnce(() =>
       membershipSelectChain([
         {
@@ -177,7 +180,7 @@ describe('api-guards authz boundaries', () => {
 
   it('enforces allowed platform roles', async () => {
     h.authMock.mockResolvedValueOnce({ userId: 'user_1' })
-    h.getUserRoleMock.mockResolvedValueOnce('org_member')
+    h.getUserRoleMock.mockResolvedValueOnce('viewer')
 
     const denied = await requirePlatformRole('platform_admin')
     expect(denied.ok).toBe(false)

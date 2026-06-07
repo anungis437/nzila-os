@@ -219,7 +219,7 @@ export const LEGACY_SURFACES: Record<WorkspaceKey, Record<string, BridgePanel>> 
         { name: 'Final Go Briefing', href: '/final-go-briefing', description: 'Final go-live briefing pack with sign-off checklist.' },
         { name: 'Field Operations Briefing', href: '/field-operations-briefing', description: 'Field operations readiness briefing for launch teams.' },
         { name: 'NACP Integrity', href: '/nacp-integrity', description: 'NACP data integrity verification and exam pipeline checks.' },
-        { name: 'Isolation Certification', href: '/isolation-certification', description: 'Tenant isolation certification evidence and controls.' },
+        { name: 'Isolation Certification', href: '/isolation-certification', description: 'Client-org isolation certification evidence and controls.' },
       ],
     },
   },
@@ -231,7 +231,7 @@ export const LEGACY_SURFACES: Record<WorkspaceKey, Record<string, BridgePanel>> 
       intro: 'Account, organization, and integration configuration.',
       links: [
         { name: 'System Settings', href: '/settings', description: 'Preferences, configuration, and account.' },
-        { name: 'Organizations', href: '/orgs', description: 'Multi-tenant organization and workspace management.' },
+        { name: 'Organizations', href: '/orgs', description: 'Client organization registry and workspace management.' },
         { name: 'Profile', href: '/settings/profile', description: 'Personal profile, identity, and notification preferences.' },
         { name: 'Organisation', href: '/settings/organisation', description: 'Organisation-level settings, branding, and workspace defaults.' },
         { name: 'Integration Settings', href: '/settings/integrations', description: 'Connect and configure third-party integrations for this workspace.' },

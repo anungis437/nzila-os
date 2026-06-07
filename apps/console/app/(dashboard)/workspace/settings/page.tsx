@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 const SETTINGS_LINKS = [
   { name: 'System Settings', href: '/settings', description: 'Preferences, configuration, and account.' },
-  { name: 'Organizations', href: '/orgs', description: 'Multi-tenant workspace management.' },
+  { name: 'Organizations', href: '/orgs', description: 'Client organization registry and workspace management.' },
 ]
 
 export default async function SettingsWorkspace() {

@@ -207,7 +207,7 @@ export const legacyNavGroups: NavGroupConfig[] = [
   {
     label: 'Admin',
     items: [
-      { name: 'Organizations', href: '/orgs', icon: 'UsersIcon', description: 'Multi-tenant organization and workspace management.' },
+      { name: 'Organizations', href: '/orgs', icon: 'UsersIcon', description: 'Client organization registry and workspace management.' },
       { name: 'Docs', href: '/docs', icon: 'DocumentTextIcon', description: 'Internal documentation and knowledge base.' },
       { name: 'Settings', href: '/settings', icon: 'Cog6ToothIcon', description: 'System settings, preferences, and configuration.' },
       { name: 'Profile', href: '/settings/profile', icon: 'Cog6ToothIcon', description: 'Personal profile, identity, and notification preferences.' },
@@ -238,7 +238,7 @@ export const legacyNavGroups: NavGroupConfig[] = [
       { name: 'Final Go Briefing', href: '/final-go-briefing', icon: 'ClipboardDocumentCheckIcon', description: 'Final go-live briefing pack with sign-off checklist.' },
       { name: 'Field Operations Briefing', href: '/field-operations-briefing', icon: 'ClipboardDocumentCheckIcon', description: 'Field operations readiness briefing for launch teams.' },
       { name: 'NACP Integrity', href: '/nacp-integrity', icon: 'ShieldExclamationIcon', description: 'NACP data integrity verification and exam pipeline checks.' },
-      { name: 'Isolation Certification', href: '/isolation-certification', icon: 'LockClosedIcon', description: 'Tenant isolation certification evidence and controls.' },
+      { name: 'Isolation Certification', href: '/isolation-certification', icon: 'LockClosedIcon', description: 'Client-org isolation certification evidence and controls.' },
     ],
   },
   // ── Executive Cockpits — platform & portfolio leadership surfaces ──────────

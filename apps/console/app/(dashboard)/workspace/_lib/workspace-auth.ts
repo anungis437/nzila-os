@@ -4,6 +4,7 @@ import { platformDb } from '@nzila/db/platform'
 import { orgMembers } from '@nzila/db/schema'
 import { getExecutiveOrgId } from '@/lib/executive-os'
 import { resolveUserIdWithDevPreview } from '@/lib/dev-preview-auth'
+import { requireOperatorRole } from '@/lib/rbac'
 
 /**
  * Auth gate for the Console workspace surface.
@@ -16,7 +17,12 @@ import { resolveUserIdWithDevPreview } from '@/lib/dev-preview-auth'
  */
 export async function requireWorkspaceUser(): Promise<string> {
   const userId = await resolveUserIdWithDevPreview()
-  if (userId) return userId
+  if (userId) {
+    if (userId !== 'dev-preview') {
+      await requireOperatorRole()
+    }
+    return userId
+  }
   redirect('/sign-in')
 }
 
@@ -36,4 +42,20 @@ export async function resolveWorkspaceOrgIdForUser(userId: string): Promise<stri
   }
 
   return getExecutiveOrgId()
+}
+
+/**
+ * Resolve a mandatory org context for server-side workspace mutations.
+ */
+export async function requireWorkspaceOrgIdForUser(userId: string): Promise<string> {
+  // Preserve the local dev preview shortcut while still enforcing operator role in real sessions.
+  if (userId !== 'dev-preview') {
+    await requireOperatorRole()
+  }
+
+  const orgId = await resolveWorkspaceOrgIdForUser(userId)
+  if (!orgId) {
+    throw new Error('Forbidden: no active workspace organization context')
+  }
+  return orgId
 }
