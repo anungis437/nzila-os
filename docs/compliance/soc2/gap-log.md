@@ -9,7 +9,6 @@
 |----|-----|----------|-------|--------|
 | SOC2-001 | No third-party penetration test completed | CC4.1 | Security Lead | Before pilot GA |
 | SOC2-004 | Vendor SOC 2 reports not aggregated (Azure, OpenAI, GitHub, Vercel, etc.) | CC9.2 | Compliance PM | Pre-audit |
-| SOC2-006 | Formal incident response training records | CC7.4 | Security Lead | Pre-audit |
 
 ## Priority 2 — Type II readiness (after Type I)
 
@@ -35,6 +34,7 @@
 | SOC2-CL-009 | Quarterly access recertification lacked live Entra evidence (CC6.2, CC6.3) | Jun 2026 | `reports/compliance/access-review/2026-Q2.json` + `reports/compliance/access-review/captures/2026-Q2/` |
 | SOC2-CL-010 | DR exercise lacked measured live restore evidence (CC7.5, CC9.1) | May 2026 | `reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json` + `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md` |
 | SOC2-CL-011 | Capacity/scaling thresholds missing (A1.1) | Jun 2026 | `docs/compliance/soc2/capacity-scaling-thresholds.md` |
+| SOC2-CL-012 | Incident response training records missing (CC7.4) | Jun 2026 | `governance/privacy/incidents/incident-response-training-log.md` + `governance/privacy/incidents/exercises/2026-Q2/` |
 
 ## Notes
 

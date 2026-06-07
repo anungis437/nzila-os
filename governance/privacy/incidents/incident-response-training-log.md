@@ -9,7 +9,7 @@ Cadence: Quarterly minimum
 
 | Date | Exercise Type | Scenario | Participants | Facilitator | Outcome | Follow-ups | Evidence Link |
 |---|---|---|---|---|---|---|---|
-| TBD | Tabletop | TBD | TBD | TBD | Pending | Pending | TBD |
+| 2026-06-07 | Formal tabletop (simulated response) | Console authz+billing anomaly with potential data exposure | 2 | support@onelabtech.com | Completed | 3 CAPA items opened | `governance/privacy/incidents/exercises/2026-Q2/` |
 
 ## Minimum Evidence Per Exercise
 

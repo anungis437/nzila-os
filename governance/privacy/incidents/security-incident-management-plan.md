@@ -39,6 +39,7 @@
 - All on-call have access to this plan, paging tools, and break-glass credentials.
 - Quarterly tabletop exercise (next: 2026-Q3).
 - Annual DR test of Postgres restore.
+- Latest completed tabletop evidence: `governance/privacy/incidents/exercises/2026-Q2/`.
 
 ### 4.2 Detection & Analysis
 - Sources: Azure Defender alerts, Snyk/Trivy CVE alerts, application audit logs, user reports, vendor breach notifications (24-hour SLA per DPA).
