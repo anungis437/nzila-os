@@ -17,7 +17,7 @@ import { Card } from '@nzila/ui'
 import { notFound } from 'next/navigation'
 import { getExecutiveOrgId } from '@/lib/executive-os'
 import { getIntegrationConnection } from '@/lib/integrations-connections'
-import type { ProviderKey } from '@/lib/integrations-provider-catalog'
+import { providerCatalog, type ProviderKey } from '@/lib/integrations-provider-catalog'
 import { ProviderConnectionForm } from './provider-connection-form'
 
 export const dynamic = 'force-dynamic'
@@ -29,7 +29,6 @@ interface ProviderMeta {
   type: string
   typeLabel: string
   color: string
-  secrets: string[]
   configHints: string[]
 }
 
@@ -39,7 +38,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'email',
     typeLabel: 'Email',
     color: 'bg-black',
-    secrets: ['apiKey'],
     configHints: ['Obtain your API key from resend.com/api-keys'],
   },
   sendgrid: {
@@ -47,7 +45,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'email',
     typeLabel: 'Email',
     color: 'bg-blue-600',
-    secrets: ['apiKey'],
     configHints: ['Create an API key at app.sendgrid.com/settings/api_keys'],
   },
   mailgun: {
@@ -55,7 +52,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'email',
     typeLabel: 'Email',
     color: 'bg-red-600',
-    secrets: ['apiKey', 'domain'],
     configHints: ['Supports US and EU regions.', 'Provide your sending domain.'],
   },
   twilio: {
@@ -63,7 +59,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'sms',
     typeLabel: 'SMS',
     color: 'bg-red-500',
-    secrets: ['accountSid', 'authToken', 'fromNumber'],
     configHints: ['TCPA compliance is your responsibility.'],
   },
   firebase: {
@@ -71,7 +66,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'push',
     typeLabel: 'Push',
     color: 'bg-amber-500',
-    secrets: ['projectId', 'clientEmail', 'privateKey'],
     configHints: ['Uses Firebase Admin SDK. Download service account JSON from Firebase console.'],
   },
   slack: {
@@ -79,7 +73,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'chatops',
     typeLabel: 'ChatOps',
     color: 'bg-purple-600',
-    secrets: ['webhookUrl', 'botToken (optional)', 'defaultChannel (optional)'],
     configHints: [
       'Incoming webhook works without a bot token.',
       'Bot token enables channel routing via chat.postMessage.',
@@ -90,7 +83,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'chatops',
     typeLabel: 'ChatOps',
     color: 'bg-indigo-600',
-    secrets: ['webhookUrl'],
     configHints: [
       'Create an incoming webhook in a Teams channel.',
       'Messages are sent as Adaptive Cards v1.4.',
@@ -101,7 +93,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'crm',
     typeLabel: 'CRM',
     color: 'bg-orange-500',
-    secrets: ['accessToken'],
     configHints: [
       'Use a private app access token with CRM scopes.',
       'Rate-limit backoff (429) handled automatically.',
@@ -112,7 +103,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'productivity',
     typeLabel: 'Productivity',
     color: 'bg-blue-700',
-    secrets: ['tenantId', 'clientId', 'clientSecret'],
     configHints: [
       'Register an app in Microsoft Entra ID with Microsoft Graph scopes.',
       'Use delegated scopes for user workflows and application scopes for background jobs.',
@@ -123,7 +113,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'productivity',
     typeLabel: 'Productivity',
     color: 'bg-emerald-600',
-    secrets: ['clientId', 'clientSecret', 'refreshToken'],
     configHints: [
       'Create OAuth credentials in Google Cloud Console and enable required Workspace APIs.',
       'Use domain-wide delegation for admin-level automation where applicable.',
@@ -134,7 +123,6 @@ const providerMeta: Record<string, ProviderMeta> = {
     type: 'webhooks',
     typeLabel: 'Webhooks',
     color: 'bg-gray-700',
-    secrets: ['signingSecret'],
     configHints: [
       'HMAC-SHA256 signatures sent via X-Nzila-Signature header.',
       'Idempotency keys prevent duplicate processing.',
@@ -162,7 +150,8 @@ interface Props {
 export default async function ProviderDetailPage(props: Props) {
   const { provider } = await props.params
   const meta = providerMeta[provider]
-  if (!meta) notFound()
+  if (!meta || !(provider in providerCatalog)) notFound()
+  const requiredSecrets = providerCatalog[provider as ProviderKey].requiredSecrets
 
   const orgId = await getExecutiveOrgId()
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -249,7 +238,7 @@ export default async function ProviderDetailPage(props: Props) {
             <ProviderConnectionForm
               provider={provider}
               orgId={orgId}
-              secrets={meta.secrets}
+              secrets={requiredSecrets}
             />
           ) : (
             <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-900">
