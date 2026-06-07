@@ -121,7 +121,9 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
         logger.warn('treasury_snapshots schema is incomplete; falling back to environment treasury values')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`treasury_snapshots query failed; falling back to environment treasury values (${message})`)
+      return []
     })
 
   const invoicePromise = platformDb
