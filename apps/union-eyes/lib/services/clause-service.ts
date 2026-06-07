@@ -551,13 +551,18 @@ export async function getMostViewedClauses(
   cbaId?: string
 ): Promise<Clause[]> {
   try {
-    const query = db
-      .select()
-      .from(cbaClause)
-      .orderBy(desc(cbaClause.viewCount))
-      .$dynamic();
-
-    const clauses = await (cbaId ? query.where(eq(cbaClause.cbaId, cbaId)) : query).limit(limit);
+    const clauses = cbaId
+      ? await db
+          .select()
+          .from(cbaClause)
+          .where(eq(cbaClause.cbaId, cbaId))
+          .orderBy(desc(cbaClause.viewCount))
+          .limit(limit)
+      : await db
+          .select()
+          .from(cbaClause)
+          .orderBy(desc(cbaClause.viewCount))
+          .limit(limit);
 
     return clauses;
   } catch (error) {
