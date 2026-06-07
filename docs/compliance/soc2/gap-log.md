@@ -8,10 +8,8 @@
 | ID | Gap | Criteria | Owner | Target |
 |----|-----|----------|-------|--------|
 | SOC2-001 | No third-party penetration test completed | CC4.1 | Security Lead | Before pilot GA |
-| SOC2-002 | Live Entra-backed quarterly access recertification evidence incomplete (framework exists; full account enumeration pending) | CC6.2, CC6.3 | Eng Lead | Before pilot GA |
 | SOC2-003 | No documented capacity / scaling thresholds | A1.1 | Platform Lead | Pre-audit |
 | SOC2-004 | Vendor SOC 2 reports not aggregated (Azure, OpenAI, GitHub, Vercel, etc.) | CC9.2 | Compliance PM | Pre-audit |
-| SOC2-005 | Measured live DR exercise with proven RTO/RPO not completed (local evidence drill exists) | CC7.5, CC9.1 | Platform Lead | Pre-audit |
 | SOC2-006 | Formal incident response training records | CC7.4 | Security Lead | Pre-audit |
 
 ## Priority 2 — Type II readiness (after Type I)
@@ -35,6 +33,8 @@
 | SOC2-CL-006 | Cross-org idempotency collision risk (CC6.1) | May 2026 P0 sprint | `intake/route.ts` org-scoped hash + `withRLSContext` duplicate check; 4/4 cross-org isolation tests |
 | SOC2-CL-007 | Unscoped assignClaim / claim mutation helpers (CC6.1) | May 2026 P0 sprint | `workflow-engine.ts` + `claims-queries.ts` org-scoped; 38/38 tests pass |
 | SOC2-CL-008 | No canonical runtime truth source (A1.2, CC9.2) | May 2026 P0 sprint | `reports/runtime/platform-runtime-truth-latest.json` (status: HEALTHY — EXC-001 resolved 2026-05-14; prod/staging separated, `sharedBlastRadius: false`) |
+| SOC2-CL-009 | Quarterly access recertification lacked live Entra evidence (CC6.2, CC6.3) | Jun 2026 | `reports/compliance/access-review/2026-Q2.json` + `reports/compliance/access-review/captures/2026-Q2/` |
+| SOC2-CL-010 | DR exercise lacked measured live restore evidence (CC7.5, CC9.1) | May 2026 | `reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json` + `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md` |
 
 ## Notes
 

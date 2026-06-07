@@ -1,0 +1,415 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#users(id,userPrincipalName,accountEnabled,signInActivity)",
+  "value": [
+    {
+      "accountEnabled": true,
+      "id": "4adcdb6d-43aa-4fb0-8583-11c862e387d8",
+      "userPrincipalName": "adwoa@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "fc4b6b30-5c39-489e-a0a1-4bf7e00c9fd2",
+      "userPrincipalName": "ama@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "b856d778-a013-4205-9900-3a5a660352db",
+      "userPrincipalName": "anungisa@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "a88c6cf4-adc7-4287-a553-53b93cd1f002",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2026-06-04T07:28:51Z",
+        "lastNonInteractiveSignInRequestId": "95370f06-f363-4d54-8bca-903b98e91a00",
+        "lastSignInDateTime": "2026-05-26T22:31:32Z",
+        "lastSignInRequestId": "7388a817-5784-4265-beae-1b8226397f00",
+        "lastSuccessfulSignInDateTime": "2026-06-04T07:28:51Z",
+        "lastSuccessfulSignInRequestId": "95370f06-f363-4d54-8bca-903b98e91a00"
+      },
+      "userPrincipalName": "aubert@onelabtech.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "b210a094-7a0e-4c36-8a1f-07083e41344c",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2026-06-03T00:54:48Z",
+        "lastNonInteractiveSignInRequestId": "374e24e9-a046-48ac-9bd2-db9b054d1700",
+        "lastSignInDateTime": "2025-09-19T12:56:21Z",
+        "lastSignInRequestId": "da2be0e6-5a72-4f6e-9f96-85036b3d1900",
+        "lastSuccessfulSignInDateTime": "2026-06-03T00:54:48Z",
+        "lastSuccessfulSignInRequestId": "374e24e9-a046-48ac-9bd2-db9b054d1700"
+      },
+      "userPrincipalName": "david@onelabtech.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "f35cd433-1f78-46d3-8cb1-886d3e541115",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2026-03-03T23:17:55Z",
+        "lastNonInteractiveSignInRequestId": "1b480297-24ef-44fb-802b-bfc4e7e00d00",
+        "lastSignInDateTime": "2025-01-06T17:15:25Z",
+        "lastSignInRequestId": "37d866ff-65fc-4b66-ae78-416d1d602b01",
+        "lastSuccessfulSignInDateTime": "2026-03-03T23:17:55Z",
+        "lastSuccessfulSignInRequestId": "1b480297-24ef-44fb-802b-bfc4e7e00d00"
+      },
+      "userPrincipalName": "help@onelabtech.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "50b6a38a-f37d-40ae-b2cf-67e0886ebfe4",
+      "userPrincipalName": "kofi@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "2f9fbe39-cd27-4647-b70c-749a9b8eb91e",
+      "userPrincipalName": "kwame@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": false,
+      "id": "900407bc-184e-4e95-a2b5-4415aa377ec4",
+      "userPrincipalName": "letschat@onelabtech.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "75db2daf-446e-47d9-8f77-78531098658a",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2026-06-07T05:05:47Z",
+        "lastNonInteractiveSignInRequestId": "8c28ed3f-599e-4e16-b85b-e388341f8400",
+        "lastSignInDateTime": null,
+        "lastSignInRequestId": null,
+        "lastSuccessfulSignInDateTime": "2026-06-07T05:05:47Z",
+        "lastSuccessfulSignInRequestId": "8c28ed3f-599e-4e16-b85b-e388341f8400"
+      },
+      "userPrincipalName": "michel_nungisalaw.ca#EXT#@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "813034f1-0fb6-40f5-aaca-2d3175c8197a",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2024-04-19T01:41:10Z",
+        "lastNonInteractiveSignInRequestId": "8670f9da-ad0a-4183-85c0-bf9866615d00",
+        "lastSignInDateTime": "2024-04-19T01:41:30Z",
+        "lastSignInRequestId": "441b1af4-84f9-4099-9b7f-ef1c992c5800",
+        "lastSuccessfulSignInDateTime": "2024-04-19T01:41:10Z",
+        "lastSuccessfulSignInRequestId": "8670f9da-ad0a-4183-85c0-bf9866615d00"
+      },
+      "userPrincipalName": "MSP-Support@onelabtech.com"
+    },
+    {
+      "accountEnabled": false,
+      "id": "f2b11226-4a4d-4edd-a234-7bd18d089372",
+      "userPrincipalName": "notifications@onelabtech.com"
+    },
+    {
+      "accountEnabled": false,
+      "id": "7226e0a5-0cd2-4887-ba42-51bdf5a9b5db",
+      "userPrincipalName": "oltadmin@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "b0897ebb-70df-4986-a4d4-1264f43f5274",
+      "userPrincipalName": "omarelamin@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": false,
+      "id": "e40af832-0f32-4727-9a17-61417a4f4f1c",
+      "userPrincipalName": "OneLabTechnologiesCorp1@onelabtech.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "4abf6432-8c9c-41e1-9471-ce76458f7d8e",
+      "userPrincipalName": "racheltorres@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": false,
+      "id": "46847164-19a4-4b0e-bc21-83fea456168a",
+      "userPrincipalName": "reports@onelabtech.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "fcb34d85-3e87-4213-9fc4-435656b17f44",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2026-06-07T05:00:59Z",
+        "lastNonInteractiveSignInRequestId": "03d1c1e0-fdbd-4a02-be1c-35e407bc1c00",
+        "lastSignInDateTime": "2026-06-06T03:31:08Z",
+        "lastSignInRequestId": "67565358-17d3-40a0-828f-57c2d4080f00",
+        "lastSuccessfulSignInDateTime": "2026-06-07T05:00:59Z",
+        "lastSuccessfulSignInRequestId": "03d1c1e0-fdbd-4a02-be1c-35e407bc1c00"
+      },
+      "userPrincipalName": "support@onelabtech.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "cff16f9b-f7c2-42e3-9961-c7caecfc5105",
+      "userPrincipalName": "testanalyticsmgr@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "8b17189f-461d-480d-a2e7-2c53df6f812d",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:51Z",
+        "lastSignInRequestId": "07be404d-86ee-4c96-8219-fb81ce393400",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:51Z",
+        "lastSuccessfulSignInRequestId": "07be404d-86ee-4c96-8219-fb81ce393400"
+      },
+      "userPrincipalName": "testbargcom.cupel123@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "7aed958f-5ea7-4d4f-824b-d0c1ff1df013",
+      "userPrincipalName": "testbargcom@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "a562a25e-ea13-46e0-95b4-d6d02271cc09",
+      "userPrincipalName": "testbillingmgr@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "bfc62fda-dd40-44fe-a426-228d4c1b5e04",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:50Z",
+        "lastSignInRequestId": "5a8fdbb0-3e1c-420b-a6f4-6558c7633a00",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:50Z",
+        "lastSuccessfulSignInRequestId": "5a8fdbb0-3e1c-420b-a6f4-6558c7633a00"
+      },
+      "userPrincipalName": "testchiefsteward.cupel123@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "e041e2c4-77a3-443f-a3ca-50f6e87c436b",
+      "userPrincipalName": "testchiefsteward@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "7f0713bd-9cb5-4290-87b0-c872b1dea920",
+      "userPrincipalName": "testclcexec@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "34fdedac-6313-4fef-b3ee-96e94daf52f4",
+      "userPrincipalName": "testclcstaff@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "7b953dbe-8418-4b9a-ae67-719c26e1ce20",
+      "userPrincipalName": "testcomplmgr@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "1f7fb213-149b-4b90-9ea0-884d4c9e0837",
+      "userPrincipalName": "testcoo@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "8c0c0cc1-84ec-43e2-9b55-fa99bd4e61d6",
+      "userPrincipalName": "testcsdir@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "7a4502a9-f926-46ef-8e04-96537bbc495c",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:26Z",
+        "lastSignInRequestId": "df4c70d9-5304-498a-9ed6-c84be4dd3d00",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:26Z",
+        "lastSuccessfulSignInRequestId": "df4c70d9-5304-498a-9ed6-c84be4dd3d00"
+      },
+      "userPrincipalName": "testcto@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "c36dbfb9-2b77-4306-a852-5ca8f9004cd8",
+      "userPrincipalName": "testfedexec@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "f5cec486-cf33-4fae-a2df-2433eff6fdc7",
+      "userPrincipalName": "testfedstaff@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "081c72da-c664-4e51-9d70-60d8cd94a023",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:51Z",
+        "lastSignInRequestId": "535b32f3-cbe1-4a23-a516-d32c36642b00",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:51Z",
+        "lastSuccessfulSignInRequestId": "535b32f3-cbe1-4a23-a516-d32c36642b00"
+      },
+      "userPrincipalName": "testhsr.cupel123@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "bff78444-ab81-435d-bc0e-4c5881cb947f",
+      "userPrincipalName": "testhsr@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "a3209853-114b-4d71-ac53-4c2a62148c4d",
+      "userPrincipalName": "testintegmgr@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "ce51e1ed-86de-4815-970a-784fd20862d6",
+      "userPrincipalName": "testnatofficer@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "fa302567-eec7-4dd5-b3e6-01d92e63a67b",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:49Z",
+        "lastSignInRequestId": "9e3efcd0-13ae-4efc-9cca-8534a8d62600",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:49Z",
+        "lastSuccessfulSignInRequestId": "9e3efcd0-13ae-4efc-9cca-8534a8d62600"
+      },
+      "userPrincipalName": "testofficer.cupel123@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "2a152e06-8298-4cfe-8c25-7b33e406be46",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:25Z",
+        "lastSignInRequestId": "5a8fdbb0-3e1c-420b-a6f4-6558bd613a00",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:25Z",
+        "lastSuccessfulSignInRequestId": "5a8fdbb0-3e1c-420b-a6f4-6558bd613a00"
+      },
+      "userPrincipalName": "testofficer@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "e3ac74fa-e84d-4473-aea1-8575bcbf6dee",
+      "userPrincipalName": "testplatformlead@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "e6160112-d13d-4ce6-9b53-416313e84cdb",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:49Z",
+        "lastSignInRequestId": "2462bc28-aa46-4cc1-8523-bd1286657c00",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:49Z",
+        "lastSuccessfulSignInRequestId": "2462bc28-aa46-4cc1-8523-bd1286657c00"
+      },
+      "userPrincipalName": "testpresident.cupel123@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "567ff30c-717c-41cc-b3f5-bc2b899a39c1",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2026-04-06T07:07:37Z",
+        "lastNonInteractiveSignInRequestId": "2594898e-def7-459a-8c22-117542043300",
+        "lastSignInDateTime": "2026-04-06T07:07:36Z",
+        "lastSignInRequestId": "a3391e69-818c-4489-8e3f-bff204283a00",
+        "lastSuccessfulSignInDateTime": "2026-04-06T07:07:37Z",
+        "lastSuccessfulSignInRequestId": "2594898e-def7-459a-8c22-117542043300"
+      },
+      "userPrincipalName": "testpresident@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "ff690043-ea1f-434d-b6a1-9a3400c102c9",
+      "userPrincipalName": "testsecmgr@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "ec5574ef-0c74-4e3e-8189-b01b156c840f",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:50Z",
+        "lastSignInRequestId": "525d8277-e6b7-4bd9-97a9-a3909bd92800",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:50Z",
+        "lastSuccessfulSignInRequestId": "525d8277-e6b7-4bd9-97a9-a3909bd92800"
+      },
+      "userPrincipalName": "testsectreasurer.cupel123@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "f0d46ee5-c829-4ce0-92e3-b76ff362e78c",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2026-04-09T03:47:10Z",
+        "lastNonInteractiveSignInRequestId": "424bc25d-2820-4e6f-80e8-c3a4955f0d00",
+        "lastSignInDateTime": "2026-04-09T03:47:10Z",
+        "lastSignInRequestId": "0c77c142-0c0c-4d96-89b6-c8934f881200",
+        "lastSuccessfulSignInDateTime": "2026-04-09T03:47:10Z",
+        "lastSuccessfulSignInRequestId": "0c77c142-0c0c-4d96-89b6-c8934f881200"
+      },
+      "userPrincipalName": "testsectreasurer@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "ac82a705-8c2c-4f78-9daa-2997eff2d641",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:25Z",
+        "lastSignInRequestId": "e2d493e2-0b8a-4c12-b428-f9e7e62e3000",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:25Z",
+        "lastSuccessfulSignInRequestId": "e2d493e2-0b8a-4c12-b428-f9e7e62e3000"
+      },
+      "userPrincipalName": "teststeward@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "03248eea-46a3-4282-9c02-7a6ebd1e049f",
+      "userPrincipalName": "testsupportmgr@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "76dc9804-ff70-4654-8617-65d6db0ef708",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:26Z",
+        "lastSignInRequestId": "83beabe5-5577-4c1a-b176-2991b2842600",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:26Z",
+        "lastSuccessfulSignInRequestId": "83beabe5-5577-4c1a-b176-2991b2842600"
+      },
+      "userPrincipalName": "testsysadmin2@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "31f582ce-eb6d-4d51-8547-aa15ecf6f2af",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": null,
+        "lastNonInteractiveSignInRequestId": null,
+        "lastSignInDateTime": "2026-04-06T00:44:49Z",
+        "lastSignInRequestId": "07053b46-4670-402b-9298-640dd2c12400",
+        "lastSuccessfulSignInDateTime": "2026-04-06T00:44:49Z",
+        "lastSuccessfulSignInRequestId": "07053b46-4670-402b-9298-640dd2c12400"
+      },
+      "userPrincipalName": "testvp.cupel123@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "e332c499-5056-4e5d-bf8b-304dc836b3e0",
+      "signInActivity": {
+        "lastNonInteractiveSignInDateTime": "2026-04-06T04:40:53Z",
+        "lastNonInteractiveSignInRequestId": "8e3b0ba7-046c-447d-b4db-9bfbdd3d3c00",
+        "lastSignInDateTime": "2026-04-06T04:40:52Z",
+        "lastSignInRequestId": "a868d01b-9d36-4099-a415-bf62c5550100",
+        "lastSuccessfulSignInDateTime": "2026-04-06T04:40:53Z",
+        "lastSuccessfulSignInRequestId": "8e3b0ba7-046c-447d-b4db-9bfbdd3d3c00"
+      },
+      "userPrincipalName": "testvp@onelabtech.onmicrosoft.com"
+    },
+    {
+      "accountEnabled": true,
+      "id": "4b6f8ef6-fe9f-4176-a5d8-477f20c5b849",
+      "userPrincipalName": "yukitanaka@onelabtech.onmicrosoft.com"
+    }
+  ]
+}

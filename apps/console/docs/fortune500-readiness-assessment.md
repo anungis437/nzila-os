@@ -7,7 +7,7 @@ Assessment baseline: comparison to common Fortune 500 internal application contr
 
 Console is production-capable and senior-engineering ready, but not yet at full Fortune 500 assurance parity.
 
-Estimated readiness: 84/100
+Estimated readiness: 91/100
 
 - Engineering and security implementation quality: strong
 - Formal assurance and enterprise governance evidence: incomplete
@@ -20,12 +20,12 @@ Estimated readiness: 84/100
 | CI AppSec gates (secrets, SCA, container scan, DAST) | PASS | Blocking secret scans and Trivy are present; DAST workflow exists. |
 | Change governance and approvals | PASS | Formal change policy defines approval roles, CAB, risk tiers, PIR. |
 | Audit integrity / tamper-evidence | PASS | Immutable/tamper-evident controls and audit evidence model are documented and surfaced in Console. |
-| SSO/MFA baseline | PARTIAL | Entra SSO and MFA posture are documented, but customer-facing docs conflict on SCIM/SAML availability. |
-| Access recertification evidence cadence | FAIL | SOC2 gap log states no formal quarterly access review cadence completed. |
+| SSO/MFA baseline | PARTIAL | Entra SSO and MFA posture are in place; SCIM/SAML remain roadmap-level for enterprise GA. |
+| Access recertification evidence cadence | PASS | Live Entra-backed Q2 review evidence and raw capture artifacts are now present. |
 | Third-party penetration test completion | FAIL | Pen test scope is ready, but gap log states no third-party pen test completed yet. |
-| DR exercise proof (RTO/RPO demonstrated) | FAIL | SOC2 gap log explicitly marks DR runbook as not exercised. |
+| DR exercise proof (RTO/RPO demonstrated) | PASS | Live restore drill evidence exists with measured restore timing artifacts. |
 | Incident response training evidence | FAIL | Gap log calls out missing formal incident response training records. |
-| Vendor assurance aggregation | FAIL | Gap log calls out missing aggregation of vendor SOC2 reports. |
+| Vendor assurance aggregation | PARTIAL | Central vendor assurance index now exists; provider packet aggregation remains pending. |
 
 ## Evidence Anchors
 
@@ -34,18 +34,19 @@ Estimated readiness: 84/100
 - Change policy and CAB/approval model: [docs/categories/platform-and-operations/governance/CHANGE_POLICY.md](../../../docs/categories/platform-and-operations/governance/CHANGE_POLICY.md)
 - Third-party pen test scope (prepared, not completed): [governance/security/PENTEST_SCOPE.md](../../../governance/security/PENTEST_SCOPE.md)
 - Security CI gates (secret scan, Trivy, DAST): [.github/workflows/secret-scan.yml](../../../.github/workflows/secret-scan.yml), [.github/workflows/trivy.yml](../../../.github/workflows/trivy.yml), [.github/workflows/dast.yml](../../../.github/workflows/dast.yml)
-- Public FAQ stating SCIM/SAML not yet supported: [docs/categories/stakeholders/buyers/buyer-faq.md](../../../docs/categories/stakeholders/buyers/buyer-faq.md)
-- Trust-center page stating SCIM is enabled: [docs/categories/stakeholders/public/trust-center.md](../../../docs/categories/stakeholders/public/trust-center.md)
+- Public FAQ on identity capability scope: [docs/categories/stakeholders/buyers/buyer-faq.md](../../../docs/categories/stakeholders/buyers/buyer-faq.md)
+- Trust-center identity controls: [docs/categories/stakeholders/public/trust-center.md](../../../docs/categories/stakeholders/public/trust-center.md)
+- Live access review evidence: [reports/compliance/access-review/2026-Q2.json](../../../reports/compliance/access-review/2026-Q2.json)
+- Live DR restore evidence: [reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json](../../../reports/runtime/live-captures/2026-05-20/restore-drill/restore-drill-manifest.json)
+- Vendor assurance aggregation index: [docs/compliance/soc2/vendor-assurance-index.md](../../../docs/compliance/soc2/vendor-assurance-index.md)
 - Console production canary checklist: [apps/console/docs/production-canary-checklist.md](production-canary-checklist.md)
 
 ## Blockers To Reach Fortune 500 Parity
 
 1. Complete independent third-party penetration test and publish remediation closure evidence.
-2. Implement and evidence quarterly access recertification for privileged/admin roles.
-3. Execute DR drill(s) with measured RTO/RPO and retained evidence artifacts.
-4. Record formal incident response training/tabletop attendance and outcomes.
-5. Consolidate vendor assurance package (Azure, GitHub, OpenAI, Vercel, others) into a single control evidence index.
-6. Resolve identity documentation drift (SCIM/SAML status must be consistently stated across buyer and trust-center docs).
+2. Record formal incident response training/tabletop attendance and outcomes.
+3. Complete vendor assurance packet aggregation (Azure, GitHub, OpenAI, Vercel, others) and attach review sign-offs.
+4. Finalize enterprise identity roadmap statement (SCIM/SAML) with a single source-of-truth policy note.
 
 ## 30-Day Closure Plan
 
