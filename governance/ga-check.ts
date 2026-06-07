@@ -32,7 +32,7 @@ import { execSync } from 'node:child_process'
 
 const ROOT = findRepoRoot()
 
-const APP_DIRS = ['apps/web', 'apps/console', 'apps/partners', 'apps/union-eyes']
+const APP_DIRS = ['apps/web', 'apps/console', 'apps/partners', 'apps/union-eyes', 'apps/zonga']
 const APPEND_ONLY_TABLES = ['audit_events', 'share_ledger_entries', 'automation_events']
 
 const IMMUTABLE_CONTROLS = [
