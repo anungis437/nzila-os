@@ -7,7 +7,7 @@ Assessment baseline: comparison to common Fortune 500 internal application contr
 
 Console is production-capable and senior-engineering ready, but not yet at full Fortune 500 assurance parity.
 
-Estimated readiness: 91/100
+Estimated readiness: 93/100
 
 - Engineering and security implementation quality: strong
 - Formal assurance and enterprise governance evidence: incomplete
