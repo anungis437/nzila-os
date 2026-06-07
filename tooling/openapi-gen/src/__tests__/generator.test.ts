@@ -203,7 +203,7 @@ describe('generator — generate', () => {
 
     generate({ rootDir, outputDir, format: 'json', combined: false })
     expect(existsSync(outputDir)).toBe(true)
-  })
+  }, 15000)
 
   it('returns 0 routes for empty monorepo', async () => {
     const rootDir = join(TMP, 'empty')

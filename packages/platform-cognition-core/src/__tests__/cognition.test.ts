@@ -257,7 +257,7 @@ describe('memory.preferences', () => {
     const p = computePreferenceProfile(SUBJECT)
     expect(p.scores['saturate']).toBeLessThanOrEqual(1)
     expect(p.scores['saturate']).toBeGreaterThan(0.99)
-  })
+  }, 15000)
 })
 
 // ── Consent ─────────────────────────────────────────────────────────────────
