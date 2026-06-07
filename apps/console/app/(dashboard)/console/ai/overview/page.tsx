@@ -19,10 +19,12 @@ import { eq, desc, count, sum, avg } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
 
 const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
+const logger = createLogger('console.ai.overview')
 
 interface OverviewMetrics {
   totalRequests: number
@@ -92,7 +94,7 @@ async function safeQuery<T>(
   } catch (error) {
     if (isMissingDbObjectError(error)) {
       const message = error instanceof Error ? error.message : String(error)
-      console.warn(`[console.ai.overview] ${label} unavailable; falling back (${message})`)
+      logger.warn(`${label} unavailable; falling back (${message})`)
       return fallback
     }
     throw error
