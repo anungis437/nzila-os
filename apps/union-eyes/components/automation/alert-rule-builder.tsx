@@ -219,7 +219,7 @@ interface Condition {
   fieldPath: string;
   operator: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: unknown;
+  value: any;
   conditionGroup: number;
   isOrCondition: boolean;
 }
@@ -228,7 +228,7 @@ interface Action {
   id: string;
   actionType: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  actionConfig: unknown;
+  actionConfig: any;
   orderIndex: number;
 }
 
@@ -242,7 +242,7 @@ export default function AlertRuleBuilder() {
   const [category, setCategory] = useState('');
   const [triggerType, setTriggerType] = useState('schedule');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [triggerConfig, setTriggerConfig] = useState<unknown>({});
+  const [triggerConfig, setTriggerConfig] = useState<any>({});
   const [severity, setSeverity] = useState('medium');
   const [frequency, setFrequency] = useState('every_occurrence');
   const [rateLimitMinutes, setRateLimitMinutes] = useState(60);
@@ -460,7 +460,7 @@ export default function AlertRuleBuilder() {
               <div key={step} className="flex items-center">
                 <button
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onClick={() => setCurrentStep(step as unknown)}
+                  onClick={() => setCurrentStep(step as any)}
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
                     currentStep === step
                       ? 'border-primary bg-primary text-white'

@@ -342,7 +342,7 @@ export function DataTable<T>({
                       key={c.key}
                       scope="col"
                       className={cn(
-                        'px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 border-b border-gray-200',
+                        'px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 border-b border-gray-200',
                         c.width,
                         c.align === 'right' && 'text-right',
                         c.align === 'center' && 'text-center',
@@ -397,7 +397,7 @@ export function DataTable<T>({
                       <td
                         key={c.key}
                         className={cn(
-                          density === 'compact' ? 'px-4 py-1.5' : 'px-4 py-2.5',
+                          density === 'compact' ? 'px-5 py-2' : 'px-5 py-3',
                           'text-gray-700 align-middle',
                           c.align === 'right' && 'text-right tabular-nums',
                           c.align === 'center' && 'text-center',

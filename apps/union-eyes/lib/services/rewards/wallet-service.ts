@@ -194,7 +194,7 @@ export async function getLedgerSummary(
   totalCreditsOutstanding: number;
   activeMembers: number;
 }> {
-  const conditions: SQL<unknown>[] = [eq(rewardWalletLedger.orgId, orgId)];
+  const conditions: SQL<any>[] = [eq(rewardWalletLedger.orgId, orgId)];
 
   if (startDate) {
     conditions.push(sql`${rewardWalletLedger.createdAt} >= ${startDate}`);
@@ -227,7 +227,7 @@ export async function getLedgerSummary(
     )
     SELECT COALESCE(SUM(balance_after), 0)::int AS total
     FROM latest_balances
-  `)) as unknown as OutstandingBalanceRow[];
+  `)) as any as OutstandingBalanceRow[];
 
   return {
     totalCreditsIssued: summary.totalIssued,
@@ -263,7 +263,7 @@ export async function getBulkBalances(
 
   const balanceMap = new Map<string, number>();
   
-  for (const row of results as unknown as BulkBalanceRow[]) {
+  for (const row of results as any as BulkBalanceRow[]) {
     balanceMap.set(row.user_id, row.balance_after);
   }
 

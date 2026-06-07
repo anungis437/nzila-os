@@ -19,7 +19,7 @@ type AuthUser = {
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as unknown as { user: AuthUser }).user;
+  return (req as any as { user: AuthUser }).user;
 }
 
 // ============================================================================
@@ -171,7 +171,7 @@ router.post('/', async (req: Request, res: Response) => {
         ...validatedData,
         organizationId: organizationId,
         createdBy: userId,
-      } as unknown as typeof schema.duesRules.$inferInsert)
+      } as any as typeof schema.duesRules.$inferInsert)
       .returning();
 
     res.status(201).json({ success: true, data: newRule });
@@ -217,7 +217,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     const [updatedRule] = await db
       .update(schema.duesRules)
-      .set(updateData as unknown as Partial<typeof schema.duesRules.$inferInsert>)
+      .set(updateData as any as Partial<typeof schema.duesRules.$inferInsert>)
       .where(and(
         eq(schema.duesRules.id, id),
         eq(schema.duesRules.organizationId, organizationId)
@@ -262,7 +262,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
       .set({
         isActive: false,
         updatedAt: new Date(),
-      } as unknown as Partial<typeof schema.duesRules.$inferInsert>)
+      } as any as Partial<typeof schema.duesRules.$inferInsert>)
       .where(and(
         eq(schema.duesRules.id, id),
         eq(schema.duesRules.organizationId, organizationId)
@@ -332,7 +332,7 @@ router.post('/:id/duplicate', async (req: Request, res: Response) => {
         ruleName: newName,
         organizationId: organizationId,
         createdBy: userId,
-      } as unknown as typeof schema.duesRules.$inferInsert)
+      } as any as typeof schema.duesRules.$inferInsert)
       .returning();
 
     res.status(201).json({ success: true, data: duplicatedRule });

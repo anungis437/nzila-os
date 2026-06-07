@@ -234,7 +234,7 @@ export function DocumentLibraryBrowser({
             </div>
 
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <Select value={filterType} onValueChange={(v: unknown) => setFilterType(v)}>
+            <Select value={filterType} onValueChange={(v: any) => setFilterType(v)}>
               <SelectTrigger className="w-35">
                 <SelectValue />
               </SelectTrigger>
@@ -246,7 +246,7 @@ export function DocumentLibraryBrowser({
             </Select>
 
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <Select value={sortBy} onValueChange={(v: unknown) => setSortBy(v)}>
+            <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
               <SelectTrigger className="w-35">
                 <SelectValue />
               </SelectTrigger>

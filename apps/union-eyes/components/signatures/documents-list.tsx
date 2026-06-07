@@ -44,7 +44,7 @@ export function DocumentsList({ organizationId }: DocumentsListProps) {
   const [documents, setDocuments] = useState<{
     sent: Document[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    toSign: unknown[];
+    toSign: any[];
   }>({ sent: [], toSign: [] });
   const [loading, setLoading] = useState(true);
 
@@ -72,7 +72,7 @@ export function DocumentsList({ organizationId }: DocumentsListProps) {
     const variants: Record<
       string,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { variant: unknown; icon: unknown; label: string }
+      { variant: any; icon: any; label: string }
     > = {
       sent: {
         variant: "default",
@@ -116,7 +116,7 @@ export function DocumentsList({ organizationId }: DocumentsListProps) {
 
     return (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      <Badge variant={config.variant as unknown}>
+      <Badge variant={config.variant as any}>
         <Icon className="w-3 h-3 mr-1" />
         {config.label}
       </Badge>

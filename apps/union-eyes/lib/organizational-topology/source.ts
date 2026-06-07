@@ -240,7 +240,7 @@ const HIERARCHY_KINDS: readonly string[] = [
   IggEntityKinds.BARGAINING_UNIT,
 ]
 
-function readEdgeKind(edge: { metadata?: unknown }): string | undefined {
+function readEdgeKind(edge: { metadata?: any }): string | undefined {
   return (edge.metadata as Record<string, unknown> | undefined)?.iggKind as
     | string
     | undefined

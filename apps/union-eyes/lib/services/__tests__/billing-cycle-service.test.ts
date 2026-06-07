@@ -67,7 +67,7 @@ describe('BillingCycleService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockWithRLS.mockImplementation(
-      async (_orgId: string, callback: (db: unknown) => Promise<unknown>) => {
+      async (_orgId: string, callback: (db: any) => Promise<any>) => {
         const mockDb = {
           select: mockSelect,
           insert: vi.fn(() => ({

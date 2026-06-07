@@ -86,7 +86,7 @@ export function PPEDistributionTracker({
       const data = await response.json();
       if (data.success) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setItems(data.items.map((item: unknown) => ({
+        setItems(data.items.map((item: any) => ({
           ...item,
           lastRestocked: item.lastRestocked ? new Date(item.lastRestocked) : undefined
         })));

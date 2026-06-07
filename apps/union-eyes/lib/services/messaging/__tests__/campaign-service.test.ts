@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 /* ── Proxy-based chain mock ────────────────────────────────────────────── */
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -48,9 +48,9 @@ vi.mock('@/db/schema/domains/member/member-segments', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
   sql: vi.fn(),
   inArray: vi.fn(),
@@ -74,8 +74,8 @@ describe('CampaignService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockEmailService = { send: vi.fn().mockResolvedValue('msg-123') } as unknown as EmailService;
-    mockSmsService = { send: vi.fn().mockResolvedValue('sms-456') } as unknown as SMSService;
+    mockEmailService = { send: vi.fn().mockResolvedValue('msg-123') } as any as EmailService;
+    mockSmsService = { send: vi.fn().mockResolvedValue('sms-456') } as any as SMSService;
     service = new CampaignService(mockEmailService, mockSmsService);
   });
 

@@ -135,7 +135,7 @@ export const getClaimsByOrganization = async (
       
       if (limit) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        query = query.limit(limit) as unknown;
+        query = query.limit(limit) as any;
       }
       
       const organizationClaims = await query;

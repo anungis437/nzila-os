@@ -193,21 +193,21 @@ export function DashboardDesigner({ existingDashboard, onSave }: DashboardDesign
     const newWidgets = [...widgets, newWidget];
     setWidgets(newWidgets);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form.setValue("widgets", newWidgets as unknown);
+    form.setValue("widgets", newWidgets as any);
   };
 
   const updateWidget = (id: string, updates: Partial<Widget>) => {
     const newWidgets = widgets.map((w) => (w.id === id ? { ...w, ...updates } : w));
     setWidgets(newWidgets);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form.setValue("widgets", newWidgets as unknown);
+    form.setValue("widgets", newWidgets as any);
   };
 
   const removeWidget = (id: string) => {
     const newWidgets = widgets.filter((w) => w.id !== id);
     setWidgets(newWidgets);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form.setValue("widgets", newWidgets as unknown);
+    form.setValue("widgets", newWidgets as any);
     if (selectedWidget?.id === id) {
       setSelectedWidget(null);
     }

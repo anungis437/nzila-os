@@ -72,13 +72,13 @@ export default function ElectionsDashboardPage() {
       
       // Calculate stats from data
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const active = data.filter((e: unknown) => e.status === 'active').length;
+      const active = data.filter((e: any) => e.status === 'active').length;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const totalVoters = data.reduce((sum: number, e: unknown) => sum + (e.eligibleVoters || 0), 0);
+      const totalVoters = data.reduce((sum: number, e: any) => sum + (e.eligibleVoters || 0), 0);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const votesCast = data.reduce((sum: number, e: unknown) => sum + (e.votesCast || 0), 0);
+      const votesCast = data.reduce((sum: number, e: any) => sum + (e.votesCast || 0), 0);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const upcoming = data.filter((e: unknown) => e.status === 'upcoming').length;
+      const upcoming = data.filter((e: any) => e.status === 'upcoming').length;
       
       setStats({
         activeElections: active,

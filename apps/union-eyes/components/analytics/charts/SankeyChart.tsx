@@ -47,8 +47,7 @@ export function SankeyChart({
   nodeColor = '#3b82f6',
   linkOpacity = 0.5,
 }: SankeyChartProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: unknown) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name?: string; source?: number; target?: number; value?: number }; value?: number; nodes?: Array<{ index: number; name: string }> }> }) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0];
 
@@ -69,10 +68,8 @@ export function SankeyChart({
 
     // Link tooltip
     if (data.payload.source && data.payload.target) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sourceName = data.nodes.find((n: unknown) => n.index === data.payload.source)?.name;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const targetName = data.nodes.find((n: unknown) => n.index === data.payload.target)?.name;
+      const sourceName = data.nodes?.find((n) => n.index === data.payload.source)?.name;
+      const targetName = data.nodes?.find((n) => n.index === data.payload.target)?.name;
 
       return (
         <div className="bg-white p-3 border rounded-lg shadow-lg">
@@ -98,9 +95,15 @@ export function SankeyChart({
     return null;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customNode = (props: unknown) => {
-    const { x, y, width, height, _index, payload } = props;
+  const customNode = (props: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    payload: { name?: string; value?: number };
+    containerWidth: number;
+  }) => {
+    const { x, y, width, height, payload } = props;
     const isOut = x + width + 6 > props.containerWidth;
 
     return (
@@ -135,9 +138,16 @@ export function SankeyChart({
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customLink = (props: unknown) => {
-    const { sourceX, targetX, sourceY, targetY, sourceControlX, targetControlX, linkWidth, _payload } = props;
+  const customLink = (props: {
+    sourceX: number;
+    targetX: number;
+    sourceY: number;
+    targetY: number;
+    sourceControlX: number;
+    targetControlX: number;
+    linkWidth: number;
+  }) => {
+    const { sourceX, targetX, sourceY, targetY, sourceControlX, targetControlX, linkWidth } = props;
 
     return (
       <path
@@ -162,8 +172,8 @@ export function SankeyChart({
       <ResponsiveContainer width="100%" height={height}>
         <Sankey
           data={data}
-          node={customNode}
-          link={customLink}
+          node={customNode as unknown as React.ComponentProps<typeof Sankey>['node']}
+          link={customLink as unknown as React.ComponentProps<typeof Sankey>['link']}
           nodePadding={50}
           margin={{ top: 20, right: 150, bottom: 20, left: 150 }}
         >

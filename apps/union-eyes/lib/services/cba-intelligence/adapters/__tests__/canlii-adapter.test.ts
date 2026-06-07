@@ -115,12 +115,12 @@ describe("CanliiAdapter", () => {
   });
 
   it("covers private helper branches directly", () => {
-    const adapter = new CanliiAdapter() as unknown as {
+    const adapter = new CanliiAdapter() as any as {
       detectJurisdiction: (url: string) => string;
       detectLanguage: (url: string) => "en" | "fr";
       detectSectorFromText: (text: string) => string | undefined;
       resolveUrl: (href: string, base: string) => string | null;
-      parseCanliiListing: (html: string, pageUrl: string, boardUrl: string) => unknown[];
+      parseCanliiListing: (html: string, pageUrl: string, boardUrl: string) => any[];
     };
 
     expect(adapter.detectJurisdiction("https://x/on/onlrb/")).toBe("CA-ON");

@@ -42,7 +42,7 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
       },
       { status: 200 }
     );
-  } catch (error: unknown) {
+  } catch (error: any) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',

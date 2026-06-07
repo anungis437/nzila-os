@@ -76,9 +76,9 @@ export class BoardPacketGenerator {
           packetType,
           organizationId: data.organizationId,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          periodStart: data.periodStart.toISOString().split('T')[0] as unknown,
+          periodStart: data.periodStart.toISOString().split('T')[0] as any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          periodEnd: data.periodEnd.toISOString().split('T')[0] as unknown,
+          periodEnd: data.periodEnd.toISOString().split('T')[0] as any,
           fiscalYear,
           fiscalQuarter: packetType === 'quarterly' || packetType === 'annual' ? fiscalQuarter : null,
           generatedBy: data.generatedBy,
@@ -122,7 +122,7 @@ export class BoardPacketGenerator {
       );
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const strikeActivity = (strikeActivityResult as unknown)[0] || { totalAmount: 0, count: 0 };
+    const strikeActivity = (strikeActivityResult as any)[0] || { totalAmount: 0, count: 0 };
     
     return {
       period: {
@@ -409,7 +409,7 @@ export class BoardPacketGenerator {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async generatePDF(packet: unknown): Promise<{ pdfBuffer: Buffer; pdfUrl: string }> {
+  private async generatePDF(packet: any): Promise<{ pdfBuffer: Buffer; pdfUrl: string }> {
     const styles = StyleSheet.create({
       page: { padding: 32, fontSize: 12 },
       title: { fontSize: 18, marginBottom: 12 },

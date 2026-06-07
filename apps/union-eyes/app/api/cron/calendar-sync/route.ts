@@ -26,7 +26,7 @@ type SyncConnection = {
   organizationId: string
   syncPastDays: number | null
   syncFutureDays: number | null
-  calendarMappings: unknown
+  calendarMappings: any
 }
 
 type CalendarMappingPair = {
@@ -51,13 +51,13 @@ function getRetryDelayMinutes(): number {
   return Number.isFinite(value) && value > 0 ? value : 10
 }
 
-function getMappingPairs(calendarMappings: unknown): CalendarMappingPair[] {
+function getMappingPairs(calendarMappings: any): CalendarMappingPair[] {
   const pairs: CalendarMappingPair[] = []
 
   if (Array.isArray(calendarMappings)) {
     for (const item of calendarMappings) {
       if (!item || typeof item !== 'object') continue
-      const mapping = item as { externalId?: unknown; localCalendarId?: unknown }
+      const mapping = item as { externalId?: any; localCalendarId?: any }
       if (typeof mapping.externalId === 'string' && typeof mapping.localCalendarId === 'string') {
         pairs.push({
           externalId: mapping.externalId,
@@ -69,7 +69,7 @@ function getMappingPairs(calendarMappings: unknown): CalendarMappingPair[] {
     const objectMappings = calendarMappings as Record<string, unknown>
     for (const [key, value] of Object.entries(objectMappings)) {
       if (value && typeof value === 'object') {
-        const mapping = value as { externalId?: unknown; localCalendarId?: unknown }
+        const mapping = value as { externalId?: any; localCalendarId?: any }
         if (typeof mapping.localCalendarId === 'string') {
           pairs.push({
             externalId: typeof mapping.externalId === 'string' ? mapping.externalId : key,

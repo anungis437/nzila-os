@@ -195,7 +195,7 @@ export interface SyncError {
   entity: string;
   orgId?: string;
   error: string;
-  details?: unknown;
+  details?: any;
 }
 
 /**
@@ -206,7 +206,7 @@ export interface WebhookEvent {
   provider: IntegrationProvider;
   type: string;
   timestamp: Date;
-  data: unknown;
+  data: any;
   signature?: string;
   verified: boolean;
 }
@@ -281,7 +281,7 @@ export class IntegrationError extends Error {
     message: string,
     public readonly provider: IntegrationProvider,
     public readonly code?: string,
-    public readonly details?: unknown
+    public readonly details?: any
   ) {
     super(message);
     this.name = 'IntegrationError';
@@ -289,14 +289,14 @@ export class IntegrationError extends Error {
 }
 
 export class ConnectionError extends IntegrationError {
-  constructor(message: string, provider: IntegrationProvider, details?: unknown) {
+  constructor(message: string, provider: IntegrationProvider, details?: any) {
     super(message, provider, 'CONNECTION_ERROR', details);
     this.name = 'ConnectionError';
   }
 }
 
 export class AuthenticationError extends IntegrationError {
-  constructor(message: string, provider: IntegrationProvider, details?: unknown) {
+  constructor(message: string, provider: IntegrationProvider, details?: any) {
     super(message, provider, 'AUTHENTICATION_ERROR', details);
     this.name = 'AuthenticationError';
   }
@@ -304,14 +304,14 @@ export class AuthenticationError extends IntegrationError {
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class SyncError extends IntegrationError {
-  constructor(message: string, provider: IntegrationProvider, details?: unknown) {
+  constructor(message: string, provider: IntegrationProvider, details?: any) {
     super(message, provider, 'SYNC_ERROR', details);
     this.name = 'SyncError';
   }
 }
 
 export class WebhookError extends IntegrationError {
-  constructor(message: string, provider: IntegrationProvider, details?: unknown) {
+  constructor(message: string, provider: IntegrationProvider, details?: any) {
     super(message, provider, 'WEBHOOK_ERROR', details);
     this.name = 'WebhookError';
   }
@@ -322,7 +322,7 @@ export class RateLimitError extends IntegrationError {
     message: string,
     provider: IntegrationProvider,
     public readonly retryAfter?: number,
-    details?: unknown
+    details?: any
   ) {
     super(message, provider, 'RATE_LIMIT_ERROR', details);
     this.name = 'RateLimitError';

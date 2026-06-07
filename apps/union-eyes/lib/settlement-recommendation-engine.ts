@@ -153,7 +153,7 @@ return null;
 /**
  * Extract features from claim for prediction model
  */
-function extractPredictionFeatures(claim: unknown): PredictionFeatures {
+function extractPredictionFeatures(claim: any): PredictionFeatures {
   const metadata = claim.metadata || {};
   
   return {
@@ -179,7 +179,7 @@ function extractPredictionFeatures(claim: unknown): PredictionFeatures {
  * Find precedent cases similar to current claim
  */
 async function findSimilarPrecedents(
-  claim: unknown,
+  claim: any,
   organizationId: string
 ): Promise<PrecedentCase[]> {
   try {
@@ -235,7 +235,7 @@ return [];
 /**
  * Calculate similarity score between two claims (0-100)
  */
-function calculateSimilarityScore(claim1: unknown, claim2: unknown): number {
+function calculateSimilarityScore(claim1: any, claim2: any): number {
   let score = 0;
 
   // Claim type match (30 points)
@@ -283,7 +283,7 @@ function calculateSimilarityScore(claim1: unknown, claim2: unknown): number {
 /**
  * Extract key factors that influenced case outcome
  */
-function extractKeyFactors(claim: unknown): string[] {
+function extractKeyFactors(claim: any): string[] {
   const factors: string[] = [];
   
   factors.push(`${claim.claimType} grievance`);
@@ -311,7 +311,7 @@ function extractKeyFactors(claim: unknown): string[] {
  * Find relevant contract clauses for claim
  */
 async function findRelevantClauses(
-  claim: unknown,
+  claim: any,
   organizationId: string
 ): Promise<ClauseReference[]> {
   try {
@@ -354,7 +354,7 @@ return [];
 /**
  * Calculate clause relevance to claim (0-100)
  */
-function calculateClauseRelevance(clause: unknown, searchTerms: string[]): number {
+function calculateClauseRelevance(clause: any, searchTerms: string[]): number {
   let score = 0;
   
   const clauseText = `${clause.clauseTitle} ${clause.clauseText} ${clause.clauseType || ""}`.toLowerCase();
@@ -386,7 +386,7 @@ function calculateClauseRelevance(clause: unknown, searchTerms: string[]): numbe
 /**
  * Generate application context for clause
  */
-function generateApplicationContext(claim: unknown, clause: unknown): string {
+function generateApplicationContext(claim: any, clause: any): string {
   return `${clause.clauseNumber || 'Clause'} applies to ${claim.claimType} issues. ${clause.clauseTitle} is relevant to this grievance.`;
 }
 
@@ -394,7 +394,7 @@ function generateApplicationContext(claim: unknown, clause: unknown): string {
  * Calculate reasoning factors that influence prediction
  */
 function calculateReasoningFactors(
-  claim: unknown,
+  claim: any,
   precedents: PrecedentCase[],
   clauses: ClauseReference[]
 ): ReasoningFactor[] {
@@ -466,7 +466,7 @@ function calculateReasoningFactors(
  * Assess risk factors for the grievance
  */
 function assessRisk(
-  claim: unknown,
+  claim: any,
   precedents: PrecedentCase[],
   factors: ReasoningFactor[]
 ): RiskAssessment {
@@ -535,7 +535,7 @@ function assessRisk(
  * Predict outcome based on all factors
  */
 function predictOutcome(
-  claim: unknown,
+  claim: any,
   precedents: PrecedentCase[],
   factors: ReasoningFactor[]
 ): {
@@ -598,8 +598,8 @@ function predictOutcome(
  * Generate suggested actions based on prediction
  */
 function generateSuggestedActions(
-  claim: unknown,
-  prediction: unknown,
+  claim: any,
+  prediction: any,
   risk: RiskAssessment,
   clauses: ClauseReference[]
 ): string[] {
@@ -651,7 +651,7 @@ function calculateEstimatedResolutionDays(precedents: PrecedentCase[]): number {
 /**
  * Calculate potential settlement value from precedents
  */
-function calculatePotentialSettlement(claim: unknown, precedents: PrecedentCase[]): number | undefined {
+function calculatePotentialSettlement(claim: any, precedents: PrecedentCase[]): number | undefined {
   const settledCases = precedents.filter((p) => p.settledAmount !== undefined);
   
   if (settledCases.length === 0) return undefined;

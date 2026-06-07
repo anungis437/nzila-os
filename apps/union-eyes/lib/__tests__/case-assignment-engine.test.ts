@@ -102,10 +102,10 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => ({ op: 'eq', args })),
-  and: vi.fn((...args: unknown[]) => ({ op: 'and', args })),
-  desc: vi.fn((col: unknown) => ({ op: 'desc', col })),
-  or: vi.fn((...args: unknown[]) => ({ op: 'or', args })),
+  eq: vi.fn((...args: any[]) => ({ op: 'eq', args })),
+  and: vi.fn((...args: any[]) => ({ op: 'and', args })),
+  desc: vi.fn((col: any) => ({ op: 'desc', col })),
+  or: vi.fn((...args: any[]) => ({ op: 'or', args })),
   relations: vi.fn(() => ({})),
 }));
 
@@ -186,7 +186,7 @@ describe('case-assignment-engine', () => {
     mocks.mockMembersFindMany.mockResolvedValue([]);
     // Default: pass mock db to callback
     mocks.mockWithRLS.mockImplementation(
-      (_opts: unknown, fn: (db: unknown) => unknown) => fn(makeRlsDb()),
+      (_opts: any, fn: (db: any) => unknown) => fn(makeRlsDb()),
     );
   });
 
@@ -695,7 +695,7 @@ describe('case-assignment-engine', () => {
       });
 
       let withRlsCalls = 0;
-      mocks.mockWithRLS.mockImplementation((_opts: unknown, fn: (db: unknown) => unknown) => {
+      mocks.mockWithRLS.mockImplementation((_opts: any, fn: (db: any) => unknown) => {
         withRlsCalls++;
         if (withRlsCalls === 6) {
           throw new Error('recent-fetch-fail');

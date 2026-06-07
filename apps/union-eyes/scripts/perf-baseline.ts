@@ -24,7 +24,7 @@ interface EndpointDef {
   name: string
   method: 'GET' | 'POST'
   path: string
-  body?: unknown
+  body?: any
   threshold_p95_ms: number
 }
 
@@ -150,7 +150,7 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err: unknown) => {
+main().catch((err: any) => {
   console.error('Perf baseline script failed:', err)
   process.exit(1)
 })

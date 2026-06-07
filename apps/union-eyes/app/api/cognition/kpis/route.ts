@@ -34,7 +34,7 @@ export const GET = withOrganizationAuth(async (
     WHERE organization_id = ${context.organizationId}::uuid
       AND resolved_at IS NOT NULL
       AND resolved_at >= ${windowStart.toISOString()}::timestamptz
-  `) as unknown as Array<{ avgDays: number | null }>;
+  `) as any as Array<{ avgDays: number | null }>;
   void isNotNull
   void gte
   void and
@@ -44,7 +44,7 @@ export const GET = withOrganizationAuth(async (
   // Steward count for assumption surface.
   const [{ count: stewardCount }] = await db.execute<{ count: number }>(sql`
     SELECT COUNT(*)::int AS count FROM stewards WHERE org_id = ${context.organizationId}::uuid AND active = true
-  `) as unknown as Array<{ count: number }>;
+  `) as any as Array<{ count: number }>;
   void stewards
 
   const snap = computeKpiSnapshot({

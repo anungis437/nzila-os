@@ -31,7 +31,7 @@ async function getApiClient() {
  * List governance-service records
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getGovernanceServiceList(filters?: unknown) {
+export async function getGovernanceServiceList(filters?: any) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -69,7 +69,7 @@ export async function getGovernanceServiceById(id: string) {
  * Create new governance-service record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function createGovernanceService(data: unknown) {
+export async function createGovernanceService(data: any) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/governance/governance-service/`, {
@@ -89,7 +89,7 @@ export async function createGovernanceService(data: unknown) {
  * Update governance-service record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateGovernanceService(id: string, data: unknown) {
+export async function updateGovernanceService(id: string, data: any) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/governance/governance-service/${id}/`, {

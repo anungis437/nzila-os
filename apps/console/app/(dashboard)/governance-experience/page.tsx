@@ -9,6 +9,7 @@
  * Doctrine: docs/nzila-governance-experience/executive-governance-experience.md
  */
 import { PageHeader } from '@/components/ui/PageHeader'
+import { Badge } from '@/components/ui/Badge'
 import {
   buildPostureCard,
   interpretBanding,
@@ -147,6 +148,7 @@ export default function ExecutiveGovernanceExperiencePage() {
         eyebrow="Governance experience"
         title="Executive briefing"
         description="One screen, one truth per card. Read sparsely; act deliberately. No urgency framing in routine surfaces."
+        badges={<Badge tone="amber">Illustrative · sample posture</Badge>}
       />
 
       <section aria-labelledby="exec-posture-heading" className="space-y-4">

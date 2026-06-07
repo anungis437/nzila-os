@@ -83,7 +83,7 @@ export async function autoDetectParentFederation(
   try {
     // Query for federations in the same province/sector
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filters: unknown[] = [
+    const filters: any[] = [
       or(
         eq(organizations.organizationType, 'federation'),
         eq(organizations.organizationType, 'congress')
@@ -178,7 +178,7 @@ export async function suggestRelevantClauses(
 
     const hierarchyPath = org.hierarchyPath || [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filters: unknown[] = [
+    const filters: any[] = [
       // Only public/federation/congress level clauses
       inArray(sharedClauseLibrary.sharingLevel, ['public', 'federation', 'congress']),
     ];
@@ -257,7 +257,7 @@ export async function suggestRelevantClauses(
         clauseTitle: clause.clauseTitle,
         clauseType: clause.clauseType,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sourceOrgName: (clause.sourceOrganization as unknown)?.name || 'Unknown',
+        sourceOrgName: (clause.sourceOrganization as any)?.name || 'Unknown',
         sharingLevel: clause.sharingLevel,
         relevanceScore,
         relevanceReasons,
@@ -295,7 +295,7 @@ export async function findPeerOrganizations(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filters: unknown[] = [
+    const filters: any[] = [
       eq(organizations.status, 'active'),
     ];
 

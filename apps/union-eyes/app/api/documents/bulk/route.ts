@@ -73,7 +73,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
     );
   }
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch (error) {

@@ -26,7 +26,7 @@ import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 
 interface ScheduledReportFormProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schedule?: unknown;
+  schedule?: any;
   onClose: () => void;
   onSubmit: () => void;
 }
@@ -85,7 +85,7 @@ toast.error('Failed to load reports');
 
       // Build schedule config
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const scheduleConfig: unknown = {
+      const scheduleConfig: any = {
         time: formData.time,
       };
 

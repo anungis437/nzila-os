@@ -51,8 +51,8 @@ describe("FpslrebAdapter", () => {
   });
 
   it("covers parser branches directly", () => {
-    const adapter = new FpslrebAdapter() as unknown as {
-      parseDecisionListing: (html: string, baseUrl: string) => unknown[];
+    const adapter = new FpslrebAdapter() as any as {
+      parseDecisionListing: (html: string, baseUrl: string) => any[];
     };
     const parsed = adapter.parseDecisionListing(
       [
@@ -74,8 +74,8 @@ describe("FpslrebAdapter", () => {
   });
 
   it("returns empty result when no decision links exist", () => {
-    const adapter = new FpslrebAdapter() as unknown as {
-      parseDecisionListing: (html: string, baseUrl: string) => unknown[];
+    const adapter = new FpslrebAdapter() as any as {
+      parseDecisionListing: (html: string, baseUrl: string) => any[];
     };
     expect(adapter.parseDecisionListing('<a href="/other">hello</a>', "https://example.ca/en")).toEqual([]);
   });

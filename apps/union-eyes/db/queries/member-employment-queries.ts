@@ -191,7 +191,7 @@ export async function getEmploymentByOrganization(
       const conditions = [eq(memberEmployment.organizationId, organizationId)];
       if (status) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        conditions.push(eq(memberEmployment.employmentStatus, status as unknown));
+        conditions.push(eq(memberEmployment.employmentStatus, status as any));
       }
 
       return await dbOrTx

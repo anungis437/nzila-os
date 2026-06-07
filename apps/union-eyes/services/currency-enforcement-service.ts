@@ -325,7 +325,7 @@ export class CurrencyEnforcementService {
         status: 'generated',
         generatedAt: new Date(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        filingData: t106Form as unknown,
+        filingData: t106Form as any,
       })
       .where(eq(t106Filings.taxYear, taxYear));
 
@@ -355,7 +355,7 @@ export class CurrencyEnforcementService {
     return filings.map(filing => {
       const transactionIds = filing.transactionIds as string[] || [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const filingData = filing.filingData as unknown;
+      const filingData = filing.filingData as any;
       const daysToDue = Math.floor((filing.filingDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
       return {

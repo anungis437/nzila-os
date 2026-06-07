@@ -11,10 +11,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface RecognitionFeedProps {
   orgId: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialAwards?: unknown[];
+  initialAwards?: FeedAward[];
   showFilters?: boolean;
 }
+
+type FeedAward = React.ComponentProps<typeof AwardCard>['award'];
+type FeedReaction = NonNullable<FeedAward['reactions']>[number];
 
 export function RecognitionFeed({ 
   orgId: _orgId, 
@@ -68,16 +70,14 @@ export function RecognitionFeed({
         prev.map((award) => {
           if (award.id === awardId) {
             const reactions = award.reactions || [];
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const existingReaction = reactions.find((r: unknown) => r.type === reactionType);
+            const existingReaction = reactions.find((r: FeedReaction) => r.type === reactionType);
             
             if (existingReaction) {
               if (existingReaction.userReacted) {
                 // Remove reaction
                 return {
                   ...award,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  reactions: reactions.map((r: unknown) =>
+                  reactions: reactions.map((r: FeedReaction) =>
                     r.type === reactionType
                       ? { ...r, count: r.count - 1, userReacted: false }
                       : r
@@ -87,8 +87,7 @@ export function RecognitionFeed({
                 // Add reaction
                 return {
                   ...award,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  reactions: reactions.map((r: unknown) =>
+                  reactions: reactions.map((r: FeedReaction) =>
                     r.type === reactionType
                       ? { ...r, count: r.count + 1, userReacted: true }
                       : r
@@ -154,8 +153,7 @@ export function RecognitionFeed({
 
       {/* Filters */}
       {showFilters && (
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as unknown)}>
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as 'all' | 'team' | 'mine')}>
           <TabsList>
             <TabsTrigger value="all">{t('filters.all')}</TabsTrigger>
             <TabsTrigger value="team">{t('filters.team')}</TabsTrigger>

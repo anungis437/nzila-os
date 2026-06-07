@@ -570,11 +570,12 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     logger.error('CRITICAL: Authentication system error', error instanceof Error ? error : new Error(String(error)), { context: 'Auth' });
     
     // Throw standardized error (doesn&apos;t leak system details)
-    const authError = new Error('Service temporarily unavailable');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (authError as unknown).statusCode = 503;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (authError as unknown).code = 'AUTH_SERVICE_ERROR';
+    const authError = new Error('Service temporarily unavailable') as Error & {
+      statusCode?: number;
+      code?: string;
+    };
+    authError.statusCode = 503;
+    authError.code = 'AUTH_SERVICE_ERROR';
     throw authError;
   }
 }
@@ -1131,10 +1132,8 @@ export async function hasMinRole(minRole: string): Promise<boolean> {
     const resolvedOrgId = await getOrganizationIdForUser(userId);
 
     const resolvedRole = await getRole(userId, resolvedOrgId);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userLevel = getRoleLevel(resolvedRole as unknown);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const minLevel = getRoleLevel(minRole as unknown);
+    const userLevel = getRoleLevel(resolvedRole as Parameters<typeof getRoleLevel>[0]);
+    const minLevel = getRoleLevel(minRole as Parameters<typeof getRoleLevel>[0]);
 
     return userLevel >= minLevel;
   } catch {
@@ -1389,8 +1388,7 @@ export function withSystemAdminAuth<TContext extends Record<string, unknown> = B
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withEnhancedRoleAuth<T = any>(
+export function withEnhancedRoleAuth<T = unknown>(
   minRoleLevel: number,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
   options: {
@@ -1401,7 +1399,7 @@ export function withEnhancedRoleAuth<T = any>(
     isSensitive?: boolean;
   } = {}
 ) {
-  return withApiAuth(async (request: NextRequest, _baseContext: unknown) => {
+  return withApiAuth(async (request: NextRequest, _baseContext: BaseAuthContext) => {
     const startTime = Date.now();
     const authResult = await auth();
     const userId = authResult?.userId;
@@ -1538,8 +1536,7 @@ export function withEnhancedRoleAuth<T = any>(
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withPermission<T = any>(
+export function withPermission<T = unknown>(
   requiredPermission: string,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
   options: {
@@ -1550,7 +1547,7 @@ export function withPermission<T = any>(
     allowExceptions?: boolean;
   } = {}
 ) {
-  return withApiAuth(async (request: NextRequest, _baseContext: unknown) => {
+  return withApiAuth(async (request: NextRequest, _baseContext: BaseAuthContext) => {
     const startTime = Date.now();
     const authResult = await auth();
     const userId = authResult?.userId;
@@ -1660,8 +1657,7 @@ export function withPermission<T = any>(
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withScopedRoleAuth<T = any>(
+export function withScopedRoleAuth<T = unknown>(
   roleCode: string,
   scopeType: string,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
@@ -1672,7 +1668,7 @@ export function withScopedRoleAuth<T = any>(
     isSensitive?: boolean;
   } = {}
 ) {
-  return withApiAuth(async (request: NextRequest, _baseContext: unknown) => {
+  return withApiAuth(async (request: NextRequest, _baseContext: BaseAuthContext) => {
     const startTime = Date.now();
     const authResult = await auth();
     const userId = authResult?.userId;
@@ -2128,10 +2124,10 @@ export async function requireMinRole(minRole: string): Promise<UnifiedUserContex
   const user = await requireUser();
   const { getRoleLevel  } = await import('./auth/roles');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const minLevel = getRoleLevel(minRole as unknown);
+  const minLevel = getRoleLevel(minRole as any);
   const userLevel = Math.max(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...user.roles.map((r: string) => getRoleLevel(r as unknown)),
+    ...user.roles.map((r: string) => getRoleLevel(r as any)),
     0,
   );
   if (userLevel < minLevel) {

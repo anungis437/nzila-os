@@ -18,10 +18,10 @@ const { mockFindFirst, mockFindMany, mockUpdate, mockInsert } = vi.hoisted(() =>
   mockInsert: vi.fn(),
 }));
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -32,12 +32,12 @@ vi.mock('@/db/db', () => ({
   db: {
     query: {
       featureFlags: {
-        findFirst: (...args: unknown[]) => mockFindFirst(...args),
-        findMany: (...args: unknown[]) => mockFindMany(...args),
+        findFirst: (...args: any[]) => mockFindFirst(...args),
+        findMany: (...args: any[]) => mockFindMany(...args),
       },
     },
-    update: (...args: unknown[]) => mockUpdate(...args),
-    insert: (...args: unknown[]) => mockInsert(...args),
+    update: (...args: any[]) => mockUpdate(...args),
+    insert: (...args: any[]) => mockInsert(...args),
   },
 }));
 

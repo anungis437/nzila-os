@@ -467,7 +467,7 @@ export class CertificationManagementService {
     performedByRole?: string;
     complianceImpact?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: unknown;
+    metadata?: any;
   }) {
     await db.insert(certificationAuditLog).values({
       actionType: params.actionType,

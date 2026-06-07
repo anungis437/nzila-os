@@ -40,7 +40,7 @@ export type WebSocketMessageType =
  */
 export interface WebSocketMessage {
   type: WebSocketMessageType;
-  payload: unknown;
+  payload: any;
   timestamp: number;
   roomId?: string;
   userId?: string;
@@ -258,7 +258,7 @@ export class WebSocketManager {
   /**
    * Send notification to user
    */
-  sendToUser(userId: string, notification: unknown): void {
+  sendToUser(userId: string, notification: any): void {
     const _message: WebSocketMessage = {
       type: 'notification',
       payload: notification,

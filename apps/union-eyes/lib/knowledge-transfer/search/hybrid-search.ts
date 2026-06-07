@@ -156,7 +156,7 @@ async function semanticSearch(
   );
 
   const scoreMap = new Map<string, number>();
-  for (const row of rows as unknown as Array<{ source_id: string; similarity: number }>) {
+  for (const row of rows as any as Array<{ source_id: string; similarity: number }>) {
     scoreMap.set(row.source_id, row.similarity);
   }
   return scoreMap;

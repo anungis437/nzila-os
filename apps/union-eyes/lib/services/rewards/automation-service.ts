@@ -349,8 +349,7 @@ export async function createAutomationRule(rule: {
   name: string;
   description?: string;
   triggerType: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
   awardTypeId: string;
   creditAmount?: number;
   schedule?: string;
@@ -389,8 +388,7 @@ export async function createAutomationRule(rule: {
 export async function updateAutomationRule(ruleId: string, updates: Partial<{
   name: string;
   description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  conditions: Record<string, any>;
+  conditions: Record<string, unknown>;
   creditAmount: number;
   schedule: string;
   isActive: boolean;

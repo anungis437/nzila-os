@@ -14,7 +14,7 @@
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { WizardStepper } from "@/components/ui/wizard-stepper";
@@ -147,8 +147,7 @@ export function MemberOnboardingWizard({
     const fields = stepFields[step];
     if (!fields) return true;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await form.trigger(fields as unknown);
+    const result = await form.trigger(fields);
     return result;
   };
 
@@ -218,8 +217,7 @@ export function MemberOnboardingWizard({
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function PersonalInfoStep({ form }: { form: unknown }) {
+function PersonalInfoStep({ form }: { form: UseFormReturn<OnboardingFormData> }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Personal Information</h3>
@@ -283,7 +281,7 @@ function PersonalInfoStep({ form }: { form: unknown }) {
               <Calendar
                 mode="single"
                 selected={form.watch("dateOfBirth")}
-                onSelect={(date) => form.setValue("dateOfBirth", date)}
+                onSelect={(date) => date && form.setValue("dateOfBirth", date)}
               />
             </PopoverContent>
           </Popover>
@@ -309,8 +307,7 @@ function PersonalInfoStep({ form }: { form: unknown }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function EmploymentStep({ form }: { form: unknown }) {
+function EmploymentStep({ form }: { form: UseFormReturn<OnboardingFormData> }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Employment Details</h3>
@@ -344,7 +341,7 @@ function EmploymentStep({ form }: { form: unknown }) {
               <Calendar
                 mode="single"
                 selected={form.watch("hireDate")}
-                onSelect={(date) => form.setValue("hireDate", date)}
+                onSelect={(date) => date && form.setValue("hireDate", date)}
               />
             </PopoverContent>
           </Popover>
@@ -357,7 +354,7 @@ function EmploymentStep({ form }: { form: unknown }) {
           <Label htmlFor="shift">Shift *</Label>
           <Select
             value={form.watch("shift")}
-            onValueChange={(value) => form.setValue("shift", value)}
+            onValueChange={(value) => form.setValue("shift", value as OnboardingFormData["shift"])}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select shift" />
@@ -375,8 +372,7 @@ function EmploymentStep({ form }: { form: unknown }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function PreferencesStep({ form }: { form: unknown }) {
+function PreferencesStep({ form }: { form: UseFormReturn<OnboardingFormData> }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Union Preferences</h3>
@@ -401,7 +397,7 @@ function PreferencesStep({ form }: { form: unknown }) {
           <Label>Membership Type *</Label>
           <Select
             value={form.watch("membershipType")}
-            onValueChange={(value) => form.setValue("membershipType", value)}
+            onValueChange={(value) => form.setValue("membershipType", value as OnboardingFormData["membershipType"])}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
@@ -417,7 +413,7 @@ function PreferencesStep({ form }: { form: unknown }) {
           <Label>Communication Preference *</Label>
           <Select
             value={form.watch("communicationPreference")}
-            onValueChange={(value) => form.setValue("communicationPreference", value)}
+            onValueChange={(value) => form.setValue("communicationPreference", value as OnboardingFormData["communicationPreference"])}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select preference" />
@@ -434,8 +430,7 @@ function PreferencesStep({ form }: { form: unknown }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function DocumentsStep({ form: _form }: { form: unknown }) {
+function DocumentsStep({ form: _form }: { form: UseFormReturn<OnboardingFormData> }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Upload Documents</h3>
@@ -454,8 +449,7 @@ function DocumentsStep({ form: _form }: { form: unknown }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ReviewStep({ form }: { form: unknown }) {
+function ReviewStep({ form }: { form: UseFormReturn<OnboardingFormData> }) {
   const data = form.watch();
   return (
     <div className="space-y-6">

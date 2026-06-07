@@ -273,7 +273,7 @@ export const pushDeliveries = pgTable(
       timeToClick?: number;
       buttonId?: string;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [key: string]: unknown;
+      [key: string]: any;
     }>(),
 
     // Metadata

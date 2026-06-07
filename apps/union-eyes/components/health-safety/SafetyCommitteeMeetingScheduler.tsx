@@ -87,7 +87,7 @@ export function SafetyCommitteeMeetingScheduler({
       const data = await response.json();
       if (data.success) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setMeetings(data.meetings.map((m: unknown) => ({
+        setMeetings(data.meetings.map((m: any) => ({
           ...m,
           date: new Date(m.date)
         })));

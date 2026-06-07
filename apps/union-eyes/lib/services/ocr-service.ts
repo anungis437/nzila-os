@@ -45,7 +45,7 @@ interface GoogleVisionVertex {
   y?: number;
 }
 
-interface GoogleVisionDetection {
+interface _GoogleVisionDetection {
   description?: string;
   boundingPoly?: {
     vertices?: GoogleVisionVertex[];

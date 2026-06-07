@@ -14,13 +14,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockCookieGet = vi.fn();
 vi.mock('next/headers', () => ({
-  cookies: vi.fn().mockResolvedValue({ get: (...a: unknown[]) => mockCookieGet(...a) }),
+  cookies: vi.fn().mockResolvedValue({ get: (...a: any[]) => mockCookieGet(...a) }),
 }));
 
 vi.mock('next/server', () => ({
   NextRequest: vi.fn(),
   NextResponse: {
-    json: vi.fn((body: unknown, init?: { status?: number }) => ({
+    json: vi.fn((body: any, init?: { status?: number }) => ({
       body,
       status: init?.status ?? 200,
     })),
@@ -102,7 +102,7 @@ describe('getOrganizationIdFromRequest', () => {
       headers: {
         get: (name: string) => headers[name] ?? null,
       },
-    } as unknown as NextRequest;
+    } as any as NextRequest;
   }
 
   it('resolves from X-Org-ID header first', async () => {
@@ -184,15 +184,15 @@ describe('withOrganizationAuth', () => {
     mockRequireUser.mockResolvedValue({
       userId: 'user_1',
       organizationId: 'org-1',
-    } as unknown as Awaited<ReturnType<typeof mockRequireUser>>);
+    } as any as Awaited<ReturnType<typeof mockRequireUser>>);
     mockGetOrgIdForUser.mockResolvedValue('org-1');
     mockRequireUserForOrg.mockResolvedValue({
       userId: 'user_1',
       organizationId: 'org-1',
       memberId: 'mem-1',
-    } as unknown as Awaited<ReturnType<typeof mockRequireUserForOrg>>);
+    } as any as Awaited<ReturnType<typeof mockRequireUserForOrg>>);
 
-    const mockResponse = { body: 'ok', status: 200 } as unknown as NextResponse;
+    const mockResponse = { body: 'ok', status: 200 } as any as NextResponse;
     const handler = vi.fn().mockResolvedValue(mockResponse);
     const wrapped = withOrganizationAuth(handler);
 

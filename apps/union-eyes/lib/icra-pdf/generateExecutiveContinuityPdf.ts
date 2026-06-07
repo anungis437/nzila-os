@@ -25,6 +25,6 @@ export async function generateExecutiveContinuityPdf(data: PdfReportData): Promi
   const element = React.createElement(
     ExecutiveContinuityBriefTemplate,
     { data },
-  ) as ReactElement<DocumentProps, string | JSXElementConstructor<unknown>>;
+  ) as ReactElement<DocumentProps, string | JSXElementConstructor<any>>;
   return renderToBuffer(element);
 }

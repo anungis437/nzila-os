@@ -276,7 +276,7 @@ alert(`Failed to submit filing: ${error instanceof Error ? error.message : 'Unkn
                 <Select
                   value={filingData.filingType}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onValueChange={(value: unknown) => setFilingData({ ...filingData, filingType: value })}
+                  onValueChange={(value: any) => setFilingData({ ...filingData, filingType: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select filing type" />
@@ -297,7 +297,7 @@ alert(`Failed to submit filing: ${error instanceof Error ? error.message : 'Unkn
                 <Select
                   value={filingData.jurisdiction}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onValueChange={(value: unknown) => setFilingData({ ...filingData, jurisdiction: value })}
+                  onValueChange={(value: any) => setFilingData({ ...filingData, jurisdiction: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select jurisdiction" />
@@ -512,7 +512,7 @@ alert(`Failed to submit filing: ${error instanceof Error ? error.message : 'Unkn
                 <Select
                   value={filingData.electionType}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onValueChange={(value: unknown) => setFilingData({ ...filingData, electionType: value })}
+                  onValueChange={(value: any) => setFilingData({ ...filingData, electionType: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select election type" />

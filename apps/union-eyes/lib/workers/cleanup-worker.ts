@@ -6,7 +6,7 @@
 
 // Only import bullmq in runtime, not during build
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Worker: unknown, _Job: unknown, IORedis: unknown;
+let Worker: any, _Job: any, IORedis: any;
 
 if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
   try {
@@ -154,7 +154,7 @@ return { deleted };
  * Process cleanup job
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function processCleanupJob(job: unknown) {
+async function processCleanupJob(job: any) {
   const { target, olderThanDays } = job.data;
 await job.updateProgress(10);
 
@@ -193,7 +193,7 @@ return {
 export const cleanupWorker = new Worker(
   'cleanup',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (job: unknown) => {
+  async (job: any) => {
     return await processCleanupJob(job);
   },
   {
@@ -204,15 +204,15 @@ export const cleanupWorker = new Worker(
 
 // Event handlers
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-cleanupWorker.on('completed', (_job: unknown) => {
+cleanupWorker.on('completed', (_job: any) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-cleanupWorker.on('failed', (_job: unknown, _err: unknown) => {
+cleanupWorker.on('failed', (_job: any, _err: any) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-cleanupWorker.on('error', (_err: unknown) => {
+cleanupWorker.on('error', (_err: any) => {
 });
 
 // Graceful shutdown

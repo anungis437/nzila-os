@@ -21,7 +21,7 @@ interface UnionEvidenceAction {
   actionType: string
   orgId: string
   actorId: string
-  artifacts: Array<{ type: string; data: unknown }>
+  artifacts: Array<{ type: string; data: any }>
 }
 
 /**

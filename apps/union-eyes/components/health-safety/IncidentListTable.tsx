@@ -104,7 +104,7 @@ export function IncidentListTable({
         const payload = json.data;
         const rows = Array.isArray(payload.data) ? payload.data : [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setIncidents(rows.map((r: unknown) => ({
+        setIncidents(rows.map((r: any) => ({
           id: r.id,
           incidentNumber: r.incidentNumber ?? '',
           reportedDate: new Date(r.reportedDate ?? Date.now()),

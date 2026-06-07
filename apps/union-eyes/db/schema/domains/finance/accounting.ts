@@ -78,7 +78,7 @@ export const chartOfAccounts = pgTable(
     subType: varchar("sub_type", { length: 100 }), // More granular classification
     
     // Hierarchy
-    parentAccountId: uuid("parent_account_id").references((): PgColumn<unknown> => chartOfAccounts.id as PgColumn<unknown>),
+    parentAccountId: uuid("parent_account_id").references((): PgColumn<any> => chartOfAccounts.id as PgColumn<any>),
     
     // Details
     status: accountStatusEnum("status").notNull().default("active"),
@@ -139,7 +139,7 @@ export const costCenters = pgTable(
     type: costCenterTypeEnum("type").notNull(),
     
     // Hierarchy
-    parentCostCenterId: uuid("parent_cost_center_id").references((): PgColumn<unknown> => costCenters.id as PgColumn<unknown>),
+    parentCostCenterId: uuid("parent_cost_center_id").references((): PgColumn<any> => costCenters.id as PgColumn<any>),
     
     // Details
     manager: varchar("manager", { length: 255 }), // User ID of manager

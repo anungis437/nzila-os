@@ -78,7 +78,7 @@ function buildLineItems(
 // ── Handler ─────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  let body: unknown;
+  let body: any;
   try {
     body = await request.json();
   } catch {
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      line_items: buildLineItems(tierId, currency) as unknown,
+      line_items: buildLineItems(tierId, currency) as any,
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {

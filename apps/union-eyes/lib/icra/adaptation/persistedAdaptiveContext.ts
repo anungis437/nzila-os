@@ -102,7 +102,7 @@ export function embedPersistedAdaptiveContext(
  * fails validation returns null so callers fall through to reconstruction.
  */
 export function extractPersistedAdaptiveContext(
-  organizationContext: unknown,
+  organizationContext: any,
 ): PersistedAdaptiveContext | null {
   if (!organizationContext || typeof organizationContext !== 'object') return null;
   const raw = (organizationContext as Record<string, unknown>)[PERSISTED_ADAPTIVE_KEY];

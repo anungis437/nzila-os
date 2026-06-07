@@ -34,6 +34,7 @@ import {
   type ClaimDeadline,
   type DeadlineExtension,
   type DeadlineAlert,
+  type MemberDeadlineSummary,
 } from '@/db/queries/deadline-queries';
 import { logger } from '@/lib/logger';
 
@@ -143,7 +144,7 @@ export async function getUpcomingDeadlines(
   organizationId: string,
   _days: number = 7
 ): Promise<ClaimDeadline[]> {
-  return getCriticalDeadlines(organizationId);
+  return (await getCriticalDeadlines(organizationId)) as unknown as ClaimDeadline[];
 }
 
 /**
@@ -153,7 +154,7 @@ export async function getMemberUpcomingDeadlines(
   memberId: string,
   organizationId: string,
   _daysAhead: number = 7
-): Promise<unknown> {
+): Promise<MemberDeadlineSummary> {
   const summary = await getMemberDeadlineSummary(memberId, organizationId);
   return summary;
 }
@@ -387,14 +388,14 @@ export async function getComplianceReport(
   organizationId: string,
   startDate?: Date,
   endDate?: Date
-): Promise<unknown> {
+) {
   return getDeadlineComplianceMetrics(organizationId, startDate, endDate);
 }
 
 /**
  * Get dashboard summary
  */
-export async function getDashboardSummary(organizationId: string): Promise<unknown> {
+export async function getDashboardSummary(organizationId: string) {
   return getDeadlineDashboardSummary(organizationId);
 }
 
@@ -404,7 +405,7 @@ export async function getDashboardSummary(organizationId: string): Promise<unkno
 export async function getMemberPerformance(
   memberId: string,
   organizationId: string
-): Promise<unknown> {
+) {
   return getMemberDeadlineSummary(memberId, organizationId);
 }
 

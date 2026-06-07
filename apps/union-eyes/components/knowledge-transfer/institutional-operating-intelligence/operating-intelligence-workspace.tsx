@@ -34,7 +34,7 @@ interface CorrelationPayload {
 
 interface OrganizationalCognitionResponse {
   data?: {
-    byEngine?: Record<string, { payload?: unknown }>;
+    byEngine?: Record<string, { payload?: any }>;
     failures?: DashboardData['failures'];
   };
 }
@@ -54,7 +54,7 @@ interface DashboardData {
   trust: Record<string, unknown> | null;
   correlation: CorrelationPayload;
   /** Per-engine envelopes keyed by engineId, available for explainability surfaces. */
-  envelopes: Record<string, { payload?: unknown }>;
+  envelopes: Record<string, { payload?: any }>;
   /** Engine failures from the orchestrator (isolated, non-cascading). */
   failures: Array<{ engineId: string; domain: string; error: string }>;
 }

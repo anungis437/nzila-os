@@ -7,7 +7,7 @@
 
 // Only import bullmq in runtime, not during build
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Worker: unknown, _Job: unknown, IORedis: unknown;
+let Worker: any, _Job: any, IORedis: any;
 
 if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
   try {
@@ -45,7 +45,7 @@ const connection = new IORedis({
 
 // Template renderers
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const templateRenderers: Record<string, (data: unknown) => Promise<string>> = {
+const templateRenderers: Record<string, (data: any) => Promise<string>> = {
   'welcome': (data) => render(WelcomeEmail(data)),
   'password-reset': (data) => render(PasswordResetEmail(data)),
   'digest': (data) => render(DigestEmail(data)),
@@ -124,7 +124,7 @@ async function logNotification(
  * Process email job
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function processEmailJob(job: unknown) {
+async function processEmailJob(job: any) {
   const { to, subject, template, data, priority } = job.data;
 
   logger.info('Processing email job', { jobId: job.id, template, recipientCount: Array.isArray(to) ? to.length : 1 });
@@ -174,9 +174,9 @@ async function processEmailJob(job: unknown) {
         const attachments = Array.isArray(data.attachments)
           ? data.attachments
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              .filter((attachment: unknown) => attachment?.filename && attachment?.content)
+              .filter((attachment: any) => attachment?.filename && attachment?.content)
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              .map((attachment: unknown) => {
+              .map((attachment: any) => {
                 if (attachment.encoding === 'base64' && typeof attachment.content === 'string') {
                   return {
                     filename: attachment.filename,
@@ -221,7 +221,7 @@ async function processEmailJob(job: unknown) {
 
   // Check for failures
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const failures = results.filter((r: unknown) => r.status === 'rejected');
+  const failures = results.filter((r: any) => r.status === 'rejected');
   if (failures.length > 0) {
     throw new Error(
       `Failed to send ${failures.length}/${recipients.length} emails`
@@ -231,7 +231,7 @@ async function processEmailJob(job: unknown) {
   return {
     success: true,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sent: results.filter((r: unknown) => r.status === 'fulfilled').length,
+    sent: results.filter((r: any) => r.status === 'fulfilled').length,
     total: recipients.length,
   };
 }
@@ -240,7 +240,7 @@ async function processEmailJob(job: unknown) {
  * Process digest email job
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function processDigestJob(job: unknown) {
+async function processDigestJob(job: any) {
   const { data: jobData } = job;
   const { frequency } = jobData.data;
 
@@ -316,7 +316,7 @@ async function processDigestJob(job: unknown) {
 export const emailWorker = new Worker(
   'email',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (job: unknown) => {
+  async (job: any) => {
     // Handle different job types
     if (job.name === 'email-digest') {
       return await processDigestJob(job);
@@ -336,17 +336,17 @@ export const emailWorker = new Worker(
 
 // Event handlers
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-emailWorker.on('completed', (job: unknown) => {
+emailWorker.on('completed', (job: any) => {
   logger.info('Email job completed', { jobId: job.id });
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-emailWorker.on('failed', (job: unknown, err: unknown) => {
+emailWorker.on('failed', (job: any, err: any) => {
   logger.error('Email job failed', err instanceof Error ? err : new Error(String(err)), { jobId: job?.id });
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-emailWorker.on('error', (err: unknown) => {
+emailWorker.on('error', (err: any) => {
   logger.error('Email worker error', err instanceof Error ? err : new Error(String(err)));
 });
 

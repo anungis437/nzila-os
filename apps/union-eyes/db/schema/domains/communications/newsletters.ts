@@ -392,7 +392,7 @@ export interface TemplateVariable {
   label: string;
   type: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'url';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default?: unknown;
+  default?: any;
   required?: boolean;
   description?: string;
 }

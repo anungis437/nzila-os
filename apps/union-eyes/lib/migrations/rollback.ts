@@ -22,7 +22,7 @@ import { updateMappingStatus } from "./tenant-to-org-mapper";
 interface RollbackResult {
   tableName: string;
   rowsRestored: number;
-  errors: Array<{ row: unknown; error: string }>;
+  errors: Array<{ row: any; error: string }>;
   status: "completed" | "failed" | "partial";
   duration: number;
 }

@@ -84,7 +84,7 @@ describe('OCRA adaptive telemetry wiring — metadata shape', () => {
     },
   });
   const bank = routeQuestionBank(
-    ALL_QUESTIONS as unknown as RoutableQuestion[],
+    ALL_QUESTIONS as any as RoutableQuestion[],
     profile,
   );
 

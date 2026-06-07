@@ -47,12 +47,12 @@ describe("UnionBargainingAdapter", () => {
   });
 
   it("covers helper branches directly", () => {
-    const adapter = new UnionBargainingAdapter() as unknown as {
+    const adapter = new UnionBargainingAdapter() as any as {
       isRelevantLink: (text: string) => boolean;
       classifyDocType: (text: string) => string;
       detectLanguage: (text: string, url: string) => "en" | "fr" | "bilingual";
       resolveUrl: (href: string, baseUrl: string) => string | null;
-      parseUnionPage: (html: string, baseUrl: string, union: { key: string; jurisdiction: string; sectors: string[] }) => unknown[];
+      parseUnionPage: (html: string, baseUrl: string, union: { key: string; jurisdiction: string; sectors: string[] }) => any[];
     };
 
     expect(adapter.isRelevantLink("tentative bargain settlement")).toBe(true);
@@ -78,8 +78,8 @@ describe("UnionBargainingAdapter", () => {
   });
 
   it("returns empty result when no relevant links exist", () => {
-    const adapter = new UnionBargainingAdapter() as unknown as {
-      parseUnionPage: (html: string, baseUrl: string, union: { key: string; jurisdiction: string; sectors: string[] }) => unknown[];
+    const adapter = new UnionBargainingAdapter() as any as {
+      parseUnionPage: (html: string, baseUrl: string, union: { key: string; jurisdiction: string; sectors: string[] }) => any[];
     };
     expect(adapter.parseUnionPage('<a href="/x">misc</a>', "https://example.ca", { key: "cupe", jurisdiction: "CA-FED", sectors: ["public"] })).toEqual([]);
     expect(adapter.parseUnionPage('<a href="/tiny">deal</a>', "https://example.ca", { key: "cupe", jurisdiction: "CA-FED", sectors: ["public"] })).toEqual([]);

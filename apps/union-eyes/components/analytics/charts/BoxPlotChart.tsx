@@ -95,8 +95,7 @@ export function BoxPlotChart({
     // Whiskers will be drawn separately
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: unknown) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { category?: string; max?: number; q3?: number; median?: number; q1?: number; min?: number; outliers?: number[] } }> }) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
 
@@ -118,9 +117,14 @@ export function BoxPlotChart({
   };
 
   // Custom box plot rendering
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomBox = (props: unknown) => {
-    const { x, _y, width, _height, payload } = props;
+  const CustomBox = (props: {
+    x?: number;
+    width?: number;
+    payload?: { min: number; q1: number; median: number; q3: number; max: number };
+    yAxis?: { scale: (v: number) => number };
+  }) => {
+    const { x = 0, width = 0, payload } = props;
+    if (!payload || !props.yAxis) return null;
     const yScale = props.yAxis.scale;
     
     const minY = yScale(payload.min);

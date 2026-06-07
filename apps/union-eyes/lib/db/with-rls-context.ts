@@ -133,7 +133,7 @@ export async function withRLSContext<T>(
     }
 
     // Execute the operation with user + org context set
-    const result = await operation(tx as unknown as RLSTx)
+    const result = await operation(tx as any as RLSTx)
 
     // Transaction commit automatically clears local config variables
     return result
@@ -228,7 +228,7 @@ export async function withSystemContext<T>(
     // NzilaOS PR-UE-02: Explicitly clear org context for system operations
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
     const result = await (operation as (tx: RLSTx) => Promise<T>)(
-      tx as unknown as RLSTx,
+      tx as any as RLSTx,
     )
     return result
   })
@@ -395,7 +395,7 @@ export type RLSAwareQuery<T> = () => Promise<T>
  *
  * export const GET = withRLS(handleGET);
  */
-export function withRLS<TArgs extends unknown[], TReturn>(
+export function withRLS<TArgs extends any[], TReturn>(
   handler: (...args: TArgs) => Promise<TReturn>,
 ): (...args: TArgs) => Promise<TReturn> {
   return async (...args: TArgs): Promise<TReturn> => {

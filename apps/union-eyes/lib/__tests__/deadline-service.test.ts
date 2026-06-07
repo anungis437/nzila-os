@@ -295,41 +295,41 @@ describe('deadline-service', () => {
   describe('getDeadlineStatus', () => {
     it('returns green for completed deadline', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = getDeadlineStatus({ status: 'completed' } as unknown);
+      const result = getDeadlineStatus({ status: 'completed' } as any);
       expect(result.color).toBe('green');
       expect(result.severity).toBe('safe');
     });
 
     it('returns black for overdue deadline', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = getDeadlineStatus({ status: 'pending', isOverdue: true, daysOverdue: 3 } as unknown);
+      const result = getDeadlineStatus({ status: 'pending', isOverdue: true, daysOverdue: 3 } as any);
       expect(result.color).toBe('black');
       expect(result.severity).toBe('overdue');
     });
 
     it('returns red for due today', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = getDeadlineStatus({ status: 'pending', isOverdue: false, daysUntilDue: 0 } as unknown);
+      const result = getDeadlineStatus({ status: 'pending', isOverdue: false, daysUntilDue: 0 } as any);
       expect(result.color).toBe('red');
       expect(result.severity).toBe('urgent');
     });
 
     it('returns red for due tomorrow', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = getDeadlineStatus({ status: 'pending', isOverdue: false, daysUntilDue: 1 } as unknown);
+      const result = getDeadlineStatus({ status: 'pending', isOverdue: false, daysUntilDue: 1 } as any);
       expect(result.color).toBe('red');
     });
 
     it('returns yellow for due in 2-3 days', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = getDeadlineStatus({ status: 'pending', isOverdue: false, daysUntilDue: 3 } as unknown);
+      const result = getDeadlineStatus({ status: 'pending', isOverdue: false, daysUntilDue: 3 } as any);
       expect(result.color).toBe('yellow');
       expect(result.severity).toBe('warning');
     });
 
     it('returns green for due in >3 days', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = getDeadlineStatus({ status: 'pending', isOverdue: false, daysUntilDue: 7 } as unknown);
+      const result = getDeadlineStatus({ status: 'pending', isOverdue: false, daysUntilDue: 7 } as any);
       expect(result.color).toBe('green');
       expect(result.severity).toBe('safe');
     });

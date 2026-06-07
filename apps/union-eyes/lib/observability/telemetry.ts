@@ -54,7 +54,7 @@ function parseOtelHeaders(raw: string | undefined): Record<string, string> {
   }
 
   try {
-    const parsed = JSON.parse(raw) as unknown;
+    const parsed = JSON.parse(raw) as any;
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return Object.fromEntries(
         Object.entries(parsed as Record<string, unknown>).map(([key, value]) => [key, String(value)]),
@@ -166,7 +166,7 @@ return null;
 export async function withSpan<T>(
   name: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (span: unknown) => Promise<T>,
+  fn: (span: any) => Promise<T>,
   attributes?: Record<string, string | number | boolean>
 ): Promise<T> {
   const tracer = trace.getTracer('union-eyes');

@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   mockExecute: vi.fn(),
 }));
 
-function makeDbChain(result: unknown = []): Record<string, unknown> {
+function makeDbChain(result: any = []): Record<string, unknown> {
   const chain: Record<string, unknown> = {};
   const methods = [
     "select", "from", "innerJoin", "leftJoin", "rightJoin",
@@ -23,7 +23,7 @@ function makeDbChain(result: unknown = []): Record<string, unknown> {
   for (const m of methods) {
     chain[m] = vi.fn(() => makeDbChain(result));
   }
-  chain.then = (resolve: (v: unknown) => void) => {
+  chain.then = (resolve: (v: any) => void) => {
     resolve(result);
     return Promise.resolve(result);
   };
@@ -73,14 +73,14 @@ vi.mock("drizzle-orm", async () => {
   const actual = await vi.importActual<typeof import("drizzle-orm")>("drizzle-orm");
   return {
     ...actual,
-    eq: vi.fn((...args: unknown[]) => ({ type: "eq", args })),
-    and: vi.fn((...args: unknown[]) => ({ type: "and", args })),
-    or: vi.fn((...args: unknown[]) => ({ type: "or", args })),
-    ne: vi.fn((...args: unknown[]) => ({ type: "ne", args })),
-    desc: vi.fn((col: unknown) => ({ type: "desc", col })),
-    ilike: vi.fn((...args: unknown[]) => ({ type: "ilike", args })),
-    gte: vi.fn((...args: unknown[]) => ({ type: "gte", args })),
-    lte: vi.fn((...args: unknown[]) => ({ type: "lte", args })),
+    eq: vi.fn((...args: any[]) => ({ type: "eq", args })),
+    and: vi.fn((...args: any[]) => ({ type: "and", args })),
+    or: vi.fn((...args: any[]) => ({ type: "or", args })),
+    ne: vi.fn((...args: any[]) => ({ type: "ne", args })),
+    desc: vi.fn((col: any) => ({ type: "desc", col })),
+    ilike: vi.fn((...args: any[]) => ({ type: "ilike", args })),
+    gte: vi.fn((...args: any[]) => ({ type: "gte", args })),
+    lte: vi.fn((...args: any[]) => ({ type: "lte", args })),
     sql: actual.sql,
     relations: vi.fn(() => ({})),
   };
@@ -197,7 +197,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
 
     const { createSource } = await import("@/lib/services/cba-intelligence/source-registry-service");
     const result = await createSource(
-      SOURCE_FIXTURE as unknown as Parameters<typeof createSource>[0],
+      SOURCE_FIXTURE as any as Parameters<typeof createSource>[0],
     );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
@@ -213,7 +213,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
         sourceId: SOURCE_ID,
         orgId: ORG_ID,
         triggerType: "manual",
-      } as unknown as Parameters<typeof createIngestionJob>[0],
+      } as any as Parameters<typeof createIngestionJob>[0],
     );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
@@ -235,7 +235,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
         rawContent: "Full text of the agreement...",
         language: "en",
         jurisdiction: "federal",
-      } as unknown as Parameters<typeof upsertDocument>[0],
+      } as any as Parameters<typeof upsertDocument>[0],
     );
 
     expect(result).toHaveProperty("document");
@@ -259,7 +259,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
         documentId: DOC_ID,
         orgId: ORG_ID,
         method: "rule_based",
-      } as unknown as Parameters<typeof createExtractionRun>[0],
+      } as any as Parameters<typeof createExtractionRun>[0],
     );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
@@ -280,7 +280,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
         confidence: 0.92,
         summary: FINDING_FIXTURE.summary,
         rawText: FINDING_FIXTURE.rawText,
-      } as unknown as Parameters<typeof createFinding>[0],
+      } as any as Parameters<typeof createFinding>[0],
     );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
@@ -300,7 +300,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
         bargainingUnit: "PA Group",
         jurisdiction: "federal",
         sector: "public_admin",
-      } as unknown as Parameters<typeof createAgreement>[0],
+      } as any as Parameters<typeof createAgreement>[0],
     );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
@@ -327,7 +327,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
         effectiveDate: new Date("2025-04-01"),
         increasePct: "2.80",
         increaseType: "general",
-      } as unknown as Parameters<typeof createWageAdjustment>[0],
+      } as any as Parameters<typeof createWageAdjustment>[0],
     );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
@@ -356,7 +356,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
         clauseFamily: "wages",
         title: "Annual Pay Increases",
         rawText: "Annual rate of pay shall be increased...",
-      } as unknown as Parameters<typeof createClause>[0],
+      } as any as Parameters<typeof createClause>[0],
     );
 
     expect(mocks.mockInsert).toHaveBeenCalled();

@@ -211,7 +211,7 @@ export function SelfServeOnboarding() {
 
 // Step Components
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function OrgInfoStep({ formData, setFormData }: unknown) {
+function OrgInfoStep({ formData, setFormData }: any) {
   return (
     <div className="space-y-4">
       <div>
@@ -281,7 +281,7 @@ function OrgInfoStep({ formData, setFormData }: unknown) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function MembersStep({ formData, setFormData }: unknown) {
+function MembersStep({ formData, setFormData }: any) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
@@ -311,7 +311,7 @@ _name, email
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function DocumentsStep({ formData, setFormData }: unknown) {
+function DocumentsStep({ formData, setFormData }: any) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
@@ -336,7 +336,7 @@ function DocumentsStep({ formData, setFormData }: unknown) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function BillingStep({ formData, setFormData }: unknown) {
+function BillingStep({ formData, setFormData }: any) {
   const plans = [
     {
       id: 'starter',

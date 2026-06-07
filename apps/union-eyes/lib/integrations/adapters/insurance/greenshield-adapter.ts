@@ -178,12 +178,12 @@ export class GreenShieldAdapter extends BaseIntegration {
 
             default:
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              errors.push({ entity, error: `Unknown entity type: ${entity}` } as unknown);
+              errors.push({ entity, error: `Unknown entity type: ${entity}` } as any);
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          errors.push({ entity, error: `Failed to sync ${entity}: ${errorMessage}` } as unknown);
+          errors.push({ entity, error: `Failed to sync ${entity}: ${errorMessage}` } as any);
           this.logError('sync', error);
         }
       }
@@ -206,7 +206,7 @@ export class GreenShieldAdapter extends BaseIntegration {
         recordsUpdated,
         recordsFailed,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        errors: [{ entity: 'sync', error: errorMessage }] as unknown,
+        errors: [{ entity: 'sync', error: errorMessage }] as any,
       };
     }
   }
@@ -378,7 +378,7 @@ export class GreenShieldAdapter extends BaseIntegration {
             externalId: claim.external_id,
             claimNumber: claim.claim_number,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            employeeId: (claim as unknown).employee_id || claim.external_id,
+            employeeId: (claim as any).employee_id || claim.external_id,
             employeeName: claim.member_name,
             submissionDate: claim.claim_date,
             claimType: claim.claim_type,
@@ -448,7 +448,7 @@ export class GreenShieldAdapter extends BaseIntegration {
             externalId: coverage.external_id,
             employeeId: coverage.member_id,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            planId: (coverage as unknown).plan_id || '',
+            planId: (coverage as any).plan_id || '',
             planType: coverage.coverage_type,
             coverageAmount: coverage.coverage_amount.toString(),
             deductible: coverage.deductible.toString(),

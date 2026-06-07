@@ -65,7 +65,7 @@ type AlertExecutionSummary = {
   completedAt: string | null;
   executionTimeMs: number | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  actionsExecuted: unknown;
+  actionsExecuted: any;
   errorMessage?: string | null;
 };
 
@@ -76,7 +76,7 @@ type AlertEscalationSummary = {
   name: string;
   description: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  escalationLevels: unknown;
+  escalationLevels: any;
   status: string;
   currentLevel: number;
   startedAt: string;
@@ -447,7 +447,7 @@ export default function AlertManagementDashboard() {
                 <select
                   value={selectedStatus}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onChange={(e) => setSelectedStatus(e.target.value as unknown)}
+                  onChange={(e) => setSelectedStatus(e.target.value as any)}
                   className="border rounded-md px-3 py-2"
                 >
                   <option value="all">All Status</option>

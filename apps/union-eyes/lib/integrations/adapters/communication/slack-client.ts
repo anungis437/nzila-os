@@ -171,7 +171,7 @@ export class SlackClient {
         throw error;
       }
 
-      return data.data || (data as unknown as T);
+      return data.data || (data as any as T);
     } catch (error) {
       if (error instanceof Error && (
         error.name === 'RateLimitError' ||
@@ -306,8 +306,8 @@ export class SlackClient {
     text: string,
     options: {
       threadTs?: string;
-      blocks?: unknown[];
-      attachments?: unknown[];
+      blocks?: any[];
+      attachments?: any[];
     } = {}
   ): Promise<SlackMessage> {
     const body = {

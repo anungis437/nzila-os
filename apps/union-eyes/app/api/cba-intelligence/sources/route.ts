@@ -78,7 +78,7 @@ export const POST = withApi(
     },
   },
   async ({ body, userId, organizationId }) => {
-    const source = await createSource(body as unknown as NewCbaIntelSource);
+    const source = await createSource(body as any as NewCbaIntelSource);
     await auditDataMutation({
       userId: userId!,
       organizationId: organizationId!,

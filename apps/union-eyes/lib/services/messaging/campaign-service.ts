@@ -54,14 +54,23 @@ export interface CampaignSendResult {
   estimatedCompletionMinutes?: number;
 }
 
+interface CampaignStats {
+  sent?: number;
+  delivered?: number;
+  opened?: number;
+  clicked?: number;
+  unsubscribed?: number;
+  queued?: number;
+  [key: string]: unknown;
+}
+
 export interface AudienceResolutionResult {
   recipients: Array<{
     userId: string;
     email?: string;
     phone?: string;
     name?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }>;
   totalCount: number;
   eligibleCount: number; // After consent filtering
@@ -138,13 +147,11 @@ export class CampaignService {
       .$dynamic();
 
     if (status) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      query = query.where(eq(campaigns.status, status as unknown));
+      query = query.where(eq(campaigns.status, status as (typeof campaigns.status)['_']['data']));
     }
 
     if (channel) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      query = query.where(eq(campaigns.channel, channel as unknown));
+      query = query.where(eq(campaigns.channel, channel as (typeof campaigns.channel)['_']['data']));
     }
 
     const campaignsList = await query
@@ -373,8 +380,7 @@ export class CampaignService {
           status: 'sent',
           completedAt: new Date(),
           stats: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ...(campaign.stats as unknown),
+            ...(campaign.stats as CampaignStats),
             queued,
           },
           updatedBy: userId,
@@ -416,8 +422,7 @@ export class CampaignService {
       email?: string;
       phone?: string;
       name?: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     },
   ): Promise<MessageLog> {
     const messageData: InsertMessageLog = {
@@ -601,8 +606,7 @@ export class CampaignService {
       throw new Error('Campaign not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const stats = campaign.stats as unknown;
+    const stats = campaign.stats as CampaignStats;
     const total = stats.sent || 0;
 
     return {

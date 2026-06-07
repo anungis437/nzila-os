@@ -102,8 +102,8 @@ vi.mock("@/db/schema", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((_col: unknown, val: unknown) => ({ eq: val })),
-  and: vi.fn((...args: unknown[]) => ({ and: args })),
+  eq: vi.fn((_col: any, val: any) => ({ eq: val })),
+  and: vi.fn((...args: any[]) => ({ and: args })),
   desc: vi.fn(),
   ilike: vi.fn(),
   relations: vi.fn(() => ({})),

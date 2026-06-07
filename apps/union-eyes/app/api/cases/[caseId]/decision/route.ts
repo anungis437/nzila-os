@@ -70,7 +70,7 @@ export async function POST(
   }
 
   const { caseId } = await params;
-  let raw: unknown;
+  let raw: any;
   try {
     raw = await request.json();
   } catch {

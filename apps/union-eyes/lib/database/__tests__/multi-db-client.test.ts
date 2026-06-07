@@ -17,10 +17,10 @@ const mocks = vi.hoisted(() => ({
   mockPool: vi.fn(),
   mockSafeColumnName: vi.fn((name: string) => `safe_${name}`),
   mockSql: Object.assign(
-    vi.fn((_strings: unknown, ..._values: unknown[]) => ({ _tag: "sql" })),
+    vi.fn((_strings: any, ..._values: any[]) => ({ _tag: "sql" })),
     {
       raw: vi.fn((s: string) => ({ _tag: "raw", value: s })),
-      join: vi.fn((items: unknown[], sep: unknown) => ({ _tag: "join", items, sep })),
+      join: vi.fn((items: any[], sep: any) => ({ _tag: "join", items, sep })),
     },
   ),
 }));
@@ -45,16 +45,16 @@ vi.mock("@/db/schema", () => ({}));
 
 vi.mock("drizzle-orm", () => ({
   sql: mocks.mockSql,
-  eq: vi.fn((...a: unknown[]) => ({ op: "eq", args: a })),
-  and: vi.fn((...a: unknown[]) => ({ op: "and", args: a })),
-  or: vi.fn((...a: unknown[]) => ({ op: "or", args: a })),
-  inArray: vi.fn((...a: unknown[]) => ({ op: "inArray", args: a })),
-  isNull: vi.fn((a: unknown) => ({ op: "isNull", args: [a] })),
-  desc: vi.fn((a: unknown) => ({ op: "desc", args: [a] })),
-  asc: vi.fn((a: unknown) => ({ op: "asc", args: [a] })),
-  ilike: vi.fn((...a: unknown[]) => ({ op: "ilike", args: a })),
-  gte: vi.fn((...a: unknown[]) => ({ op: "gte", args: a })),
-  lte: vi.fn((...a: unknown[]) => ({ op: "lte", args: a })),
+  eq: vi.fn((...a: any[]) => ({ op: "eq", args: a })),
+  and: vi.fn((...a: any[]) => ({ op: "and", args: a })),
+  or: vi.fn((...a: any[]) => ({ op: "or", args: a })),
+  inArray: vi.fn((...a: any[]) => ({ op: "inArray", args: a })),
+  isNull: vi.fn((a: any) => ({ op: "isNull", args: [a] })),
+  desc: vi.fn((a: any) => ({ op: "desc", args: [a] })),
+  asc: vi.fn((a: any) => ({ op: "asc", args: [a] })),
+  ilike: vi.fn((...a: any[]) => ({ op: "ilike", args: a })),
+  gte: vi.fn((...a: any[]) => ({ op: "gte", args: a })),
+  lte: vi.fn((...a: any[]) => ({ op: "lte", args: a })),
 }));
 
 vi.mock("@/lib/safe-sql-identifiers", () => ({

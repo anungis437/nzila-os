@@ -38,7 +38,7 @@ import { logger } from '@/lib/logger';
 export interface RateLimitContext {
   userId?: string;
   organizationId?: string;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 /**

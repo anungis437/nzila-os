@@ -373,7 +373,7 @@ export async function getAllMappings(
 
     const result = await db.execute(query);
 
-    return result.map((_row: unknown) => {
+    return result.map((_row: any) => {
       const row = _row as Record<string, unknown>;
       return {
         tenantId: row.tenant_id as string,

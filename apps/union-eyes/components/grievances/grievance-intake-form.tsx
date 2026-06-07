@@ -203,7 +203,7 @@ export function GrievanceIntakeForm({
     branch: "",
     supervisorName: "",
     grievanceType: "",
-    issueDate: undefined as unknown as Date,
+    issueDate: undefined as any as Date,
     urgency: "medium",
     cbaArticle: "",
     cbaSection: "",
@@ -222,7 +222,7 @@ export function GrievanceIntakeForm({
 
   const form = useForm<GrievanceFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(fullSchema) as unknown,
+    resolver: zodResolver(fullSchema) as any,
     defaultValues: defaults,
     mode: "onTouched",
   });
@@ -246,7 +246,7 @@ export function GrievanceIntakeForm({
     const fields = STEP_FIELDS[currentStep];
     if (!fields || fields.length === 0) return true;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return form.trigger(fields as unknown);
+    return form.trigger(fields as any);
   };
 
   const handleNext = async () => {

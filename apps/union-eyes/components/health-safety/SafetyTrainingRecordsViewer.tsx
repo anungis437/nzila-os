@@ -100,7 +100,7 @@ export function SafetyTrainingRecordsViewer({
       const data = await response.json();
       if (data.success) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setRecords(data.records.map((r: unknown) => ({
+        setRecords(data.records.map((r: any) => ({
           ...r,
           completionDate: new Date(r.completionDate),
           expiryDate: r.expiryDate ? new Date(r.expiryDate) : undefined

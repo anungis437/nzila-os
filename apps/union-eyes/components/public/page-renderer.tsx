@@ -13,9 +13,9 @@ interface CMSPage {
     id: string;
     type: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    content: unknown;
+    content: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    styles?: unknown;
+    styles?: any;
   }>;
   status: 'draft' | 'published' | 'archived';
   seoTitle: string | null;
@@ -205,7 +205,7 @@ export function PublicPageRenderer({ pageSlug }: PublicPageRendererProps) {
         return (
           <div key={block.id} className="grid md:grid-cols-3 gap-8 mb-8" {...styleProps}>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {content.items?.map((item: unknown, index: number) => (
+            {content.items?.map((item: any, index: number) => (
               <div key={index} className="text-center">
                 <div className="text-4xl mb-4">{item.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
@@ -243,7 +243,7 @@ export function PublicPageRenderer({ pageSlug }: PublicPageRendererProps) {
         return (
           <div key={block.id} className="grid md:grid-cols-3 gap-4 mb-8" {...styleProps}>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {content.images?.map((image: unknown, index: number) => (
+            {content.images?.map((image: any, index: number) => (
               <div key={index} className="aspect-square overflow-hidden rounded-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

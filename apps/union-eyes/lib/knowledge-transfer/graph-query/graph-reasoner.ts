@@ -290,7 +290,7 @@ function queryUndocumentedChains(
     evidenceChain: [
       `Chain length: ${chain.nodeIds.length} connected steps`,
       `Single source: the first step is only known to one person`,
-      `Documentation status: unknown/likely informal`,
+      `Documentation status: any/likely informal`,
     ],
   }));
 

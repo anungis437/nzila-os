@@ -113,7 +113,7 @@ function formatDateTime(date: string, locale: string): string {
 
 function getStatusBadge(status: string, t: (key: string) => string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const statusConfig: Record<string, { variant: unknown; icon: React.ReactNode; label: string }> = {
+  const statusConfig: Record<string, { variant: any; icon: React.ReactNode; label: string }> = {
     paid: {
       variant: 'default',
       icon: <CheckCircle className="h-3 w-3 mr-1" />,

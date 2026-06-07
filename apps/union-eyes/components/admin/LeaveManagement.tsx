@@ -127,7 +127,7 @@ export default function LeaveManagement({ organizationId, memberId }: LeaveManag
       const result = await getAllMemberLeavesAction(memberId);
       if (result.isSuccess && Array.isArray(result.data)) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setLeaves(result.data as unknown);
+        setLeaves(result.data as any);
       }
     } catch (_error) {
       toast({
@@ -308,9 +308,9 @@ function LeaveFormDialog({ open, onClose, editingLeave, organizationId, defaultM
   const [submitting, setSubmitting] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const form = useForm<unknown>({
+  const form = useForm<any>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(createMemberLeaveSchema) as unknown,
+    resolver: zodResolver(createMemberLeaveSchema) as any,
     defaultValues: editingLeave
       ? {
           organizationId: editingLeave.organizationId,
@@ -331,7 +331,7 @@ function LeaveFormDialog({ open, onClose, editingLeave, organizationId, defaultM
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: unknown) => {
+  const onSubmit = async (data: any) => {
     setSubmitting(true);
     try {
       const result = editingLeave

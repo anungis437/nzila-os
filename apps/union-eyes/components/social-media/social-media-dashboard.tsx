@@ -181,7 +181,7 @@ export default function SocialMediaDashboard() {
         const data = await postsRes.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setPosts(items.map((p: unknown) => ({
+        setPosts(items.map((p: any) => ({
           ...p,
           scheduledFor: p.scheduledFor ? new Date(p.scheduledFor) : undefined,
           publishedAt: p.publishedAt ? new Date(p.publishedAt) : undefined,

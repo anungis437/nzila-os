@@ -44,7 +44,7 @@ export default async function AdminShopifyPage({
   // Test connection if fully configured
   let connectionStatus: 'success' | 'error' | 'unknown' = 'unknown';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let shopInfo: unknown = null;
+  let shopInfo: any = null;
 
   if (isFullyConfigured) {
     try {
@@ -243,7 +243,7 @@ function ConfigItem({
   configured: boolean;
   value?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: unknown;
+  t: any;
 }) {
   return (
     <div className="flex items-center justify-between p-3 border rounded-md">
@@ -268,7 +268,7 @@ function ConfigItem({
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function WebhookEndpoint({ topic, url, t }: { topic: string; url: string; t: unknown }) {
+function WebhookEndpoint({ topic, url, t }: { topic: string; url: string; t: any }) {
   return (
     <div className="p-3 border rounded-md space-y-2">
       <div className="flex items-center justify-between">

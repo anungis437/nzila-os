@@ -251,7 +251,7 @@ export const POST = withRoleAuth('member', async (request, _context) => {
   const userId = postUser?.id ?? '';
   const organizationId = postUser?.organizationId ?? '';
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {

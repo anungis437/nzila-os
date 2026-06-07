@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     .select()
     .from(organizations)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .where(eq(organizations.id, organizationId as unknown))
+    .where(eq(organizations.id, organizationId as any))
     .limit(1);
 
   const org = orgs[0];

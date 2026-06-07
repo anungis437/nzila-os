@@ -1,25 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  selectQueue: [] as unknown[],
-  insertQueue: [] as unknown[],
-  updateQueue: [] as unknown[],
+  selectQueue: [] as any[],
+  insertQueue: [] as any[],
+  updateQueue: [] as any[],
   mockSelect: vi.fn(),
   mockInsert: vi.fn(),
   mockUpdate: vi.fn(),
   mockLoggerError: vi.fn(),
 }));
 
-function makeSelectChain(result: unknown) {
+function makeSelectChain(result: any) {
   const chain: Record<string, unknown> = {};
   for (const method of ["from", "where", "orderBy", "limit", "offset"]) {
     chain[method] = vi.fn(() => chain);
   }
-  chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(resolve(result));
+  chain.then = (resolve: (value: any) => unknown) => Promise.resolve(resolve(result));
   return chain;
 }
 
-function makeInsertChain(result: unknown) {
+function makeInsertChain(result: any) {
   const chain: Record<string, unknown> = {
     values: vi.fn(() => chain),
     returning: vi.fn(() => Promise.resolve(result)),
@@ -27,13 +27,13 @@ function makeInsertChain(result: unknown) {
   return chain;
 }
 
-function makeUpdateChain(result: unknown) {
+function makeUpdateChain(result: any) {
   const chain: Record<string, unknown> = {
     set: vi.fn(() => chain),
     where: vi.fn(() => chain),
     returning: vi.fn(() => Promise.resolve(result)),
   };
-  chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(resolve(result));
+  chain.then = (resolve: (value: any) => unknown) => Promise.resolve(resolve(result));
   return chain;
 }
 

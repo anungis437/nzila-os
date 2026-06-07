@@ -212,8 +212,8 @@ export function buildReplayDiff(
 
 export function buildEvaluationGraphDiff(input: {
   employeeExternalId: string;
-  originalTrace: unknown;
-  replayTrace: unknown;
+  originalTrace: any;
+  replayTrace: any;
   causeDetail: string;
 }) {
   return diffEvaluationGraph(input);

@@ -34,7 +34,6 @@ export interface ScatterChartProps {
     z?: number; // Optional size dimension
     category?: string;
     name?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: unknown;
   }>;
   xAxisLabel?: string;
@@ -43,7 +42,6 @@ export interface ScatterChartProps {
   colors?: string[];
   showGrid?: boolean;
   showLegend?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onPointClick?: (data: unknown) => void;
   height?: number;
   xDomain?: [number | 'auto', number | 'auto'];
@@ -100,8 +98,7 @@ export function ScatterChart({
       }];
 
   // Custom tooltip
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: unknown) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name?: string; x?: number; y?: number; z?: number; category?: string } }> }) => {
     if (!active || !payload || !payload.length) return null;
 
     const data = payload[0].payload;
@@ -138,7 +135,6 @@ export function ScatterChart({
   };
 
   // Handle point click
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleClick = (data: unknown) => {
     if (onPointClick) {
       onPointClick(data);

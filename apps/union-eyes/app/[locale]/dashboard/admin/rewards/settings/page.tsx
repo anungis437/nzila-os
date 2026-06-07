@@ -66,7 +66,7 @@ export default async function RewardsSettingsPage({
           ) : (
             <div className="space-y-4">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {programs.map((program: unknown) => (
+              {programs.map((program: any) => (
                 <div
                   key={program.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors"

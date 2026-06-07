@@ -62,21 +62,21 @@ import {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function setupSelectChain(rows: unknown[]) {
+function setupSelectChain(rows: any[]) {
   mocks.mockLimit.mockResolvedValue(rows);
   mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
   mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
   mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
 }
 
-function setupUpdateChain(returnRows: unknown[]) {
+function setupUpdateChain(returnRows: any[]) {
   mocks.mockReturning.mockResolvedValue(returnRows);
   mocks.mockUpdateWhere.mockReturnValue({ returning: mocks.mockReturning });
   mocks.mockSet.mockReturnValue({ where: mocks.mockUpdateWhere });
   mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
 }
 
-function setupInsertChain(returnRows: unknown[]) {
+function setupInsertChain(returnRows: any[]) {
   mocks.mockInsertReturning.mockResolvedValue(returnRows);
   mocks.mockValues.mockReturnValue({ returning: mocks.mockInsertReturning });
   mocks.mockInsert.mockReturnValue({ values: mocks.mockValues });
@@ -153,7 +153,7 @@ describe('autopay-utils', () => {
       const result = getPaymentMethodLast4({
         type: 'card',
         card: { last4: '4242' },
-      } as unknown as Parameters<typeof getPaymentMethodLast4>[0]);
+      } as any as Parameters<typeof getPaymentMethodLast4>[0]);
       expect(result).toBe('4242');
     });
 
@@ -161,14 +161,14 @@ describe('autopay-utils', () => {
       const result = getPaymentMethodLast4({
         type: 'us_bank_account',
         us_bank_account: { last4: '6789' },
-      } as unknown as Parameters<typeof getPaymentMethodLast4>[0]);
+      } as any as Parameters<typeof getPaymentMethodLast4>[0]);
       expect(result).toBe('6789');
     });
 
     it('returns null for unknown type', () => {
       const result = getPaymentMethodLast4({
         type: 'paypal',
-      } as unknown as Parameters<typeof getPaymentMethodLast4>[0]);
+      } as any as Parameters<typeof getPaymentMethodLast4>[0]);
       expect(result).toBeNull();
     });
   });
@@ -180,7 +180,7 @@ describe('autopay-utils', () => {
       const result = getPaymentMethodBrand({
         type: 'card',
         card: { brand: 'visa' },
-      } as unknown as Parameters<typeof getPaymentMethodBrand>[0]);
+      } as any as Parameters<typeof getPaymentMethodBrand>[0]);
       expect(result).toBe('visa');
     });
 
@@ -188,7 +188,7 @@ describe('autopay-utils', () => {
       const result = getPaymentMethodBrand({
         type: 'us_bank_account',
         us_bank_account: { bank_name: 'Chase' },
-      } as unknown as Parameters<typeof getPaymentMethodBrand>[0]);
+      } as any as Parameters<typeof getPaymentMethodBrand>[0]);
       expect(result).toBe('Chase');
     });
 
@@ -196,14 +196,14 @@ describe('autopay-utils', () => {
       const result = getPaymentMethodBrand({
         type: 'us_bank_account',
         us_bank_account: { bank_name: null },
-      } as unknown as Parameters<typeof getPaymentMethodBrand>[0]);
+      } as any as Parameters<typeof getPaymentMethodBrand>[0]);
       expect(result).toBe('bank_account');
     });
 
     it('returns type for unknown payment methods', () => {
       const result = getPaymentMethodBrand({
         type: 'sepa_debit',
-      } as unknown as Parameters<typeof getPaymentMethodBrand>[0]);
+      } as any as Parameters<typeof getPaymentMethodBrand>[0]);
       expect(result).toBe('sepa_debit');
     });
   });

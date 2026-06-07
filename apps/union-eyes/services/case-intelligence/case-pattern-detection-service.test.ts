@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type SelectStep = {
-  rows: unknown[];
+  rows: any[];
   directWhere?: boolean;
 };
 
@@ -16,7 +16,7 @@ const dbMock = {
       throw new Error('No mocked select step configured');
     }
 
-    const builder: Record<string, (...args: unknown[]) => unknown> = {
+    const builder: Record<string, (...args: any[]) => unknown> = {
       from: () => builder,
       orderBy: () => builder,
       limit: async () => step.rows,

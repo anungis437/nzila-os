@@ -274,7 +274,7 @@ function ClassificationFormDialog({
 
   const form = useForm({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(createJobClassificationSchema) as unknown,
+    resolver: zodResolver(createJobClassificationSchema) as any,
     defaultValues: editingClassification
       ? {
           organizationId: editingClassification.organizationId,
@@ -299,12 +299,12 @@ function ClassificationFormDialog({
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: unknown) => {
+  const onSubmit = async (data: any) => {
     setSubmitting(true);
     try {
       // Convert numeric rates to strings
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const classificationData: unknown = {
+      const classificationData: any = {
         ...data,
         minimumRate: data.minimumRate ? String(data.minimumRate) : undefined,
         maximumRate: data.maximumRate ? String(data.maximumRate) : undefined,

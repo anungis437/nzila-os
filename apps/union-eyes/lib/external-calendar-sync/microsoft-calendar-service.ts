@@ -364,7 +364,7 @@ export async function importMicrosoftEvents(
         } else {
           // Create new event
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await db.insert(calendarEvents).values(eventData as unknown);
+          await db.insert(calendarEvents).values(eventData as any);
           importedCount++;
         }
       } catch (_error) {
@@ -466,7 +466,7 @@ throw error;
  * Map Microsoft Outlook event to local event format
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapMicrosoftEventToLocal(msEvent: unknown, calendarId: string, organizationId: string) {
+function mapMicrosoftEventToLocal(msEvent: any, calendarId: string, organizationId: string) {
   return {
     calendarId,
     organizationId,
@@ -499,9 +499,9 @@ function mapMicrosoftEventToLocal(msEvent: unknown, calendarId: string, organiza
  * Map local event to Microsoft Outlook event format
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapLocalEventToMicrosoft(localEvent: unknown) {
+function mapLocalEventToMicrosoft(localEvent: any) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const msEvent: unknown = {
+  const msEvent: any = {
     subject: localEvent.title,
     body: {
       contentType: 'HTML',
@@ -541,7 +541,7 @@ function mapLocalEventToMicrosoft(localEvent: unknown) {
  * Map Microsoft recurrence to RRULE
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapMicrosoftRecurrenceToRRule(recurrence: unknown): string {
+function mapMicrosoftRecurrenceToRRule(recurrence: any): string {
   const pattern = recurrence.pattern;
   const range = recurrence.range;
 
@@ -573,10 +573,10 @@ function mapMicrosoftRecurrenceToRRule(recurrence: unknown): string {
  * Map RRULE to Microsoft recurrence
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapRRuleToMicrosoftRecurrence(rrule: string): unknown {
+function mapRRuleToMicrosoftRecurrence(rrule: string): any {
   const parts = rrule.split(';');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recurrence: unknown = {
+  const recurrence: any = {
     pattern: {},
     range: {},
   };
@@ -678,7 +678,7 @@ async function updateDeltaLink(
     if (!connection) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappings: unknown = (connection.calendarMappings as unknown) || {};
+    const mappings: any = (connection.calendarMappings as any) || {};
     
     if (!mappings[microsoftCalendarId]) {
       mappings[microsoftCalendarId] = {};
@@ -690,7 +690,7 @@ async function updateDeltaLink(
       .update(externalCalendarConnections)
       .set({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        calendarMappings: mappings as unknown,
+        calendarMappings: mappings as any,
         lastSyncAt: new Date(),
         syncStatus: 'synced',
         updatedAt: new Date(),
@@ -704,7 +704,7 @@ async function updateDeltaLink(
  * Get delta link for a calendar
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getDeltaLink(connection: unknown, microsoftCalendarId: string): string | null {
+export function getDeltaLink(connection: any, microsoftCalendarId: string): string | null {
   const mappings = connection.calendarMappings || {};
   return mappings[microsoftCalendarId]?.deltaLink || null;
 }

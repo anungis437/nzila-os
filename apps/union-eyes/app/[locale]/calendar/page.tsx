@@ -30,20 +30,42 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Settings } from 'lucide-react';
 
+interface CalendarSummary {
+  id: string;
+  name: string;
+  color: string;
+  isDefault: boolean;
+  visibility: boolean;
+  syncEnabled?: boolean;
+  syncStatus?: 'synced' | 'syncing' | 'failed' | 'pending';
+  provider?: 'google' | 'microsoft' | 'local';
+  connectionId?: string;
+  externalCalendarId?: string;
+}
+
+interface CalendarEventRecord {
+  id: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  eventType: string;
+  status: string;
+  location?: string;
+  isAllDay: boolean;
+  calendarId?: string;
+}
+
 export default function CalendarPage() {
   const t = useTranslations();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [calendars, setCalendars] = useState<any[]>([]);
+  const [calendars, setCalendars] = useState<CalendarSummary[]>([]);
   const [selectedCalendarId, setSelectedCalendarId] = useState<string>('');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<CalendarEventRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Dialog states
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [syncManagerOpen, setSyncManagerOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedEvent, setSelectedEvent] = useState<unknown>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEventRecord | null>(null);
   const [initialDate, setInitialDate] = useState<Date | undefined>();
   const [createCalendarOpen, setCreateCalendarOpen] = useState(false);
   const [isCreatingCalendar, setIsCreatingCalendar] = useState(false);
@@ -97,14 +119,12 @@ export default function CalendarPage() {
     setEventDialogOpen(true);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleEditEvent = (event: unknown) => {
+  const handleEditEvent = (event: CalendarEventRecord) => {
     setSelectedEvent(event);
     setInitialDate(undefined);
     setEventDialogOpen(true);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSaveEvent = async (eventData: unknown) => {
     try {
       if (selectedEvent) {

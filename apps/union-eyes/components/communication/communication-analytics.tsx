@@ -298,7 +298,7 @@ export function CommunicationAnalytics({
         </div>
         <div className="flex gap-2">
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Select value={timePeriod} onValueChange={(v) => setTimePeriod(v as unknown)}>
+          <Select value={timePeriod} onValueChange={(v) => setTimePeriod(v as any)}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>

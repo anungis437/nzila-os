@@ -55,7 +55,7 @@ export const POST = withMinRole('officer', async (request, context: BaseAuthCont
     return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
   }
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {

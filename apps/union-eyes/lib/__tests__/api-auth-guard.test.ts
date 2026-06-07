@@ -29,10 +29,10 @@ const mocks = vi.hoisted(() => ({
 }));
 
 /** Recursive chain for db.select chains */
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -48,8 +48,8 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return {
     ...actual,
-    eq: vi.fn((...a: unknown[]) => a),
-    and: vi.fn((...a: unknown[]) => a),
+    eq: vi.fn((...a: any[]) => a),
+    and: vi.fn((...a: any[]) => a),
   };
 });
 
@@ -60,7 +60,7 @@ vi.mock('next/headers', () => ({
 vi.mock('next/server', () => ({
   NextRequest: vi.fn(),
   NextResponse: {
-    json: vi.fn((body: unknown, init?: { status?: number }) => ({ body, status: init?.status ?? 200 })),
+    json: vi.fn((body: any, init?: { status?: number }) => ({ body, status: init?.status ?? 200 })),
   },
 }));
 
@@ -594,7 +594,7 @@ describe('ApiAuthGuard', () => {
     const mockRequest = {
       nextUrl: { pathname: '/api/test' },
       headers: { get: vi.fn() },
-    } as unknown as NextRequest;
+    } as any as NextRequest;
 
     it('calls handler when authenticated', async () => {
       const handler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
@@ -628,7 +628,7 @@ describe('ApiAuthGuard', () => {
       const req = {
         nextUrl: { pathname: '/api/cron/test' },
         headers: { get: vi.fn().mockReturnValue(null) },
-      } as unknown as NextRequest;
+      } as any as NextRequest;
       const res = await wrapped(req, {} as never);
       expect(res.status).toBe(401);
     });
@@ -641,7 +641,7 @@ describe('ApiAuthGuard', () => {
       const req = {
         nextUrl: { pathname: '/api/cron/test' },
         headers: { get: vi.fn().mockReturnValue('secret') },
-      } as unknown as NextRequest;
+      } as any as NextRequest;
       await wrapped(req, {} as never);
       expect(handler).toHaveBeenCalled();
       delete process.env.CRON_SECRET_KEY;
@@ -657,7 +657,7 @@ describe('ApiAuthGuard', () => {
       const req = {
         nextUrl: { pathname: '/api/cron/test' },
         headers: { get: vi.fn().mockReturnValue('legacy-secret') },
-      } as unknown as NextRequest;
+      } as any as NextRequest;
 
       await wrapped(req, {} as never);
       expect(handler).toHaveBeenCalled();

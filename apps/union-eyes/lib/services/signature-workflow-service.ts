@@ -75,7 +75,7 @@ interface WorkflowData {
   storageKey?: string;
 }
 
-function getWorkflowData(value: unknown): WorkflowData {
+function getWorkflowData(value: any): WorkflowData {
   return typeof value === 'object' && value !== null ? (value as WorkflowData) : {};
 }
 

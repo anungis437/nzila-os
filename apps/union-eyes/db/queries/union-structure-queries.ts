@@ -144,7 +144,7 @@ export async function listEmployersByOrganization(
 
       if (options?.status) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        query = query.where(eq(employers.status, options.status as unknown));
+        query = query.where(eq(employers.status, options.status as any));
       }
 
       if (options?.search) {
@@ -340,7 +340,7 @@ export async function listWorksitesByEmployer(
 
       if (options?.status) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        query = query.where(eq(worksites.status, options.status as unknown));
+        query = query.where(eq(worksites.status, options.status as any));
       }
 
       if (options?.search) {
@@ -531,7 +531,7 @@ export async function listBargainingUnitsByOrganization(
 
       if (options?.status) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        query = query.where(eq(bargainingUnits.status, options.status as unknown));
+        query = query.where(eq(bargainingUnits.status, options.status as any));
       }
 
       if (options?.search) {
@@ -771,7 +771,7 @@ export async function listCommitteesByOrganization(
 
       if (options?.committeeType) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        query = query.where(eq(committees.committeeType, options.committeeType as unknown));
+        query = query.where(eq(committees.committeeType, options.committeeType as any));
       }
 
       if (options?.status) {
@@ -1182,7 +1182,7 @@ export async function getUnitStewards(
 
       if (options?.stewardType) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        query = query.where(eq(stewardAssignments.stewardType, options.stewardType as unknown));
+        query = query.where(eq(stewardAssignments.stewardType, options.stewardType as any));
       }
 
       query = query.orderBy(asc(stewardAssignments.stewardType));

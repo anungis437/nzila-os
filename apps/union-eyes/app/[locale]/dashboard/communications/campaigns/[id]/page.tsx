@@ -98,7 +98,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [dryRunResult, setDryRunResult] = useState<unknown>(null);
+  const [dryRunResult, setDryRunResult] = useState<any>(null);
 
   useEffect(() => {
     fetchCampaign();

@@ -106,7 +106,7 @@ export function CorrectiveActionTracker({
       const data = await response.json();
       if (data.success) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setActions(data.actions.map((a: unknown) => ({
+        setActions(data.actions.map((a: any) => ({
           ...a,
           assignedDate: new Date(a.assignedDate),
           dueDate: new Date(a.dueDate),

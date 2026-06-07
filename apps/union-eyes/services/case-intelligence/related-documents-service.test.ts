@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type SelectStep = {
-  rows: unknown[];
+  rows: any[];
 };
 
 const selectSteps: SelectStep[] = [];
@@ -21,7 +21,7 @@ const dbMock = {
       orderBy: () => builder,
       where: () => builder,
       limit: async () => step.rows,
-      then: (onFulfilled: (value: unknown[]) => unknown, onRejected?: (reason: unknown) => unknown) =>
+      then: (onFulfilled: (value: any[]) => unknown, onRejected?: (reason: any) => unknown) =>
         Promise.resolve(step.rows).then(onFulfilled, onRejected),
     };
 

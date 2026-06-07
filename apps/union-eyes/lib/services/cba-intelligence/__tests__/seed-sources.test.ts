@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  selectQueue: [] as unknown[],
+  selectQueue: [] as any[],
   dbSelect: vi.fn(),
   dbInsert: vi.fn(),
   loggerInfo: vi.fn(),
   loggerError: vi.fn(),
 }));
 
-function makeSelectChain(result: unknown) {
+function makeSelectChain(result: any) {
   const chain: Record<string, unknown> = {
     from: vi.fn(() => chain),
     where: vi.fn(() => chain),

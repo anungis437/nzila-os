@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 const mocks = vi.hoisted(() => {
-  const selectQueue: unknown[][] = []
+  const selectQueue: any[][] = []
 
   const db = {
     select: vi.fn(() => ({
@@ -28,7 +28,7 @@ const mocks = vi.hoisted(() => {
 })
 
 vi.mock('@/lib/organization-middleware', () => ({
-  withOrganizationAuth: vi.fn((handler: (...args: unknown[]) => unknown) => handler),
+  withOrganizationAuth: vi.fn((handler: (...args: any[]) => unknown) => handler),
 }))
 
 vi.mock('@/db/db', () => ({ db: mocks.db }))

@@ -132,7 +132,7 @@ export default function EditOrganizationPage() {
         const data = await response.json();
         // Filter out current organization and its descendants
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setAvailableOrganizations((data.data || []).filter((org: unknown) => org.id !== organizationId));
+        setAvailableOrganizations((data.data || []).filter((org: any) => org.id !== organizationId));
       } catch (_error) {
 }
     };

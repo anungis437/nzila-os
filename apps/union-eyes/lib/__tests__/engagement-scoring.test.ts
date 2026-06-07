@@ -33,7 +33,7 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   gte: vi.fn(),
   and: vi.fn(),
-  sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }),
+  sql: (strings: TemplateStringsArray, ...values: any[]) => ({ strings, values }),
   relations: vi.fn(() => ({})),
 }));
 
@@ -53,7 +53,7 @@ describe('engagement-scoring', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default: each DB query returns zero counts
-    mocks.mockThen.mockImplementation((fn: (rows: unknown[]) => unknown) =>
+    mocks.mockThen.mockImplementation((fn: (rows: any[]) => unknown) =>
       Promise.resolve(
         fn([{ received: 0, replied: 0, clicked: 0, lastActivity: null, opened: 0, started: 0, completed: 0, voted: 0, delivered: 0, count: 0 }])
       )
@@ -68,7 +68,7 @@ describe('engagement-scoring', () => {
 
   it('assigns highly-engaged tier for high activity', async () => {
     let callCount = 0;
-    mocks.mockThen.mockImplementation((fn: (rows: unknown[]) => unknown) => {
+    mocks.mockThen.mockImplementation((fn: (rows: any[]) => unknown) => {
       callCount++;
       // First 5 calls are main activity queries; then previous-period queries
       if (callCount <= 5) {

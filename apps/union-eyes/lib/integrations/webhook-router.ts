@@ -152,7 +152,7 @@ export class WebhookRouter {
    */
   private async processEvent(
     organizationId: string,
-    integration: unknown,
+    integration: any,
     event: WebhookEvent,
     attempt: number = 1
   ): Promise<void> {
@@ -187,7 +187,7 @@ export class WebhookRouter {
   /**
    * Extract event type from payload
    */
-  private extractEventType(data: unknown, provider: IntegrationProvider): string {
+  private extractEventType(data: any, provider: IntegrationProvider): string {
     // Provider-specific event type extraction
     switch (provider) {
       case IntegrationProvider.WORKDAY:

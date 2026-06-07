@@ -222,7 +222,7 @@ export async function withRetry<T>(
  */
 export function retry(options?: RetryOptions) {
   return function (
-    target: unknown,
+    target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
@@ -230,10 +230,10 @@ export function retry(options?: RetryOptions) {
     const policy = new RetryPolicy({
       ...options,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      name: options?.name || `${(target as unknown).constructor.name}.${propertyKey}`,
+      name: options?.name || `${(target as any).constructor.name}.${propertyKey}`,
     });
 
-    descriptor.value = async function (...args: unknown[]) {
+    descriptor.value = async function (...args: any[]) {
       return policy.execute(() => originalMethod.apply(this, args));
     };
 

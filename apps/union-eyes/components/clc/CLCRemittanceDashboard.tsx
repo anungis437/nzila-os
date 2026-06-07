@@ -36,7 +36,7 @@ export default function CLCRemittanceDashboard({ period }: CLCRemittanceDashboar
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setRemittances(items.map((r: unknown) => ({
+        setRemittances(items.map((r: any) => ({
           affiliateId: String(r.affiliateId ?? r.affiliate_id ?? r.id),
           affiliateName: r.affiliateName ?? r.affiliate_name ?? '',
           province: r.province ?? '',

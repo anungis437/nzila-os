@@ -309,7 +309,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
       });
 
       const bank = routeQuestionBank(
-        ALL_QUESTIONS as unknown as RoutableQuestion[],
+        ALL_QUESTIONS as any as RoutableQuestion[],
         profile,
       );
       setRoutedBank(bank);

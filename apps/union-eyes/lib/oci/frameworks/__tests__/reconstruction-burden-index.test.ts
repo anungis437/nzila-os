@@ -154,7 +154,7 @@ describe('Reconstruction Burden Index', () => {
         exposedCarriers: 0,
         institutionCriticalCarriers: 0,
         densityIndex: 0,
-        governanceEntropyOrdinal: 0 as unknown as 1,
+        governanceEntropyOrdinal: 0 as any as 1,
       });
       // default entropy=2 -> (2-1)*0.25 = 0.25 -> round1 = 0.3
       expect(r.score).toBe(0.3);
@@ -165,7 +165,7 @@ describe('Reconstruction Burden Index', () => {
         exposedCarriers: 0,
         institutionCriticalCarriers: 0,
         densityIndex: 0,
-        governanceEntropyOrdinal: 2.5 as unknown as 2,
+        governanceEntropyOrdinal: 2.5 as any as 2,
       });
       expect(r.score).toBe(0.3);
     });

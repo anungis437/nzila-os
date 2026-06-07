@@ -279,7 +279,7 @@ class DocumentStorageService {
         });
 
         const response = await this.s3Client!.send(command);
-        const buffer = await streamToBuffer(response.Body!);
+  const buffer = await bodyToBuffer(response.Body);
 
         logger.info("Document downloaded from S3/R2", { key, backend: this.backend });
         return buffer;
@@ -345,13 +345,35 @@ async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   });
 }
 
-function isReadableStream(value: unknown): value is NodeJS.ReadableStream {
+function isReadableStream(value: any): value is NodeJS.ReadableStream {
   return (
     typeof value === "object" &&
     value !== null &&
     "on" in value &&
     typeof value.on === "function"
   );
+}
+
+async function bodyToBuffer(body: unknown): Promise<Buffer> {
+  if (isReadableStream(body)) {
+    return streamToBuffer(body);
+  }
+
+  if (body instanceof Uint8Array) {
+    return Buffer.from(body);
+  }
+
+  if (body instanceof ArrayBuffer) {
+    return Buffer.from(body);
+  }
+
+  if (typeof body === "object" && body !== null && "transformToByteArray" in body) {
+    const transformable = body as { transformToByteArray: () => Promise<Uint8Array> };
+    const bytes = await transformable.transformToByteArray();
+    return Buffer.from(bytes);
+  }
+
+  throw new Error("Unsupported object body stream type");
 }
 
 // ============================================================================

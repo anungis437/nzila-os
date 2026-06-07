@@ -49,7 +49,7 @@ export default async function RedeemCreditsPage() {
         </AlertTitle>
         <AlertDescription>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(t as unknown)('redeem.balanceMessage', {
+          {(t as any)('redeem.balanceMessage', {
             defaultValue: 'You have {balance} credits available to redeem',
             values: { balance: balance.toLocaleString() },
           })}

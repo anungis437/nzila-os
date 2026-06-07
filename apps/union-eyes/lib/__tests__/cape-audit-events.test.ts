@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockAuditLog = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("@/lib/audit-logger", () => ({
-  auditLog: (...args: unknown[]) => mockAuditLog(...args),
+  auditLog: (...args: any[]) => mockAuditLog(...args),
   AuditSeverity: {
     LOW: "low",
     MEDIUM: "medium",

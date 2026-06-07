@@ -71,7 +71,7 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [systemStats, setSystemStats] = useState<unknown>(null);
+  const [systemStats, setSystemStats] = useState<any>(null);
   const [users, setUsers] = useState<SystemUser[]>([]);
   const [organizations, setOrganizations] = useState<LocalSection[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

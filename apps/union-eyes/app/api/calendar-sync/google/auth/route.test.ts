@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@/lib/api-auth-guard', () => ({
-  withRoleAuth: vi.fn((_requiredRole: string, handler: (...args: unknown[]) => unknown) => handler),
+  withRoleAuth: vi.fn((_requiredRole: string, handler: (...args: any[]) => unknown) => handler),
 }))
 
 vi.mock('@/lib/external-calendar-sync/google-calendar-service', () => ({

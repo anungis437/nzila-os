@@ -35,7 +35,7 @@ export interface RecurringEventInstance {
   parentEventId: string;
   startTime: Date;
   endTime: Date;
-  originalEventData: unknown;
+  originalEventData: any;
 }
 
 // ============================================================================

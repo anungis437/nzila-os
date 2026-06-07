@@ -15,7 +15,12 @@
 import { describe, it, expect } from 'vitest'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { navGroups } from '../../apps/console/lib/nav-config'
+import { navGroups, legacyNavGroups } from '../../apps/console/lib/nav-config'
+
+// The sidebar renders only `navGroups` (the six-workspace surface). Legacy
+// direct routes live in `legacyNavGroups` and remain reachable via the command
+// palette. Both must still resolve to real routes — validate them together.
+const allGroups = [...navGroups, ...legacyNavGroups]
 
 const DASHBOARD = resolve(__dirname, '../../apps/console/app/(dashboard)')
 
@@ -31,17 +36,17 @@ describe('Console nav config integrity (CONSOLE-NAV-01)', () => {
   })
 
   it('every group is non-empty', () => {
-    const empty = navGroups.filter(g => g.items.length === 0).map(g => g.label)
+    const empty = allGroups.filter(g => g.items.length === 0).map(g => g.label)
     expect(empty, `Empty nav groups: ${empty.join(', ')}`).toEqual([])
   })
 
   it('has no duplicate hrefs across groups', () => {
-    const all = navGroups.flatMap(g => g.items.map(i => i.href))
+    const all = allGroups.flatMap(g => g.items.map(i => i.href))
     const dupes = all.filter((h, i) => all.indexOf(h) !== i)
     expect(dupes, `Duplicate nav hrefs: ${[...new Set(dupes)].join(', ')}`).toEqual([])
   })
 
-  for (const group of navGroups) {
+  for (const group of allGroups) {
     describe(`group "${group.label}"`, () => {
       for (const item of group.items) {
         if (/^https?:\/\//.test(item.href)) continue

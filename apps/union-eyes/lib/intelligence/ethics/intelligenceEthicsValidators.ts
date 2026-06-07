@@ -112,7 +112,7 @@ export function checkAnonymisationIntegrity(
  * ranking content. Detects common ranking field names so callers are forced
  * to reshape ranked content before submission.
  */
-export function checkAgainstRanking(payload: unknown): EthicsVerdict {
+export function checkAgainstRanking(payload: any): EthicsVerdict {
   if (typeof payload !== 'object' || payload === null) {
     return ok;
   }

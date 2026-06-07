@@ -213,7 +213,7 @@ export class LMBPImmigrationService {
     applicationId: string,
     status: 'approved' | 'denied' | 'withdrawn',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    decisionDetails?: unknown
+    decisionDetails?: any
   ) {
     const application = await db
       .select()

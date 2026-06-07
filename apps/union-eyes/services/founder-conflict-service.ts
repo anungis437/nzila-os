@@ -23,7 +23,7 @@ export interface BlindTrustSetup {
   trusteeRelationship: string;
   trustType: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  assetsTransferred: unknown[];
+  assetsTransferred: any[];
   estimatedValue: number;
   trustDocument: string;
 }
@@ -36,7 +36,7 @@ export interface ConflictDisclosure {
   conflictType: string;
   conflictDescription: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  relatedParties?: unknown[];
+  relatedParties?: any[];
   financialInterestAmount?: number;
   ownershipPercentage?: number;
   mitigationPlan?: string;
@@ -321,7 +321,7 @@ export class FounderConflictService {
 
     for (const disclosure of disclosures) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const relatedParties = (disclosure.relatedParties as unknown[]) || [];
+      const relatedParties = (disclosure.relatedParties as any[]) || [];
       const hasRelationship = relatedParties.some((p) => p.userId === party2);
 
       if (hasRelationship) {
@@ -437,7 +437,7 @@ export class FounderConflictService {
     performedByRole?: string;
     complianceImpact?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: unknown;
+    metadata?: any;
   }) {
     await db.insert(conflictAuditLog).values({
       actionType: params.actionType,

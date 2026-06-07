@@ -70,7 +70,7 @@ export async function guardAiFeature(
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Unable to evaluate AI feature availability.',
-    ) as unknown as NextResponse<AiFallbackResponse>;
+    ) as any as NextResponse<AiFallbackResponse>;
   }
 }
 

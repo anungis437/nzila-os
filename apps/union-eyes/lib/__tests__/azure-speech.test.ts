@@ -5,10 +5,10 @@ const mocks = vi.hoisted(() => ({
   mockFromWavFileInput: vi.fn(),
   mockFromStreamInput: vi.fn(),
   mockCreatePushStream: vi.fn(),
-  mockStartContinuous: vi.fn((ok: unknown) => (ok as (() => void) | undefined)?.()),
-  mockStopContinuous: vi.fn((ok: unknown) => (ok as (() => void) | undefined)?.()),
+  mockStartContinuous: vi.fn((ok: any) => (ok as (() => void) | undefined)?.()),
+  mockStopContinuous: vi.fn((ok: any) => (ok as (() => void) | undefined)?.()),
   mockRecognizerClose: vi.fn(),
-  recognizerInstances: [] as unknown[],
+  recognizerInstances: [] as any[],
 }));
 
 vi.mock('microsoft-cognitiveservices-speech-sdk', () => {
@@ -31,11 +31,11 @@ vi.mock('microsoft-cognitiveservices-speech-sdk', () => {
       }),
     },
     SpeechRecognizer: class {
-      recognized: unknown = null;
-      canceled: unknown = null;
-      sessionStopped: unknown = null;
-      startContinuousRecognitionAsync = (...args: unknown[]) => mocks.mockStartContinuous(...args);
-      stopContinuousRecognitionAsync = (...args: unknown[]) => mocks.mockStopContinuous(...args);
+      recognized: any = null;
+      canceled: any = null;
+      sessionStopped: any = null;
+      startContinuousRecognitionAsync = (...args: any[]) => mocks.mockStartContinuous(...args);
+      stopContinuousRecognitionAsync = (...args: any[]) => mocks.mockStopContinuous(...args);
       close = mocks.mockRecognizerClose;
       constructor() {
         mocks.recognizerInstances.push(this);
@@ -50,8 +50,8 @@ describe('azure-speech', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.recognizerInstances.length = 0;
-    mocks.mockStartContinuous.mockImplementation((ok: unknown) => (ok as (() => void) | undefined)?.());
-    mocks.mockStopContinuous.mockImplementation((ok: unknown) => (ok as (() => void) | undefined)?.());
+    mocks.mockStartContinuous.mockImplementation((ok: any) => (ok as (() => void) | undefined)?.());
+    mocks.mockStopContinuous.mockImplementation((ok: any) => (ok as (() => void) | undefined)?.());
     process.env.AZURE_SPEECH_KEY = 'test-key';
     process.env.AZURE_SPEECH_REGION = 'eastus';
   });
@@ -155,7 +155,7 @@ describe('azure-speech', () => {
     });
 
     it('rejects on startContinuousRecognitionAsync error', async () => {
-      mocks.mockStartContinuous.mockImplementation((_ok: unknown, err: unknown) => (err as ((e: string) => void) | undefined)?.('start failed'));
+      mocks.mockStartContinuous.mockImplementation((_ok: any, err: any) => (err as ((e: string) => void) | undefined)?.('start failed'));
       const { transcribeAudio } = await import('../azure-speech');
       const promise = transcribeAudio(Buffer.from('audio'));
       await expect(promise).rejects.toBe('start failed');

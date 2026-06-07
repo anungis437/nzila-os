@@ -74,10 +74,10 @@ export function LedgerTable({ entries }: LedgerTableProps) {
                       {getTransactionTitle(entry, t)}
                     </span>
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(entry as unknown).notes && (
+                    {(entry as any).notes && (
                       <span className="text-sm text-muted-foreground">
                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {(entry as unknown).notes}
+                        {(entry as any).notes}
                       </span>
                     )}
                   </div>
@@ -128,7 +128,7 @@ function getTransactionIcon(type: string) {
 function getTransactionTitle(
   entry: RewardWalletLedger & { created_by_name?: string },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: unknown
+  t: any
 ): string {
   switch (entry.eventType) {
     case 'earn':
@@ -147,7 +147,7 @@ function getTransactionTitle(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatEntryType(type: string, t: unknown): string {
+function formatEntryType(type: string, t: any): string {
   switch (type) {
     case 'earned':
       return t('badges.earned', { defaultValue: 'Earned' });

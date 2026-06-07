@@ -238,7 +238,7 @@ export function DocumentSharingControls({
                           </FormControl>
                           <SelectContent>
                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                            {(targetType === "user" ? users : groups).map((option: unknown) => (
+                            {(targetType === "user" ? users : groups).map((option: any) => (
                               <SelectItem key={option.id} value={option.id}>
                                 {option.name}
                                 {option.email && ` (${option.email})`}

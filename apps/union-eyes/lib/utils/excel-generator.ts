@@ -13,7 +13,7 @@ import ExcelJS from 'exceljs';
 
 export interface ExcelOptions {
   title: string;
-  data: unknown[] | Record<string, unknown>;
+  data: Record<string, unknown>[] | Record<string, unknown>;
   columns: ExcelColumn[];
   sheetName?: string;
   includeHeader?: boolean;
@@ -41,7 +41,7 @@ export interface MultiSheetExcelOptions {
   filename: string;
   sheets: {
     name: string;
-    data: unknown[];
+    data: Record<string, unknown>[];
     columns: ExcelColumn[];
   }[];
 }
@@ -95,8 +95,7 @@ export async function generateExcel(options: ExcelOptions): Promise<Buffer> {
   headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
   // Add data rows
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data.forEach((row: unknown, index) => {
+  data.forEach((row: Record<string, unknown>, index) => {
     const excelRow = worksheet.addRow(row);
 
     // Apply body font
@@ -216,9 +215,9 @@ export async function generateMultiSheetExcel(
  * Generate financial Excel report with multiple sheets
  */
 export async function generateFinancialExcel(data: {
-  summary: unknown;
-  transactions: unknown[];
-  categories: unknown[];
+  summary: Record<string, unknown>;
+  transactions: Record<string, unknown>[];
+  categories: Record<string, unknown>[];
 }): Promise<Buffer> {
   return await generateMultiSheetExcel({
     filename: 'financial-report',
@@ -260,7 +259,7 @@ export async function generateFinancialExcel(data: {
 /**
  * Generate membership roster Excel
  */
-export async function generateMembershipRoster(members: unknown[]): Promise<Buffer> {
+export async function generateMembershipRoster(members: Record<string, unknown>[]): Promise<Buffer> {
   return await generateExcel({
     title: 'Membership Roster',
     data: members,
@@ -280,7 +279,7 @@ export async function generateMembershipRoster(members: unknown[]): Promise<Buff
 /**
  * Generate claims/grievances Excel report
  */
-export async function generateClaimsExcel(claims: unknown[]): Promise<Buffer> {
+export async function generateClaimsExcel(claims: Record<string, unknown>[]): Promise<Buffer> {
   return await generateExcel({
     title: 'Claims Report',
     data: claims,
@@ -301,9 +300,9 @@ export async function generateClaimsExcel(claims: unknown[]): Promise<Buffer> {
  * Generate CLC remittance Excel
  */
 export async function generateRemittanceExcel(data: {
-  organizationInfo: unknown;
-  remittances: unknown[];
-  summary: unknown;
+  organizationInfo: Record<string, unknown>;
+  remittances: Record<string, unknown>[];
+  summary: Record<string, unknown>;
 }): Promise<Buffer> {
   return await generateMultiSheetExcel({
     filename: 'clc-remittance',
@@ -338,9 +337,9 @@ export async function generateRemittanceExcel(data: {
  * Generate training report Excel
  */
 export async function generateTrainingReportExcel(data: {
-  programs: unknown[];
-  enrollments: unknown[];
-  completions: unknown[];
+  programs: Record<string, unknown>[];
+  enrollments: Record<string, unknown>[];
+  completions: Record<string, unknown>[];
 }): Promise<Buffer> {
   return await generateMultiSheetExcel({
     filename: 'training-report',

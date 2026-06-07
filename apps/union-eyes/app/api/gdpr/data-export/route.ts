@@ -93,7 +93,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       );
     }
 
-    await (queue as unknown as { add: (...args: unknown[]) => Promise<unknown> }).add(
+    await (queue as any as { add: (...args: any[]) => Promise<any> }).add(
       "gdpr-export",
       {
         reportType: "gdpr_export",
@@ -226,7 +226,7 @@ export const GET = withApiAuth(async (request: NextRequest) => {
 
     const stream = fs.createReadStream(filePath);
 
-    return new NextResponse(stream as unknown as ReadableStream, {
+    return new NextResponse(stream as any as ReadableStream, {
       status: 200,
       headers: {
         "Content-Type": contentType,

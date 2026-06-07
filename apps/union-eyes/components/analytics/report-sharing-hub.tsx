@@ -122,7 +122,7 @@ export interface ReportSharingHubProps {
   onShare?: (data: ShareReportData) => Promise<void>;
   onRevoke?: (accessId: string) => Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSubscribe?: (data: unknown) => Promise<void>;
+  onSubscribe?: (data: any) => Promise<void>;
   onUnsubscribe?: (subscriberId: string) => Promise<void>;
 }
 

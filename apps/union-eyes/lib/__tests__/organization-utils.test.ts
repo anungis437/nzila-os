@@ -44,8 +44,8 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return {
     ...actual,
-    eq: vi.fn((...args: unknown[]) => ({ type: 'eq', args })),
-    and: vi.fn((...args: unknown[]) => ({ type: 'and', args })),
+    eq: vi.fn((...args: any[]) => ({ type: 'eq', args })),
+    and: vi.fn((...args: any[]) => ({ type: 'and', args })),
     or: vi.fn(),
     relations: vi.fn(() => ({})),
   };
@@ -56,7 +56,7 @@ vi.mock('../logger', () => ({
 }));
 
 /** Helper: set up N sequential db.select→from→where→limit chains */
-function setupLimitSequence(...values: unknown[][]) {
+function setupLimitSequence(...values: any[][]) {
   let callCount = 0;
   mocks.mockLimit.mockImplementation(() => {
     const idx = Math.min(callCount, values.length - 1);

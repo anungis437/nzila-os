@@ -160,7 +160,7 @@ router.post("/", async (req: Request, res: Response) => {
       ) returning id
     `);
 
-    const payrollRunId = (insertRun as unknown as Array<{ id: string }>)[0]?.id;
+    const payrollRunId = (insertRun as any as Array<{ id: string }>)[0]?.id;
 
     for (const item of run.items) {
       await db.execute(sql`

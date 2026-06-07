@@ -548,7 +548,7 @@ async function updateSyncToken(
 /**
  * Get sync token for a calendar
  */
-export function getSyncToken(_connection: unknown, _googleCalendarId: string): string | null {
+export function getSyncToken(_connection: any, _googleCalendarId: string): string | null {
   const connection = _connection as { calendarMappings?: CalendarMapping[] | null };
   const mappings = Array.isArray(connection.calendarMappings) ? connection.calendarMappings : [];
   const mapping = mappings.find((item) => item.externalId === _googleCalendarId);

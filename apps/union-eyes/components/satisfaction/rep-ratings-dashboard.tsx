@@ -197,7 +197,7 @@ function LroCard({
               <MetricBar
                 key={metric.key}
                 label={t(`metrics.${metric.labelKey}` as 'metrics.communication')}
-                value={(lro as unknown as Record<string, number>)[metric.key] ?? 0}
+                value={(lro as any as Record<string, number>)[metric.key] ?? 0}
                 icon={metric.icon}
                 color={metric.color}
               />

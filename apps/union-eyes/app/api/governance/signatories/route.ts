@@ -49,7 +49,7 @@ export const GET = withApi(
         and(
           eq(organizationMembers.organizationId, organizationId!),
           eq(organizationMembers.status, 'active'),
-          inArray(organizationMembers.role, SIGNATORY_ROLES as unknown as string[]),
+          inArray(organizationMembers.role, SIGNATORY_ROLES as any as string[]),
         ),
       )
       .orderBy(desc(organizationMembers.updatedAt));

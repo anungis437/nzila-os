@@ -64,11 +64,11 @@ export enum SpanStatusCode {
   ERROR = 2,
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Span {
   setAttribute(key: string, value: unknown): this;
-  setAttributes(attributes: Record<string, any>): this;
-  addEvent(name: string, attributes?: Record<string, any>): this;
+  setAttributes(attributes: Record<string, unknown>): this;
+  addEvent(name: string, attributes?: Record<string, unknown>): this;
+  spanContext(): { traceId: string; spanId: string };
   recordException(exception: Error | string, time?: number): this;
   setStatus(status: { code: SpanStatusCode; message?: string }): this;
   end(endTime?: number): void;
@@ -84,14 +84,13 @@ export interface Tracer {
 interface OTelAPI {
   trace: {
     getTracer(name: string, version?: string): Tracer;
-    getSpan(context: unknown): { spanContext(): { traceId: string; spanId: string } } | undefined;
+    getSpan(context: unknown): Span | undefined;
   };
   context: {
     active(): unknown;
   };
   SpanStatusCode: typeof SpanStatusCode;
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Lazy-loaded OpenTelemetry API
 let otelApi: OTelAPI | null = null;
@@ -136,8 +135,7 @@ export function getTracer(name: string = 'unioneyes'): Tracer {
 export async function traced<T>(
   spanName: string,
   fn: (span: Span) => Promise<T>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes?: Record<string, any>
+  attributes?: Record<string, unknown>
 ): Promise<T> {
   const tracer = getTracer();
   const api = getOTelAPI();
@@ -189,8 +187,7 @@ export async function traced<T>(
  */
 export function startSpan(
   spanName: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes?: Record<string, any>
+  attributes?: Record<string, unknown>
 ): Span {
   const tracer = getTracer();
   const span = tracer.startSpan(spanName);
@@ -234,8 +231,7 @@ export function getTraceContext(): { trace_id?: string; span_id?: string } {
  */
 export function addSpanEvent(
   name: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes?: Record<string, any>
+  attributes?: Record<string, unknown>
 ): void {
   const api = getOTelAPI();
   
@@ -257,8 +253,7 @@ export function addSpanEvent(
  * Set attributes on the current span
  */
 export function setSpanAttributes(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes: Record<string, any>
+  attributes: Record<string, unknown>
 ): void {
   const api = getOTelAPI();
   
@@ -347,8 +342,7 @@ export const TraceAttributes = {
 function createNoOpTracer(): Tracer {
   return {
     startSpan: () => createNoOpSpan(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    startActiveSpan: async <T>(nameOrOptions: unknown, fnOrOptions?: unknown, fn?: unknown): Promise<T> => {
+    startActiveSpan: async <T>(_nameOrOptions: unknown, fnOrOptions?: unknown, fn?: unknown): Promise<T> => {
       const actualFn = (typeof fnOrOptions === 'function' ? fnOrOptions : fn) as ((span: Span) => Promise<T>) | undefined;
       if (!actualFn) {
         throw new Error('No-op tracer requires a callback');
@@ -366,6 +360,7 @@ function createNoOpSpan(): Span {
     setAttribute: () => createNoOpSpan(),
     setAttributes: () => createNoOpSpan(),
     addEvent: () => createNoOpSpan(),
+    spanContext: () => ({ traceId: '00000000000000000000000000000000', spanId: '0000000000000000' }),
     recordException: () => createNoOpSpan(),
     setStatus: () => createNoOpSpan(),
     end: () => {},

@@ -22,7 +22,7 @@ bootstrapPlatformContracts();
 // ── Route registry ─────────────────────────────────────────────────────────────
 
 const routeRegistryPath = resolve(__dirname, '../reports/route-registry.json');
-let routeRegistry: { routes?: unknown[] } = {};
+let routeRegistry: { routes?: any[] } = {};
 if (existsSync(routeRegistryPath)) {
   routeRegistry = JSON.parse(readFileSync(routeRegistryPath, 'utf-8'));
 }

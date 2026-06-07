@@ -104,7 +104,7 @@ export async function POST(
     return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
   }
 
-  let body: unknown;
+  let body: any;
   try {
     body = await request.json();
   } catch {

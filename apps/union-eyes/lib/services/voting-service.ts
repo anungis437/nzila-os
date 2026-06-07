@@ -140,7 +140,7 @@ export async function listVotingSessions(
 
     if (filters.status && filters.status.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(votingSessions.status, filters.status as unknown));
+      conditions.push(inArray(votingSessions.status, filters.status as any));
     }
 
     if (filters.type) {
@@ -636,7 +636,7 @@ export async function calculateRankedChoiceResults(
       rankedVotes.forEach(vote => {
         // Get voter's ranked preferences (stored in voterMetadata)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const preferences = (vote.voterMetadata as unknown)?.preferences as string[] || [vote.optionId];
+        const preferences = (vote.voterMetadata as any)?.preferences as string[] || [vote.optionId];
         
         // Find first active option in their preferences
         const firstChoice = preferences.find(prefId => activeOptions.has(prefId));

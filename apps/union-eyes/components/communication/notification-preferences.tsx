@@ -14,7 +14,7 @@
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -256,8 +256,7 @@ export function NotificationPreferences({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <FormField
               control={form.control}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={`${categoryKey}.email` as unknown}
+              name={`${categoryKey}.email` as FieldPath<NotificationPreferencesData>}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
                   <div className="flex items-center gap-2">
@@ -266,7 +265,7 @@ export function NotificationPreferences({
                   </div>
                   <FormControl>
                     <Switch
-                      checked={field.value}
+                      checked={field.value as boolean}
                       onCheckedChange={field.onChange}
                       disabled={doNotDisturb}
                     />
@@ -277,8 +276,7 @@ export function NotificationPreferences({
 
             <FormField
               control={form.control}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={`${categoryKey}.sms` as unknown}
+              name={`${categoryKey}.sms` as FieldPath<NotificationPreferencesData>}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
                   <div className="flex items-center gap-2">
@@ -287,7 +285,7 @@ export function NotificationPreferences({
                   </div>
                   <FormControl>
                     <Switch
-                      checked={field.value}
+                      checked={field.value as boolean}
                       onCheckedChange={field.onChange}
                       disabled={doNotDisturb}
                     />
@@ -298,8 +296,7 @@ export function NotificationPreferences({
 
             <FormField
               control={form.control}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={`${categoryKey}.push` as unknown}
+              name={`${categoryKey}.push` as FieldPath<NotificationPreferencesData>}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
                   <div className="flex items-center gap-2">
@@ -308,7 +305,7 @@ export function NotificationPreferences({
                   </div>
                   <FormControl>
                     <Switch
-                      checked={field.value}
+                      checked={field.value as boolean}
                       onCheckedChange={field.onChange}
                       disabled={doNotDisturb}
                     />
@@ -319,8 +316,7 @@ export function NotificationPreferences({
 
             <FormField
               control={form.control}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={`${categoryKey}.inApp` as unknown}
+              name={`${categoryKey}.inApp` as FieldPath<NotificationPreferencesData>}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
                   <div className="flex items-center gap-2">
@@ -329,7 +325,7 @@ export function NotificationPreferences({
                   </div>
                   <FormControl>
                     <Switch
-                      checked={field.value}
+                      checked={field.value as boolean}
                       onCheckedChange={field.onChange}
                       disabled={doNotDisturb}
                     />
@@ -342,15 +338,14 @@ export function NotificationPreferences({
           {/* Frequency */}
           <FormField
             control={form.control}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            name={`${categoryKey}.frequency` as unknown}
+            name={`${categoryKey}.frequency` as FieldPath<NotificationPreferencesData>}
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel>Frequency</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    defaultValue={field.value as string}
                     disabled={doNotDisturb}
                   >
                     <FormControl>

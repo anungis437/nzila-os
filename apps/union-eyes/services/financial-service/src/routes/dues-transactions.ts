@@ -33,7 +33,7 @@ type BatchCalcResult = {
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as unknown as { user: AuthUser }).user;
+  return (req as any as { user: AuthUser }).user;
 }
 
 // Validation schemas
@@ -274,7 +274,7 @@ router.post('/batch', async (req: Request, res: Response) => {
       });
 
     // Run batch calculation
-    const batchResult = calculationEngine.batchCalculateDuesSimple(calculationInputs) as unknown as BatchCalcResult;
+    const batchResult = calculationEngine.batchCalculateDuesSimple(calculationInputs) as any as BatchCalcResult;
 
     // If dry run, return results without saving
     if (validatedData.dryRun) {
@@ -320,7 +320,7 @@ router.post('/batch', async (req: Request, res: Response) => {
     if (transactionsToInsert.length > 0) {
       createdTransactions = await db
         .insert(schema.duesTransactions)
-        .values(transactionsToInsert as unknown as Array<typeof schema.duesTransactions.$inferInsert>)
+        .values(transactionsToInsert as any as Array<typeof schema.duesTransactions.$inferInsert>)
         .returning();
     }
 

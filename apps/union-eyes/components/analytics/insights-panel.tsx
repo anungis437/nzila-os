@@ -29,7 +29,7 @@ interface Insight {
   title: string;
   description: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  recommendations?: unknown[];
+  recommendations?: any[];
   status: 'new' | 'acknowledged' | 'in_progress' | 'completed' | 'dismissed';
   actionRequired: boolean;
   createdAt: string;
@@ -197,7 +197,7 @@ export function InsightsPanel({ insights, compact = false }: InsightsPanelProps)
                   <h4 className="font-semibold text-sm mb-2">Recommendations</h4>
                   <ul className="space-y-2">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {insight.recommendations.map((rec: unknown, idx: number) => (
+                    {insight.recommendations.map((rec: any, idx: number) => (
                       <li key={idx} className="flex items-start gap-2 text-sm">
                         <CheckCircle className="h-4 w-4 mt-0.5 text-green-600" />
                         <span>{rec.description || rec}</span>

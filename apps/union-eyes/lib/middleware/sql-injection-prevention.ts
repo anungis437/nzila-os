@@ -48,7 +48,7 @@ export class SQLInjectionScanner {
   /**
    * Scan request for potential SQL injection vulnerabilities
    */
-  static scanRequest(body: unknown, query: unknown): SQLAnalysisResult {
+  static scanRequest(body: any, query: any): SQLAnalysisResult {
     const detectedPatterns: string[] = [];
     let severity: 'low' | 'medium' | 'high' | 'critical' = 'low';
 
@@ -172,7 +172,7 @@ export class SQLInjectionScanner {
  *     // ... continue processing
  *   }
  */
-export function validateSQLSafety(body: unknown, query: unknown): SQLAnalysisResult {
+export function validateSQLSafety(body: any, query: any): SQLAnalysisResult {
   return SQLInjectionScanner.scanRequest(body, query);
 }
 

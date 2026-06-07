@@ -23,11 +23,11 @@ const mocks = vi.hoisted(() => ({
 }));
 
 /** Recursive chain: every method returns the chain; await resolves to value */
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
       if (prop === 'then') {
-        return (resolve: (v: unknown) => void) => resolve(resolveValue);
+        return (resolve: (v: any) => void) => resolve(resolveValue);
       }
       return vi.fn(() => new Proxy({}, handler));
     },
@@ -69,14 +69,14 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  desc: vi.fn((a: unknown) => a),
-  asc: vi.fn((a: unknown) => a),
-  inArray: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  desc: vi.fn((a: any) => a),
+  asc: vi.fn((a: any) => a),
+  inArray: vi.fn((...a: any[]) => a),
   count: vi.fn(() => 'count_fn'),
-  gte: vi.fn((...a: unknown[]) => a),
-  lte: vi.fn((...a: unknown[]) => a),
+  gte: vi.fn((...a: any[]) => a),
+  lte: vi.fn((...a: any[]) => a),
   relations: vi.fn(() => ({})),
 }));
 

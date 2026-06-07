@@ -217,7 +217,7 @@ export async function runInstitutionalOperatingIntelligence(
 ): Promise<OrchestrationResult> {
   return orchestrateCognition({
     organizationId,
-    steps: ADVANCED_ORCHESTRATION_STEPS as unknown as Parameters<typeof orchestrateCognition>[0]['steps'],
+    steps: ADVANCED_ORCHESTRATION_STEPS as any as Parameters<typeof orchestrateCognition>[0]['steps'],
   });
 }
 

@@ -117,7 +117,7 @@ export async function findNearbyLocations(
     `);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (result as unknown as NearbyLocationRow[]).map((row) => ({
+    return (result as any as NearbyLocationRow[]).map((row) => ({
       userId: row.user_id,
       latitude: row.latitude,
       longitude: row.longitude,

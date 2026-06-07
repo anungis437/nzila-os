@@ -16,12 +16,12 @@ import { aggregationService } from './analytics-aggregation';
  */
 export function withAnalyticsCache<T>(
   endpoint: string,
-  handler: (req: NextRequest, organizationId: string, params: unknown) => Promise<T>,
+  handler: (req: NextRequest, organizationId: string, params: any) => Promise<T>,
   ttl: number = 5 * 60 * 1000 // 5 minutes default
 ) {
   return async (req: NextRequest) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as unknown).organizationId;
+    const organizationId = (req as any).organizationId;
     if (!organizationId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -82,7 +82,7 @@ export async function handleDataChange(
  * Get analytics dashboard summary with caching
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getAnalyticsDashboard(organizationId: string): Promise<unknown> {
+export async function getAnalyticsDashboard(organizationId: string): Promise<any> {
   return await withCache(
     organizationId,
     'dashboard',
@@ -113,7 +113,7 @@ const _commonTimeRanges = [7, 30, 90];
  * Get cache statistics for monitoring
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getAnalyticsCacheStats(): unknown {
+export function getAnalyticsCacheStats(): any {
   return analyticsCache.getStats();
 }
 

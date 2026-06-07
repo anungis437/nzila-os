@@ -154,9 +154,9 @@ export const chatMessages = pgTable(
       Array<{
         name: string;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        arguments: unknown;
+        arguments: any;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        result: unknown;
+        result: any;
       }>
     >(),
     

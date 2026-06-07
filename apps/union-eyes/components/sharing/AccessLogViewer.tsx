@@ -50,7 +50,7 @@ interface AccessLogViewerProps {
 export default function AccessLogViewer({ organizationId }: AccessLogViewerProps) {
   const [logs, setLogs] = useState<AccessLog[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [stats, setStats] = useState<unknown>(null);
+  const [stats, setStats] = useState<any>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 50,
@@ -181,7 +181,7 @@ export default function AccessLogViewer({ organizationId }: AccessLogViewerProps
               <CardDescription>Most Common Access</CardDescription>
               <CardTitle className="text-xl">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {Object.entries(stats.byAccessType || {}).sort(([, a]: unknown, [, b]: unknown) => b - a)[0]?.[0] || "N/A"}
+                {Object.entries(stats.byAccessType || {}).sort(([, a]: any, [, b]: any) => b - a)[0]?.[0] || "N/A"}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -190,7 +190,7 @@ export default function AccessLogViewer({ organizationId }: AccessLogViewerProps
               <CardDescription>Most Accessed Type</CardDescription>
               <CardTitle className="text-xl">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {Object.entries(stats.byResourceType || {}).sort(([, a]: unknown, [, b]: unknown) => b - a)[0]?.[0] || "N/A"}
+                {Object.entries(stats.byResourceType || {}).sort(([, a]: any, [, b]: any) => b - a)[0]?.[0] || "N/A"}
               </CardTitle>
             </CardHeader>
           </Card>

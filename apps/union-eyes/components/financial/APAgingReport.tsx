@@ -55,7 +55,7 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
         const json = await response.json();
         const items = Array.isArray(json) ? json : json?.results ?? json?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data = items.map((v: unknown) => ({
+        data = items.map((v: any) => ({
           vendorId: String(v.vendorId ?? v.vendor_id ?? v.id ?? ''),
           vendorName: v.vendorName ?? v.vendor_name ?? v.name ?? '',
           current: v.current ?? 0,

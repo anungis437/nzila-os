@@ -632,7 +632,7 @@ export async function extractDocument(
 
     // Update document status
     await updateDocumentStatus(documentId, "extracted", {
-      parsedMetadata: metadata as unknown as Record<string, unknown>,
+      parsedMetadata: metadata as any as Record<string, unknown>,
     });
 
     // Complete extraction run

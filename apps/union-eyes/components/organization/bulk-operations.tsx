@@ -165,7 +165,7 @@ alert("Failed to activate organizations");
       const csv = [
         ["ID", "Name", "Type", "Status", "Parent ID", "Slug", "Created"],
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...orgs.map((org: unknown) => [
+        ...orgs.map((org: any) => [
           org.id,
           org.name,
           org.organization_type,

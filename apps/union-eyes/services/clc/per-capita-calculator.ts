@@ -442,7 +442,7 @@ export async function updateLastRemittanceDate(
   const org = await db.select().from(organizations).where(eq(organizations.id, organizationId)).limit(1);
   if (org[0]) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const settings = (org[0].settings as unknown) || {};
+    const settings = (org[0].settings as any) || {};
     await db
       .update(organizations)
       .set({ 

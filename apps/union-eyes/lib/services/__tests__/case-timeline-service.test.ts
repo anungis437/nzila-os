@@ -38,7 +38,7 @@ vi.mock("@/db/schema", () => ({
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
-  and: vi.fn((...a: unknown[]) => ({ _type: "and", a })),
+  and: vi.fn((...a: any[]) => ({ _type: "and", a })),
   inArray: vi.fn((_c, v) => ({ _type: "inArray", v })),
   desc: vi.fn((c) => ({ _type: "desc", c })),
 }));

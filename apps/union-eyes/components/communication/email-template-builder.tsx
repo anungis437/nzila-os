@@ -361,7 +361,7 @@ export function EmailTemplateBuilder({
 
   React.useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form.setValue("blocks", blocks as unknown);
+    form.setValue("blocks", blocks as any);
   }, [blocks, form]);
 
   return (

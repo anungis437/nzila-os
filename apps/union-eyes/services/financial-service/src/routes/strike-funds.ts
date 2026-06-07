@@ -23,7 +23,7 @@ type ExecuteResult<T extends Record<string, unknown> = Record<string, unknown>> 
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as unknown as { user: AuthUser }).user;
+  return (req as any as { user: AuthUser }).user;
 }
 
 /** Validates a route :param is a UUID before it reaches any query. */
@@ -59,7 +59,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
         AND fund_id = ${fundId} 
         AND check_out_time IS NULL
       LIMIT 1
-    `) as unknown as ExecuteResult;
+    `) as any as ExecuteResult;
 
     if (existingCheckIn.rows.length > 0) {
       return res.status(400).json({
@@ -81,7 +81,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
             ST_GeogFromText(${checkInLocation}), 
             ${validatedData.picketLocationId}
           ) as verified
-        `) as unknown as ExecuteResult<{ verified?: boolean }>;
+        `) as any as ExecuteResult<{ verified?: boolean }>;
         
         locationVerified = verification.rows[0]?.verified || false;
 
@@ -110,7 +110,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
         ${validatedData.coordinatorOverride}, ${validatedData.notes}, ${userId}
       )
       RETURNING *
-    `) as unknown as ExecuteResult;
+    `) as any as ExecuteResult;
 
     res.status(201).json({
       success: true,
@@ -170,7 +170,7 @@ router.post('/:fundId/check-out', async (req: Request, res: Response) => {
         AND tenant_id = ${organizationId}
         AND check_out_time IS NULL
       RETURNING *
-    `) as unknown as ExecuteResult;
+    `) as any as ExecuteResult;
 
     if (result.length === 0) {
       return res.status(404).json({
@@ -228,7 +228,7 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
       SELECT * FROM calculate_weekly_stipend(
         ${fundId}, NULL, ${validatedData.weekStart}, ${validatedData.weekEnd}
       )
-    `) as unknown as ExecuteResult<{ member_id: string; hours_worked: number; stipend_amount: number }>;
+    `) as any as ExecuteResult<{ member_id: string; hours_worked: number; stipend_amount: number }>;
 
     if (validatedData.dryRun) {
       return res.json({
@@ -254,7 +254,7 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
           'pending', ${userId}
         )
         RETURNING *
-      `) as unknown as ExecuteResult;
+      `) as any as ExecuteResult;
       disbursements.push(disbursement.rows[0]);
     }
 
@@ -292,7 +292,7 @@ router.get('/', async (req: Request, res: Response) => {
       SELECT * FROM strike_funds 
       WHERE tenant_id = ${organizationId}
       ORDER BY created_at DESC
-    `) as unknown as ExecuteResult;
+    `) as any as ExecuteResult;
 
     res.json({
       success: true,
@@ -344,7 +344,7 @@ router.post('/', async (req: Request, res: Response) => {
         'active', ${userId}
       )
       RETURNING *
-    `) as unknown as ExecuteResult;
+    `) as any as ExecuteResult;
 
     res.status(201).json({
       success: true,

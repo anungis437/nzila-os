@@ -17,7 +17,7 @@ type AuthUser = {
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as unknown as { user: AuthUser }).user;
+  return (req as any as { user: AuthUser }).user;
 }
 
 // ============================================================================
@@ -153,7 +153,7 @@ router.post('/', async (req: Request, res: Response) => {
       .values({
         ...validatedData,
         organizationId: organizationId,
-      } as unknown as typeof schema.memberDuesAssignments.$inferInsert)
+      } as any as typeof schema.memberDuesAssignments.$inferInsert)
       .returning();
 
     res.status(201).json({ success: true, data: newAssignment });
@@ -199,7 +199,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     const [updatedAssignment] = await db
       .update(schema.memberDuesAssignments)
-      .set(updateData as unknown as Partial<typeof schema.memberDuesAssignments.$inferInsert>)
+      .set(updateData as any as Partial<typeof schema.memberDuesAssignments.$inferInsert>)
       .where(and(
         eq(schema.memberDuesAssignments.id, id),
         eq(schema.memberDuesAssignments.organizationId, organizationId)
@@ -239,7 +239,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
       .set({
         isActive: false,
         endDate: new Date().toISOString().split('T')[0],
-      } as unknown as Partial<typeof schema.memberDuesAssignments.$inferInsert>)
+      } as any as Partial<typeof schema.memberDuesAssignments.$inferInsert>)
       .where(and(
         eq(schema.memberDuesAssignments.id, id),
         eq(schema.memberDuesAssignments.organizationId, organizationId)

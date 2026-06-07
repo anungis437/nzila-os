@@ -60,9 +60,31 @@ const OUTCOME_COLORS = {
 };
 
 // Normalize arbitrationDecisions fields to arbitrationPrecedents field names
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizePrecedent(p: unknown): unknown {
-  if (!p) return p;
+interface PrecedentRecord {
+  id: string;
+  isOwner: boolean;
+  caseNumber?: string;
+  caseTitle?: string;
+  decisionDate?: string;
+  issueSummary?: string;
+  decisionSummary?: string;
+  summary?: string;
+  precedentSummary?: string;
+  sharingLevel?: string;
+  sharedWithOrgIds?: string[];
+  decisionDocumentUrl?: string;
+  redactedDocumentUrl?: string;
+  organization?: { name?: string };
+  union?: string;
+  issueTypes?: string[];
+  grievanceType?: string;
+  outcome?: string;
+  jurisdiction?: string;
+  [key: string]: unknown;
+}
+
+function normalizePrecedent(p: Record<string, unknown> | null): PrecedentRecord | null {
+  if (!p) return null;
   return {
     ...p,
     arbitratorName: p.arbitratorName || p.arbitrator,
@@ -74,7 +96,7 @@ function normalizePrecedent(p: unknown): unknown {
     precedentLevel: p.precedentLevel || p.precedentValue,
     grievorNames: p.grievorNames || p.grievor,
     sharingLevel: p.sharingLevel || (p.isPublic ? 'public' : 'private'),
-  };
+  } as unknown as PrecedentRecord;
 }
 
 export function PrecedentsConsole() {
@@ -98,13 +120,19 @@ export function PrecedentsConsole() {
   const [selectedPrecedentIds, setSelectedPrecedentIds] = useState<string[]>([]);
   const [comparisonNotes, setComparisonNotes] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [precedentsData, setPrecedentsData] = useState<unknown>(null);
+  const [precedentsData, setPrecedentsData] = useState<{
+    precedents?: PrecedentRecord[];
+    total?: number;
+    page?: number;
+    limit?: number;
+    pagination?: { totalPages: number };
+  } | null>(null);
   const [isLoadingPrecedents, setIsLoadingPrecedents] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedPrecedent, setSelectedPrecedent] = useState<unknown>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [comparisonData, setComparisonData] = useState<unknown>(null);
+  const [selectedPrecedent, setSelectedPrecedent] = useState<PrecedentRecord | null>(null);
+  const [comparisonData, setComparisonData] = useState<{
+    precedents: React.ComponentProps<typeof PrecedentCompareView>['precedents'];
+    analysis?: React.ComponentProps<typeof PrecedentCompareView>['analysis'];
+  } | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -280,7 +308,7 @@ export function PrecedentsConsole() {
             limit: pageSize,
           });
         }
-      } catch (error: unknown) {
+      } catch (error) {
         // Ignore abort errors
         if (error instanceof Error && error.name !== "AbortError") {
           setPrecedentsData({
@@ -666,8 +694,7 @@ export function PrecedentsConsole() {
       )}
 
       {/* Main Content */}
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <Tabs value={activeTab} onValueChange={(v: unknown) => setActiveTab(v)}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "browse" | "view" | "compare" | "setup")}>
         <TabsList>
           <TabsTrigger value="browse">{t('precedents.browse')}</TabsTrigger>
           <TabsTrigger value="view" disabled={!selectedPrecedentId}>
@@ -695,8 +722,7 @@ export function PrecedentsConsole() {
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {precedentsData?.precedents?.map((precedent: unknown) => (
+                {precedentsData?.precedents?.map((precedent: PrecedentRecord) => (
                   <Card
                     key={precedent.id}
                     className="cursor-pointer hover:shadow-md transition-shadow"

@@ -23,7 +23,7 @@ async function resolveActivePilotId(orgId: string): Promise<string | null> {
       AND status = 'active'
     ORDER BY started_at DESC NULLS LAST, created_at DESC
     LIMIT 1
-  `)) as unknown as Array<{ id: string }>
+  `)) as any as Array<{ id: string }>
 
   return rows[0]?.id ?? null
 }

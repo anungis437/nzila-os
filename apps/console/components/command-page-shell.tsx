@@ -12,7 +12,7 @@ export function CommandPageShell({
   const Component = as
 
   return (
-    <Component className={`mx-auto w-full max-w-7xl px-6 py-8 lg:px-8 ${className}`.trim()}>
+    <Component className={`mx-auto w-full max-w-7xl px-6 py-8 lg:px-8 lg:py-10 ${className}`.trim()}>
       {children}
     </Component>
   )

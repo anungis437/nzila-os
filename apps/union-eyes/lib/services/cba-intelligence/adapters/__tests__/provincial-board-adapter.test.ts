@@ -56,13 +56,13 @@ describe("ProvincialBoardAdapter", () => {
   });
 
   it("covers private helper branches directly", () => {
-    const adapter = new ProvincialBoardAdapter() as unknown as {
+    const adapter = new ProvincialBoardAdapter() as any as {
       isRelevantLink: (text: string, href: string) => boolean;
       classifyDocType: (text: string, href: string) => string;
       detectSector: (text: string) => string | undefined;
       detectLanguage: (text: string, href: string) => "en" | "fr" | "bilingual";
       resolveUrl: (href: string, baseUrl: string) => string | null;
-      parseBoardPage: (html: string, baseUrl: string, board: { key: string; jurisdiction: string; language: "en" | "fr" | "bilingual" }) => unknown[];
+      parseBoardPage: (html: string, baseUrl: string, board: { key: string; jurisdiction: string; language: "en" | "fr" | "bilingual" }) => any[];
     };
 
     expect(adapter.isRelevantLink("decision agreement", "x")).toBe(true);
@@ -94,8 +94,8 @@ describe("ProvincialBoardAdapter", () => {
   });
 
   it("returns empty result when no links exist", () => {
-    const adapter = new ProvincialBoardAdapter() as unknown as {
-      parseBoardPage: (html: string, baseUrl: string, board: { key: string; jurisdiction: string; language: "en" | "fr" | "bilingual" }) => unknown[];
+    const adapter = new ProvincialBoardAdapter() as any as {
+      parseBoardPage: (html: string, baseUrl: string, board: { key: string; jurisdiction: string; language: "en" | "fr" | "bilingual" }) => any[];
     };
     expect(adapter.parseBoardPage("<html></html>", "https://example.ca", { key: "olrb", jurisdiction: "CA-ON", language: "en" })).toEqual([]);
     expect(adapter.parseBoardPage('<a href="/x">hello</a>', "https://example.ca", { key: "olrb", jurisdiction: "CA-ON", language: "en" })).toEqual([]);

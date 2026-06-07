@@ -212,7 +212,7 @@ export async function verifyNoBackgroundTracking(): Promise<{
 
   const hasBackgroundTracking = backgroundRecords.some(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (record: unknown) => record.trackingType !== 'foreground_only'
+    (record: any) => record.trackingType !== 'foreground_only'
   );
 
   return {

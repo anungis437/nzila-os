@@ -56,7 +56,7 @@ async function verifyPayPalWebhook(
   }
 
   const token = await getPayPalAccessToken(clientId, clientSecret, baseUrl);
-  let event: unknown;
+  let event: any;
   try {
     event = JSON.parse(payload);
   } catch {
@@ -92,7 +92,7 @@ async function verifyPayPalWebhook(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getTransactionIdFromPayPalEvent(resource: unknown): string | null {
+function getTransactionIdFromPayPalEvent(resource: any): string | null {
   return (
     resource?.custom_id ||
     resource?.invoice_id ||

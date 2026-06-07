@@ -28,6 +28,42 @@ interface SearchFilters {
   includeExpired: boolean;
 }
 
+interface ClauseListItem {
+  id: string;
+  clauseNumber?: string | null;
+  clauseTitle?: string;
+  clauseText?: string;
+  clauseType?: string;
+  sharingLevel?: string;
+  sector?: string | null;
+  sourceOrganization?: { organizationName?: string } | null;
+}
+
+interface ClausesData {
+  clauses?: ClauseListItem[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  pagination?: { totalPages: number };
+}
+
+interface SelectedClause {
+  id: string;
+  isOwner: boolean;
+  tags?: Array<{ id: string; tagName: string }>;
+  sharingLevel: "private" | "federation" | "congress" | "public";
+  sharedWithOrgIds?: string[];
+  isAnonymized: boolean;
+  originalEmployerName?: string;
+  anonymizedEmployerName?: string;
+  [key: string]: unknown;
+}
+
+interface ComparisonData {
+  clauses: React.ComponentProps<typeof ClauseCompareView>['clauses'];
+  analysis?: React.ComponentProps<typeof ClauseCompareView>['analysis'];
+}
+
 export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: string }) {
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
@@ -45,13 +81,10 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
   const [comparisonNotes, setComparisonNotes] = useState("");
   const [sharingDialogOpen, setSharingDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [clausesData, setClausesData] = useState<unknown>(null);
+  const [clausesData, setClausesData] = useState<ClausesData | null>(null);
   const [isLoadingClauses, setIsLoadingClauses] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedClause, setSelectedClause] = useState<unknown>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [comparisonData, setComparisonData] = useState<unknown>(null);
+  const [selectedClause, setSelectedClause] = useState<SelectedClause | null>(null);
+  const [comparisonData, setComparisonData] = useState<ComparisonData | null>(null);
   const [isLoadingClause, setIsLoadingClause] = useState(false);
   const [isLoadingComparison, setIsLoadingComparison] = useState(false);
   const pageSize = 20;
@@ -135,7 +168,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
         } else {
           setClausesData({ clauses: [], total: 0, page: currentPage, limit: pageSize });
         }
-      } catch (error: unknown) {
+      } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') {
           setClausesData({ clauses: [], total: 0, page: currentPage, limit: pageSize });
         }
@@ -334,8 +367,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
       )}
 
       {/* Main Content */}
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <Tabs value={activeTab} onValueChange={(v: unknown) => setActiveTab(v)}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "browse" | "view" | "compare")}>
         <TabsList>
           <TabsTrigger value="browse">Browse</TabsTrigger>
           <TabsTrigger value="view" disabled={!selectedClauseId}>
@@ -357,8 +389,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {clausesData?.clauses?.map((clause: unknown) => (
+                {clausesData?.clauses?.map((clause: ClauseListItem) => (
                   <Card key={clause.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -616,15 +647,14 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                 report += `Unique Types: ${comparisonData.analysis?.statistics.uniqueTypes || 0}\n`;
                 report += `Unique Sectors: ${comparisonData.analysis?.statistics.uniqueSectors || 0}\n\n`;
                 
-                if (comparisonData.analysis?.commonKeywords?.length > 0) {
-                  report += "Common Keywords: " + comparisonData.analysis.commonKeywords.join(", ") + "\n\n";
+                if ((comparisonData.analysis?.commonKeywords?.length ?? 0) > 0) {
+                  report += "Common Keywords: " + (comparisonData.analysis?.commonKeywords?.join(", ") ?? "") + "\n\n";
                 }
                 
                 report += "CLAUSES\n";
                 report += "=".repeat(80) + "\n\n";
                 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                comparisonData.clauses.forEach((clause: unknown, index: number) => {
+                comparisonData.clauses.forEach((clause, index: number) => {
                   report += `${index + 1}. ${clause.clauseTitle}\n`;
                   report += "-".repeat(80) + "\n";
                   report += `Organization: ${clause.sourceOrganization?.organizationName || "Unknown"}\n`;
@@ -634,9 +664,8 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                   if (clause.province) report += `Province: ${clause.province}\n`;
                   if (clause.effectiveDate) report += `Effective: ${clause.effectiveDate}\n`;
                   report += `\nClause Text:\n${clause.clauseText}\n\n`;
-                  if (clause.tags?.length > 0) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    report += `Tags: ${clause.tags.map((t: unknown) => t.tagName).join(", ")}\n`;
+                  if (clause.tags?.length) {
+                    report += `Tags: ${clause.tags.map((t) => t.tagName).join(", ")}\n`;
                   }
                   report += "\n";
                 });

@@ -54,7 +54,7 @@ export const PATCH = withApi(
     for (const key of ALLOWED) {
       if (key in body) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (updates as unknown)[key] = body[key];
+        (updates as any)[key] = body[key];
       }
     }
 

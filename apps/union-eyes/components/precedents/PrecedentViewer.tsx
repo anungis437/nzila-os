@@ -107,7 +107,7 @@ const GRIEVANCE_TYPE_LABELS: Record<string, string> = {
 
 interface PrecedentViewerProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  precedent: unknown;
+  precedent: any;
   isOwner: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -644,7 +644,7 @@ export function PrecedentViewer({
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {precedent.tags.map((tag: unknown) => (
+                  {precedent.tags.map((tag: any) => (
                     <Badge key={tag.id} variant="secondary">
                       {tag.tagName}
                     </Badge>

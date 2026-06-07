@@ -71,7 +71,7 @@ import { cn } from '@/lib/utils';
 interface NewsletterEditorProps {
   content?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onChange?: (html: string, json: unknown) => void;
+  onChange?: (html: string, json: any) => void;
   editable?: boolean;
   placeholder?: string;
   className?: string;

@@ -33,9 +33,9 @@ vi.mock('@/db/schema-organizations', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => ({ type: 'eq', args })),
-  and: vi.fn((...args: unknown[]) => ({ type: 'and', args })),
-  sql: vi.fn((str: unknown) => ({ type: 'sql', value: str })),
+  eq: vi.fn((...args: any[]) => ({ type: 'eq', args })),
+  and: vi.fn((...args: any[]) => ({ type: 'and', args })),
+  sql: vi.fn((str: any) => ({ type: 'sql', value: str })),
   relations: vi.fn(() => ({})),
 }));
 
@@ -62,7 +62,7 @@ import { db as mockDbRaw } from '@/db/db';
 
 const mockAuth = vi.mocked(mockAuthRaw);
 const mockCurrentUser = vi.mocked(mockCurrentUserRaw);
-const mockDbSelect = vi.mocked((mockDbRaw as unknown as { select: ReturnType<typeof vi.fn> }).select);
+const mockDbSelect = vi.mocked((mockDbRaw as any as { select: ReturnType<typeof vi.fn> }).select);
 
 // Chainable mock for db.select().from().where().limit()
 function mockSelectChain(rows: Record<string, unknown>[]) {
@@ -102,12 +102,12 @@ describe('getUserRole', () => {
 
     // Step 1 fall through (organization_users)
     const emptyChain = mockSelectChain([]);
-    mockDbSelect.mockReturnValue(emptyChain as unknown as never);
+    mockDbSelect.mockReturnValue(emptyChain as any as never);
 
     // Step 3 fallback
     mockCurrentUser.mockResolvedValue({
       publicMetadata: { role: 'member' },
-    } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
+    } as any as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
 
     const role = await getUserRole('user_other');
     expect(role).toBe(UserRole.MEMBER);
@@ -121,7 +121,7 @@ describe('getUserRole', () => {
     mockCurrentUser.mockResolvedValue({
       emailAddresses: [{ emailAddress: 'info@nzilaventures.com' }],
       publicMetadata: { role: 'member' },
-    } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
+    } as any as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
 
     const role = await getUserRole('user_123');
     expect(role).toBe(UserRole.APP_OWNER);
@@ -132,11 +132,11 @@ describe('getUserRole', () => {
     mockCurrentUser.mockResolvedValue({
       emailAddresses: [{ emailAddress: 'user@example.com' }],
       publicMetadata: {},
-    } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
+    } as any as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
 
     // organization_members returns admin for this org
     const chain = mockSelectChain([{ role: 'admin' }]);
-    mockDbSelect.mockReturnValue(chain as unknown as never);
+    mockDbSelect.mockReturnValue(chain as any as never);
 
     const role = await getUserRole('user_123', 'org-uuid-123');
     expect(role).toBe(UserRole.ADMIN);
@@ -150,13 +150,13 @@ describe('getUserRole', () => {
       .mockResolvedValueOnce({
         emailAddresses: [{ emailAddress: 'user@example.com' }],
         publicMetadata: { role: 'steward' },
-      } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>)
+      } as any as Awaited<ReturnType<typeof mockCurrentUserRaw>>)
       .mockResolvedValueOnce({
         publicMetadata: { role: 'steward' },
-      } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
+      } as any as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
 
     const chain = mockSelectChain([]);
-    mockDbSelect.mockReturnValue(chain as unknown as never);
+    mockDbSelect.mockReturnValue(chain as any as never);
 
     const role = await getUserRole('user_123');
     expect(role).toBe(UserRole.STEWARD);
@@ -166,11 +166,11 @@ describe('getUserRole', () => {
     mockCurrentUser.mockResolvedValue({
       emailAddresses: [{ emailAddress: 'user@example.com' }],
       publicMetadata: {},
-    } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
+    } as any as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
 
     // organization_members returns legacy 'super_admin' — resolved to admin via alias map
     const chain = mockSelectChain([{ role: 'super_admin' }]);
-    mockDbSelect.mockReturnValue(chain as unknown as never);
+    mockDbSelect.mockReturnValue(chain as any as never);
 
     const role = await getUserRole('user_123', 'org-uuid-123');
     expect(role).toBe(UserRole.ADMIN);
@@ -180,10 +180,10 @@ describe('getUserRole', () => {
     mockCurrentUser.mockResolvedValue({
       emailAddresses: [{ emailAddress: 'nobody@example.com' }],
       publicMetadata: {},
-    } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
+    } as any as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
 
     const chain = mockSelectChain([]);
-    mockDbSelect.mockReturnValue(chain as unknown as never);
+    mockDbSelect.mockReturnValue(chain as any as never);
 
     const role = await getUserRole('user_nobody');
     expect(role).toBe(UserRole.MEMBER);
@@ -212,7 +212,7 @@ describe('getCurrentUserRole', () => {
   });
 
   it('returns null when auth() has no userId', async () => {
-    mockAuth.mockResolvedValue({ userId: null } as unknown as Awaited<ReturnType<typeof mockAuthRaw>>);
+    mockAuth.mockResolvedValue({ userId: null } as any as Awaited<ReturnType<typeof mockAuthRaw>>);
 
     const role = await getCurrentUserRole();
     expect(role).toBeNull();
@@ -227,14 +227,14 @@ describe('requireAuth', () => {
   });
 
   it('throws when not authenticated', async () => {
-    mockAuth.mockResolvedValue({ userId: null } as unknown as Awaited<ReturnType<typeof mockAuthRaw>>);
+    mockAuth.mockResolvedValue({ userId: null } as any as Awaited<ReturnType<typeof mockAuthRaw>>);
 
     await expect(requireAuth()).rejects.toThrow('Unauthorized');
   });
 
   it('returns userId and role when authenticated', async () => {
     process.env.PLATFORM_ADMIN_USER_IDS = 'user_authed';
-    mockAuth.mockResolvedValue({ userId: 'user_authed' } as unknown as Awaited<ReturnType<typeof mockAuthRaw>>);
+    mockAuth.mockResolvedValue({ userId: 'user_authed' } as any as Awaited<ReturnType<typeof mockAuthRaw>>);
 
     const result = await requireAuth();
     expect(result.userId).toBe('user_authed');
@@ -252,15 +252,15 @@ describe('requirePermission', () => {
   });
 
   it('throws when user lacks the required permission', async () => {
-    mockAuth.mockResolvedValue({ userId: 'user_member' } as unknown as Awaited<ReturnType<typeof mockAuthRaw>>);
+    mockAuth.mockResolvedValue({ userId: 'user_member' } as any as Awaited<ReturnType<typeof mockAuthRaw>>);
 
     // Resolve as MEMBER via PLATFORM_ADMIN_USER_IDS miss + auth metadata
     process.env.PLATFORM_ADMIN_USER_IDS = '';
     mockCurrentUser.mockResolvedValue({
       emailAddresses: [{ emailAddress: 'u@example.com' }],
       publicMetadata: { role: 'member' },
-    } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
-    mockDbSelect.mockReturnValue(mockSelectChain([]) as unknown as never);
+    } as any as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
+    mockDbSelect.mockReturnValue(mockSelectChain([]) as any as never);
 
     // MEMBER shouldn't have ADMIN-level permissions
     await expect(

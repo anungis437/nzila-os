@@ -43,9 +43,9 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: vi.fn().mockImplementation((fn: () => Promise<unknown>) => fn()),
+  withSystemContext: vi.fn().mockImplementation((fn: () => Promise<any>) => fn()),
   withSystemRLSContext: vi.fn().mockImplementation(
-    (_reason: string, fn: (tx: unknown) => Promise<unknown>) => {
+    (_reason: string, fn: (tx: any) => Promise<any>) => {
       const tx = {
         execute: vi.fn().mockResolvedValue([{ max_num: null }]),
         insert: vi.fn().mockReturnValue({
@@ -76,7 +76,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 
 vi.mock('@/lib/api/with-api', () => ({
   withApi: vi.fn().mockImplementation(
-    (_options: unknown, handler: (ctx: Record<string, unknown>) => Promise<unknown>) =>
+    (_options: any, handler: (ctx: Record<string, unknown>) => Promise<any>) =>
       handler,
   ),
 }));
@@ -125,7 +125,7 @@ describe('POST /api/claims', () => {
   });
 
   it('converts incidentDate string to Date before insert', async () => {
-    const handler = POST as unknown as (ctx: Record<string, unknown>) => Promise<unknown>;
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
     await handler(makeCtx());
 
     expect(capturedInsertValues).not.toBeNull();
@@ -134,28 +134,28 @@ describe('POST /api/claims', () => {
   });
 
   it('generates claimNumber with CLM- prefix', async () => {
-    const handler = POST as unknown as (ctx: Record<string, unknown>) => Promise<unknown>;
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
     await handler(makeCtx());
 
     expect(capturedInsertValues!.claimNumber).toMatch(/^CLM-\d{8}-\d{4}$/);
   });
 
   it('sets memberId from userId context, not from body', async () => {
-    const handler = POST as unknown as (ctx: Record<string, unknown>) => Promise<unknown>;
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
     await handler(makeCtx());
 
     expect(capturedInsertValues!.memberId).toBe('user_3BP6IlC0zg9MwHJDDNn7KCcR0MV');
   });
 
   it('sets organizationId from auth context', async () => {
-    const handler = POST as unknown as (ctx: Record<string, unknown>) => Promise<unknown>;
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
     await handler(makeCtx());
 
     expect(capturedInsertValues!.organizationId).toBe('9210418f-6a4f-4dab-a7d2-4450d581dc81');
   });
 
   it('throws ApiError.badRequest when organizationId is null', async () => {
-    const handler = POST as unknown as (ctx: Record<string, unknown>) => Promise<unknown>;
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
     await expect(
       handler(makeCtx({ organizationId: null })),
     ).rejects.toMatchObject({
@@ -164,7 +164,7 @@ describe('POST /api/claims', () => {
   });
 
   it('does not pass incidentDate as raw string to DB', async () => {
-    const handler = POST as unknown as (ctx: Record<string, unknown>) => Promise<unknown>;
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
     await handler(makeCtx());
 
     // If this were a string, Drizzle's mapToDriverValue would throw
@@ -173,7 +173,7 @@ describe('POST /api/claims', () => {
   });
 
   it('returns inserted row data', async () => {
-    const handler = POST as unknown as (ctx: Record<string, unknown>) => Promise<unknown>;
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
     const result = await handler(makeCtx()) as { data: Record<string, unknown> };
 
     expect(result).toHaveProperty('data');

@@ -7,6 +7,24 @@
 import { useEffect, useState, useCallback } from 'react';
 import { logger } from '@/lib/logger';
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+interface NavigatorConnection {
+  effectiveType?: string;
+  addEventListener: (type: string, listener: () => void) => void;
+  removeEventListener: (type: string, listener: () => void) => void;
+}
+
+type NavigatorWithConnection = Navigator & {
+  connection?: NavigatorConnection;
+  mozConnection?: NavigatorConnection;
+  webkitConnection?: NavigatorConnection;
+  standalone?: boolean;
+};
+
 export interface ServiceWorkerState {
   isSupported: boolean;
   isReady: boolean;
@@ -96,8 +114,7 @@ export function usePWAInstall(): {
 
     // Check if running in standalone mode
     const _isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        (window.navigator as unknown).standalone === true;
+                        (window.navigator as NavigatorWithConnection).standalone === true;
 
     // Check if can install
     const handleBeforeInstall = (e: Event) => {
@@ -116,10 +133,8 @@ export function usePWAInstall(): {
   const install = useCallback(async () => {
     if (!deferredPrompt) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (deferredPrompt as unknown).prompt();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { outcome } = await (deferredPrompt as unknown).userChoice;
+    (deferredPrompt as BeforeInstallPromptEvent).prompt();
+    const { outcome } = await (deferredPrompt as BeforeInstallPromptEvent).userChoice;
     
     if (outcome === 'accepted') {
       setCanInstall(false);
@@ -131,8 +146,7 @@ export function usePWAInstall(): {
   return {
     isStandalone: typeof window !== 'undefined' && 
       (window.matchMedia('(display-mode: standalone)').matches ||
-       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-       (window.navigator as unknown).standalone === true),
+       (window.navigator as NavigatorWithConnection).standalone === true),
     isInstalled: typeof window !== 'undefined' && 
       window.matchMedia('(display-mode: standalone)').matches,
     canInstall,
@@ -158,12 +172,9 @@ export function useNetworkStatus(): {
     if (typeof window === 'undefined') return;
 
     const updateStatus = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const connection = (navigator as unknown).connection || 
-                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                       (navigator as unknown).mozConnection || 
-                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                       (navigator as unknown).webkitConnection;
+      const connection = (navigator as NavigatorWithConnection).connection || 
+                       (navigator as NavigatorWithConnection).mozConnection || 
+                       (navigator as NavigatorWithConnection).webkitConnection;
       
       setStatus({
         isOnline: navigator.onLine,
@@ -178,8 +189,7 @@ export function useNetworkStatus(): {
     window.addEventListener('offline', updateStatus);
 
     // Listen for connection changes
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const connection = (navigator as unknown).connection;
+    const connection = (navigator as NavigatorWithConnection).connection;
     if (connection) {
       connection.addEventListener('change', updateStatus);
     }

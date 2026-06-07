@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Proxy chain helper ───────────────────────────────────────────────────────
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -33,7 +33,7 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => ({ op: 'eq', args })),
+  eq: vi.fn((...args: any[]) => ({ op: 'eq', args })),
   relations: vi.fn(() => ({})),
 }));
 
@@ -42,7 +42,7 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 vi.mock('react', () => ({
-  cache: vi.fn((fn: (...args: unknown[]) => unknown) => fn),
+  cache: vi.fn((fn: (...args: any[]) => unknown) => fn),
 }));
 
 import {

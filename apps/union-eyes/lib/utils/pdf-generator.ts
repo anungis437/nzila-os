@@ -13,7 +13,7 @@ import PDFDocument from 'pdfkit';
 
 export interface PDFOptions {
   title: string;
-  data: unknown[] | Record<string, unknown>;
+  data: any[] | Record<string, unknown>;
   template?: string;
   orientation?: 'portrait' | 'landscape';
   size?: 'letter' | 'legal' | 'A4';
@@ -274,7 +274,7 @@ function renderGenericReport(doc: typeof PDFDocument, options: PDFOptions) {
 function renderTable(
   doc: typeof PDFDocument,
   columns: TableColumn[],
-  data: unknown[]
+  data: any[]
 ) {
   const startY = doc.y;
   const rowHeight = 20;
@@ -386,7 +386,7 @@ export function addFooter(
   });
 
   if (showPageNumbers) {
-    const pageNumber = (doc as unknown as { bufferedPageRange: () => { start: number } }).bufferedPageRange().start + 1;
+    const pageNumber = (doc as any as { bufferedPageRange: () => { start: number } }).bufferedPageRange().start + 1;
     doc.text(`Page ${pageNumber}`, doc.page.margins.left, footerY + 15, {
       align: 'center',
       width: doc.page.width - doc.page.margins.left - doc.page.margins.right,

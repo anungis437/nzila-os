@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  selectQueue: [] as unknown[],
+  selectQueue: [] as any[],
   dbSelect: vi.fn(),
   dbInsert: vi.fn(),
   loggerInfo: vi.fn(),
@@ -13,12 +13,12 @@ const mocks = vi.hoisted(() => ({
   computeFreshnessStatus: vi.fn(),
 }));
 
-function makeSelectChain(result: unknown) {
+function makeSelectChain(result: any) {
   const chain: Record<string, unknown> = {};
   for (const method of ["from", "where", "orderBy", "limit"]) {
     chain[method] = vi.fn(() => chain);
   }
-  chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(resolve(result));
+  chain.then = (resolve: (value: any) => unknown) => Promise.resolve(resolve(result));
   return chain;
 }
 

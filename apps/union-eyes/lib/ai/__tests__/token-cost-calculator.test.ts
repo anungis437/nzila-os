@@ -80,7 +80,7 @@ describe('TokenCostCalculator', () => {
     });
 
     it('returns 0 for undefined-ish input', () => {
-      expect(estimateTokens(undefined as unknown as string)).toBe(0);
+      expect(estimateTokens(undefined as any as string)).toBe(0);
     });
 
     it('handles long text', () => {

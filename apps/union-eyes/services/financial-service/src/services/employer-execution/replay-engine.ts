@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import type { EvaluationGraphDiffEntry, ReplayDiff, ReplayDiffEntry, RuleEvaluationNode } from "./types";
 
-function jsonEqual(left: unknown, right: unknown): boolean {
+function jsonEqual(left: any, right: any): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
@@ -13,14 +13,14 @@ function causeTypeFromDetail(causeDetail: string): ReplayDiffEntry["causeType"] 
   return "derived_change";
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
+function toRecord(value: any): Record<string, unknown> {
   if (typeof value === "object" && value !== null && !Array.isArray(value)) {
     return value as Record<string, unknown>;
   }
   return {};
 }
 
-function getEvaluationNodes(value: unknown): RuleEvaluationNode[] {
+function getEvaluationNodes(value: any): RuleEvaluationNode[] {
   const record = toRecord(value);
   const calcTrace = toRecord(record.calc_trace);
   const evaluationGraph = toRecord(calcTrace.evaluation_graph);
@@ -30,7 +30,7 @@ function getEvaluationNodes(value: unknown): RuleEvaluationNode[] {
   return nodes.filter((node): node is RuleEvaluationNode => typeof node === "object" && node !== null) as RuleEvaluationNode[];
 }
 
-function getAppliedPath(value: unknown): string[] {
+function getAppliedPath(value: any): string[] {
   const record = toRecord(value);
   const calcTrace = toRecord(record.calc_trace);
   const evaluationGraph = toRecord(calcTrace.evaluation_graph);
@@ -45,8 +45,8 @@ function keyForNode(node: RuleEvaluationNode): string {
 
 export function diffEvaluationGraph(input: {
   employeeExternalId: string;
-  originalTrace: unknown;
-  replayTrace: unknown;
+  originalTrace: any;
+  replayTrace: any;
   causeDetail: string;
 }): EvaluationGraphDiffEntry[] {
   const originalNodes = getEvaluationNodes(input.originalTrace);
@@ -64,7 +64,7 @@ export function diffEvaluationGraph(input: {
         employeeExternalId: input.employeeExternalId,
         nodeId: originalNode.nodeId,
         changeType: "node_removed",
-        original: originalNode as unknown as Record<string, unknown>,
+        original: originalNode as any as Record<string, unknown>,
         replay: undefined,
         causeType,
         causeDetail: input.causeDetail,
@@ -122,7 +122,7 @@ export function diffEvaluationGraph(input: {
         nodeId: replayNode.nodeId,
         changeType: "node_added",
         original: undefined,
-        replay: replayNode as unknown as Record<string, unknown>,
+        replay: replayNode as any as Record<string, unknown>,
         causeType,
         causeDetail: input.causeDetail,
       });

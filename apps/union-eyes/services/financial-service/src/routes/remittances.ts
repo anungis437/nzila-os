@@ -31,7 +31,7 @@ type TxSummaryRow = {
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as unknown as { user: AuthUser }).user;
+  return (req as any as { user: AuthUser }).user;
 }
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -218,7 +218,7 @@ router.post('/', async (req: Request, res: Response) => {
         // Store additional data in metadata if needed
         metadata: validatedData.referenceNumber ? { referenceNumber: validatedData.referenceNumber } : {},
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as unknown as typeof schema.employerRemittances.$inferInsert)
+      } as any as typeof schema.employerRemittances.$inferInsert)
       .returning();
 
     res.status(201).json({
@@ -340,7 +340,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
       .set({
         paidDate: remittance.remittanceDate, // Already a string from date column
         notes: `Paid via remittance ${id}`,
-      } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
+      } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
       .where(
         and(
           eq(schema.duesTransactions.organizationId, scopedOrgId),
@@ -363,7 +363,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
           matchedTransactions: transactionsToMatch.length,
           matchedAmount: matchedTotal,
         },
-      } as unknown as Partial<typeof schema.employerRemittances.$inferInsert>)
+      } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
       .where(eq(schema.employerRemittances.id, id))
       .returning();
 
@@ -427,7 +427,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       .set({
         ...validatedData,
         // updatedAt is handled automatically by database trigger
-      } as unknown as Partial<typeof schema.employerRemittances.$inferInsert>)
+      } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
       .where(
         and(
           eq(schema.employerRemittances.id, id),
@@ -622,7 +622,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
           .set({
             paidDate: remittance.remittanceDate, // Already a string
             notes: `Paid via remittance ${id}`,
-          } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
+          } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
           .where(eq(schema.duesTransactions.id, match.transactionId));
       }
 
@@ -636,7 +636,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
             matchedCount: reconciliationResult.summary.matchedCount,
             totalVariance: reconciliationResult.summary.totalVariance,
           },
-        } as unknown as Partial<typeof schema.employerRemittances.$inferInsert>)
+        } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
         .where(eq(schema.employerRemittances.id, id));
     }
 

@@ -229,7 +229,7 @@ export function ClaimFormWizard({
 // Step Components
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function IncidentStep({ form }: { form: unknown }) {
+function IncidentStep({ form }: { form: any }) {
   const [dateOpen, setDateOpen] = React.useState(false);
 
   return (
@@ -373,7 +373,7 @@ function IncidentStep({ form }: { form: unknown }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function EvidenceStep({ form: _form }: { form: unknown }) {
+function EvidenceStep({ form: _form }: { form: any }) {
   // File upload will be implemented with actual upload handler
   return (
     <div className="space-y-6">
@@ -394,7 +394,7 @@ function EvidenceStep({ form: _form }: { form: unknown }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function WitnessStep({ form }: { form: unknown }) {
+function WitnessStep({ form }: { form: any }) {
   const witnessPresent = form.watch("witnessesPresent");
   const previousReport = form.watch("previouslyReported");
 
@@ -460,7 +460,7 @@ function WitnessStep({ form }: { form: unknown }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ReviewStep({ form }: { form: unknown }) {
+function ReviewStep({ form }: { form: any }) {
   const data = form.watch();
 
   return (

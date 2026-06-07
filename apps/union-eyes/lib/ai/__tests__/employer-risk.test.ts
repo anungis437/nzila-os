@@ -48,7 +48,7 @@ vi.mock('@/db/schema/domains/claims/grievances', () => ({
 
 vi.mock('./ai-feature-guard', () => ({
   auditAiInteraction: vi.fn(async () => 'ai-risk-ref-123'),
-  buildAiEnvelope: vi.fn((data: unknown, meta: Record<string, unknown>) => ({
+  buildAiEnvelope: vi.fn((data: any, meta: Record<string, unknown>) => ({
     available: true, data, ...meta, disclaimer: 'AI disclaimer',
   })),
 }));

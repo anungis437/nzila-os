@@ -21,12 +21,13 @@ import { embeddingCache } from './embedding-cache';
 const EMBEDDING_MODEL = 'text-embedding-3-small';
 const _EMBEDDING_DIMENSIONS = 1536;
 
+type SqlRow = Record<string, unknown>;
+
 export interface SearchResult {
   id: string;
   content: string;
   similarity: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface SemanticSearchOptions {
@@ -111,11 +112,10 @@ export async function semanticClauseSearch(
     const embeddingString = `[${queryEmbedding.join(',')}]`;
 
     // Build WHERE clause based on filters
-    const whereConditions: (SQL<unknown> | undefined)[] = [];
+    const whereConditions: (SQL | undefined)[] = [];
     if (filters.clauseType && filters.clauseType.length > 0) {
       whereConditions.push(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        or(...filters.clauseType.map(type => eq(cbaClause.clauseType, type as unknown)))
+        or(...filters.clauseType.map(type => eq(cbaClause.clauseType, type as (typeof cbaClause.clauseType)['_']['data'])))
       );
     }
 
@@ -142,8 +142,7 @@ export async function semanticClauseSearch(
       LIMIT ${limit}
     `);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (results as unknown[]).map((row: unknown) => ({
+    return (results as unknown as SqlRow[]).map((row: SqlRow) => ({
       id: row.id as string,
       content: row.content as string,
       similarity: hybridSearch.enabled ? (row.hybrid_score as number) : (row.similarity as number),
@@ -154,8 +153,7 @@ export async function semanticClauseSearch(
         articleNumber: row.article_number,
         tags: row.tags,
       },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    })).filter((result: unknown) => result.similarity >= threshold);
+    })).filter((result) => result.similarity >= threshold);
   } catch (error) {
     logger.error('Error in semantic clause search', { error, query, options });
     throw new Error('Semantic search failed');
@@ -211,10 +209,8 @@ export async function findSimilarClauses(
       LIMIT ${limit}
     `);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (results as unknown[])
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((row: unknown) => ({
+    return (results as unknown as SqlRow[])
+      .map((row: SqlRow) => ({
         id: row.id as string,
         content: row.content as string,
         similarity: row.similarity as number,
@@ -226,8 +222,7 @@ export async function findSimilarClauses(
           tags: row.tags,
         },
       }))
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((result: unknown) => result.similarity >= threshold);
+      .filter((result) => result.similarity >= threshold);
   } catch (error) {
     logger.error('Error finding similar clauses', { error, clauseId, options });
     throw new Error('Failed to find similar clauses');
@@ -252,7 +247,7 @@ export async function semanticPrecedentSearch(
     const queryEmbedding = await generateEmbedding(query);
     const embeddingString = `[${queryEmbedding.join(',')}]`;
 
-    const whereFilters: SQL<unknown>[] = [];
+    const whereFilters: SQL[] = [];
     if (issueType) {
       whereFilters.push(sql`issue_type = ${issueType}`);
     }
@@ -282,10 +277,8 @@ export async function semanticPrecedentSearch(
       LIMIT ${limit}
     `);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (results as unknown[])
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((row: unknown) => ({
+    return (results as unknown as SqlRow[])
+      .map((row: SqlRow) => ({
         id: row.id as string,
         content: row.precedent_summary as string,
         similarity: row.similarity as number,
@@ -299,8 +292,7 @@ export async function semanticPrecedentSearch(
           citationCount: row.citation_count,
         },
       }))
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((result: unknown) => result.similarity >= threshold);
+      .filter((result) => result.similarity >= threshold);
   } catch (error) {
     logger.error('Error in semantic precedent search', {
       error,

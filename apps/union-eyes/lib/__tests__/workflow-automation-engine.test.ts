@@ -74,16 +74,16 @@ const mocks = vi.hoisted(() => {
 vi.mock("@/db/db", () => ({ db: mocks.mockDb }));
 
 vi.mock("drizzle-orm", () => ({
-  ne: vi.fn((...args: unknown[]) => ({ _tag: "ne", args })),
-  eq: vi.fn((...args: unknown[]) => ({ _tag: "eq", args })),
-  and: vi.fn((...args: unknown[]) => ({ _tag: "and", args })),
-  or: vi.fn((...args: unknown[]) => ({ _tag: "or", args })),
-  desc: vi.fn((col: unknown) => ({ _tag: "desc", col })),
-  asc: vi.fn((col: unknown) => ({ _tag: "asc", col })),
-  isNull: vi.fn((col: unknown) => ({ _tag: "isNull", col })),
-  lte: vi.fn((...args: unknown[]) => ({ _tag: "lte", args })),
-  gte: vi.fn((...args: unknown[]) => ({ _tag: "gte", args })),
-  sql: Object.assign(vi.fn((...args: unknown[]) => args), {
+  ne: vi.fn((...args: any[]) => ({ _tag: "ne", args })),
+  eq: vi.fn((...args: any[]) => ({ _tag: "eq", args })),
+  and: vi.fn((...args: any[]) => ({ _tag: "and", args })),
+  or: vi.fn((...args: any[]) => ({ _tag: "or", args })),
+  desc: vi.fn((col: any) => ({ _tag: "desc", col })),
+  asc: vi.fn((col: any) => ({ _tag: "asc", col })),
+  isNull: vi.fn((col: any) => ({ _tag: "isNull", col })),
+  lte: vi.fn((...args: any[]) => ({ _tag: "lte", args })),
+  gte: vi.fn((...args: any[]) => ({ _tag: "gte", args })),
+  sql: Object.assign(vi.fn((...args: any[]) => args), {
     raw: vi.fn((s: string) => s),
   }),
   relations: vi.fn(() => ({})),

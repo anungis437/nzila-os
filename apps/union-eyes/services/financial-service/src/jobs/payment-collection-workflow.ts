@@ -137,7 +137,7 @@ export async function processPaymentCollection(params: {
             })
             .where(eq(payments.id, payment.id))
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .catch((err: unknown) => {
+            .catch((err: any) => {
               logger.error('Failed to mark payment as unmatched', { error: err, paymentId: payment.id });
             });
           
@@ -212,7 +212,7 @@ export async function processPaymentCollection(params: {
           })
           .where(eq(payments.id, payment.id))
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .catch((err: unknown) => {
+          .catch((err: any) => {
             logger.error('Failed to update payment status', { error: err, paymentId: payment.id });
           });
 
@@ -273,7 +273,7 @@ export async function processPaymentCollection(params: {
           })
           .where(eq(payments.id, payment.id))
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .catch((err: unknown) => {
+          .catch((err: any) => {
             logger.error('Failed to mark payment as failed', { error: err, paymentId: payment.id });
           });
       }

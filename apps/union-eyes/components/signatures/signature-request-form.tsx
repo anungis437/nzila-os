@@ -39,7 +39,7 @@ interface Signer {
 interface SignatureRequestFormProps {
   organizationId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSuccess?: (document: unknown) => void;
+  onSuccess?: (document: any) => void;
 }
 
 export function SignatureRequestForm({
@@ -84,7 +84,7 @@ export function SignatureRequestForm({
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateSigner = (id: string, field: keyof Signer, value: unknown) => {
+  const updateSigner = (id: string, field: keyof Signer, value: any) => {
     setSigners(
       signers.map((s) => (s.id === id ? { ...s, [field]: value } : s))
     );

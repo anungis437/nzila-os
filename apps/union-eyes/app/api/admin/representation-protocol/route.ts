@@ -79,7 +79,7 @@ export const PUT = withAdminAuth(async (request, context: BaseAuthContext) => {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Organization context required");
   }
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {

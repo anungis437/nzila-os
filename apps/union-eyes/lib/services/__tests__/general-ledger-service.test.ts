@@ -43,7 +43,7 @@ vi.mock('@/db/schema/domains/finance', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
-  and: vi.fn((...args: unknown[]) => args),
+  and: vi.fn((...args: any[]) => args),
   lte: vi.fn((a, b) => ({ field: a, value: b })),
   isNull: vi.fn((a) => ({ field: a, op: 'isNull' })),
 }));
@@ -71,13 +71,13 @@ import {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function setupInsertChain(rows: unknown[] = [{ id: 'tx-1', transactionNumber: 'GL-1', createdAt: new Date() }]) {
+function setupInsertChain(rows: any[] = [{ id: 'tx-1', transactionNumber: 'GL-1', createdAt: new Date() }]) {
   mocks.mockReturning.mockResolvedValue(rows);
   mocks.mockValues.mockReturnValue({ returning: mocks.mockReturning });
   mocks.mockInsert.mockReturnValue({ values: mocks.mockValues });
 }
 
-function setupSelectChain(rows: unknown[]) {
+function setupSelectChain(rows: any[]) {
   mocks.mockWhere.mockResolvedValue(rows);
   mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
   mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });

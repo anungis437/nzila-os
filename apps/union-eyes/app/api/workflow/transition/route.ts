@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
     logger.error('Workflow transition failed', { error: String(err) })
     const message = err instanceof Error ? err.message : 'Internal error'
     const exposeDetails = process.env.QA_TEST_ENV === 'true' || process.env.NODE_ENV !== 'production'
-    const e = err as Error & { cause?: unknown }
+    const e = err as Error & { cause?: any }
     const cause = e?.cause as { message?: string; code?: string } | undefined
 
     return NextResponse.json(

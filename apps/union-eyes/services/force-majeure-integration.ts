@@ -407,7 +407,7 @@ export class ForceMajeureIntegrationService {
    */
   private generatePostIncidentReport(params: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    event: unknown;
+    event: any;
     duration: number;
     resolution: string;
     lessonsLearned?: string;

@@ -133,7 +133,7 @@ export async function queueNotification(request: NotificationRequest): Promise<s
     scheduledFor: (scheduledFor || new Date()).toISOString(),
     attempts: '0',
     createdAt: new Date().toISOString(),
-  } as unknown as typeof notificationQueue.$inferInsert).returning();
+  } as any as typeof notificationQueue.$inferInsert).returning();
 
   return notification.id;
 }
@@ -194,7 +194,7 @@ export async function sendNotification(notificationId: string): Promise<SendNoti
     .set({ 
       attempts: notification.attempts + 1,
       lastAttemptAt: new Date(),
-    } as unknown as Partial<typeof notificationQueue.$inferInsert>)
+    } as any as Partial<typeof notificationQueue.$inferInsert>)
     .where(eq(notificationQueue.id, notificationId));
 
   const channelResults: SendNotificationResult['channelResults'] = [];
@@ -262,7 +262,7 @@ export async function sendNotification(notificationId: string): Promise<SendNoti
         .filter(r => !r.success)
         .map(r => `${r.channel}: ${r.error}`)
         .join('; '),
-    } as unknown as Partial<typeof notificationQueue.$inferInsert>)
+    } as any as Partial<typeof notificationQueue.$inferInsert>)
     .where(eq(notificationQueue.id, notificationId));
 
   return {
@@ -708,13 +708,13 @@ export async function updateUserNotificationPreferences(
       userId,
       preferences: JSON.stringify(preferences),
       updatedAt: new Date(),
-    } as unknown as typeof userNotificationPreferences.$inferInsert)
+    } as any as typeof userNotificationPreferences.$inferInsert)
     .onConflictDoUpdate({
       target: [userNotificationPreferences.tenantId, userNotificationPreferences.userId],
       set: {
         preferences: JSON.stringify(preferences),
         updatedAt: new Date(),
-      } as unknown as Partial<typeof userNotificationPreferences.$inferInsert>,
+      } as any as Partial<typeof userNotificationPreferences.$inferInsert>,
     });
 }
 
@@ -763,7 +763,7 @@ async function logNotification(
     error,
     deliveredAt: status === 'delivered' ? new Date() : undefined,
     createdAt: new Date(),
-  } as unknown as typeof notificationLog.$inferInsert);
+  } as any as typeof notificationLog.$inferInsert);
 }
 
 /**

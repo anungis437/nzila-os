@@ -11,8 +11,7 @@
 
 import { requireAdmin } from '@/lib/auth/rbac-server';
 import { db } from '@/db/db';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { organizationUsers } from "@/db/schema/domains/member";
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';import { organizationUsers } from "@/db/schema/domains/member";
 import { organizations, orgConfigurations, orgUsage } from "@/db/schema";
 import { eq, and, desc, sql, count, like, or, ne, sum as _sum } from "drizzle-orm";
 import { logger } from "@/lib/logger";
@@ -27,12 +26,13 @@ import type {
 
 export type { UserRole } from '@/types/action-dtos';
 
+type AdminTx = NodePgDatabase<Record<string, unknown>>;
+
 /**
  * Get system-wide statistics
  * @param tx - Database transaction from RLS-protected route
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getSystemStats(tx: NodePgDatabase<unknown>): Promise<SystemStats> {
+export async function getSystemStats(tx: AdminTx): Promise<SystemStats> {
   try {
     // Total unique users across all orgs
     const totalMembersResult = await tx
@@ -89,8 +89,7 @@ export async function getSystemStats(tx: NodePgDatabase<unknown>): Promise<Syste
  * @param tx - Database transaction from RLS-protected route
  */
 export async function getAdminUsers(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<unknown>,
+  tx: AdminTx,
   searchQuery?: string,
   organizationId?: string,
   role?: UserRole
@@ -229,8 +228,7 @@ export async function getAdminOrgs(searchQuery?: string): Promise<OrgWithStats[]
  * @param tx - Database transaction from RLS-protected route
  */
 export async function updateUserRole(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<unknown>,
+  tx: AdminTx,
   userId: string,
   organizationId: string,
   newRole: UserRole
@@ -265,8 +263,7 @@ export async function updateUserRole(
  * @param tx - Database transaction from RLS-protected route
  */
 export async function toggleUserStatus(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<unknown>,
+  tx: AdminTx,
   userId: string,
   organizationId: string
 ): Promise<void> {
@@ -313,8 +310,7 @@ export async function toggleUserStatus(
  * @param tx - Database transaction from RLS-protected route
  */
 export async function deleteUserFromOrg(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<unknown>,
+  tx: AdminTx,
   userId: string,
   organizationId: string
 ): Promise<void> {
@@ -414,8 +410,7 @@ export async function createOrg(data: {
  * Get system configurations
  * @param tx - Database transaction from RLS-protected route
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getSystemConfigs(tx: NodePgDatabase<unknown>, category?: string): Promise<SystemConfig[]> {
+export async function getSystemConfigs(tx: AdminTx, category?: string): Promise<SystemConfig[]> {
   try {
     const conditions = category
       ? eq(orgConfigurations.category, category)
@@ -449,12 +444,11 @@ export async function getSystemConfigs(tx: NodePgDatabase<unknown>, category?: s
  * @param tx - Database transaction from RLS-protected route
  */
 export async function updateSystemConfig(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<unknown>,
+  tx: AdminTx,
   organizationId: string,
   category: string,
   key: string,
-  value: unknown
+  value: (typeof orgConfigurations.$inferInsert)['value']
 ): Promise<void> {
   try {
     // Upsert: update existing or insert new config
@@ -496,8 +490,7 @@ export async function updateSystemConfig(
  * Get recent activity logs (simplified - would need audit log table in production)
  * @param tx - Database transaction from RLS-protected route
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getRecentActivity(tx: NodePgDatabase<unknown>, limit: number = 10): Promise<any[]> {
+export async function getRecentActivity(tx: AdminTx, limit: number = 10): Promise<Array<{ action: string; user: string; org: string; role: string; timestamp: string | undefined }>> {
   try {
     // For now, return recent user joins
     const recentUsers = await tx

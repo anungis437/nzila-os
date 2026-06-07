@@ -249,7 +249,7 @@ export class SyncEngine {
     organizationId: string,
     provider?: IntegrationProvider,
     limit: number = 50
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     const conditions = [eq(integrationSyncLog.organizationId, organizationId)];
 
     if (provider) {
@@ -270,7 +270,7 @@ export class SyncEngine {
   private async getLastSync(
     organizationId: string,
     provider: IntegrationProvider
-  ): Promise<unknown> {
+  ): Promise<any> {
     const [lastSync] = await db
       .select()
       .from(integrationSyncLog)
@@ -396,7 +396,7 @@ export async function getSyncHistory(
   organizationId: string,
   provider?: IntegrationProvider,
   limit?: number
-): Promise<unknown[]> {
+): Promise<any[]> {
   const engine = SyncEngine.getInstance();
   return engine.getSyncHistory(organizationId, provider, limit);
 }

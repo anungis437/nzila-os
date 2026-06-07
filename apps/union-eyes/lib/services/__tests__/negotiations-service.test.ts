@@ -66,7 +66,7 @@ import {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Build a two-call mockSelectFrom (count query → data query) */
-function setupDualSelect(count: number, rows: unknown[]) {
+function setupDualSelect(count: number, rows: any[]) {
   let callCount = 0;
   mockSelectFrom.mockImplementation(() => {
     callCount++;
@@ -86,7 +86,7 @@ function setupDualSelect(count: number, rows: unknown[]) {
 }
 
 /** Build a single-call mockSelectFrom returning a chain for non-paginated queries */
-function setupSingleSelect(rows: unknown[]) {
+function setupSingleSelect(rows: any[]) {
   mockSelectFrom.mockReturnValue({
     where: vi.fn(() => ({
       orderBy: vi.fn(() => rows),

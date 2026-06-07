@@ -20,13 +20,10 @@ export interface AuditLogEntry {
   userName: string;
   changes?: Array<{
     field: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     oldValue: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     newValue: unknown;
   }>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
   timestamp: Date;
@@ -44,6 +41,14 @@ export interface AuditQueryOptions {
   offset?: number;
 }
 
+interface JournalEntryInput {
+  entryNumber: string | number;
+  totalDebit: { toString(): string };
+  totalCredit: { toString(): string };
+  description: string;
+  lines: unknown[];
+}
+
 export class AuditTrailService {
   /**
    * Log a financial transaction action
@@ -56,8 +61,7 @@ export class AuditTrailService {
     userId: string;
     userName: string;
     changes?: AuditLogEntry['changes'];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     ipAddress?: string;
     userAgent?: string;
   }): Promise<AuditLogEntry> {
@@ -77,8 +81,7 @@ export class AuditTrailService {
 
     return {
       ...(entry as AuditLogEntry),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      organizationId: (entry as unknown).organizationId || params.organizationId,
+      organizationId: (entry as { organizationId?: string }).organizationId || params.organizationId,
     } as AuditLogEntry;
   }
 
@@ -90,8 +93,7 @@ export class AuditTrailService {
     entryId: string;
     userId: string;
     userName: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    entry: unknown;
+    entry: JournalEntryInput;
     ipAddress?: string;
   }): Promise<void> {
     await this.logAction({
@@ -173,7 +175,6 @@ export class AuditTrailService {
     invoiceId: string;
     userId: string;
     userName: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     changes: Array<{ field: string; oldValue: unknown; newValue: unknown }>;
     ipAddress?: string;
   }): Promise<void> {
@@ -262,8 +263,7 @@ export class AuditTrailService {
     }
 
     if (options.action) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(eq(financialAuditLog.action, options.action as unknown));
+      conditions.push(eq(financialAuditLog.action, options.action as AuditLogEntry['action']));
     }
 
     if (options.startDate) {
@@ -287,8 +287,7 @@ export class AuditTrailService {
 
     return results.map((entry) => ({
       ...(entry as AuditLogEntry),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      organizationId: (entry as unknown).organizationId || options.organizationId,
+      organizationId: (entry as { organizationId?: string }).organizationId || options.organizationId,
     })) as AuditLogEntry[];
   }
 
@@ -538,13 +537,11 @@ export class AuditTrailService {
     actionType: string;
     entityType: string;
     orgId: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     visibilityScope: 'member' | 'staff' | 'admin' | 'system';
     ipAddress?: string;
     userAgent?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }): Promise<unknown> {
+  }): Promise<Record<string, unknown>> {
     // Import at method level to avoid circular dependencies
     const { auditLogs } = await import('@/db/schema/audit-security-schema');
 
@@ -580,8 +577,7 @@ export class AuditTrailService {
    * @param metadata - Raw metadata object
    * @returns Sanitized metadata
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static sanitizeMetadata(metadata: Record<string, any>): Record<string, any> {
+  static sanitizeMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
     const sensitiveKeys = [
       'password',
       'token',
@@ -599,8 +595,7 @@ export class AuditTrailService {
       'pin',
     ];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sanitized: Record<string, any> = {};
+    const sanitized: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(metadata)) {
       const lowerKey = key.toLowerCase();
@@ -612,7 +607,7 @@ export class AuditTrailService {
         sanitized[key] = '[REDACTED]';
       } else if (value && typeof value === 'object' && !Array.isArray(value)) {
         // Recursively sanitize nested objects
-        sanitized[key] = this.sanitizeMetadata(value);
+        sanitized[key] = this.sanitizeMetadata(value as Record<string, unknown>);
       } else {
         sanitized[key] = value;
       }

@@ -269,11 +269,11 @@ describe('scheduled-jobs', () => {
 
     it('skips cron scheduling in browser-like environment', () => {
       // Simulate browser env where typeof window !== 'undefined'
-      (global as unknown as Record<string, unknown>).window = {};
+      (global as any as Record<string, unknown>).window = {};
       try {
         expect(() => initializeAnalyticsJobs()).not.toThrow();
       } finally {
-        delete (global as unknown as Record<string, unknown>).window;
+        delete (global as any as Record<string, unknown>).window;
       }
     });
 

@@ -192,8 +192,8 @@ export const bargainingProposals = pgTable("bargaining_proposals", {
   resolvedDate: timestamp("resolved_date", { withTimezone: true }),
   
   // Related proposals (for tracking counter-offers)
-  parentProposalId: uuid("parent_proposal_id").references((): PgColumn<unknown> => bargainingProposals.id as PgColumn<unknown>, { onDelete: "set null" }),
-  supersededById: uuid("superseded_by_id").references((): PgColumn<unknown> => bargainingProposals.id as PgColumn<unknown>, { onDelete: "set null" }),
+  parentProposalId: uuid("parent_proposal_id").references((): PgColumn<any> => bargainingProposals.id as PgColumn<any>, { onDelete: "set null" }),
+  supersededById: uuid("superseded_by_id").references((): PgColumn<any> => bargainingProposals.id as PgColumn<any>, { onDelete: "set null" }),
   
   // Attachments
   attachments: jsonb("attachments").$type<Array<{

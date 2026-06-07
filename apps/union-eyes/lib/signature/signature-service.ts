@@ -65,7 +65,7 @@ export class SignatureService {
     expirationDays?: number;
     requireAuthentication?: boolean;
     sequentialSigning?: boolean;
-    metadata?: unknown;
+    metadata?: any;
   }): Promise<typeof signatureDocuments.$inferSelect> {
     // Calculate file hash for integrity
     const fileHash = createHash("sha256").update(data.file).digest("hex");
@@ -381,7 +381,7 @@ return false;
     signatureType: "electronic" | "digital" | "wet";
     ipAddress?: string;
     userAgent?: string;
-    geolocation?: unknown;
+    geolocation?: any;
   }) {
     const [updated] = await db
       .update(documentSigners)
@@ -610,8 +610,8 @@ export class AuditTrailService {
     actorRole?: string;
     ipAddress?: string;
     userAgent?: string;
-    geolocation?: unknown;
-    metadata?: unknown;
+    geolocation?: any;
+    metadata?: any;
   }) {
     const auditData: SignatureAuditTrailInsert = {
       ...data,

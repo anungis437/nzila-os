@@ -60,7 +60,7 @@ vi.mock("@/db/schema", () => ({
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_col, val) => ({ _type: "eq", val })),
-  and: vi.fn((...args: unknown[]) => ({ _type: "and", args })),
+  and: vi.fn((...args: any[]) => ({ _type: "and", args })),
   desc: vi.fn((col) => ({ _type: "desc", col })),
   sql: Object.assign(vi.fn(), {
     join: vi.fn(),

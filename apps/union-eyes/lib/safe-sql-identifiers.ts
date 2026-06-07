@@ -186,6 +186,6 @@ export function safeColumnList(columns: string[]): SQL {
  * Type guard to check if an object looks like a SQL fragment
  * Used for defensive programming when mixing safe and unsafe SQL
  */
-export function isSQLFragment(value: unknown): value is SQL {
+export function isSQLFragment(value: any): value is SQL {
   return value !== null && value !== undefined && typeof value === 'object' && 'queryChunks' in value;
 }

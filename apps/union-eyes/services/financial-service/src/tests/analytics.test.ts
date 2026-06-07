@@ -19,12 +19,12 @@ import { randomUUID } from 'crypto';
 const HAS_DB = Boolean(process.env.DATABASE_URL);
 
 // Dynamically import DB-dependent modules only when DATABASE_URL is available
-const requestMod = HAS_DB ? await import('supertest') : { default: null as unknown };
-const appMod = HAS_DB ? await import('../index') : { default: null as unknown };
-const dbMod = HAS_DB ? await import('../db') : { db: null as unknown };
+const requestMod = HAS_DB ? await import('supertest') : { default: null as any };
+const appMod = HAS_DB ? await import('../index') : { default: null as any };
+const dbMod = HAS_DB ? await import('../db') : { db: null as any };
 const schemaMod = HAS_DB
   ? await import('../db/schema')
-  : { strikeFunds: null, donations: null, stipendDisbursements: null, members: null } as unknown as Record<string, unknown>;
+  : { strikeFunds: null, donations: null, stipendDisbursements: null, members: null } as any as Record<string, unknown>;
 const { eq } = await import('drizzle-orm');
 
 const request = requestMod.default;
@@ -52,7 +52,7 @@ describe.skipIf(!HAS_DB)('Analytics Endpoints - Comprehensive Tests (requires DA
       email: 'donor@test.com',
       status: 'active',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as unknown).returning();
+    } as any).returning();
     testMemberId = memberResult[0].id;
     
     // Create test strike funds
@@ -79,7 +79,7 @@ describe.skipIf(!HAS_DB)('Analytics Endpoints - Comprehensive Tests (requires DA
         createdBy: TEST_USER_ID,
       },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ] as unknown).returning();
+    ] as any).returning();
     testFundId1 = funds[0].id;
     testFundId2 = funds[1].id;
     
@@ -135,7 +135,7 @@ describe.skipIf(!HAS_DB)('Analytics Endpoints - Comprehensive Tests (requires DA
     }
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await db.insert(stipendDisbursements).values(stipendData as unknown);
+    await db.insert(stipendDisbursements).values(stipendData as any);
 });
   
   afterAll(async () => {
@@ -329,7 +329,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
       
       // All returned alerts should be critical
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      response.body.forEach((alert: unknown) => {
+      response.body.forEach((alert: any) => {
         expect(alert.severity).toBe('critical');
       });
     });

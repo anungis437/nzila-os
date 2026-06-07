@@ -16,8 +16,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <AuthProvider>
-      <html lang={locale} data-product="console">
-        <body>
+      <html lang={locale} data-product="console" suppressHydrationWarning>
+        <body suppressHydrationWarning>
           <NzilaAppShell moduleId="console">
             <NextIntlClientProvider locale={locale} messages={messages}>
               {children}

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 const mocks = vi.hoisted(() => {
-  const selectQueue: unknown[][] = []
+  const selectQueue: any[][] = []
 
   const db = {
     select: vi.fn(() => ({
@@ -13,19 +13,19 @@ const mocks = vi.hoisted(() => {
       })),
     })),
     update: vi.fn(() => ({
-      set: vi.fn((payload: unknown) => {
-        ;(db as unknown as { _lastUpdatePayload: unknown })._lastUpdatePayload = payload
+      set: vi.fn((payload: any) => {
+        ;(db as any as { _lastUpdatePayload: any })._lastUpdatePayload = payload
         return { where: vi.fn(async () => undefined) }
       }),
     })),
     insert: vi.fn(() => ({
-      values: vi.fn(async (payload: unknown) => {
-        ;(db as unknown as { _lastInsertPayload: unknown })._lastInsertPayload = payload
+      values: vi.fn(async (payload: any) => {
+        ;(db as any as { _lastInsertPayload: any })._lastInsertPayload = payload
         return undefined
       }),
     })),
-    _lastInsertPayload: null as unknown,
-    _lastUpdatePayload: null as unknown,
+    _lastInsertPayload: null as any,
+    _lastUpdatePayload: null as any,
     _selectQueue: selectQueue,
   }
 
@@ -36,11 +36,11 @@ const mocks = vi.hoisted(() => {
 })
 
 vi.mock('@/lib/api-auth-guard', () => ({
-  withRoleAuth: vi.fn((_requiredRole: string, handler: (...args: unknown[]) => unknown) => handler),
+  withRoleAuth: vi.fn((_requiredRole: string, handler: (...args: any[]) => unknown) => handler),
 }))
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: vi.fn((fn: () => Promise<unknown>) => fn()),
+  withRLSContext: vi.fn((fn: () => Promise<any>) => fn()),
 }))
 
 vi.mock('@/db/db', () => ({ db: mocks.db }))

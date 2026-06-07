@@ -22,7 +22,7 @@ type StripePaymentIntentLike = {
 type StripeWebhookEventLike = {
   type: string;
   data: {
-    object: unknown;
+    object: any;
   };
 };
 
@@ -66,12 +66,12 @@ type DonationStatusRow = {
 // Initialize Stripe via platform wrapper
 const stripe = getStripeClient();
 
-function toRows<T extends Record<string, unknown>>(result: unknown): T[] {
+function toRows<T extends Record<string, unknown>>(result: any): T[] {
   if (Array.isArray(result)) {
     return result as T[];
   }
   if (typeof result === 'object' && result !== null && 'rows' in result) {
-    const rows = (result as { rows?: unknown }).rows;
+    const rows = (result as { rows?: any }).rows;
     return Array.isArray(rows) ? (rows as T[]) : [];
   }
   return [];
@@ -101,7 +101,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Verify strike fund exists and is active
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fundResult: unknown = await db.execute(sql`
+    const fundResult: any = await db.execute(sql`
       SELECT id, fund_name, tenant_id, status, current_balance, target_amount
       FROM strike_funds
       WHERE id = ${validatedData.fundId}
@@ -143,7 +143,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Create pending donation record in database
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const donationResult: unknown = await db.execute(sql`
+    const donationResult: any = await db.execute(sql`
       INSERT INTO public_donations (
         tenant_id, strike_fund_id, amount, donor_name, donor_email,
         is_anonymous, payment_provider, payment_intent_id,
@@ -216,7 +216,7 @@ router.post(
         req.body,
         sig,
         webhookSecret
-      ) as unknown as StripeWebhookEventLike;
+      ) as any as StripeWebhookEventLike;
     } catch (err) {
       const errMessage = err instanceof Error ? err.message : 'unknown webhook verification error';
       logger.error('Webhook signature verification failed', { error: err });
@@ -271,7 +271,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
     const fundId = uuidParam.parse(req.params.fundId);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fundResult: unknown = await db.execute(sql`
+    const fundResult: any = await db.execute(sql`
       SELECT 
         sf.id,
         sf.fund_name,
@@ -306,7 +306,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
 
     // Get recent donations (non-anonymous only)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const recentDonationsResult: unknown = await db.execute(sql`
+    const recentDonationsResult: any = await db.execute(sql`
       SELECT 
         donor_name,
         amount,
@@ -356,7 +356,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
     const donationId = uuidParam.parse(req.params.donationId);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: unknown = await db.execute(sql`
+    const result: any = await db.execute(sql`
       SELECT 
         pd.id,
         pd.amount,

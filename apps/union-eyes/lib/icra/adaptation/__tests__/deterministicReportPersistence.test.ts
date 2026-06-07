@@ -104,7 +104,7 @@ describe('deterministic report persistence', () => {
           },
         }),
         routeQuestionBank(
-          ALL_QUESTIONS as unknown as Parameters<typeof routeQuestionBank>[0],
+          ALL_QUESTIONS as any as Parameters<typeof routeQuestionBank>[0],
           classifyOrgContext({
             rawForm: {
               ctx_org_type: 'federation',
@@ -122,7 +122,7 @@ describe('deterministic report persistence', () => {
     const resolved = resolveAdaptiveReportAISlot({
       rawProfile,
       organizationContext: orgContext,
-      questionBank: ALL_QUESTIONS as unknown as Parameters<typeof routeQuestionBank>[0],
+      questionBank: ALL_QUESTIONS as any as Parameters<typeof routeQuestionBank>[0],
       locale: 'en-CA',
       generatedAt: '2026-05-22T12:00:00.000Z',
     });

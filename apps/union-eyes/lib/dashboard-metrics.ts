@@ -262,7 +262,7 @@ interface CacheEntry<T> {
 }
 
 // ga-check:exempt — TTL cache, not primary persistence
-const cache = new Map<string, CacheEntry<unknown>>();
+const cache = new Map<string, CacheEntry<any>>();
 
 /** Default TTL: 5 minutes */
 const DEFAULT_TTL_MS = 5 * 60 * 1000;

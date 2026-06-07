@@ -127,15 +127,15 @@ describe('Question Architecture Audit™ — adaptive routing depth', () => {
       typeof ALL_QUESTIONS[number] & {
         adaptive?: {
           rules?: {
-            suppressedFor?: unknown[];
-            requiredFor?: unknown[];
-            recommendedFor?: unknown[];
+            suppressedFor?: any[];
+            requiredFor?: any[];
+            recommendedFor?: any[];
             minOrgComplexity?: string;
             maxOrgComplexity?: string;
-            sectorRelevance?: unknown[];
-            sizeRelevance?: unknown[];
-            governanceRelevance?: unknown[];
-            respondentRelevance?: unknown[];
+            sectorRelevance?: any[];
+            sizeRelevance?: any[];
+            governanceRelevance?: any[];
+            respondentRelevance?: any[];
           };
         };
       }

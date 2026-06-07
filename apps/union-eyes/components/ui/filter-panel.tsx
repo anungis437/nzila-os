@@ -62,7 +62,7 @@ export interface FilterGroup {
 export interface ActiveFilter {
   id: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: unknown;
+  value: any;
   label: string;
 }
 
@@ -91,7 +91,7 @@ export function FilterPanel({
   }, [activeFilters]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleFilterChange = (filterId: string, value: unknown, label: string) => {
+  const handleFilterChange = (filterId: string, value: any, label: string) => {
     const newFilters = filters.filter((f) => f.id !== filterId);
     
     if (value !== null && value !== undefined && value !== "") {

@@ -195,10 +195,10 @@ export class BambooHRClient {
    * Get employees who changed since a specific date
    * Useful for incremental sync
    */
-  async getChangedEmployees(since: Date): Promise<{ changes: unknown[] }> {
+  async getChangedEmployees(since: Date): Promise<{ changes: any[] }> {
     const sinceDate = since.toISOString().split('T')[0]; // YYYY-MM-DD
     
-    return await this.request<{ changes: unknown[] }>(
+    return await this.request<{ changes: any[] }>(
       `/employees/changed?since=${sinceDate}`
     );
   }
@@ -245,7 +245,7 @@ export class BambooHRClient {
     endDate?: string;
     type?: string;
     status?: string;
-  }): Promise<unknown[]> {
+  }): Promise<any[]> {
     const queryParams = new URLSearchParams();
     if (params?.startDate) queryParams.set('start', params.startDate);
     if (params?.endDate) queryParams.set('end', params.endDate);
@@ -255,7 +255,7 @@ export class BambooHRClient {
     const query = queryParams.toString();
     const endpoint = query ? `/time_off/requests?${query}` : `/time_off/requests`;
 
-    return await this.request<unknown[]>(endpoint);
+    return await this.request<any[]>(endpoint);
   }
 
   // ==========================================================================
@@ -268,7 +268,7 @@ export class BambooHRClient {
   async healthCheck(): Promise<boolean> {
     try {
       // Simple metadata request to verify connectivity
-      await this.request<unknown>('/meta/lists/department');
+      await this.request<any>('/meta/lists/department');
       return true;
     } catch (error) {
       logger.error('BambooHR health check failed', {

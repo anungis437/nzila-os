@@ -95,7 +95,7 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
 
   const getStatusBadge = (status: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon?: unknown }> = {
+    const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon?: any }> = {
       submitted: { variant: 'outline', icon: Clock },
       approved: { variant: 'default', icon: CheckCircle },
       rejected: { variant: 'destructive', icon: XCircle },

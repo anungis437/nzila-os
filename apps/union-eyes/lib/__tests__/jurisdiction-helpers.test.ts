@@ -11,7 +11,7 @@ vi.mock('@/db/db', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }),
+  sql: (strings: TemplateStringsArray, ...values: any[]) => ({ strings, values }),
   relations: vi.fn(() => ({})),
 }));
 

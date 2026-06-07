@@ -40,7 +40,7 @@ interface PicketLine {
   location_name: string;
   address: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  shift_schedule: unknown;
+  shift_schedule: any;
   active_picketers_count: number;
   total_hours_today: number;
   status: 'active' | 'inactive' | 'suspended';

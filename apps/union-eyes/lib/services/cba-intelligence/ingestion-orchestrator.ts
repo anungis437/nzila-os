@@ -188,7 +188,7 @@ async function ingestSource(source: CbaIntelSource): Promise<IngestionRunResult>
       async (doc) => {
         try {
           let fetched: FetchedContent | null = null;
-          let lastError: unknown = null;
+          let lastError: any = null;
 
           for (let attempt = 1; attempt <= tuning.fetchRetries; attempt++) {
             try {

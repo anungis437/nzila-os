@@ -29,7 +29,7 @@ export async function getIcraAdaptiveResolution(
 
     return resolveAdaptiveContext({
       organizationContext: row.organizationContext,
-      questionBank: ALL_QUESTIONS as unknown as RoutableQuestion[],
+      questionBank: ALL_QUESTIONS as any as RoutableQuestion[],
       currentQuestionBankVersion: QUESTION_BANK_VERSION,
     })
   } catch {

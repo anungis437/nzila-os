@@ -39,7 +39,7 @@ const DEFAULT_CONFIG: MambaConfig = {
 export class MambaModel {
   private config: MambaConfig;
   private isInitialized: boolean = false;
-  private model: unknown = null;
+  private model: any = null;
 
   constructor(config: Partial<MambaConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };

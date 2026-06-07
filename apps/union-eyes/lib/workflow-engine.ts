@@ -26,7 +26,7 @@ import {
   type ClaimStatus,
   type ClaimPriority 
 } from './services/claim-workflow-fsm';
-import { detectAllSignals } from './services/lro-signals';
+import { detectAllSignals, type CaseForSignals } from './services/lro-signals';
 import { 
   generateDefensibilityPack,
   type TimelineEvent,
@@ -189,7 +189,7 @@ export async function updateClaimStatus(
   notes?: string,
    
   tx?: RLSTx
-): Promise<{ success: boolean; error?: string; claim?: unknown }> {
+): Promise<{ success: boolean; error?: string; claim?: typeof claims.$inferSelect }> {
   // If no transaction provided, wrap in withRLSContext
   if (!tx) {
      
@@ -223,8 +223,7 @@ export async function updateClaimStatus(
       updatedAt: claim.updatedAt ?? claim.createdAt ?? new Date(),
       assignedTo: claim.assignedTo || undefined,
       organizationId: claim.organizationId,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as unknown]);
+    } as unknown as CaseForSignals]);
 
     const hasUnresolvedCriticalSignals = signals.some(
       signal => signal.severity === 'critical' && signal.actionable
@@ -272,8 +271,7 @@ export async function updateClaimStatus(
     }
 
     // Update claim status and timestamps
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, unknown> = {
       status: newStatus,
       updatedAt: new Date(),
     };
@@ -535,7 +533,7 @@ export async function updateClaimStatusById(
   notes?: string,
    
   tx?: RLSTx
-): Promise<{ success: boolean; error?: string; claim?: unknown }> {
+): Promise<{ success: boolean; error?: string; claim?: typeof claims.$inferSelect }> {
   if (!tx) {
      
     return withRLSContext(async (transaction: RLSTx) => {
@@ -646,7 +644,7 @@ export async function assignClaim(
 /**
  * Get overdue claims
  */
-export async function getOverdueClaims(): Promise<unknown[]> {
+export async function getOverdueClaims(): Promise<Array<typeof claims.$inferSelect>> {
   try {
     const allClaims = await withSystemRLSContext('background-job: overdue-claims-scan', async (tx) => tx.select().from(claims));
     
@@ -676,7 +674,7 @@ return [];
 /**
  * Get claims approaching deadline (within 1 day)
  */
-export async function getClaimsApproachingDeadline(): Promise<unknown[]> {
+export async function getClaimsApproachingDeadline(): Promise<Array<typeof claims.$inferSelect>> {
   try {
     const allClaims = await withSystemRLSContext('background-job: approaching-deadline-scan', async (tx) => tx.select().from(claims));
     
@@ -770,8 +768,7 @@ return {
 /**
  * Get workflow status for a claim (deadline info, transitions, etc.)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getClaimWorkflowStatus(claim: Record<string, any>) {
+export function getClaimWorkflowStatus(claim: { status: string; priority: string; updatedAt?: Date | null; createdAt: Date; progress?: number | null }) {
   const status = claim.status as ClaimStatus;
   const priority = claim.priority as ClaimPriority;
   const statusDate = claim.updatedAt || claim.createdAt;

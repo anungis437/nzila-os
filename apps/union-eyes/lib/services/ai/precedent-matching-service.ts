@@ -64,6 +64,27 @@ export interface PrecedentMatchOptions {
   weightMetadata?: number; // 0-1
 }
 
+interface ClaimInput {
+  facts: string;
+  issueType: string;
+  jurisdiction?: string;
+  unionArguments?: string;
+  employerArguments?: string;
+  [key: string]: unknown;
+}
+
+interface PrecedentInput {
+  id?: string;
+  caseTitle?: string | null;
+  caseNumber?: string | null;
+  issueType?: string | null;
+  jurisdictionType?: string | null;
+  keyFacts?: string | null;
+  reasoning?: string | null;
+  outcome?: string | null;
+  [key: string]: unknown;
+}
+
 /**
  * Match a claim/grievance to relevant precedents using hybrid approach
  */
@@ -227,8 +248,7 @@ function calculateKeywordMatch(keywords: string[], precedentText: string): numbe
  */
 function calculateMetadataMatch(
   claim: { issueType: string; jurisdiction?: string },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  precedent: unknown
+  precedent: PrecedentInput
 ): number {
   let score = 0;
   let factors = 0;
@@ -237,7 +257,7 @@ function calculateMetadataMatch(
   factors++;
   if (claim.issueType === precedent.issueType) {
     score += 1.0;
-  } else if (areRelatedIssues(claim.issueType, precedent.issueType)) {
+  } else if (areRelatedIssues(claim.issueType, precedent.issueType ?? '')) {
     score += 0.5;
   }
 
@@ -272,10 +292,8 @@ function areRelatedIssues(type1: string, type2: string): boolean {
  * Analyze why precedent is applicable and how it differs
  */
 async function analyzePrecedentApplicability(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  claim: unknown,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  precedent: unknown
+  claim: ClaimInput,
+  precedent: PrecedentInput
 ): Promise<{
   applicableReasons: string[];
   distinctions: string[];
@@ -373,8 +391,7 @@ export async function analyzeClaimWithPrecedents(
  * Generate comprehensive claim analysis using AI
  */
 async function generateClaimAnalysis(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  claim: unknown,
+  claim: ClaimInput,
   precedents: PrecedentMatch[]
 ): Promise<{
   outcomeReasoning: string;
@@ -441,8 +458,7 @@ Provide analysis.`,
  * Generate legal memorandum based on claim and precedents
  */
 export async function generateLegalMemorandum(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  claim: unknown,
+  claim: ClaimInput,
   analysis: ClaimAnalysis
 ): Promise<string> {
   try {

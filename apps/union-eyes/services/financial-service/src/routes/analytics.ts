@@ -29,7 +29,7 @@ type AuthUser = {
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as unknown as { user: AuthUser }).user;
+  return (req as any as { user: AuthUser }).user;
 }
 
 // ============================================================================

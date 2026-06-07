@@ -16,7 +16,7 @@ vi.mock('@/db', () => ({
 
 vi.mock('drizzle-orm', () => ({
   sql: Object.assign(
-    (strings: TemplateStringsArray, ...vals: unknown[]) => ({
+    (strings: TemplateStringsArray, ...vals: any[]) => ({
       queryChunks: [strings.join('?')],
       values: vals,
     }),
@@ -47,7 +47,7 @@ import { executeScheduledReport, retryFailedExecution } from '../scheduled-repor
 
 describe('scheduled-report-executor', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const makeSchedule = (overrides: Record<string, unknown> = {}): unknown => ({
+  const makeSchedule = (overrides: Record<string, unknown> = {}): any => ({
     id: 'sched-1',
     reportId: 'report-1',
     organizationId: 'org-1',

@@ -31,7 +31,7 @@ async function getApiClient() {
  * List certification-management-service records
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getCertificationManagementServiceList(filters?: unknown) {
+export async function getCertificationManagementServiceList(filters?: any) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -69,7 +69,7 @@ export async function getCertificationManagementServiceById(id: string) {
  * Create new certification-management-service record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function createCertificationManagementService(data: unknown) {
+export async function createCertificationManagementService(data: any) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/certification-management/certification-management-service/`, {
@@ -89,7 +89,7 @@ export async function createCertificationManagementService(data: unknown) {
  * Update certification-management-service record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateCertificationManagementService(id: string, data: unknown) {
+export async function updateCertificationManagementService(id: string, data: any) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/certification-management/certification-management-service/${{id}}/`, {

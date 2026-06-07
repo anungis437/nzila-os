@@ -93,7 +93,7 @@ export function HazardsList({
       if (json.success) {
         const rows = Array.isArray(json.data?.data) ? json.data.data : [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setHazards(rows.map((h: unknown) => ({
+        setHazards(rows.map((h: any) => ({
           id: h.id,
           hazardNumber: h.reportNumber ?? h.hazardNumber ?? '',
           type: h.hazardCategory ?? h.type ?? '',

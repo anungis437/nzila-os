@@ -51,8 +51,8 @@ export const POST = withApi(
       electionYear?: number;
       electionDate?: string;
       positionsAvailable?: number;
-      candidates?: unknown[];
-      winners?: unknown[];
+      candidates?: any[];
+      winners?: any[];
       totalVotes?: number;
       participationRate?: number;
       verifiedBy?: string;

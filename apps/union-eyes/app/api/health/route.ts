@@ -18,7 +18,7 @@ async function checkDb(): Promise<{ state: HealthCheckState; ms: number; error?:
     const { sql } = await import('drizzle-orm')
     // Cast needed: packages/db pins drizzle-orm ^0.39 while app uses ^0.45
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await db.execute(sql`SELECT 1` as unknown)
+    await db.execute(sql`SELECT 1` as any)
     return { state: 'ok', ms: Date.now() - start }
   } catch (err) {
     return {

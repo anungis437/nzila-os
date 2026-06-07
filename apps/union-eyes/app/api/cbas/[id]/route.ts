@@ -148,7 +148,7 @@ export const PATCH = withRoleAuth('steward', async (request, context) => {
       
       // Handle unique constraint violations
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as unknown)?.code === "23505") {
+      if ((error as any)?.code === "23505") {
         return standardErrorResponse(
       ErrorCode.ALREADY_EXISTS,
       'CBA number already exists',

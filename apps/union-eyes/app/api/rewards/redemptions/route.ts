@@ -58,7 +58,7 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
       },
       { status: 200 }
     );
-  } catch (error: unknown) {
+  } catch (error: any) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',
@@ -114,7 +114,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
       redemption: cancelledRedemption,
       message: 'Redemption cancelled and credits refunded',
     });
-  } catch (error: unknown) {
+  } catch (error: any) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     if (errorMessage.includes('Cannot cancel')) {

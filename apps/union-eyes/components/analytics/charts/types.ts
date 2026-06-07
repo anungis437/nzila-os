@@ -15,7 +15,6 @@ export interface ScatterChartProps {
     z?: number;
     category?: string;
     name?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: unknown;
   }>;
   xAxisLabel?: string;
@@ -24,7 +23,6 @@ export interface ScatterChartProps {
   colors?: string[];
   showGrid?: boolean;
   showLegend?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onPointClick?: (data: unknown) => void;
   height?: number;
   xDomain?: [number | 'auto', number | 'auto'];
@@ -39,7 +37,6 @@ export interface BubbleChartProps {
     z: number;
     category?: string;
     name?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: unknown;
   }>;
   xAxisLabel?: string;
@@ -49,7 +46,6 @@ export interface BubbleChartProps {
   colors?: string[];
   showGrid?: boolean;
   showLegend?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onBubbleClick?: (data: unknown) => void;
   height?: number;
   zRange?: [number, number];
@@ -63,16 +59,13 @@ export interface TreemapChartProps {
     children?: Array<{
       name: string;
       size: number;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [key: string]: unknown;
     }>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: unknown;
   }>;
   title?: string;
   colors?: string[];
   height?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onNodeClick?: (data: unknown) => void;
 }
 
@@ -142,7 +135,6 @@ export interface FunnelChartProps {
   showValues?: boolean;
   showPercentages?: boolean;
   height?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onStageClick?: (stage: unknown) => void;
 }
 
@@ -186,7 +178,6 @@ export interface SunburstChartProps {
   title?: string;
   colors?: string[];
   height?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onNodeClick?: (node: unknown) => void;
 }
 

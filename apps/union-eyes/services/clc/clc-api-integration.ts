@@ -86,9 +86,9 @@ interface SyncResult {
 interface ConflictResolution {
   field: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  localValue: unknown;
+  localValue: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  clcValue: unknown;
+  clcValue: any;
   resolution: 'clc_wins' | 'local_wins' | 'manual_review';
   reason: string;
 }
@@ -312,7 +312,7 @@ export async function createOrganizationFromCLC(
         displayName: clcOrg.legalName, // Map legalName to displayName which exists in schema
         slug: clcOrg.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        organizationType: clcOrg.organizationType as unknown, // Type assertion for CLC data
+        organizationType: clcOrg.organizationType as any, // Type assertion for CLC data
         status: clcOrg.status,
         provinceTerritory: clcOrg.province,
         address: {
@@ -569,7 +569,7 @@ async function fetchWithRetry(
 
 function compareOrganizations(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  localOrg: unknown,
+  localOrg: any,
   clcOrg: CLCOrganization
 ): {
   hasChanges: boolean;
@@ -621,7 +621,7 @@ function compareOrganizations(
 
 function buildUpdateData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  localOrg: unknown,
+  localOrg: any,
   clcOrg: CLCOrganization,
   conflicts: ConflictResolution[]
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -753,7 +753,7 @@ async function logWebhook(
       type: payload.type,
       affiliateCode: payload.data.affiliateCode,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      payload: payload as unknown,
+      payload: payload as any,
       status,
       message,
       processingDuration: processingDuration || null,

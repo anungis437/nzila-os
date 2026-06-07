@@ -62,8 +62,8 @@ describe('Governance Entropy Scale', () => {
     });
 
     it('treats non-number inputs as 0 (coherent) — defensive', () => {
-      expect(classifyEntropy('0.9' as unknown as number).id).toBe('coherent');
-      expect(classifyEntropy(undefined as unknown as number).id).toBe('coherent');
+      expect(classifyEntropy('0.9' as any as number).id).toBe('coherent');
+      expect(classifyEntropy(undefined as any as number).id).toBe('coherent');
     });
 
     it('ordinals are unique and in 1..5', () => {

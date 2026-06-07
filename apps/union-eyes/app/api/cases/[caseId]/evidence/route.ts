@@ -29,7 +29,7 @@ interface AttachmentMetadata {
 interface CaseRecord {
   claimId: string;
   claimNumber: string | null;
-  attachments?: unknown;
+  attachments?: any;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -47,7 +47,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'image/webp',
 ]);
 
-function normalizeAttachments(value: unknown): AttachmentMetadata[] {
+function normalizeAttachments(value: any): AttachmentMetadata[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -76,7 +76,7 @@ async function resolveCaseRecord(caseId: string, organizationId: string | null, 
     LIMIT 1
   `));
 
-  const row = rows[0] as unknown as CaseRecord | undefined;
+  const row = rows[0] as any as CaseRecord | undefined;
   if (!row) {
     throw ApiError.notFound('Case', caseId);
   }

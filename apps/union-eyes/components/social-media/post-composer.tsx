@@ -165,7 +165,7 @@ export default function SocialMediaPostComposer() {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const accounts = items.map((a: unknown) => ({
+        const accounts = items.map((a: any) => ({
           id: String(a.id),
           platform: a.platform,
           username: a.username,

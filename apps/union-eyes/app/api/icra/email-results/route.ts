@@ -23,9 +23,9 @@ import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { logger } from '@/lib/logger'
 
 interface RequestBody {
-  assessmentId?: unknown
-  email?: unknown
-  locale?: unknown
+  assessmentId?: any
+  email?: any
+  locale?: any
 }
 
 const COPY = {

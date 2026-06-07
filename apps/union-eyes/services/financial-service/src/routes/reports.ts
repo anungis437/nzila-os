@@ -293,7 +293,7 @@ router.get(
       const { startDate, endDate } = validation.data;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let data: unknown;
+      let data: any;
 
       switch (reportType) {
         case 'dashboard':
@@ -356,7 +356,7 @@ router.get(
  * Simple CSV converter for export
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function convertToCSV(data: unknown): string {
+function convertToCSV(data: any): string {
   if (Array.isArray(data)) {
     if (data.length === 0) return '';
     

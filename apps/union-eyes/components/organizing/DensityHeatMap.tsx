@@ -97,7 +97,7 @@ export function DensityHeatMap({ organizationId, campaignId }: DensityHeatMapPro
       if (data.success) {
         // Calculate support percentages per department
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const densityData = data.data.map((dept: unknown) => ({
+        const densityData = data.data.map((dept: any) => ({
           department: dept.department || 'Unknown',
           total_contacts: dept.total_contacts,
           cards_signed: dept.cards_signed,
@@ -113,7 +113,7 @@ export function DensityHeatMap({ organizationId, campaignId }: DensityHeatMapPro
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getDensityLevel = (percentage: number): { label: string; color: string; icon: unknown } => {
+  const getDensityLevel = (percentage: number): { label: string; color: string; icon: any } => {
     if (percentage >= 70) {
       return { label: 'Super Majority', color: 'bg-green-500', icon: CheckCircle };
     } else if (percentage >= 50) {

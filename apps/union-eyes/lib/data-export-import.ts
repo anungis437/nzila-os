@@ -89,7 +89,7 @@ export class DataExportService {
   /**
    * Fetch data based on entity type
    */
-  private async fetchData(entityType: string, filters: Record<string, unknown>): Promise<unknown[]> {
+  private async fetchData(entityType: string, filters: Record<string, unknown>): Promise<Record<string, unknown>[]> {
     switch (entityType) {
       case 'members':
         return this.queryMembers(filters);
@@ -170,7 +170,7 @@ export class DataExportService {
   /**
    * Format data to specified format
    */
-  private async formatData(data: unknown[], format: string): Promise<string> {
+  private async formatData(data: Record<string, unknown>[], format: string): Promise<string> {
     switch (format) {
       case 'json':
         return JSON.stringify(data, null, 2);
@@ -290,7 +290,7 @@ export class DataImportService {
   /**
    * Parse file content
    */
-  private async parseFile(content: string, format: string): Promise<unknown[]> {
+  private async parseFile(content: string, format: string): Promise<Record<string, unknown>[]> {
     switch (format) {
       case 'json':
         return JSON.parse(content);
@@ -351,7 +351,7 @@ export class DataImportService {
   /**
    * Validate data
    */
-  private async validateData(entityType: string, data: unknown[]): Promise<{
+  private async validateData(entityType: string, data: Record<string, unknown>[]): Promise<{
     valid: boolean;
     errors: string[];
   }> {
@@ -383,7 +383,7 @@ export class DataImportService {
    */
   private async importRecord(
     entityType: string,
-    record: unknown,
+    record: Record<string, unknown>,
     updateExisting: boolean
   ): Promise<void> {
     const data = record as Record<string, unknown>;

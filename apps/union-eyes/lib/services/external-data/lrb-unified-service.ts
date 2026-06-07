@@ -63,6 +63,23 @@ export interface AgreementComparison {
   source: string;
 }
 
+export interface RawLRBAgreement {
+  sourceId: string;
+  employerName: string;
+  employerAddress: string;
+  unionName: string;
+  unionCode: string;
+  bargainingUnit: string;
+  bargainingUnitSize: number;
+  effectiveDate: string;
+  expiryDate: string;
+  sector: string;
+  jurisdiction: string;
+  hourlyWageRange: string;
+  annualSalaryRange: string;
+  pdfUrl: string;
+}
+
 // =============================================================================
 // ONTARIO LRB CLIENT
 // =============================================================================
@@ -84,8 +101,7 @@ class OntarioLRBClient {
     page?: number;
     employerName?: string;
     unionName?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }): Promise<any[]> {
+  }): Promise<RawLRBAgreement[]> {
     logger.warn('[LRB] OntarioLRBClient.fetchAgreements is a stub — no real OLRB integration exists. Returning sample data only in non-production.', params);
 
     if (process.env.NODE_ENV === 'production') {
@@ -136,8 +152,7 @@ class BCLRBClient {
     page?: number;
     employerName?: string;
     unionName?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }): Promise<any[]> {
+  }): Promise<RawLRBAgreement[]> {
     logger.warn('[LRB] BCLRBClient.fetchAgreements is a stub — no real BC LRB integration exists. Returning sample data only in non-production.', { params, hasApiKey: Boolean(this.apiKey) });
 
     if (process.env.NODE_ENV === 'production') {
@@ -501,8 +516,7 @@ export class UnifiedLRBService {
    * Search agreements
    */
   async search(params: LRBSearchParams): Promise<{
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    agreements: unknown[];
+    agreements: (typeof lrbAgreements.$inferSelect)[];
     total: number;
     page: number;
     totalPages: number;
@@ -561,8 +575,7 @@ export class UnifiedLRBService {
   /**
    * Get agreement by ID
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getById(id: string): Promise<unknown> {
+  async getById(id: string): Promise<(typeof lrbAgreements.$inferSelect) | null> {
     const result = await db.select()
       .from(lrbAgreements)
       .where(eq(lrbAgreements.id, id))

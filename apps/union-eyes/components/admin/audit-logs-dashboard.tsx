@@ -492,7 +492,7 @@ alert('Failed to export audit logs');
                   <Select
                     value={filters.dateRange}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onValueChange={(value: unknown) => setFilters({ ...filters, dateRange: value })}
+                    onValueChange={(value: any) => setFilters({ ...filters, dateRange: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />

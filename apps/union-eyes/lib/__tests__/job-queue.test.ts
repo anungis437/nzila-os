@@ -25,7 +25,7 @@ import {
   getEmailQueue,
 } from '../job-queue';
 
-function mockOkResponse(data: unknown) {
+function mockOkResponse(data: any) {
   return {
     ok: true,
     json: vi.fn().mockResolvedValue(data),

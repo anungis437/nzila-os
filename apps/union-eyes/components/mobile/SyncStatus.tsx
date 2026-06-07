@@ -42,11 +42,11 @@ export function SyncStatus({ className, showDetails = false }: SyncStatusProps) 
 
     // Add event listener for sync events
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window.addEventListener('sync-status' as unknown, handleSyncEvent as EventListener);
+    window.addEventListener('sync-status' as any, handleSyncEvent as EventListener);
 
     return () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      window.removeEventListener('sync-status' as unknown, handleSyncEvent as EventListener);
+      window.removeEventListener('sync-status' as any, handleSyncEvent as EventListener);
     };
   }, []);
 
@@ -125,11 +125,11 @@ export function SyncStatusButton({ className }: { className?: string }) {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window.addEventListener('sync-status' as unknown, handleSyncEvent as EventListener);
+    window.addEventListener('sync-status' as any, handleSyncEvent as EventListener);
 
     return () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      window.removeEventListener('sync-status' as unknown, handleSyncEvent as EventListener);
+      window.removeEventListener('sync-status' as any, handleSyncEvent as EventListener);
     };
   }, []);
 

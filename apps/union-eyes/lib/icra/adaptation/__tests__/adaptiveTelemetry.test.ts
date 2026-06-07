@@ -34,7 +34,7 @@ beforeEach(() => {
   fireMock.mockReset();
 });
 
-function flatten(obj: unknown): string {
+function flatten(obj: any): string {
   return JSON.stringify(obj);
 }
 function pii(s: string): boolean {

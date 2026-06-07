@@ -36,8 +36,8 @@ export interface BatchSummary {
 }
 
 export interface BatchDetail extends BatchSummary {
-  errorSummary: unknown;
-  metadata: unknown;
+  errorSummary: any;
+  metadata: any;
   records: RecordSummary[];
   warnings: WarningEntry[];
 }

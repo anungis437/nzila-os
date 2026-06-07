@@ -49,7 +49,7 @@ export function ingestContinuityEvents(
   for (const env of envelopes) {
     const v: ValidationResult = validateContinuityEventEnvelope(env);
     const reasons: string[] = [...v.violations];
-    if (!isKnownContinuityEventKind(env.kind as unknown as string)) {
+    if (!isKnownContinuityEventKind(env.kind as any as string)) {
       reasons.push('event.kind_not_recognised');
     }
     if (reasons.length > 0) {

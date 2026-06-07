@@ -38,7 +38,7 @@ export async function POST(
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
 
-  let body: unknown;
+  let body: any;
   try {
     body = await request.json();
   } catch {

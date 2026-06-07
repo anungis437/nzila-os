@@ -69,7 +69,7 @@ export async function createExtractionRun(data: NewExtractionRun): Promise<CbaIn
 
 export async function completeExtractionRun(
   id: string,
-  stats: { findingsCount: number; errorCount?: number; errors?: unknown },
+  stats: { findingsCount: number; errorCount?: number; errors?: any },
 ): Promise<CbaIntelExtractionRun | null> {
   const now = new Date();
   try {

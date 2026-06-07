@@ -128,7 +128,7 @@ export default function SocialAnalyticsDashboard() {
         if (data.platformMetrics ?? data.platform_metrics) setPlatformMetrics(data.platformMetrics ?? data.platform_metrics);
         if (data.topPosts ?? data.top_posts) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setTopPosts((data.topPosts ?? data.top_posts).map((p: unknown) => ({ ...p, publishedAt: new Date(p.publishedAt ?? p.published_at) })));
+          setTopPosts((data.topPosts ?? data.top_posts).map((p: any) => ({ ...p, publishedAt: new Date(p.publishedAt ?? p.published_at) })));
         }
         if (data.audienceDemographics ?? data.audience_demographics) setAudienceDemographics(data.audienceDemographics ?? data.audience_demographics);
         if (data.bestPostingTimes ?? data.best_posting_times) setBestPostingTimes(data.bestPostingTimes ?? data.best_posting_times);

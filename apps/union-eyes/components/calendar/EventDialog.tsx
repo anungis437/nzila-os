@@ -54,7 +54,7 @@ interface EventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  event?: unknown;
+  event?: any;
   initialDate?: Date;
   calendarId: string;
   onSave: (data: EventFormData) => Promise<void>;

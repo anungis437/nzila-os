@@ -77,7 +77,7 @@ interface ContentObject {
 
 interface MediaTypeObject {
   schema: SchemaObject;
-  example?: unknown;
+  example?: any;
 }
 
 interface ParameterObject {
@@ -106,7 +106,7 @@ interface SecuritySchemeObject {
   type: string;
   scheme?: string;
   bearerFormat?: string;
-  flows?: unknown;
+  flows?: any;
   in?: string;
   name?: string;
 }
@@ -124,7 +124,7 @@ interface SchemaObject {
   format?: string;
   description?: string;
   $ref?: string;
-  default?: unknown;
+  default?: any;
 }
 
 // Route metadata storage
@@ -162,7 +162,7 @@ export function registerRoute(
 /**
  * Convert Zod schema to OpenAPI schema
  */
-export function zodToOpenAPI(schema: z.ZodType<unknown>): SchemaObject {
+export function zodToOpenAPI(schema: z.ZodType<any>): SchemaObject {
   if (schema instanceof z.ZodString) {
     return { type: 'string', format: 'string' };
   }

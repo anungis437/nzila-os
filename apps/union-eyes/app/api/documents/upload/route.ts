@@ -46,7 +46,7 @@ const _documentUploadSchema = z.object({
   file: z.object({
     name: z.string().min(1, "File name is required"),
     size: z.number().max(MAX_FILE_SIZE, "File size exceeds 50MB limit"),
-    type: z.enum(ALLOWED_MIME_TYPES_LIST as unknown as [string, ...string[]], {
+    type: z.enum(ALLOWED_MIME_TYPES_LIST as any as [string, ...string[]], {
       errorMap: () => ({ message: "Invalid file type" })
     })
   }),

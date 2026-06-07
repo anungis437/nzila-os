@@ -15,12 +15,12 @@ type TimelineEvent = {
   data: Record<string, unknown>;
 };
 
-function asObject(value: unknown): Record<string, unknown> | null {
+function asObject(value: any): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
 }
 
-function normalizeAt(value: unknown): string | null {
+function normalizeAt(value: any): string | null {
   if (typeof value !== 'string') return null;
   const parsed = Date.parse(value);
   if (Number.isNaN(parsed)) return null;

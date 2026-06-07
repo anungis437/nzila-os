@@ -36,7 +36,7 @@ export default function SignatoryManager({ organizationId, canManage = false }: 
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setSignatories(items.map((s: unknown, i: number) => ({
+        setSignatories(items.map((s: any, i: number) => ({
           id: String(s.id ?? i + 1),
           name: s.name ?? s.full_name ?? '',
           role: s.role ?? '',

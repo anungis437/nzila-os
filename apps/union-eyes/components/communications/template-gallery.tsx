@@ -70,7 +70,7 @@ interface NewsletterTemplate {
   thumbnailUrl?: string;
   htmlContent: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jsonStructure?: unknown;
+  jsonStructure?: any;
   variables?: TemplateVariable[];
   isSystem: boolean;
   isActive: boolean;
@@ -84,7 +84,7 @@ interface TemplateVariable {
   label: string;
   type: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default?: unknown;
+  default?: any;
   required?: boolean;
 }
 

@@ -35,7 +35,6 @@ export interface SunburstChartProps {
   title?: string;
   colors?: string[];
   height?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onNodeClick?: (node: unknown) => void;
 }
 
@@ -53,10 +52,15 @@ const DEFAULT_COLORS = [
 // Helper Functions
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function flattenHierarchy(node: SunburstNode, level: number = 0, colors: string[]): unknown[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: unknown[] = [];
+interface FlatNode {
+  name: string;
+  value: number;
+  level: number;
+  color: string;
+}
+
+function flattenHierarchy(node: SunburstNode, level: number = 0, colors: string[]): FlatNode[] {
+  const result: FlatNode[] = [];
   
   if (node.children && node.children.length > 0) {
     node.children.forEach((child, index) => {
@@ -87,8 +91,7 @@ export function SunburstChart({
   const [selectedLevel, setSelectedLevel] = React.useState<number | null>(null);
   
   // Flatten hierarchy into levels
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const levels: unknown[][] = [];
+  const levels: FlatNode[][] = [];
   let currentLevel = flattenHierarchy(data, 0, colors);
   
   while (currentLevel.length > 0) {
@@ -98,8 +101,7 @@ export function SunburstChart({
     currentLevel = currentLevel.filter(node => node.level > levels.length - 1);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: unknown) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: FlatNode }> }) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
 
@@ -120,9 +122,8 @@ export function SunburstChart({
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const renderLabel = (entry: unknown) => {
-    if (entry.percent < 0.05) return ''; // Hide labels for small slices
+  const renderLabel = (entry: { percent?: number; name?: string }) => {
+    if ((entry.percent ?? 0) < 0.05) return ''; // Hide labels for small slices
     return entry.name;
   };
 

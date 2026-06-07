@@ -109,7 +109,7 @@ export type StageCondition = {
   field: string;
   operator: "equals" | "not_equals" | "greater_than" | "less_than" | "contains";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: unknown;
+  value: any;
 };
 
 export type StageAction = {

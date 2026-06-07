@@ -22,7 +22,7 @@ import { ROUTING_ENGINE_VERSION } from '../adaptation/routingTypes';
 import type { RoutableQuestion } from '../adaptation/routingTypes';
 import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from '../questions';
 
-const BANK = ALL_QUESTIONS as unknown as RoutableQuestion[];
+const BANK = ALL_QUESTIONS as any as RoutableQuestion[];
 
 const RAW_FORM_FEDERATION: Record<string, string> = {
   ctx_org_type: 'federation',

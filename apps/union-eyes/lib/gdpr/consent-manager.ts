@@ -50,7 +50,7 @@ export class ConsentManager {
     ipAddress?: string;
     userAgent?: string;
     expiresAt?: Date;
-    metadata?: unknown;
+    metadata?: any;
   }): Promise<typeof userConsents.$inferSelect> {
     const { organizationId, ...rest } = data;
     const [consent] = await db
@@ -61,7 +61,7 @@ export class ConsentManager {
         status: "granted",
         grantedAt: new Date(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as unknown)
+      } as any)
       .returning();
 
     return consent;
@@ -125,7 +125,7 @@ export class ConsentManager {
           eq(userConsents.userId, userId),
           eq(userConsents.organizationId, organizationId),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq(userConsents.consentType, consentType as unknown),
+          eq(userConsents.consentType, consentType as any),
           eq(userConsents.status, "granted")
         )
       )
@@ -174,7 +174,7 @@ export class CookieConsentManager {
           lastUpdated: new Date(),
           expiresAt,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as unknown)
+        } as any)
         .where(eq(cookieConsents.consentId, data.consentId))
         .returning();
 
@@ -189,7 +189,7 @@ export class CookieConsentManager {
           organizationId: data.organizationId,
           expiresAt,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as unknown)
+        } as any)
         .returning();
 
       return consent;
@@ -231,7 +231,7 @@ export class GdprRequestManager {
   static async requestDataAccess(data: {
     userId: string;
     organizationId: string;
-    requestDetails?: unknown;
+    requestDetails?: any;
     verificationMethod?: string;
   }): Promise<typeof gdprDataRequests.$inferSelect> {
     const deadline = new Date();
@@ -246,7 +246,7 @@ export class GdprRequestManager {
         status: "pending" as const,
         deadline,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        requestDetails: data.requestDetails as unknown,
+        requestDetails: data.requestDetails as any,
         verificationMethod: data.verificationMethod,
       })
       .returning();
@@ -291,7 +291,7 @@ export class GdprRequestManager {
   static async requestDataErasure(data: {
     userId: string;
     organizationId: string;
-    requestDetails?: unknown;
+    requestDetails?: any;
     verificationMethod?: string;
   }): Promise<typeof gdprDataRequests.$inferSelect> {
     const deadline = new Date();
@@ -306,7 +306,7 @@ export class GdprRequestManager {
         status: "pending" as const,
         deadline,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        requestDetails: data.requestDetails as unknown,
+        requestDetails: data.requestDetails as any,
         verificationMethod: data.verificationMethod,
       })
       .returning();
@@ -321,7 +321,7 @@ export class GdprRequestManager {
     userId: string;
     organizationId: string;
     preferredFormat?: "json" | "csv" | "xml";
-    requestDetails?: unknown;
+    requestDetails?: any;
   }): Promise<typeof gdprDataRequests.$inferSelect> {
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + 30);
@@ -337,7 +337,7 @@ export class GdprRequestManager {
         requestDetails: {
           preferredFormat: data.preferredFormat || "json",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...(data.requestDetails as unknown),
+          ...(data.requestDetails as any),
         },
       })
       .returning();
@@ -385,7 +385,7 @@ export class GdprRequestManager {
     status: "in_progress" | "completed" | "rejected",
     data?: {
       processedBy?: string;
-      responseData?: unknown;
+      responseData?: any;
       rejectionReason?: string;
     }
   ) {
@@ -406,7 +406,7 @@ export class GdprRequestManager {
     const [updated] = await db
       .update(gdprDataRequests)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .set(updateData as unknown)
+      .set(updateData as any)
       .where(eq(gdprDataRequests.id, requestId))
       .returning();
 
@@ -425,7 +425,7 @@ export class DataExportService {
     userId: string,
     organizationId: string,
     format: "json" | "csv" | "xml" = "json"
-  ): Promise<unknown> {
+  ): Promise<any> {
     // Collect all user data from various tables
     const userData = {
       exportDate: new Date().toISOString(),
@@ -549,7 +549,7 @@ export class DataExportService {
 
       // Query claim updates/notes for user's claims
       const claimIds = userClaims.map(c => c.claimId);
-      let claimNotes: unknown[] = [];
+      let claimNotes: any[] = [];
       
       if (claimIds.length > 0) {
         claimNotes = await db.query.claimUpdates.findMany({
@@ -584,7 +584,7 @@ export class DataExportService {
           dataType: "claim_notes",
           count: claimNotes.length,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          data: claimNotes.map((n: unknown) => ({
+          data: claimNotes.map((n: any) => ({
             updateId: n.updateId,
             claimId: n.claimId,
             updateType: n.updateType,

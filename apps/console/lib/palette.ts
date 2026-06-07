@@ -5,7 +5,7 @@
  * result down to the client palette. Keeps the palette in lockstep with
  * the actual nav surface so dead routes are impossible.
  */
-import { navGroups, appLinks } from './nav-config'
+import { navGroups, legacyNavGroups, appLinks } from './nav-config'
 import type { PaletteItem } from '@/components/command-palette'
 
 const QUICK_ACTIONS: PaletteItem[] = [
@@ -22,7 +22,9 @@ const QUICK_ACTIONS: PaletteItem[] = [
 export function buildPaletteItems(): PaletteItem[] {
   const items: PaletteItem[] = []
 
-  for (const group of navGroups) {
+  // Workspace surface + every legacy direct route remain searchable via ⌘K,
+  // even though only the workspace groups render in the sidebar.
+  for (const group of [...navGroups, ...legacyNavGroups]) {
     for (const item of group.items) {
       items.push({
         id: `nav:${item.href}`,

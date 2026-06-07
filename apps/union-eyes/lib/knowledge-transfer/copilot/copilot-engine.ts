@@ -64,7 +64,7 @@ async function upsertConversation(
     const rows = await db.execute(sql`
       SELECT id FROM ue_copilot_conversations WHERE id = ${conversationId} AND org_id = ${orgId} LIMIT 1
     `);
-    const result = rows as unknown as Record<string, unknown>[];
+    const result = rows as any as Record<string, unknown>[];
     if (result.length > 0) return conversationId;
   }
   // Create new conversation
@@ -327,7 +327,7 @@ export async function loadConversationHistory(
     WHERE id = ${conversationId} AND org_id = ${orgId}
     LIMIT 1
   `);
-  const result = rows as unknown as Record<string, unknown>[];
+  const result = rows as any as Record<string, unknown>[];
   if (result.length === 0) return [];
   return (result[0].messages as CopilotMessage[]) ?? [];
 }
@@ -345,7 +345,7 @@ export async function listConversations(
     ORDER BY updated_at DESC
     LIMIT ${limit}
   `);
-  return (rows as unknown as Record<string, unknown>[]).map((r) => ({
+  return (rows as any as Record<string, unknown>[]).map((r) => ({
     id: r.id as string,
     title: r.title as string,
     updatedAt: (r.updated_at as Date)?.toISOString?.() ?? (r.updated_at as string),

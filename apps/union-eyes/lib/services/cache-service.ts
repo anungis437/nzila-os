@@ -136,7 +136,7 @@ export async function cacheGet<T>(
       logger.debug(`[Cache] Non-JSON value for ${cacheKey}`, {
         error: error instanceof Error ? error.message : String(error),
       });
-      return value as unknown as T;
+      return value as any as T;
     }
   } catch (error) {
     logger.error(`[Cache] Get error for ${cacheKey}`, error instanceof Error ? error : new Error(String(error)));
@@ -150,7 +150,7 @@ export async function cacheGet<T>(
 export async function cacheSet(
   key: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: unknown,
+  value: any,
   options?: CacheOptions
 ): Promise<boolean> {
   const redis = getRedis();
@@ -586,7 +586,7 @@ export async function pingRedis(): Promise<boolean> {
 
 export interface CacheWarmupEntry {
   key: string;
-  fetchFn: () => Promise<unknown>;
+  fetchFn: () => Promise<any>;
   ttl?: number;
   namespace?: string;
   priority?: number; // Lower number = higher priority

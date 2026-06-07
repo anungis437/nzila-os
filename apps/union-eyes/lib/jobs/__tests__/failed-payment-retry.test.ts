@@ -38,8 +38,8 @@ vi.mock('@/db/schema/domains/finance/dues', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
   sql: vi.fn(),
 }));
 
@@ -96,7 +96,7 @@ describe('FailedPaymentRetryService', () => {
         ]),
       };
 
-      vi.mocked(db.select).mockReturnValue(mockSelectResult as unknown as never);
+      vi.mocked(db.select).mockReturnValue(mockSelectResult as any as never);
 
       const result = await FailedPaymentRetryService.runRetryJob();
       expect(result.totalProcessed).toBeGreaterThanOrEqual(0);

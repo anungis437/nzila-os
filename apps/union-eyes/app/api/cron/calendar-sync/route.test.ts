@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 const mocks = vi.hoisted(() => {
-  const selectQueue: unknown[][] = []
-  const updatePayloads: unknown[] = []
+  const selectQueue: any[][] = []
+  const updatePayloads: any[] = []
 
   const db = {
     select: vi.fn(() => ({
@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => {
       })),
     })),
     update: vi.fn(() => ({
-      set: vi.fn((payload: unknown) => {
+      set: vi.fn((payload: any) => {
         updatePayloads.push(payload)
         return { where: vi.fn(async () => undefined) }
       }),
@@ -31,7 +31,7 @@ const mocks = vi.hoisted(() => {
 })
 
 vi.mock('@/lib/api-auth-guard', () => ({
-  withApiAuth: vi.fn((handler: (...args: unknown[]) => unknown) => handler),
+  withApiAuth: vi.fn((handler: (...args: any[]) => unknown) => handler),
 }))
 
 vi.mock('@/db/db', () => ({ db: mocks.db }))

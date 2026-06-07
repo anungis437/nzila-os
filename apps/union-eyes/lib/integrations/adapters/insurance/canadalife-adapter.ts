@@ -119,7 +119,7 @@ export class CanadaLifeAdapter extends BaseIntegration {
     let recordsCreated = 0;
     let recordsUpdated = 0;
     let recordsFailed = 0;
-    const errors: Array<{ entity: string; orgId?: string; error: string; details?: unknown }> = [];
+    const errors: Array<{ entity: string; orgId?: string; error: string; details?: any }> = [];
 
     try {
       const orgs = options.orgs || this.capabilities.supportedEntities;
@@ -165,7 +165,7 @@ export class CanadaLifeAdapter extends BaseIntegration {
         recordsCreated,
         recordsUpdated,
         recordsFailed,
-        errors: errors.length > 0 ? errors as unknown as SyncError[] : undefined,
+        errors: errors.length > 0 ? errors as any as SyncError[] : undefined,
         cursor: new Date().toISOString(),
       };
     } catch (error) {
@@ -176,7 +176,7 @@ export class CanadaLifeAdapter extends BaseIntegration {
         recordsCreated,
         recordsUpdated,
         recordsFailed,
-        errors: [{ entity: 'sync', error: errorMessage } as unknown as SyncError],
+        errors: [{ entity: 'sync', error: errorMessage } as any as SyncError],
       };
     }
   }

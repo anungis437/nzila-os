@@ -1,39 +1,40 @@
-import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
-import { UserButton } from '@nzila/platform-auth/entra/client'
 import Link from 'next/link'
-
 export const dynamic = 'force-dynamic'
 
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
+import { ArrowTopRightOnSquareIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { ExecutiveModeWrapper } from './executive-mode'
 import { SidebarNav } from '@/components/sidebar-nav'
 import { CommandSectionGuide } from '@/components/command-section-guide'
 import { CommandPalette } from '@/components/command-palette'
 import { MobileShell } from '@/components/mobile-shell'
 import { WebVitalsReporter } from '@/components/web-vitals-reporter'
+import { SignOutButton } from '@/components/auth/sign-out-button'
 import { navGroups, appLinks } from '@/lib/nav-config'
 import { buildPaletteItems } from '@/lib/palette'
+import { resolveUserIdWithDevPreview } from '@/lib/dev-preview-auth'
 
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
   // Server-side auth gate — runs on Node.js (not Edge) so crypto.subtle works.
   // Middleware only sets up auth context; this layout enforces authentication.
-  const { userId } = await auth()
+  // In development with no auth/DB configured, a synthetic preview id is returned
+  // so the Console can be validated locally; production still redirects.
+  const userId = await resolveUserIdWithDevPreview()
   if (!userId) redirect('/sign-in')
 
   const paletteItems = buildPaletteItems()
 
   const sidebarContent = (
     <>
-      <div className="p-4 border-b border-gray-100 hidden md:block">
-        <Link href="/console" className="text-xl font-bold text-blue-600">
+      <div className="p-4 border-b border-gray-100 hidden md:block shrink-0">
+        <Link href="/workspace/overview" className="text-xl font-bold text-blue-600">
           Nzila Console
         </Link>
       </div>
       <SidebarNav groups={navGroups} />
 
       {/* App Launcher */}
-      <div className="px-3 pb-2 border-t border-gray-100 pt-3">
+      <div className="px-3 pb-2 border-t border-gray-100 pt-3 shrink-0">
         <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Launch App</p>
         {appLinks.map((app) => (
           app.href ? (
@@ -58,9 +59,18 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
           )
         ))}
       </div>
-      <div className="p-4 border-t border-gray-100 flex items-center gap-3">
-        <UserButton />
-        <span className="text-sm text-gray-500">Account</span>
+      <div className="p-3 border-t border-gray-100 shrink-0">
+        <Link
+          href="/account"
+          className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-gray-50"
+        >
+          <UserCircleIcon className="h-8 w-8 shrink-0 text-gray-300" />
+          <span className="flex min-w-0 flex-col">
+            <span className="text-sm font-medium text-gray-700">Account</span>
+            <span className="text-xs text-gray-400">Profile &amp; session</span>
+          </span>
+        </Link>
+        <SignOutButton variant="menu" className="mt-1" />
       </div>
     </>
   )

@@ -8,7 +8,7 @@ import 'swagger-ui-react/swagger-ui.css';
 
 // Dynamic import to avoid SSR issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SwaggerUI = nextDynamic(() => import('swagger-ui-react'), { ssr: false }) as unknown;
+const SwaggerUI = nextDynamic(() => import('swagger-ui-react'), { ssr: false }) as any;
 
 export default function APIDocsPage() {
   const t = useTranslations('docsApiPage');

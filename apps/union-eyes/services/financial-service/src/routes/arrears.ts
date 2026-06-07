@@ -22,7 +22,7 @@ type AuthUser = {
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as unknown as { user: AuthUser }).user;
+  return (req as any as { user: AuthUser }).user;
 }
 
 // Validation schemas
@@ -288,7 +288,7 @@ router.post('/', async (req: Request, res: Response) => {
         escalationLevel: '1',
         notes: validatedData.notes,
         createdBy: userId,
-      } as unknown as typeof schema.arrearsCases.$inferInsert)
+      } as any as typeof schema.arrearsCases.$inferInsert)
       .returning();
 
     res.status(201).json({
@@ -382,7 +382,7 @@ router.post('/:id/payment-plan', async (req: Request, res: Response) => {
         installmentAmount: validatedData.installmentAmount.toString(),
         numberOfInstallments: validatedData.numberOfInstallments.toString(),
         paymentSchedule,
-      } as unknown as Partial<typeof schema.arrearsCases.$inferInsert>)
+      } as any as Partial<typeof schema.arrearsCases.$inferInsert>)
       .where(eq(schema.arrearsCases.id, id))
       .returning();
 
@@ -443,7 +443,7 @@ router.put('/:id/status', async (req: Request, res: Response) => {
         escalationLevel: escalationLevels[validatedData.status].toString(),
         notes: validatedData.notes,
         updatedBy: userId,
-      } as unknown as Partial<typeof schema.arrearsCases.$inferInsert>)
+      } as any as Partial<typeof schema.arrearsCases.$inferInsert>)
       .where(
         and(
           eq(schema.arrearsCases.id, id),
@@ -509,7 +509,7 @@ router.post('/:id/contact', async (req: Request, res: Response) => {
     }
 
     // Add to contact history
-    const contactHistory = (arrearsCase.contactHistory as unknown[]) || [];
+    const contactHistory = (arrearsCase.contactHistory as any[]) || [];
     contactHistory.push({
       timestamp: new Date(),
       contactType: validatedData.contactType,
@@ -524,7 +524,7 @@ router.post('/:id/contact', async (req: Request, res: Response) => {
         contactHistory,
         lastContactDate: new Date(),
         updatedAt: new Date(),
-      } as unknown as Partial<typeof schema.arrearsCases.$inferInsert>)
+      } as any as Partial<typeof schema.arrearsCases.$inferInsert>)
       .where(eq(schema.arrearsCases.id, id))
       .returning();
 
@@ -602,7 +602,7 @@ router.post('/:id/payment', async (req: Request, res: Response) => {
 
     const [updatedCase] = await db
       .update(schema.arrearsCases)
-      .set(updateData as unknown as Partial<typeof schema.arrearsCases.$inferInsert>)
+      .set(updateData as any as Partial<typeof schema.arrearsCases.$inferInsert>)
       .where(eq(schema.arrearsCases.id, id))
       .returning();
 

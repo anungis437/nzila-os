@@ -50,7 +50,7 @@ export class BackgroundSyncManager {
       const registration = await navigator.serviceWorker?.ready;
       if (registration) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (registration as unknown).sync.register('sync-all');
+        await (registration as any).sync.register('sync-all');
         logger.info('Background sync registered');
       }
     } catch (error) {
@@ -64,7 +64,7 @@ export class BackgroundSyncManager {
    */
   isSupported(): boolean {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return 'serviceWorker' in navigator && 'sync' in ((navigator.serviceWorker as unknown)?.registration || {});
+    return 'serviceWorker' in navigator && 'sync' in ((navigator.serviceWorker as any)?.registration || {});
   }
 
   /**
@@ -79,7 +79,7 @@ export class BackgroundSyncManager {
         const registration = await navigator.serviceWorker?.ready;
         if (registration) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await (registration as unknown).sync.register(`sync-${operation.entity}`);
+          await (registration as any).sync.register(`sync-${operation.entity}`);
         }
       } catch (error) {
         logger.warn('Failed to trigger background sync', { error });

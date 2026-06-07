@@ -514,7 +514,7 @@ export class AddressService {
     
     if (format.displayOrder) {
       for (const field of format.displayOrder) {
-        const value = (address as unknown as Record<string, string>)[field];
+        const value = (address as any as Record<string, string>)[field];
         if (value) parts.push(value);
       }
     } else {

@@ -17,6 +17,23 @@ import {
 import { eq, desc, inArray } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
+interface AxeViolation {
+  description: string;
+  help: string;
+  impact?: string | null;
+  tags: string[];
+  helpUrl: string;
+  nodes: Array<{ target: string[]; html: string; failureSummary?: string }>;
+}
+
+interface AxeScanResult {
+  violations: AxeViolation[];
+}
+
+type IssueSeverityValue = (typeof accessibilityIssues.severity)['_']['data'];
+type IssueStatusValue = (typeof accessibilityIssues.status)['_']['data'];
+type WCAGLevelValue = (typeof accessibilityIssues.wcagLevel)['_']['data'];
+
 /**
  * Accessibility Audit Manager
  */
@@ -32,7 +49,7 @@ export class AccessibilityAuditManager {
     targetEnvironment: string;
     wcagVersion?: string;
     conformanceLevel?: "A" | "AA" | "AAA";
-    toolsUsed?: Array<{ name: string; version: string; config?: unknown }>;
+    toolsUsed?: Array<{ name: string; version: string; config?: Record<string, unknown> }>;
     scheduledBy?: string;
     triggeredBy?: string;
   }): Promise<AccessibilityAudit> {
@@ -71,13 +88,11 @@ export class AccessibilityAuditManager {
     
     try {
       // Run axe-core scan via Playwright (see runAxeScan below).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const scanResults = await this.runAxeScan(audit[0].targetUrl) as unknown;
+      const scanResults = await this.runAxeScan(audit[0].targetUrl ?? "");
       
       // Process and save issues
       const issues: NewAccessibilityIssue[] = scanResults.violations.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (violation: unknown) => ({
+        (violation: AxeViolation) => ({
           auditId,
           organizationId: audit[0].organizationId,
           issueTitle: violation.description,
@@ -87,7 +102,7 @@ export class AccessibilityAuditManager {
             .find((t: string) => t.startsWith("wcag"))
             ?.replace("wcag", "")
             .replace(/([a-z])(\d)/gi, "$1.$2") || "unknown",
-          wcagLevel: this.extractWCAGLevel(violation.tags) as unknown,
+          wcagLevel: this.extractWCAGLevel(violation.tags) as WCAGLevelValue,
           wcagTitle: violation.description,
           wcagUrl: violation.helpUrl,
           pageUrl: audit[0].targetUrl,
@@ -140,7 +155,7 @@ export class AccessibilityAuditManager {
    * Run axe-core scan via Playwright
    * Requires @axe-core/playwright and playwright to be installed
    */
-  private async runAxeScan(url: string): Promise<unknown> {
+  private async runAxeScan(url: string): Promise<AxeScanResult> {
     try {
       // Dynamically import Playwright + axe-core for WCAG scanning
       const { chromium } = await import('playwright');
@@ -211,8 +226,7 @@ export class AccessibilityAuditManager {
     
     if (options.severity && options.severity.length > 0) {
       query = query.where(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        inArray(accessibilityIssues.severity as unknown, options.severity)
+        inArray(accessibilityIssues.severity, options.severity as IssueSeverityValue[])
       );
     }
     
@@ -224,8 +238,7 @@ export class AccessibilityAuditManager {
     
     if (options.status) {
       query = query.where(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        eq(accessibilityIssues.status as unknown, options.status)
+        eq(accessibilityIssues.status, options.status as IssueStatusValue)
       );
     }
     
@@ -262,7 +275,7 @@ export class AccessibilityAuditManager {
    * Helper: Map axe severity to our severity
    */
   private mapAxeSeverityToOurs(
-    axeSeverity: string
+    axeSeverity: string | null | undefined
   ): "critical" | "serious" | "moderate" | "minor" {
     const mapping: Record<string, "critical" | "serious" | "moderate" | "minor"> = {
       critical: "critical",
@@ -271,7 +284,7 @@ export class AccessibilityAuditManager {
       minor: "minor",
     };
     
-    return mapping[axeSeverity] || "moderate";
+    return mapping[axeSeverity ?? ""] || "moderate";
   }
   
   /**

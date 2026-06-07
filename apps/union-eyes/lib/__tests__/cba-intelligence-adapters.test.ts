@@ -100,8 +100,8 @@ describe("HtmlBulletinAdapter", () => {
   });
 
   it("skips empty href CBA links during list parsing", () => {
-    const parsed = (adapter as unknown as {
-      parseListPage: (html: string, baseUrl: string, config: Record<string, unknown>) => unknown[];
+    const parsed = (adapter as any as {
+      parseListPage: (html: string, baseUrl: string, config: Record<string, unknown>) => any[];
     }).parseListPage(
       '<a href="">Collective Agreement Empty Link</a><a href="#top">Collective Agreement Anchor Link</a><a href="javascript:void(0)">Collective Agreement Script Link</a>',
       "https://example.ca",

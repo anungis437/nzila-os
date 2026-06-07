@@ -458,7 +458,7 @@ export interface PostMetadata {
   target_demographics?: string[];
   ab_test_variant?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface CampaignMetadata {
@@ -469,7 +469,7 @@ export interface CampaignMetadata {
     conversion_events?: string[];
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface AnalyticsMetadata {
@@ -481,6 +481,6 @@ export interface AnalyticsMetadata {
   };
   best_posting_times?: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: unknown;
+  [key: string]: any;
 }
 

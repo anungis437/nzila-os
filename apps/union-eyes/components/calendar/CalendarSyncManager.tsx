@@ -309,7 +309,7 @@ alert('Failed to update sync direction');
                           <Select
                             value={connection.syncDirection}
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            onValueChange={(value: unknown) =>
+                            onValueChange={(value: any) =>
                               handleChangeSyncDirection(connection.id, value)
                             }
                             disabled={!connection.syncEnabled}

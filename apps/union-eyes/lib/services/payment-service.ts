@@ -80,7 +80,7 @@ export interface ReceiptData {
   organizationName: string;
 }
 
-function isReadable(value: unknown): value is Readable {
+function isReadable(value: any): value is Readable {
   return value instanceof Readable;
 }
 
@@ -500,7 +500,7 @@ export class PaymentService {
     processorPaymentId: string,
     processorType: 'stripe' | 'paypal'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<unknown> {
+  ): Promise<any> {
     try {
       const transaction = await db
         .select()
@@ -530,7 +530,7 @@ export class PaymentService {
   static async getTransactionBySessionId(
     sessionId: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<unknown> {
+  ): Promise<any> {
     try {
       // Query by metadata (session ID stored in metadata)
       const transactions = await db

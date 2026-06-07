@@ -26,11 +26,11 @@ interface TimelineEvent {
 interface NegotiationTimelineProps {
   negotiationId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sessions?: unknown[];
+  sessions?: any[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  proposals?: unknown[];
+  proposals?: any[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  agreements?: unknown[];
+  agreements?: any[];
 }
 
 export function NegotiationTimeline({

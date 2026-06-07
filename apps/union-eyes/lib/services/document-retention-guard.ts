@@ -1,5 +1,5 @@
 export interface DocumentMutabilityGuardInput {
-  metadata?: unknown;
+  metadata?: any;
 }
 
 interface ParsedRetentionSignals {
@@ -7,13 +7,13 @@ interface ParsedRetentionSignals {
   retentionUntil: Date | null;
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
+function toRecord(value: any): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
 }
 
-function parseDate(value: unknown): Date | null {
+function parseDate(value: any): Date | null {
   if (typeof value !== 'string' && typeof value !== 'number' && !(value instanceof Date)) {
     return null;
   }
@@ -26,7 +26,7 @@ function parseDate(value: unknown): Date | null {
   return parsed;
 }
 
-function parseSignals(metadata: unknown): ParsedRetentionSignals {
+function parseSignals(metadata: any): ParsedRetentionSignals {
   const record = toRecord(metadata);
   const legalHold = record.legalHold;
   const legalHoldRecord = toRecord(legalHold);

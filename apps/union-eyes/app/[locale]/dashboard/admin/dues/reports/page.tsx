@@ -141,7 +141,7 @@ export default function ReportsAnalyticsPage() {
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('reportTypeLabel')}</label>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Select value={reportType} onValueChange={(value: unknown) => setReportType(value)}>
+              <Select value={reportType} onValueChange={(value: any) => setReportType(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder={t('selectReportTypePlaceholder')} />
                 </SelectTrigger>
@@ -159,7 +159,7 @@ export default function ReportsAnalyticsPage() {
             <div className="space-y-2">
               <label className="text-sm font-medium">{t('dateRangeLabel')}</label>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Select value={dateRange} onValueChange={(value: unknown) => setDateRange(value)}>
+              <Select value={dateRange} onValueChange={(value: any) => setDateRange(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder={t('selectDateRangePlaceholder')} />
                 </SelectTrigger>

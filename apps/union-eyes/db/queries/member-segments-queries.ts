@@ -188,7 +188,7 @@ export async function searchMembersAdvanced(
     sortOrder?: "asc" | "desc";
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<{ members: unknown[]; total: number }> {
+): Promise<{ members: any[]; total: number }> {
    
   return withRLSContext(async (tx: RLSTx) => {
     try {
@@ -210,7 +210,7 @@ export async function searchMembersAdvanced(
       }
       if (filters.membershipType && filters.membershipType.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        conditions.push(inArray(organizationMembers.memberCategory, filters.membershipType as unknown));
+        conditions.push(inArray(organizationMembers.memberCategory, filters.membershipType as any));
       }
 
       // Date ranges (using joinedAt which exists)
@@ -267,7 +267,7 @@ export async function searchMembersAdvanced(
       }
       if (filters.employmentStatus && filters.employmentStatus.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        employmentConditions.push(inArray(memberEmployment.employmentStatus, filters.employmentStatus as unknown));
+        employmentConditions.push(inArray(memberEmployment.employmentStatus, filters.employmentStatus as any));
       }
       if (filters.checkoffAuthorized !== undefined) {
         employmentConditions.push(eq(memberEmployment.checkoffAuthorized, filters.checkoffAuthorized));
@@ -346,7 +346,7 @@ export async function executeSegment(
     limit?: number;
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<{ members: unknown[]; total: number }> {
+): Promise<{ members: any[]; total: number }> {
    
   return withRLSContext(async (tx: RLSTx) => {
     try {
@@ -376,7 +376,7 @@ export async function executeSegment(
         resultCount: result.total,
         executionTimeMs,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        filtersSnapshot: segment.filters as unknown,
+        filtersSnapshot: segment.filters as any,
       });
 
       // Update segment metadata

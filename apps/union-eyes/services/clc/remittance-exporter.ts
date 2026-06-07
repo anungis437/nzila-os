@@ -285,7 +285,7 @@ export async function generateStatCanExport(
 
   // Data records
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const org of organizations as unknown[]) {
+  for (const org of organizations as any[]) {
     const affiliateCode = (org.clc_affiliate_code as string) || 'UNKNOWN';
     const orgType = mapOrgTypeToStatCan(org.organization_type as string);
     

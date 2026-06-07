@@ -26,8 +26,14 @@ export interface FunnelChartProps {
   showValues?: boolean;
   showPercentages?: boolean;
   height?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onStageClick?: (stage: unknown) => void;
+  onStageClick?: (stage: {
+    stage: string;
+    value: number;
+    color: string;
+    percentage: number;
+    dropoff: number;
+    dropoffPercentage: number;
+  }) => void;
 }
 
 // ============================================================================

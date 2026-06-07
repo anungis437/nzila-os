@@ -5,7 +5,7 @@ import { LoginForm } from '@/components/auth/login-form'
 
 export default async function SignInPage() {
   const { userId } = await auth()
-  if (userId) redirect('/console')
+  if (userId) redirect('/workspace/overview')
 
   return (
     <AuthPageLayout

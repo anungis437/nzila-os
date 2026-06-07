@@ -158,7 +158,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         metadata: {
           source: metadata.source,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          type: extraction?.documentType as unknown || 'document',
+          type: extraction?.documentType as any || 'document',
           jurisdiction: metadata.jurisdiction,
           createdAt: new Date(),
           updatedAt: new Date(),

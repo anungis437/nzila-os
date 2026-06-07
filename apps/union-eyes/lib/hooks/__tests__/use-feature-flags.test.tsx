@@ -25,7 +25,7 @@ describe('use-feature-flags', () => {
       ok: true,
       json: async () => ({ flags: { dark_mode: true, beta_ui: false } }),
     });
-    globalThis.fetch = mocks.mockFetch as unknown as typeof fetch;
+    globalThis.fetch = mocks.mockFetch as any as typeof fetch;
   });
 
   describe('useFeatureFlag', () => {

@@ -11,10 +11,10 @@ const mocks = vi.hoisted(() => ({
   mockDecryptSIN: vi.fn(() => '123-456-789'),
 }));
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -48,7 +48,7 @@ vi.mock('@/lib/encryption', () => ({
 }));
 
 vi.mock('@/lib/decimal-safe', () => ({
-  moneyToNumber: vi.fn((s: unknown) => Number(s)),
+  moneyToNumber: vi.fn((s: any) => Number(s)),
 }));
 
 vi.mock('@/lib/logger', () => ({

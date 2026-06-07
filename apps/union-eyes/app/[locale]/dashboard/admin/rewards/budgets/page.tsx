@@ -62,7 +62,7 @@ export default async function AdminBudgetsPage({
       {/* Budget Usage Overview */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {usageSummary.map((summary: unknown) => {
+        {usageSummary.map((summary: any) => {
           const usagePercent = summary.amount_allocated > 0
             ? (summary.amount_used / summary.amount_allocated) * 100
             : 0;

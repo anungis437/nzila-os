@@ -45,7 +45,7 @@ describe('org-context', () => {
       }),
     });
 
-    globalThis.fetch = mocks.mockFetch as unknown as typeof fetch;
+    globalThis.fetch = mocks.mockFetch as any as typeof fetch;
 
     // Mock window.location.reload
     Object.defineProperty(window, 'location', {

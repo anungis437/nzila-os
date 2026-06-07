@@ -70,21 +70,21 @@ describe("EsdcFederalAdapter", () => {
   });
 
   it("returns empty result when page has no links", () => {
-    const adapter = new EsdcFederalAdapter() as unknown as {
-      parseCanadaPage: (html: string, baseUrl: string) => unknown[];
+    const adapter = new EsdcFederalAdapter() as any as {
+      parseCanadaPage: (html: string, baseUrl: string) => any[];
     };
     expect(adapter.parseCanadaPage("<html><body>No links</body></html>", "https://example.ca")).toEqual([]);
     expect(adapter.parseCanadaPage('<a href="/x">hello world</a>', "https://example.ca")).toEqual([]);
   });
 
   it("covers private helper branches directly", () => {
-    const adapter = new EsdcFederalAdapter() as unknown as {
+    const adapter = new EsdcFederalAdapter() as any as {
       isCbaRelated: (text: string, href: string) => boolean;
       classifyDocType: (text: string) => string;
       detectSector: (text: string) => string | undefined;
       detectLanguage: (text: string, url: string) => "en" | "fr" | "bilingual";
       resolveUrl: (href: string, baseUrl: string) => string | null;
-      parseCanadaPage: (html: string, baseUrl: string) => unknown[];
+      parseCanadaPage: (html: string, baseUrl: string) => any[];
     };
 
     expect(adapter.isCbaRelated("collective bargaining", "x")).toBe(true);

@@ -148,13 +148,13 @@ return null;
       }
 
       // Extract user information from session
-      const userId = (session as unknown as Record<string, unknown>).userId as string | undefined;
+      const userId = (session as any as Record<string, unknown>).userId as string | undefined;
       if (!userId) {
         return null;
       }
 
       // Get user details from session
-      const sessionData = session as unknown as Record<string, unknown>;
+      const sessionData = session as any as Record<string, unknown>;
       
       // Extract user roles from auth provider metadata
       const publicMetadata = sessionData?.publicMetadata as Record<string, unknown> | undefined;

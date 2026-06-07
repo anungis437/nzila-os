@@ -189,7 +189,7 @@ export default function LocalePilotRequestPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const set = (field: keyof PilotApplicationInput, value: unknown) =>
+  const set = (field: keyof PilotApplicationInput, value: any) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
   const toggle = (field: 'jurisdictions' | 'sectors' | 'challenges' | 'goals', value: string) =>

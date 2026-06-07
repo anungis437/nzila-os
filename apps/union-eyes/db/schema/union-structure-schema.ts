@@ -175,7 +175,7 @@ export const employers = pgTable(
     labourRelationsContactPhone: varchar('labour_relations_contact_phone', { length: 50 }),
 
     // Additional Information
-    parentCompanyId: uuid('parent_company_id').references((): PgColumn<unknown> => employers.id as PgColumn<unknown>),
+    parentCompanyId: uuid('parent_company_id').references((): PgColumn<any> => employers.id as PgColumn<any>),
     notes: text('notes'),
     customFields: jsonb('custom_fields').$type<Record<string, unknown>>(),
 

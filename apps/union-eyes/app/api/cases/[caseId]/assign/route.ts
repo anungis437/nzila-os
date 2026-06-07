@@ -46,7 +46,7 @@ export async function POST(
     const orgId = await getOrganizationIdForUser(userId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
-    let body: unknown;
+    let body: any;
     try {
       body = await request.json();
     } catch {

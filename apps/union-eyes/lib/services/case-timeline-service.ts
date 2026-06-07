@@ -28,7 +28,7 @@ export type TimelineEvent = {
   createdBy: string;
   visibilityScope: VisibilityScope;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: unknown;
+  metadata?: any;
 };
 
 /**
@@ -202,7 +202,7 @@ export async function addCaseEvent(payload: {
   isInternal?: boolean;
   visibilityScope?: VisibilityScope;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: unknown;
+  metadata?: any;
 }): Promise<string> {
   // Auto-determine scope if not explicitly provided
   let scope = payload.visibilityScope;
@@ -329,9 +329,9 @@ async function recomputeSignalsForCase(claimId: string): Promise<void> {
     memberId: claimData.memberId!,
     memberName,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    currentState: claimData.status as unknown, // Map claim status to case state
+    currentState: claimData.status as any, // Map claim status to case state
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    priority: (claimData.priority as unknown) || 'medium',
+    priority: (claimData.priority as any) || 'medium',
     createdAt: claimData.createdAt!,
     lastUpdated: claimData.updatedAt || claimData.createdAt!,
     timeline,

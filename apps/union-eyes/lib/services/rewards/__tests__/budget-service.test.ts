@@ -16,9 +16,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock('drizzle-orm', () => ({
   like: vi.fn(),
   ilike: vi.fn(),
   not: vi.fn(),
-  ne: vi.fn((...a: unknown[]) => a),
+  ne: vi.fn((...a: any[]) => a),
   count: vi.fn(),
   sum: vi.fn(),
   avg: vi.fn(),
@@ -129,7 +129,7 @@ describe('budget-service', () => {
       const envelope = { id: 'env-1', orgId: 'org-1', amountLimit: 1000, amountUsed: 0 };
       mocks.mockReturning.mockResolvedValueOnce([envelope]);
 
-      const result = await createBudgetEnvelope({ orgId: 'org-1', amountLimit: 1000 } as unknown as Parameters<typeof createBudgetEnvelope>[0]);
+      const result = await createBudgetEnvelope({ orgId: 'org-1', amountLimit: 1000 } as any as Parameters<typeof createBudgetEnvelope>[0]);
 
       expect(result).toEqual(envelope);
       expect(mocks.mockInsert).toHaveBeenCalled();
@@ -182,7 +182,7 @@ describe('budget-service', () => {
       const updated = { id: 'e-1', name: 'Updated', orgId: 'org-1' };
       mocks.mockReturning.mockResolvedValueOnce([updated]);
 
-      const result = await updateBudgetEnvelope('e-1', 'org-1', { name: 'Updated' } as unknown as Parameters<typeof updateBudgetEnvelope>[2]);
+      const result = await updateBudgetEnvelope('e-1', 'org-1', { name: 'Updated' } as any as Parameters<typeof updateBudgetEnvelope>[2]);
 
       expect(result).toEqual(updated);
       expect(mocks.mockUpdate).toHaveBeenCalled();

@@ -66,7 +66,7 @@ export const sharedClauseLibrary = pgTable("shared_clause_library", {
   version: integer("version").default(1),
   previousVersionId: uuid("previous_version_id")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .references((): unknown => sharedClauseLibrary.id),
+    .references((): any => sharedClauseLibrary.id),
   
   // Audit
   createdBy: varchar("created_by", { length: 255 }).notNull(),

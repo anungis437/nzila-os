@@ -327,7 +327,7 @@ export class IndigenousDataService {
     agreementTitle: string;
     agreementDescription: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dataSharingScope: unknown;
+    dataSharingScope: any;
     purposeLimitation: string;
     validFrom: Date;
     validUntil?: Date;

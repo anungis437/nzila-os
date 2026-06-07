@@ -10,14 +10,14 @@ const mocks = vi.hoisted(() => ({
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function chain(result: unknown = []) {
+function chain(result: any = []) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const c: unknown = {};
+  const c: any = {};
   for (const m of ['from', 'where', 'limit']) {
     c[m] = vi.fn(() => c);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  c.then = (resolve: unknown) => resolve(result);
+  c.then = (resolve: any) => resolve(result);
   return c;
 }
 
@@ -37,10 +37,10 @@ vi.mock('@/lib/services/notification-service', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => ({ _t: 'eq', _a: a })),
-  relations: vi.fn((...a: unknown[]) => a),
-  sql: Object.assign(vi.fn((...a: unknown[]) => a), {
-    raw: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => ({ _t: 'eq', _a: a })),
+  relations: vi.fn((...a: any[]) => a),
+  sql: Object.assign(vi.fn((...a: any[]) => a), {
+    raw: vi.fn((...a: any[]) => a),
   }),
 }));
 

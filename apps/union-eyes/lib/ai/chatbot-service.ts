@@ -102,8 +102,7 @@ export class ChatSessionManager {
         userId: data.userId,
         organizationId: data.organizationId,
         title: data.title || "New conversation",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        aiProvider: (data.aiProvider as unknown) || "openai",
+        aiProvider: (data.aiProvider as (typeof chatSessions.aiProvider)['_']['data']) || "openai",
         model: data.model || "gpt-4",
         contextTags: data.contextTags,
         relatedEntityType: data.relatedEntityType,
@@ -144,8 +143,7 @@ export class ChatSessionManager {
       conditions.push(eq(chatSessions.organizationId, options.organizationId));
     }
     if (options.status) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(eq(chatSessions.status, options.status as unknown));
+      conditions.push(eq(chatSessions.status, options.status as (typeof chatSessions.status)['_']['data']));
     }
 
     const results = await db
@@ -218,10 +216,8 @@ export class RAGService {
     await db.insert(knowledgeBase).values({
       ...data,
       organizationId: data.organizationId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      documentType: data.documentType as unknown,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      embedding: JSON.stringify(embedding) as unknown,
+      documentType: data.documentType as (typeof knowledgeBase.documentType)['_']['data'],
+      embedding: JSON.stringify(embedding) as unknown as (typeof knowledgeBase.$inferInsert)['embedding'],
       embeddingModel: "text-embedding-ada-002",
     });
   }
@@ -441,8 +437,7 @@ export class ChatbotService {
         modelUsed: response.model,
         tokensUsed: response.tokensUsed,
         responseTimeMs: responseTime,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        retrievedDocuments: retrievedDocs.length > 0 ? retrievedDocs as unknown : undefined,
+        retrievedDocuments: retrievedDocs.length > 0 ? (retrievedDocs as (typeof chatMessages.$inferInsert)['retrievedDocuments']) : undefined,
       })
       .returning();
     

@@ -12,7 +12,7 @@ interface Template {
   category: string;
   thumbnail?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  blocks: unknown[];
+  blocks: any[];
   isDefault: boolean;
 }
 
@@ -39,7 +39,7 @@ export default function CMSPageManager() {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSavePage = async (blocks: unknown[], pageData: unknown) => {
+  const handleSavePage = async (blocks: any[], pageData: any) => {
     try {
       // API call to save the page
       const response = await fetch('/api/cms/pages', {

@@ -161,7 +161,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          errors.push({ entity, error: `Failed to sync ${entity}: ${errorMessage}` } as unknown);
+          errors.push({ entity, error: `Failed to sync ${entity}: ${errorMessage}` } as any);
           this.logError('sync', error);
         }
       }
@@ -184,7 +184,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
         recordsUpdated,
         recordsFailed,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        errors: [{ entity: 'sync', error: errorMessage }] as unknown,
+        errors: [{ entity: 'sync', error: errorMessage }] as any,
       };
     }
   }
@@ -267,7 +267,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
             externalId: claim.external_id,
             claimNumber: claim.claim_number,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            employeeId: (claim as unknown).employee_id || '',
+            employeeId: (claim as any).employee_id || '',
             employeeName: claim.member_name,
             submissionDate: claim.claim_date,
             claimType: claim.claim_type,
@@ -325,13 +325,13 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
             externalId: beneficiary.external_id,
             policyId: beneficiary.policy_id,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            employeeId: (beneficiary as unknown).employee_id || '',
+            employeeId: (beneficiary as any).employee_id || '',
             firstName: beneficiary.beneficiary_name?.split(' ')[0] || '',
             lastName: beneficiary.beneficiary_name?.split(' ').slice(1).join(' ') || '',
             relationship: beneficiary.relationship,
             percentage: Math.round(beneficiary.percentage),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            isPrimary: (beneficiary as unknown).is_primary ?? false,
+            isPrimary: (beneficiary as any).is_primary ?? false,
             status: beneficiary.status,
             lastSyncedAt: new Date(),
           };

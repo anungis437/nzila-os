@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  selectQueue: [] as unknown[],
-  insertQueue: [] as unknown[],
+  selectQueue: [] as any[],
+  insertQueue: [] as any[],
   mockSelect: vi.fn(),
   mockInsert: vi.fn(),
   mockInsertValues: vi.fn(),
@@ -12,13 +12,13 @@ const mocks = vi.hoisted(() => ({
   mockLoggerError: vi.fn(),
 }));
 
-function makeSelectChain(result: unknown) {
+function makeSelectChain(result: any) {
   const chain: Record<string, unknown> = {};
   const methods = ["from", "where", "orderBy", "limit", "offset"];
   for (const method of methods) {
     chain[method] = vi.fn(() => chain);
   }
-  chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(resolve(result));
+  chain.then = (resolve: (value: any) => unknown) => Promise.resolve(resolve(result));
   return chain;
 }
 

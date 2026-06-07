@@ -706,7 +706,7 @@ toast({
               <Select
                 value={listType}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onValueChange={(value: unknown) => setListType(value)}
+                onValueChange={(value: any) => setListType(value)}
               >
                 <SelectTrigger>
                   <SelectValue />

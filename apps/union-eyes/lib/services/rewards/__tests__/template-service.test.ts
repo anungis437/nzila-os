@@ -16,9 +16,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
   sql: vi.fn(),
   asc: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock('drizzle-orm', () => ({
   like: vi.fn(),
   ilike: vi.fn(),
   not: vi.fn(),
-  ne: vi.fn((...args: unknown[]) => args),
+  ne: vi.fn((...args: any[]) => args),
   count: vi.fn(),
   sum: vi.fn(),
   avg: vi.fn(),
@@ -370,7 +370,7 @@ describe('template-service', () => {
   // ──────────────── recordTemplateUsage ────────────────
   describe('recordTemplateUsage', () => {
     it('records usage in a transaction', async () => {
-      mocks.mockTransaction.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
+      mocks.mockTransaction.mockImplementation(async (fn: (tx: any) => Promise<any>) => {
         const txMock = {
           update: vi.fn().mockReturnValue({
             set: vi.fn().mockReturnValue({
@@ -395,7 +395,7 @@ describe('template-service', () => {
     });
 
     it('uses monetary value fallback when value is undefined', async () => {
-      mocks.mockTransaction.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
+      mocks.mockTransaction.mockImplementation(async (fn: (tx: any) => Promise<any>) => {
         const txMock = {
           update: vi.fn().mockReturnValue({
             set: vi.fn().mockReturnValue({
@@ -409,7 +409,7 @@ describe('template-service', () => {
         return fn(txMock);
       });
 
-      const result = await recordTemplateUsage('t1', 'u1', 'r1', 'Bob', undefined, 10, undefined as unknown as number, 'N/A');
+      const result = await recordTemplateUsage('t1', 'u1', 'r1', 'Bob', undefined, 10, undefined as any as number, 'N/A');
       expect(result.success).toBe(true);
     });
   });

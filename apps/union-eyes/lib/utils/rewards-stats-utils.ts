@@ -35,7 +35,7 @@ export async function calculateRewardTotals(
         and(
           eq(rewardWalletLedger.userId, userId),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq((rewardWalletLedger as unknown).orgId, organizationId)
+          eq((rewardWalletLedger as any).orgId, organizationId)
         )
       )
       .groupBy(rewardWalletLedger.transactionType);
@@ -96,7 +96,7 @@ export async function getTotalEarned(userId: string, organizationId: string): Pr
         and(
           eq(rewardWalletLedger.userId, userId),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq((rewardWalletLedger as unknown).orgId, organizationId),
+          eq((rewardWalletLedger as any).orgId, organizationId),
           sql`${rewardWalletLedger.transactionType} IN ('earn', 'adjust', 'refund')`
         )
       );
@@ -121,7 +121,7 @@ export async function getTotalRedeemed(userId: string, organizationId: string): 
         and(
           eq(rewardWalletLedger.userId, userId),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq((rewardWalletLedger as unknown).orgId, organizationId),
+          eq((rewardWalletLedger as any).orgId, organizationId),
           eq(rewardWalletLedger.transactionType, 'spend')
         )
       );

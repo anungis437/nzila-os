@@ -51,17 +51,17 @@ type ExpirationBatchCounter =
 
 type RewardWalletLedgerInsert = typeof rewardWalletLedger.$inferInsert;
 
-function asObject(value: unknown): Record<string, unknown> | null {
+function asObject(value: any): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
 }
 
-function readStringProperty(value: unknown, key: string): string | undefined {
+function readStringProperty(value: any, key: string): string | undefined {
   const objectValue = asObject(value);
   const property = objectValue?.[key];
   return typeof property === 'string' ? property : undefined;
 }
 
-function readNumberProperty(value: unknown, key: string): number | undefined {
+function readNumberProperty(value: any, key: string): number | undefined {
   const objectValue = asObject(value);
   const property = objectValue?.[key];
   return typeof property === 'number' ? property : undefined;

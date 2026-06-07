@@ -83,7 +83,7 @@ describe('api-guards', () => {
     it('creates context and runs function', async () => {
       const ctx = { traceId: 'abc' };
       mocks.mockCreateRequestContext.mockReturnValue(ctx);
-      mocks.mockRunWithContext.mockImplementation((_ctx: unknown, fn: () => unknown) => fn());
+      mocks.mockRunWithContext.mockImplementation((_ctx: any, fn: () => unknown) => fn());
 
       const req = new Request('http://localhost/api/test');
       const result = await withRequestContext(req, async () => 'result');

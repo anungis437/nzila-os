@@ -74,7 +74,7 @@ export async function loadLatestExecutiveSnapshot(
       LIMIT 1
     `);
 
-    const row = rows[0] as { snapshot_data?: unknown } | undefined;
+    const row = rows[0] as { snapshot_data?: any } | undefined;
     if (!row?.snapshot_data) return null;
 
     return row.snapshot_data as ExecutiveSnapshot;

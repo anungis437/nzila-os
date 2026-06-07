@@ -72,7 +72,7 @@ export async function listBudgetEnvelopes(
 ): Promise<RewardBudgetEnvelope[]> {
   const now = new Date();
   
-  const conditions: SQL<unknown>[] = [
+  const conditions: SQL[] = [
     eq(rewardBudgetEnvelopes.programId, programId),
     eq(rewardBudgetEnvelopes.orgId, orgId),
   ];
@@ -242,7 +242,7 @@ export async function getBudgetUsageSummary(
 }>> {
   const now = new Date();
 
-  const conditions: SQL<unknown>[] = [eq(rewardBudgetEnvelopes.orgId, orgId)];
+  const conditions: SQL[] = [eq(rewardBudgetEnvelopes.orgId, orgId)];
   if (programId) {
     conditions.push(eq(rewardBudgetEnvelopes.programId, programId));
   }
@@ -514,7 +514,7 @@ export async function cleanupExpiredReservations(): Promise<{
 }> {
   const now = new Date();
 
-  const expiredReservationConditions: SQL<unknown>[] = [
+  const expiredReservationConditions: SQL[] = [
     ne(budgetReservations.status, 'released'),
     ne(budgetReservations.status, 'expired'),
     lte(budgetReservations.expiresAt, now),
@@ -577,7 +577,7 @@ export async function checkBudgetWithReservations(
 export async function getActiveReservations(poolId?: string) {
   const _now = new Date();
   
-  const conditions: SQL<unknown>[] = [
+  const conditions: SQL[] = [
     ne(budgetReservations.status, 'released'),
     ne(budgetReservations.status, 'expired'),
   ];

@@ -39,7 +39,7 @@ export class DjangoAPIError extends Error {
     message: string,
     public statusCode?: number,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public response?: unknown
+    public response?: any
   ) {
     super(message);
     this.name = 'DjangoAPIError';

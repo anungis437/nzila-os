@@ -114,7 +114,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       LIMIT ${max_results}
     `));
 
-    const hits = (results as unknown as Array<Record<string, unknown>>)
+    const hits = (results as any as Array<Record<string, unknown>>)
       .filter((r) => (r.similarity as number) >= threshold)
       .map((r) => ({
         id: r.id,
@@ -207,7 +207,7 @@ export const GET = withRoleAuth('member', async (_request: NextRequest, _context
       WHERE is_active = true
     `));
 
-    const stats = (rows as unknown as Array<Record<string, unknown>>)[0] || {};
+    const stats = (rows as any as Array<Record<string, unknown>>)[0] || {};
     const total = (stats.total as number) || 0;
     const withEmbeddings = (stats.with_embeddings as number) || 0;
 

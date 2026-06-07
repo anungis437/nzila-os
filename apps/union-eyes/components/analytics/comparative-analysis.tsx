@@ -50,7 +50,7 @@ export function ComparativeAnalysis({ organizationId }: ComparativeAnalysisProps
   const [comparisonData, setComparisonData] = useState<ComparisonData[]>([]);
   const [gapAnalysis, setGapAnalysis] = useState<GapAnalysis[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [industryBenchmark, setIndustryBenchmark] = useState<unknown>(null);
+  const [industryBenchmark, setIndustryBenchmark] = useState<any>(null);
 
   useEffect(() => {
     fetchComparativeData();

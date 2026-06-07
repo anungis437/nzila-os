@@ -6,7 +6,7 @@
 
 // Only import bullmq in runtime, not during build
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Worker: unknown, _Job: unknown, IORedis: unknown;
+let Worker: any, _Job: any, IORedis: any;
 
 if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
   try {
@@ -125,7 +125,7 @@ function formatPhoneNumber(phone: string): string {
  * Process SMS job
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function processSmsJob(job: unknown) {
+async function processSmsJob(job: any) {
   const { to, message, priority } = job.data;
 // Check if Twilio is configured
   if (!twilioClient || !TWILIO_PHONE_NUMBER) {
@@ -182,7 +182,7 @@ const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 export const smsWorker = new Worker(
   'sms',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (job: unknown) => {
+  async (job: any) => {
     return await processSmsJob(job);
   },
   {
@@ -197,15 +197,15 @@ export const smsWorker = new Worker(
 
 // Event handlers
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-smsWorker.on('completed', (_job: unknown) => {
+smsWorker.on('completed', (_job: any) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-smsWorker.on('failed', (_job: unknown, _err: unknown) => {
+smsWorker.on('failed', (_job: any, _err: any) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-smsWorker.on('error', (_err: unknown) => {
+smsWorker.on('error', (_err: any) => {
 });
 
 // Graceful shutdown

@@ -41,7 +41,7 @@ export interface PaymentTransaction {
   stripePaymentIntentId?: string;
   stripeChargeId?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: unknown;
+  metadata?: any;
 }
 
 export class WhiplashPreventionService {
@@ -443,7 +443,7 @@ export class WhiplashPreventionService {
     performedBy: string;
     complianceImpact?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: unknown;
+    metadata?: any;
   }) {
     await db.insert(whiplashPreventionAudit).values({
       actionType: params.actionType,

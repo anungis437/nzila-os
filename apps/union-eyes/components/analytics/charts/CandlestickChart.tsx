@@ -57,8 +57,7 @@ export function CandlestickChart({
   positiveColor = '#10b981',
   negativeColor = '#ef4444',
 }: CandlestickChartProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: unknown) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { date?: string; open: number; high?: number; low?: number; close: number; volume?: number } }> }) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
     const isPositive = data.close >= data.open;
@@ -82,9 +81,14 @@ export function CandlestickChart({
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const Candlestick = (props: unknown) => {
-    const { x, _y, width, payload } = props;
+  const Candlestick = (props: {
+    x?: number;
+    width?: number;
+    payload?: { open: number; high: number; low: number; close: number };
+    yAxis?: { scale: (v: number) => number };
+  }) => {
+    const { x = 0, width = 0, payload } = props;
+    if (!payload || !props.yAxis) return null;
     const yScale = props.yAxis.scale;
     
     const isPositive = payload.close >= payload.open;

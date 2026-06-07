@@ -31,7 +31,7 @@ async function getApiClient() {
  * List WorkflowsTest records
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getWorkflowsTestList(filters?: unknown) {
+export async function getWorkflowsTestList(filters?: any) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -69,7 +69,7 @@ export async function getWorkflowsTestById(id: string) {
  * Create new WorkflowsTest record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function createWorkflowsTest(data: unknown) {
+export async function createWorkflowsTest(data: any) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/api/WorkflowsTest/`, {
@@ -89,7 +89,7 @@ export async function createWorkflowsTest(data: unknown) {
  * Update WorkflowsTest record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateWorkflowsTest(id: string, data: unknown) {
+export async function updateWorkflowsTest(id: string, data: any) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/api/WorkflowsTest/${{id}}/`, {

@@ -69,7 +69,7 @@ describe('csv-export', () => {
         overdueAcknowledgement: 1,
         overdueResolution: 2,
       };
-      const rows = kpiCardsToRows(kpis as unknown as Parameters<typeof kpiCardsToRows>[0]);
+      const rows = kpiCardsToRows(kpis as any as Parameters<typeof kpiCardsToRows>[0]);
       expect(rows).toHaveLength(4);
       expect(rows[0]).toEqual({ metric: 'Total Open', value: 10 });
     });
@@ -81,8 +81,8 @@ describe('csv-export', () => {
     });
 
     it('handles boolean values', () => {
-      expect(escapeCSVValue(true as unknown as string)).toBe('true');
-      expect(escapeCSVValue(false as unknown as string)).toBe('false');
+      expect(escapeCSVValue(true as any as string)).toBe('true');
+      expect(escapeCSVValue(false as any as string)).toBe('false');
     });
 
     it('handles zero', () => {

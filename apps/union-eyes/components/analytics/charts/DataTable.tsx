@@ -22,24 +22,20 @@ export interface Column {
   label: string;
   sortable?: boolean;
   filterable?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  render?: (value: unknown, row: unknown) => React.ReactNode;
+  render?: (value: unknown, row: Record<string, unknown>) => React.ReactNode;
   width?: string;
 }
 
 export interface DataTableProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: unknown[];
+  data: Record<string, unknown>[];
   columns: Column[];
   title?: string;
   pageSize?: number;
   searchable?: boolean;
   exportable?: boolean;
   selectable?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onRowSelect?: (selectedRows: unknown[]) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onExport?: (data: unknown[]) => void;
+  onRowSelect?: (selectedRows: Record<string, unknown>[]) => void;
+  onExport?: (data: Record<string, unknown>[]) => void;
 }
 
 // ============================================================================
@@ -105,7 +101,7 @@ export function DataTable({
 
       if (aValue === bValue) return 0;
       
-      const comparison = aValue < bValue ? -1 : 1;
+      const comparison = (aValue as string | number) < (bValue as string | number) ? -1 : 1;
       return sortDirection === 'asc' ? comparison : -comparison;
     });
   }, [filteredData, sortKey, sortDirection]);
@@ -337,7 +333,7 @@ export function DataTable({
                     )}
                     {visibleColumnsList.map(col => (
                       <td key={col.key} className="px-4 py-3 text-sm">
-                        {col.render ? col.render(row[col.key], row) : row[col.key]}
+                        {col.render ? col.render(row[col.key], row) : (row[col.key] as React.ReactNode)}
                       </td>
                     ))}
                   </tr>

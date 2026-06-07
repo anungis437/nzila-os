@@ -251,7 +251,7 @@ async function NegotiationDetailContent({ params }: PageProps) {
                   <h4 className="text-sm font-medium mb-2">{t('keyIssuesLabel')}</h4>
                   <div className="space-y-2">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {negotiation.keyIssues.map((issue: unknown, idx: number) => (
+                    {negotiation.keyIssues.map((issue: any, idx: number) => (
                       <div key={idx} className="flex items-center justify-between p-2 border rounded">
                         <span className="text-sm">{issue.issue}</span>
                         <div className="flex items-center gap-2">

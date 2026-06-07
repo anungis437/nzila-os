@@ -111,7 +111,7 @@ async function findExistingByIdempotencyKey(
         AND metadata->>'idempotencyKey' = ${key}
       ORDER BY started_at DESC
       LIMIT 1;
-    `)) as unknown as Array<{
+    `)) as any as Array<{
       pipeline_run_id: string;
       decision_id: string | null;
       recorded_at: string;
@@ -363,7 +363,7 @@ export async function listDecisionsForCase(caseId: string): Promise<CaseDecision
         AND ed.title LIKE ${titlePrefix}
       ORDER BY ed.date DESC
       LIMIT 25;
-    `)) as unknown as Array<{
+    `)) as any as Array<{
       id: string;
       date: string;
       title: string;

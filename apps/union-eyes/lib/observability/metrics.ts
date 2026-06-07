@@ -297,7 +297,7 @@ export async function getMetrics(): Promise<string> {
 /**
  * Get metrics as JSON (for internal use)
  */
-export async function getMetricsJSON(): Promise<unknown> {
+export async function getMetricsJSON(): Promise<any> {
   return register.getMetricsAsJSON();
 }
 

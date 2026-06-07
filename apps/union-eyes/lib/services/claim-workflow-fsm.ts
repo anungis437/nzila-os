@@ -377,7 +377,7 @@ export function getTransitionRequirements(
     minHours: state.minTimeInState / (1000 * 60 * 60),
     requiresDocumentation: state.requiresDocumentation,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    blockIfCriticalSignals: (state as unknown).blockIfCriticalSignals || false,
+    blockIfCriticalSignals: (state as any).blockIfCriticalSignals || false,
   };
 }
 

@@ -238,7 +238,7 @@ export class LinkedInAPIClient {
     const orgs: LinkedInOrganization[] = [];
     for (const element of response.elements || []) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const org = (element as unknown)['organization~'];
+      const org = (element as any)['organization~'];
       if (org) {
         orgs.push(org as LinkedInOrganization);
       }
@@ -431,7 +431,7 @@ export class LinkedInAPIClient {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await this.makeRequest<unknown>(
+    const response = await this.makeRequest<any>(
       '/assets?action=registerUpload',
       {},
       {
@@ -557,8 +557,8 @@ export class LinkedInAPIClient {
     organizationId: string,
     count: number = 20,
     start: number = 0
-  ): Promise<{ elements: LinkedInShare[]; paging: unknown }> {
-    const response = await this.makeRequest<{ elements: LinkedInShare[]; paging: unknown }>(
+  ): Promise<{ elements: LinkedInShare[]; paging: any }> {
+    const response = await this.makeRequest<{ elements: LinkedInShare[]; paging: any }>(
       '/ugcPosts',
       {
         q: 'authors',

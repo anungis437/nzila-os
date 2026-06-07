@@ -178,7 +178,7 @@ export default function OrgSettingsContent() {
   ];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleInputChange = (section: OrgSettingsSection, field: string, value: unknown) => {
+  const handleInputChange = (section: OrgSettingsSection, field: string, value: any) => {
     setOrgSettings(prev => ({
       ...prev,
       [section]: {

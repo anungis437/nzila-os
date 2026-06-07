@@ -165,19 +165,26 @@ const OPERATORS = [
 
 export interface CustomReportBuilderProps {
   onSave?: (report: ReportBuilderData) => Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onRun?: (report: ReportBuilderData) => Promise<unknown>;
+  onRun?: (report: ReportBuilderData) => Promise<Record<string, unknown>[]>;
+}
+
+interface ReportFilter {
+  field: string;
+  operator: string;
+  value: string;
+}
+
+interface ReportCalculatedField {
+  name: string;
+  formula: string;
 }
 
 export function CustomReportBuilder({ onSave, onRun }: CustomReportBuilderProps) {
   const [selectedDataSource, setSelectedDataSource] = React.useState<DataSource | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [filters, setFilters] = React.useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [calculatedFields, setCalculatedFields] = React.useState<any[]>([]);
+  const [filters, setFilters] = React.useState<ReportFilter[]>([]);
+  const [calculatedFields, setCalculatedFields] = React.useState<ReportCalculatedField[]>([]);
   const [isRunning, setIsRunning] = React.useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [reportResults, setReportResults] = React.useState<any[] | null>(null);
+  const [reportResults, setReportResults] = React.useState<Record<string, unknown>[] | null>(null);
 
   const form = useForm<ReportBuilderData>({
     resolver: zodResolver(reportBuilderSchema),
@@ -205,8 +212,7 @@ export function CustomReportBuilder({ onSave, onRun }: CustomReportBuilderProps)
     setFilters([...filters, { field: "", operator: "equals", value: "" }]);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateFilter = (index: number, updates: unknown) => {
+  const updateFilter = (index: number, updates: Partial<ReportFilter>) => {
     const newFilters = [...filters];
     newFilters[index] = { ...newFilters[index], ...updates };
     setFilters(newFilters);
@@ -223,8 +229,7 @@ export function CustomReportBuilder({ onSave, onRun }: CustomReportBuilderProps)
     setCalculatedFields([...calculatedFields, { name: "", formula: "" }]);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateCalculatedField = (index: number, updates: unknown) => {
+  const updateCalculatedField = (index: number, updates: Partial<ReportCalculatedField>) => {
     const newFields = [...calculatedFields];
     newFields[index] = { ...newFields[index], ...updates };
     setCalculatedFields(newFields);

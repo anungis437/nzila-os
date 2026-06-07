@@ -28,6 +28,7 @@ import {
   DocumentTextIcon,
   ClockIcon,
   ArrowRightIcon,
+  ArrowLeftIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
@@ -195,6 +196,14 @@ export default async function RevenuePage() {
 
   return (
     <CommandPageShell className="space-y-8">
+      {/* Back to workspace */}
+      <Link
+        href="/workspace/sales"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900"
+      >
+        <ArrowLeftIcon className="h-4 w-4" /> Back to Sales workspace
+      </Link>
+
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

@@ -84,7 +84,7 @@ describe('DocumentStorageService', () => {
     it('uploads to S3 and returns signed URL', async () => {
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
 
       const mockSend = vi.fn().mockResolvedValue({});
       service.s3Client = { send: mockSend };
@@ -114,7 +114,7 @@ describe('DocumentStorageService', () => {
     it('throws and logs on upload error', async () => {
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
       service.s3Client = { send: vi.fn().mockRejectedValue(new Error('S3 fail')) };
       service.s3Sdk = {
         PutObjectCommand: vi.fn(),
@@ -139,7 +139,7 @@ describe('DocumentStorageService', () => {
       process.env.AZURE_STORAGE_CONNECTION_STRING = 'conn';
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
 
       const mockUpload = vi.fn().mockResolvedValue(undefined);
       const mockGetBlockBlobClient = vi.fn().mockReturnValue({ upload: mockUpload });
@@ -164,7 +164,7 @@ describe('DocumentStorageService', () => {
     it('downloads from S3 and returns buffer', async () => {
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
       const fileData = Buffer.from('downloaded-content');
       const mockStream = Readable.from([fileData]);
 
@@ -183,7 +183,7 @@ describe('DocumentStorageService', () => {
     it('throws on download error', async () => {
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
       service.s3Client = { send: vi.fn().mockRejectedValue(new Error('Download fail')) };
       service.s3Sdk = {
         PutObjectCommand: vi.fn(),
@@ -201,7 +201,7 @@ describe('DocumentStorageService', () => {
       process.env.AZURE_STORAGE_CONNECTION_STRING = 'conn';
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
       const fileData = Buffer.from('azure-file-data');
       const mockStream = Readable.from([fileData]);
 
@@ -220,7 +220,7 @@ describe('DocumentStorageService', () => {
     it('deletes from S3', async () => {
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
       const mockSend = vi.fn().mockResolvedValue({});
       service.s3Client = { send: mockSend };
       service.s3Sdk = {
@@ -237,7 +237,7 @@ describe('DocumentStorageService', () => {
     it('throws on delete error', async () => {
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
       service.s3Client = { send: vi.fn().mockRejectedValue(new Error('Delete fail')) };
       service.s3Sdk = {
         PutObjectCommand: vi.fn(),
@@ -255,7 +255,7 @@ describe('DocumentStorageService', () => {
       process.env.AZURE_STORAGE_CONNECTION_STRING = 'conn';
       const mod = await import('../document-storage-service');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = new mod.default() as unknown;
+      const service = new mod.default() as any;
 
       const mockDeleteBlob = vi.fn().mockResolvedValue(undefined);
       const mockGetContainerClient = vi.fn().mockReturnValue({ deleteBlob: mockDeleteBlob });

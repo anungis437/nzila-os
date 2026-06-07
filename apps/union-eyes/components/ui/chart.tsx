@@ -22,6 +22,22 @@ type ChartContextProps = {
   config: ChartConfig
 }
 
+type ChartTooltipPayloadItem = {
+  dataKey?: string
+  name?: string
+  value?: number | string
+  color?: string
+  payload: { fill?: string; [key: string]: unknown }
+  [key: string]: unknown
+}
+
+type ChartLegendPayloadItem = {
+  value?: string
+  dataKey?: string
+  color?: string
+  [key: string]: unknown
+}
+
 const ChartContext = React.createContext<ChartContextProps | null>(null)
 
 function useChart() {
@@ -106,12 +122,10 @@ const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
       active?: boolean
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      payload?: unknown[]
+      payload?: ChartTooltipPayloadItem[]
       label?: string
-      labelFormatter?: (label: unknown, payload: unknown[]) => React.ReactNode
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      formatter?: (value: unknown, name: unknown, item: unknown, index: number, payload: unknown) => React.ReactNode
+      labelFormatter?: (label: unknown, payload: ChartTooltipPayloadItem[]) => React.ReactNode
+      formatter?: (value: unknown, name: unknown, item: ChartTooltipPayloadItem, index: number, payload: unknown) => React.ReactNode
       color?: string
       hideLabel?: boolean
       hideIndicator?: boolean
@@ -269,8 +283,7 @@ const ChartLegend: typeof RechartsPrimitive.Legend = RechartsPrimitive.Legend
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      payload?: unknown[]
+      payload?: ChartLegendPayloadItem[]
       verticalAlign?: "top" | "bottom" | "middle"
       hideIcon?: boolean
       nameKey?: string
@@ -329,7 +342,7 @@ ChartLegendContent.displayName = "ChartLegend"
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
   config: ChartConfig,
-  payload: unknown,
+  payload: Record<string, unknown>,
   key: string
 ) {
   if (typeof payload !== "object" || payload === null) {
@@ -340,7 +353,7 @@ function getPayloadConfigFromPayload(
     "payload" in payload &&
     typeof payload.payload === "object" &&
     payload.payload !== null
-      ? payload.payload
+      ? (payload.payload as Record<string, unknown>)
       : undefined
 
   let configLabelKey: string = key

@@ -42,13 +42,13 @@ function assertSafeRuntime(): void {
   }
 }
 
-function isMissingColumnError(error: unknown): boolean {
+function isMissingColumnError(error: any): boolean {
   if (!error || typeof error !== 'object') return false
   const cause = (error as { cause?: { code?: string } }).cause
   return cause?.code === '42703'
 }
 
-function isMissingRelationError(error: unknown): boolean {
+function isMissingRelationError(error: any): boolean {
   if (!error || typeof error !== 'object') return false
   const cause = (error as { cause?: { code?: string } }).cause
   return cause?.code === '42P01'
@@ -59,7 +59,7 @@ function isMissingRelationError(error: unknown): boolean {
 // collapse must become observable evidence — log the underlying PG error code,
 // message, and (if available) the offending column so the next CI run reveals the
 // actual schema-drift cause rather than masking it behind a generic warning.
-function describePgError(error: unknown): string {
+function describePgError(error: any): string {
   if (!error || typeof error !== 'object') return String(error)
   const cause = (error as { cause?: { code?: string; message?: string; column?: string; detail?: string; table?: string } }).cause
   if (!cause) return (error as { message?: string }).message ?? String(error)
@@ -113,7 +113,7 @@ async function seed(): Promise<void> {
 
     const tableExists = async (qualifiedName: string): Promise<boolean> => {
       const result = await tx.execute(sql`select to_regclass(${qualifiedName}) as regclass`)
-      const row = (result as unknown as Array<{ regclass?: string | null }>)[0]
+      const row = (result as any as Array<{ regclass?: string | null }>)[0]
       return Boolean(row?.regclass)
     }
 

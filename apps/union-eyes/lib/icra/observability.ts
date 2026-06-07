@@ -60,7 +60,7 @@ export async function trackIcraEvent(event: IcraEvent): Promise<void> {
   try {
     const { db } = await import('@/db');
     // Dynamic import to avoid circular deps and allow graceful skip if DB unavailable
-    await (db as unknown as { execute: (q: unknown) => Promise<unknown> }).execute(
+    await (db as any as { execute: (q: any) => Promise<any> }).execute(
       buildInsertSql(event),
     );
   } catch {
@@ -75,7 +75,7 @@ export function fireAndForgetEvent(event: Omit<IcraEvent, 'occurredAt'>): void {
 }
 
 /** Raw SQL insert — avoids schema import cycle (icra-schema not in main index) */
-function buildInsertSql(event: IcraEvent): { sql: string; params: unknown[] } {
+function buildInsertSql(event: IcraEvent): { sql: string; params: any[] } {
   return {
     sql: `
       INSERT INTO icra_events (

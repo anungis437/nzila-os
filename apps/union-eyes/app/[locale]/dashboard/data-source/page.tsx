@@ -187,7 +187,7 @@ export default async function DataSourcePage() {
           FROM external_data_sync_log
           ORDER BY started_at DESC
           LIMIT 20
-        `) as unknown as SyncLogEntry[];
+        `) as any as SyncLogEntry[];
         logs = Array.from(rawLogs);
       }
     } catch {

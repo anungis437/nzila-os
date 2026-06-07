@@ -1062,8 +1062,7 @@ class AttentionMechanismEngine {
         ];
         
         for (const [target, reqs] of Object.entries(fsmState.requirements)) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const r = reqs as unknown;
+          const r = reqs as ReturnType<typeof getTransitionRequirements>;
           fsmContext.push(
             `→ ${target}: requires ${r.requiresRole?.join('/') || 'any'}, min ${r.minHours}h, docs: ${r.requiresDocumentation}`
           );
@@ -1185,13 +1184,12 @@ class AttentionMechanismEngine {
 
       const caseState = {
         id: claim.claimId,
-        status: claim.status as unknown,
-        priority: claim.priority as unknown,
+        status: claim.status,
+        priority: claim.priority as CaseForSignals['priority'],
         createdAt: claim.createdAt || new Date(),
         updatedAt: claim.updatedAt || claim.createdAt || new Date(),
         assignedTo: claim.assignedTo,
         organizationId: claim.organizationId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as unknown as CaseForSignals;
 
       return await detectAllSignals([caseState]);
@@ -1526,8 +1524,15 @@ class GovernanceAuditLayer {
       logger.info('AI Request Audit', auditRecord);
 
       // Track costs
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (this.costTracker as unknown)?.trackCost({
+      await (this.costTracker as unknown as {
+        trackCost?: (data: {
+          organizationId: string;
+          tokensUsed: number;
+          model: string;
+          templateId: string;
+          timestamp: Date;
+        }) => Promise<void>;
+      })?.trackCost?.({
         organizationId: request.context.organizationId,
         tokensUsed: response.tokensUsed,
         model: response.model,
@@ -1751,7 +1756,6 @@ export interface TemplateContext {
   jurisdiction: string;
   userRole: string;
   intent: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   orgs: unknown[];
   retrievedContext: string[];
   sla: string;

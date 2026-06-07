@@ -33,8 +33,8 @@ export const clcOrganizationSyncLog = pgTable(
     changes: text('changes'), // Semicolon-separated list of changed fields
     conflicts: json('conflicts').$type<Array<{
       field: string;
-      localValue: unknown;
-      clcValue: unknown;
+      localValue: any;
+      clcValue: any;
       resolution: 'clc_wins' | 'local_wins' | 'manual_review';
       reason: string;
     }>>(), // JSON array of conflict resolutions

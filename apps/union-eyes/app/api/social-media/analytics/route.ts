@@ -130,12 +130,12 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
 
       // Calculate average engagement rate
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Object.values(accountAnalytics).forEach((account: unknown) => {
+      Object.values(accountAnalytics).forEach((account: any) => {
         const analyticsCount = account.analytics.length;
         if (analyticsCount > 0) {
           const totalEngagementRate = account.analytics.reduce(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (sum: number, a: unknown) => sum + (Number(a.engagementRate) || 0),
+            (sum: number, a: any) => sum + (Number(a.engagementRate) || 0),
             0
           );
           account.summary.avg_engagement_rate = totalEngagementRate / analyticsCount;
@@ -410,7 +410,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       const platformMetrics = Object.entries(postsByPlatform).map(([platform, platformPosts]: [string, any]) => {
         const platformTotal = platformPosts.reduce(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (acc: unknown, post: unknown) => ({
+          (acc: any, post: any) => ({
             posts: acc.posts + 1,
             impressions: acc.impressions + (post.impressions || 0),
             engagement: acc.engagement + (post.engagement || 0),
@@ -426,7 +426,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
           ...platformTotal,
           avg_engagement_rate:
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            platformPosts.reduce((sum: number, post: unknown) => sum + (post.engagement_rate || 0), 0) /
+            platformPosts.reduce((sum: number, post: any) => sum + (post.engagement_rate || 0), 0) /
             platformPosts.length,
         };
       });
@@ -662,7 +662,7 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
               .map((header) => {
                 const key = header.toLowerCase().replace(/ /g, '_');
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                let value: unknown = row[key] || '';
+                let value: any = row[key] || '';
                 
                 // Handle nested objects
                 if (typeof value === 'object' && value !== null) {

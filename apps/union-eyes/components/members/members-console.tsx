@@ -49,8 +49,7 @@ type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
 type MemberStatus = "active" | "inactive" | "on-leave";
 type Department = "Manufacturing" | "Logistics" | "Administration" | "Maintenance" | "Customer Service" | "IT";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type LooseMembersResponse = Record<string, any>;
+type LooseMembersResponse = Record<string, unknown>;
 
 interface Member {
   id: string;
@@ -302,55 +301,76 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
   const responseData = (data ?? null) as LooseMembersResponse | null;
 
   // Extract members from API response (supports multiple envelope shapes)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rawMembers: unknown[] = (() => {
-    if (Array.isArray(responseData?.data?.members)) return responseData.data.members;
-    if (Array.isArray(responseData?.members)) return responseData.members;
-    if (Array.isArray(responseData?.data?.data?.members)) return responseData.data.data.members;
-    if (Array.isArray(responseData?.data?.result?.members)) return responseData.data.result.members;
-    if (Array.isArray(responseData?.result?.members)) return responseData.result.members;
-    if (Array.isArray(responseData?.payload?.members)) return responseData.payload.members;
-    if (Array.isArray(responseData?.data?.data)) return responseData.data.data;
-    if (Array.isArray(responseData?.data)) return responseData.data;
-    const discovered = findMemberArrayInPayload(responseData);
-    return Array.isArray(discovered) ? discovered : [];
-  })();
+  const getArray = (obj: unknown, ...keys: string[]): unknown[] | null => {
+    let cur: unknown = obj;
+    for (const k of keys) {
+      if (cur && typeof cur === 'object') {
+        cur = (cur as Record<string, unknown>)[k];
+      } else {
+        return null;
+      }
+    }
+    return Array.isArray(cur) ? cur : null;
+  };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const members: Member[] = rawMembers.map((m: unknown) => {
-    const metadata = m?.metadata && typeof m.metadata === 'object' ? m.metadata : {};
+  const getNumber = (obj: unknown, ...keys: string[]): number | undefined => {
+    let cur: unknown = obj;
+    for (const k of keys) {
+      if (cur && typeof cur === 'object') {
+        cur = (cur as Record<string, unknown>)[k];
+      } else {
+        return undefined;
+      }
+    }
+    return typeof cur === 'number' ? cur : undefined;
+  };
+
+  const rawMembers: Record<string, unknown>[] = (
+    getArray(responseData, 'data', 'members') ??
+    getArray(responseData, 'members') ??
+    getArray(responseData, 'data', 'data', 'members') ??
+    getArray(responseData, 'data', 'result', 'members') ??
+    getArray(responseData, 'result', 'members') ??
+    getArray(responseData, 'payload', 'members') ??
+    getArray(responseData, 'data', 'data') ??
+    getArray(responseData, 'data') ??
+    findMemberArrayInPayload(responseData)
+  ) as Record<string, unknown>[];
+
+  const members: Member[] = rawMembers.map((m: Record<string, unknown>) => {
+    const metadata = (m?.metadata && typeof m.metadata === 'object' ? m.metadata : {}) as Record<string, unknown>;
     return {
-      id: m.id,
-      name: m.name || m.full_name || 'Unknown Member',
-      email: m.email || '',
-      phone: m.phone || '',
+      id: m.id as string,
+      name: (m.name || m.full_name || 'Unknown Member') as string,
+      email: (m.email || '') as string,
+      phone: (m.phone || '') as string,
       role: (m.role || 'member') as MemberRole,
       status: (m.status || 'active') as MemberStatus,
       department: (m.department || 'Administration') as Department,
-      position: m.position || 'Union Member',
-      hireDate: m.hireDate || m.hire_date || m.createdAt || m.created_at || '',
+      position: (m.position || 'Union Member') as string,
+      hireDate: (m.hireDate || m.hire_date || m.createdAt || m.created_at || '') as string,
       seniority: Number(m.seniority || 0),
-      location: m.location || metadata.location || '',
+      location: (m.location || metadata.location || '') as string,
       activeCases: Number(metadata.activeCases || metadata.active_cases || 0),
-      joinDate: m.unionJoinDate || m.union_join_date || m.joinedAt || m.joined_at || m.createdAt || m.created_at || '',
-      membershipNumber: m.membershipNumber || m.membership_number || '',
-      steward: metadata.steward,
+      joinDate: (m.unionJoinDate || m.union_join_date || m.joinedAt || m.joined_at || m.createdAt || m.created_at || '') as string,
+      membershipNumber: (m.membershipNumber || m.membership_number || '') as string,
+      steward: metadata.steward as string | undefined,
     };
   });
 
   const memberCount =
-    responseData?.data?.stats?.total ??
-    responseData?.data?.data?.stats?.total ??
-    responseData?.data?.result?.stats?.total ??
-    responseData?.data?.total ??
-    responseData?.data?.data?.total ??
-    responseData?.total ??
+    getNumber(responseData, 'data', 'stats', 'total') ??
+    getNumber(responseData, 'data', 'data', 'stats', 'total') ??
+    getNumber(responseData, 'data', 'result', 'stats', 'total') ??
+    getNumber(responseData, 'data', 'total') ??
+    getNumber(responseData, 'data', 'data', 'total') ??
+    getNumber(responseData, 'total') ??
     members.length;
 
   const activeMemberCount =
-    responseData?.data?.stats?.active ??
-    responseData?.data?.data?.stats?.active ??
-    responseData?.data?.result?.stats?.active ??
+    getNumber(responseData, 'data', 'stats', 'active') ??
+    getNumber(responseData, 'data', 'data', 'stats', 'active') ??
+    getNumber(responseData, 'data', 'result', 'stats', 'active') ??
     members.filter(m => m.status === 'active').length;
 
   // Filter members

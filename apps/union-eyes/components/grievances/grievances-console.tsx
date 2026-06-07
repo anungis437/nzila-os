@@ -89,7 +89,7 @@ const mapDbStatusToUi = (dbStatus: string | undefined | null): GrievanceStatus =
 
 // Map raw API/DB row to component Grievance shape
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapDbGrievanceToUi = (raw: unknown): Grievance => ({
+const mapDbGrievanceToUi = (raw: any): Grievance => ({
   id: raw.id ?? raw.grievanceNumber ?? "",
   number: raw.grievanceNumber ?? raw.number ?? "",
   title: raw.title ?? "Untitled Grievance",

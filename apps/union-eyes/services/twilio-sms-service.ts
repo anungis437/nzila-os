@@ -449,7 +449,7 @@ export async function handleTwilioWebhook(data: TwilioWebhookData): Promise<void
 
     // Update message status
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: unknown = {
+    const updateData: any = {
       status: newStatus,
     };
 

@@ -231,7 +231,7 @@ export async function searchMembersAdvancedAction(
     sortBy?: "name" | "joinDate" | "seniority" | "relevance";
     sortOrder?: "asc" | "desc";
   }
-): Promise<ActionResult<{ members: unknown[]; total: number }>> {
+): Promise<ActionResult<{ members: any[]; total: number }>> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -267,7 +267,7 @@ export async function executeSegmentAction(
     page?: number;
     limit?: number;
   }
-): Promise<ActionResult<{ members: unknown[]; total: number }>> {
+): Promise<ActionResult<{ members: any[]; total: number }>> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -348,7 +348,7 @@ export async function exportMembersAction(
     }
 
     // Get members data
-    let members: unknown[];
+    let members: any[];
     let totalCount: number;
 
     if (segmentId) {
@@ -378,7 +378,7 @@ export async function exportMembersAction(
       .select({ name: organizations.name })
       .from(organizations)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(or(eq(organizations.id, organizationId as unknown), eq(organizations.slug, organizationId)))
+      .where(or(eq(organizations.id, organizationId as any), eq(organizations.slug, organizationId)))
       .limit(1);
 
     const organizationName = org?.name || organizationId;

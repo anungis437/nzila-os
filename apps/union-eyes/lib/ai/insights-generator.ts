@@ -236,8 +236,7 @@ async function generateTrendInsights(
         affectedMetrics: [trend.analysisType],
         estimatedImpact: trendStrength > 0.85 ? 'High' : 'Medium',
         confidence: trendStrength,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataPoints: (trend.visualizationData as unknown)?.dataPoints || []
+        dataPoints: (trend.visualizationData as { dataPoints?: unknown[] } | null)?.dataPoints || []
       });
     }
 
@@ -258,8 +257,7 @@ async function generateTrendInsights(
         affectedMetrics: [trend.analysisType],
         estimatedImpact: 'High',
         confidence: 0.8,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataPoints: (trend.visualizationData as unknown)?.dataPoints || []
+        dataPoints: (trend.visualizationData as { dataPoints?: unknown[] } | null)?.dataPoints || []
       });
     }
 
@@ -280,8 +278,7 @@ async function generateTrendInsights(
         affectedMetrics: [trend.analysisType],
         estimatedImpact: 'Medium',
         confidence: trendStrength,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataPoints: (trend.visualizationData as unknown)?.dataPoints || []
+        dataPoints: (trend.visualizationData as { dataPoints?: unknown[] } | null)?.dataPoints || []
       });
     }
   }
@@ -330,8 +327,7 @@ async function generateAnomalyInsights(
         affectedMetrics: [analysis.analysisType],
         estimatedImpact: 'High',
         confidence: 0.9,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataPoints: (analysis.visualizationData as unknown)?.dataPoints || []
+        dataPoints: (analysis.visualizationData as { dataPoints?: unknown[] } | null)?.dataPoints || []
       });
     }
   }
@@ -543,10 +539,10 @@ export async function saveInsights(
         priority: insight.priority,
         title: insight.title,
         description: insight.description,
-        recommendations: insight.recommendations as unknown,
-        metrics: { affectedMetrics: insight.affectedMetrics, estimatedImpact: insight.estimatedImpact } as unknown,
+        recommendations: insight.recommendations as (typeof insightRecommendations.$inferInsert)['recommendations'],
+        metrics: { affectedMetrics: insight.affectedMetrics, estimatedImpact: insight.estimatedImpact } as (typeof insightRecommendations.$inferInsert)['metrics'],
         confidenceScore: insight.confidence.toString(),
-        dataSource: { dataPoints: insight.dataPoints } as unknown,
+        dataSource: { dataPoints: insight.dataPoints } as (typeof insightRecommendations.$inferInsert)['dataSource'],
         status: 'new'
       });
     }

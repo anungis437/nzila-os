@@ -106,7 +106,7 @@ export default function SocialFeedWidget() {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setFeedItems(items.map((item: unknown) => ({
+        setFeedItems(items.map((item: any) => ({
           ...item,
           publishedAt: new Date(item.publishedAt ?? item.published_at),
           mediaUrls: item.mediaUrls ?? item.media_urls ?? [],
@@ -329,7 +329,7 @@ export function SocialFeedCompact() {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setFeedItems(items.map((item: unknown) => ({
+        setFeedItems(items.map((item: any) => ({
           ...item,
           publishedAt: new Date(item.publishedAt ?? item.published_at),
           mediaUrls: item.mediaUrls ?? item.media_urls ?? [],

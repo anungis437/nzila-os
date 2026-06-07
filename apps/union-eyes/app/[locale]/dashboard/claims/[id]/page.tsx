@@ -14,6 +14,23 @@ import { ClaimJurisdictionInfo } from '@/components/claims/claim-jurisdiction-in
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
 import Link from 'next/link';
 
+interface ClaimAttachment {
+  url: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  uploadedAt: string;
+  uploadedBy: string;
+}
+
+interface WorkflowUpdate {
+  id?: string;
+  newStatus: string;
+  previousStatus?: string | null;
+  changedAt: string;
+  notes?: string | null;
+}
+
 interface Claim {
   claimId: string;
   claimNumber: string;
@@ -27,8 +44,7 @@ interface Claim {
   location: string;
   description: string;
   desiredOutcome: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attachments: unknown[];
+  attachments: ClaimAttachment[];
   witnessesPresent: boolean;
   witnessDetails: string | null;
   filedDate?: string;
@@ -82,8 +98,7 @@ export default function ClaimDetailPage() {
   const [claim, setClaim] = useState<Claim | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [workflowHistory, setWorkflowHistory] = useState<any[]>([]);
+  const [workflowHistory, setWorkflowHistory] = useState<WorkflowUpdate[]>([]);
 
   useEffect(() => {
     const fetchClaim = async () => {
@@ -123,8 +138,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
     }
   }, [claimId, trackCaseViewed]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleUploadComplete = (attachment: unknown) => {
+  const handleUploadComplete = (attachment: ClaimAttachment) => {
     // Refresh claim data to show new attachment
     if (claim) {
       setClaim({
@@ -139,8 +153,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
     if (claim) {
       setClaim({
         ...claim,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        attachments: (claim.attachments || []).filter((a: unknown) => a.url !== url),
+        attachments: (claim.attachments || []).filter((a) => a.url !== url),
       });
     }
   };
@@ -298,8 +311,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {workflowHistory.map((update: unknown, index: number) => (
+                      {workflowHistory.map((update, index: number) => (
                         <div key={update.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-medium text-gray-900">

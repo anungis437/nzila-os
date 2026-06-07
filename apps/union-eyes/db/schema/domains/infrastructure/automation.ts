@@ -69,7 +69,7 @@ export const automationRules = pgTable("automation_rules", {
     field: string;
     operator: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: unknown;
+    value: any;
   }>>(),
   
   // Actions to execute

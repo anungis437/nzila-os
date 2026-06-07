@@ -30,8 +30,7 @@ async function getApiClient() {
 /**
  * List signature-service records
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getSignatureServiceList(filters?: unknown) {
+export async function getSignatureServiceList(filters?: Record<string, string>) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -68,7 +67,6 @@ export async function getSignatureServiceById(id: string) {
 /**
  * Create new signature-service record
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createSignatureService(data: unknown) {
   const client = await getApiClient();
   
@@ -88,7 +86,6 @@ export async function createSignatureService(data: unknown) {
 /**
  * Update signature-service record
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateSignatureService(id: string, data: unknown) {
   const client = await getApiClient();
   
@@ -108,7 +105,6 @@ export async function updateSignatureService(id: string, data: unknown) {
 /**
  * Custom action: hashDocument
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function hashDocument(data: unknown) {
   const client = await getApiClient();
   
@@ -128,7 +124,6 @@ export async function hashDocument(data: unknown) {
 /**
  * Custom action: hashDocumentReference
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function hashDocumentReference(data: unknown) {
   const client = await getApiClient();
   
@@ -148,7 +143,6 @@ export async function hashDocumentReference(data: unknown) {
 /**
  * Custom action: signDocument
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function signDocument(data: unknown) {
   const client = await getApiClient();
   
@@ -168,7 +162,6 @@ export async function signDocument(data: unknown) {
 /**
  * Custom action: signDocumentWithKey
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function signDocumentWithKey(data: unknown) {
   const client = await getApiClient();
   
@@ -188,7 +181,6 @@ export async function signDocumentWithKey(data: unknown) {
 /**
  * Custom action: getDocumentSignatures
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getDocumentSignatures(data: unknown) {
   const client = await getApiClient();
   
@@ -208,7 +200,6 @@ export async function getDocumentSignatures(data: unknown) {
 /**
  * Custom action: rejectSignature
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function rejectSignature(data: unknown) {
   const client = await getApiClient();
   
@@ -228,7 +219,6 @@ export async function rejectSignature(data: unknown) {
 /**
  * Custom action: createSignatureRequest
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createSignatureRequest(data: unknown) {
   const client = await getApiClient();
   
@@ -248,7 +238,6 @@ export async function createSignatureRequest(data: unknown) {
 /**
  * Custom action: getUserSignatureRequests
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getUserSignatureRequests(data: unknown) {
   const client = await getApiClient();
   
@@ -268,7 +257,6 @@ export async function getUserSignatureRequests(data: unknown) {
 /**
  * Custom action: completeSignatureRequestStep
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function completeSignatureRequestStep(data: unknown) {
   const client = await getApiClient();
   
@@ -288,7 +276,6 @@ export async function completeSignatureRequestStep(data: unknown) {
 /**
  * Custom action: cancelSignatureRequest
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function cancelSignatureRequest(data: unknown) {
   const client = await getApiClient();
   
@@ -308,7 +295,6 @@ export async function cancelSignatureRequest(data: unknown) {
 /**
  * Custom action: expireOverdueSignatureRequests
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function expireOverdueSignatureRequests(data: unknown) {
   const client = await getApiClient();
   

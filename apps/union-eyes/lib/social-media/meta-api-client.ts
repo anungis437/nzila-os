@@ -451,7 +451,7 @@ export class MetaAPIClient {
     period: 'day' | 'week' | 'days_28' = 'day',
     since?: Date,
     until?: Date
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       metric: metrics.join(','),
@@ -489,7 +489,7 @@ export class MetaAPIClient {
       'post_comments',
       'post_shares',
     ]
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     const params = {
       metric: metrics.join(','),
       access_token: accessToken,
@@ -517,7 +517,7 @@ export class MetaAPIClient {
     period: 'day' | 'week' | 'days_28' | 'lifetime' = 'day',
     since?: Date,
     until?: Date
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     if (!this.accessToken) {
       throw new Error('Access token required');
     }
@@ -556,7 +556,7 @@ export class MetaAPIClient {
       'reach',
       'saved',
     ]
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     if (!this.accessToken) {
       throw new Error('Access token required');
     }
@@ -599,7 +599,7 @@ export class MetaAPIClient {
     try {
       const parsed = JSON.parse(usage);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const appUsage = Object.values(parsed)[0] as unknown;
+      const appUsage = Object.values(parsed)[0] as any;
       
       this.rateLimitInfo = {
         call_count: appUsage.call_count || 0,
@@ -727,7 +727,7 @@ export function createMetaClient(accessToken?: string): MetaAPIClient {
  * Helper to format Meta insights data
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function formatMetaInsights(insights: unknown[]): Record<string, number> {
+export function formatMetaInsights(insights: any[]): Record<string, number> {
   const formatted: Record<string, number> = {};
 
   for (const insight of insights) {

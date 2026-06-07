@@ -595,7 +595,7 @@ export default function EscalationWorkflowBuilder() {
                           <select
                             value={level.severity}
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            onChange={(e) => updateLevel(level.id, { severity: e.target.value as unknown })}
+                            onChange={(e) => updateLevel(level.id, { severity: e.target.value as any })}
                             className="w-full border rounded-md px-3 py-2"
                           >
                             {SEVERITY_LEVELS.map(s => (
@@ -608,7 +608,7 @@ export default function EscalationWorkflowBuilder() {
                           <select
                             value={level.recipientType}
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            onChange={(e) => updateLevel(level.id, { recipientType: e.target.value as unknown })}
+                            onChange={(e) => updateLevel(level.id, { recipientType: e.target.value as any })}
                             className="w-full border rounded-md px-3 py-2"
                           >
                             {RECIPIENT_TYPES.map(r => (
@@ -688,7 +688,7 @@ export default function EscalationWorkflowBuilder() {
                                         value={action.type}
                                         onChange={(e) => updateAction(level.id, action.id, { 
                                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                          type: e.target.value as unknown,
+                                          type: e.target.value as any,
                                           config: {},
                                         })}
                                         className="w-full border rounded-md px-3 py-2"

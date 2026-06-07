@@ -25,7 +25,7 @@ export const GET = withApi(
     const offset = Number(url.searchParams.get('offset') ?? 0)
 
     return withSystemContext(async () => {
-      const conditions: SQL<unknown>[] = []
+      const conditions: SQL<any>[] = []
       if (policyId) conditions.push(eq(policyGovernanceEvents.policyId, policyId))
       if (domain) conditions.push(eq(policyGovernanceEvents.domain, domain))
       if (eventType) conditions.push(eq(policyGovernanceEvents.eventType, eventType as never))

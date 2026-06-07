@@ -44,7 +44,7 @@ export class GovernanceService {
         headers: await this.getAuthHeaders(),
         body: JSON.stringify({
           certificateNumber: data.certificateNumber,
-          issueDate: typeof data.issueDate === 'string' ? data.issueDate : (data.issueDate as unknown as Date).toISOString().split('T')[0],
+          issueDate: typeof data.issueDate === 'string' ? data.issueDate : (data.issueDate as any as Date).toISOString().split('T')[0],
           councilMembers: data.councilMembers,
         }),
       }
@@ -283,9 +283,9 @@ export class GovernanceService {
     electionDate: Date;
     positionsAvailable: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    candidates: unknown[];
+    candidates: any[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    winners: unknown[];
+    winners: any[];
     totalVotes?: number;
     participationRate?: number;
   }) {

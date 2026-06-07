@@ -62,7 +62,7 @@ export async function generateWorkbookPdf(input: GenerateWorkbookPdfInput): Prom
 
   const element = React.createElement(GovernanceEntropyWorkbookTemplate, {
     data,
-  }) as ReactElement<DocumentProps, string | JSXElementConstructor<unknown>>;
+  }) as ReactElement<DocumentProps, string | JSXElementConstructor<any>>;
 
   return renderToBuffer(element);
 }

@@ -5,10 +5,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Proxy chain helper ───────────────────────────────────────────────────────
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -40,6 +40,9 @@ vi.mock('@/db/schema', () => ({
     responseSlaBreach: 'rsBreach', resolutionSlaBreach: 'rlBreach',
     satisfactionRating: 'satRating', responseTimeMinutes: 'rtm', resolutionTimeMinutes: 'rlm',
     slaResponseBy: 'slaRB', slaResolveBy: 'slaRL', viewCount: 'vc', firstResponseAt: 'fra' },
+  ticketStatusEnum: { enumValues: ['open', 'in_progress', 'resolved', 'closed'] },
+  ticketPriorityEnum: { enumValues: ['low', 'medium', 'high', 'urgent'] },
+  ticketCategoryEnum: { enumValues: ['general', 'technical', 'billing', 'security', 'other'] },
   ticketComments: { ticketId: 'ticketId', isInternal: 'isInternal', createdAt: 'createdAt' },
   ticketHistory: {},
   slaPolices: { isActive: 'isActive', priority: 'priority', category: 'category', isDefault: 'isDefault' },
@@ -125,7 +128,7 @@ describe('SupportService', () => {
     mocks.mockInsert.mockReturnValueOnce(chain(undefined));
 
     const { updateTicket } = await import('../support-service');
-    const result = await updateTicket('t-1', { status: 'in_progress' as unknown as Parameters<typeof updateTicket>[1]['status'] }, 'user-1');
+    const result = await updateTicket('t-1', { status: 'in_progress' as any as Parameters<typeof updateTicket>[1]['status'] }, 'user-1');
     expect(result).toEqual(updated);
   });
 

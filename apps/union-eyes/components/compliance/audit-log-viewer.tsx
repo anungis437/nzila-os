@@ -58,9 +58,9 @@ export interface AuditLogEntry {
   changes?: {
     field: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    oldValue: unknown;
+    oldValue: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    newValue: unknown;
+    newValue: any;
   }[];
 }
 

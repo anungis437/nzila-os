@@ -149,7 +149,7 @@ export async function confirmDuesPayment(
         paymentDate: new Date(),
         stripePaymentIntentId: paymentIntentId,
         updatedAt: new Date(),
-      } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
+      } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
       .where(and(
         eq(schema.duesTransactions.id, transactionId),
         eq(schema.duesTransactions.organizationId, organizationId)
@@ -287,7 +287,7 @@ export async function createStipendPayout(
         paymentReference: transactionId,
         paymentMethod: process.env.STRIPE_SECRET_KEY ? 'stripe_connect' : 'pending',
         updatedAt: new Date(),
-      } as unknown as Partial<typeof schema.stipendDisbursements.$inferInsert>)
+      } as any as Partial<typeof schema.stipendDisbursements.$inferInsert>)
       .where(and(
         eq(schema.stipendDisbursements.id, disbursementId),
         eq(schema.stipendDisbursements.tenantId, organizationId)
@@ -367,7 +367,7 @@ export async function batchProcessStipendPayouts(
           paymentReference: transactionId,
           paymentDate: new Date(),
           updatedAt: new Date(),
-        } as unknown as Partial<typeof schema.stipendDisbursements.$inferInsert>)
+        } as any as Partial<typeof schema.stipendDisbursements.$inferInsert>)
         .where(eq(schema.stipendDisbursements.id, disbursementId));
 
       results.push({
@@ -516,7 +516,7 @@ export async function confirmDonationPayment(
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as unknown as typeof schema.donations.$inferInsert)
+      } as any as typeof schema.donations.$inferInsert)
       .returning({ id: schema.donations.id });
 
     return donation.id;
@@ -536,7 +536,7 @@ export interface StripeWebhookEvent {
   type: string;
   data: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    object: unknown;
+    object: any;
   };
 }
 
@@ -556,7 +556,7 @@ export async function processStripeWebhook(
       signature,
       webhookSecret
     );
-    event = verified as unknown as StripeWebhookEvent;
+    event = verified as any as StripeWebhookEvent;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.error('Stripe webhook signature verification failed', { error: message });
@@ -588,7 +588,7 @@ export async function processStripeWebhook(
       stripeCustomerId: eventObject.customer || null,
       eventData: eventObject || {},
       processed: false,
-    } as unknown as typeof schema.stripeWebhookEvents.$inferInsert);
+    } as any as typeof schema.stripeWebhookEvents.$inferInsert);
   } catch (dedupErr) {
     // Unique constraint violation = already inserted by concurrent request
     const msg = dedupErr instanceof Error ? dedupErr.message : String(dedupErr);
@@ -634,7 +634,7 @@ export async function processStripeWebhook(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handlePaymentIntentSucceeded(paymentIntent: unknown): Promise<void> {
+async function handlePaymentIntentSucceeded(paymentIntent: any): Promise<void> {
   const intent = paymentIntent as StripePaymentIntentLike;
   const metadata = intent.metadata;
   const type = metadata.type;
@@ -648,7 +648,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: unknown): Promise<voi
         paymentDate: new Date(),
         stripePaymentIntentId: intent.id,
         updatedAt: new Date(),
-      } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
+      } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
       .where(eq(schema.duesTransactions.id, metadata.transactionId));
 
   } else if (type === 'donation') {
@@ -668,12 +668,12 @@ async function handlePaymentIntentSucceeded(paymentIntent: unknown): Promise<voi
         stripePaymentIntentId: intent.id,
         status: 'completed',
         createdAt: new Date().toISOString(),
-      } as unknown as typeof schema.donations.$inferInsert);
+      } as any as typeof schema.donations.$inferInsert);
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handlePaymentIntentFailed(paymentIntent: unknown): Promise<void> {
+async function handlePaymentIntentFailed(paymentIntent: any): Promise<void> {
   const intent = paymentIntent as StripePaymentIntentLike;
   const metadata = intent.metadata;
   const type = metadata.type;
@@ -684,13 +684,13 @@ async function handlePaymentIntentFailed(paymentIntent: unknown): Promise<void> 
         status: 'failed',
         stripePaymentIntentId: intent.id,
         updatedAt: new Date(),
-      } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
+      } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
       .where(eq(schema.duesTransactions.id, metadata.transactionId));
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleChargeRefunded(charge: unknown): Promise<void> {
+async function handleChargeRefunded(charge: any): Promise<void> {
   const chargeData = charge as StripeChargeLike;
   const paymentIntentId = chargeData.payment_intent;
 
@@ -699,14 +699,14 @@ async function handleChargeRefunded(charge: unknown): Promise<void> {
     .set({
       status: 'refunded',
       updatedAt: new Date(),
-    } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
+    } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
     .where(eq(schema.duesTransactions.paymentReference, paymentIntentId));
 
   await db.update(schema.donations)
     .set({
       status: 'refunded',
       updatedAt: new Date(),
-    } as unknown as Partial<typeof schema.donations.$inferInsert>)
+    } as any as Partial<typeof schema.donations.$inferInsert>)
     .where(eq(schema.donations.stripePaymentIntentId, paymentIntentId));
 }
 
