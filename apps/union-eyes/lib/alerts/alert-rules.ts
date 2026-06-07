@@ -392,9 +392,9 @@ export function validateAlertRule(rule: Partial<AlertRule>): AlertRuleValidation
     AlertRuleSchema.parse(rule);
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).errors) {
+    if ((error as unknown).errors) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      errors.push(...(error as any).errors.map((e: any) => `${e.path.join('.')}: ${e.message}`));
+      errors.push(...(error as unknown).errors.map((e: unknown) => `${e.path.join('.')}: ${e.message}`));
     }
   }
 

@@ -34,7 +34,7 @@ import {
 
 describe('role hierarchy fallback branch', () => {
   it('returns false when user role is unknown at runtime', () => {
-    expect(meetsRoleRequirement('unknown-role' as any, 'org_viewer')).toBe(false)
+    expect(meetsRoleRequirement('unknown-role' as Parameters<typeof meetsRoleRequirement>[0], 'org_viewer')).toBe(false)
   })
 })
 
@@ -102,7 +102,11 @@ describe('feature gate branches', () => {
       ...manifest,
       tierOrder: ['registered', 'select'] as const,
     }
-    const result = checkFeatureGate(customManifest as any, 'deals.pipeline', 'professional' as any)
+    const result = checkFeatureGate(
+      customManifest as unknown as Parameters<typeof checkFeatureGate>[0],
+      'deals.pipeline',
+      'professional' as Parameters<typeof checkFeatureGate>[2],
+    )
     expect(result.granted).toBe(false)
     expect(result.reason).toBe('Unknown tier')
   })

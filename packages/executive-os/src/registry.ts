@@ -6,20 +6,20 @@
  */
 import type { ExecutiveAgent, ExecutiveDomain } from './contract'
 
-const agents = new Map<string, ExecutiveAgent<any>>()
+const agents = new Map<string, ExecutiveAgent<unknown>>()
 
 export function registerAgent<T>(agent: ExecutiveAgent<T>): void {
   if (agents.has(agent.key)) {
     throw new Error(`Executive agent already registered: ${agent.key}`)
   }
-  agents.set(agent.key, agent as ExecutiveAgent<any>)
+  agents.set(agent.key, agent as ExecutiveAgent<unknown>)
 }
 
-export function getAgent(key: string): ExecutiveAgent<any> | undefined {
+export function getAgent(key: string): ExecutiveAgent<unknown> | undefined {
   return agents.get(key)
 }
 
-export function listAgents(domain?: ExecutiveDomain): readonly ExecutiveAgent<any>[] {
+export function listAgents(domain?: ExecutiveDomain): readonly ExecutiveAgent<unknown>[] {
   const all = Array.from(agents.values())
   return domain ? all.filter((a) => a.domain === domain) : all
 }

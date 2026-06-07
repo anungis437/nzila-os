@@ -230,12 +230,12 @@ describe('RED-TEAM-013 — Audit hash chain tampering is detectable', () => {
       { payload: e3, hash: h3, previousHash: h2 },
     ]
 
-    const valid = verifyChain(chain, (e: any) => e.payload)
+    const valid = verifyChain(chain, (e: unknown) => e.payload)
     expect(valid.valid).toBe(true)
 
     // Tamper: modify middle entry payload
     chain[1] = { ...chain[1], payload: { data: 'TAMPERED' } }
-    const tampered = verifyChain(chain, (e: any) => e.payload)
+    const tampered = verifyChain(chain, (e: unknown) => e.payload)
     expect(tampered.valid).toBe(false)
     expect(tampered.brokenAtIndex).toBe(1)
   })

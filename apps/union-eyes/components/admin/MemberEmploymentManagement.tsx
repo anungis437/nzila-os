@@ -175,7 +175,7 @@ export default function MemberEmploymentManagement({ organizationId }: MemberEmp
       const result = await getEmploymentByOrganizationAction(organizationId, statusFilter);
       if (result.isSuccess && result.data) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setEmploymentRecords(result.data as any);
+        setEmploymentRecords(result.data as unknown);
       } else {
         toast({
           title: "Error",
@@ -392,9 +392,9 @@ function EmploymentFormDialog({
   const [submitting, setSubmitting] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const form = useForm<any>({
+  const form = useForm<unknown>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(createMemberEmploymentSchema) as any,
+    resolver: zodResolver(createMemberEmploymentSchema) as unknown,
     defaultValues: editingRecord
       ? {
           organizationId: editingRecord.organizationId,
@@ -403,11 +403,11 @@ function EmploymentFormDialog({
           seniorityDate: editingRecord.seniorityDate,
           jobTitle: editingRecord.jobTitle,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          employmentStatus: editingRecord.employmentStatus as any,
+          employmentStatus: editingRecord.employmentStatus as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          employmentType: editingRecord.employmentType as any,
+          employmentType: editingRecord.employmentType as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          payFrequency: editingRecord.payFrequency as any,
+          payFrequency: editingRecord.payFrequency as unknown,
           jobCode: editingRecord.jobCode || undefined,
           hourlyRate: editingRecord.hourlyRate ? parseFloat(editingRecord.hourlyRate) : undefined,
           baseSalary: editingRecord.baseSalary ? parseFloat(editingRecord.baseSalary) : undefined,
@@ -415,7 +415,7 @@ function EmploymentFormDialog({
             ? parseFloat(editingRecord.regularHoursPerWeek)
             : 40,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          shiftType: editingRecord.shiftType as any,
+          shiftType: editingRecord.shiftType as unknown,
           checkoffAuthorized: editingRecord.checkoffAuthorized ?? true,
         }
       : {
@@ -432,12 +432,12 @@ function EmploymentFormDialog({
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: unknown) => {
     setSubmitting(true);
     try {
       // Convert numeric fields to strings for database compatibility
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const employmentData: any = {
+      const employmentData: unknown = {
         ...data,
         hourlyRate: data.hourlyRate ? String(data.hourlyRate) : undefined,
         baseSalary: data.baseSalary ? String(data.baseSalary) : undefined,

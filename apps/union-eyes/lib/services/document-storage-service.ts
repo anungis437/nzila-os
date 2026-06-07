@@ -55,19 +55,19 @@ class DocumentStorageService {
   private backend: StorageBackend;
   private bucket: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private s3Client?: any;
+  private s3Client?: unknown;
   private s3Sdk?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    PutObjectCommand: any;
+    PutObjectCommand: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    GetObjectCommand: any;
+    GetObjectCommand: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    DeleteObjectCommand: any;
+    DeleteObjectCommand: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getSignedUrl: any;
+    getSignedUrl: unknown;
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private blobServiceClient?: any;
+  private blobServiceClient?: unknown;
   private azureConnectionString?: string;
   private r2Endpoint?: string;
 
@@ -92,7 +92,7 @@ class DocumentStorageService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async ensureAzureClient(): Promise<any> {
+  private async ensureAzureClient(): Promise<unknown> {
     if (this.blobServiceClient) {
       return this.blobServiceClient;
     }
@@ -110,13 +110,13 @@ class DocumentStorageService {
 
   private async ensureS3Client(): Promise<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    PutObjectCommand: any;
+    PutObjectCommand: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    GetObjectCommand: any;
+    GetObjectCommand: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    DeleteObjectCommand: any;
+    DeleteObjectCommand: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getSignedUrl: any;
+    getSignedUrl: unknown;
   }> {
     if (this.s3Client && this.s3Sdk) {
       return this.s3Sdk;

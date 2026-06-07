@@ -10,14 +10,14 @@ const mocks = vi.hoisted(() => ({
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function chain(result: any = []) {
+function chain(result: unknown = []) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const c: any = {};
+  const c: unknown = {};
   for (const m of ['from', 'where', 'limit']) {
     c[m] = vi.fn(() => c);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  c.then = (resolve: any) => resolve(result);
+  c.then = (resolve: unknown) => resolve(result);
   return c;
 }
 

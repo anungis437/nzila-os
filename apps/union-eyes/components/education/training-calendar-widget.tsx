@@ -256,7 +256,7 @@ export function TrainingCalendarWidget({
               </Popover>
 
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Select value={view} onValueChange={(v: any) => setView(v)}>
+              <Select value={view} onValueChange={(v: unknown) => setView(v)}>
                 <SelectTrigger className="w-[120px]">
                   <SelectValue />
                 </SelectTrigger>

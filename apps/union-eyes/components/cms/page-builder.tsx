@@ -43,15 +43,15 @@ interface ContentBlock {
   id: string;
   type: 'heading' | 'text' | 'image' | 'video' | 'button' | 'hero' | 'features' | 'cta' | 'gallery';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  content: any;
+  content: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  styles?: any;
+  styles?: unknown;
 }
 
 interface PageBuilderProps {
   initialBlocks?: ContentBlock[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSave: (blocks: ContentBlock[], pageData: any) => Promise<void>;
+  onSave: (blocks: ContentBlock[], pageData: unknown) => Promise<void>;
   pageTitle?: string;
   pageSlug?: string;
 }
@@ -380,7 +380,7 @@ export function PageBuilder({ initialBlocks = [], onSave, pageTitle = '', pageSl
       case 'button':
         return (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          <Button variant={block.content.variant as any}>
+          <Button variant={block.content.variant as unknown}>
             {block.content.text}
           </Button>
         );

@@ -14,7 +14,7 @@ import { vendorSchema, formatZodErrors } from '@/lib/validations/financial';
 
 interface VendorFormProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  vendor?: any;
+  vendor?: unknown;
   mode: 'create' | 'edit';
 }
 

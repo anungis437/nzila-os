@@ -247,7 +247,7 @@ export class IndigenousDataService {
    */
   async routeToStorage(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any,
+    data: unknown,
     reserveId: string,
     _dataCategory: string
   ): Promise<{

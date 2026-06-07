@@ -287,8 +287,8 @@ export class GovernanceService {
     electionYear: number;
     electionDate: Date;
     positionsAvailable: number;
-    candidates: any[];
-    winners: any[];
+    candidates: unknown[];
+    winners: unknown[];
     totalVotes?: number;
     participationRate?: number;
   }) {

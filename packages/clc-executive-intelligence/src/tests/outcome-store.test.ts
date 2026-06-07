@@ -39,7 +39,7 @@ describe('validateOutcome', () => {
   });
 
   it('flags invalid outcome result', () => {
-    const errors = validateOutcome(makeOutcome({ outcome: 'invalid' as any }));
+    const errors = validateOutcome(makeOutcome({ outcome: 'invalid' as DecisionOutcome['outcome'] }));
     expect(errors).toContainEqual(expect.objectContaining({ field: 'outcome' }));
   });
 

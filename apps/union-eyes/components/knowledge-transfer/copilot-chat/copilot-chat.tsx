@@ -10,7 +10,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import type { CopilotQueryResult, CopilotMessage } from '@/lib/knowledge-transfer/copilot/copilot-models';
+import type { CopilotQueryResult } from '@/lib/knowledge-transfer/copilot/copilot-models';
 
 interface MessageDisplay {
   id: string;
@@ -46,10 +46,6 @@ function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
       {badge.label}
     </span>
   );
-}
-
-interface GovernanceFlagSeverityProps {
-  severity: string;
 }
 
 function severityColor(severity: string): string {

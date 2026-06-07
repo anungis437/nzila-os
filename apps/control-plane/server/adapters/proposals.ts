@@ -8,7 +8,6 @@ import { db } from "@nzila/db";
 import {
   commerceQuotes,
   commerceCustomers,
-  commerceOpportunities,
   tradeQuotes,
   tradeDeals,
   tradeParties,

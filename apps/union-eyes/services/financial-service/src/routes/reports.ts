@@ -22,6 +22,11 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
+const getOrganizationId = (req: Request): string | undefined => {
+  const authReq = req as AuthenticatedRequest;
+  return authReq.user?.organizationId ?? authReq.user?.tenantId;
+};
+
 // Role-based authorization (assumes authenticate middleware already ran)
 const authorize = (roles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -50,9 +55,10 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
-      const organizationId = organizationIdFromUser ?? legacyTenantId;
+      const organizationId = getOrganizationId(req);
+      if (!organizationId) {
+        return res.status(401).json({ success: false, error: 'Missing organization context' });
+      }
 
       // Default to last 30 days if not specified
       const endDate = req.query.endDate 
@@ -91,9 +97,10 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
-      const organizationId = organizationIdFromUser ?? legacyTenantId;
+      const organizationId = getOrganizationId(req);
+      if (!organizationId) {
+        return res.status(401).json({ success: false, error: 'Missing organization context' });
+      }
 
       const validation = dateRangeSchema.safeParse(req.query);
       if (!validation.success) {
@@ -134,9 +141,10 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
-      const organizationId = organizationIdFromUser ?? legacyTenantId;
+      const organizationId = getOrganizationId(req);
+      if (!organizationId) {
+        return res.status(401).json({ success: false, error: 'Missing organization context' });
+      }
 
       const statistics = await getArrearsStatistics(organizationId);
 
@@ -163,9 +171,10 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
-      const organizationId = organizationIdFromUser ?? legacyTenantId;
+      const organizationId = getOrganizationId(req);
+      if (!organizationId) {
+        return res.status(401).json({ success: false, error: 'Missing organization context' });
+      }
 
       const validation = dateRangeSchema.safeParse(req.query);
       if (!validation.success) {
@@ -206,9 +215,10 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
-      const organizationId = organizationIdFromUser ?? legacyTenantId;
+      const organizationId = getOrganizationId(req);
+      if (!organizationId) {
+        return res.status(401).json({ success: false, error: 'Missing organization context' });
+      }
 
       const validation = dateRangeSchema.safeParse(req.query);
       if (!validation.success) {
@@ -257,9 +267,10 @@ router.get(
   authorize(['admin', 'financial_admin']),
   async (req, res) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
-      const organizationId = organizationIdFromUser ?? legacyTenantId;
+      const organizationId = getOrganizationId(req);
+      if (!organizationId) {
+        return res.status(401).json({ success: false, error: 'Missing organization context' });
+      }
       const format = (req.query.format as string) || 'json';
       const reportType = req.query.type as string;
 
@@ -282,7 +293,7 @@ router.get(
       const { startDate, endDate } = validation.data;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let data: any;
+      let data: unknown;
 
       switch (reportType) {
         case 'dashboard':
@@ -345,7 +356,7 @@ router.get(
  * Simple CSV converter for export
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function convertToCSV(data: any): string {
+function convertToCSV(data: unknown): string {
   if (Array.isArray(data)) {
     if (data.length === 0) return '';
     
@@ -359,7 +370,8 @@ function convertToCSV(data: any): string {
     return [headers, ...rows].join('\n');
   } else {
     // For single objects, convert to key-value pairs
-    const rows = Object.entries(data).map(([key, value]) => 
+    const obj = (data && typeof data === 'object') ? (data as Record<string, unknown>) : {};
+    const rows = Object.entries(obj).map(([key, value]) => 
       `"${key}","${value}"`
     );
     return ['Field,Value', ...rows].join('\n');

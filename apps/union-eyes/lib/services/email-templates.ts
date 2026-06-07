@@ -15,7 +15,7 @@ interface TemplateContext {
   recipientName?: string;
   organizationName?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface RenderedTemplate {
@@ -460,7 +460,7 @@ export function renderEmailTemplate(
 ): RenderedTemplate {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const template = (emailTemplates as any)[templateKey];
+    const template = (emailTemplates as unknown)[templateKey];
 
     if (!template) {
       throw new Error(`Email template not found: ${templateKey}`);
@@ -530,7 +530,7 @@ export function validateTemplateContext(
   context: TemplateContext
 ): { valid: boolean; missingVariables: string[] } {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const template = (emailTemplates as any)[templateKey];
+  const template = (emailTemplates as unknown)[templateKey];
 
   if (!template) {
     return { valid: false, missingVariables: [`Template not found: ${templateKey}`] };

@@ -144,7 +144,7 @@ describe('CLC Governance', () => {
     it('returns empty for unknown dimension', () => {
       setParticipationRegistry([makeParticipation('org-1')]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(getConsentedOrgIds('unknownDimension' as any)).toEqual([]);
+      expect(getConsentedOrgIds('unknownDimension' as unknown)).toEqual([]);
     });
   });
 

@@ -55,11 +55,11 @@ describe('NzilaAppShell', () => {
       orgId: null,
       orgRole: null,
       roles: [],
-    } as any)
+    } as unknown as ReturnType<typeof useAuth>)
     vi.mocked(useUser).mockReturnValueOnce({
       isLoaded: false,
       user: null,
-    } as any)
+    } as unknown as ReturnType<typeof useUser>)
 
     render(
       <NzilaAppShell moduleId="flow">
@@ -76,7 +76,7 @@ describe('NzilaAppShell', () => {
       isLoaded: true,
       organization: null,
       membership: null,
-    } as any)
+    } as unknown as ReturnType<typeof useOrganization>)
 
     render(
       <NzilaAppShell moduleId="flow">

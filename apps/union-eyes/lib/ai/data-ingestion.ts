@@ -202,7 +202,7 @@ class PDFParser implements FileParser {
     try {
       // Load the PDF document
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const loadingTask = (pdfjs as any).getDocument({ data: buffer });
+      const loadingTask = (pdfjs as unknown).getDocument({ data: buffer });
       const pdf = await loadingTask.promise;
 
       const textContent: string[] = [];
@@ -215,7 +215,7 @@ class PDFParser implements FileParser {
         
         const pageText = content.items
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .map((item: any) => item.str)
+          .map((item: unknown) => item.str)
           .join(' ');
         
         textContent.push(pageText);

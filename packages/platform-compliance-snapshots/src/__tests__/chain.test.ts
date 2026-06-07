@@ -215,7 +215,7 @@ describe('SnapshotChain', () => {
     await chain.append(makeSnapshot(3))
 
     // Corrupt entry 2 to have null previousHash
-    ports.chain[2] = { ...ports.chain[2]!, previousHash: null as any }
+    ports.chain[2] = { ...ports.chain[2]!, previousHash: null as unknown }
 
     const result = await chain.verify(ORG_ID)
 

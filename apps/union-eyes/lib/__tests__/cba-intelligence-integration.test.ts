@@ -75,6 +75,7 @@ vi.mock("drizzle-orm", async () => {
     ...actual,
     eq: vi.fn((...args: unknown[]) => ({ type: "eq", args })),
     and: vi.fn((...args: unknown[]) => ({ type: "and", args })),
+    or: vi.fn((...args: unknown[]) => ({ type: "or", args })),
     ne: vi.fn((...args: unknown[]) => ({ type: "ne", args })),
     desc: vi.fn((col: unknown) => ({ type: "desc", col })),
     ilike: vi.fn((...args: unknown[]) => ({ type: "ilike", args })),
@@ -423,5 +424,20 @@ describe("CBA Intelligence – Integration pipeline", () => {
     });
 
     expect(mocks.mockSelect).toHaveBeenCalled();
+  });
+
+  it("Step 12: applies free-text search when listing agreements", async () => {
+    mocks.mockSelect
+      .mockReturnValueOnce(makeDbChain([{ count: 1 }]))
+      .mockReturnValueOnce(makeDbChain([AGREEMENT_FIXTURE]));
+
+    const drizzle = await import("drizzle-orm");
+    const { listAgreements } = await import("@/lib/services/cba-intelligence/extraction-service");
+
+    const result = await listAgreements({ search: "PSAC" }, { page: 1, limit: 25 });
+
+    expect(drizzle.or).toHaveBeenCalled();
+    expect(drizzle.ilike).toHaveBeenCalledTimes(4);
+    expect(result.items).toHaveLength(1);
   });
 });

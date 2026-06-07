@@ -11,6 +11,16 @@ import { eq, and, desc } from 'drizzle-orm';
 
 const router = Router();
 
+type AuthUser = {
+  organizationId: string;
+  id: string;
+  role: string;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as unknown as { user: AuthUser }).user;
+}
+
 // ============================================================================
 // VALIDATION SCHEMAS
 // ============================================================================
@@ -68,8 +78,7 @@ const createDuesRuleSchema = z.object({
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { active } = req.query;
     
     // Build where conditions
@@ -104,8 +113,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { id } = req.params;
     
     const rules = await db
@@ -141,8 +149,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, role } = (req as any).user;
+    const { organizationId, role, id } = getAuthUser(req);
     
     // Check permissions
     if (!['admin', 'financial_admin'].includes(role)) {
@@ -172,8 +179,7 @@ router.post('/', async (req: Request, res: Response) => {
       billingFrequency: validatedData.billingFrequency,
       effectiveDate: validatedData.effectiveFrom.toISOString().split('T')[0],
       endDate: validatedData.effectiveTo?.toISOString().split('T')[0],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      createdBy: (req as any).user.id,
+      createdBy: id,
     };
     
     const newRule = await db.insert(duesRules).values(dbData).returning();
@@ -205,8 +211,7 @@ router.post('/', async (req: Request, res: Response) => {
  */
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
     const { id } = req.params;
     
     // Check permissions
@@ -221,8 +226,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const validatedData = createDuesRuleSchema.partial().parse(req.body);
     
     // Map validation schema to database schema for update
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dbData: any = {};
+    const dbData: Partial<typeof duesRules.$inferInsert> = {};
     if (validatedData.ruleName) dbData.ruleName = validatedData.ruleName;
     if (validatedData.ruleCode) dbData.ruleCode = validatedData.ruleCode;
     if (validatedData.description !== undefined) dbData.description = validatedData.description;
@@ -280,8 +284,7 @@ router.put('/:id', async (req: Request, res: Response) => {
  */
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
     const { id } = req.params;
     
     // Check permissions - only admin can delete
@@ -326,8 +329,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
  */
 router.post('/:id/duplicate', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, role } = (req as any).user;
+    const { organizationId, role, id: userId } = getAuthUser(req);
     const { id } = req.params;
     const { newRuleCode, newRuleName } = req.body;
     
@@ -372,8 +374,7 @@ router.post('/:id/duplicate', async (req: Request, res: Response) => {
       billingFrequency: existingRule.billingFrequency,
       effectiveDate: existingRule.effectiveDate,
       endDate: existingRule.endDate,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      createdBy: (req as any).user.id,
+      createdBy: userId,
     }).returning();
     
     res.status(201).json({

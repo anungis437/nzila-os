@@ -254,7 +254,7 @@ export function PushNotificationBuilder({
               <div className="space-y-2">
                 <Label htmlFor="priority">Priority</Label>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <Select value={priority} onValueChange={(v: any) => setPriority(v)}>
+                <Select value={priority} onValueChange={(v: unknown) => setPriority(v)}>
                   <SelectTrigger id="priority">
                     <SelectValue />
                   </SelectTrigger>
@@ -322,7 +322,7 @@ export function PushNotificationBuilder({
             <div className="space-y-2">
               <Label>Send to</Label>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Select value={targetAudience} onValueChange={(v: any) => setTargetAudience(v)}>
+              <Select value={targetAudience} onValueChange={(v: unknown) => setTargetAudience(v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

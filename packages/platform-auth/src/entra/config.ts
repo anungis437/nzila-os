@@ -200,9 +200,14 @@ export const authConfig: NextAuthConfig = {
 
 const nextAuth = NextAuth(authConfig)
 
+export type PlatformAuthFn = {
+  (): Promise<EntraSession | null>
+  <T>(middleware: (req: unknown) => T): T
+}
+
+export type PlatformSignInFn = (...args: unknown[]) => Promise<unknown>
+
 export const handlers = nextAuth.handlers
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const auth: any = nextAuth.auth
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const signIn: any = nextAuth.signIn
+export const auth: PlatformAuthFn = nextAuth.auth as unknown as PlatformAuthFn
+export const signIn: PlatformSignInFn = nextAuth.signIn as unknown as PlatformSignInFn
 export const signOut = nextAuth.signOut

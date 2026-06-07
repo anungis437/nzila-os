@@ -8,6 +8,7 @@ import {
 } from './coa-mapping'
 import type { CoaMapping } from './coa-mapping'
 import type { QboAccount } from './types'
+import type { QboClient } from './client'
 
 vi.mock('./client', () => ({
   qboAccounts: { list: vi.fn() },
@@ -74,7 +75,7 @@ describe('inferNzilaCategory', () => {
     // Use name that matches rd-expense but not earlier patterns like accounts-receivable (/ar/)
     const result = inferNzilaCategory(makeAccount({
       Classification: 'Asset',
-      AccountType: 'Other Asset' as any,
+      AccountType: 'Other Asset',
       Name: 'SRED Costs',
       FullyQualifiedName: 'SRED Costs',
     }))
@@ -105,7 +106,7 @@ describe('inferNzilaCategory', () => {
   it('returns null for unrecognized accounts', () => {
     const result = inferNzilaCategory(makeAccount({
       Classification: 'Asset',
-      AccountType: 'Other Asset' as any,
+      AccountType: 'Other Asset',
       Name: 'Mystery',
       FullyQualifiedName: 'Mystery',
     }))
@@ -123,7 +124,7 @@ describe('buildCoaMapping', () => {
       makeAccount({ Id: '30', Classification: 'Expense', AccountType: 'Expense', Name: 'Rent' }),
     ])
 
-    const qbo: any = {}
+    const qbo = {} as unknown as QboClient
     const result = await buildCoaMapping(qbo)
 
     expect(result.mapped.length).toBeGreaterThanOrEqual(2)
@@ -137,7 +138,7 @@ describe('buildCoaMapping', () => {
       makeAccount({ Id: '10', Classification: 'Asset', AccountType: 'Bank', Name: 'Cash' }),
     ])
 
-    const result = await buildCoaMapping({} as any)
+    const result = await buildCoaMapping({} as unknown as QboClient)
     expect(result.unmappedNzila.length).toBeGreaterThan(0)
     expect(result.unmappedNzila).not.toContain('cash')
   })
@@ -145,10 +146,10 @@ describe('buildCoaMapping', () => {
   it('reports unmapped QBO accounts', async () => {
     mockList.mockResolvedValue([
       makeAccount({ Id: '10', Classification: 'Asset', AccountType: 'Bank', Name: 'Cash' }),
-      makeAccount({ Id: '99', Classification: 'Asset', AccountType: 'Other Asset' as any, Name: 'Xyzzy', FullyQualifiedName: 'Xyzzy' }),
+      makeAccount({ Id: '99', Classification: 'Asset', AccountType: 'Other Asset', Name: 'Xyzzy', FullyQualifiedName: 'Xyzzy' }),
     ])
 
-    const result = await buildCoaMapping({} as any)
+    const result = await buildCoaMapping({} as unknown as QboClient)
     expect(result.unmappedQbo.find((a) => a.Id === '99')).toBeDefined()
   })
 
@@ -158,7 +159,7 @@ describe('buildCoaMapping', () => {
       makeAccount({ Id: '11', Classification: 'Asset', AccountType: 'Bank', Name: 'Savings' }),
     ])
 
-    const result = await buildCoaMapping({} as any)
+    const result = await buildCoaMapping({} as unknown as QboClient)
     const cashMappings = result.mapped.filter((m) => m.nzilaCategory === 'cash')
     expect(cashMappings).toHaveLength(1)
   })
@@ -185,7 +186,7 @@ describe('detectMappingDrifts', () => {
   it('returns empty when nothing changed', async () => {
     const qbo = {
       get: vi.fn().mockResolvedValue(makeAccount({ Id: '1', Name: 'Cash', AccountType: 'Bank', Active: true })),
-    } as any
+    } as unknown as QboClient
 
     const existing: CoaMapping[] = [{
       nzilaCategory: 'cash',
@@ -204,7 +205,7 @@ describe('detectMappingDrifts', () => {
   it('detects name change', async () => {
     const qbo = {
       get: vi.fn().mockResolvedValue(makeAccount({ Id: '1', Name: 'Primary Chequing', AccountType: 'Bank', Active: true })),
-    } as any
+    } as unknown as QboClient
 
     const existing: CoaMapping[] = [{
       nzilaCategory: 'cash',
@@ -222,8 +223,8 @@ describe('detectMappingDrifts', () => {
 
   it('detects account type change', async () => {
     const qbo = {
-      get: vi.fn().mockResolvedValue(makeAccount({ Id: '1', Name: 'Cash', AccountType: 'Other Current Asset' as any, Active: true })),
-    } as any
+      get: vi.fn().mockResolvedValue(makeAccount({ Id: '1', Name: 'Cash', AccountType: 'Other Current Asset', Active: true })),
+    } as unknown as QboClient
 
     const existing: CoaMapping[] = [{
       nzilaCategory: 'cash',
@@ -242,7 +243,7 @@ describe('detectMappingDrifts', () => {
   it('detects deactivated account', async () => {
     const qbo = {
       get: vi.fn().mockResolvedValue(makeAccount({ Id: '1', Name: 'Cash', AccountType: 'Bank', Active: false })),
-    } as any
+    } as unknown as QboClient
 
     const existing: CoaMapping[] = [{
       nzilaCategory: 'cash',
@@ -261,7 +262,7 @@ describe('detectMappingDrifts', () => {
   it('detects deleted/inaccessible account', async () => {
     const qbo = {
       get: vi.fn().mockRejectedValue(new Error('Not found')),
-    } as any
+    } as unknown as QboClient
 
     const existing: CoaMapping[] = [{
       nzilaCategory: 'cash',
@@ -288,14 +289,14 @@ describe('syncChartOfAccounts', () => {
 
     const qbo = {
       get: vi.fn().mockResolvedValue(makeAccount({ Id: '5', Name: 'Changed', AccountType: 'Bank', Active: true })),
-    } as any
+    } as unknown as QboClient
 
     const existing: CoaMapping[] = [{
       nzilaCategory: 'revenue',
       qboAccountId: '5',
       qboAccountName: 'Sales',
       qboClassification: 'Revenue',
-      qboAccountType: 'Bank' as any,
+      qboAccountType: 'Bank',
       confidence: 'exact',
       lastSyncedAt: new Date().toISOString(),
     }]
@@ -307,7 +308,7 @@ describe('syncChartOfAccounts', () => {
 
   it('returns empty drifts when no existing mappings', async () => {
     mockList.mockResolvedValue([])
-    const result = await syncChartOfAccounts({} as any, [])
+    const result = await syncChartOfAccounts({} as unknown as QboClient, [])
     expect(result.drifts).toHaveLength(0)
   })
 })

@@ -290,7 +290,7 @@ describe('Batch 37 branch coverage', () => {
 
   it('trackLocation returns generic message when non-Error is thrown', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.spyOn(service as any, 'verifyLocationPermission').mockRejectedValue('string-error');
+    vi.spyOn(service as unknown, 'verifyLocationPermission').mockRejectedValue('string-error');
     const result = await service.trackLocation('m-1', {
       latitude: 45.0, longitude: -75.0, timestamp: new Date(),
     }, 'strike_line_tracking');

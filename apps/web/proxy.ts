@@ -14,13 +14,16 @@ import { detectLocaleFromHeaders } from './lib/i18n-utils'
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '200')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = auth(async (request: any) => {
+type ProxyRequest = NextRequest & { auth?: unknown }
+
+export const proxy = auth(async (request: unknown) => {
+  const req = request as ProxyRequest
+
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      req.headers.get('x-real-ip') ??
       'unknown'
 
     const rl = checkRateLimit(ip, {
@@ -42,14 +45,14 @@ export const proxy = auth(async (request: any) => {
   // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
   if (process.env.NODE_ENV !== 'development') {
     if (
-      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
-      request.nextUrl.pathname.startsWith('/api') &&
-      !request.nextUrl.pathname.startsWith('/api/webhooks') &&
-      !request.nextUrl.pathname.startsWith('/api/health') &&
-      !request.nextUrl.pathname.startsWith('/api/cron') &&
-      !request.nextUrl.pathname.startsWith('/api/auth')
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
+      req.nextUrl.pathname.startsWith('/api') &&
+      !req.nextUrl.pathname.startsWith('/api/webhooks') &&
+      !req.nextUrl.pathname.startsWith('/api/health') &&
+      !req.nextUrl.pathname.startsWith('/api/cron') &&
+      !req.nextUrl.pathname.startsWith('/api/auth')
     ) {
-      if (!request.headers.get('idempotency-key')) {
+      if (!req.headers.get('idempotency-key')) {
         return NextResponse.json(
           {
             error: 'Missing Idempotency-Key header',
@@ -64,11 +67,11 @@ export const proxy = auth(async (request: any) => {
   }
 
   /* ── Request-ID propagation for observability ── */
-  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+  const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
 
   // Locale detection — set cookie so getRequestConfig can read it (no URL rewrite)
-  if (!request.nextUrl.pathname.startsWith('/api')) {
-    const locale: Locale = detectLocaleFromHeaders(request.headers, locales, defaultLocale)
+  if (!req.nextUrl.pathname.startsWith('/api')) {
+    const locale: Locale = detectLocaleFromHeaders(req.headers, locales, defaultLocale)
     const response = NextResponse.next()
     response.headers.set('x-request-id', requestId)
     response.cookies.set('NEXT_LOCALE', locale, { path: '/', sameSite: 'lax' })
@@ -78,7 +81,7 @@ export const proxy = auth(async (request: any) => {
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response
-}) as (request: NextRequest) => Promise<NextResponse>
+})
 
 export const config = {
   matcher: [

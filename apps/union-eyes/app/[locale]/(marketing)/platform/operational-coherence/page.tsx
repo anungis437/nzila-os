@@ -18,7 +18,6 @@
  * /platform/operational-coherence — Wave 6 ontology collapse.
  * Canonical: /platform#priorities (operational cadence pillar).
  */
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 

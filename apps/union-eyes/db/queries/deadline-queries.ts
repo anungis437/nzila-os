@@ -9,7 +9,7 @@
  * - Business day calculations
  */
 
-import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
@@ -137,7 +137,7 @@ export async function getDeadlineRules(organizationId: string): Promise<Deadline
     ORDER BY rule_name
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -152,7 +152,7 @@ export async function getDeadlineRuleByCode(
     WHERE organization_id = ${organizationId} AND rule_code = ${ruleCode} AND is_active = TRUE
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any || null;
+  return result[0] as unknown || null;
 }
 
 /**
@@ -172,7 +172,7 @@ export async function getApplicableDeadlineRules(
     ORDER BY step_number NULLS LAST, days_from_event
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -216,7 +216,7 @@ export async function createDeadlineRule(
     RETURNING *
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result[0] as unknown;
 }
 
 // ============================================================================
@@ -233,7 +233,7 @@ export async function getClaimDeadlines(claimId: string): Promise<ClaimDeadline[
     ORDER BY due_date
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -246,7 +246,7 @@ export async function getPendingClaimDeadlines(claimId: string): Promise<ClaimDe
     ORDER BY due_date
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -283,7 +283,7 @@ export async function getCriticalDeadlines(organizationId: string): Promise<any[
         due_date
     `));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return result as any[];
+    return result as unknown[];
   } catch (error) {
     logger.error('Error fetching critical deadlines', { error, organizationId });
     return [];
@@ -322,7 +322,7 @@ export async function getMemberDeadlines(
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -337,7 +337,7 @@ export async function getOverdueDeadlines(organizationId: string): Promise<Claim
     ORDER BY days_overdue DESC, priority DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -374,7 +374,7 @@ export async function createClaimDeadline(
     RETURNING *
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result[0] as unknown;
 }
 
 /**
@@ -407,7 +407,7 @@ export async function autoCreateClaimDeadlines(
           deadlineRuleId: rule.id,
           businessDaysOnly: rule.businessDaysOnly,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          priority: priorityLevel as any,
+          priority: priorityLevel as unknown,
         }
       );
       deadlines.push(deadline);
@@ -425,7 +425,7 @@ export async function completeDeadline(
   completedBy: string,
   notes?: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<unknown> {
   const result = await withRLSContext(async (tx) => tx.execute(sql`
     UPDATE claim_deadlines
     SET status = 'completed',
@@ -476,7 +476,7 @@ export async function requestDeadlineExtension(
     RETURNING *
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result[0] as unknown;
 }
 
 /**
@@ -497,7 +497,7 @@ export async function approveDeadlineExtension(
   `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const extension = extensionResult[0] as any;
+  const extension = extensionResult[0] as unknown;
   if (!extension) throw new Error('Extension not found');
   
   const granted = daysGranted || extension.requested_days;
@@ -568,7 +568,7 @@ export async function getPendingExtensionRequests(
     ORDER BY de.requested_at
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 // ============================================================================
@@ -607,7 +607,7 @@ export async function createDeadlineAlert(
     RETURNING *
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result[0] as unknown;
 }
 
 /**
@@ -673,7 +673,7 @@ export async function getUnreadAlerts(
     ORDER BY da.sent_at DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -699,7 +699,7 @@ export async function generateUpcomingDeadlineAlerts(
   `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const deadline of threeDayResult as any[]) {
+  for (const deadline of threeDayResult as unknown[]) {
     if (deadline.assigned_to) {
       await createDeadlineAlert(
         deadline.id,
@@ -734,7 +734,7 @@ export async function generateUpcomingDeadlineAlerts(
   `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const deadline of oneDayResult as any[]) {
+  for (const deadline of oneDayResult as unknown[]) {
     if (deadline.assigned_to) {
       await createDeadlineAlert(
         deadline.id,
@@ -769,7 +769,7 @@ export async function generateUpcomingDeadlineAlerts(
   `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const deadline of todayResult as any[]) {
+  for (const deadline of todayResult as unknown[]) {
     if (deadline.assigned_to) {
       await createDeadlineAlert(
         deadline.id,
@@ -849,7 +849,7 @@ export async function getHolidays(
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 // ============================================================================
@@ -881,7 +881,7 @@ export async function getDeadlineComplianceMetrics(
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -891,7 +891,7 @@ export async function getMemberDeadlineSummary(
   memberId: string,
   organizationId: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<unknown> {
   const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM v_member_deadline_summary
     WHERE member_id = ${memberId} AND organization_id = ${organizationId}
@@ -909,7 +909,7 @@ export async function getMemberDeadlineSummary(
  * Get deadline summary for all claims (dashboard widget)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getDeadlineDashboardSummary(organizationId: string): Promise<any> {
+export async function getDeadlineDashboardSummary(organizationId: string): Promise<unknown> {
   const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       COUNT(*) FILTER (WHERE status = 'pending') as active_deadlines,
@@ -924,7 +924,7 @@ export async function getDeadlineDashboardSummary(organizationId: string): Promi
   `));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const row = result[0] as any;
+  const row = result[0] as unknown;
   return {
     activeDeadlines: parseInt(row.active_deadlines) || 0,
     overdueCount: parseInt(row.overdue_count) || 0,

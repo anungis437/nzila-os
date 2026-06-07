@@ -57,7 +57,7 @@ export default async function ComplianceDashboard() {
   // Calculate metrics
   const totalEvents = auditLogs.length;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const highRiskEvents = auditLogs.filter((log: any) => log.risk_level === 'high').length;
+  const highRiskEvents = auditLogs.filter((log: unknown) => log.risk_level === 'high').length;
   const complianceScore = totalEvents > 0 
     ? (((totalEvents - highRiskEvents) / totalEvents) * 100).toFixed(1)
     : '100.0';
@@ -219,7 +219,7 @@ export default async function ComplianceDashboard() {
               ) : (
                 <div className="space-y-3">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {auditLogs.map((log: any, index: number) => (
+                  {auditLogs.map((log: unknown, index: number) => (
                     <div key={log.id || index} className="flex items-center justify-between border-b pb-3 last:border-0">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">

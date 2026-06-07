@@ -20,7 +20,7 @@ import { eq, and, or, lt } from "drizzle-orm";
 
 let firebaseAdmin: typeof import('firebase-admin') | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let firebaseApp: any = null;
+let firebaseApp: unknown = null;
 
 async function getFirebaseMessaging() {
   if (typeof window !== 'undefined') {
@@ -377,20 +377,20 @@ export class TwilioSMSProvider implements NotificationProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await response.json() as any;
+      const data = await response.json() as unknown;
       const messageId = data.sid || `sms-${uuid()}`;
 
       logger.info("SMS notification sent via Twilio", {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        to: payload.recipientPhone as any,
+        to: payload.recipientPhone as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        body: payload.body.substring(0, 50) as any,
+        body: payload.body.substring(0, 50) as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        messageId: messageId as any,
+        messageId: messageId as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        status: data.status as any,
+        status: data.status as unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown);
 
       return {
         id: messageId,
@@ -401,11 +401,11 @@ export class TwilioSMSProvider implements NotificationProvider {
       logger.error("Failed to send SMS notification", { 
         error: error instanceof Error ? error.message : 'Unknown error',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        phone: payload.recipientPhone as any,
+        phone: payload.recipientPhone as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        body: payload.body.substring(0, 50) as any,
+        body: payload.body.substring(0, 50) as unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown);
       return {
         id: uuid(),
         status: "failed",
@@ -459,17 +459,17 @@ export class FirebasePushProvider implements NotificationProvider {
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const messageId = await messaging.send(fcmMessage as any);
+      const messageId = await messaging.send(fcmMessage as unknown);
 
       logger.info("Push notification sent via Firebase", {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        token: payload.recipientFirebaseToken?.substring(0, 20) as any,
+        token: payload.recipientFirebaseToken?.substring(0, 20) as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        title: payload.title as any,
+        title: payload.title as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        messageId: messageId as any,
+        messageId: messageId as unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown);
 
       return {
         id: messageId,
@@ -480,11 +480,11 @@ export class FirebasePushProvider implements NotificationProvider {
       logger.error("Failed to send push notification", { 
         error: error instanceof Error ? error.message : 'Unknown error',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        token: payload.recipientFirebaseToken?.substring(0, 20) as any,
+        token: payload.recipientFirebaseToken?.substring(0, 20) as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        title: payload.title as any,
+        title: payload.title as unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown);
       return {
         id: uuid(),
         status: "failed",
@@ -565,27 +565,27 @@ export class NotificationService {
         await db.insert(notificationQueue).values({
           id: response.id,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          organizationId: payload.organizationId as any,
+          organizationId: payload.organizationId as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          status: 'completed' as any,
+          status: 'completed' as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          priority: (payload.priority || 'normal') as any,
+          priority: (payload.priority || 'normal') as unknown,
           payload: {
             ...payload,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any,
+          } as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          attemptCount: '1' as any,
+          attemptCount: '1' as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          maxAttempts: '1' as any,
+          maxAttempts: '1' as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          processedAt: new Date() as any,
+          processedAt: new Date() as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          completedAt: response.sentAt as any,
+          completedAt: response.sentAt as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          resultNotificationId: response.id as any,
+          resultNotificationId: response.id as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        }).catch((err: any) => logger.warn("Failed to store notification in queue", {
+        }).catch((err: unknown) => logger.warn("Failed to store notification in queue", {
           error: err instanceof Error ? err.message : String(err)
         }));
 
@@ -593,28 +593,28 @@ export class NotificationService {
         await db.insert(notificationDeliveryLog).values({
           id: uuid(),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          organizationId: payload.organizationId as any,
+          organizationId: payload.organizationId as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          notificationId: response.id as any,
+          notificationId: response.id as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          event: response.status === 'sent' ? 'sent' : 'failed' as any,
+          event: response.status === 'sent' ? 'sent' : 'failed' as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eventTimestamp: response.sentAt || new Date() as any,
+          eventTimestamp: response.sentAt || new Date() as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          providerId: provider.name as any,
+          providerId: provider.name as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          externalEventId: response.id as any,
+          externalEventId: response.id as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          statusCode: response.status === 'sent' ? '200' : '500' as any,
+          statusCode: response.status === 'sent' ? '200' : '500' as unknown,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          errorMessage: response.failureReason as any,
+          errorMessage: response.failureReason as unknown,
           details: {
             type: payload.type,
             channel: payload.type,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any,
+          } as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        }).catch((err: any) => logger.warn("Failed to log delivery event", {
+        }).catch((err: unknown) => logger.warn("Failed to log delivery event", {
           error: err instanceof Error ? err.message : String(err)
         }));
       } catch (dbError) {
@@ -635,7 +635,7 @@ export class NotificationService {
             status: response.status,
           },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        }).catch((err: any) => logger.warn("Failed to create audit log for notification", {
+        }).catch((err: unknown) => logger.warn("Failed to create audit log for notification", {
           error: err instanceof Error ? err.message : String(err)
         }));
       }
@@ -658,25 +658,25 @@ export class NotificationService {
       await db.insert(notificationQueue).values({
         id: notificationId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        organizationId: payload.organizationId as any,
+        organizationId: payload.organizationId as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        status: 'pending' as any,
+        status: 'pending' as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        priority: (payload.priority || 'normal') as any,
+        priority: (payload.priority || 'normal') as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        payload: payload as any,
+        payload: payload as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        attemptCount: '0' as any,
+        attemptCount: '0' as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        maxAttempts: '3' as any,
+        maxAttempts: '3' as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        nextRetryAt: new Date() as any,
+        nextRetryAt: new Date() as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        createdAt: new Date() as any,
+        createdAt: new Date() as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        updatedAt: new Date() as any,
+        updatedAt: new Date() as unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }).catch((err: any) => logger.warn("Failed to queue notification in database", {
+      }).catch((err: unknown) => logger.warn("Failed to queue notification in database", {
         error: err instanceof Error ? err.message : String(err)
       }));
     } catch (dbError) {
@@ -716,25 +716,25 @@ export class NotificationService {
       await db.insert(notificationQueue).values({
         id: queueId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        organizationId: payload.organizationId as any,
+        organizationId: payload.organizationId as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        status: 'retrying' as any,
+        status: 'retrying' as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        priority: (payload.priority || 'normal') as any,
+        priority: (payload.priority || 'normal') as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        payload: payload as any,
+        payload: payload as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        attemptCount: `${attemptNumber}` as any,
+        attemptCount: `${attemptNumber}` as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        maxAttempts: `${maxRetries}` as any,
+        maxAttempts: `${maxRetries}` as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        nextRetryAt: nextRetryTime as any,
+        nextRetryAt: nextRetryTime as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        createdAt: new Date() as any,
+        createdAt: new Date() as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        updatedAt: new Date() as any,
+        updatedAt: new Date() as unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }).catch((err: any) => logger.warn("Failed to schedule retry", {
+      }).catch((err: unknown) => logger.warn("Failed to schedule retry", {
         error: err instanceof Error ? err.message : String(err)
       }));
 
@@ -865,7 +865,7 @@ export class NotificationService {
             ),
             lt(notificationQueue.nextRetryAt || now, now),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            lt(notificationQueue.attemptCount as any, maxRetries),
+            lt(notificationQueue.attemptCount as unknown, maxRetries),
             eq(notificationQueue.organizationId, organizationId)
           ]
         : [
@@ -875,7 +875,7 @@ export class NotificationService {
             ),
             lt(notificationQueue.nextRetryAt || now, now),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            lt(notificationQueue.attemptCount as any, maxRetries)
+            lt(notificationQueue.attemptCount as unknown, maxRetries)
           ];
       
       const failedNotifications = await db.select().from(notificationQueue).where(
@@ -901,13 +901,13 @@ export class NotificationService {
           if (response.status === 'sent' || response.status === 'delivered') {
             await db.update(notificationQueue).set({
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              status: 'completed' as any,
+              status: 'completed' as unknown,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              processedAt: new Date() as any,
+              processedAt: new Date() as unknown,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              completedAt: new Date() as any,
+              completedAt: new Date() as unknown,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              resultNotificationId: response.id as any,
+              resultNotificationId: response.id as unknown,
             }).where(eq(notificationQueue.id, queuedItem.id));
             succeeded++;
           } else {
@@ -917,13 +917,13 @@ export class NotificationService {
             
             await db.update(notificationQueue).set({
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              status: 'retrying' as any,
+              status: 'retrying' as unknown,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              attemptCount: `${currentAttempt + 1}` as any,
+              attemptCount: `${currentAttempt + 1}` as unknown,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              nextRetryAt: nextRetryAt as any,
+              nextRetryAt: nextRetryAt as unknown,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              errorMessage: response.failureReason as any,
+              errorMessage: response.failureReason as unknown,
             }).where(eq(notificationQueue.id, queuedItem.id));
             failedCount++;
           }
@@ -939,9 +939,9 @@ export class NotificationService {
             if (currentAttempt >= maxRetries) {
               await db.update(notificationQueue).set({
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                status: 'failed' as any,
+                status: 'failed' as unknown,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                errorMessage: error instanceof Error ? error.message : 'Unknown error' as any,
+                errorMessage: error instanceof Error ? error.message : 'Unknown error' as unknown,
               }).where(eq(notificationQueue.id, queuedItem.id));
             } else {
               const delaySeconds = 300 * Math.pow(2, currentAttempt);
@@ -949,13 +949,13 @@ export class NotificationService {
               
               await db.update(notificationQueue).set({
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                status: 'retrying' as any,
+                status: 'retrying' as unknown,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                attemptCount: `${currentAttempt + 1}` as any,
+                attemptCount: `${currentAttempt + 1}` as unknown,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                nextRetryAt: nextRetryAt as any,
+                nextRetryAt: nextRetryAt as unknown,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                errorMessage: error instanceof Error ? error.message : 'Unknown error' as any,
+                errorMessage: error instanceof Error ? error.message : 'Unknown error' as unknown,
               }).where(eq(notificationQueue.id, queuedItem.id));
             }
           } catch (updateError) {
@@ -1098,7 +1098,7 @@ export async function processPendingNotifications(batchSize: number = 50): Promi
     // Query pending notifications
     const pendingNotifications = await db.select().from(notificationQueue).where(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      eq(notificationQueue.status, 'pending' as any)
+      eq(notificationQueue.status, 'pending' as unknown)
     ).limit(batchSize);
 
     let processed = 0;

@@ -617,7 +617,7 @@ export class DuesReminderScheduler {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const metadata = (member[0].metadata as any) || {};
+      const metadata = (member[0].metadata as unknown) || {};
       return {
         name: member[0].name,
         email: member[0].email,
@@ -635,7 +635,7 @@ export class DuesReminderScheduler {
         .select({ name: organizations.name })
         .from(organizations)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .where(eq(organizations.id, organizationId as any))
+        .where(eq(organizations.id, organizationId as unknown))
         .limit(1);
 
       return org?.name || 'UnionEyes';

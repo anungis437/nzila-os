@@ -218,7 +218,7 @@ export function DataExportScheduler({
       </div>
 
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as unknown)}>
         <TabsList>
           <TabsTrigger value="create">Create Schedule</TabsTrigger>
           <TabsTrigger value="schedules">

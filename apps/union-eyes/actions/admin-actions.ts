@@ -32,7 +32,7 @@ export type { UserRole } from '@/types/action-dtos';
  * @param tx - Database transaction from RLS-protected route
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getSystemStats(tx: NodePgDatabase<any>): Promise<SystemStats> {
+export async function getSystemStats(tx: NodePgDatabase<unknown>): Promise<SystemStats> {
   try {
     // Total unique users across all orgs
     const totalMembersResult = await tx
@@ -90,7 +90,7 @@ export async function getSystemStats(tx: NodePgDatabase<any>): Promise<SystemSta
  */
 export async function getAdminUsers(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<any>,
+  tx: NodePgDatabase<unknown>,
   searchQuery?: string,
   organizationId?: string,
   role?: UserRole
@@ -230,7 +230,7 @@ export async function getAdminOrgs(searchQuery?: string): Promise<OrgWithStats[]
  */
 export async function updateUserRole(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<any>,
+  tx: NodePgDatabase<unknown>,
   userId: string,
   organizationId: string,
   newRole: UserRole
@@ -266,7 +266,7 @@ export async function updateUserRole(
  */
 export async function toggleUserStatus(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<any>,
+  tx: NodePgDatabase<unknown>,
   userId: string,
   organizationId: string
 ): Promise<void> {
@@ -314,7 +314,7 @@ export async function toggleUserStatus(
  */
 export async function deleteUserFromOrg(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<any>,
+  tx: NodePgDatabase<unknown>,
   userId: string,
   organizationId: string
 ): Promise<void> {
@@ -415,7 +415,7 @@ export async function createOrg(data: {
  * @param tx - Database transaction from RLS-protected route
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getSystemConfigs(tx: NodePgDatabase<any>, category?: string): Promise<SystemConfig[]> {
+export async function getSystemConfigs(tx: NodePgDatabase<unknown>, category?: string): Promise<SystemConfig[]> {
   try {
     const conditions = category
       ? eq(orgConfigurations.category, category)
@@ -450,7 +450,7 @@ export async function getSystemConfigs(tx: NodePgDatabase<any>, category?: strin
  */
 export async function updateSystemConfig(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tx: NodePgDatabase<any>,
+  tx: NodePgDatabase<unknown>,
   organizationId: string,
   category: string,
   key: string,
@@ -497,7 +497,7 @@ export async function updateSystemConfig(
  * @param tx - Database transaction from RLS-protected route
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getRecentActivity(tx: NodePgDatabase<any>, limit: number = 10): Promise<any[]> {
+export async function getRecentActivity(tx: NodePgDatabase<unknown>, limit: number = 10): Promise<any[]> {
   try {
     // For now, return recent user joins
     const recentUsers = await tx

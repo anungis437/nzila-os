@@ -10,7 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth-guard'
 import { updateClaimStatus } from '@/lib/workflow-engine'
-import { getAllowedTransitions, type ActorRole } from '@/lib/workflow/case-lifecycle'
+import { getAllowedTransitions } from '@/lib/workflow/case-lifecycle'
 import { toLifecycleState, toLegacyClaimStatus } from '@/lib/workflow/state-bridge'
 
 // Local alias for DB claim status values — decoupled from deprecated FSM module

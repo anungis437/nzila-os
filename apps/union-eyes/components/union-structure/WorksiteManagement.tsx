@@ -82,7 +82,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<WorksiteFormData, any, WorksiteFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as unknown,
     defaultValues: {
       employerId: "",
       name: "",

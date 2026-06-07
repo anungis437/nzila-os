@@ -1,10 +1,10 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import {
   buildDeepLink,
   computeViralityMetrics,
   ShareIntentSchema,
 } from './sharing'
-import type { SharedContent, DeepLinkParams } from './sharing'
+import type { SharedContent } from './sharing'
 
 function makeShare(overrides: Partial<SharedContent> = {}): SharedContent {
   return {

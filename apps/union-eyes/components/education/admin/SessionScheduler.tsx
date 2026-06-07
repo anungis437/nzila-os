@@ -473,9 +473,9 @@ toast.error("Failed to cancel session");
 // Session Form Component
 interface SessionFormProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  formData: any;
+  formData: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setFormData: (data: any) => void;
+  setFormData: (data: unknown) => void;
   courses: Course[];
   onSubmit: () => void;
   onCancel: () => void;

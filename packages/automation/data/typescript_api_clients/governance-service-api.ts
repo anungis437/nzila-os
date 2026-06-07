@@ -30,7 +30,7 @@ async function getApiClient() {
 /**
  * List governance-service records
  */
-export async function getGovernanceServiceList(filters?: any) {
+export async function getGovernanceServiceList(filters?: unknown) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -67,7 +67,7 @@ export async function getGovernanceServiceById(id: string) {
 /**
  * Create new governance-service record
  */
-export async function createGovernanceService(data: any) {
+export async function createGovernanceService(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/governance/governance-service/`, {
@@ -86,7 +86,7 @@ export async function createGovernanceService(data: any) {
 /**
  * Update governance-service record
  */
-export async function updateGovernanceService(id: string, data: any) {
+export async function updateGovernanceService(id: string, data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/governance/governance-service/${{id}}/`, {

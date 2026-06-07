@@ -23,7 +23,7 @@ describe('redaction', () => {
   }
 
   describe('redactArtifact', () => {
-    it('returns artifact as-is for internal mode', () => {
+    it('returns same artifact in internal mode', () => {
       const result = redactArtifact(internalArtifact, 'internal')
       expect(result).toBe(internalArtifact) // same reference
     })
@@ -62,8 +62,9 @@ describe('redaction', () => {
         user: { email: 'x@y.com', role: 'admin' },
       }
       const result = redactArtifact(artifact, 'partner')!
-      expect((result.user as any).email).toBeUndefined()
-      expect((result.user as any).role).toBe('admin')
+      const user = result.user as { email?: string; role?: string }
+      expect(user.email).toBeUndefined()
+      expect(user.role).toBe('admin')
     })
 
     it('strips PII in arrays', () => {
@@ -72,9 +73,9 @@ describe('redaction', () => {
         actors: [{ email: 'a@b.com', id: '1' }],
       }
       const result = redactArtifact(artifact, 'partner')!
-      const actors = result.actors as any[]
-      expect(actors[0].email).toBeUndefined()
-      expect(actors[0].id).toBe('1')
+      const actors = result.actors as Array<{ email?: string; id?: string }>
+      expect(actors[0]?.email).toBeUndefined()
+      expect(actors[0]?.id).toBe('1')
     })
   })
 
@@ -128,7 +129,7 @@ describe('redaction', () => {
       const withSeal = { ...baseIndex, seal }
 
       const result = redactAndReseal(withSeal, 'partner')
-      const remainingArt = result.index.artifacts[0] as any
+      const remainingArt = result.index.artifacts[0] as { email?: string }
       expect(remainingArt.email).toBeUndefined()
     })
 

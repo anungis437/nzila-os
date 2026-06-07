@@ -13,10 +13,16 @@
  */
 
 import { db } from "@/db/db";
-import { documents, documentFolders } from "@/db/schema";
+import { documents, documentFolders, documentVersions } from "@/db/schema";
 import { eq, and, or, desc, asc, sql, inArray, count, like } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { processImageOCR, processPDFOCR } from "@/lib/services/ocr-service";
+import { downloadBuffer } from "@/lib/blob-client";
+import { extractBlobPathFromUrl } from "@/lib/services/document-blob-integrity-service";
+import { getDocumentMutabilityBlockReason } from "@/lib/services/document-retention-guard";
+
+const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? "union-eyes";
 
 // ============================================================================
 // Types
@@ -465,21 +471,56 @@ export async function createDocumentVersion(
   documentId: string,
   fileUrl: string,
   uploadedBy: string,
-  changeDescription?: string
+  changeDescription?: string,
+  organizationId?: string,
 ): Promise<DocumentVersion> {
   try {
-    // In production, store in document_versions table
-    const version: DocumentVersion = {
-      id: `version-${Date.now()}`,
-      documentId,
-      versionNumber: 1,
-      fileUrl,
-      uploadedBy,
-      uploadedAt: new Date(),
+    const document = await db.query.documents.findFirst({
+      where:
+        organizationId
+          ? and(eq(documents.id, documentId), eq(documents.organizationId, organizationId))
+          : eq(documents.id, documentId),
+    });
+
+    if (!document || document.deletedAt) {
+      throw new Error("Document not found");
+    }
+
+    const latest = (
+      await db
+        .select({ versionNo: documentVersions.versionNo })
+        .from(documentVersions)
+        .where(eq(documentVersions.documentId, documentId))
+        .orderBy(desc(documentVersions.versionNo))
+        .limit(1)
+    )[0];
+
+    const nextVersionNo = (latest?.versionNo ?? 0) + 1;
+
+    const [created] = await db
+      .insert(documentVersions)
+      .values({
+        organizationId: document.organizationId,
+        documentId,
+        versionNo: nextVersionNo,
+        storageKey: fileUrl,
+        contentHash: document.checksum ?? `version-${nextVersionNo}`,
+        uploadedBy,
+        metadata: {
+          changeDescription,
+        },
+      })
+      .returning();
+
+    return {
+      id: created.id,
+      documentId: created.documentId,
+      versionNumber: created.versionNo,
+      fileUrl: created.storageKey,
+      uploadedBy: created.uploadedBy,
+      uploadedAt: created.uploadedAt,
       changeDescription,
     };
-
-    return version;
   } catch (error) {
     logger.error("Error creating document version", { error, documentId });
     throw new Error("Failed to create document version");
@@ -489,10 +530,33 @@ export async function createDocumentVersion(
 /**
  * Get document versions
  */
-export async function getDocumentVersions(documentId: string): Promise<DocumentVersion[]> {
+export async function getDocumentVersions(documentId: string, organizationId?: string): Promise<DocumentVersion[]> {
   try {
-    // In production, query document_versions table
-    return [];
+    const rows = await db
+      .select()
+      .from(documentVersions)
+      .where(
+        organizationId
+          ? and(
+              eq(documentVersions.documentId, documentId),
+              eq(documentVersions.organizationId, organizationId),
+            )
+          : eq(documentVersions.documentId, documentId),
+      )
+      .orderBy(desc(documentVersions.versionNo));
+
+    return rows.map((row) => ({
+      id: row.id,
+      documentId: row.documentId,
+      versionNumber: row.versionNo,
+      fileUrl: row.storageKey,
+      uploadedBy: row.uploadedBy,
+      uploadedAt: row.uploadedAt,
+      changeDescription:
+        row.metadata && typeof row.metadata === "object"
+          ? (row.metadata as { changeDescription?: string }).changeDescription
+          : undefined,
+    }));
   } catch (error) {
     logger.error("Error fetching document versions", { error, documentId });
     throw new Error("Failed to fetch document versions");
@@ -506,21 +570,97 @@ export async function getDocumentVersions(documentId: string): Promise<DocumentV
 /**
  * Process document with OCR
  */
-export async function processDocumentOCR(documentId: string): Promise<OCRResult> {
+export async function processDocumentOCR(documentId: string, organizationId?: string): Promise<OCRResult> {
   try {
-    // In production, integrate with OCR service (Tesseract, AWS Textract, etc.)
-    const result: OCRResult = {
-      documentId,
-      text: "",
-      confidence: 0,
-      language: "en",
-      processedAt: new Date(),
-      metadata: {},
+    const document = await db.query.documents.findFirst({
+      where:
+        organizationId
+          ? and(eq(documents.id, documentId), eq(documents.organizationId, organizationId))
+          : eq(documents.id, documentId),
+    });
+
+    if (!document || document.deletedAt) {
+      throw new Error("Document not found");
+    }
+
+    const fileUrl = document.fileUrl;
+    const blobPath =
+      (document.metadata && typeof document.metadata === "object"
+        ? (document.metadata as { blobKey?: string }).blobKey
+        : undefined) ??
+      extractBlobPathFromUrl(fileUrl);
+
+    if (!blobPath) {
+      throw new Error("Document blob path missing");
+    }
+
+    const buffer = await downloadBuffer(DOCUMENT_BLOB_CONTAINER, blobPath);
+    const lowerMimeType = (document.mimeType ?? "").toLowerCase();
+    const lowerFileType = (document.fileType ?? "").toLowerCase();
+    const processedAt = new Date();
+
+    let extractedText = "";
+    let confidence = 0;
+    const language = "en";
+    let metadata: Record<string, unknown> = {
+      provider: "native",
+      blobPath,
     };
 
-    // Update document with extracted text
+    if (lowerMimeType.startsWith("image/")) {
+      const imageResult = await processImageOCR(buffer);
+      extractedText = imageResult.text;
+      confidence = imageResult.confidence;
+      metadata = {
+        provider: "image-ocr",
+        blobPath,
+      };
+    } else if (lowerMimeType.includes("pdf") || lowerFileType === "pdf") {
+      const pdfResult = await processPDFOCR(buffer);
+      extractedText = pdfResult.fullText;
+      confidence = pdfResult.pages.length > 0
+        ? Math.round(pdfResult.pages.reduce((sum, page) => sum + page.confidence, 0) / pdfResult.pages.length)
+        : 0;
+      metadata = {
+        provider: "pdf-ocr",
+        blobPath,
+        pages: pdfResult.pages.length,
+      };
+    } else if (
+      lowerMimeType.startsWith("text/")
+      || lowerMimeType.includes("json")
+      || lowerFileType === "txt"
+      || lowerFileType === "csv"
+      || lowerFileType === "json"
+    ) {
+      extractedText = buffer.toString("utf8");
+      confidence = 100;
+      metadata = {
+        provider: "text-decode",
+        blobPath,
+      };
+    }
+
+    const result: OCRResult = {
+      documentId,
+      text: extractedText,
+      confidence,
+      language,
+      processedAt,
+      metadata,
+    };
+
     await updateDocument(documentId, {
-      contentText: result.text,
+      contentText: extractedText,
+      metadata: {
+        ...(document.metadata && typeof document.metadata === "object" ? document.metadata : {}),
+        ocr: {
+          ...metadata,
+          confidence,
+          language,
+          processedAt: processedAt.toISOString(),
+        },
+      },
     });
 
     return result;
@@ -533,14 +673,18 @@ export async function processDocumentOCR(documentId: string): Promise<OCRResult>
 /**
  * Bulk process documents with OCR
  */
-export async function bulkProcessOCR(documentIds: string[]): Promise<BulkOperationResult> {
+export async function bulkProcessOCR(documentIds: string[], organizationId?: string): Promise<BulkOperationResult> {
   const errors: Array<{ id: string; error: string }> = [];
   let processed = 0;
 
   try {
     for (const id of documentIds) {
       try {
-        await processDocumentOCR(id);
+        if (organizationId) {
+          await processDocumentOCR(id, organizationId);
+        } else {
+          await processDocumentOCR(id);
+        }
         processed++;
       } catch (error) {
         errors.push({
@@ -643,13 +787,14 @@ export async function searchDocuments(
  */
 export async function bulkMoveDocuments(
   documentIds: string[],
-  targetFolderId: string | null
+  targetFolderId: string | null,
+  organizationId: string,
 ): Promise<BulkOperationResult> {
   try {
     await db
       .update(documents)
       .set({ folderId: targetFolderId, updatedAt: new Date() })
-      .where(inArray(documents.id, documentIds));
+      .where(and(eq(documents.organizationId, organizationId), inArray(documents.id, documentIds)));
 
     return {
       success: true,
@@ -673,18 +818,22 @@ export async function bulkMoveDocuments(
 export async function bulkUpdateTags(
   documentIds: string[],
   tags: string[],
-  operation: "add" | "remove" | "replace"
+  operation: "add" | "remove" | "replace",
+  organizationId: string,
 ): Promise<BulkOperationResult> {
   try {
     if (operation === "replace") {
       await db
         .update(documents)
         .set({ tags, updatedAt: new Date() })
-        .where(inArray(documents.id, documentIds));
+        .where(and(eq(documents.organizationId, organizationId), inArray(documents.id, documentIds)));
     } else {
       // For add/remove, would need more complex SQL
       // This is a simplified version
-      const docs = await db.select().from(documents).where(inArray(documents.id, documentIds));
+      const docs = await db
+        .select()
+        .from(documents)
+        .where(and(eq(documents.organizationId, organizationId), inArray(documents.id, documentIds)));
 
       for (const doc of docs) {
         const currentTags = doc.tags || [];
@@ -719,16 +868,43 @@ export async function bulkUpdateTags(
 /**
  * Bulk delete documents
  */
-export async function bulkDeleteDocuments(documentIds: string[]): Promise<BulkOperationResult> {
+export async function bulkDeleteDocuments(documentIds: string[], organizationId: string): Promise<BulkOperationResult> {
   try {
-    await db
-      .update(documents)
-      .set({ deletedAt: new Date(), updatedAt: new Date() })
-      .where(inArray(documents.id, documentIds));
+    const docs = await db
+      .select({ id: documents.id, metadata: documents.metadata })
+      .from(documents)
+      .where(and(eq(documents.organizationId, organizationId), inArray(documents.id, documentIds)));
+
+    const blocked = docs
+      .map((doc) => ({ id: doc.id, reason: getDocumentMutabilityBlockReason({ metadata: doc.metadata }) }))
+      .filter((item): item is { id: string; reason: string } => Boolean(item.reason));
+
+    const allowedDocumentIds = docs
+      .filter((doc) => !blocked.some((item) => item.id === doc.id))
+      .map((doc) => doc.id);
+
+    if (allowedDocumentIds.length > 0) {
+      await db
+        .update(documents)
+        .set({ deletedAt: new Date(), updatedAt: new Date() })
+        .where(and(eq(documents.organizationId, organizationId), inArray(documents.id, allowedDocumentIds)));
+    }
+
+    if (blocked.length > 0) {
+      return {
+        success: false,
+        processed: allowedDocumentIds.length,
+        failed: blocked.length,
+        errors: blocked.map((item) => ({
+          id: item.id,
+          error: `Delete blocked: ${item.reason}`,
+        })),
+      };
+    }
 
     return {
       success: true,
-      processed: documentIds.length,
+      processed: allowedDocumentIds.length,
       failed: 0,
     };
   } catch (error) {

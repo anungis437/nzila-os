@@ -31,7 +31,7 @@ async function getApiClient() {
  * List lmbp-immigration-service records
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getLmbpImmigrationServiceList(filters?: any) {
+export async function getLmbpImmigrationServiceList(filters?: unknown) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -69,7 +69,7 @@ export async function getLmbpImmigrationServiceById(id: string) {
  * Create new lmbp-immigration-service record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function createLmbpImmigrationService(data: any) {
+export async function createLmbpImmigrationService(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/lmbp-immigration/lmbp-immigration-service/`, {
@@ -89,7 +89,7 @@ export async function createLmbpImmigrationService(data: any) {
  * Update lmbp-immigration-service record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateLmbpImmigrationService(id: string, data: any) {
+export async function updateLmbpImmigrationService(id: string, data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/lmbp-immigration/lmbp-immigration-service/${{id}}/`, {

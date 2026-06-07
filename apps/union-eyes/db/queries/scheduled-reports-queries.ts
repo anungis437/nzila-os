@@ -103,7 +103,7 @@ export async function getScheduledReports(
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -125,7 +125,7 @@ export async function getScheduledReportById(
   `);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = result as any[];
+  const rows = result as unknown[];
   return rows[0] || null;
 }
 
@@ -175,7 +175,7 @@ export async function createScheduledReport(
   `);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = result as any[];
+  const rows = result as unknown[];
   return rows[0];
 }
 
@@ -233,7 +233,7 @@ export async function updateScheduledReport(
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = result as any[];
+  const rows = result as unknown[];
   if (rows.length === 0) {
     throw new Error('Scheduled report not found');
   }
@@ -273,7 +273,7 @@ export async function getDueSchedules(): Promise<ScheduledReport[]> {
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -290,7 +290,7 @@ export async function updateScheduleAfterRun(
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scheduleRows = scheduleResult as any[];
+  const scheduleRows = scheduleResult as unknown[];
   if (scheduleRows.length === 0) return;
 
   const scheduleData = scheduleRows[0];
@@ -336,7 +336,7 @@ export async function getScheduleExecutionHistory(
   `);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 // ============================================================================

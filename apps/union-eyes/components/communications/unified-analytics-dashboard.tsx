@@ -210,7 +210,7 @@ export default function UnifiedAnalyticsDashboard() {
     if (!data) return [];
     return data.timeSeries.map((item) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const filtered: any = { date: item.date };
+      const filtered: unknown = { date: item.date };
       selectedChannels.forEach((channel) => {
         filtered[channel] = item[channel as keyof TimeSeriesData];
       });

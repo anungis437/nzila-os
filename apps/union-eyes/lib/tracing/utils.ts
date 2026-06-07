@@ -66,7 +66,7 @@ export enum SpanStatusCode {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Span {
-  setAttribute(key: string, value: any): this;
+  setAttribute(key: string, value: unknown): this;
   setAttributes(attributes: Record<string, any>): this;
   addEvent(name: string, attributes?: Record<string, any>): this;
   recordException(exception: Error | string, time?: number): this;
@@ -76,15 +76,15 @@ export interface Span {
 }
 
 export interface Tracer {
-  startSpan(name: string, options?: any): Span;
+  startSpan(name: string, options?: unknown): Span;
   startActiveSpan<T>(name: string, fn: (span: Span) => Promise<T>): Promise<T>;
-  startActiveSpan<T>(name: string, options: any, fn: (span: Span) => Promise<T>): Promise<T>;
+  startActiveSpan<T>(name: string, options: unknown, fn: (span: Span) => Promise<T>): Promise<T>;
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Lazy-loaded OpenTelemetry API
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let otelApi: any = null;
+let otelApi: unknown = null;
 
 /**
  * Get OpenTelemetry API (lazy-loaded)
@@ -338,7 +338,7 @@ function createNoOpTracer(): Tracer {
   return {
     startSpan: () => createNoOpSpan(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    startActiveSpan: async <T>(nameOrOptions: any, fnOrOptions?: any, fn?: any): Promise<T> => {
+    startActiveSpan: async <T>(nameOrOptions: unknown, fnOrOptions?: unknown, fn?: unknown): Promise<T> => {
       const actualFn = typeof fnOrOptions === 'function' ? fnOrOptions : fn;
       return await actualFn(createNoOpSpan());
     },

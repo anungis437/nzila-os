@@ -4,6 +4,13 @@ import {
   buildLeadershipDashboard,
 } from "@/lib/services/dashboard-kpi-service";
 
+type LeadershipDashboardGrievances = Parameters<typeof buildLeadershipDashboard>[0];
+type LeadershipDashboardAlerts = Parameters<typeof buildLeadershipDashboard>[1];
+type ExecutiveMetricsGrievances = Parameters<typeof buildExecutiveMetrics>[0];
+type ExecutiveMetricsMembers = Parameters<typeof buildExecutiveMetrics>[1];
+type ExecutiveMetricsGoals = Parameters<typeof buildExecutiveMetrics>[2];
+type ExecutiveMetricsRemittances = Parameters<typeof buildExecutiveMetrics>[3];
+
 function iso(date: string): Date {
   return new Date(date);
 }
@@ -49,7 +56,7 @@ describe("dashboard-kpi-service", () => {
         meetingDate: null,
         responseDeadline: iso("2026-01-06T00:00:00.000Z"),
       },
-    ] as any[];
+    ] satisfies LeadershipDashboardGrievances;
 
     const alerts = [
       {
@@ -62,9 +69,9 @@ describe("dashboard-kpi-service", () => {
         createdAt: iso("2026-01-02T00:00:00.000Z"),
         resolvedAt: null,
       },
-    ] as any[];
+    ] satisfies LeadershipDashboardAlerts;
 
-    const result = buildLeadershipDashboard(grievances as any, alerts as any, "monthly", iso("2026-01-12T00:00:00.000Z"));
+    const result = buildLeadershipDashboard(grievances, alerts, "monthly", iso("2026-01-12T00:00:00.000Z"));
 
     expect(result.kpi.avgTriageDays).toBe(2);
     expect(result.kpi.avgResolutionDays).toBe(9);
@@ -97,29 +104,29 @@ describe("dashboard-kpi-service", () => {
         closedAt: null,
         meetingDate: iso("2026-02-20T00:00:00.000Z"),
       },
-    ] as any[];
+    ] satisfies ExecutiveMetricsGrievances;
 
     const members = [
       { id: "m-1", status: "active", joinedAt: iso("2026-02-03T00:00:00.000Z"), createdAt: iso("2026-02-03T00:00:00.000Z") },
       { id: "m-2", status: "inactive", joinedAt: iso("2026-02-01T00:00:00.000Z"), createdAt: iso("2026-02-01T00:00:00.000Z") },
       { id: "m-3", status: "active", joinedAt: iso("2026-01-05T00:00:00.000Z"), createdAt: iso("2026-01-05T00:00:00.000Z") },
-    ] as any[];
+    ] satisfies ExecutiveMetricsMembers;
 
     const goals = [
       { id: "goal-1", status: "at-risk" },
       { id: "goal-2", status: "on-track" },
-    ] as any[];
+    ] satisfies ExecutiveMetricsGoals;
 
     const remittances = [
       { id: "r-1", totalAmount: "45000.25", expectedAmount: "50000.00" },
       { id: "r-2", totalAmount: "55000.75", expectedAmount: null },
-    ] as any[];
+    ] satisfies ExecutiveMetricsRemittances;
 
     const result = buildExecutiveMetrics(
-      grievances as any,
-      members as any,
-      goals as any,
-      remittances as any,
+      grievances,
+      members,
+      goals,
+      remittances,
       "monthly",
       iso("2026-02-12T00:00:00.000Z"),
     );

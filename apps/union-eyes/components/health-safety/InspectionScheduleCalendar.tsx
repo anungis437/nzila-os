@@ -91,7 +91,7 @@ export function InspectionScheduleCalendar({
       if (json.success) {
         const rows = Array.isArray(json.data?.data) ? json.data.data : [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setInspections(rows.map((i: any) => ({
+        setInspections(rows.map((i: unknown) => ({
           id: i.id,
           title: i.inspectionType ?? i.inspectionNumber ?? i.title ?? 'Inspection',
           date: new Date(i.scheduledDate ?? i.date ?? Date.now()),

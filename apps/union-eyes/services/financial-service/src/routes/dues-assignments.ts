@@ -11,6 +11,15 @@ import { logger } from '@/lib/logger';
 
 const router = Router();
 
+type AuthUser = {
+  organizationId: string;
+  role: string;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as unknown as { user: AuthUser }).user;
+}
+
 // ============================================================================
 // VALIDATION SCHEMAS
 // ============================================================================
@@ -34,8 +43,7 @@ const createAssignmentSchema = z.object({
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { memberId, active } = req.query;
 
     const conditions = [eq(schema.memberDuesAssignments.organizationId, organizationId)];
@@ -79,8 +87,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { id } = req.params;
 
     const [assignment] = await db
@@ -116,8 +123,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, _userId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
 
     // Check permissions
     if (!['admin', 'financial_admin'].includes(role)) {
@@ -147,8 +153,7 @@ router.post('/', async (req: Request, res: Response) => {
       .values({
         ...validatedData,
         organizationId: organizationId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as typeof schema.memberDuesAssignments.$inferInsert)
       .returning();
 
     res.status(201).json({ success: true, data: newAssignment });
@@ -167,8 +172,7 @@ router.post('/', async (req: Request, res: Response) => {
  */
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
     const { id } = req.params;
 
     // Check permissions
@@ -179,8 +183,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     // Validate input
     const validatedData = createAssignmentSchema.partial().parse(req.body);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = { ...validatedData };
+    const updateData: Record<string, unknown> = { ...validatedData };
     // Convert Date objects to strings
     if (updateData.effectiveDate instanceof Date) {
       updateData.effectiveDate = updateData.effectiveDate.toISOString().split('T')[0];
@@ -188,13 +191,15 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (updateData.endDate instanceof Date) {
       updateData.endDate = updateData.endDate.toISOString().split('T')[0];
     }
-    if (updateData.overrideAmount !== undefined) {
-      updateData.overrideAmount = updateData.overrideAmount.toString();
+    if (updateData.overrideAmount != null) {
+      if (typeof updateData.overrideAmount === 'number' || typeof updateData.overrideAmount === 'string') {
+        updateData.overrideAmount = updateData.overrideAmount.toString();
+      }
     }
 
     const [updatedAssignment] = await db
       .update(schema.memberDuesAssignments)
-      .set(updateData)
+      .set(updateData as unknown as Partial<typeof schema.memberDuesAssignments.$inferInsert>)
       .where(and(
         eq(schema.memberDuesAssignments.id, id),
         eq(schema.memberDuesAssignments.organizationId, organizationId)
@@ -221,8 +226,7 @@ router.put('/:id', async (req: Request, res: Response) => {
  */
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
     const { id } = req.params;
 
     // Check permissions
@@ -235,8 +239,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
       .set({
         isActive: false,
         endDate: new Date().toISOString().split('T')[0],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Partial<typeof schema.memberDuesAssignments.$inferInsert>)
       .where(and(
         eq(schema.memberDuesAssignments.id, id),
         eq(schema.memberDuesAssignments.organizationId, organizationId)

@@ -7,7 +7,7 @@ import "server-only";
 import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { evidencePacks } from "@nzila/db";
-import { eq, sql, count } from "drizzle-orm";
+import { sql, count } from "drizzle-orm";
 import type { AccountHealth } from "@nzila/deal-engine/types";
 
 interface EvidencePackSummary {

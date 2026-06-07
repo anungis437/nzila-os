@@ -165,7 +165,7 @@ export function LabourBoardFormGenerator({ campaignId, organizationId: _organiza
       if (field.mappedTo) {
         const path = field.mappedTo.split('.');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let value: any = campaignData;
+        let value: unknown = campaignData;
         
         for (const key of path) {
           if (key === 'campaign') continue;

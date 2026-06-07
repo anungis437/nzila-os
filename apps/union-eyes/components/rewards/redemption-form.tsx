@@ -106,7 +106,7 @@ export function RedemptionForm({ balance, mode, userId: _userId, orgId: _orgId }
         />
         <p className="text-xs text-muted-foreground">
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(t as any)('creditsHelper', {
+          {(t as unknown)('creditsHelper', {
             defaultValue: 'Maximum: {balance} credits',
             values: { balance: balance.toLocaleString() },
           })}

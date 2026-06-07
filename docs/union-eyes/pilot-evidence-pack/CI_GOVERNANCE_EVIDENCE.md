@@ -34,8 +34,8 @@ Files fixed this sprint: **46 files**, +580 / −516 lines.
 Key fixes:
 - `RLSTx = typeof db` (postgres.js adapter — correct for Drizzle/postgres.js)
 - `withRLSContext` overloads reordered (tx-arg overloads first — required for TS overload resolution)
-- `AnyColumn` → `PgColumn<any>` in all 4 self-referential FK schema lambdas
-- `NodePgDatabase<any>` → `RLSTx` across all query files + `billing-cycle-service.ts`
+- `AnyColumn` → `PgColumn<unknown>` in all 4 self-referential FK schema lambdas
+- `NodePgDatabase<unknown>` → `RLSTx` across all query files + `billing-cycle-service.ts`
 - All `result.rows` accesses removed (postgres.js returns array-direct, not `.rows`)
 - `signatures.ts` `relations()` added (required for Drizzle relational query result typing)
 - `analytics-actions.ts` insert columns corrected to match `mlPredictions` schema

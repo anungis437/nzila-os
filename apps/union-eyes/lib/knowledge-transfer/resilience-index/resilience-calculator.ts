@@ -5,9 +5,12 @@
  */
 
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import type { PropagationMap } from '../propagation/propagation-models';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
+
+type PublishedInterview = Awaited<ReturnType<typeof loadPublishedInterviews>>[number];
 
 export interface ResilienceIndexDimension {
   name: string;
@@ -34,12 +37,16 @@ export interface OrganizationalResilienceIndex {
   recommendations: string[];
 }
 
-export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {
-  const propagationMap = await buildDependencyPropagationMap(orgId);
-  const interviews = await db
+async function loadPublishedInterviews(orgId: string) {
+  return db
     .select()
     .from(exitInterviews)
     .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')));
+}
+
+export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {
+  const propagationMap = await buildDependencyPropagationMap(orgId);
+  const interviews = await loadPublishedInterviews(orgId);
 
   // Calculate dimensions
   const redundancyScore = calculateRedundancyScore(propagationMap);
@@ -54,8 +61,8 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
       score: redundancyScore,
       status: statusFromScore(redundancyScore),
       components: [
-        { name: 'Single-source knowledge areas', value: propagationMap.nodes.filter((n: any) => n.isSingleSource).length },
-        { name: 'Average coverage', value: propagationMap.nodes.reduce((sum: any, n: any) => sum + n.frequency, 0) / Math.max(propagationMap.nodes.length, 1) },
+        { name: 'Single-source knowledge areas', value: propagationMap.nodes.filter((node) => node.isSingleSource).length },
+        { name: 'Average coverage', value: propagationMap.nodes.reduce((sum, node) => sum + node.frequency, 0) / Math.max(propagationMap.nodes.length, 1) },
       ],
       recommendations: redundancyScore < 60 ? ['Cross-train on critical areas', 'Document isolated knowledge'] : [],
     },
@@ -74,8 +81,8 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
       score: governanceScore,
       status: statusFromScore(governanceScore),
       components: [
-        { name: 'Governance/compliance nodes', value: propagationMap.nodes.filter((n: any) => n.category === 'governance' || n.category === 'compliance').length },
-        { name: 'Single-source governance', value: propagationMap.nodes.filter((n: any) => (n.category === 'governance' || n.category === 'compliance') && n.isSingleSource).length },
+        { name: 'Governance/compliance nodes', value: propagationMap.nodes.filter((node) => node.category === 'governance' || node.category === 'compliance').length },
+        { name: 'Single-source governance', value: propagationMap.nodes.filter((node) => (node.category === 'governance' || node.category === 'compliance') && node.isSingleSource).length },
       ],
       recommendations: governanceScore < 60 ? ['Formalize governance procedures', 'Cross-train on compliance'] : [],
     },
@@ -94,8 +101,8 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
       score: diversificationScore,
       status: statusFromScore(diversificationScore),
       components: [
-        { name: 'Vendor concentration risks', value: propagationMap.nodes.filter((n: any) => n.category === 'vendor' && n.isSingleSource).length },
-        { name: 'System diversification', value: propagationMap.nodes.filter((n: any) => n.category === 'system').length },
+        { name: 'Vendor concentration risks', value: propagationMap.nodes.filter((node) => node.category === 'vendor' && node.isSingleSource).length },
+        { name: 'System diversification', value: propagationMap.nodes.filter((node) => node.category === 'system').length },
       ],
       recommendations: diversificationScore < 60 ? ['Diversify vendor relationships', 'Consider system redundancy'] : [],
     },
@@ -114,7 +121,7 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
     'initial';
 
   // Trend (heuristic)
-  const trend = propagationMap.nodes.filter((n: any) => n.isSingleSource).length > propagationMap.nodes.length * 0.4 ? 'degrading' : 'stable' as const;
+  const trend = propagationMap.nodes.filter((node) => node.isSingleSource).length > propagationMap.nodes.length * 0.4 ? 'degrading' : 'stable' as const;
 
   // Overall recommendations
   const recommendations = dimensions
@@ -134,10 +141,10 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
   };
 }
 
-function calculateRedundancyScore(propagationMap: any): number {
+function calculateRedundancyScore(propagationMap: PropagationMap): number {
   const totalNodes = propagationMap.nodes.length;
-  const singleSourceCount = propagationMap.nodes.filter((n: any) => n.isSingleSource).length;
-  const avgFrequency = propagationMap.nodes.reduce((sum: any, n: any) => sum + n.frequency, 0) / totalNodes;
+  const singleSourceCount = propagationMap.nodes.filter((node) => node.isSingleSource).length;
+  const avgFrequency = propagationMap.nodes.reduce((sum, node) => sum + node.frequency, 0) / totalNodes;
 
   // Score based on redundancy
   const singleSourcePenalty = (singleSourceCount / totalNodes) * 40;
@@ -146,50 +153,50 @@ function calculateRedundancyScore(propagationMap: any): number {
   return Math.max(50 + redundancyBonus - singleSourcePenalty, 0);
 }
 
-function calculateDocumentationScore(interviews: any[], propagationMap: any): number {
+function calculateDocumentationScore(interviews: PublishedInterview[], propagationMap: PropagationMap): number {
   let score = Math.min(interviews.length * 10, 60); // Base on interview count
 
   // Bonus for comprehensive coverage
-  const avgFrequency = propagationMap.nodes.reduce((sum: any, n: any) => sum + n.frequency, 0) / propagationMap.nodes.length;
+  const avgFrequency = propagationMap.nodes.reduce((sum, node) => sum + node.frequency, 0) / propagationMap.nodes.length;
   score += Math.min(avgFrequency * 5, 20);
 
   // Penalty for undocumented areas
-  const undocumentedPenalty = propagationMap.nodes.filter((n: any) => n.isSingleSource).length / propagationMap.nodes.length * 20;
+  const undocumentedPenalty = propagationMap.nodes.filter((node) => node.isSingleSource).length / propagationMap.nodes.length * 20;
   score -= undocumentedPenalty;
 
   return Math.max(Math.min(score, 100), 0);
 }
 
-function calculateGovernanceScore(propagationMap: any): number {
-  const governanceNodes = propagationMap.nodes.filter((n: any) => n.category === 'governance' || n.category === 'compliance');
+function calculateGovernanceScore(propagationMap: PropagationMap): number {
+  const governanceNodes = propagationMap.nodes.filter((node) => node.category === 'governance' || node.category === 'compliance');
   const totalNodes = propagationMap.nodes.length;
 
   // Score based on governance coverage and redundancy
   let score = 50;
   score += Math.min((governanceNodes.length / totalNodes) * 30, 30); // More governance = better
 
-  const singleSourceGov = governanceNodes.filter((n: any) => n.isSingleSource).length;
+  const singleSourceGov = governanceNodes.filter((node) => node.isSingleSource).length;
   score -= (singleSourceGov / Math.max(governanceNodes.length, 1)) * 20;
 
   return Math.max(Math.min(score, 100), 0);
 }
 
-function calculatePreparednessScore(propagationMap: any, interviewCount: number): number {
+function calculatePreparednessScore(propagationMap: PropagationMap, interviewCount: number): number {
   let score = Math.min(interviewCount * 8, 60);
 
   // Bonus for identified bottlenecks (means org is aware)
   if (propagationMap.bottlenecks.length > 0) score += 15;
 
   // Penalty for unaddressed critical issues
-  const criticalBottlenecks = propagationMap.bottlenecks.filter((b: any) => b.riskLevel === 'critical').length;
+  const criticalBottlenecks = propagationMap.bottlenecks.filter((bottleneck) => bottleneck.riskLevel === 'critical').length;
   score -= criticalBottlenecks * 10;
 
   return Math.max(Math.min(score, 100), 0);
 }
 
-function calculateDiversificationScore(propagationMap: any): number {
-  const vendors = propagationMap.nodes.filter((n: any) => n.category === 'vendor');
-  const systems = propagationMap.nodes.filter((n: any) => n.category === 'system');
+function calculateDiversificationScore(propagationMap: PropagationMap): number {
+  const vendors = propagationMap.nodes.filter((node) => node.category === 'vendor');
+  const systems = propagationMap.nodes.filter((node) => node.category === 'system');
 
   let score = 50;
 
@@ -198,7 +205,7 @@ function calculateDiversificationScore(propagationMap: any): number {
   score += Math.min(vendors.length * 5, 25);
 
   // Penalty for single-source critical items
-  const singleSourceCritical = vendors.filter((v: any) => v.isSingleSource).length;
+  const singleSourceCritical = vendors.filter((vendor) => vendor.isSingleSource).length;
   score -= singleSourceCritical * 15;
 
   return Math.max(Math.min(score, 100), 0);

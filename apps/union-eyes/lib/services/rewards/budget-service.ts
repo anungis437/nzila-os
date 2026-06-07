@@ -83,7 +83,7 @@ export async function listBudgetEnvelopes(
       lte(rewardBudgetEnvelopes.startsAt, now),
       gte(rewardBudgetEnvelopes.endsAt, now)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any;
+    ) as unknown;
   }
 
   const envelopes = await db.query.rewardBudgetEnvelopes.findMany({
@@ -244,7 +244,7 @@ export async function getBudgetUsageSummary(
   let whereClause = eq(rewardBudgetEnvelopes.orgId, orgId);
   if (programId) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    whereClause = and(whereClause, eq(rewardBudgetEnvelopes.programId, programId)) as any;
+    whereClause = and(whereClause, eq(rewardBudgetEnvelopes.programId, programId)) as unknown;
   }
 
   const envelopes = await db.query.rewardBudgetEnvelopes.findMany({
@@ -512,12 +512,12 @@ export async function cleanupExpiredReservations(): Promise<{
   const expiredReservations = await db.query.budgetReservations.findMany({
     where: and(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ne(budgetReservations.status, 'released' as any),
+      ne(budgetReservations.status, 'released' as unknown),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ne(budgetReservations.status, 'expired' as any),
+      ne(budgetReservations.status, 'expired' as unknown),
       lte(budgetReservations.expiresAt, now)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any,
+    ) as unknown,
   });
 
   let released = 0;
@@ -570,11 +570,11 @@ export async function getActiveReservations(poolId?: string) {
   
   let whereClause = and(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ne(budgetReservations.status, 'released' as any),
+    ne(budgetReservations.status, 'released' as unknown),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ne(budgetReservations.status, 'expired' as any)
+    ne(budgetReservations.status, 'expired' as unknown)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  ) as unknown;
 
   if (poolId) {
     whereClause = and(whereClause, eq(budgetReservations.poolId, poolId));

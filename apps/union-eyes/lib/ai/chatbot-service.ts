@@ -103,7 +103,7 @@ export class ChatSessionManager {
         organizationId: data.organizationId,
         title: data.title || "New conversation",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        aiProvider: (data.aiProvider as any) || "openai",
+        aiProvider: (data.aiProvider as unknown) || "openai",
         model: data.model || "gpt-4",
         contextTags: data.contextTags,
         relatedEntityType: data.relatedEntityType,
@@ -145,7 +145,7 @@ export class ChatSessionManager {
     }
     if (options.status) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(eq(chatSessions.status, options.status as any));
+      conditions.push(eq(chatSessions.status, options.status as unknown));
     }
 
     const results = await db
@@ -219,9 +219,9 @@ export class RAGService {
       ...data,
       organizationId: data.organizationId,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      documentType: data.documentType as any,
+      documentType: data.documentType as unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      embedding: JSON.stringify(embedding) as any,
+      embedding: JSON.stringify(embedding) as unknown,
       embeddingModel: "text-embedding-ada-002",
     });
   }
@@ -442,7 +442,7 @@ export class ChatbotService {
         tokensUsed: response.tokensUsed,
         responseTimeMs: responseTime,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        retrievedDocuments: retrievedDocs.length > 0 ? retrievedDocs as any : undefined,
+        retrievedDocuments: retrievedDocs.length > 0 ? retrievedDocs as unknown : undefined,
       })
       .returning();
     

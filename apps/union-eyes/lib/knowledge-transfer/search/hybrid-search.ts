@@ -11,7 +11,7 @@
 
 import { and, eq, ilike, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
-import { exitInterviews, knowledgeBase } from '@/db/schema';
+import { exitInterviews } from '@/db/schema';
 import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import type { ExitInterviewSensitivityLevel } from '@/db/schema';

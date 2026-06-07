@@ -213,7 +213,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
                     <Select
                       value={formData.proposalType}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      onValueChange={(value: any) => setFormData({ ...formData, proposalType: value })}
+                      onValueChange={(value: unknown) => setFormData({ ...formData, proposalType: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />

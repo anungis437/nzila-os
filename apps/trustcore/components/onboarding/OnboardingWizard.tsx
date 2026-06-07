@@ -68,11 +68,38 @@ const DATA_TYPE_OPTIONS: { value: DataType; label: string; description: string }
 ]
 
 const KNOWN_VENDOR_OPTIONS: { value: KnownVendor; label: string; sub: string }[] = [
-  { value: 'google_workspace', label: 'Google Workspace', sub: 'Gmail, Drive, Meet' },
+  { value: 'ue_docs', label: 'UE Docs', sub: 'Policies, records, and operating docs' },
   { value: 'microsoft_365', label: 'Microsoft 365', sub: 'Outlook, Teams, SharePoint' },
   { value: 'stripe', label: 'Stripe', sub: 'Payment processing' },
   { value: 'shopify', label: 'Shopify', sub: 'E-commerce platform' },
 ]
+
+function normalizeLegacyWizardState(rawState: unknown): WizardState {
+  if (!rawState || typeof rawState !== 'object') return DEFAULT_STATE
+
+  const state = rawState as Partial<WizardState>
+  const legacyVendors = Array.isArray(state.step4?.selectedVendors)
+    ? (state.step4.selectedVendors as string[])
+    : []
+  const allowedVendors: KnownVendor[] = ['ue_docs', 'microsoft_365', 'stripe', 'shopify', 'other']
+  const selectedVendors = legacyVendors
+    .map((vendor) => (vendor === 'google_workspace' ? 'ue_docs' : vendor))
+    .filter((vendor): vendor is KnownVendor => allowedVendors.includes(vendor as KnownVendor))
+
+  return {
+    ...DEFAULT_STATE,
+    ...state,
+    step1: { ...DEFAULT_STATE.step1, ...state.step1 },
+    step2: { ...DEFAULT_STATE.step2, ...state.step2 },
+    step3: { ...DEFAULT_STATE.step3, ...state.step3 },
+    step4: {
+      ...DEFAULT_STATE.step4,
+      ...state.step4,
+      selectedVendors,
+    },
+    step5: { ...DEFAULT_STATE.step5, ...state.step5 },
+  }
+}
 
 // ── Step heading helper ────────────────────────────────────────────────────
 
@@ -618,7 +645,7 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
     if (typeof window === 'undefined') return DEFAULT_STATE
     try {
       const saved = window.localStorage.getItem(`tc_onboarding_${orgId}`)
-      if (saved) return JSON.parse(saved) as WizardState
+      if (saved) return normalizeLegacyWizardState(JSON.parse(saved))
     } catch {
       // ignore
     }

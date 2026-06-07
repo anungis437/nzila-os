@@ -238,12 +238,12 @@ export const memberHistoryEvents = pgTable('member_history_events', {
   eventDescription: text('event_description'),
   eventData: jsonb('event_data').$type<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    previousValue?: any;
+    previousValue?: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    newValue?: any;
+    newValue?: unknown;
     relatedId?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: unknown;
   }>(),
   
   // Actor

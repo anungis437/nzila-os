@@ -152,7 +152,7 @@ export function Cupe4373MemberInboxPage({
                 Your messages
               </CardTitle>
               <CardDescription>
-                Questions and intake notes you've shared with your steward.
+                Questions and intake notes you&apos;ve shared with your steward.
               </CardDescription>
             </div>
             <Button asChild size="sm" variant="outline">
@@ -217,7 +217,7 @@ export function Cupe4373MemberInboxPage({
             Updates on your files
           </CardTitle>
           <CardDescription>
-            Reminders and deadlines tied to files you're part of.
+            Reminders and deadlines tied to files you&apos;re part of.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -225,7 +225,7 @@ export function Cupe4373MemberInboxPage({
             <EmptyState
               icon={ShieldCheck}
               title="No updates right now"
-              body="You'll see deadline reminders here when one of your files needs attention."
+              body="You&apos;ll see deadline reminders here when one of your files needs attention."
             />
           ) : (
             alerts.map((item) => (

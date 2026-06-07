@@ -15,7 +15,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { TrustCenterManifest, TrustClaim } from '../lib/trust-center/types.js';
+import type { TrustCenterManifest } from '../lib/trust-center/types.js';
 import { classifyClaimCoverage } from '../lib/trust-center/evidence.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

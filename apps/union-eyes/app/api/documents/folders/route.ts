@@ -20,6 +20,8 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+
+const LEGACY_DOCUMENT_API_ENABLED = process.env.LEGACY_DOCUMENT_API_ENABLED === 'true';
 /**
  * Validation schema for creating folders
  */
@@ -40,7 +42,14 @@ const createFolderSchema = z.object({
  * - tree: boolean - return full folder tree structure
  */
 export const GET = withRoleAuth('member', async (request, context) => {
-    const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
+    const { userId, organizationId } = context as { userId: string; organizationId: string };
+
+  if (!LEGACY_DOCUMENT_API_ENABLED) {
+    return standardErrorResponse(
+      ErrorCode.NOT_IMPLEMENTED,
+      'Legacy documents folders endpoint is disabled. Use /api/documents/repository.',
+    );
+  }
 
   try {
         const { searchParams } = new URL(request.url);
@@ -61,6 +70,13 @@ export const GET = withRoleAuth('member', async (request, context) => {
       ErrorCode.MISSING_REQUIRED_FIELD,
       'organizationId is required'
     );
+        }
+
+        if (organizationIdParam !== organizationId) {
+          return standardErrorResponse(
+            ErrorCode.FORBIDDEN,
+            'You do not have access to this organization\'s folders',
+          );
         }
 
         const tree = searchParams.get("tree") === "true";
@@ -122,6 +138,13 @@ return standardErrorResponse(
  * - parentFolderId: string
  */
 export const POST = withRoleAuth('steward', async (request, context) => {
+  if (!LEGACY_DOCUMENT_API_ENABLED) {
+    return standardErrorResponse(
+      ErrorCode.NOT_IMPLEMENTED,
+      'Legacy documents folders endpoint is disabled. Use /api/documents/repository.',
+    );
+  }
+
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -192,4 +215,4 @@ return standardErrorResponse(
     }
 });
 
-
+

@@ -15,6 +15,16 @@ import {
 
 const router = Router();
 
+type AuthUser = {
+  organizationId: string;
+  userId: string;
+  role: string;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as unknown as { user: AuthUser }).user;
+}
+
 // Validation schemas
 const createArrearsCaseSchema = z.object({
   memberId: z.string().uuid(),
@@ -70,8 +80,7 @@ const arrearsDetectionSchema = z.object({
  */
 router.post('/detect', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId, role } = (req as any).user;
+    const { organizationId, userId, role } = getAuthUser(req);
 
     if (!['admin', 'financial_admin'].includes(role)) {
       return res.status(403).json({
@@ -134,8 +143,7 @@ router.post('/detect', async (req: Request, res: Response) => {
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { memberId, status } = req.query;
 
     const conditions = [eq(schema.arrearsCases.organizationId, organizationId)];
@@ -144,8 +152,12 @@ router.get('/', async (req: Request, res: Response) => {
       conditions.push(eq(schema.arrearsCases.memberId, memberId as string));
     }
     if (status) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(eq(schema.arrearsCases.status, status as any));
+      conditions.push(
+        eq(
+          schema.arrearsCases.status,
+          status as typeof schema.arrearsCases.$inferSelect['status'],
+        ),
+      );
     }
 
     const cases = await db
@@ -173,8 +185,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { id } = req.params;
 
     const [arrearsCase] = await db
@@ -198,7 +209,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     // Fetch related transactions
     const transactionIds = arrearsCase.transactionIds as string[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let transactions: any[] = [];
+    let transactions: Array<typeof schema.duesTransactions.$inferSelect> = [];
     
     if (transactionIds && transactionIds.length > 0) {
       transactions = await db
@@ -233,8 +244,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId, role } = (req as any).user;
+    const { organizationId, userId, role } = getAuthUser(req);
 
     if (!['admin', 'financial_admin'].includes(role)) {
       return res.status(403).json({
@@ -278,8 +288,7 @@ router.post('/', async (req: Request, res: Response) => {
         escalationLevel: '1',
         notes: validatedData.notes,
         createdBy: userId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as typeof schema.arrearsCases.$inferInsert)
       .returning();
 
     res.status(201).json({
@@ -307,8 +316,7 @@ router.post('/', async (req: Request, res: Response) => {
  */
 router.post('/:id/payment-plan', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, _userId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
     const { id } = req.params;
 
     if (!['admin', 'financial_admin'].includes(role)) {
@@ -374,8 +382,7 @@ router.post('/:id/payment-plan', async (req: Request, res: Response) => {
         installmentAmount: validatedData.installmentAmount.toString(),
         numberOfInstallments: validatedData.numberOfInstallments.toString(),
         paymentSchedule,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Partial<typeof schema.arrearsCases.$inferInsert>)
       .where(eq(schema.arrearsCases.id, id))
       .returning();
 
@@ -407,8 +414,7 @@ router.post('/:id/payment-plan', async (req: Request, res: Response) => {
  */
 router.put('/:id/status', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId, role } = (req as any).user;
+    const { organizationId, userId, role } = getAuthUser(req);
     const { id } = req.params;
 
     if (!['admin', 'financial_admin'].includes(role)) {
@@ -437,8 +443,7 @@ router.put('/:id/status', async (req: Request, res: Response) => {
         escalationLevel: escalationLevels[validatedData.status].toString(),
         notes: validatedData.notes,
         updatedBy: userId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Partial<typeof schema.arrearsCases.$inferInsert>)
       .where(
         and(
           eq(schema.arrearsCases.id, id),
@@ -479,8 +484,7 @@ router.put('/:id/status', async (req: Request, res: Response) => {
  */
 router.post('/:id/contact', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = (req as any).user;
+    const { organizationId, userId } = getAuthUser(req);
     const { id } = req.params;
 
     const validatedData = contactLogSchema.parse(req.body);
@@ -505,8 +509,7 @@ router.post('/:id/contact', async (req: Request, res: Response) => {
     }
 
     // Add to contact history
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const contactHistory = (arrearsCase.contactHistory as any[]) || [];
+    const contactHistory = (arrearsCase.contactHistory as unknown[]) || [];
     contactHistory.push({
       timestamp: new Date(),
       contactType: validatedData.contactType,
@@ -521,8 +524,7 @@ router.post('/:id/contact', async (req: Request, res: Response) => {
         contactHistory,
         lastContactDate: new Date(),
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Partial<typeof schema.arrearsCases.$inferInsert>)
       .where(eq(schema.arrearsCases.id, id))
       .returning();
 
@@ -551,8 +553,7 @@ router.post('/:id/contact', async (req: Request, res: Response) => {
  */
 router.post('/:id/payment', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, _userId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { id } = req.params;
 
     const paymentSchema = z.object({
@@ -588,8 +589,7 @@ router.post('/:id/payment', async (req: Request, res: Response) => {
     const newBalance = Math.max(0, currentBalance - paymentAmount);
 
     // Update case with payment
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       remainingBalance: newBalance.toString(),
       updatedAt: new Date(),
     };
@@ -602,7 +602,7 @@ router.post('/:id/payment', async (req: Request, res: Response) => {
 
     const [updatedCase] = await db
       .update(schema.arrearsCases)
-      .set(updateData)
+      .set(updateData as unknown as Partial<typeof schema.arrearsCases.$inferInsert>)
       .where(eq(schema.arrearsCases.id, id))
       .returning();
 

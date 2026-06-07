@@ -447,7 +447,7 @@ export async function cloneTemplate(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const template = original.data as any;
+    const template = original.data as unknown;
     const cloned = await createAwardTemplate(
       newOrganizationId,
       {
@@ -529,7 +529,7 @@ export async function archiveOldTemplates(organizationId: string, olderThanDays 
       ));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return { success: true, archivedCount: (result as any).rowCount };
+    return { success: true, archivedCount: (result as unknown).rowCount };
   } catch (error) {
     logger.error('[Templates] Error archiving old templates', {
       error,

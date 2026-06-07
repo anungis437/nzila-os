@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-02T14:54:34.999Z",
+  "generatedAt": "2026-06-05T11:24:41.264Z",
   "totalDocuments": 1179,
   "staleDocuments": 0,
   "categories": [
@@ -198,7 +198,7 @@
     {
       "path": "docs/categories/historical-archive/archive/audit-reports/DECISION_INTELLIGENCE_AUDIT_2026-07-06.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -306,7 +306,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-cognition-doctrine/global-anti-surveillance-enforcement.md",
       "category": "categories",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -1656,7 +1656,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/plans/IMPLEMENTATION_PLAN_FINAL.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -1800,7 +1800,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/AUDIT_ENFORCEMENT.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -1986,7 +1986,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -2010,7 +2010,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/orm-governance/governance-attachment-to-orm-authority.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -2400,7 +2400,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/platform-readiness.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -3288,7 +3288,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/VENDOR_DIVERSIFICATION_STRATEGY.md",
       "category": "categories",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -4866,7 +4866,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/wave9-constitutional-runtime-finalization-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -5112,7 +5112,7 @@
     {
       "path": "docs/categories/stakeholders/commercial/FOUNDER_REVENUE_COCKPIT.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -5670,7 +5670,7 @@
     {
       "path": "docs/categories/stakeholders/personas/03-auditor.md",
       "category": "categories",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -5850,7 +5850,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-06-02",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -6276,7 +6276,7 @@
     {
       "path": "docs/oci/audit/QUESTION_ARCHITECTURE_GOVERNANCE.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -6402,7 +6402,7 @@
     {
       "path": "docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -6954,13 +6954,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-06-02",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-06-02",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -7032,7 +7032,7 @@
     {
       "path": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {

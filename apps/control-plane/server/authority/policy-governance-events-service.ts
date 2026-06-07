@@ -30,7 +30,7 @@ const logger = createLogger('control-plane:authority:policy-governance-events')
 // The caller provides the Drizzle DB instance. This service has no module-level
 // state.
 
-type AnyDB = any
+type GovernanceEventsDb = typeof import('@nzila/db')['db']
 
 // ── Recording ────────────────────────────────────────────────────────────────
 
@@ -59,7 +59,7 @@ export interface RecordGovernanceEventInput {
  */
 export async function recordGovernanceEvent(
   input: RecordGovernanceEventInput,
-  db: AnyDB,
+  db: GovernanceEventsDb,
 ): Promise<PolicyGovernanceEventRow> {
   const row: NewPolicyGovernanceEventRow = {
     orgId: input.orgId ?? null,
@@ -118,7 +118,7 @@ export interface PaginatedGovernanceEvents {
 
 export async function queryGovernanceEvents(
   filter: GovernanceEventFilter,
-  db: AnyDB,
+  db: GovernanceEventsDb,
 ): Promise<PaginatedGovernanceEvents> {
   const conditions = []
   if (filter.policyId) conditions.push(eq(policyGovernanceEvents.policyId, filter.policyId))
@@ -160,7 +160,7 @@ export async function queryGovernanceEvents(
  */
 export async function getEventsByPolicy(
   policyId: string,
-  db: AnyDB,
+  db: GovernanceEventsDb,
 ): Promise<PolicyGovernanceEventRow[]> {
   const events = await db
     .select()
@@ -181,7 +181,7 @@ export async function getEventsByPolicy(
 export async function reconstructPolicyStateAt(
   policyId: string,
   at: Date,
-  db: AnyDB,
+  db: GovernanceEventsDb,
 ): Promise<PolicyLifecycleState | null> {
   const events = await db
     .select()

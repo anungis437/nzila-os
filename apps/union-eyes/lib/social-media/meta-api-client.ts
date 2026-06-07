@@ -599,7 +599,7 @@ export class MetaAPIClient {
     try {
       const parsed = JSON.parse(usage);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const appUsage = Object.values(parsed)[0] as any;
+      const appUsage = Object.values(parsed)[0] as unknown;
       
       this.rateLimitInfo = {
         call_count: appUsage.call_count || 0,
@@ -727,7 +727,7 @@ export function createMetaClient(accessToken?: string): MetaAPIClient {
  * Helper to format Meta insights data
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function formatMetaInsights(insights: any[]): Record<string, number> {
+export function formatMetaInsights(insights: unknown[]): Record<string, number> {
   const formatted: Record<string, number> = {};
 
   for (const insight of insights) {

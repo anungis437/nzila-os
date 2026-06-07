@@ -22,7 +22,6 @@ async function main() {
   const {
     getAllSimulationScenarios,
     runCrossFederationSimulation,
-    BUILT_IN_SCENARIOS,
   } = await import('../lib/federation-sovereignty/simulation.js');
 
   const { computeSovereigntyReadiness } = await import(

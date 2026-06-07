@@ -508,7 +508,7 @@ alert("Unable to access GPS. Location tracking will not be available.");
               <Select
                 value={newActivity.activityType}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onValueChange={(value: any) => setNewActivity({ ...newActivity, activityType: value })}
+                onValueChange={(value: unknown) => setNewActivity({ ...newActivity, activityType: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -595,7 +595,7 @@ alert("Unable to access GPS. Location tracking will not be available.");
                   <Select
                     value={newActivity.interactionQuality}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onValueChange={(value: any) => setNewActivity({ ...newActivity, interactionQuality: value })}
+                    onValueChange={(value: unknown) => setNewActivity({ ...newActivity, interactionQuality: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />

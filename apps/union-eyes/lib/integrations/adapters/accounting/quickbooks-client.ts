@@ -102,7 +102,7 @@ export interface QuickBooksAccount {
 export interface QuickBooksPaginatedResponse<_T> {
   QueryResponse: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: unknown;
     startPosition: number;
     maxResults: number;
     totalCount?: number;

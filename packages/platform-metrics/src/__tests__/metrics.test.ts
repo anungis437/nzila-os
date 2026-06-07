@@ -42,7 +42,7 @@ vi.mock('@nzila/db/schema', () => ({
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((...args: unknown[]) => args),
   count: vi.fn(() => ({ as: vi.fn(() => 'count_col') })),
-  sql: vi.fn((...args: unknown[]) => ({ as: vi.fn(() => 'sql_col') })),
+  sql: vi.fn(() => ({ as: vi.fn(() => 'sql_col') })),
   and: vi.fn((...args: unknown[]) => args),
   gte: vi.fn((...args: unknown[]) => args),
 }))

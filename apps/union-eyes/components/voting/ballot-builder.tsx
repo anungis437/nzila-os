@@ -306,9 +306,9 @@ function QuestionEditor({
 }: {
   index: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  question: any;
+  question: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form: any;
+  form: unknown;
   onMoveUp: () => void;
   onMoveDown: () => void;
   onRemove: () => void;

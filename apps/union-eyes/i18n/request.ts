@@ -8,7 +8,7 @@ export default getRequestConfig(async ({ locale }) => {
   // Validate that the incoming `locale` parameter is valid
   // If invalid, fall back to default locale instead of calling notFound()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const validLocale = (locales.includes(locale as any) ? locale : defaultLocale) as Locale;
+  const validLocale = (locales.includes(locale as unknown) ? locale : defaultLocale) as Locale;
 
   return {
     locale: validLocale,

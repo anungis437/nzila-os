@@ -122,7 +122,7 @@ export function BargainingUnitManagement({
 
   const form = useForm<FormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as unknown,
     defaultValues: {
       name: "",
       unitNumber: "",
@@ -230,9 +230,9 @@ export function BargainingUnitManagement({
       name: unit.name,
       unitNumber: unit.unitNumber || "",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      unitType: unit.unitType as any,
+      unitType: unit.unitType as unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      status: unit.status as any,
+      status: unit.status as unknown,
       employerId: unit.employerId,
       worksiteId: unit.worksiteId || undefined,
       certificationNumber: unit.certificationNumber || "",

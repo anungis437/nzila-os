@@ -184,7 +184,7 @@ export class DocuSignProvider implements SignatureProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await response.json() as any;
+      const data = await response.json() as unknown;
       if (!data.access_token) {
         throw new Error('DocuSign auth response missing access_token');
       }
@@ -255,7 +255,7 @@ export class DocuSignProvider implements SignatureProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await response.json() as any;
+      const data = await response.json() as unknown;
       const envelopeId = data.envelopeId || `docusign-${Date.now()}`;
 
       logger.info("DocuSign envelope created", { envelopeId, signerCount: request.signers.length });
@@ -308,7 +308,7 @@ export class DocuSignProvider implements SignatureProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await response.json() as any;
+      const data = await response.json() as unknown;
 
       logger.info("Fetched DocuSign envelope status", { envelopeId, status: data.status });
 
@@ -318,7 +318,7 @@ export class DocuSignProvider implements SignatureProvider {
         subject: data.emailSubject || "Document Signing",
         message: data.emailBlurb || "",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: data.recipients?.signers?.map((s: any) => ({
+        signers: data.recipients?.signers?.map((s: unknown) => ({
           name: s.name,
           email: s.email,
           role: 'signer',
@@ -486,7 +486,7 @@ export class HelloSignProvider implements SignatureProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await response.json() as any;
+      const data = await response.json() as unknown;
       const requestId = data.signature_request?.signature_request_id || `hellosign-${Date.now()}`;
 
       logger.info("HelloSign signature request created", { requestId, signerCount: request.signers.length });
@@ -537,7 +537,7 @@ export class HelloSignProvider implements SignatureProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await response.json() as any;
+      const data = await response.json() as unknown;
       const request = data.signature_request;
 
       logger.info("Fetched HelloSign request status", { envelopeId, status: request.status });
@@ -548,7 +548,7 @@ export class HelloSignProvider implements SignatureProvider {
         subject: request.title || "Document Signing",
         message: request.message || "",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: request.signatures?.map((s: any) => ({
+        signers: request.signatures?.map((s: unknown) => ({
           name: s.signer_name,
           email: s.signer_email_address,
           role: 'signer',
@@ -690,7 +690,7 @@ export class AdobeSignProvider implements SignatureProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const uploadData = await uploadResponse.json() as any;
+      const uploadData = await uploadResponse.json() as unknown;
       const transientDocumentId = uploadData.transientDocumentId;
 
       // Step 2: Create agreement from transient document
@@ -727,7 +727,7 @@ export class AdobeSignProvider implements SignatureProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await createResponse.json() as any;
+      const data = await createResponse.json() as unknown;
       const agreementId = data.id || `adobe-sign-${Date.now()}`;
 
       logger.info("Adobe Sign agreement created", { agreementId, signerCount: request.signers.length });
@@ -777,7 +777,7 @@ export class AdobeSignProvider implements SignatureProvider {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await response.json() as any;
+      const data = await response.json() as unknown;
 
       logger.info("Fetched Adobe Sign agreement status", { envelopeId, status: data.status });
 
@@ -787,7 +787,7 @@ export class AdobeSignProvider implements SignatureProvider {
         subject: data.name || "Document Signing",
         message: data.message || "",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: data.participantSetsInfo?.[0]?.memberInfos?.map((m: any) => ({
+        signers: data.participantSetsInfo?.[0]?.memberInfos?.map((m: unknown) => ({
           name: m.name,
           email: m.email,
           role: 'signer',

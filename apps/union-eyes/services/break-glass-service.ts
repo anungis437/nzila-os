@@ -331,7 +331,7 @@ export class BreakGlassService {
     const signatureSlot = `signature${signaturesReceived}`;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = {
+    const updateData: unknown = {
       [`${signatureSlot}UserId`]: signature.keyHolderId,
       [`${signatureSlot}Timestamp`]: new Date(),
       [`${signatureSlot}IpAddress`]: signature.ipAddress,
@@ -430,9 +430,9 @@ export class BreakGlassService {
       objectivesMet: string[];
       overallScore: number;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      issuesIdentified?: any[];
+      issuesIdentified?: unknown[];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      remediationActions?: any[];
+      remediationActions?: unknown[];
     }
   ) {
     const duration = this.calculateDuration(results.actualStartTime, results.actualEndTime);

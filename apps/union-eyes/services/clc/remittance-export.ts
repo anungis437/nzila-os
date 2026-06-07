@@ -197,7 +197,7 @@ export class RemittanceExportService {
     
     // Build query conditions
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const conditions: any[] = [];
+    const conditions: unknown[] = [];
 
     if (options.remittanceIds && options.remittanceIds.length > 0) {
       conditions.push(inArray(perCapitaRemittances.id, options.remittanceIds));

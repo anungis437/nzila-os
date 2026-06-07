@@ -111,7 +111,7 @@ export class SharePointAdapter extends BaseIntegration implements IIntegration {
     } catch (error) {
       results.success = false;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      results.errors = [{ entity: 'sync', error: error instanceof Error ? error.message : String(error) }] as any;
+      results.errors = [{ entity: 'sync', error: error instanceof Error ? error.message : String(error) }] as unknown;
       this.logError('sync', error instanceof Error ? error : new Error(String(error)));
     }
 

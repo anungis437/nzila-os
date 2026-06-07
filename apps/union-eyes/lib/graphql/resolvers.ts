@@ -49,7 +49,7 @@ export const resolvers = {
 
       if (filters?.status) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        query = query.where(eq(claims.status, filters.status as any)) as typeof query;
+        query = query.where(eq(claims.status, filters.status as unknown)) as typeof query;
       }
 
       const results = await query.limit(limit).offset(offset).orderBy(desc(claims.createdAt));

@@ -15,7 +15,6 @@ import type {
   EffectivenessDimension,
   EffectivenessRating,
 } from './effectiveness-models';
-import type { CognitionMemoryEntry } from '@/lib/knowledge-transfer/cognition-memory/memory-models';
 
 function rateEffectiveness(scoreChange: number | null): EffectivenessRating {
   if (scoreChange === null) return 'unverified';

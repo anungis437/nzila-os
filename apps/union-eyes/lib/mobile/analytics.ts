@@ -278,11 +278,11 @@ export class MobileAnalytics {
    */
   private getDeviceInfo(): DeviceInfo {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const connection = (navigator as any).connection || 
+    const connection = (navigator as unknown).connection || 
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (navigator as any).mozConnection || 
+                      (navigator as unknown).mozConnection || 
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (navigator as any).webkitConnection;
+                      (navigator as unknown).webkitConnection;
 
     return {
       platform: navigator.platform,

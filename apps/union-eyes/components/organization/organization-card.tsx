@@ -114,10 +114,10 @@ export function OrganizationCard({
 
         {/* Description */}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {(organization as any).description && (
+        {(organization as unknown).description && (
           <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {(organization as any).description}
+            {(organization as unknown).description}
           </p>
         )}
 

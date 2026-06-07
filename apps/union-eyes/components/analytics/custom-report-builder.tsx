@@ -166,7 +166,7 @@ const OPERATORS = [
 export interface CustomReportBuilderProps {
   onSave?: (report: ReportBuilderData) => Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onRun?: (report: ReportBuilderData) => Promise<any>;
+  onRun?: (report: ReportBuilderData) => Promise<unknown>;
 }
 
 export function CustomReportBuilder({ onSave, onRun }: CustomReportBuilderProps) {
@@ -206,7 +206,7 @@ export function CustomReportBuilder({ onSave, onRun }: CustomReportBuilderProps)
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateFilter = (index: number, updates: any) => {
+  const updateFilter = (index: number, updates: unknown) => {
     const newFilters = [...filters];
     newFilters[index] = { ...newFilters[index], ...updates };
     setFilters(newFilters);
@@ -224,7 +224,7 @@ export function CustomReportBuilder({ onSave, onRun }: CustomReportBuilderProps)
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateCalculatedField = (index: number, updates: any) => {
+  const updateCalculatedField = (index: number, updates: unknown) => {
     const newFields = [...calculatedFields];
     newFields[index] = { ...newFields[index], ...updates };
     setCalculatedFields(newFields);

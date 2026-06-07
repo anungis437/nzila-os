@@ -318,7 +318,7 @@ export function MemberListTableAdvanced({
   ];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const _handleBulkAction = (action: string, selectedRows: any[]) => {
+  const _handleBulkAction = (action: string, selectedRows: unknown[]) => {
     const memberIds = selectedRows.map((row) => row.original.id);
     onBulkAction?.(action, memberIds);
   };

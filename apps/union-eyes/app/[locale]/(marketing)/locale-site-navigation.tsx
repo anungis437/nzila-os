@@ -98,7 +98,7 @@ export default function LocaleSiteNavigation() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+   
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') setMobileMenuOpen(false);
   }, []);

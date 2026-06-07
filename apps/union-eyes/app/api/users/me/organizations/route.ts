@@ -130,7 +130,7 @@ export async function GET(_req: NextRequest) {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let orgs: any[] = [];
+    let orgs: unknown[] = [];
 
     if (isAdmin) {
       // Platform admins can see ALL organizations

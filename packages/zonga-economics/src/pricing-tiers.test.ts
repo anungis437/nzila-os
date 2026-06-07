@@ -9,6 +9,7 @@ import {
 } from './pricing-tiers'
 import type { CreatorPlanTier } from './pricing-tiers'
 import { FeeType } from './types'
+import type { RevenueSource } from './types'
 
 // ── PRICING_TIERS constant ──────────────────────────────────────────────────
 
@@ -101,7 +102,7 @@ describe('@nzila/zonga-economics — pricing-tiers', () => {
 
   it('returns 0 for a revenue source with no default commission rule', () => {
     // Cast an unknown source to hit the ?? 0 fallback
-    expect(getEffectiveTierCommission('starter', 'nonexistent_source' as any)).toBe(0)
+    expect(getEffectiveTierCommission('starter', 'nonexistent_source' as RevenueSource)).toBe(0)
   })
 
   // ── computeSubscriptionRevenue ──────────────────────────────────────────

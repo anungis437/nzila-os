@@ -115,7 +115,7 @@ export async function semanticClauseSearch(
     if (filters.clauseType && filters.clauseType.length > 0) {
       whereConditions.push(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        or(...filters.clauseType.map(type => eq(cbaClause.clauseType, type as any)))
+        or(...filters.clauseType.map(type => eq(cbaClause.clauseType, type as unknown)))
       );
     }
 
@@ -143,7 +143,7 @@ export async function semanticClauseSearch(
     `);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (results as any[]).map((row: any) => ({
+    return (results as unknown[]).map((row: unknown) => ({
       id: row.id as string,
       content: row.content as string,
       similarity: hybridSearch.enabled ? (row.hybrid_score as number) : (row.similarity as number),
@@ -155,7 +155,7 @@ export async function semanticClauseSearch(
         tags: row.tags,
       },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    })).filter((result: any) => result.similarity >= threshold);
+    })).filter((result: unknown) => result.similarity >= threshold);
   } catch (error) {
     logger.error('Error in semantic clause search', { error, query, options });
     throw new Error('Semantic search failed');
@@ -212,9 +212,9 @@ export async function findSimilarClauses(
     `);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (results as any[])
+    return (results as unknown[])
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((row: any) => ({
+      .map((row: unknown) => ({
         id: row.id as string,
         content: row.content as string,
         similarity: row.similarity as number,
@@ -227,7 +227,7 @@ export async function findSimilarClauses(
         },
       }))
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((result: any) => result.similarity >= threshold);
+      .filter((result: unknown) => result.similarity >= threshold);
   } catch (error) {
     logger.error('Error finding similar clauses', { error, clauseId, options });
     throw new Error('Failed to find similar clauses');
@@ -283,9 +283,9 @@ export async function semanticPrecedentSearch(
     `);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (results as any[])
+    return (results as unknown[])
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((row: any) => ({
+      .map((row: unknown) => ({
         id: row.id as string,
         content: row.precedent_summary as string,
         similarity: row.similarity as number,
@@ -300,7 +300,7 @@ export async function semanticPrecedentSearch(
         },
       }))
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((result: any) => result.similarity >= threshold);
+      .filter((result: unknown) => result.similarity >= threshold);
   } catch (error) {
     logger.error('Error in semantic precedent search', {
       error,

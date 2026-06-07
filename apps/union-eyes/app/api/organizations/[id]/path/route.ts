@@ -52,7 +52,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     .select()
     .from(organizations)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .where(lookupByUuid ? eq(organizations.id, id as any) : eq(organizations.slug, id as any))
+    .where(lookupByUuid ? eq(organizations.id, id as unknown) : eq(organizations.slug, id as unknown))
     .limit(1);
 
   const org = rows[0];
@@ -76,14 +76,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
             .select()
             .from(organizations)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .where(inArray(organizations.id, uuidTokens as any))
+            .where(inArray(organizations.id, uuidTokens as unknown))
         : Promise.resolve([]),
       slugTokens.length > 0
         ? db
             .select()
             .from(organizations)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .where(inArray(organizations.slug, slugTokens as any))
+            .where(inArray(organizations.slug, slugTokens as unknown))
         : Promise.resolve([]),
     ]);
 

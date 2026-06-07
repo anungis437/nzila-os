@@ -117,7 +117,7 @@ export class BillingCycleService {
     });
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       return await withRLSContext(async (tx: RLSTx) => {
         // Step 1: Get all active members
         const activeMembers = await this.getActiveMembersForBilling(tx, organizationId, periodStart);
@@ -236,7 +236,7 @@ export class BillingCycleService {
    * Get all active members eligible for billing
    */
   private static async getActiveMembersForBilling(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     tx: RLSTx,
     organizationId: string,
     _periodStart: Date
@@ -280,12 +280,12 @@ export class BillingCycleService {
    * Process billing for a single member
    */
   private static async processMemberBilling(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     tx: RLSTx,
     params: {
       organizationId: string;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      member: any;
+      member: unknown;
       periodStart: Date;
       periodEnd: Date;
       dryRun: boolean;

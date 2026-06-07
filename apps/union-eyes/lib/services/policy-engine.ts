@@ -122,7 +122,7 @@ export class PolicyEngine {
    */
   private async evaluateRule(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rule: any,
+    rule: unknown,
     context: EvaluationContext
   ): Promise<{ passed: boolean; failureReason?: string }> {
     try {
@@ -162,7 +162,7 @@ export class PolicyEngine {
    * Evaluate a single condition
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private evaluateCondition(condition: any, data: Record<string, any>): boolean {
+  private evaluateCondition(condition: unknown, data: Record<string, any>): boolean {
     const fieldValue = data[condition.field];
     const expectedValue = condition.value;
     

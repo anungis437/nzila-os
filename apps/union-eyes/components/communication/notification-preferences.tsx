@@ -257,7 +257,7 @@ export function NotificationPreferences({
             <FormField
               control={form.control}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={`${categoryKey}.email` as any}
+              name={`${categoryKey}.email` as unknown}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
                   <div className="flex items-center gap-2">
@@ -278,7 +278,7 @@ export function NotificationPreferences({
             <FormField
               control={form.control}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={`${categoryKey}.sms` as any}
+              name={`${categoryKey}.sms` as unknown}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
                   <div className="flex items-center gap-2">
@@ -299,7 +299,7 @@ export function NotificationPreferences({
             <FormField
               control={form.control}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={`${categoryKey}.push` as any}
+              name={`${categoryKey}.push` as unknown}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
                   <div className="flex items-center gap-2">
@@ -320,7 +320,7 @@ export function NotificationPreferences({
             <FormField
               control={form.control}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name={`${categoryKey}.inApp` as any}
+              name={`${categoryKey}.inApp` as unknown}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
                   <div className="flex items-center gap-2">
@@ -343,7 +343,7 @@ export function NotificationPreferences({
           <FormField
             control={form.control}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            name={`${categoryKey}.frequency` as any}
+            name={`${categoryKey}.frequency` as unknown}
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-between">

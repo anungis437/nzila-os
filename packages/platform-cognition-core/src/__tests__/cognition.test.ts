@@ -17,12 +17,9 @@ import * as path from 'node:path'
 
 import {
   COGNITION_ENGINE_VERSION,
-  consent,
   memory,
   riskScoresToSignals,
   riskScoreToSignal,
-  state,
-  trajectory,
   type CognitionSubject,
   type MemoryEvent,
   type StateSignalInput,

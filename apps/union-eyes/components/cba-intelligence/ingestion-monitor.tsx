@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -64,6 +65,17 @@ interface JobListResponse {
     total: number;
     page: number;
     limit: number;
+  };
+}
+
+interface OperationalHealthResponse {
+  success: boolean;
+  data: {
+    checks: Array<{
+      name: string;
+      level: "healthy" | "warning" | "critical";
+      detail: string;
+    }>;
   };
 }
 
@@ -118,6 +130,12 @@ export function IngestionMonitor() {
     refetchInterval: 10_000, // Poll every 10s for running jobs
   });
 
+  const { data: healthData } = useQuery<OperationalHealthResponse>({
+    queryKey: ["cba-intel-operational-health"],
+    queryFn: () => fetch("/api/cba-intelligence/health").then((r) => r.json()),
+    refetchInterval: 60_000,
+  });
+
   const _triggerMutation = useMutation({
     mutationFn: (sourceId: string) =>
       fetch("/api/cba-intelligence/ingestion", {
@@ -137,6 +155,8 @@ export function IngestionMonitor() {
   // Summary counts
   const running = items.filter((j) => j.status === "running").length;
   const failed = items.filter((j) => j.status === "failed").length;
+  const ingestionHealth = healthData?.data.checks.find((c) => c.name === "ingestion_success_rate");
+  const showIngestionAlert = ingestionHealth && ingestionHealth.level !== "healthy";
 
   return (
     <Card>
@@ -165,10 +185,21 @@ export function IngestionMonitor() {
         </div>
       </CardHeader>
       <CardContent>
+        {showIngestionAlert && (
+          <Alert
+            className={`mb-4 ${ingestionHealth.level === "critical" ? "border-red-300 text-red-700" : "border-yellow-300 text-yellow-700"}`}
+            variant={ingestionHealth.level === "critical" ? "destructive" : "default"}
+          >
+            <AlertDescription>
+              {ingestionHealth.detail}. Prioritize adapter diagnostics for failed jobs and re-run transient failures.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Filters */}
         <div className="flex gap-3 mb-4">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -264,7 +295,7 @@ export function IngestionMonitor() {
                       <TableCell>
                         {job.errorMessage && (
                           <span
-                            className="text-xs text-red-500 truncate block max-w-[200px]"
+                            className="text-xs text-red-500 truncate block max-w-50"
                             title={job.errorMessage}
                           >
                             {job.errorMessage}

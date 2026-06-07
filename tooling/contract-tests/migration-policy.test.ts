@@ -267,7 +267,7 @@ function findTsFiles(dir: string): string[] {
   const entries = readdirSync(dir, { withFileTypes: true, recursive: true })
   for (const entry of entries) {
     if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx'))) {
-      results.push(join((entry as any).path ?? dir, entry.name))
+      results.push(join((entry as unknown).path ?? dir, entry.name))
     }
   }
   return results

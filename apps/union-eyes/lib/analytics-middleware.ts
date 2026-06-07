@@ -21,7 +21,7 @@ export function withAnalyticsCache<T>(
 ) {
   return async (req: NextRequest) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as any).organizationId;
+    const organizationId = (req as unknown).organizationId;
     if (!organizationId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -82,7 +82,7 @@ export async function handleDataChange(
  * Get analytics dashboard summary with caching
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getAnalyticsDashboard(organizationId: string): Promise<any> {
+export async function getAnalyticsDashboard(organizationId: string): Promise<unknown> {
   return await withCache(
     organizationId,
     'dashboard',
@@ -113,7 +113,7 @@ const _commonTimeRanges = [7, 30, 90];
  * Get cache statistics for monitoring
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getAnalyticsCacheStats(): any {
+export function getAnalyticsCacheStats(): unknown {
   return analyticsCache.getStats();
 }
 

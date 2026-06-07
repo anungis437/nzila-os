@@ -256,7 +256,7 @@ toast({
 
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Select value={timeRange} onValueChange={(v: any) => setTimeRange(v)}>
+          <Select value={timeRange} onValueChange={(v: unknown) => setTimeRange(v)}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>

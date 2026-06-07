@@ -21,9 +21,9 @@ export interface AuditLogEntry {
   changes?: Array<{
     field: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    oldValue: any;
+    oldValue: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    newValue: any;
+    newValue: unknown;
   }>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
@@ -78,7 +78,7 @@ export class AuditTrailService {
     return {
       ...(entry as AuditLogEntry),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      organizationId: (entry as any).organizationId || params.organizationId,
+      organizationId: (entry as unknown).organizationId || params.organizationId,
     } as AuditLogEntry;
   }
 
@@ -91,7 +91,7 @@ export class AuditTrailService {
     userId: string;
     userName: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    entry: any;
+    entry: unknown;
     ipAddress?: string;
   }): Promise<void> {
     await this.logAction({
@@ -174,7 +174,7 @@ export class AuditTrailService {
     userId: string;
     userName: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    changes: Array<{ field: string; oldValue: any; newValue: any }>;
+    changes: Array<{ field: string; oldValue: unknown; newValue: unknown }>;
     ipAddress?: string;
   }): Promise<void> {
     await this.logAction({
@@ -263,7 +263,7 @@ export class AuditTrailService {
 
     if (options.action) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(eq(financialAuditLog.action, options.action as any));
+      conditions.push(eq(financialAuditLog.action, options.action as unknown));
     }
 
     if (options.startDate) {
@@ -288,7 +288,7 @@ export class AuditTrailService {
     return results.map((entry) => ({
       ...(entry as AuditLogEntry),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      organizationId: (entry as any).organizationId || options.organizationId,
+      organizationId: (entry as unknown).organizationId || options.organizationId,
     })) as AuditLogEntry[];
   }
 
@@ -544,7 +544,7 @@ export class AuditTrailService {
     ipAddress?: string;
     userAgent?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }): Promise<any> {
+  }): Promise<unknown> {
     // Import at method level to avoid circular dependencies
     const { auditLogs } = await import('@/db/schema/audit-security-schema');
 

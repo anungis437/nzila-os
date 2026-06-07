@@ -144,6 +144,16 @@ export const DEFAULT_FALLBACK_STRATEGY: FallbackStrategy = {
   retryableErrors: ['provider_error', 'timeout', 'quota_exceeded', 'rate_limited', 'connection_error'],
 }
 
+function getErrorCode(err: unknown): string {
+  if (typeof err === 'object' && err !== null && 'code' in err) {
+    const candidate = (err as { code?: unknown }).code
+    if (typeof candidate === 'string') {
+      return candidate
+    }
+  }
+  return 'unknown_error'
+}
+
 /**
  * Execute with fallback: try primary provider, fall back to others on retryable errors.
  */
@@ -170,7 +180,7 @@ export async function executeWithFallback<T>(opts: {
       opts.circuitBreaker.recordSuccess(providerKey)
       return { result, providerUsed, fallbackAttempts }
     } catch (err) {
-      const errorCode = (err as any)?.code ?? 'unknown_error'
+      const errorCode = getErrorCode(err)
       const isRetryable = opts.strategy.retryableErrors.includes(errorCode)
 
       opts.circuitBreaker.recordFailure(providerKey)

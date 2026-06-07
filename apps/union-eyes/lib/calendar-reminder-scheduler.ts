@@ -104,9 +104,9 @@ export async function scheduleEventReminders(
             .values({
               eventId,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              organizationId: (event as any).organizationId,
+              organizationId: (event as unknown).organizationId,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              userId: (attendee as any).userId || (attendee as any).email,
+              userId: (attendee as unknown).userId || (attendee as unknown).email,
               reminderMinutes: minutes as number,
               reminderType: channel,
               scheduledFor: reminderTime,
@@ -142,9 +142,9 @@ async function scheduleReminderJob(
   try {
     const timeUntilReminder = getTimeDescription(minutes);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const evt = event as any;
+    const evt = event as unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const att = attendee as any;
+    const att = attendee as unknown;
 
     // Prepare notification content
     const notification = {
@@ -208,11 +208,11 @@ export async function cancelEventReminders(eventId: string): Promise<number> {
       if (queue) {
         // Get all jobs in the queue
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const jobs = await (queue as any).getJobs(['waiting', 'delayed', 'active']);
+        const jobs = await (queue as unknown).getJobs(['waiting', 'delayed', 'active']);
         
         // Filter jobs related to this event
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const eventJobs = jobs.filter((job: any) => 
+        const eventJobs = jobs.filter((job: unknown) => 
           job.data.metadata?.eventId === eventId
         );
         

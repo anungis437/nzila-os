@@ -141,15 +141,18 @@ export async function createDisbursement(
         tenantId: request.organizationId,
         strikeFundId: request.strikeFundId,
         memberId: request.memberId,
-        amount: request.amount.toString(),
-        weekStartDate: request.weekStartDate,
-        weekEndDate: request.weekEndDate,
+        weekStartDate: request.weekStartDate.toISOString().split('T')[0],
+        weekEndDate: request.weekEndDate.toISOString().split('T')[0],
+        daysWorked: 0,
+        hoursWorked: '0.00',
+        calculatedAmount: request.amount.toString(),
+        baseStipendAmount: request.amount.toString(),
+        totalAmount: request.amount.toString(),
         status: 'pending',
         paymentMethod: request.paymentMethod,
         approvedBy: request.approvedBy,
         notes: request.notes,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .returning();
 
     return {
@@ -195,12 +198,11 @@ export async function approveDisbursement(
       .update(schema.stipendDisbursements)
       .set({
         status: 'approved',
-        approvedAt: new Date(),
+        approvedAt: new Date().toISOString(),
         approvedBy: approval.approvedBy,
         notes: approval.approvalNotes,
-        updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+        updatedAt: new Date().toISOString(),
+      })
       .where(eq(schema.stipendDisbursements.id, approval.disbursementId));
 
     return { success: true };
@@ -245,10 +247,10 @@ export async function markDisbursementPaid(
       .update(schema.stipendDisbursements)
       .set({
         status: 'paid',
-        paymentDate: new Date(),
+        paymentDate: new Date().toISOString(),
+        paymentReference: transactionId,
         notes: `Transaction ID: ${transactionId}, Processed by: ${paidBy}`,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .where(eq(schema.stipendDisbursements.id, disbursementId));
 
     return { success: true };
@@ -385,7 +387,7 @@ export async function getStrikeFundDisbursementSummary(
  * Batch create disbursements for all eligible members
  */
 export async function batchCreateDisbursements(
-  request: StipendCalculationRequest & { approvedBy: string; paymentMethod: string }
+  request: StipendCalculationRequest & { approvedBy: string; paymentMethod: DisbursementRequest['paymentMethod'] }
 ): Promise<{ 
   success: boolean; 
   created: number; 
@@ -409,8 +411,7 @@ export async function batchCreateDisbursements(
         weekStartDate: request.weekStartDate,
         weekEndDate: request.weekEndDate,
         approvedBy: request.approvedBy,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        paymentMethod: request.paymentMethod as any,
+        paymentMethod: request.paymentMethod,
         notes: `Week ${request.weekStartDate.toISOString().split('T')[0]} - ${member.totalHours} hours worked`,
       });
 

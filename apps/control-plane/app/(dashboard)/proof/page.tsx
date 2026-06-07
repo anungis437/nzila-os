@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { CardSkeleton } from "@/components/ui/loading";
 import { SummaryCard } from "@/components/ui/summary-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ShieldCheck, FileCheck, Activity, AlertTriangle } from "lucide-react";
+import { ShieldCheck, FileCheck, Activity } from "lucide-react";
 import { getAccountHealthRecords } from "@/server/deal-engine-data";
 
 export const dynamic = "force-dynamic";

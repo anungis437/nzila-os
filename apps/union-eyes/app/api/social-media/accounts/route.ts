@@ -78,7 +78,7 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         success: true,
         metadata: { count: accounts.length },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown);
 
       return NextResponse.json({ accounts });
     } catch (error) {
@@ -214,7 +214,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
         success: true,
         metadata: { platform },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown);
 
       return NextResponse.json({ auth_url: authUrl });
     } catch (_error) {
@@ -308,7 +308,7 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
         success: true,
         metadata: { platform: account.platform },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown);
 
       return NextResponse.json({
         message: 'Account disconnected successfully',

@@ -112,8 +112,8 @@ export function computeModernizationContinuityGaps(
 
 function buildGapReading(
   gap: ModernizationContinuityGap['gapKind'],
-  m: ContinuityPosture,
-  g: GovernanceReviewPosture,
+  _m: ContinuityPosture,
+  _g: GovernanceReviewPosture,
 ): string {
   switch (gap) {
     case 'aligned':

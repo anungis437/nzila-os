@@ -79,7 +79,6 @@ type ObservabilityBaseline = {
   recommendation: string;
 };
 
-const REPO_ROOT = path.resolve(__dirname, '../../..');
 const REPORTS_DIR = path.join(__dirname, '../reports');
 const INVENTORY_PATH = path.join(REPORTS_DIR, 'ontology-antipattern-inventory.json');
 const MATRIX_PATH = path.join(__dirname, '../config/continuity-ontology-matrix.json');

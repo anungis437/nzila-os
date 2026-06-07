@@ -43,7 +43,7 @@ import {
 interface SmsCampaignBuilderProps {
   organizationId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onComplete?: (campaign: any) => void;
+  onComplete?: (campaign: unknown) => void;
   onCancel?: () => void;
 }
 

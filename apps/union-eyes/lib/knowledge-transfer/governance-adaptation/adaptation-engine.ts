@@ -10,7 +10,6 @@ import { listReasoningSessions } from '@/lib/knowledge-transfer/reasoning-sessio
 import type {
   GovernanceAdaptationReport,
   GovernanceAdaptationEvent,
-  GovernanceAdaptationTimeline,
   RecurringPattern,
   GovernanceAdaptationEventType,
 } from './adaptation-models';

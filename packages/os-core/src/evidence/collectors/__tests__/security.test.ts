@@ -67,7 +67,8 @@ describe('collectSecurityEvidence', () => {
 
     expect(artifacts).toHaveLength(1)
     expect(artifacts[0].type).toBe('dependency-audit')
-    expect((artifacts[0] as any).summary.vulnerabilityCount).toBe(2)
+    const first = artifacts[0] as { summary?: { vulnerabilityCount?: number } }
+    expect(first.summary?.vulnerabilityCount).toBe(2)
     expect(artifacts[0].fullReport).toEqual(auditData)
   })
 

@@ -228,7 +228,7 @@ function calculateKeywordMatch(keywords: string[], precedentText: string): numbe
 function calculateMetadataMatch(
   claim: { issueType: string; jurisdiction?: string },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  precedent: any
+  precedent: unknown
 ): number {
   let score = 0;
   let factors = 0;
@@ -273,9 +273,9 @@ function areRelatedIssues(type1: string, type2: string): boolean {
  */
 async function analyzePrecedentApplicability(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  claim: any,
+  claim: unknown,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  precedent: any
+  precedent: unknown
 ): Promise<{
   applicableReasons: string[];
   distinctions: string[];
@@ -374,7 +374,7 @@ export async function analyzeClaimWithPrecedents(
  */
 async function generateClaimAnalysis(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  claim: any,
+  claim: unknown,
   precedents: PrecedentMatch[]
 ): Promise<{
   outcomeReasoning: string;
@@ -442,7 +442,7 @@ Provide analysis.`,
  */
 export async function generateLegalMemorandum(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  claim: any,
+  claim: unknown,
   analysis: ClaimAnalysis
 ): Promise<string> {
   try {

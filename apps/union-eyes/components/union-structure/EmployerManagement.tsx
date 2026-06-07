@@ -134,7 +134,7 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<EmployerFormData, any, EmployerFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as unknown,
     defaultValues: {
       name: "",
       legalName: "",
@@ -198,7 +198,7 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
       legalName: employer.legalName || "",
       dbaName: "",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      employerType: (employer.employerType as any) || "private",
+      employerType: (employer.employerType as unknown) || "private",
       status: employer.status,
       businessNumber: employer.businessNumber || "",
       email: employer.contactEmail || "",

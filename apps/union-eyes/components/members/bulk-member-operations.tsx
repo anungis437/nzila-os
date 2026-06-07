@@ -60,7 +60,7 @@ export interface BulkOperation {
 export interface BulkMemberOperationsProps {
   selectedMemberIds: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onOperationComplete?: (operation: string, results: any) => void;
+  onOperationComplete?: (operation: string, results: unknown) => void;
   onClearSelection?: () => void;
 }
 

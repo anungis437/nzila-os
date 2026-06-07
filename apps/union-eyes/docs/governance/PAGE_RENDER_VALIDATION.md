@@ -352,20 +352,17 @@ The dashboard layout is the first line of defence for every page under `/dashboa
 ### `/dashboard/documents`
 
 **File:** `app/[locale]/dashboard/documents/page.tsx`  
-**Pattern:** Client Component (`"use client"`)
+**Pattern:** Server Component wrapper + client console (`DocumentsConsole`)
 
 | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ✅ |
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **Notes:**  
-- `useEffect` fetches `/api/documents/repository` on mount
-- `setLoading` spinner and `repoDocs.length === 0` empty state are implemented
-- `toast.error()` on fetch failure
-- Upload form submits to `/api/documents/upload` — real API
-- **C6 Warn:** `DocumentLibraryBrowser` receives empty stub arrays for the library, templates, and approvals sub-tabs — these sections will render as permanently empty until the backing API endpoints are implemented
-- **C7 Fail:** No `requireUser()` or `hasMinRole()` in this page file; any authenticated user can access all documents regardless of role
-- **Assessment: WARN/FAIL — C6 stub sub-tabs (P2), C7 no server role gate (P1)**
+- Page is guarded by server-side `requireUser()` and role-aware demo/runtime branching.
+- Console uses governed repository APIs for library/search/templates/approvals/retention/bulk flows.
+- Upload + OCR ingestion and migration URL import are wired into the live console surface.
+- **Assessment: PASS**
 
 ---
 
@@ -547,9 +544,10 @@ Each directory has only a `[id]/` detail page. Pilots who land on the list URL (
 #### P2-4 · `/dashboard/documents` — library, templates, and approvals sub-tabs pass empty stub arrays
 
 **File:** `app/[locale]/dashboard/documents/page.tsx`  
-**Impact:** `DocumentLibraryBrowser` receives `library=[]`, `templates=[]`, and `approvals=[]` — these tabs will always appear empty regardless of what the repository API returns, because the API response is not wired into these props.
+**Status:** RESOLVED  
+**Impact (historical):** `DocumentLibraryBrowser` and related tabs previously received empty arrays and rendered as stubs.
 
-**Fix:** Map the API response fields into the correct props before passing them to `DocumentLibraryBrowser`.
+**Resolution:** `DocumentsConsole` now maps governed repository responses into library/search/template/approval/retention/bulk tab props and handlers.
 
 ---
 

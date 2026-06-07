@@ -358,10 +358,10 @@ import { isPublicRoute, isCronRoute } from './public-routes';
  */
 function verifyCronAuth(request: NextRequest): boolean {
   const cronSecret = request.headers.get('x-cron-secret');
-  const expectedSecret = process.env.CRON_SECRET_KEY;
+  const expectedSecret = process.env.CRON_SECRET_KEY || process.env.CRON_SECRET;
   
   if (!expectedSecret) {
-    logger.error('CRON_SECRET_KEY not configured', undefined, { context: 'Auth' });
+    logger.error('CRON_SECRET_KEY/CRON_SECRET not configured', undefined, { context: 'Auth' });
     return false;
   }
   
@@ -572,9 +572,9 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     // Throw standardized error (doesn&apos;t leak system details)
     const authError = new Error('Service temporarily unavailable');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (authError as any).statusCode = 503;
+    (authError as unknown).statusCode = 503;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (authError as any).code = 'AUTH_SERVICE_ERROR';
+    (authError as unknown).code = 'AUTH_SERVICE_ERROR';
     throw authError;
   }
 }
@@ -1132,9 +1132,9 @@ export async function hasMinRole(minRole: string): Promise<boolean> {
 
     const resolvedRole = await getRole(userId, resolvedOrgId);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userLevel = getRoleLevel(resolvedRole as any);
+    const userLevel = getRoleLevel(resolvedRole as unknown);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const minLevel = getRoleLevel(minRole as any);
+    const minLevel = getRoleLevel(minRole as unknown);
 
     return userLevel >= minLevel;
   } catch {
@@ -2128,10 +2128,10 @@ export async function requireMinRole(minRole: string): Promise<UnifiedUserContex
   const user = await requireUser();
   const { getRoleLevel  } = await import('./auth/roles');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const minLevel = getRoleLevel(minRole as any);
+  const minLevel = getRoleLevel(minRole as unknown);
   const userLevel = Math.max(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...user.roles.map((r: string) => getRoleLevel(r as any)),
+    ...user.roles.map((r: string) => getRoleLevel(r as unknown)),
     0,
   );
   if (userLevel < minLevel) {

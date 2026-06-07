@@ -363,5 +363,5 @@ function mapCaseTypeToClaimType(
     other: 'other',
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (mapping[cupeType] ?? 'other') as any;
+  return (mapping[cupeType] ?? 'other') as unknown;
 }

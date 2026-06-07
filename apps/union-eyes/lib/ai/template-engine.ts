@@ -1063,7 +1063,7 @@ class AttentionMechanismEngine {
         
         for (const [target, reqs] of Object.entries(fsmState.requirements)) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const r = reqs as any;
+          const r = reqs as unknown;
           fsmContext.push(
             `→ ${target}: requires ${r.requiresRole?.join('/') || 'any'}, min ${r.minHours}h, docs: ${r.requiresDocumentation}`
           );
@@ -1192,7 +1192,7 @@ class AttentionMechanismEngine {
         assignedTo: claim.assignedTo,
         organizationId: claim.organizationId,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any as CaseForSignals;
+      } as unknown as CaseForSignals;
 
       return await detectAllSignals([caseState]);
     } catch (_error) {
@@ -1527,7 +1527,7 @@ class GovernanceAuditLayer {
 
       // Track costs
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (this.costTracker as any)?.trackCost({
+      await (this.costTracker as unknown)?.trackCost({
         organizationId: request.context.organizationId,
         tokensUsed: response.tokensUsed,
         model: response.model,
@@ -1752,7 +1752,7 @@ export interface TemplateContext {
   userRole: string;
   intent: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  orgs: any[];
+  orgs: unknown[];
   retrievedContext: string[];
   sla: string;
   organizationId: string;

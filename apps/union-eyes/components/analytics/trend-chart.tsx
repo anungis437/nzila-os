@@ -61,7 +61,7 @@ export function TrendChart({
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background border rounded-lg shadow-lg p-3">

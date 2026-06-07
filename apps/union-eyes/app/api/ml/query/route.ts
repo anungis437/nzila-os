@@ -23,13 +23,13 @@ const QuerySchema = z.object({
  * Request body:
  * {
  *   question: string,    // Natural language question
- *   context?: any        // Optional context
+ *   context?: unknown        // Optional context
  * }
  * 
  * Response:
  * {
  *   answer: string,
- *   data?: any,          // Query results if data query
+ *   data?: unknown,          // Query results if data query
  *   sql?: string,        // Generated SQL if applicable
  *   confidence: number,
  *   sources: string[],

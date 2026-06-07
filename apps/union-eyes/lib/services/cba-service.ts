@@ -42,7 +42,7 @@ export interface CBAFilters {
 export interface CBAWithClauses extends CBA {
   clauseCount?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  clauses?: any[];
+  clauses?: unknown[];
 }
 
 // ============================================================================
@@ -127,12 +127,12 @@ export async function listCBAs(
 
     if (filters.status && filters.status.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(collectiveAgreements.status, filters.status as any));
+      conditions.push(inArray(collectiveAgreements.status, filters.status as unknown));
     }
 
     if (filters.jurisdiction && filters.jurisdiction.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(collectiveAgreements.jurisdiction, filters.jurisdiction as any));
+      conditions.push(inArray(collectiveAgreements.jurisdiction, filters.jurisdiction as unknown));
     }
 
     if (filters.sector) {

@@ -222,7 +222,7 @@ export class DocuSignProvider implements SignatureProvider {
         envelopeId: data.envelopeId,
         status: data.status?.toLowerCase() || "sent",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: (data.recipients?.signers || []).map((signer: any) => ({
+        signers: (data.recipients?.signers || []).map((signer: unknown) => ({
           signerId: signer.recipientId,
           email: signer.email,
           status: signer.status?.toLowerCase() || "sent",
@@ -406,7 +406,7 @@ export class HelloSignProvider implements SignatureProvider {
         envelopeId: signatureRequest.signature_request_id,
         status: this.mapHelloSignStatus(signatureRequest.is_complete, signatureRequest.is_declined),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: signatureRequest.signatures.map((sig: any) => ({
+        signers: signatureRequest.signatures.map((sig: unknown) => ({
           email: sig.signer_email_address,
           signerId: sig.signature_id,
           status: this.mapSignerStatus(sig.status_code),
@@ -463,7 +463,7 @@ export class HelloSignProvider implements SignatureProvider {
         envelopeId,
         status: this.mapHelloSignStatus(signatureRequest.is_complete, signatureRequest.is_declined),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        signers: signatureRequest.signatures.map((sig: any) => ({
+        signers: signatureRequest.signatures.map((sig: unknown) => ({
           email: sig.signer_email_address,
           signerId: sig.signature_id,
           status: this.mapSignerStatus(sig.status_code),

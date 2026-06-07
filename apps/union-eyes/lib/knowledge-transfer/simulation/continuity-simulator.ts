@@ -17,18 +17,29 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import type { DependencyNode, PropagationMap } from '../propagation/propagation-models';
 import type {
   SimulationScenario,
   SimulatedContinuityImpact,
+  ContinuityDegradationTimeline,
   ResilienceWeaknessIndicator,
   ContinuitySimulationResult,
+  SimulationType,
 } from './simulation-models';
 import {
   computeDomainDegradation,
   buildDegradationTimeline,
   estimateAutonomousRecoveryProbability,
 } from './simulation-models';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+
+type PublishedInterview = Awaited<ReturnType<typeof loadPublishedInterviews>>[number];
+
+async function loadPublishedInterviews(orgId: string) {
+  return db
+    .select()
+    .from(exitInterviews)
+    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')));
+}
 
 /**
  * Simulate continuity impact of a scenario (retirement, departure, vendor loss, etc.)
@@ -41,10 +52,7 @@ export async function simulateContinuityImpact(
   const propagationMap = await buildDependencyPropagationMap(orgId);
 
   // Load baseline (current interviews for doc quality assessment)
-  const interviews = await db
-    .select()
-    .from(exitInterviews)
-    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')));
+  const interviews = await loadPublishedInterviews(orgId);
 
   // Calculate baseline continuity score
   const baselineContinuityScore = calculateBaselineContinuity(propagationMap, interviews.length);
@@ -152,11 +160,11 @@ export async function simulateContinuityImpact(
   };
 }
 
-function calculateBaselineContinuity(propagationMap: any, interviewCount: number): number {
+function calculateBaselineContinuity(propagationMap: PropagationMap, interviewCount: number): number {
   let score = 70; // Baseline: org with some documentation
 
   // Single-source nodes reduce baseline
-  const singleSourceCount = propagationMap.nodes.filter((n: any) => n.isSingleSource).length;
+  const singleSourceCount = propagationMap.nodes.filter((node) => node.isSingleSource).length;
   score -= Math.min(singleSourceCount * 3, 30);
 
   // Interview count (more sources = better baseline)
@@ -169,13 +177,10 @@ function calculateBaselineContinuity(propagationMap: any, interviewCount: number
   return Math.max(30, Math.min(score, 90));
 }
 
-function computeDomainImpacts(affectedNodes: any[], propagationMap: any): SimulatedContinuityImpact[] {
+function computeDomainImpacts(affectedNodes: DependencyNode[], _propagationMap: PropagationMap): SimulatedContinuityImpact[] {
   const impacts: SimulatedContinuityImpact[] = [];
 
   for (const node of affectedNodes) {
-    // Find downstream impact
-    const downstreamImpact = propagationMap.downstreamImpacts.find((d: any) => d.nodeId === node.id);
-
     // Assess documentation quality (heuristic: single-source = minimal, etc.)
     const docQuality = node.isSingleSource ? 'minimal' : 'partial';
     const redundancyLevel = node.isSingleSource ? 'none' : 'weak';
@@ -197,7 +202,7 @@ function computeDomainImpacts(affectedNodes: any[], propagationMap: any): Simula
   return impacts;
 }
 
-function identifyExacerbatedWeaknesses(affectedNodes: any[], propagationMap: any): ResilienceWeaknessIndicator[] {
+function identifyExacerbatedWeaknesses(affectedNodes: DependencyNode[], _propagationMap: PropagationMap): ResilienceWeaknessIndicator[] {
   const weaknesses: ResilienceWeaknessIndicator[] = [];
 
   for (const node of affectedNodes) {
@@ -239,9 +244,9 @@ function identifyExacerbatedWeaknesses(affectedNodes: any[], propagationMap: any
 }
 
 function generateRecommendations(
-  affectedNodes: any[],
-  propagationMap: any,
-  weaknesses: ResilienceWeaknessIndicator[],
+  affectedNodes: DependencyNode[],
+  _propagationMap: PropagationMap,
+  _weaknesses: ResilienceWeaknessIndicator[],
 ): {
   immediateActions: string[];
   mitigation30Day: string[];
@@ -252,7 +257,7 @@ function generateRecommendations(
   const remediation90Day: string[] = [];
 
   // Immediate actions (today)
-  for (const node of affectedNodes.filter((n: any) => n.isSingleSource)) {
+  for (const node of affectedNodes.filter((affectedNode) => affectedNode.isSingleSource)) {
     immediateActions.push(`Lock down current knowledge: conduct detailed interview/documentation session with ${node.associatedRoles[0]}`);
   }
   immediateActions.push('Activate business continuity team');
@@ -284,7 +289,7 @@ function generateRecommendations(
 function generateExecutiveSummary(
   scenario: SimulationScenario,
   impactScore: number,
-  timeline: any[],
+  timeline: ContinuityDegradationTimeline[],
   weaknesses: ResilienceWeaknessIndicator[],
 ): string {
   const severity =
@@ -293,7 +298,7 @@ function generateExecutiveSummary(
     impactScore >= 40 ? 'MODERATE' :
     'LOW';
 
-  const criticalWeeks = timeline.findIndex((t: any) => t.healthScore < 30);
+  const criticalWeeks = timeline.findIndex((timelinePoint) => timelinePoint.healthScore < 30);
   const timePhrase = criticalWeeks >= 0 ? `within ${criticalWeeks} weeks` : 'within 12 weeks';
 
   const typeDescriptions: Record<string, string> = {
@@ -312,7 +317,7 @@ function generateExecutiveSummary(
 function estimateRecoveryEffort(
   impactScore: number,
   weaknessCount: number,
-  scenarioType: string,
+  _scenarioType: SimulationType,
 ): 'low' | 'medium' | 'high' | 'extreme' {
   if (impactScore >= 80 && weaknessCount >= 3) return 'extreme';
   if (impactScore >= 60 && weaknessCount >= 2) return 'high';
@@ -324,7 +329,7 @@ function projectContinuityScore(
   baseline: number,
   immediateImpact: number,
   affectedNodeCount: number,
-  scenarioType: string,
+  scenarioType: SimulationType,
 ): number {
   let score = baseline - immediateImpact;
 
@@ -342,17 +347,17 @@ function projectContinuityScore(
   return Math.max(0, Math.min(score, 100));
 }
 
-function assessDocumentationQuality(interviews: any[], affectedNodes: any[]): 'minimal' | 'partial' | 'good' {
+function assessDocumentationQuality(interviews: PublishedInterview[], affectedNodes: DependencyNode[]): 'minimal' | 'partial' | 'good' {
   const totalInterviews = interviews.length;
-  const singleSourceCount = affectedNodes.filter((n: any) => n.isSingleSource).length;
+  const singleSourceCount = affectedNodes.filter((node) => node.isSingleSource).length;
 
   if (totalInterviews >= 8 && singleSourceCount === 0) return 'good';
   if (totalInterviews >= 4) return 'partial';
   return 'minimal';
 }
 
-function assessRedundancy(affectedNodes: any[], propagationMap: any): 'none' | 'weak' | 'moderate' | 'strong' {
-  const singleSourceCount = affectedNodes.filter((n: any) => n.isSingleSource).length;
+function assessRedundancy(affectedNodes: DependencyNode[], _propagationMap: PropagationMap): 'none' | 'weak' | 'moderate' | 'strong' {
+  const singleSourceCount = affectedNodes.filter((node) => node.isSingleSource).length;
 
   if (singleSourceCount === affectedNodes.length) return 'none';
   if (singleSourceCount >= Math.ceil(affectedNodes.length * 0.5)) return 'weak';

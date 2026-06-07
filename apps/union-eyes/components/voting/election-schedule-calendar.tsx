@@ -285,7 +285,7 @@ function ElectionTimeline({ election }: { election: Election }) {
         <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200" />
 
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {phases.map((phase: any, index) => (
+        {phases.map((phase: unknown, index) => (
           <div key={index} className="relative">
             <div
               className={cn(
@@ -293,7 +293,7 @@ function ElectionTimeline({ election }: { election: Election }) {
                 phase.isPast
                   ? "border-green-500"
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  : index === phases.findIndex((p: any) => !p.isPast)
+                  : index === phases.findIndex((p: unknown) => !p.isPast)
                   ? "border-blue-500"
                   : "border-gray-300"
               )}

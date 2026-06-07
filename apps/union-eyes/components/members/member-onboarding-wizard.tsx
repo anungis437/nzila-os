@@ -148,7 +148,7 @@ export function MemberOnboardingWizard({
     if (!fields) return true;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await form.trigger(fields as any);
+    const result = await form.trigger(fields as unknown);
     return result;
   };
 
@@ -219,7 +219,7 @@ export function MemberOnboardingWizard({
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function PersonalInfoStep({ form }: { form: any }) {
+function PersonalInfoStep({ form }: { form: unknown }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Personal Information</h3>
@@ -310,7 +310,7 @@ function PersonalInfoStep({ form }: { form: any }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function EmploymentStep({ form }: { form: any }) {
+function EmploymentStep({ form }: { form: unknown }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Employment Details</h3>
@@ -376,7 +376,7 @@ function EmploymentStep({ form }: { form: any }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function PreferencesStep({ form }: { form: any }) {
+function PreferencesStep({ form }: { form: unknown }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Union Preferences</h3>
@@ -435,7 +435,7 @@ function PreferencesStep({ form }: { form: any }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function DocumentsStep({ form: _form }: { form: any }) {
+function DocumentsStep({ form: _form }: { form: unknown }) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Upload Documents</h3>
@@ -455,7 +455,7 @@ function DocumentsStep({ form: _form }: { form: any }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ReviewStep({ form }: { form: any }) {
+function ReviewStep({ form }: { form: unknown }) {
   const data = form.watch();
   return (
     <div className="space-y-6">

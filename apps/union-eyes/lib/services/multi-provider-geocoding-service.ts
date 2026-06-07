@@ -64,7 +64,7 @@ export class MultiProviderGeocodingService {
    */
   private initializeProviders() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const providers: any[] = [];
+    const providers: unknown[] = [];
 
     // Google Maps Geocoding (highest priority)
     const googleApiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -259,9 +259,9 @@ export class MultiProviderGeocodingService {
       provider,
       confidence,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      placeId: (result.extra as any)?.googlePlaceId,
+      placeId: (result.extra as unknown)?.googlePlaceId,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      plusCode: (result.extra as any)?.plusCode,
+      plusCode: (result.extra as unknown)?.plusCode,
     };
   }
 

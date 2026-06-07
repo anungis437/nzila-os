@@ -119,12 +119,12 @@ export function withEnhancedRoleAuth<T = any>(
   return withOrganizationAuth(async (request: NextRequest, orgContext: unknown) => {
     const startTime = Date.now();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = orgContext as any;
+    const { organizationId, userId } = orgContext as unknown;
     
     try {
       // Get member from context (requires org middleware to populate this)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberId = (orgContext as any).memberId;
+      const memberId = (orgContext as unknown).memberId;
       if (!memberId) {
         await logAuditDenial(
           orgContext,
@@ -249,11 +249,11 @@ export function withPermission<T = any>(
   return withOrganizationAuth(async (request: NextRequest, orgContext: unknown) => {
     const startTime = Date.now();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = orgContext as any;
+    const { organizationId, userId } = orgContext as unknown;
     
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberId = (orgContext as any).memberId;
+      const memberId = (orgContext as unknown).memberId;
       if (!memberId) {
         await logAuditDenial(
           { organizationId, userId, memberId: '' },
@@ -365,11 +365,11 @@ export function withScopedRoleAuth<T = any>(
   return withOrganizationAuth(async (request: NextRequest, orgContext: unknown) => {
     const startTime = Date.now();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = orgContext as any;
+    const { organizationId, userId } = orgContext as unknown;
     
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberId = (orgContext as any).memberId;
+      const memberId = (orgContext as unknown).memberId;
       if (!memberId) {
         await logAuditDenial(
           { organizationId, userId, memberId: '' },
@@ -534,7 +534,7 @@ async function getPermissionExceptionId(
     
     const result = await db.execute(query);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (result as any[])[0]?.id || null;
+    return (result as unknown[])[0]?.id || null;
   } catch (_error) {
 return null;
   }
@@ -605,11 +605,11 @@ async function logAuditDenial(
 ): Promise<void> {
   await logPermissionCheck({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    actorId: (context as any).memberId || (context as any).userId || 'unknown',
+    actorId: (context as unknown).memberId || (context as unknown).userId || 'unknown',
     action,
     resourceType,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    organizationId: (context as any).organizationId,
+    organizationId: (context as unknown).organizationId,
     granted: false,
     denialReason: reason,
     executionTimeMs,

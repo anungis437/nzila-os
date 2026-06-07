@@ -24,7 +24,6 @@ import {
   buildExplainabilityEnvelope,
   buildPropagationEvidence,
   buildGovernanceFlags,
-  assessConfidence,
 } from '../copilot-explainability/response-builder';
 import type { EvidenceReference, ReasoningLink, GovernanceFlag } from '../copilot-explainability/explainability-models';
 import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './copilot-models';
@@ -128,7 +127,7 @@ RESPONSE FORMAT:
 }
 
 /** Extract follow-up suggestions from an AI response. */
-function extractFollowUps(query: string, responseType: string): string[] {
+function extractFollowUps(query: string, _responseType: string): string[] {
   const suggestions: Record<string, string[]> = {
     fragility: [
       'What governance processes are most fragile?',
@@ -179,10 +178,10 @@ export async function processCopilotQuery(
     calculateResilienceIndex(orgId),
   ]);
 
-  const nodes = propagationMap.nodes as any[];
+  const nodes = propagationMap.nodes;
   const singleSourceCount = nodes.filter((n) => n.isSingleSource).length;
   const totalNodes = nodes.length;
-  const bottleneckCount = (propagationMap.bottlenecks as any[]).length;
+  const bottleneckCount = propagationMap.bottlenecks.length;
   const govNodes = nodes.filter((n) => n.category === 'governance' || n.category === 'compliance');
   const govSingleSource = govNodes.filter((n) => n.isSingleSource);
   const criticalGaps = resilienceIndex.dimensions

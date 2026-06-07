@@ -396,7 +396,7 @@ class TestPatternExtractorExtended:
             "}\n\n"
             "export function debounce(fn: Function, delay: number) {\n"
             "  let timer: NodeJS.Timeout;\n"
-            "  return (...args: any[]) => {\n"
+            "  return (...args: unknown[]) => {\n"
             "    clearTimeout(timer);\n"
             "    timer = setTimeout(() => fn(...args), delay);\n"
             "  };\n"

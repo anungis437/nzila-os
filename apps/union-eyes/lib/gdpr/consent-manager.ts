@@ -61,7 +61,7 @@ export class ConsentManager {
         status: "granted",
         grantedAt: new Date(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown)
       .returning();
 
     return consent;
@@ -125,7 +125,7 @@ export class ConsentManager {
           eq(userConsents.userId, userId),
           eq(userConsents.organizationId, organizationId),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq(userConsents.consentType, consentType as any),
+          eq(userConsents.consentType, consentType as unknown),
           eq(userConsents.status, "granted")
         )
       )
@@ -174,7 +174,7 @@ export class CookieConsentManager {
           lastUpdated: new Date(),
           expiresAt,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+        } as unknown)
         .where(eq(cookieConsents.consentId, data.consentId))
         .returning();
 
@@ -189,7 +189,7 @@ export class CookieConsentManager {
           organizationId: data.organizationId,
           expiresAt,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+        } as unknown)
         .returning();
 
       return consent;
@@ -246,7 +246,7 @@ export class GdprRequestManager {
         status: "pending" as const,
         deadline,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        requestDetails: data.requestDetails as any,
+        requestDetails: data.requestDetails as unknown,
         verificationMethod: data.verificationMethod,
       })
       .returning();
@@ -306,7 +306,7 @@ export class GdprRequestManager {
         status: "pending" as const,
         deadline,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        requestDetails: data.requestDetails as any,
+        requestDetails: data.requestDetails as unknown,
         verificationMethod: data.verificationMethod,
       })
       .returning();
@@ -337,7 +337,7 @@ export class GdprRequestManager {
         requestDetails: {
           preferredFormat: data.preferredFormat || "json",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...(data.requestDetails as any),
+          ...(data.requestDetails as unknown),
         },
       })
       .returning();
@@ -406,7 +406,7 @@ export class GdprRequestManager {
     const [updated] = await db
       .update(gdprDataRequests)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .set(updateData as any)
+      .set(updateData as unknown)
       .where(eq(gdprDataRequests.id, requestId))
       .returning();
 
@@ -584,7 +584,7 @@ export class DataExportService {
           dataType: "claim_notes",
           count: claimNotes.length,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          data: claimNotes.map((n: any) => ({
+          data: claimNotes.map((n: unknown) => ({
             updateId: n.updateId,
             claimId: n.claimId,
             updateType: n.updateType,

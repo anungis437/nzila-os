@@ -30,7 +30,7 @@ async function getApiClient() {
 /**
  * List signature-service records
  */
-export async function getSignatureServiceList(filters?: any) {
+export async function getSignatureServiceList(filters?: unknown) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -67,7 +67,7 @@ export async function getSignatureServiceById(id: string) {
 /**
  * Create new signature-service record
  */
-export async function createSignatureService(data: any) {
+export async function createSignatureService(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/`, {
@@ -86,7 +86,7 @@ export async function createSignatureService(data: any) {
 /**
  * Update signature-service record
  */
-export async function updateSignatureService(id: string, data: any) {
+export async function updateSignatureService(id: string, data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/${{id}}/`, {
@@ -105,7 +105,7 @@ export async function updateSignatureService(id: string, data: any) {
 /**
  * Custom action: hashDocument
  */
-export async function hashDocument(data: any) {
+export async function hashDocument(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/hashDocument/`, {
@@ -124,7 +124,7 @@ export async function hashDocument(data: any) {
 /**
  * Custom action: hashDocumentReference
  */
-export async function hashDocumentReference(data: any) {
+export async function hashDocumentReference(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/hashDocumentReference/`, {
@@ -143,7 +143,7 @@ export async function hashDocumentReference(data: any) {
 /**
  * Custom action: signDocument
  */
-export async function signDocument(data: any) {
+export async function signDocument(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/signDocument/`, {
@@ -162,7 +162,7 @@ export async function signDocument(data: any) {
 /**
  * Custom action: signDocumentWithKey
  */
-export async function signDocumentWithKey(data: any) {
+export async function signDocumentWithKey(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/signDocumentWithKey/`, {
@@ -181,7 +181,7 @@ export async function signDocumentWithKey(data: any) {
 /**
  * Custom action: getDocumentSignatures
  */
-export async function getDocumentSignatures(data: any) {
+export async function getDocumentSignatures(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/getDocumentSignatures/`, {
@@ -200,7 +200,7 @@ export async function getDocumentSignatures(data: any) {
 /**
  * Custom action: rejectSignature
  */
-export async function rejectSignature(data: any) {
+export async function rejectSignature(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/rejectSignature/`, {
@@ -219,7 +219,7 @@ export async function rejectSignature(data: any) {
 /**
  * Custom action: createSignatureRequest
  */
-export async function createSignatureRequest(data: any) {
+export async function createSignatureRequest(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/createSignatureRequest/`, {
@@ -238,7 +238,7 @@ export async function createSignatureRequest(data: any) {
 /**
  * Custom action: getUserSignatureRequests
  */
-export async function getUserSignatureRequests(data: any) {
+export async function getUserSignatureRequests(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/getUserSignatureRequests/`, {
@@ -257,7 +257,7 @@ export async function getUserSignatureRequests(data: any) {
 /**
  * Custom action: completeSignatureRequestStep
  */
-export async function completeSignatureRequestStep(data: any) {
+export async function completeSignatureRequestStep(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/completeSignatureRequestStep/`, {
@@ -276,7 +276,7 @@ export async function completeSignatureRequestStep(data: any) {
 /**
  * Custom action: cancelSignatureRequest
  */
-export async function cancelSignatureRequest(data: any) {
+export async function cancelSignatureRequest(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/cancelSignatureRequest/`, {
@@ -295,7 +295,7 @@ export async function cancelSignatureRequest(data: any) {
 /**
  * Custom action: expireOverdueSignatureRequests
  */
-export async function expireOverdueSignatureRequests(data: any) {
+export async function expireOverdueSignatureRequests(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/documents/signature-service/expireOverdueSignatureRequests/`, {

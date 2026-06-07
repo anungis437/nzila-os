@@ -187,7 +187,7 @@ return null;
 
   // Get per-capita rate from organization settings
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orgSettings = (org.settings as any) || {};
+  const orgSettings = (org.settings as unknown) || {};
   const perCapitaRate = parseFloat(orgSettings.perCapitaRate || '1.0');
   
   if (perCapitaRate <= 0) {
@@ -245,7 +245,7 @@ export async function calculateAllPerCapita(
   // Filter to those with per-capita rate in settings
   const orgsWithRate = orgsWithParent.filter(org => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const settings = (org.settings as any) || {};
+    const settings = (org.settings as unknown) || {};
     return settings.perCapitaRate && parseFloat(settings.perCapitaRate) > 0;
   });
 const calculations: PerCapitaCalculation[] = [];
@@ -433,7 +433,7 @@ export async function updateLastRemittanceDate(
   const org = await db.select().from(organizations).where(eq(organizations.id, organizationId)).limit(1);
   if (org[0]) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const settings = (org[0].settings as any) || {};
+    const settings = (org[0].settings as unknown) || {};
     await db
       .update(organizations)
       .set({ 

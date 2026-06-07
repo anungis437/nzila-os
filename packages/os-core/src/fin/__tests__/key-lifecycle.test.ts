@@ -9,6 +9,7 @@ import {
   generateDRSimulationArtifact,
   KEY_AGE_THRESHOLDS,
   DUAL_CONTROL_REQUIRED,
+  type FinancialActionType,
   type KeyMetadata,
   type DualControlRequest,
   type KeyRotationEvent,
@@ -138,7 +139,7 @@ describe('key-lifecycle', () => {
 
     it('rejects unknown action types', () => {
       const result = validateDualControlFinancial(
-        { ...request, actionType: 'unknown' as any },
+          { ...request, actionType: 'unknown' as FinancialActionType },
         [],
       )
       expect(result.authorized).toBe(false)

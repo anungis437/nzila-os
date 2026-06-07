@@ -516,7 +516,7 @@ alert("Failed to archive organization");
               <CardContent>
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {ancestors.map((ancestor: any, index: number) => (
+                  {ancestors.map((ancestor: unknown, index: number) => (
                     <div key={ancestor.id} className="flex items-center gap-2">
                       {index > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
                       <Button
@@ -610,7 +610,7 @@ alert("Failed to archive organization");
               ) : (
                 <div className="space-y-2">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {children.map((child: any) => {
+                  {children.map((child: unknown) => {
                     const childTypeInfo = typeConfig[(child.organization_type || child.type) as OrganizationType] ?? typeConfig.union;
                     const childStatusInfo = statusConfig[child.status as OrganizationStatus] ?? statusConfig.active;
                     

@@ -14,7 +14,7 @@ export default function BudgetDetailClient() {
   const params = useParams();
   const budgetId = params.id as string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [budget, setBudget] = useState<any>(null);
+  const [budget, setBudget] = useState<unknown>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [lineItems, setLineItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

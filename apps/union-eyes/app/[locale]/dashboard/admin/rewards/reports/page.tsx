@@ -36,9 +36,9 @@ export default async function AdminRewardsReportsPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let stats: Record<string, any> = {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let recentAwards: any[] = [];
+  let recentAwards: unknown[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let topRecipients: any[] = [];
+  let topRecipients: unknown[] = [];
 
   try {
     const result = await withSystemContext(async () => {

@@ -141,7 +141,7 @@ export default function PilotOnboardingWizard({ onComplete }: PilotOnboardingWiz
 /* ─── Step sub-components ─────────────────────────────────────────────────── */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function StepWelcome({ t }: { t: any }) {
+function StepWelcome({ t }: { t: unknown }) {
   return (
     <div className="text-center">
       <div className="inline-flex p-4 rounded-2xl bg-blue-100 mb-4">
@@ -166,7 +166,7 @@ function StepInfo({
   setLocation,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any;
+  t: unknown;
   department: string;
   setDepartment: (v: string) => void;
   shift: string;
@@ -215,7 +215,7 @@ function StepInfo({
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function StepFeatures({ t }: { t: any }) {
+function StepFeatures({ t }: { t: unknown }) {
   const features = [
     { icon: <FileText size={20} className="text-blue-600" />, text: t("step3Feature1") },
     { icon: <Clock size={20} className="text-green-600" />, text: t("step3Feature2") },
@@ -245,7 +245,7 @@ function StepFeatures({ t }: { t: any }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function StepDone({ t }: { t: any }) {
+function StepDone({ t }: { t: unknown }) {
   return (
     <div className="text-center">
       <div className="inline-flex p-4 rounded-2xl bg-green-100 mb-4">

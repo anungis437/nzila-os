@@ -406,7 +406,7 @@ describe('SignatureProviderFactory', () => {
   beforeEach(() => {
     // Clear providers map and re-initialize to avoid state leaking
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (SignatureProviderFactory as any).providers = new Map();
+    (SignatureProviderFactory as unknown).providers = new Map();
     SignatureProviderFactory.initialize({});
   });
 
@@ -603,7 +603,7 @@ describe('HelloSignProvider - error handling', () => {
 describe('SignatureProviderFactory - initialization state', () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (SignatureProviderFactory as any).providers = new Map();
+    (SignatureProviderFactory as unknown).providers = new Map();
     SignatureProviderFactory.initialize({});
   });
 

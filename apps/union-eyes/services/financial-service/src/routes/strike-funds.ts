@@ -10,6 +10,22 @@ import { sql } from 'drizzle-orm';
 
 const router = Router();
 
+type AuthUser = {
+  organizationId: string;
+  userId: string;
+  role?: string;
+};
+
+type ExecuteResult<T extends Record<string, unknown> = Record<string, unknown>> = {
+  rows: T[];
+  length: number;
+  [index: number]: T;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as unknown as { user: AuthUser }).user;
+}
+
 /** Validates a route :param is a UUID before it reaches any query. */
 const uuidParam = z.string().uuid();
 
@@ -32,20 +48,18 @@ const checkInSchema = z.object({
  */
 router.post('/:fundId/check-in', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = (req as any).user;
+    const { organizationId, userId } = getAuthUser(req);
     const fundId = uuidParam.parse(req.params.fundId);
     const validatedData = checkInSchema.parse(req.body);
 
     // Check if already checked in
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const existingCheckIn: any = await db.execute(sql`
+    const existingCheckIn = await db.execute(sql`
       SELECT * FROM picket_attendance 
       WHERE member_id = ${userId} 
         AND fund_id = ${fundId} 
         AND check_out_time IS NULL
       LIMIT 1
-    `);
+    `) as unknown as ExecuteResult;
 
     if (existingCheckIn.rows.length > 0) {
       return res.status(400).json({
@@ -62,13 +76,12 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
       checkInLocation = `POINT(${validatedData.longitude} ${validatedData.latitude})`;
       
       if (validatedData.checkInMethod === 'gps') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const verification: any = await db.execute(sql`
+        const verification = await db.execute(sql`
           SELECT verify_picket_location(
             ST_GeogFromText(${checkInLocation}), 
             ${validatedData.picketLocationId}
           ) as verified
-        `);
+        `) as unknown as ExecuteResult<{ verified?: boolean }>;
         
         locationVerified = verification.rows[0]?.verified || false;
 
@@ -82,8 +95,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
     }
 
     // Insert attendance record
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await db.execute(sql`
+    const result = await db.execute(sql`
       INSERT INTO picket_attendance (
         tenant_id, fund_id, member_id, picket_location_id,
         check_in_time, check_in_method, check_in_location,
@@ -98,7 +110,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
         ${validatedData.coordinatorOverride}, ${validatedData.notes}, ${userId}
       )
       RETURNING *
-    `);
+    `) as unknown as ExecuteResult;
 
     res.status(201).json({
       success: true,
@@ -129,8 +141,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
  */
 router.post('/:fundId/check-out', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = (req as any).user;
+    const { organizationId, userId } = getAuthUser(req);
     const { _fundId } = req.params;
 
     const checkOutSchema = z.object({
@@ -146,8 +157,7 @@ router.post('/:fundId/check-out', async (req: Request, res: Response) => {
       checkOutLocation = `POINT(${validatedData.longitude} ${validatedData.latitude})`;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await db.execute(sql`
+    const result = await db.execute(sql`
       UPDATE picket_attendance
       SET 
         check_out_time = NOW(),
@@ -160,7 +170,7 @@ router.post('/:fundId/check-out', async (req: Request, res: Response) => {
         AND tenant_id = ${organizationId}
         AND check_out_time IS NULL
       RETURNING *
-    `);
+    `) as unknown as ExecuteResult;
 
     if (result.length === 0) {
       return res.status(404).json({
@@ -194,11 +204,11 @@ router.post('/:fundId/check-out', async (req: Request, res: Response) => {
  */
 router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId, role } = (req as any).user;
+    const { organizationId, userId, role } = getAuthUser(req);
     const fundId = uuidParam.parse(req.params.fundId);
+    const effectiveRole = role ?? '';
 
-    if (!['admin', 'financial_admin'].includes(role)) {
+    if (!['admin', 'financial_admin'].includes(effectiveRole)) {
       return res.status(403).json({
         success: false,
         error: 'Insufficient permissions',
@@ -214,12 +224,11 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
     const validatedData = calculateSchema.parse(req.body);
 
     // Use database function
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const results: any = await db.execute(sql`
+    const results = await db.execute(sql`
       SELECT * FROM calculate_weekly_stipend(
         ${fundId}, NULL, ${validatedData.weekStart}, ${validatedData.weekEnd}
       )
-    `);
+    `) as unknown as ExecuteResult<{ member_id: string; hours_worked: number; stipend_amount: number }>;
 
     if (validatedData.dryRun) {
       return res.json({
@@ -234,8 +243,7 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
     // Create disbursement records
     const disbursements = [];
     for (const row of results.rows) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const disbursement: any = await db.execute(sql`
+      const disbursement = await db.execute(sql`
         INSERT INTO stipend_disbursements (
           tenant_id, fund_id, member_id, week_start, week_end,
           hours_worked, total_amount, status, created_by
@@ -246,7 +254,7 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
           'pending', ${userId}
         )
         RETURNING *
-      `);
+      `) as unknown as ExecuteResult;
       disbursements.push(disbursement.rows[0]);
     }
 
@@ -278,15 +286,13 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await db.execute(sql`
+    const result = await db.execute(sql`
       SELECT * FROM strike_funds 
       WHERE tenant_id = ${organizationId}
       ORDER BY created_at DESC
-    `);
+    `) as unknown as ExecuteResult;
 
     res.json({
       success: true,
@@ -306,10 +312,10 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId, role } = (req as any).user;
+    const { organizationId, userId, role } = getAuthUser(req);
+    const effectiveRole = role ?? '';
 
-    if (!['admin'].includes(role)) {
+    if (!['admin'].includes(effectiveRole)) {
       return res.status(403).json({
         success: false,
         error: 'Only admins can create strike funds',
@@ -326,8 +332,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     const validatedData = createSchema.parse(req.body);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await db.execute(sql`
+    const result = await db.execute(sql`
       INSERT INTO strike_funds (
         tenant_id, name, description, target_amount,
         current_balance, weekly_stipend_amount, start_date,
@@ -339,7 +344,7 @@ router.post('/', async (req: Request, res: Response) => {
         'active', ${userId}
       )
       RETURNING *
-    `);
+    `) as unknown as ExecuteResult;
 
     res.status(201).json({
       success: true,

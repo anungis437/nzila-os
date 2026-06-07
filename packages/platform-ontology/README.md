@@ -28,7 +28,7 @@ isRelationshipAllowed(OntologyEntityTypes.CLIENT, OntologyEntityTypes.FAMILY, Re
 
 // Register a custom vertical entity type
 registerOntologyType({
-  entityType: 'VehicleInspection' as any,
+  entityType: 'VehicleInspection' as unknown,
   description: 'A mobility vehicle inspection',
   requiredFields: ['canonicalName'],
   optionalFields: ['inspectorId', 'result'],

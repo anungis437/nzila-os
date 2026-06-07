@@ -74,8 +74,6 @@ export function MarketingHeroSection({
   className = '',
   tone = 'dark',
   revealTempo = 'default',
-  contextKicker,
-  contextNote,
 }: HeroSectionProps) {
   const isDarkTone = tone === 'dark';
   const washOpacityClass = overlayOpacity >= 0.75

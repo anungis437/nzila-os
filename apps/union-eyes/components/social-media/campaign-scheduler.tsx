@@ -161,7 +161,7 @@ export default function CampaignScheduler() {
         const data = await campRes.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setCampaigns(items.map((c: any) => ({
+        setCampaigns(items.map((c: unknown) => ({
           ...c,
           startDate: new Date(c.startDate ?? c.start_date),
           endDate: c.endDate ?? c.end_date ? new Date(c.endDate ?? c.end_date) : undefined,
@@ -176,7 +176,7 @@ export default function CampaignScheduler() {
         const data = await postsRes.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setScheduledPosts(items.map((p: any) => ({
+        setScheduledPosts(items.map((p: unknown) => ({
           ...p,
           scheduledFor: new Date(p.scheduledFor ?? p.scheduled_for),
           mediaCount: p.mediaCount ?? p.media_count ?? 0,

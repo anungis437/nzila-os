@@ -541,7 +541,7 @@ export interface ActionConfig {
   webhookMethod?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   webhookHeaders?: Record<string, string>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  webhookBody?: any;
+  webhookBody?: unknown;
   
   // Task action
   taskTitle?: string;
@@ -569,9 +569,9 @@ export interface WorkflowStep {
   type: WorkflowActionType;
   name: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: any;
+  config: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  conditions?: any[];
+  conditions?: unknown[];
   retryConfig?: {
     maxRetries: number;
     retryDelay: number;
@@ -583,9 +583,9 @@ export interface ConditionEvaluation {
   fieldPath: string;
   operator: AlertConditionOperator;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  expectedValue: any;
+  expectedValue: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  actualValue: any;
+  actualValue: unknown;
   result: boolean;
 }
 
@@ -594,7 +594,7 @@ export interface ActionExecution {
   actionType: AlertActionType;
   status: 'success' | 'failed' | 'skipped';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  result?: any;
+  result?: unknown;
   error?: string;
   executionTime: number;
 }

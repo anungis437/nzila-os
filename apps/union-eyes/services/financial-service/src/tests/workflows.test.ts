@@ -58,7 +58,7 @@ describe.skipIf(!HAS_DB)('Financial Workflows - End-to-End Tests (requires DATAB
       status: 'active',
       createdBy: TEST_USER_ID,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any).returning();
+    } as unknown as Record<string, unknown>).returning();
     testStrikeFundId = fundResult[0].id;
     
     // Create test members
@@ -77,7 +77,7 @@ describe.skipIf(!HAS_DB)('Financial Workflows - End-to-End Tests (requires DATAB
         email: member.email,
         status: 'active',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any).returning();
+      } as unknown as Record<string, unknown>).returning();
       
       if (member.name.startsWith('Alice')) testMemberId1 = result[0].id;
       if (member.name.startsWith('Bob')) testMemberId2 = result[0].id;
@@ -93,7 +93,7 @@ describe.skipIf(!HAS_DB)('Financial Workflows - End-to-End Tests (requires DATAB
       flatAmount: '50.00',
       isActive: true,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any).returning();
+    } as unknown as Record<string, unknown>).returning();
     testDuesRuleId = ruleResult[0].id;
 });
   
@@ -140,7 +140,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
           endDate: yearFromNow.toISOString().split('T')[0],
         },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any);
+      ] as unknown as Array<Record<string, unknown>>);
       
       // Run dues calculation
       const result = await processMonthlyDuesCalculation({
@@ -178,7 +178,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         effectiveDate: today.toISOString().split('T')[0],
         endDate: yearFromNow.toISOString().split('T')[0],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run dues calculation twice
       await processMonthlyDuesCalculation({
@@ -233,7 +233,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         periodStart: '2025-01-01',
         periodEnd: '2025-01-31',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run arrears management
       const result = await processArrearsManagement({
@@ -284,7 +284,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         periodStart: '2025-01-01',
         periodEnd: '2025-01-31',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run arrears management
       const _result = await processArrearsManagement({
@@ -332,7 +332,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
           periodEnd: '2025-02-28',
         },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any);
+      ] as unknown as Array<Record<string, unknown>>);
       
       // Run arrears management
       await processArrearsManagement({
@@ -368,7 +368,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         periodStart: '2025-01-01',
         periodEnd: '2025-01-31',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run payment collection
       const result = await processPaymentCollection({
@@ -424,7 +424,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
           periodEnd: '2025-02-28',
         },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any);
+      ] as unknown as Array<Record<string, unknown>>);
       
       // Run payment collection
       const result = await processPaymentCollection({
@@ -460,7 +460,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         periodStart: '2025-01-01',
         periodEnd: '2025-01-31',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Create arrears record
       await db.insert(arrears).values({
@@ -470,7 +470,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         oldestDebtDate: tenDaysAgo.toISOString().split('T')[0],
         arrearsStatus: 'active',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run payment collection
       const result = await processPaymentCollection({
@@ -516,7 +516,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
       }
       
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await db.insert(picketAttendance).values(attendanceRecords as any);
+      await db.insert(picketAttendance).values(attendanceRecords as unknown as Array<Record<string, unknown>>);
       
       // Run stipend processing
       const result = await processWeeklyStipends({
@@ -554,7 +554,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         hoursWorked: '2.0',
         approved: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run stipend processing
       const result = await processWeeklyStipends({
@@ -588,7 +588,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
       }
       
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await db.insert(picketAttendance).values(attendanceRecords as any);
+      await db.insert(picketAttendance).values(attendanceRecords as unknown as Array<Record<string, unknown>>);
       
       // Run stipend processing
       const result = await processWeeklyStipends({
@@ -627,7 +627,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         hoursWorked: '8.0',
         approved: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run stipend processing with low auto-approve threshold
       const result = await processWeeklyStipends({
@@ -665,7 +665,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         hoursWorked: '4.5',
         approved: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run stipend processing with high auto-approve threshold
       const result = await processWeeklyStipends({
@@ -703,7 +703,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         hoursWorked: '8.0',
         approved: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
       
       // Run stipend processing twice
       await processWeeklyStipends({
@@ -744,7 +744,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         effectiveDate: today.toISOString().split('T')[0],
         endDate: yearFromNow.toISOString().split('T')[0],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as Record<string, unknown>);
 
       const duesResult = await processMonthlyDuesCalculation({
         tenantId: TEST_TENANT_ID,
@@ -757,7 +757,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         .set({ 
           dueDate: tenDaysAgo.toISOString().split('T')[0],
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+        } as unknown as Record<string, unknown>)
         .where(eq(duesTransactions.organizationId, TEST_TENANT_ID));
       
       // 3. Run arrears management

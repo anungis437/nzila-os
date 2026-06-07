@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -63,6 +64,8 @@ interface BenchmarkResult {
   medianWageIncrease: number | null;
   avgTermMonths: number | null;
   clauseFamilyCoverage: Record<string, number>;
+  insufficientData?: boolean;
+  requiredComparables?: number;
 }
 
 interface BenchmarkResponse {
@@ -109,6 +112,8 @@ export function BenchmarkView() {
   const [jurisdiction, setJurisdiction] = useState("all");
   const [sector, setSector] = useState("");
   const [showHistory, setShowHistory] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const queryParams = new URLSearchParams();
   if (jurisdiction !== "all") queryParams.set("jurisdiction", jurisdiction);
@@ -128,7 +133,10 @@ export function BenchmarkView() {
     enabled: !!agreementId,
   });
 
-  const { data: historyData } = useQuery<BenchmarkHistoryResponse>({
+  const {
+    data: historyData,
+    refetch: refetchHistory,
+  } = useQuery<BenchmarkHistoryResponse>({
     queryKey: ["cba-intel-benchmark-history", agreementId],
     queryFn: () =>
       fetch(
@@ -139,6 +147,28 @@ export function BenchmarkView() {
 
   const result = benchmarkData?.data;
   const history = historyData?.data ?? [];
+
+  async function handleSaveSnapshot() {
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const response = await fetch(
+        `/api/cba-intelligence/benchmark/${agreementId}?save=true&${queryParams}`,
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to save benchmark snapshot (${response.status})`);
+      }
+
+      setShowHistory(true);
+      await refetchHistory();
+    } catch (saveSnapshotError) {
+      setSaveError(saveSnapshotError instanceof Error ? saveSnapshotError.message : t("errorLoad"));
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   // Build chart data from clause family coverage
   const clauseChartData = result?.clauseFamilyCoverage
@@ -163,6 +193,14 @@ export function BenchmarkView() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {result?.insufficientData && (
+          <Alert>
+            <AlertDescription>
+              Benchmark confidence is limited until at least {result.requiredComparables ?? 5} comparable agreements are available.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Input controls */}
         <div className="flex gap-3 items-end">
           <div className="flex-1 max-w-md">
@@ -174,7 +212,7 @@ export function BenchmarkView() {
             />
           </div>
           <Select value={jurisdiction} onValueChange={setJurisdiction}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder={t("jurisdictionPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -184,7 +222,7 @@ export function BenchmarkView() {
               ))}
             </SelectContent>
           </Select>
-          <div className="w-[180px]">
+          <div className="w-45">
             <Input
               placeholder={t("sectorPlaceholder")}
               value={sector}
@@ -251,7 +289,7 @@ export function BenchmarkView() {
             {clauseChartData.length > 0 && (
               <div>
                 <h4 className="font-semibold mb-2">{t("clauseCoverage")}</h4>
-                <div className="h-[300px]">
+                <div className="h-75">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={clauseChartData} layout="vertical" margin={{ left: 120 }}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -306,17 +344,22 @@ export function BenchmarkView() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() =>
-                  fetch(`/api/cba-intelligence/benchmark/${agreementId}?save=true&${queryParams}`)
-                }
+                disabled={isSaving}
+                onClick={() => void handleSaveSnapshot()}
               >
                 <Save className="h-4 w-4 mr-2" />
-                {t("actions.saveSnapshot")}
+                {isSaving ? t("computing") : t("actions.saveSnapshot")}
               </Button>
               <Button variant="outline" onClick={() => setShowHistory(!showHistory)}>
                 {showHistory ? t("actions.hideHistory") : t("actions.showHistory")}
               </Button>
             </div>
+
+            {saveError && (
+              <div className="text-sm text-red-500">
+                {saveError}
+              </div>
+            )}
 
             {/* History */}
             {showHistory && history.length > 0 && (

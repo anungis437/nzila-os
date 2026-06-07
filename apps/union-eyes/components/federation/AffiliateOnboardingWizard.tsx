@@ -118,7 +118,7 @@ export function AffiliateOnboardingWizard({
   const progress = (currentStep / totalSteps) * 100;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function updateFormData(field: string, value: any) {
+  function updateFormData(field: string, value: unknown) {
     setFormData(prev => {
       if (field.includes('.')) {
         const [parent, child] = field.split('.');
@@ -126,7 +126,7 @@ export function AffiliateOnboardingWizard({
           ...prev,
           [parent]: {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ...(prev[parent as keyof typeof prev] as any),
+            ...(prev[parent as keyof typeof prev] as unknown),
             [child]: value
           }
         };

@@ -235,10 +235,10 @@ export function VoteCastingInterface({
               question={currentQuestion}
               selectedVotes={votes[currentQuestion.id] || []}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onVoteChange={(value: any) => handleVoteChange(currentQuestion.id, value)}
+              onVoteChange={(value: unknown) => handleVoteChange(currentQuestion.id, value)}
               writeInValue={writeIns[currentQuestion.id] || ""}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onWriteInChange={(value: any) => handleWriteInChange(currentQuestion.id, value)}
+              onWriteInChange={(value: unknown) => handleWriteInChange(currentQuestion.id, value)}
             />
           )}
 
@@ -247,7 +247,7 @@ export function VoteCastingInterface({
               question={currentQuestion}
               selectedVote={votes[currentQuestion.id]?.[0]}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onVoteChange={(value: any) => handleVoteChange(currentQuestion.id, [value])}
+              onVoteChange={(value: unknown) => handleVoteChange(currentQuestion.id, [value])}
             />
           )}
 
@@ -256,7 +256,7 @@ export function VoteCastingInterface({
               question={currentQuestion}
               selectedVotes={votes[currentQuestion.id] || []}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onVoteChange={(value: any) => handleVoteChange(currentQuestion.id, value)}
+              onVoteChange={(value: unknown) => handleVoteChange(currentQuestion.id, value)}
             />
           )}
 
@@ -312,14 +312,14 @@ function CandidateQuestion({
   writeInValue,
   onWriteInChange,
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: any) {
+}: unknown) {
   const t = useTranslations("voting.casting");
   const multiSelect = question.maxSelections > 1;
 
   return (
     <div className="space-y-3">
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {question.candidates?.map((candidate: any) => (
+      {question.candidates?.map((candidate: unknown) => (
         <div
           key={candidate.id}
           className={cn(
@@ -376,7 +376,7 @@ function CandidateQuestion({
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function YesNoQuestion({ _question, selectedVote, onVoteChange }: any) {
+function YesNoQuestion({ _question, selectedVote, onVoteChange }: unknown) {
   const t = useTranslations("voting.casting");
   return (
     <RadioGroup value={selectedVote} onValueChange={onVoteChange}>
@@ -404,7 +404,7 @@ function YesNoQuestion({ _question, selectedVote, onVoteChange }: any) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function MultipleChoiceQuestion({ question, selectedVotes, onVoteChange }: any) {
+function MultipleChoiceQuestion({ question, selectedVotes, onVoteChange }: unknown) {
   const multiSelect = question.maxSelections > 1;
 
   return (
@@ -452,7 +452,7 @@ function ReviewDialog({
   onSubmit,
   isSubmitting,
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: any) {
+}: unknown) {
   const t = useTranslations("voting.casting");
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

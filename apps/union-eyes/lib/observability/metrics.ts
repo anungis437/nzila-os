@@ -271,6 +271,18 @@ export const cbaIntelAgreementsTotal = new Gauge({
   registers: [register],
 });
 
+export function updateReviewQueueDepthMetrics(counts: {
+  findings: number;
+  agreements: number;
+  wageAdjustments: number;
+  clauses: number;
+}): void {
+  cbaIntelReviewQueueDepth.set({ target_type: 'finding' }, counts.findings);
+  cbaIntelReviewQueueDepth.set({ target_type: 'agreement' }, counts.agreements);
+  cbaIntelReviewQueueDepth.set({ target_type: 'wage_adjustment' }, counts.wageAdjustments);
+  cbaIntelReviewQueueDepth.set({ target_type: 'clause' }, counts.clauses);
+}
+
 // ============================================
 // Export Registry
 // ============================================

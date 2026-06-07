@@ -76,7 +76,7 @@ const statusConfig: Record<string, { color: string; icon: React.ReactElement }> 
 const defaultStatus = statusConfig.pending;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapApiToCase(raw: any): ArbitrationCase {
+function mapApiToCase(raw: unknown): ArbitrationCase {
   return {
     id: raw.id ?? "",
     arbitrationNumber: raw.arbitrationNumber ?? raw.arbitration_number ?? "",

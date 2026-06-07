@@ -143,14 +143,14 @@ export function DataTableAdvanced<TData, TValue>({
       const headers = table
         .getAllColumns()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((col: any) => col.getIsVisible())
+        .filter((col: unknown) => col.getIsVisible())
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((col: any) => col.id);
+        .map((col: unknown) => col.id);
       
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rows = table.getFilteredRowModel().rows.map((row: any) =>
+      const rows = table.getFilteredRowModel().rows.map((row: unknown) =>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        headers.map((header: any) => {
+        headers.map((header: unknown) => {
           const value = row.getValue(header);
           return typeof value === "string" ? `"${value}"` : value;
         })
@@ -159,7 +159,7 @@ export function DataTableAdvanced<TData, TValue>({
       const csv = [
         headers.join(","),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...rows.map((row: any) => row.join(",")),
+        ...rows.map((row: unknown) => row.join(",")),
       ].join("\n");
 
       const blob = new Blob([csv], { type: "text/csv" });
@@ -212,9 +212,9 @@ export function DataTableAdvanced<TData, TValue>({
                 {table
                   .getAllColumns()
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  .filter((column: any) => column.getCanFilter())
+                  .filter((column: unknown) => column.getCanFilter())
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  .map((column: any) => {
+                  .map((column: unknown) => {
                     return (
                       <div key={column.id} className="px-2 py-1">
                         <Input
@@ -268,9 +268,9 @@ export function DataTableAdvanced<TData, TValue>({
               {table
                 .getAllColumns()
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .filter((column: any) => column.getCanHide())
+                .filter((column: unknown) => column.getCanHide())
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .map((column: any) => {
+                .map((column: unknown) => {
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
@@ -310,10 +310,10 @@ export function DataTableAdvanced<TData, TValue>({
         <Table>
           <TableHeader>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {table.getHeaderGroups().map((headerGroup: any) => (
+            {table.getHeaderGroups().map((headerGroup: unknown) => (
               <TableRow key={headerGroup.id}>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {headerGroup.headers.map((header: any) => {
+                {headerGroup.headers.map((header: unknown) => {
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
@@ -331,7 +331,7 @@ export function DataTableAdvanced<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              table.getRowModel().rows.map((row: any) => (
+              table.getRowModel().rows.map((row: unknown) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
@@ -341,7 +341,7 @@ export function DataTableAdvanced<TData, TValue>({
                   )}
                 >
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {row.getVisibleCells().map((cell: any) => (
+                  {row.getVisibleCells().map((cell: unknown) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -453,7 +453,7 @@ export function DataTableColumnHeader<_TData, _TValue>({
   className,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any;
+  column: unknown;
   title: string;
   className?: string;
 }) {

@@ -21,7 +21,7 @@ interface Template {
   category: string;
   thumbnail?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  blocks: any[];
+  blocks: unknown[];
   isDefault: boolean;
 }
 

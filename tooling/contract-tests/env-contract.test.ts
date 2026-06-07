@@ -38,7 +38,7 @@ function findFiles(dir: string, exts: string[]): string[] {
     for (const entry of entries) {
       if (!entry.isFile()) continue
       if (exts.some((e) => entry.name.endsWith(e))) {
-        results.push(join((entry as any).path ?? dir, entry.name))
+        results.push(join((entry as unknown).path ?? dir, entry.name))
       }
     }
   } catch {

@@ -5,7 +5,7 @@ export interface FinancialLogMeta {
   correlationId?: string
   organizationId?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any
+  [key: string]: unknown
 }
 
 const baseLogger = winston.createLogger({

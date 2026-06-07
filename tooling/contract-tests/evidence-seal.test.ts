@@ -105,7 +105,7 @@ describe('Evidence Seal — tamper detection (pack index mutation)', () => {
     const pack = makePackIndex()
     const seal = generateSeal(pack, { sealedAt: FIXED_TIMESTAMP })
 
-    const tampered = { ...pack, injectedField: 'malicious', seal } as any
+    const tampered = { ...pack, injectedField: 'malicious', seal } as unknown
     const result = verifySeal(tampered)
 
     expect(result.valid).toBe(false)
@@ -181,7 +181,7 @@ describe('Evidence Seal — tamper detection (artifact mutation)', () => {
 describe('Evidence Seal — missing seal detection', () => {
   it('returns invalid when seal is absent', () => {
     const pack = makePackIndex()
-    const result = verifySeal(pack as any)
+    const result = verifySeal(pack as unknown)
 
     expect(result.valid).toBe(false)
     expect(result.signatureVerified).toBe('unsigned')

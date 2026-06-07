@@ -3,7 +3,7 @@
  * GET /api/ml/runs/inference
  *
  * Returns recent inference runs for an entity.
- * RBAC: any active entity member.
+ * RBAC: unknown active entity member.
  *
  * Query params:
  *   orgId    required

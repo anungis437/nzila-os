@@ -46,12 +46,12 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
   const [sharingDialogOpen, setSharingDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [clausesData, setClausesData] = useState<any>(null);
+  const [clausesData, setClausesData] = useState<unknown>(null);
   const [isLoadingClauses, setIsLoadingClauses] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedClause, setSelectedClause] = useState<any>(null);
+  const [selectedClause, setSelectedClause] = useState<unknown>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [comparisonData, setComparisonData] = useState<any>(null);
+  const [comparisonData, setComparisonData] = useState<unknown>(null);
   const [isLoadingClause, setIsLoadingClause] = useState(false);
   const [isLoadingComparison, setIsLoadingComparison] = useState(false);
   const pageSize = 20;
@@ -335,7 +335,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
 
       {/* Main Content */}
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
+      <Tabs value={activeTab} onValueChange={(v: unknown) => setActiveTab(v)}>
         <TabsList>
           <TabsTrigger value="browse">Browse</TabsTrigger>
           <TabsTrigger value="view" disabled={!selectedClauseId}>
@@ -358,7 +358,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
             <>
               <div className="grid gap-4 md:grid-cols-2">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {clausesData?.clauses?.map((clause: any) => (
+                {clausesData?.clauses?.map((clause: unknown) => (
                   <Card key={clause.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -624,7 +624,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                 report += "=".repeat(80) + "\n\n";
                 
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                comparisonData.clauses.forEach((clause: any, index: number) => {
+                comparisonData.clauses.forEach((clause: unknown, index: number) => {
                   report += `${index + 1}. ${clause.clauseTitle}\n`;
                   report += "-".repeat(80) + "\n";
                   report += `Organization: ${clause.sourceOrganization?.organizationName || "Unknown"}\n`;
@@ -636,7 +636,7 @@ export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: str
                   report += `\nClause Text:\n${clause.clauseText}\n\n`;
                   if (clause.tags?.length > 0) {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    report += `Tags: ${clause.tags.map((t: any) => t.tagName).join(", ")}\n`;
+                    report += `Tags: ${clause.tags.map((t: unknown) => t.tagName).join(", ")}\n`;
                   }
                   report += "\n";
                 });

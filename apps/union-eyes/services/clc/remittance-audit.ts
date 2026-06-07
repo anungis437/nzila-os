@@ -509,7 +509,7 @@ return null;
 // ============================================================================
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function runComplianceChecks(remittance: any): Promise<ComplianceCheckResult> {
+async function runComplianceChecks(remittance: unknown): Promise<ComplianceCheckResult> {
   const errors: string[] = [];
   const warnings: string[] = [];
 

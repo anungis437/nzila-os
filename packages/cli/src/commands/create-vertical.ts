@@ -33,6 +33,12 @@ const VALID_PROFILES = [
   'advisory',
 ] as const
 
+type VerticalProfile = (typeof VALID_PROFILES)[number]
+
+function isValidProfile(profile: string): profile is VerticalProfile {
+  return VALID_PROFILES.includes(profile as VerticalProfile)
+}
+
 export async function createVertical(name: string, options: CreateVerticalOptions): Promise<void> {
   // Validate name
   if (!/^[a-z][a-z0-9-]*$/.test(name)) {
@@ -41,7 +47,7 @@ export async function createVertical(name: string, options: CreateVerticalOption
   }
 
   // Validate profile
-  if (!VALID_PROFILES.includes(options.profile as any)) {
+  if (!isValidProfile(options.profile)) {
     console.error(`❌ Invalid governance profile: "${options.profile}". Valid: ${VALID_PROFILES.join(', ')}`)
     process.exit(1)
   }
@@ -238,7 +244,7 @@ const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = auth(async (request: any) => {
+export const proxy = auth(async (request: unknown) => {
   const ip =
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     request.headers.get('x-real-ip') ??
@@ -313,7 +319,7 @@ export async function requireOrgAccess(
 
     return { ok: true, context: ctx, scopedDb: auditedDb }
   } catch (err) {
-    const status = (err as any).statusCode ?? 403
+    const status = (err as unknown).statusCode ?? 403
     return {
       ok: false,
       response: NextResponse.json(

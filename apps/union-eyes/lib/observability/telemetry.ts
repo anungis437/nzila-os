@@ -166,7 +166,7 @@ return null;
 export async function withSpan<T>(
   name: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (span: any) => Promise<T>,
+  fn: (span: unknown) => Promise<T>,
   attributes?: Record<string, string | number | boolean>
 ): Promise<T> {
   const tracer = trace.getTracer('union-eyes');

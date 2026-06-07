@@ -43,7 +43,7 @@ export default function CalendarPage() {
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [syncManagerOpen, setSyncManagerOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<unknown>(null);
   const [initialDate, setInitialDate] = useState<Date | undefined>();
   const [createCalendarOpen, setCreateCalendarOpen] = useState(false);
   const [isCreatingCalendar, setIsCreatingCalendar] = useState(false);
@@ -98,14 +98,14 @@ export default function CalendarPage() {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleEditEvent = (event: any) => {
+  const handleEditEvent = (event: unknown) => {
     setSelectedEvent(event);
     setInitialDate(undefined);
     setEventDialogOpen(true);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSaveEvent = async (eventData: any) => {
+  const handleSaveEvent = async (eventData: unknown) => {
     try {
       if (selectedEvent) {
         // Update existing event

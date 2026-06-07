@@ -25,15 +25,15 @@ export async function listClaims(
   }
   if (filters.status) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(claims.status, filters.status as any));
+    conditions.push(eq(claims.status, filters.status as unknown));
   }
   if (filters.priority) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(claims.priority, filters.priority as any));
+    conditions.push(eq(claims.priority, filters.priority as unknown));
   }
   if (filters.claimType) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(claims.claimType, filters.claimType as any));
+    conditions.push(eq(claims.claimType, filters.claimType as unknown));
   }
   if (filters.search) {
     conditions.push(like(claims.description, `%${filters.search}%`));

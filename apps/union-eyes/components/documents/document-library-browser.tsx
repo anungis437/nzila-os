@@ -93,6 +93,8 @@ export interface DocumentLibraryBrowserProps {
   onPreview?: (item: DocumentItem) => void;
   onUpload?: () => void;
   onToggleStar?: (item: DocumentItem) => void;
+  onSelectionChange?: (items: DocumentItem[]) => void;
+  selectionResetSignal?: number;
 }
 
 export function DocumentLibraryBrowser({
@@ -105,6 +107,8 @@ export function DocumentLibraryBrowser({
   onPreview,
   onUpload,
   onToggleStar,
+  onSelectionChange,
+  selectionResetSignal,
 }: DocumentLibraryBrowserProps) {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("list");
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -193,6 +197,14 @@ export function DocumentLibraryBrowser({
     setSelectedItems(new Set());
   };
 
+  React.useEffect(() => {
+    onSelectionChange?.(items.filter((item) => selectedItems.has(item.id)));
+  }, [items, onSelectionChange, selectedItems]);
+
+  React.useEffect(() => {
+    setSelectedItems(new Set());
+  }, [selectionResetSignal]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -222,8 +234,8 @@ export function DocumentLibraryBrowser({
             </div>
 
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <Select value={filterType} onValueChange={(v: any) => setFilterType(v)}>
-              <SelectTrigger className="w-[140px]">
+            <Select value={filterType} onValueChange={(v: unknown) => setFilterType(v)}>
+              <SelectTrigger className="w-35">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -234,8 +246,8 @@ export function DocumentLibraryBrowser({
             </Select>
 
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
-              <SelectTrigger className="w-[140px]">
+            <Select value={sortBy} onValueChange={(v: unknown) => setSortBy(v)}>
+              <SelectTrigger className="w-35">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

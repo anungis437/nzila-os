@@ -23,7 +23,7 @@
  * @module @nzila/db/scoped
  */
 import { db, type Database } from './client'
-import { eq, and, type SQL, type InferSelectModel } from 'drizzle-orm'
+import { eq, and, type SQL, type InferSelectModel, type SQLWrapper } from 'drizzle-orm'
 import type { PgTable, TableConfig } from 'drizzle-orm/pg-core'
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -124,16 +124,17 @@ export interface ScopedDb extends ReadOnlyScopedDb {
  * Throws with an explicit error if the column does not exist —
  * this is a structural enforcement, not a soft warning.
  */
-function getOrgIdColumn(table: PgTable<TableConfig>): any {
-  const tableColumns = (table as any)
+function getOrgIdColumn(table: PgTable<TableConfig>): SQLWrapper {
+  const tableColumns = table as unknown as Record<string, unknown>
   // Drizzle exposes columns as direct properties on the table object
   const col = tableColumns['orgId'] ?? tableColumns['org_id']
   if (!col) {
+    const tableRecord = table as unknown as Record<PropertyKey, unknown>
     const tableName =
-      (table as any)[Symbol.for('drizzle:Name')] ??
-      (table as any)['_'] ?.name ??
+      tableRecord[Symbol.for('drizzle:Name')] ??
+      ((tableRecord['_'] as { name?: string } | undefined)?.name) ??
       Object.getOwnPropertySymbols(table)
-        .map((s) => (table as any)[s])
+        .map((s) => tableRecord[s])
         .find((v) => typeof v === 'string') ??
       'unknown'
     throw new ScopedDbError(
@@ -142,7 +143,7 @@ function getOrgIdColumn(table: PgTable<TableConfig>): any {
         'Use rawDb (from @nzila/db/raw) only in the OS platform layer for unscoped tables.',
     )
   }
-  return col
+  return col as SQLWrapper
 }
 
 // ── Error classes ──────────────────────────────────────────────────────────
@@ -192,10 +193,10 @@ export function createScopedDb(opts: ScopedDbOptions): ReadOnlyScopedDb
 /** @deprecated Use object form: createScopedDb({ orgId }) */
 export function createScopedDb(orgId: string): ScopedDb
 /** @internal */
-export function createScopedDb(orgId: string, txClient: any): ScopedDb
+export function createScopedDb(orgId: string, txClient: unknown): ScopedDb
 export function createScopedDb(
   optsOrOrgId: ScopedDbOptions | string,
-  txClient?: any,
+  txClient?: unknown,
 ): ReadOnlyScopedDb | ScopedDb {
   // ── Guard: null/undefined always throws ScopedDbError ─────────────────
   if (optsOrOrgId === null || optsOrOrgId === undefined) {
@@ -220,13 +221,18 @@ export function createScopedDb(
     )
   }
 
-  const client: Database = txClient ?? db
+  const client = txClient ?? db
 
-  function scopedSelect(c: any, table: PgTable<TableConfig>, extraWhere?: SQL) {
+  function scopedSelect<T extends PgTable<TableConfig>>(c: unknown, table: T, extraWhere?: SQL): Promise<InferSelectModel<T>[]> {
     const orgCol = getOrgIdColumn(table)
     const orgFilter = eq(orgCol, orgId)
     const where = extraWhere ? and(orgFilter, extraWhere) : orgFilter
-    return c.select().from(table).where(where)
+    const queryClient = c as {
+      select: () => {
+        from: (tbl: T) => { where: (clause: unknown) => Promise<InferSelectModel<T>[]> }
+      }
+    }
+    return queryClient.select().from(table).where(where)
   }
 
   const readOnlyDb: ReadOnlyScopedDb = {
@@ -238,7 +244,8 @@ export function createScopedDb(
     },
 
     async transaction<TResult>(fn: (tx: ReadOnlyScopedDb) => Promise<TResult>): Promise<TResult> {
-      return (client as any).transaction(async (tx: any) => {
+      const txClient = client as unknown as { transaction: <R>(cb: (tx: unknown) => Promise<R>) => Promise<R> }
+      return txClient.transaction(async (tx: unknown) => {
         const txReadOnly: ReadOnlyScopedDb = {
           orgId,
           correlationId,
@@ -246,7 +253,8 @@ export function createScopedDb(
             return scopedSelect(tx, table, extraWhere)
           },
           async transaction<R>(innerFn: (innerTx: ReadOnlyScopedDb) => Promise<R>): Promise<R> {
-            return tx.transaction(async (nested: any) => {
+            const nestedClient = tx as { transaction: <X>(cb: (nested: unknown) => Promise<X>) => Promise<X> }
+            return nestedClient.transaction(async (nested: unknown) => {
               const nestedReadOnly: ReadOnlyScopedDb = {
                 orgId,
                 correlationId,
@@ -274,7 +282,7 @@ export function createScopedDb(
  *
  * @internal
  */
-export function createFullScopedDb(orgId: string, txClient?: any): ScopedDb {
+export function createFullScopedDb(orgId: string, txClient?: unknown): ScopedDb {
   if (!orgId || typeof orgId !== 'string') {
     throw new ScopedDbError(
       'createScopedDb() requires a non-empty orgId string. ' +
@@ -282,7 +290,7 @@ export function createFullScopedDb(orgId: string, txClient?: any): ScopedDb {
     )
   }
 
-  const client: Database = txClient ?? db
+  const client = txClient ?? db
 
   const scopedDb: ScopedDb = {
     orgId,
@@ -292,7 +300,10 @@ export function createFullScopedDb(orgId: string, txClient?: any): ScopedDb {
       const orgCol = getOrgIdColumn(table)
       const orgFilter = eq(orgCol, orgId)
       const where = extraWhere ? and(orgFilter, extraWhere) : orgFilter
-      return (client as any).select().from(table).where(where)
+      const queryClient = client as unknown as {
+        select: () => { from: (tbl: PgTable<TableConfig>) => { where: (clause: unknown) => unknown } }
+      }
+      return queryClient.select().from(table).where(where) as Promise<InferSelectModel<typeof table>[]>
     },
 
     insert(table, values) {
@@ -303,25 +314,35 @@ export function createFullScopedDb(orgId: string, txClient?: any): ScopedDb {
         orgId: orgId, // force orgId on every row
       }))
       const toInsert = injected.length === 1 ? injected[0] : injected
-      return (client as any).insert(table).values(toInsert)
+      const queryClient = client as unknown as {
+        insert: (tbl: PgTable<TableConfig>) => { values: (rows: unknown) => ReturnType<Database['insert']> }
+      }
+      return queryClient.insert(table).values(toInsert)
     },
 
     update(table, values, extraWhere) {
       const orgCol = getOrgIdColumn(table)
       const orgFilter = eq(orgCol, orgId)
       const where = extraWhere ? and(orgFilter, extraWhere) : orgFilter
-      return (client as any).update(table).set(values).where(where)
+      const queryClient = client as unknown as {
+        update: (tbl: PgTable<TableConfig>) => { set: (v: Record<string, unknown>) => { where: (clause: unknown) => ReturnType<Database['update']> } }
+      }
+      return queryClient.update(table).set(values).where(where)
     },
 
     delete(table, extraWhere) {
       const orgCol = getOrgIdColumn(table)
       const orgFilter = eq(orgCol, orgId)
       const where = extraWhere ? and(orgFilter, extraWhere) : orgFilter
-      return (client as any).delete(table).where(where)
+      const queryClient = client as unknown as {
+        delete: (tbl: PgTable<TableConfig>) => { where: (clause: unknown) => ReturnType<Database['delete']> }
+      }
+      return queryClient.delete(table).where(where)
     },
 
     async transaction<TResult>(fn: (tx: ScopedDb) => Promise<TResult>): Promise<TResult> {
-      return (client as any).transaction(async (tx: any) => {
+      const txClient = client as unknown as { transaction: <R>(cb: (tx: unknown) => Promise<R>) => Promise<R> }
+      return txClient.transaction(async (tx: unknown) => {
         const txScopedDb = createFullScopedDb(orgId, tx)
         return fn(txScopedDb)
       })

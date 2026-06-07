@@ -215,7 +215,7 @@ export class ManualEntryConnector implements PayrollConnector {
   async parseFile(data: Buffer | string): Promise<ParsedRemittanceFile> {
     const json = JSON.parse(typeof data === 'string' ? data : data.toString('utf-8'));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: PayrollDeductionRow[] = (json.rows ?? []).map((r: any) => ({
+    const rows: PayrollDeductionRow[] = (json.rows ?? []).map((r: unknown) => ({
       employeeId: r.employeeId ?? '',
       employeeName: r.employeeName ?? '',
       periodStart: new Date(r.periodStart),

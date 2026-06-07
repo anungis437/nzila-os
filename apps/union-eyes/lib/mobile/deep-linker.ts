@@ -228,9 +228,9 @@ export async function handleDeepLink(url: string): Promise<boolean> {
 
   // Navigate to the parsed route
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (typeof window !== 'undefined' && (window as any).navigate) {
+  if (typeof window !== 'undefined' && (window as unknown).navigate) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).navigate(parsed.route, parsed.params, parsed.query);
+    (window as unknown).navigate(parsed.route, parsed.params, parsed.query);
     return true;
   }
 
@@ -246,10 +246,10 @@ export function registerDeepLinkHandlers(): void {
 
   // Handle universal links (iOS)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((navigator as any).registerProtocolHandler) {
+  if ((navigator as unknown).registerProtocolHandler) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any).registerProtocolHandler(
+      (navigator as unknown).registerProtocolHandler(
         'unioneyes',
         `${window.location.origin}/deep-link?url=%s`,
         'UnionEyes'

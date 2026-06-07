@@ -6,6 +6,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { validateEnv } from '../config/env'
 
+type AppName = Parameters<typeof validateEnv>[0]
+
 const VALID_BASE_ENV: Record<string, string> = {
   NODE_ENV: 'test',
   DATABASE_URL: 'postgres://localhost:5432/nzila',
@@ -38,7 +40,7 @@ describe('validateEnv', () => {
   })
 
   it('throws for unknown app name', () => {
-    expect(() => validateEnv('nonexistent-app' as any)).toThrow('Unknown app name')
+    expect(() => validateEnv('nonexistent-app' as AppName)).toThrow('Unknown app name')
   })
 
   it('validates console schema requires auth keys', () => {

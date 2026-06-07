@@ -302,11 +302,11 @@ export const signatureAuditTrail = pgTable(
       providerEventId?: string;
       authenticationMethod?: string;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      certificateInfo?: any;
+      certificateInfo?: unknown;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      previousValue?: any;
+      previousValue?: unknown;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      newValue?: any;
+      newValue?: unknown;
     }>(),
     
     // Blockchain/Immutability (future)

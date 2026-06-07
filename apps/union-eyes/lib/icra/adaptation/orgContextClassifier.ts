@@ -7,7 +7,7 @@
  * only. Never reads behavioural signals, free text, IP, geolocation, or any
  * data not explicitly declared by the respondent.
  *
- * Refuses rather than guesses: any unresolved dimension falls back to a
+ * Refuses rather than guesses: unknown unresolved dimension falls back to a
  * conservative default and records a `*_safe_default` rationale.
  */
 

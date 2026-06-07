@@ -155,7 +155,7 @@ export function SurveyBuilder({ organizationId, surveyId, onSave, onCancel }: Su
 
       // Convert loaded questions to component format
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const formattedQuestions: Question[] = loadedQuestions.map((q: any) => ({
+      const formattedQuestions: Question[] = loadedQuestions.map((q: unknown) => ({
         id: q.id,
         questionText: q.questionText,
         questionType: q.questionType,

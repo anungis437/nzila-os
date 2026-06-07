@@ -61,7 +61,7 @@ const OUTCOME_COLORS = {
 
 // Normalize arbitrationDecisions fields to arbitrationPrecedents field names
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizePrecedent(p: any): any {
+function normalizePrecedent(p: unknown): unknown {
   if (!p) return p;
   return {
     ...p,
@@ -99,12 +99,12 @@ export function PrecedentsConsole() {
   const [comparisonNotes, setComparisonNotes] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [precedentsData, setPrecedentsData] = useState<any>(null);
+  const [precedentsData, setPrecedentsData] = useState<unknown>(null);
   const [isLoadingPrecedents, setIsLoadingPrecedents] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedPrecedent, setSelectedPrecedent] = useState<any>(null);
+  const [selectedPrecedent, setSelectedPrecedent] = useState<unknown>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [comparisonData, setComparisonData] = useState<any>(null);
+  const [comparisonData, setComparisonData] = useState<unknown>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -667,7 +667,7 @@ export function PrecedentsConsole() {
 
       {/* Main Content */}
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
+      <Tabs value={activeTab} onValueChange={(v: unknown) => setActiveTab(v)}>
         <TabsList>
           <TabsTrigger value="browse">{t('precedents.browse')}</TabsTrigger>
           <TabsTrigger value="view" disabled={!selectedPrecedentId}>
@@ -696,7 +696,7 @@ export function PrecedentsConsole() {
             <>
               <div className="grid gap-4 md:grid-cols-2">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {precedentsData?.precedents?.map((precedent: any) => (
+                {precedentsData?.precedents?.map((precedent: unknown) => (
                   <Card
                     key={precedent.id}
                     className="cursor-pointer hover:shadow-md transition-shadow"

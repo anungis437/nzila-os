@@ -16,7 +16,7 @@ import { BillingCycleService, type BillingFrequency } from '../services/billing-
 
 // Access private static methods via type-casting — purely for testing
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Service = BillingCycleService as any;
+const Service = BillingCycleService as unknown;
 
 // ─── calculatePeriodDates ────────────────────────────────────────────────────
 

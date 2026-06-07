@@ -341,7 +341,7 @@ export async function bulkMapEmployees(
     internalMemberId: string;
   }>
 ): Promise<{ success: number; failed: number }> {
-  let success = 0;
+  const success = 0;
   let failed = 0;
 
   // No junction table exists yet to persist external-employee ↔ internal-member

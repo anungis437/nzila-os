@@ -116,7 +116,7 @@ export async function calculateMetrics(params: {
         const membersCount = await withRLSContext({ organizationId: orgId }, async (db) =>
           db.query.organizationMembers.findMany({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            where: (members: any, { eq, and, gte, lte }: any) => and(
+            where: (members: unknown, { eq, and, gte, lte }: unknown) => and(
               eq(members.organizationId, orgId),
               gte(members.createdAt, params.periodStart),
               lte(members.createdAt, params.periodEnd)
@@ -213,7 +213,7 @@ export async function generatePredictions(params: {
     
     // Convert to time series format
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const timeSeriesData: TimeSeriesData[] = historicalMetrics.reverse().map((m: any) => ({
+    const timeSeriesData: TimeSeriesData[] = historicalMetrics.reverse().map((m: unknown) => ({
       date: m.periodStart,
       value: Number(m.metricValue),
       metadata: m.metadata as Record<string, unknown>
@@ -295,7 +295,7 @@ export async function detectMetricTrends(params: {
     
     // Convert to time series
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const timeSeriesData: TimeSeriesData[] = metrics.reverse().map((m: any) => ({
+    const timeSeriesData: TimeSeriesData[] = metrics.reverse().map((m: unknown) => ({
       date: m.periodStart,
       value: Number(m.metricValue)
     }));

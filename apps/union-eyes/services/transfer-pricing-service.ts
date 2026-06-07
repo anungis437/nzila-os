@@ -40,9 +40,9 @@ export interface TransferPricingDoc {
   pricingJustification: string;
   documentedBy: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  comparableTransactions?: any[];
+  comparableTransactions?: unknown[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supportingDocuments?: any[];
+  supportingDocuments?: unknown[];
 }
 
 export class TransferPricingService {
@@ -400,7 +400,7 @@ export class TransferPricingService {
     newRate?: number;
     performedBy?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: any;
+    metadata?: unknown;
   }) {
     await db.insert(fxRateAuditLog).values({
       actionType: params.actionType,
@@ -427,7 +427,7 @@ export class TransferPricingService {
     performedByRole?: string;
     complianceImpact?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: any;
+    metadata?: unknown;
   }) {
     await db.insert(currencyEnforcementAudit).values({
       actionType: params.actionType,

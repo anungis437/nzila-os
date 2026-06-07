@@ -193,7 +193,7 @@ export async function getLedgerSummary(
       sql`${rewardWalletLedger.createdAt} >= ${startDate}`,
       sql`${rewardWalletLedger.createdAt} <= ${endDate}`
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any;
+    ) as unknown;
   }
 
   const [summary] = await db
@@ -223,7 +223,7 @@ export async function getLedgerSummary(
     totalCreditsIssued: summary.totalIssued,
     totalCreditsSpent: summary.totalSpent,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    totalCreditsOutstanding: (outstanding as any).total,
+    totalCreditsOutstanding: (outstanding as unknown).total,
     activeMembers: summary.activeMembers,
   };
 }
@@ -255,7 +255,7 @@ export async function getBulkBalances(
   const balanceMap = new Map<string, number>();
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const row of results as any) {
+  for (const row of results as unknown) {
     balanceMap.set(row.user_id, row.balance_after);
   }
 

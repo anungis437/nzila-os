@@ -52,9 +52,9 @@ export default function CaseStudyEditorForm({ caseStudy }: CaseStudyEditorFormPr
     organizationName: caseStudy?.organizationId || '',
     organizationType: caseStudy?.organizationType || 'local',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sector: (caseStudy as any)?.sector || '',
+    sector: (caseStudy as unknown)?.sector || '',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jurisdiction: (caseStudy as any)?.jurisdiction || '',
+    jurisdiction: (caseStudy as unknown)?.jurisdiction || '',
     category: caseStudy?.category || 'grievance-wins',
     summary: caseStudy?.summary || '',
     challenge: caseStudy?.challenge || '',
@@ -62,7 +62,7 @@ export default function CaseStudyEditorForm({ caseStudy }: CaseStudyEditorFormPr
     results: caseStudy?.outcome || '',
     publishStatus: caseStudy?.publishedAt ? 'published' : 'draft',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    featuredImage: (caseStudy as any)?.featuredImage || '',
+    featuredImage: (caseStudy as unknown)?.featuredImage || '',
   });
 
   // Metrics state

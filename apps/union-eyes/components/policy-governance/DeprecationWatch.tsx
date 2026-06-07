@@ -36,15 +36,19 @@ export default function DeprecationWatch() {
   const [data, setData] = useState<DeprecationData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
+  const loadData = useCallback(async () => {
     const res = await fetch('/api/governance/lifecycle/deprecation-watch')
     const json = await res.json()
     setData(json)
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadData()
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
+  }, [loadData])
 
   if (loading) return (
     <div className="space-y-3">

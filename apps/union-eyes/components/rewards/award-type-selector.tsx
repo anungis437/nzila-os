@@ -47,7 +47,7 @@ export function AwardTypeSelector({
   const activeTypes = awardTypes; // All types passed in are considered active
   const groupedByProgram = activeTypes.reduce((acc, type) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const programName = (type as any).program_name || 'Other';
+    const programName = (type as unknown).program_name || 'Other';
     if (!acc[programName]) {
       acc[programName] = [];
     }

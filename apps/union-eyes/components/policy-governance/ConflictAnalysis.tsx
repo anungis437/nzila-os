@@ -32,15 +32,24 @@ export default function ConflictAnalysis() {
   const [resolvingId, setResolvingId] = useState<string | null>(null)
   const [notes, setNotes] = useState('')
 
-  const fetchConflicts = useCallback(async () => {
-    setLoading(true)
+  const loadConflicts = useCallback(async () => {
     const res = await fetch('/api/governance/lifecycle/conflicts?activeOnly=true')
     const data = await res.json()
     setConflicts(data.conflicts ?? [])
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchConflicts() }, [fetchConflicts])
+  const fetchConflicts = useCallback(async () => {
+    setLoading(true)
+    await loadConflicts()
+  }, [loadConflicts])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadConflicts()
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
+  }, [loadConflicts])
 
   const resolveConflict = async (id: string) => {
     await fetch(`/api/governance/lifecycle/conflicts/${id}`, {
@@ -50,7 +59,7 @@ export default function ConflictAnalysis() {
     })
     setResolvingId(null)
     setNotes('')
-    fetchConflicts()
+    await fetchConflicts()
   }
 
   if (loading) return (

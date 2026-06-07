@@ -226,19 +226,19 @@ async function fetchCollectionByHandle(
     description: collection.description,
     handle: collection.handle,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    products: collection.products.edges.map((edge: any) => ({
+    products: collection.products.edges.map((edge: unknown) => ({
       id: edge.node.id,
       title: edge.node.title,
       description: edge.node.description,
       handle: edge.node.handle,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      images: edge.node.images.edges.map((imgEdge: any) => ({
+      images: edge.node.images.edges.map((imgEdge: unknown) => ({
         url: imgEdge.node.url,
         altText: imgEdge.node.altText,
       })),
       priceRange: edge.node.priceRange,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      variants: edge.node.variants.edges.map((variantEdge: any) => ({
+      variants: edge.node.variants.edges.map((variantEdge: unknown) => ({
         id: variantEdge.node.id,
         title: variantEdge.node.title,
         price: variantEdge.node.price,
@@ -300,7 +300,7 @@ async function createPriceRule(
   currency: string,
   title: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<unknown> {
   const response = await fetch(`${ADMIN_API_URL}/price_rules.json`, {
     method: 'POST',
     headers: {
@@ -344,7 +344,7 @@ async function createDiscountCodeForPriceRule(
   priceRuleId: string,
   code: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<unknown> {
   const response = await fetch(
     `${ADMIN_API_URL}/price_rules/${priceRuleId}/discount_codes.json`,
     {
@@ -528,13 +528,13 @@ export async function getProductByHandle(
       description: product.description,
       handle: product.handle,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      images: product.images.edges.map((edge: any) => ({
+      images: product.images.edges.map((edge: unknown) => ({
         url: edge.node.url,
         altText: edge.node.altText,
       })),
       priceRange: product.priceRange,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      variants: product.variants.edges.map((edge: any) => ({
+      variants: product.variants.edges.map((edge: unknown) => ({
         id: edge.node.id,
         title: edge.node.title,
         price: edge.node.price,

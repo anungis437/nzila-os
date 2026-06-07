@@ -52,7 +52,7 @@ export default async function PeerRecognitionPage() {
 
   // Get the first active program (or you can let user select)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const activeProgram = programsResult.data?.find((p: any) => p.status === 'active');
+  const activeProgram = programsResult.data?.find((p: unknown) => p.status === 'active');
   
   if (!activeProgram) {
     return (

@@ -88,7 +88,7 @@ async function processTesseractOCR(
 ): Promise<OCRResult> {
   const worker = await createWorker(language, 1, {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    logger: (m: any) => {
+    logger: (m: unknown) => {
       if (m.status === "recognizing text") {
         logger.debug("OCR progress", { percent: Math.round(m.progress * 100) });
       }
@@ -98,11 +98,11 @@ async function processTesseractOCR(
   try {
     const { data } = await worker.recognize(imageBuffer);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dataAny = data as any;
+    const dataAny = data as unknown;
 
     // Extract word-level details
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const words = dataAny.words.map((word: any) => ({
+    const words = dataAny.words.map((word: unknown) => ({
       text: word.text,
       confidence: word.confidence,
       bbox: word.bbox,
@@ -110,11 +110,11 @@ async function processTesseractOCR(
 
     // Extract line-level details
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lines = dataAny.lines.map((line: any) => ({
+    const lines = dataAny.lines.map((line: unknown) => ({
       text: line.text,
       confidence: line.confidence,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      words: line.words.map((w: any) => w.text),
+      words: line.words.map((w: unknown) => w.text),
     }));
 
     await worker.terminate();
@@ -166,18 +166,18 @@ async function processAWSTextractOCR(
     const blocks = response.Blocks || [];
     const lines = blocks
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((block: any) => block.BlockType === "LINE")
+      .filter((block: unknown) => block.BlockType === "LINE")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((block: any) => ({
+      .map((block: unknown) => ({
         text: block.Text || "",
         confidence: block.Confidence || 0,
         words: block.Text?.split(" ") || [],
       }));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const text = lines.map((line: any) => line.text).join("\n");
+    const text = lines.map((line: unknown) => line.text).join("\n");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const confidence = lines.reduce((sum: any, line: any) => sum + line.confidence, 0) / lines.length;
+    const confidence = lines.reduce((sum: unknown, line: unknown) => sum + line.confidence, 0) / lines.length;
 
     return {
       text,
@@ -222,7 +222,7 @@ async function processGoogleVisionOCR(
     
     // Extract word-level details
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const words = detections.slice(1).map((detection: any) => {
+    const words = detections.slice(1).map((detection: unknown) => {
       const vertices = detection.boundingPoly?.vertices || [];
       return {
         text: detection.description || "",
@@ -292,21 +292,21 @@ async function processAzureOCR(
     // Extract text from pages
     const pages = readResult.analyzeResult?.readResults || [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lines = pages.flatMap((page: any) =>
+    const lines = pages.flatMap((page: unknown) =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (page.lines || []).map((line: any) => ({
+      (page.lines || []).map((line: unknown) => ({
         text: line.text,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        confidence: (line as any).confidence || 95,
+        confidence: (line as unknown).confidence || 95,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        words: line.words?.map((w: any) => w.text) || [],
+        words: line.words?.map((w: unknown) => w.text) || [],
       }))
     );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const text = lines.map((line: any) => line.text).join("\n");
+    const text = lines.map((line: unknown) => line.text).join("\n");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const confidence = lines.reduce((sum: any, line: any) => sum + line.confidence, 0) / lines.length;
+    const confidence = lines.reduce((sum: unknown, line: unknown) => sum + line.confidence, 0) / lines.length;
 
     return {
       text,
@@ -337,7 +337,7 @@ export async function processPDFOCR(
 ): Promise<{ pages: OCRResult[]; fullText: string }> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pdfParse = (await import("pdf-parse")) as any;
+    const pdfParse = (await import("pdf-parse")) as unknown;
     
     // First try to extract text directly from PDF
     const pdfData = await pdfParse(pdfBuffer);
@@ -359,7 +359,7 @@ export async function processPDFOCR(
     
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).code === "MODULE_NOT_FOUND") {
+    if ((error as unknown).code === "MODULE_NOT_FOUND") {
       throw new Error("PDF parsing library not installed. Run: npm install pdf-parse");
     }
     throw error;
@@ -380,7 +380,7 @@ export async function preprocessImage(
     const sharp = await import("sharp");
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return await (sharp.default(imageBuffer) as any)
+    return await (sharp.default(imageBuffer) as unknown)
       .grayscale()
       .normalize() // Enhance contrast
       .median(3) // Reduce noise
@@ -388,7 +388,7 @@ export async function preprocessImage(
       .toBuffer();
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).code === "MODULE_NOT_FOUND") {
+    if ((error as unknown).code === "MODULE_NOT_FOUND") {
       logger.warn("Sharp not installed. Image preprocessing disabled. Run: npm install sharp");
       return imageBuffer;
     }

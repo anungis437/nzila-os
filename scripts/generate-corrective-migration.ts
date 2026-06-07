@@ -22,28 +22,28 @@ interface ColMeta {
   notNull: boolean;
   hasDefault: boolean;
   primary: boolean;
-  defaultFn: any;
-  defaultValue: any;
+  defaultFn: unknown;
+  defaultValue: unknown;
   columnType: string;
   enumValues?: string[];
 }
 
-function extractTableSchema(tbl: PgTable<any>): string {
+function extractTableSchema(tbl: PgTable<unknown>): string {
   const symbols = Object.getOwnPropertySymbols(tbl);
   const schemaSym = symbols.find(s => s.toString().includes('Schema'));
   if (schemaSym) {
-    const val = (tbl as any)[schemaSym];
+    const val = (tbl as unknown)[schemaSym];
     if (val && typeof val === 'string') return val;
     if (val && typeof val === 'object' && val.schemaName) return val.schemaName;
   }
   return 'public';
 }
 
-function getColumnMeta(tbl: PgTable<any>): ColMeta[] {
+function getColumnMeta(tbl: PgTable<unknown>): ColMeta[] {
   const drizzleCols = getTableColumns(tbl);
   const cols: ColMeta[] = [];
   for (const [, col] of Object.entries(drizzleCols)) {
-    const c = col as any;
+    const c = col as unknown;
     cols.push({
       name: c.name,
       sqlType: typeof c.getSQLType === 'function' ? c.getSQLType() : 'text',
@@ -128,7 +128,7 @@ async function main() {
 
   for (const [, value] of Object.entries(schema)) {
     if (!is(value, PgTable)) continue;
-    const tbl = value as PgTable<any>;
+    const tbl = value as PgTable<unknown>;
     const tableName = getTableName(tbl);
     const dbSchema = extractTableSchema(tbl);
     const key = `${dbSchema}.${tableName}`;

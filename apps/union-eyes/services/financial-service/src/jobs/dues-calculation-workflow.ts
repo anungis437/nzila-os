@@ -124,7 +124,7 @@ export async function processMonthlyDuesCalculation(params: {
         periodEnd.setMonth(periodEnd.getMonth() + 1, 0);
 
         await db.insert(duesTransactions).values({
-          tenantId,
+          organizationId: tenantId,
           memberId: member.memberId,
           assignmentId: member.assignmentId || null,
           periodStart: effectiveDate.toISOString().split('T')[0],
@@ -135,8 +135,7 @@ export async function processMonthlyDuesCalculation(params: {
           status: 'pending',
           dueDate: dueDate.toISOString().split('T')[0],
           transactionType: 'dues',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any);
+        });
 
         membersProcessed++;
         transactionsCreated++;

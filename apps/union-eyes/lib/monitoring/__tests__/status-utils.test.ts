@@ -18,7 +18,7 @@ describe('status-utils', () => {
 
     it('returns gray for unknown status', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(getStatusColor('unknown' as any)).toBe('gray');
+      expect(getStatusColor('unknown' as unknown)).toBe('gray');
     });
   });
 
@@ -38,7 +38,7 @@ describe('status-utils', () => {
 
     it('returns question mark for unknown', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(getStatusEmoji('unknown' as any)).toBe('❓');
+      expect(getStatusEmoji('unknown' as unknown)).toBe('❓');
     });
   });
 

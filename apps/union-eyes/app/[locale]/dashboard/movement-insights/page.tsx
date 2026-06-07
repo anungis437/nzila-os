@@ -317,7 +317,7 @@ function TrendCard({
   title: string;
   description: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trends: any[];
+  trends: unknown[];
   unit: string;
   lowerIsBetter: boolean;
   icon: React.ReactNode;

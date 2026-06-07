@@ -9,7 +9,7 @@ const SYSTEM_USER_ID = "system";
 
 // Only import bullmq in runtime, not during build
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Worker: any, _Job: any,IORedis: any;
+let Worker: unknown, _Job: unknown,IORedis: unknown;
 
 if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
   try {
@@ -57,7 +57,7 @@ async function ensureReportsDir() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function flattenForExport(input: any, prefix = ''): Array<{ path: string; value: string }> {
+function flattenForExport(input: unknown, prefix = ''): Array<{ path: string; value: string }> {
   if (input === null || input === undefined) {
     return [{ path: prefix, value: '' }];
   }
@@ -138,7 +138,7 @@ async function generateClaimsReport(
 ) {
 // Build query with combined where conditions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const conditions: any[] = [eq(claims.organizationId, organizationId)];
+  const conditions: unknown[] = [eq(claims.organizationId, organizationId)];
   
   if (parameters.startDate && parameters.endDate) {
     conditions.push(
@@ -148,7 +148,7 @@ async function generateClaimsReport(
 
   if (parameters.status) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(claims.status, parameters.status as any));
+    conditions.push(eq(claims.status, parameters.status as unknown));
   }
 
   // Execute query
@@ -193,11 +193,11 @@ async function generateMembersReport(
 ) {
 // Build query with combined where conditions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const conditions: any[] = [eq(members.organizationId, organizationId)];
+  const conditions: unknown[] = [eq(members.organizationId, organizationId)];
   
   if (parameters.status) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(members.status, parameters.status as any));
+    conditions.push(eq(members.status, parameters.status as unknown));
   }
 
   // Execute query
@@ -244,7 +244,7 @@ async function generateGrievancesReport(
 ) {
 // Build query with combined where conditions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const conditions: any[] = [eq(claims.organizationId, organizationId)];
+  const conditions: unknown[] = [eq(claims.organizationId, organizationId)];
   
   if (parameters.startDate && parameters.endDate) {
     conditions.push(
@@ -254,7 +254,7 @@ async function generateGrievancesReport(
 
   if (parameters.status) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(claims.status, parameters.status as any));
+    conditions.push(eq(claims.status, parameters.status as unknown));
   }
 
   // Query grievance claims with latest transition info
@@ -348,12 +348,12 @@ async function generateUsageReport(
     claims: {
       total: claimsData.length,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      byStatus: claimsData.reduce((acc: any, claim) => {
+      byStatus: claimsData.reduce((acc: unknown, claim) => {
         acc[claim.status] = (acc[claim.status] || 0) + 1;
         return acc;
       }, {}),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      byPriority: claimsData.reduce((acc: any, claim) => {
+      byPriority: claimsData.reduce((acc: unknown, claim) => {
         acc[claim.priority] = (acc[claim.priority] || 0) + 1;
         return acc;
       }, {}),
@@ -397,7 +397,7 @@ async function generateUsageReport(
  * Process report generation job
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function processReportJob(job: any) {
+async function processReportJob(job: unknown) {
   const { reportType, tenantId: organizationId, userId, parameters } = job.data;
 await ensureReportsDir();
 
@@ -411,31 +411,31 @@ await ensureReportsDir();
     switch (reportType) {
       case 'claims':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        buffer = await generateClaimsReport(organizationId, parameters as any);
+        buffer = await generateClaimsReport(organizationId, parameters as unknown);
         filename = `claims-report-${Date.now()}.${parameters.format}`;
         break;
 
       case 'members':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        buffer = await generateMembersReport(organizationId, parameters as any);
+        buffer = await generateMembersReport(organizationId, parameters as unknown);
         filename = `members-report-${Date.now()}.${parameters.format}`;
         break;
 
       case 'grievances':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        buffer = await generateGrievancesReport(organizationId, parameters as any);
+        buffer = await generateGrievancesReport(organizationId, parameters as unknown);
         filename = `grievances-report-${Date.now()}.${parameters.format}`;
         break;
 
       case 'usage':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        buffer = await generateUsageReport(organizationId, parameters as any);
+        buffer = await generateUsageReport(organizationId, parameters as unknown);
         filename = `usage-report-${Date.now()}.${parameters.format}`;
         break;
 
       case 'gdpr_export':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        buffer = await generateGdprExport(organizationId, userId, parameters as any);
+        buffer = await generateGdprExport(organizationId, userId, parameters as unknown);
         filename = `gdpr-export-${parameters.requestId}.${parameters.format}`;
         break;
 
@@ -515,7 +515,7 @@ throw error;
 export const reportWorker = new Worker(
   'reports',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (job: any) => {
+  async (job: unknown) => {
     return await processReportJob(job);
   },
   {
@@ -526,15 +526,15 @@ export const reportWorker = new Worker(
 
 // Event handlers
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-reportWorker.on('completed', (_job: any) => {
+reportWorker.on('completed', (_job: unknown) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-reportWorker.on('failed', (_job: any, _err: any) => {
+reportWorker.on('failed', (_job: unknown, _err: unknown) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-reportWorker.on('error', (_err: any) => {
+reportWorker.on('error', (_err: unknown) => {
 });
 
 // Graceful shutdown

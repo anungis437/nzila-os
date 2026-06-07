@@ -198,7 +198,7 @@ export function arrayAppend(
  */
 export function createLikeQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any,
+  column: unknown,
   pattern: string,
   dbType: DatabaseType = 'postgresql'
 ) {
@@ -279,7 +279,7 @@ export function createPaginationQuery(
  */
 export function createBooleanQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any,
+  column: unknown,
   value: boolean,
   dbType: DatabaseType = 'postgresql'
 ) {
@@ -297,7 +297,7 @@ export function createBooleanQuery(
  */
 export function createNullCheck(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any,
+  column: unknown,
   checkNull: boolean = true,
   dbType: DatabaseType = 'postgresql'
 ) {
@@ -347,10 +347,10 @@ export async function checkDatabaseHealth(): Promise<{
     await executeQuery(db, async (db) => {
       if (config.type === 'azure-sql' || config.type === 'mssql') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return await (db as any).execute(sql`SELECT 1`);
+        return await (db as unknown).execute(sql`SELECT 1`);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return await (db as any).execute(sql`SELECT 1`);
+        return await (db as unknown).execute(sql`SELECT 1`);
       }
     });
     

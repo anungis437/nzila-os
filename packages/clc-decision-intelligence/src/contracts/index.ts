@@ -271,7 +271,7 @@ export interface DecisionPromptContract {
   anonymizationRules: string[];
   /** Build input payload from governed aggregates */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  buildInput: (data: any) => Record<string, unknown>;
+  buildInput: (data: unknown) => Record<string, unknown>;
 }
 
 // ── Audit Extensions ────────────────────────────────────────────────────────

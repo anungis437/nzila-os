@@ -29,7 +29,7 @@ export async function listNegotiations(
   }
   if (filters.status) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(negotiations.status, filters.status as any));
+    conditions.push(eq(negotiations.status, filters.status as unknown));
   }
   if (filters.search) {
     conditions.push(like(negotiations.title, `%${filters.search}%`));
@@ -76,11 +76,11 @@ export async function listProposals(
   }
   if (filters.status) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(bargainingProposals.status, filters.status as any));
+    conditions.push(eq(bargainingProposals.status, filters.status as unknown));
   }
   if (filters.type) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(eq(bargainingProposals.proposalType, filters.type as any));
+    conditions.push(eq(bargainingProposals.proposalType, filters.type as unknown));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

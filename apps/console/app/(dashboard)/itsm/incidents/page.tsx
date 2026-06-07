@@ -12,7 +12,7 @@ import { type Priority } from '@nzila/itsm-core'
 import { platformDb } from '@nzila/db/platform'
 import { itsmTickets } from '@nzila/db/schema'
 import { getExecutiveOrgId } from '@/lib/executive-os'
-import { and, desc, eq, or } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 

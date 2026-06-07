@@ -259,7 +259,7 @@ toast({
         <div className="space-y-3">
           <Label>When would you like to send?</Label>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <RadioGroup value={sendType} onValueChange={(v: any) => setSendType(v)}>
+          <RadioGroup value={sendType} onValueChange={(v: unknown) => setSendType(v)}>
             <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
               <RadioGroupItem value="now" id="send-now" />
               <Label

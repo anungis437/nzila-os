@@ -821,7 +821,7 @@ function CreateScheduleForm({ onClose }: CreateScheduleFormProps) {
         <Select
           value={formData.scheduleType}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onValueChange={(value: any) => setFormData({ ...formData, scheduleType: value })}
+          onValueChange={(value: unknown) => setFormData({ ...formData, scheduleType: value })}
         >
           <SelectTrigger>
             <SelectValue />
@@ -920,7 +920,7 @@ function CreateScheduleForm({ onClose }: CreateScheduleFormProps) {
         <Select
           value={formData.deliveryFormat}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onValueChange={(value: any) => setFormData({ ...formData, deliveryFormat: value })}
+          onValueChange={(value: unknown) => setFormData({ ...formData, deliveryFormat: value })}
         >
           <SelectTrigger>
             <SelectValue />

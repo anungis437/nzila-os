@@ -11,7 +11,6 @@ import 'server-only'
 
 import { platformDb } from '@nzila/db/platform'
 import { createLogger } from '@nzila/os-core'
-import type { ActorIdentity } from '@nzila/platform-contracts/control-system'
 import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
 
 const logger = createLogger('control-plane:authority:entitlements')

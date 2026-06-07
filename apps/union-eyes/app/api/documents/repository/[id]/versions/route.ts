@@ -10,10 +10,15 @@ import {
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { documents, documentVersions } from '@/db/schema/documents-schema';
+import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
+import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 
 const appendVersionSchema = z.object({
-  fileUrl: z.string().url(),
-  contentHash: z.string().min(8),
+  fileUrl: z.string().url().optional(),
+  blobPath: z.string().min(1).optional(),
+}).refine((value) => Boolean(value.blobPath || value.fileUrl), {
+  message: 'blobPath or fileUrl is required',
+  path: ['blobPath'],
 });
 
 export const POST = withOrganizationAuth(async (request, context, params?: { id: string }) => {
@@ -35,9 +40,23 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid version payload', parsed.error.flatten());
   }
 
+  let resolvedBlob;
+  try {
+    resolvedBlob = await resolveStoredBlob({
+      organizationId,
+      blobPath: parsed.data.blobPath,
+      fileUrl: parsed.data.fileUrl,
+    });
+  } catch (error) {
+    return standardErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      error instanceof Error ? error.message : 'Invalid storage payload',
+    );
+  }
+
   const doc = (
     await db
-      .select({ id: documents.id })
+      .select({ id: documents.id, metadata: documents.metadata })
       .from(documents)
       .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId)))
       .limit(1)
@@ -45,6 +64,14 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
   if (!doc) {
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+  }
+
+  const blockedReason = getDocumentMutabilityBlockReason({ metadata: doc.metadata });
+  if (blockedReason) {
+    return standardErrorResponse(
+      ErrorCode.CONFLICT,
+      `Document versioning blocked: ${blockedReason}`,
+    );
   }
 
   const latest = (
@@ -69,15 +96,15 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       organizationId,
       documentId: params.id,
       versionNo: nextVersion,
-      storageKey: parsed.data.fileUrl,
-      contentHash: parsed.data.contentHash,
+      storageKey: resolvedBlob.blobPath,
+      contentHash: resolvedBlob.contentHash,
       uploadedBy: userId,
     })
     .returning();
 
   await db
     .update(documents)
-    .set({ fileUrl: parsed.data.fileUrl, updatedAt: new Date() })
+    .set({ fileUrl: resolvedBlob.fileUrl, updatedAt: new Date() })
     .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId)));
 
   return standardSuccessResponse(createdVersion);

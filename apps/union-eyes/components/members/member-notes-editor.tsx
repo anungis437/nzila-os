@@ -291,7 +291,7 @@ export function MemberNotesEditor({
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <Select value={category} onValueChange={(value: any) => setCategory(value)}>
+                <Select value={category} onValueChange={(value: unknown) => setCategory(value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -308,7 +308,7 @@ export function MemberNotesEditor({
               <div className="space-y-2">
                 <Label htmlFor="privacy">Privacy *</Label>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <Select value={privacy} onValueChange={(value: any) => setPrivacy(value)}>
+                <Select value={privacy} onValueChange={(value: unknown) => setPrivacy(value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

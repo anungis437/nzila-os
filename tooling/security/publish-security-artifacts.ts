@@ -74,7 +74,7 @@ async function publishSecurityArtifacts(): Promise<void> {
       periodLabel,
       tag: 'security',
       additionalArtifacts: evidenceArtifacts,
-    } as any)
+    } as unknown)
     console.log('✅ Security evidence pack uploaded')
   } else {
     console.log('ℹ️  Set UPLOAD_EVIDENCE=true to upload to Azure Blob')

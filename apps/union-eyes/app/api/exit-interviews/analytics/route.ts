@@ -19,7 +19,7 @@
  */
 
 import { withApi } from '@/lib/api/framework';
-import { and, eq, gte, sql } from 'drizzle-orm';
+import { and, eq, gte } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews, exitInterviewEvents } from '@/db/schema';
 

@@ -381,7 +381,7 @@ export default async function CLCDashboardPage() {
                       <div>
                         <div className="font-medium">{federation.name}</div>
                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        <div className="text-sm text-muted-foreground">{(federation as any).province || federation.provinceTerritory || 'N/A'}</div>
+                        <div className="text-sm text-muted-foreground">{(federation as unknown).province || federation.provinceTerritory || 'N/A'}</div>
                       </div>
                     </div>
                     <Button variant="ghost" size="sm" asChild>

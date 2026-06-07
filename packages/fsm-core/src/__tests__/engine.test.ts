@@ -20,6 +20,7 @@ import type {
   TransitionContext,
   GuardResolver,
 } from '../index'
+import type { createPlatformEvent } from '@nzila/platform-events'
 
 /* ─── Test fixtures ───────────────────────────────────── */
 
@@ -600,7 +601,7 @@ describe('builders', () => {
   it('treats predicate guard without fn as a named guard at runtime', () => {
     type S = 'a' | 'b'
     const builder = transition<S>('a', 'b', 'Go')
-    ;(builder as any).guard('predicate', 'missing_fn')
+    ;(builder as unknown as { guard: (kind: 'predicate', name: string) => unknown }).guard('predicate', 'missing_fn')
     const def = builder.build()
     expect(def.guards[0]).toEqual({ kind: 'named', name: 'missing_fn' })
   })
@@ -641,7 +642,7 @@ describe('event bridge', () => {
         actorId: ctx.actorId,
         correlationId: 'corr-1',
       },
-      createEvent as any,
+      createEvent as typeof createPlatformEvent,
     )
 
     expect(events).toHaveLength(2)
@@ -672,7 +673,7 @@ describe('event bridge', () => {
         causationId: null,
         source: 'custom-source',
       },
-      createEvent as any,
+      createEvent as typeof createPlatformEvent,
     )
 
     expect(event.type).toBe('fsm.transition.recorded')

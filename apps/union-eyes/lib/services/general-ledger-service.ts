@@ -344,7 +344,7 @@ export async function generateTrialBalance(
       .values({
         organizationId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        chartOfAccountsId: null as any, // Null for combined TB
+        chartOfAccountsId: null as unknown, // Null for combined TB
         periodEndDate,
         debitTotal: totalDebitsDollars.toString(),
         creditTotal: totalCreditsDollars.toString(),

@@ -9,7 +9,7 @@
  * - Audit logging
  */
 
-import { withRLSContext, withSystemRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemRLSContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
@@ -130,9 +130,9 @@ export interface AuditLogEntry {
   sessionId?: string;
   requestId?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  oldValues?: any;
+  oldValues?: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  newValues?: any;
+  newValues?: unknown;
   changedFields?: string[];
   recordHash: string;
   previousHash?: string;
@@ -158,7 +158,7 @@ export async function getAllRoleDefinitions(): Promise<RoleDefinition[]> {
     ORDER BY role_level DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -170,7 +170,7 @@ export async function getRoleDefinitionByCode(roleCode: string): Promise<RoleDef
     WHERE role_code = ${roleCode} AND is_active = TRUE
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any || null;
+  return result[0] as unknown || null;
 }
 
 /**
@@ -183,7 +183,7 @@ export async function getRoleDefinitionsByLevel(minLevel: number): Promise<RoleD
     ORDER BY role_level DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -219,7 +219,7 @@ export async function createRoleDefinition(
     RETURNING *
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result[0] as unknown;
 }
 
 // ============================================================================
@@ -240,7 +240,7 @@ export async function getMemberRoles(
     ORDER BY role_level DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -279,7 +279,7 @@ export async function getMemberEffectivePermissions(
       AND (mr.end_date IS NULL OR mr.end_date >= CURRENT_DATE)
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result.map((row: any) => row.permission);
+  return result.map((row: unknown) => row.permission);
 }
 
 /**
@@ -397,7 +397,7 @@ export async function assignMemberRole(
     RETURNING *
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result[0] as unknown;
 }
 
 /**
@@ -416,7 +416,7 @@ export async function updateMemberRole(
   // Build UPDATE query dynamically using sql template
   let query = sql`UPDATE member_roles SET `;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const setClauses: any[] = [];
+  const setClauses: unknown[] = [];
   
   if (updates.endDate !== undefined) {
     setClauses.push(sql`end_date = ${updates.endDate}`);
@@ -448,7 +448,7 @@ export async function updateMemberRole(
   const result = await withSystemRLSContext('system: update-role-definition', async (tx) => tx.execute(query));
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result[0] as unknown;
 }
 
 /**
@@ -488,7 +488,7 @@ export async function getExpiringRoles(
     ORDER BY end_date
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -506,7 +506,7 @@ export async function getUpcomingElections(
     ORDER BY next_election_date
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -546,7 +546,7 @@ export async function getMemberPermissionExceptions(
     ORDER BY effective_date DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -614,7 +614,7 @@ export async function grantPermissionException(
     RETURNING *
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result[0] as any;
+  return result[0] as unknown;
 }
 
 /**
@@ -764,7 +764,7 @@ export async function getMemberAuditLogs(
   
   const result = await withRLSContext(async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -785,7 +785,7 @@ export async function getResourceAuditLogs(
     LIMIT ${limit}
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -803,7 +803,7 @@ export async function getDeniedAccessAttempts(
     ORDER BY timestamp DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -820,7 +820,7 @@ export async function getSensitiveActionsForReview(
     ORDER BY timestamp DESC
   `));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as unknown[];
 }
 
 /**
@@ -857,7 +857,7 @@ export async function verifyAuditLogIntegrity(
   
   const result = await withSystemRLSContext('system: verify-audit-integrity', async (tx) => tx.execute(query));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const row = result[0] as any;
+  const row = result[0] as unknown;
   
   return {
     valid: row.invalid_records === 0,

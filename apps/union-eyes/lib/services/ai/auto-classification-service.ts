@@ -46,6 +46,59 @@ export interface ClassificationResult {
   reasoning: string;
 }
 
+export interface ClassificationPolicy {
+  autoAcceptThreshold: number;
+  reviewThreshold: number;
+}
+
+export interface ClassificationQuality {
+  decision: 'auto_accept' | 'needs_review';
+  confidence: number;
+  reason: string;
+}
+
+function parseThreshold(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(parsed, 1));
+}
+
+export function getClassificationPolicy(): ClassificationPolicy {
+  const autoAcceptThreshold = parseThreshold(
+    process.env.UE_AUTO_CLASSIFICATION_ACCEPT_THRESHOLD,
+    0.9,
+  );
+  const reviewThreshold = parseThreshold(
+    process.env.UE_AUTO_CLASSIFICATION_REVIEW_THRESHOLD,
+    0.65,
+  );
+
+  return {
+    autoAcceptThreshold: Math.max(autoAcceptThreshold, reviewThreshold),
+    reviewThreshold,
+  };
+}
+
+export function evaluateClassificationQuality(
+  result: Pick<ClassificationResult, 'confidence'>,
+  policy: ClassificationPolicy = getClassificationPolicy(),
+): ClassificationQuality {
+  if (result.confidence >= policy.autoAcceptThreshold) {
+    return {
+      decision: 'auto_accept',
+      confidence: result.confidence,
+      reason: `Confidence ${result.confidence.toFixed(3)} met auto-accept threshold ${policy.autoAcceptThreshold.toFixed(3)}`,
+    };
+  }
+
+  return {
+    decision: 'needs_review',
+    confidence: result.confidence,
+    reason: `Confidence ${result.confidence.toFixed(3)} below auto-accept threshold ${policy.autoAcceptThreshold.toFixed(3)}`,
+  };
+}
+
 export interface TagGenerationResult {
   tags: string[];
   confidence: number;
@@ -74,7 +127,16 @@ export async function classifyClause(
     clauseNumber?: string;
     jurisdiction?: string;
     sector?: string;
-  }
+  },
+  options?: {
+    onLowConfidence?: (payload: {
+      confidence: number;
+      threshold: number;
+      clauseType: ClauseType;
+      reasoning: string;
+    }) => Promise<void> | void;
+    policy?: ClassificationPolicy;
+  },
 ): Promise<ClassificationResult> {
   const systemPrompt = `You are an expert Canadian labour law classifier. 
 Classify the following clause into ONE of these types:
@@ -118,12 +180,24 @@ ${clauseContent}`
 
     const result = response.data as Record<string, unknown>;
     
-    return {
+    const classification: ClassificationResult = {
       clauseType: (result.clauseType as ClauseType) || 'other',
       confidence: (result.confidence as number) || 0.5,
       alternativeTypes: (result.alternativeTypes as { type: ClauseType; confidence: number }[]) || [],
       reasoning: (result.reasoning as string) || 'Classification based on content analysis',
     };
+
+    const policy = options?.policy ?? getClassificationPolicy();
+    if (classification.confidence < policy.reviewThreshold) {
+      await options?.onLowConfidence?.({
+        confidence: classification.confidence,
+        threshold: policy.reviewThreshold,
+        clauseType: classification.clauseType,
+        reasoning: classification.reasoning,
+      });
+    }
+
+    return classification;
   } catch (error) {
     logger.error('Error classifying clause', { error });
     return {

@@ -150,7 +150,7 @@ export function ClauseSharingControls({
           <div className="space-y-3">
             <Label className="text-base font-semibold">Sharing Level</Label>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <RadioGroup value={sharingLevel} onValueChange={(value: any) => setSharingLevel(value)}>
+            <RadioGroup value={sharingLevel} onValueChange={(value: unknown) => setSharingLevel(value)}>
               <div className="space-y-3">
                 {SHARING_LEVELS.map((level) => {
                   const Icon = level.icon;

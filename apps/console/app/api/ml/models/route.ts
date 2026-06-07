@@ -3,7 +3,7 @@
  * GET /api/ml/models
  *
  * Returns all ML models (all statuses) for a given orgId.
- * RBAC: any active entity member.
+ * RBAC: unknown active entity member.
  *
  * Query params:
  *   orgId    required

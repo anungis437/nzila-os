@@ -41,7 +41,7 @@ interface SmsTemplateEditorProps {
     category?: string;
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSave?: (template: any) => void;
+  onSave?: (template: unknown) => void;
   onCancel?: () => void;
 }
 

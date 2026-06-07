@@ -144,12 +144,12 @@ export async function listMembers(
 
     if (filters.status && filters.status.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(organizationMembers.status, filters.status as any));
+      conditions.push(inArray(organizationMembers.status, filters.status as unknown));
     }
 
     if (filters.role && filters.role.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(organizationMembers.role, filters.role as any));
+      conditions.push(inArray(organizationMembers.role, filters.role as unknown));
     }
 
     if (filters.department) {
@@ -354,7 +354,7 @@ export async function bulkUpdateMemberStatus(
       .update(organizationMembers)
       .set({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        status: status as any,
+        status: status as unknown,
         updatedAt: new Date(),
       })
       .where(inArray(organizationMembers.id, memberIds));
@@ -391,7 +391,7 @@ export async function bulkUpdateMemberRole(
       .update(organizationMembers)
       .set({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        role: role as any,
+        role: role as unknown,
         updatedAt: new Date(),
       })
       .where(inArray(organizationMembers.id, memberIds));
@@ -458,12 +458,12 @@ export async function searchMembers(
 
     if (filters?.status && filters.status.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(organizationMembers.status, filters.status as any));
+      conditions.push(inArray(organizationMembers.status, filters.status as unknown));
     }
 
     if (filters?.role && filters.role.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(organizationMembers.role, filters.role as any));
+      conditions.push(inArray(organizationMembers.role, filters.role as unknown));
     }
 
     if (filters?.department) {
@@ -660,7 +660,7 @@ export async function getMembersByRole(
         and(
           eq(organizationMembers.organizationId, organizationId),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq(organizationMembers.role, role as any),
+          eq(organizationMembers.role, role as unknown),
           sql`${organizationMembers.deletedAt} IS NULL`
         )
       );

@@ -132,7 +132,7 @@ async function fetchQueuedMessages() {
  * Process a batch of messages
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function processBatch(messages: any[]): Promise<ProcessingStats> {
+async function processBatch(messages: unknown[]): Promise<ProcessingStats> {
   const stats: ProcessingStats = {
     processed: 0,
     sent: 0,
@@ -238,7 +238,7 @@ async function processBatch(messages: any[]): Promise<ProcessingStats> {
  * Check if message should be skipped (quiet hours, opt-out, etc.)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function shouldSkipMessage(message: any): Promise<boolean> {
+async function shouldSkipMessage(message: unknown): Promise<boolean> {
   if (!message.recipientId) return false;
 
   try {
@@ -328,7 +328,7 @@ async function updateMessageStatus(
   externalId: string | null = null
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updates: any = {
+  const updates: unknown = {
     status,
     updatedAt: new Date(),
   };

@@ -108,7 +108,7 @@ export async function createSignatureWorkflow(
         name: request.documentName,
         description: request.subject,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        provider: provider.name as any,
+        provider: provider.name as unknown,
         externalEnvelopeId: envelope.id,
         totalSigners: request.signers.length,
         status: "sent",
@@ -268,7 +268,7 @@ export async function getWorkflowStatus(
           .update(signatureWorkflows)
           .set({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            status: envelope.status as any,
+            status: envelope.status as unknown,
             completedAt:
               envelope.status === "completed" ? envelope.completedAt : undefined,
           })
@@ -359,7 +359,7 @@ export async function handleSignerCompleted(
       subject: "Signature Received - Thank You",
       title: "Signature Confirmed",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      body: `Thank you for signing ${(workflow.workflowData as any)?.documentName || workflow.name}. Your signature has been recorded.`,
+      body: `Thank you for signing ${(workflow.workflowData as unknown)?.documentName || workflow.name}. Your signature has been recorded.`,
       metadata: {
         type: "signature_completed",
         workflowId,
@@ -423,7 +423,7 @@ async function completeWorkflow(workflowId: string): Promise<void> {
         completedAt: new Date(),
         workflowData: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...(workflow.workflowData as any || {}),
+          ...(workflow.workflowData as unknown || {}),
           signedDocumentHash,
         },
       })
@@ -433,14 +433,14 @@ async function completeWorkflow(workflowId: string): Promise<void> {
     await db.insert(signatureVerification).values({
       workflowId,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      signerId: (workflow as any).lastSignerId || workflowId,
+      signerId: (workflow as unknown).lastSignerId || workflowId,
       verificationMethod: "provider_hash",
       isVerified: true,
       signatureHash: signedDocumentHash,
       verificationResult: {
         provider: workflow.provider,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        originalHash: (workflow.workflowData as any)?.documentHash,
+        originalHash: (workflow.workflowData as unknown)?.documentHash,
         signedHash: signedDocumentHash,
       },
     });
@@ -463,7 +463,7 @@ async function completeWorkflow(workflowId: string): Promise<void> {
         organizationId: workflow.organizationId,
         documentBuffer: signedDocument,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        documentName: `${(workflow.workflowData as any)?.documentName || workflow.name}_signed.pdf`,
+        documentName: `${(workflow.workflowData as unknown)?.documentName || workflow.name}_signed.pdf`,
         documentType: "signed_contract",
         contentType: "application/pdf",
         metadata: {
@@ -479,7 +479,7 @@ async function completeWorkflow(workflowId: string): Promise<void> {
         .set({
           workflowData: {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ...(workflow.workflowData as any || {}),
+            ...(workflow.workflowData as unknown || {}),
             storageUrl: storageResult.url,
             storageKey: storageResult.key,
           },
@@ -507,10 +507,10 @@ async function completeWorkflow(workflowId: string): Promise<void> {
       type: "email",
       priority: "high",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      subject: `Signature Workflow Completed: ${(workflow.workflowData as any)?.subject || workflow.description}`,
+      subject: `Signature Workflow Completed: ${(workflow.workflowData as unknown)?.subject || workflow.description}`,
       title: "All Signatures Received",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      body: `All parties have signed ${(workflow.workflowData as any)?.documentName || workflow.name}. The signed document is now available.`,
+      body: `All parties have signed ${(workflow.workflowData as unknown)?.documentName || workflow.name}. The signed document is now available.`,
       actionUrl: `/documents/${workflow.documentId}`,
       actionLabel: "View Document",
       metadata: {
@@ -587,10 +587,10 @@ export async function voidWorkflow(
           type: "email",
           priority: "normal",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          subject: `Signature Request Cancelled: ${(workflow.workflowData as any)?.subject || workflow.description}`,
+          subject: `Signature Request Cancelled: ${(workflow.workflowData as unknown)?.subject || workflow.description}`,
           title: "Signature Request Cancelled",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          body: `The signature request for ${(workflow.workflowData as any)?.documentName || workflow.name} has been cancelled. Reason: ${reason}`,
+          body: `The signature request for ${(workflow.workflowData as unknown)?.documentName || workflow.name} has been cancelled. Reason: ${reason}`,
           metadata: {
             type: "workflow_voided",
             workflowId,
@@ -648,10 +648,10 @@ export async function sendSignerReminders(workflowId: string, userId: string): P
           type: "email",
           priority: "high",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          subject: `Reminder: Signature Required - ${(workflow.workflowData as any)?.subject || workflow.description}`,
+          subject: `Reminder: Signature Required - ${(workflow.workflowData as unknown)?.subject || workflow.description}`,
           title: "Signature Reminder",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          body: `This is a reminder to sign ${(workflow.workflowData as any)?.documentName || workflow.name}`,
+          body: `This is a reminder to sign ${(workflow.workflowData as unknown)?.documentName || workflow.name}`,
           actionUrl: signer.signingUrl || undefined,
           actionLabel: "Sign Now",
           metadata: {

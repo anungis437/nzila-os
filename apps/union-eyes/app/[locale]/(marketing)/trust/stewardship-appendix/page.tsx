@@ -165,29 +165,6 @@ export async function generateMetadata({
   };
 }
 
-const provisions = [
-  {
-    icon: Vote,
-    title: 'Veto on change of control',
-    body: 'A reserved special share gives an elected labour council authority to block any sale, merger, or transfer of controlling interest without affirmative labour consent.',
-  },
-  {
-    icon: Shield,
-    title: 'Mission lock',
-    body: 'Changes to the company mission require reserved-share consent, protecting worker-first purpose against investor or executive drift.',
-  },
-  {
-    icon: Users,
-    title: 'Labour-elected council seats',
-    body: 'Reserved board seats are held by labour-elected representatives with full voting rights on strategic decisions.',
-  },
-  {
-    icon: FileText,
-    title: 'Reserved matters',
-    body: 'Critical decisions such as major pricing changes, data-sharing policy, and data residency shifts require reserved-share approval.',
-  },
-];
-
 export default async function StewardshipAppendixPage({
   params,
 }: {

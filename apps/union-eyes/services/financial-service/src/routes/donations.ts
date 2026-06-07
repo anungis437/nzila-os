@@ -26,8 +26,56 @@ type StripeWebhookEventLike = {
   };
 };
 
+type FundRow = {
+  id: string;
+  fund_name: string;
+  tenant_id: string;
+  status: string;
+  current_balance: string;
+  target_amount: string;
+};
+
+type DonationInsertRow = {
+  id: string;
+};
+
+type CampaignRow = {
+  id: string;
+  fund_name: string;
+  description: string | null;
+  target_amount: string;
+  current_balance: string;
+  strike_start_date: string | null;
+  strike_end_date: string | null;
+  status: string;
+  donor_count: string;
+  total_donations: string;
+};
+
+type DonationStatusRow = {
+  id: string;
+  amount: string;
+  donor_name: string | null;
+  is_anonymous: boolean;
+  status: string;
+  transaction_id: string | null;
+  created_at: string;
+  fund_name: string;
+};
+
 // Initialize Stripe via platform wrapper
 const stripe = getStripeClient();
+
+function toRows<T extends Record<string, unknown>>(result: unknown): T[] {
+  if (Array.isArray(result)) {
+    return result as T[];
+  }
+  if (typeof result === 'object' && result !== null && 'rows' in result) {
+    const rows = (result as { rows?: unknown }).rows;
+    return Array.isArray(rows) ? (rows as T[]) : [];
+  }
+  return [];
+}
 
 /** Validates a route :param is a UUID before it reaches any query. */
 const uuidParam = z.string().uuid();
@@ -53,7 +101,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Verify strike fund exists and is active
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fundResult: any = await db.execute(sql`
+    const fundResult: unknown = await db.execute(sql`
       SELECT id, fund_name, tenant_id, status, current_balance, target_amount
       FROM strike_funds
       WHERE id = ${validatedData.fundId}
@@ -61,7 +109,7 @@ router.post('/', async (req: Request, res: Response) => {
       LIMIT 1
     `);
 
-    const funds = Array.isArray(fundResult) ? fundResult : (fundResult.rows || fundResult);
+    const funds = toRows<FundRow>(fundResult);
 
     if (funds.length === 0) {
       return res.status(404).json({
@@ -95,7 +143,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Create pending donation record in database
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const donationResult: any = await db.execute(sql`
+    const donationResult: unknown = await db.execute(sql`
       INSERT INTO public_donations (
         tenant_id, strike_fund_id, amount, donor_name, donor_email,
         is_anonymous, payment_provider, payment_intent_id,
@@ -109,7 +157,7 @@ router.post('/', async (req: Request, res: Response) => {
       RETURNING *
     `);
 
-    const donations = Array.isArray(donationResult) ? donationResult : (donationResult.rows || donationResult);
+    const donations = toRows<DonationInsertRow>(donationResult);
 
     res.status(201).json({
       success: true,
@@ -223,7 +271,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
     const fundId = uuidParam.parse(req.params.fundId);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fundResult: any = await db.execute(sql`
+    const fundResult: unknown = await db.execute(sql`
       SELECT 
         sf.id,
         sf.fund_name,
@@ -245,7 +293,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
     `);
 
     // postgres-js with drizzle returns array directly, not wrapped in .rows
-    const rows = Array.isArray(fundResult) ? fundResult : (fundResult.rows || fundResult);
+    const rows = toRows<CampaignRow>(fundResult);
 
     if (rows.length === 0) {
       return res.status(404).json({
@@ -258,7 +306,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
 
     // Get recent donations (non-anonymous only)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const recentDonationsResult: any = await db.execute(sql`
+    const recentDonationsResult: unknown = await db.execute(sql`
       SELECT 
         donor_name,
         amount,
@@ -272,7 +320,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
       LIMIT 10
     `);
 
-    const recentDonations = Array.isArray(recentDonationsResult) ? recentDonationsResult : (recentDonationsResult.rows || recentDonationsResult);
+    const recentDonations = toRows<Record<string, unknown>>(recentDonationsResult);
 
     res.json({
       success: true,
@@ -308,7 +356,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
     const donationId = uuidParam.parse(req.params.donationId);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await db.execute(sql`
+    const result: unknown = await db.execute(sql`
       SELECT 
         pd.id,
         pd.amount,
@@ -324,7 +372,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
       LIMIT 1
     `);
 
-    const donations = Array.isArray(result) ? result : (result.rows || result);
+    const donations = toRows<DonationStatusRow>(result);
 
     if (donations.length === 0) {
       return res.status(404).json({

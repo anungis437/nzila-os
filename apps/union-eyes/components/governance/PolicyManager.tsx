@@ -34,7 +34,7 @@ export default function PolicyManager({ organizationId, canManage = false }: Pol
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setPolicies(items.map((p: any, i: number) => ({
+        setPolicies(items.map((p: unknown, i: number) => ({
           id: String(p.id ?? i + 1),
           title: p.title ?? p.name ?? '',
           category: p.category ?? 'hr',

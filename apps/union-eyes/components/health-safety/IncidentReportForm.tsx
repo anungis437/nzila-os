@@ -124,7 +124,7 @@ export function IncidentReportForm({
 
   const form = useForm<IncidentFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(incidentSchema) as any,
+    resolver: zodResolver(incidentSchema) as unknown,
     defaultValues: initialData || {
       incidentTime: "",
       location: "",

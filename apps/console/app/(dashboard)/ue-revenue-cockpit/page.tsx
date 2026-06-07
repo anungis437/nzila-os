@@ -24,7 +24,6 @@ import {
   unionMap,
   sequences,
   type TargetOrganisation,
-  type SequenceInstance,
 } from '@nzila/platform-growth-os'
 import { seedDeals } from '@nzila/deal-engine/seed'
 import type { Deal } from '@nzila/deal-engine'

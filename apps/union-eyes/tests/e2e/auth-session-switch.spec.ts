@@ -1,8 +1,8 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type APIRequestContext } from '@playwright/test'
 import { ensureServerReady, loginAsTestUser, seedOrVerifyTestState, cleanupDatabaseConnections } from './_helpers'
 import { UE_TEST_USERS } from '../fixtures/test-users'
 
-async function getRole(request: Parameters<typeof test>[0] extends never ? never : any): Promise<string> {
+async function getRole(request: APIRequestContext): Promise<string> {
   const response = await request.get('/api/auth/user-role')
   expect(response.status()).toBe(200)
 

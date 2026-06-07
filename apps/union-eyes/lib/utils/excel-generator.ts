@@ -96,7 +96,7 @@ export async function generateExcel(options: ExcelOptions): Promise<Buffer> {
 
   // Add data rows
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data.forEach((row: any, index) => {
+  data.forEach((row: unknown, index) => {
     const excelRow = worksheet.addRow(row);
 
     // Apply body font

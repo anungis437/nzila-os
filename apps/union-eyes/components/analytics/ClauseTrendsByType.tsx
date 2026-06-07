@@ -55,11 +55,11 @@ export function ClauseTrendsByType({
       const data = await response.json();
       
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const total = data.distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
+      const total = data.distribution?.reduce((sum: number, item: unknown) => sum + item.count, 0) || 0;
       setTotalClauses(total);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const statsWithPercentage = data.distribution?.map((item: any) => ({
+      const statsWithPercentage = data.distribution?.map((item: unknown) => ({
         ...item,
         percentage: total > 0 ? (item.count / total) * 100 : 0,
       })) || [];

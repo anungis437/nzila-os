@@ -103,7 +103,7 @@ export async function getOrgMembership(orgId: string, userId: string) {
 export async function requireOrgAccess(
   orgId: string,
   options?: {
-    /** Minimum org role required. Default: any active member. */
+    /** Minimum org role required. Default: unknown active member. */
     minRole?: 'org_admin' | 'org_secretary'
     /** Platform roles that bypass org membership checks. */
     platformBypass?: NzilaRole[]

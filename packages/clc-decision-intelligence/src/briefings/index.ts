@@ -47,8 +47,8 @@ Given a MovementRiskPosture object (posture, watchAreas, risingSectors, issueClu
 Use authoritative, measured language appropriate for CLC executive leadership.`,
     requiredOutputFields: ['summary', 'keyTakeaway', 'recommendedNextStep'],
     anonymizationRules: STANDARD_ANONYMIZATION,
-    buildInput: (data: { riskPosture: MovementRiskPosture }) => ({
-      riskPosture: data.riskPosture,
+    buildInput: (data: unknown) => ({
+      riskPosture: (data as { riskPosture: MovementRiskPosture }).riskPosture,
     }),
   },
   {
@@ -64,8 +64,10 @@ Given a list of CorrelatedPattern objects of type 'cross_affiliate_issue_cluster
 Never name individual affiliates. Use aggregate sector references only.`,
     requiredOutputFields: ['clusters', 'movementSignificance', 'recommendedActions'],
     anonymizationRules: STANDARD_ANONYMIZATION,
-    buildInput: (data: { patterns: CorrelatedPattern[] }) => ({
-      patterns: data.patterns.filter((p) => p.patternType === 'cross_affiliate_issue_cluster'),
+    buildInput: (data: unknown) => ({
+      patterns: (data as { patterns: CorrelatedPattern[] }).patterns.filter(
+        (p) => p.patternType === 'cross_affiliate_issue_cluster',
+      ),
     }),
   },
   {
@@ -81,9 +83,13 @@ Given a list of DecisionRecommendations with their linked pattern IDs, produce a
 Be specific — reference the actual signal data, not generic advice.`,
     requiredOutputFields: ['urgentActions', 'preparatoryActions', 'monitoringItems', 'timeline'],
     anonymizationRules: STANDARD_ANONYMIZATION,
-    buildInput: (data: { recommendations: DecisionRecommendation[]; patterns: CorrelatedPattern[] }) => ({
-      recommendations: data.recommendations,
-      patternSummaries: data.patterns.map((p) => ({ id: p.id, title: p.title, summary: p.summary })),
+    buildInput: (data: unknown) => ({
+      recommendations: (data as { recommendations: DecisionRecommendation[] }).recommendations,
+      patternSummaries: (data as { patterns: CorrelatedPattern[] }).patterns.map((p) => ({
+        id: p.id,
+        title: p.title,
+        summary: p.summary,
+      })),
     }),
   },
   {
@@ -99,8 +105,8 @@ Given a BargainingWatch object, produce a pre-bargaining intelligence brief that
 This is time-sensitive intelligence — be direct and actionable.`,
     requiredOutputFields: ['sectorAnalysis', 'preparationSteps', 'signalAssessment', 'urgency'],
     anonymizationRules: STANDARD_ANONYMIZATION,
-    buildInput: (data: { bargainingWatch: BargainingWatch }) => ({
-      bargainingWatch: data.bargainingWatch,
+    buildInput: (data: unknown) => ({
+      bargainingWatch: (data as { bargainingWatch: BargainingWatch }).bargainingWatch,
     }),
   },
   {
@@ -116,8 +122,10 @@ Given a list of SectorDivergence objects, explain the divergence patterns:
 Use precise comparative language. Avoid value judgments about specific sectors.`,
     requiredOutputFields: ['divergentSectors', 'driversAnalysis', 'riskOpportunityAssessment'],
     anonymizationRules: STANDARD_ANONYMIZATION,
-    buildInput: (data: { divergence: SectorDivergence[] }) => ({
-      sectorDivergence: data.divergence.filter((d) => d.divergenceScore > 0.3),
+    buildInput: (data: unknown) => ({
+      sectorDivergence: (data as { divergence: SectorDivergence[] }).divergence.filter(
+        (d) => d.divergenceScore > 0.3,
+      ),
     }),
   },
   {
@@ -133,8 +141,8 @@ Given a set of ExecutiveBriefingCards, compose a structured briefing note that:
 Write in formal briefing-note style. Be concise — total length should be 200-400 words.`,
     requiredOutputFields: ['postureStatement', 'attentionItems', 'lookingAhead'],
     anonymizationRules: STANDARD_ANONYMIZATION,
-    buildInput: (data: { cards: ExecutiveBriefingCard[] }) => ({
-      briefingCards: data.cards.slice(0, 10), // Limit to top 10 for prompt budget
+    buildInput: (data: unknown) => ({
+      briefingCards: (data as { cards: ExecutiveBriefingCard[] }).cards.slice(0, 10), // Limit to top 10 for prompt budget
     }),
   },
 ];

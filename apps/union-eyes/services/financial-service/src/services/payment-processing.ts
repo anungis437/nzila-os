@@ -34,6 +34,25 @@ export type PaymentStatus =
 // Stripe payment method types
 export type StripePaymentMethod = 'card' | 'bank_account' | 'us_bank_account';
 
+type StripeEventObjectLike = {
+  id?: string;
+  customer?: string;
+  amount?: number;
+  status?: string;
+  payment_intent?: string;
+  metadata?: Record<string, string>;
+};
+
+type StripePaymentIntentLike = {
+  id: string;
+  amount: number;
+  metadata: Record<string, string>;
+};
+
+type StripeChargeLike = {
+  payment_intent: string;
+};
+
 /**
  * DUES PAYMENT PROCESSING
  */
@@ -130,8 +149,7 @@ export async function confirmDuesPayment(
         paymentDate: new Date(),
         stripePaymentIntentId: paymentIntentId,
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
       .where(and(
         eq(schema.duesTransactions.id, transactionId),
         eq(schema.duesTransactions.organizationId, organizationId)
@@ -206,9 +224,7 @@ export async function createStipendPayout(
         throw new Error(`Disbursement ${disbursementId} not found`);
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const metadata = (disbursement as any).metadata || {};
-      const connectedAccountId: string | undefined = metadata.stripeConnectedAccountId;
+      const connectedAccountId: string | undefined = undefined;
 
       if (connectedAccountId) {
         // Use Stripe Connect Transfer to connected account
@@ -271,8 +287,7 @@ export async function createStipendPayout(
         paymentReference: transactionId,
         paymentMethod: process.env.STRIPE_SECRET_KEY ? 'stripe_connect' : 'pending',
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Partial<typeof schema.stipendDisbursements.$inferInsert>)
       .where(and(
         eq(schema.stipendDisbursements.id, disbursementId),
         eq(schema.stipendDisbursements.tenantId, organizationId)
@@ -349,11 +364,10 @@ export async function batchProcessStipendPayouts(
       await db.update(schema.stipendDisbursements)
         .set({
           status: 'paid',
-          transactionId,
-          paidAt: new Date(),
+          paymentReference: transactionId,
+          paymentDate: new Date(),
           updatedAt: new Date(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+        } as unknown as Partial<typeof schema.stipendDisbursements.$inferInsert>)
         .where(eq(schema.stipendDisbursements.id, disbursementId));
 
       results.push({
@@ -491,7 +505,7 @@ export async function confirmDonationPayment(
     // Create donation record
     const [donation] = await db.insert(schema.donations)
       .values({
-        organizationId: organizationId,
+        tenantId: organizationId,
         strikeFundId: metadata.strikeFundId,
         amount: amount.toString(),
         donorName: metadata.donorName || 'Anonymous',
@@ -502,8 +516,7 @@ export async function confirmDonationPayment(
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as typeof schema.donations.$inferInsert)
       .returning({ id: schema.donations.id });
 
     return donation.id;
@@ -523,7 +536,7 @@ export interface StripeWebhookEvent {
   type: string;
   data: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    object: any;
+    object: unknown;
   };
 }
 
@@ -564,16 +577,16 @@ export async function processStripeWebhook(
     }
 
     // Record event before processing (pre-insert pattern)
-    const eventOrgId = event.data?.object?.metadata?.organizationId
-      || event.data?.object?.metadata?.tenantId;
+    const eventObject = event.data.object as StripeEventObjectLike;
+    const eventOrgId = eventObject.metadata?.organizationId || eventObject.metadata?.tenantId;
      
     await db.insert(schema.stripeWebhookEvents).values({
       stripeEventId: event.id,
       eventType: event.type,
       organizationId: eventOrgId || '00000000-0000-0000-0000-000000000000',
-      stripePaymentIntentId: event.data?.object?.id || null,
-      stripeCustomerId: event.data?.object?.customer || null,
-      eventData: event.data?.object || {},
+      stripePaymentIntentId: eventObject.id || null,
+      stripeCustomerId: eventObject.customer || null,
+      eventData: eventObject || {},
       processed: false,
     } as unknown as typeof schema.stripeWebhookEvents.$inferInsert);
   } catch (dedupErr) {
@@ -621,8 +634,9 @@ export async function processStripeWebhook(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handlePaymentIntentSucceeded(paymentIntent: any): Promise<void> {
-  const metadata = paymentIntent.metadata;
+async function handlePaymentIntentSucceeded(paymentIntent: unknown): Promise<void> {
+  const intent = paymentIntent as StripePaymentIntentLike;
+  const metadata = intent.metadata;
   const type = metadata.type;
 
   if (type === 'dues_payment') {
@@ -632,15 +646,14 @@ async function handlePaymentIntentSucceeded(paymentIntent: any): Promise<void> {
         status: 'paid',
         paymentMethod: 'stripe',
         paymentDate: new Date(),
-        stripePaymentIntentId: paymentIntent.id,
+        stripePaymentIntentId: intent.id,
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
       .where(eq(schema.duesTransactions.id, metadata.transactionId));
 
   } else if (type === 'donation') {
     // Create or update donation record
-    const amount = paymentIntent.amount / 100;
+    const amount = intent.amount / 100;
     
     const organizationId = metadata.organizationId || metadata.tenantId;
     await db.insert(schema.donations)
@@ -652,50 +665,48 @@ async function handlePaymentIntentSucceeded(paymentIntent: any): Promise<void> {
         donorEmail: metadata.donorEmail || null,
         isAnonymous: metadata.isAnonymous === 'true',
         message: metadata.message || null,
-        stripePaymentIntentId: paymentIntent.id,
+        stripePaymentIntentId: intent.id,
         status: 'completed',
         createdAt: new Date().toISOString(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      } as unknown as typeof schema.donations.$inferInsert);
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handlePaymentIntentFailed(paymentIntent: any): Promise<void> {
-  const metadata = paymentIntent.metadata;
+async function handlePaymentIntentFailed(paymentIntent: unknown): Promise<void> {
+  const intent = paymentIntent as StripePaymentIntentLike;
+  const metadata = intent.metadata;
   const type = metadata.type;
 
   if (type === 'dues_payment') {
     await db.update(schema.duesTransactions)
       .set({
         status: 'failed',
-        stripePaymentIntentId: paymentIntent.id,
+        stripePaymentIntentId: intent.id,
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
       .where(eq(schema.duesTransactions.id, metadata.transactionId));
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleChargeRefunded(charge: any): Promise<void> {
-  const paymentIntentId = charge.payment_intent;
+async function handleChargeRefunded(charge: unknown): Promise<void> {
+  const chargeData = charge as StripeChargeLike;
+  const paymentIntentId = chargeData.payment_intent;
 
   // Update relevant records to refunded status
   await db.update(schema.duesTransactions)
     .set({
       status: 'refunded',
       updatedAt: new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    } as unknown as Partial<typeof schema.duesTransactions.$inferInsert>)
     .where(eq(schema.duesTransactions.paymentReference, paymentIntentId));
 
   await db.update(schema.donations)
     .set({
       status: 'refunded',
       updatedAt: new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    } as unknown as Partial<typeof schema.donations.$inferInsert>)
     .where(eq(schema.donations.stripePaymentIntentId, paymentIntentId));
 }
 

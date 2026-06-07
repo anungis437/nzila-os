@@ -19,7 +19,6 @@ import {
   SECTIONS,
   QUESTIONS_BY_SECTION,
   ALL_QUESTIONS,
-  TOTAL_SCORED_QUESTIONS,
   METADATA_QUESTIONS,
   QUESTION_BANK_VERSION,
   CTX_PRIMARY_CHALLENGE_MAX_LENGTH,
@@ -221,7 +220,7 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
     } finally {
       setHydrated(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // ── Persist on every meaningful change ────────────────────────────────────

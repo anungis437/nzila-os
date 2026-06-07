@@ -139,12 +139,12 @@ export class CampaignService {
 
     if (status) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      query = query.where(eq(campaigns.status, status as any));
+      query = query.where(eq(campaigns.status, status as unknown));
     }
 
     if (channel) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      query = query.where(eq(campaigns.channel, channel as any));
+      query = query.where(eq(campaigns.channel, channel as unknown));
     }
 
     const campaignsList = await query
@@ -374,7 +374,7 @@ export class CampaignService {
           completedAt: new Date(),
           stats: {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ...(campaign.stats as any),
+            ...(campaign.stats as unknown),
             queued,
           },
           updatedBy: userId,
@@ -602,7 +602,7 @@ export class CampaignService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const stats = campaign.stats as any;
+    const stats = campaign.stats as unknown;
     const total = stats.sent || 0;
 
     return {

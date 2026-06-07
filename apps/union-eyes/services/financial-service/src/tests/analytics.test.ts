@@ -52,7 +52,7 @@ describe.skipIf(!HAS_DB)('Analytics Endpoints - Comprehensive Tests (requires DA
       email: 'donor@test.com',
       status: 'active',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any).returning();
+    } as unknown).returning();
     testMemberId = memberResult[0].id;
     
     // Create test strike funds
@@ -79,7 +79,7 @@ describe.skipIf(!HAS_DB)('Analytics Endpoints - Comprehensive Tests (requires DA
         createdBy: TEST_USER_ID,
       },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ] as any).returning();
+    ] as unknown).returning();
     testFundId1 = funds[0].id;
     testFundId2 = funds[1].id;
     
@@ -135,7 +135,7 @@ describe.skipIf(!HAS_DB)('Analytics Endpoints - Comprehensive Tests (requires DA
     }
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await db.insert(stipendDisbursements).values(stipendData as any);
+    await db.insert(stipendDisbursements).values(stipendData as unknown);
 });
   
   afterAll(async () => {
@@ -329,7 +329,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
       
       // All returned alerts should be critical
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      response.body.forEach((alert: any) => {
+      response.body.forEach((alert: unknown) => {
         expect(alert.severity).toBe('critical');
       });
     });

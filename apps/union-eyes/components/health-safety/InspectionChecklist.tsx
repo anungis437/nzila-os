@@ -259,7 +259,7 @@ export function InspectionChecklist({
                     value={item.status || ""}
                     onValueChange={(value) =>
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      updateItem(item.id, { status: value as any })
+                      updateItem(item.id, { status: value as unknown })
                     }
                   >
                     <div className="flex gap-4">

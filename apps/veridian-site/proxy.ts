@@ -23,7 +23,6 @@ export function proxy(request: NextRequest): NextResponse {
     return response
   } catch {
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
       return NextResponse.next()
     }
     return NextResponse.json(

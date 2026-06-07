@@ -49,8 +49,8 @@ interface Vote {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function mapSessions(apiSessions: any[]): Vote[] {
-  return apiSessions.map((s: any) => ({
+function mapSessions(apiSessions: unknown[]): Vote[] {
+  return apiSessions.map((s: unknown) => ({
     id: s.id,
     title: s.title,
     description: s.description || '',
@@ -59,7 +59,7 @@ function mapSessions(apiSessions: any[]): Vote[] {
     status: (s.status === 'draft' ? 'upcoming' : s.status === 'completed' ? 'closed' : s.status) as VoteStatus,
     startDate: s.startTime || s.start_time || '',
     endDate: s.endTime || s.end_time || '',
-    options: (s.options || []).map((o: any) => ({
+    options: (s.options || []).map((o: unknown) => ({
       id: o.id,
       label: o.text || o.label || '',
       votes: o.votes || 0,

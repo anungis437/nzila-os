@@ -78,7 +78,7 @@ interface Document {
   folder_path: string | null;
   ocr_text: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: any;
+  metadata: unknown;
 }
 
 interface DocumentBrowserProps {

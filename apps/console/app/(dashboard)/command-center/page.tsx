@@ -298,7 +298,6 @@ export default async function CommandCenterPage() {
   const liveClients = clientList.filter(c => c.onboardingStage === 'live').length
   const atRiskClients = clientList.filter(c => c.health === 'at_risk' || c.health === 'churned').length
   const totalContractValue = clientList.reduce((sum, c) => sum + parseInt(c.contractValue ?? '0', 10), 0)
-  // eslint-disable-next-line react-hooks/purity -- server component, Date.now() safe per-request
   const nowMs = Date.now()
   const renewalNext90 = clientList.filter(c => {
     if (!c.renewalDate) return false

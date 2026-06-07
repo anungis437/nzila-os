@@ -936,21 +936,21 @@ describe('Governed Machine Validation — structural soundness', () => {
   it('governed quote machine passes validateMachine', () => {
     const governed = createGovernedQuoteMachine(quoteMachine)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errors = validateMachine(governed as any)
+    const errors = validateMachine(governed as unknown)
     expect(errors).toEqual([])
   })
 
   it('governed order machine passes validateMachine', () => {
     const governed = createGovernedOrderMachine(orderMachine)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errors = validateMachine(governed as any)
+    const errors = validateMachine(governed as unknown)
     expect(errors).toEqual([])
   })
 
   it('governed invoice machine passes validateMachine', () => {
     const governed = createGovernedInvoiceMachine(invoiceMachine)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errors = validateMachine(governed as any)
+    const errors = validateMachine(governed as unknown)
     expect(errors).toEqual([])
   })
 

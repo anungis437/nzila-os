@@ -20,7 +20,7 @@ import { logger } from '@/lib/logger';
 
 // Optional import - will be checked at runtime
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let admin: any = null;
+let admin: unknown = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   admin = require('firebase-admin');
@@ -41,13 +41,13 @@ export interface FCMMessage {
   };
   data?: Record<string, string>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  android?: any; // AndroidConfig
+  android?: unknown; // AndroidConfig
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  apns?: any; // ApnsConfig
+  apns?: unknown; // ApnsConfig
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  webpush?: any; // WebpushConfig
+  webpush?: unknown; // WebpushConfig
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fcmOptions?: any; // FcmOptions
+  fcmOptions?: unknown; // FcmOptions
 }
 
 export interface SendResult {
@@ -79,7 +79,7 @@ export interface TopicSubscriptionResult {
   errors: Array<{
     index: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    error: any; // FirebaseError
+    error: unknown; // FirebaseError
   }>;
 }
 
@@ -98,7 +98,7 @@ export interface DirectSendResult {
 // =============================================
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let firebaseApp: any = null; // app.App
+let firebaseApp: unknown = null; // app.App
 
 /**
  * Initialize Firebase Admin SDK
@@ -138,7 +138,7 @@ export function initializeFirebase() {
  * Get Firebase Messaging instance
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getMessaging(): any | null { // Messaging
+function getMessaging(): unknown | null { // Messaging
   const app = firebaseApp || initializeFirebase();
   if (!app) return null;
 
@@ -628,7 +628,7 @@ export async function sendToTopic(
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const message: any = { // TopicMessage
+    const message: unknown = { // TopicMessage
       topic,
       notification: {
         title: notification.title,
@@ -811,12 +811,12 @@ export async function updateDeliveryStatus(
   fcmMessageId: string,
   status: 'delivered' | 'failed' | 'clicked' | 'dismissed',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  eventData?: any
+  eventData?: unknown
 ): Promise<void> {
   const now = new Date();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateData: any = {
+  const updateData: unknown = {
     status,
     eventData: eventData || undefined,
   };

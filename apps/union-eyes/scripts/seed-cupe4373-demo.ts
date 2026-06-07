@@ -31,7 +31,6 @@ if (!process.env.DATABASE_URL) {
 }
 
 import { db, client } from '../db/db';
-import { grievances } from '../db/schema/grievance-schema';
 import { demoCases, type DemoCase } from '../lib/demo/cupe4373-demo';
 import {
   PRIORITY_FEATURE_SPEC,

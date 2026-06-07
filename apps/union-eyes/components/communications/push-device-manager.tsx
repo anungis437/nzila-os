@@ -97,7 +97,7 @@ export function PushDeviceManager({
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setFetchedDevices(items.map((d: any) => ({
+        setFetchedDevices(items.map((d: unknown) => ({
           ...d,
           lastActiveAt: new Date(d.lastActiveAt ?? d.last_active_at),
           createdAt: new Date(d.createdAt ?? d.created_at),

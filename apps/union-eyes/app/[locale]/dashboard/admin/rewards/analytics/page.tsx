@@ -332,7 +332,7 @@ export default async function RewardsAnalyticsPage({
               <CardContent>
                 <div className="space-y-3">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {data.topAwardTypes.map((type: any) => (
+                  {data.topAwardTypes.map((type: unknown) => (
                     <div key={type.award_type_id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{type.award_type_name}</span>
@@ -358,7 +358,7 @@ export default async function RewardsAnalyticsPage({
               <CardContent>
                 <div className="space-y-3">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {data.topReceivers.map((receiver: any, index: number) => (
+                  {data.topReceivers.map((receiver: unknown, index: number) => (
                     <div key={receiver.user_id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">#{index + 1}</Badge>
@@ -388,7 +388,7 @@ export default async function RewardsAnalyticsPage({
             <CardContent>
               <div className="space-y-4">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {data.budgets.map((budget: any) => {
+                {data.budgets.map((budget: unknown) => {
                   const usagePercent = (budget.used_credits / budget.total_credits) * 100;
                   return (
                     <div key={budget.id}>

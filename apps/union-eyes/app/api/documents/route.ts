@@ -19,6 +19,8 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
+const LEGACY_DOCUMENT_API_ENABLED = process.env.LEGACY_DOCUMENT_API_ENABLED === 'true';
+
 /**
  * Validation schema for creating documents
  */
@@ -59,6 +61,13 @@ const createDocumentSchema = z.object({
  * - search: boolean - uses advanced search
  */
 export const GET = withRoleAuth('member', async (request, _context) => {
+  if (!LEGACY_DOCUMENT_API_ENABLED) {
+    return standardErrorResponse(
+      ErrorCode.NOT_IMPLEMENTED,
+      'Legacy documents endpoint is disabled. Use /api/documents/repository.',
+    );
+  }
+
   const user = await getCurrentUser();
   const userId = user?.id ?? '';
   const organizationId = user?.organizationId ?? '';
@@ -231,6 +240,13 @@ return NextResponse.json(
  * - metadata: object
  */
 export const POST = withRoleAuth('member', async (request, _context) => {
+  if (!LEGACY_DOCUMENT_API_ENABLED) {
+    return standardErrorResponse(
+      ErrorCode.NOT_IMPLEMENTED,
+      'Legacy documents endpoint is disabled. Use /api/documents/repository.',
+    );
+  }
+
   const postUser = await getCurrentUser();
   const userId = postUser?.id ?? '';
   const organizationId = postUser?.organizationId ?? '';

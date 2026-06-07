@@ -358,7 +358,7 @@ export class StatisticsCanadaClient {
     const endpoint = `/ins-ei/contributions/v1?year=${year}`;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = await this.fetch<any>(endpoint);
+    const data = await this.fetch<unknown>(endpoint);
     
     return {
       year: data.year,
@@ -385,7 +385,7 @@ export class StatisticsCanadaClient {
     const endpoint = `/ins-cpp/contributions/v1?year=${year}`;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = await this.fetch<any>(endpoint);
+    const data = await this.fetch<unknown>(endpoint);
     
     return {
       year: data.year,

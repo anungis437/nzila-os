@@ -30,7 +30,6 @@ import {
   TYPE,
   SPACE,
   PAGE,
-  DIMENSION_LABELS,
   SECTION_LABELS,
 } from './reportTheme';
 import {
@@ -38,7 +37,6 @@ import {
   DimensionGrid,
   BurdenIndexBlock,
   StewardshipSignalList,
-  PageDivider,
   OciMotif,
   RecommendationBlock,
 } from './continuityVisuals';
@@ -441,7 +439,7 @@ function CoverPage({ data }: { data: PdfReportData }) {
       {/* Motif */}
       <View style={S.coverMotifContainer}>
         <Text style={S.coverMotif}>
-          "What institutions choose to remember determines what they become."
+          &ldquo;What institutions choose to remember determines what they become.&rdquo;
         </Text>
       </View>
 

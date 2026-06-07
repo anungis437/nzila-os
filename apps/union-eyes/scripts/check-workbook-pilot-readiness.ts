@@ -148,7 +148,7 @@ async function main(): Promise<void> {
 
 async function countRows(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  table: any,
+  table: unknown,
   workbookId: string,
 ): Promise<number> {
   const rows = await db.select({ id: table.id }).from(table).where(eq(table.workbookId, workbookId));

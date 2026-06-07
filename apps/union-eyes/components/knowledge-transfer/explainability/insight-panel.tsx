@@ -97,7 +97,7 @@ function InsightCard({ insight }: { insight: InsightExplanation }) {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="text-xs underline underline-offset-2 opacity-70 hover:opacity-100 flex-shrink-0"
+          className="text-xs underline underline-offset-2 opacity-70 hover:opacity-100 shrink-0"
           aria-label={expanded ? 'Hide explanation' : 'Explain this'}
         >
           {expanded ? 'Hide' : 'Why?'}
@@ -126,7 +126,7 @@ function InsightCard({ insight }: { insight: InsightExplanation }) {
                     <p className="font-medium">{ref.interviewTitle}</p>
                     <p className="opacity-60">{ref.roleInUnion} interview</p>
                     {ref.supportingPattern && (
-                      <p className="mt-1 italic opacity-70">"{ref.supportingPattern}"</p>
+                      <p className="mt-1 italic opacity-70">&ldquo;{ref.supportingPattern}&rdquo;</p>
                     )}
                   </li>
                 ))}

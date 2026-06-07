@@ -98,13 +98,13 @@ async function calculateSLADeadlines(
         or(
           and(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            eq(slaPolices.priority, priority as any),
+            eq(slaPolices.priority, priority as unknown),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            eq(slaPolices.category, category as any)
+            eq(slaPolices.category, category as unknown)
           ),
           and(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            eq(slaPolices.priority, priority as any),
+            eq(slaPolices.priority, priority as unknown),
             sql`${slaPolices.category} IS NULL`
           ),
           eq(slaPolices.isDefault, true)
@@ -190,17 +190,17 @@ export async function listTickets(
   
   if (filters.status?.length) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(inArray(supportTickets.status, filters.status as any));
+    conditions.push(inArray(supportTickets.status, filters.status as unknown));
   }
   
   if (filters.priority?.length) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(inArray(supportTickets.priority, filters.priority as any));
+    conditions.push(inArray(supportTickets.priority, filters.priority as unknown));
   }
   
   if (filters.category?.length) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(inArray(supportTickets.category, filters.category as any));
+    conditions.push(inArray(supportTickets.category, filters.category as unknown));
   }
   
   if (filters.assignedTo) {

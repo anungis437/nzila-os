@@ -397,7 +397,7 @@ export async function analyzeMultiYearTrends(options: {
 
 async function generateComplianceSummary(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: unknown[],
   _year: number
 ): Promise<ComplianceSummary> {
   const totalRemittances = remittances.length;
@@ -447,7 +447,7 @@ async function generateComplianceSummary(
 
 export async function analyzeOrganizationPerformance(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: unknown[],
   year: number
 ): Promise<OrganizationPerformance[]> {
   // Group remittances by organization
@@ -597,7 +597,7 @@ async function determineOrganizationTrend(
 
 export async function analyzePaymentPatterns(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: unknown[],
   year: number
 ): Promise<PaymentPatternAnalysis> {
   // Monthly distribution
@@ -708,7 +708,7 @@ export async function analyzePaymentPatterns(
 
 async function calculateComplianceMetrics(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: unknown[],
   year: number
 ): Promise<ComplianceMetrics> {
   const _now = new Date();
@@ -770,7 +770,7 @@ async function calculateComplianceMetrics(
 
 export async function detectComplianceAnomalies(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: unknown[],
   _year: number
 ): Promise<ComplianceAnomaly[]> {
   const anomalies: ComplianceAnomaly[] = [];
@@ -922,7 +922,7 @@ function generateRecommendations(
 
 async function aggregateStatCanFinancialData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: unknown[],
   _fiscalYear: number
 ): Promise<StatCanFinancialSummary> {
   // Aggregate per-capita revenue (category 020) — this is the only StatCan financial
@@ -962,7 +962,7 @@ async function aggregateStatCanFinancialData(
 
 async function aggregateStatCanMembershipData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: unknown[],
   _fiscalYear: number
 ): Promise<StatCanMembershipData> {
   // Aggregate membership data from remittances
@@ -986,7 +986,7 @@ async function aggregateStatCanMembershipData(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function generateStatCanComplianceNotes(remittances: any[], fiscalYear: number): string {
+function generateStatCanComplianceNotes(remittances: unknown[], fiscalYear: number): string {
   const totalRemittances = remittances.length;
   const paidCount = remittances.filter(r => r.status === 'paid').length;
   const complianceRate = totalRemittances > 0 ? (paidCount / totalRemittances) * 100 : 0;
@@ -999,7 +999,7 @@ function generateStatCanComplianceNotes(remittances: any[], fiscalYear: number):
 // ============================================================================
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function calculateYearlyComplianceRate(remittances: any[]): number {
+function calculateYearlyComplianceRate(remittances: unknown[]): number {
   if (remittances.length === 0) return 0;
 
   const onTimePayments = remittances.filter(r => {

@@ -84,7 +84,7 @@ describe('deterministic report persistence', () => {
 
   it('resolves a report slot from assessment context without persistence', () => {
     const rawProfile = buildRawProfile();
-    const contextual = adaptScoring(rawProfile, buildInstitutionalProfile());
+    adaptScoring(rawProfile, buildInstitutionalProfile());
     const orgContext = embedPersistedAdaptiveContext(
       {
         ctx_org_type: 'federation',

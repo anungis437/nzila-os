@@ -35,5 +35,5 @@
 
 - Alert thresholds:
   - critical: >=3 overdue, >=3 stalled, or any open P0 decision
-  - warning: any overdue or no-owner initiative
+  - warning: unknown overdue or no-owner initiative
 - Weekly target: velocity >= 2 completed initiatives per week.

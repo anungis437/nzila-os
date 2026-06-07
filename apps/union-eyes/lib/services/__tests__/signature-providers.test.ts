@@ -160,6 +160,6 @@ describe('getSignatureProvider', () => {
 
   it('throws for unknown provider', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(() => getSignatureProvider('unknown' as any)).toThrow();
+    expect(() => getSignatureProvider('unknown' as unknown)).toThrow();
   });
 });

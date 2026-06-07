@@ -135,7 +135,7 @@ export async function listClauses(
 
     if (filters.clauseType && filters.clauseType.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(cbaClause.clauseType, filters.clauseType as any));
+      conditions.push(inArray(cbaClause.clauseType, filters.clauseType as unknown));
     }
 
     if (filters.articleNumber) {
@@ -293,7 +293,7 @@ export async function searchClauses(
 
     if (filters.clauseType && filters.clauseType.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(cbaClause.clauseType, filters.clauseType as any));
+      conditions.push(inArray(cbaClause.clauseType, filters.clauseType as unknown));
     }
 
     if (filters.cbaId) {
@@ -328,7 +328,7 @@ export async function getClausesByType(
       .select()
       .from(cbaClause)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(eq(cbaClause.clauseType, clauseType as any))
+      .where(eq(cbaClause.clauseType, clauseType as unknown))
       .orderBy(desc(cbaClause.createdAt))
       .limit(limit);
 
@@ -447,16 +447,16 @@ export async function saveClauseComparison(
   organizationId: string,
   createdBy: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  analysisResults?: any
+  analysisResults?: unknown
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<unknown> {
   try {
     const [comparison] = await db
       .insert(clauseComparisons)
       .values({
         comparisonName,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        clauseType: clauseType as any,
+        clauseType: clauseType as unknown,
         clauseIds,
         organizationId,
         createdBy,
@@ -562,7 +562,7 @@ export async function getMostViewedClauses(
 
     if (cbaId) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      query = query.where(eq(cbaClause.cbaId, cbaId)) as any;
+      query = query.where(eq(cbaClause.cbaId, cbaId)) as unknown;
     }
 
     const clauses = await query.limit(limit);

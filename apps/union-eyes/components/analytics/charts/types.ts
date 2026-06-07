@@ -16,7 +16,7 @@ export interface ScatterChartProps {
     category?: string;
     name?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
   xAxisLabel?: string;
   yAxisLabel?: string;
@@ -25,7 +25,7 @@ export interface ScatterChartProps {
   showGrid?: boolean;
   showLegend?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onPointClick?: (data: any) => void;
+  onPointClick?: (data: unknown) => void;
   height?: number;
   xDomain?: [number | 'auto', number | 'auto'];
   yDomain?: [number | 'auto', number | 'auto'];
@@ -40,7 +40,7 @@ export interface BubbleChartProps {
     category?: string;
     name?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
   xAxisLabel?: string;
   yAxisLabel?: string;
@@ -50,7 +50,7 @@ export interface BubbleChartProps {
   showGrid?: boolean;
   showLegend?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onBubbleClick?: (data: any) => void;
+  onBubbleClick?: (data: unknown) => void;
   height?: number;
   zRange?: [number, number];
 }
@@ -64,16 +64,16 @@ export interface TreemapChartProps {
       name: string;
       size: number;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [key: string]: any;
+      [key: string]: unknown;
     }>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
   title?: string;
   colors?: string[];
   height?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onNodeClick?: (data: any) => void;
+  onNodeClick?: (data: unknown) => void;
 }
 
 // SankeyChart types
@@ -143,7 +143,7 @@ export interface FunnelChartProps {
   showPercentages?: boolean;
   height?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onStageClick?: (stage: any) => void;
+  onStageClick?: (stage: unknown) => void;
 }
 
 // WaterfallChart types
@@ -187,6 +187,6 @@ export interface SunburstChartProps {
   colors?: string[];
   height?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onNodeClick?: (node: any) => void;
+  onNodeClick?: (node: unknown) => void;
 }
 

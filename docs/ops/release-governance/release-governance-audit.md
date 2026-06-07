@@ -1,6 +1,6 @@
 # Release Governance Audit
 
-Generated: 2026-06-02T14:54:35.566Z
+Generated: 2026-06-05T11:24:42.743Z
 
 ## Scores
 

@@ -102,9 +102,9 @@ export const internationalAddresses = pgTable(
       isValid: boolean;
       confidence: number;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      corrections?: any;
+      corrections?: unknown;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata?: any;
+      metadata?: unknown;
     }>(),
     
     // Standardization

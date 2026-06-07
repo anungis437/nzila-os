@@ -283,9 +283,9 @@ export class GovernanceService {
     electionDate: Date;
     positionsAvailable: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    candidates: any[];
+    candidates: unknown[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    winners: any[];
+    winners: unknown[];
     totalVotes?: number;
     participationRate?: number;
   }) {

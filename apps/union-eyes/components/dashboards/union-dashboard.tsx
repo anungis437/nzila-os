@@ -77,7 +77,7 @@ interface QuickLink {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getQuickLinks = (t: any, locale: string): QuickLink[] => [
+const getQuickLinks = (t: unknown, locale: string): QuickLink[] => [
   {
     title: t('claims.submitNew'),
     description: t('dashboard.voiceEnabled'),
@@ -154,7 +154,7 @@ interface StatCard {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getStats = (t: any): StatCard[] => [
+const getStats = (t: unknown): StatCard[] => [
   {
     title: t('dashboard.myActiveCases'),
     value: 0,

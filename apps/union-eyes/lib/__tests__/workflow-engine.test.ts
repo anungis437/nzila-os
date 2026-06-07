@@ -357,7 +357,7 @@ describe('workflow-engine', () => {
         update: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await addClaimNote('CLM-001', 'Test note', 'user1', true, mockTx as any);
+      const result = await addClaimNote('CLM-001', 'Test note', 'user1', true, mockTx as unknown);
       expect(result).toEqual({ success: true });
     });
 
@@ -368,7 +368,7 @@ describe('workflow-engine', () => {
         update: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await addClaimNote('MISSING', 'msg', 'u1', true, mockTx as any);
+      const result = await addClaimNote('MISSING', 'msg', 'u1', true, mockTx as unknown);
       expect(result).toEqual({ success: false, error: 'Claim not found' });
     });
 
@@ -393,7 +393,7 @@ describe('workflow-engine', () => {
         update: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await addClaimNote('CLM-001', 'msg', 'u1', true, mockTx as any);
+      const result = await addClaimNote('CLM-001', 'msg', 'u1', true, mockTx as unknown);
       expect(result).toEqual({ success: false, error: 'DB fail' });
     });
   });
@@ -420,7 +420,7 @@ describe('workflow-engine', () => {
         insert: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatus('CLM-001', 'under_review' as any, 'user1', 'reviewing', mockTx as any);
+      const result = await updateClaimStatus('CLM-001', 'under_review' as unknown, 'user1', 'reviewing', mockTx as unknown);
       expect(result.success).toBe(true);
     });
 
@@ -431,7 +431,7 @@ describe('workflow-engine', () => {
         insert: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatus('MISSING', 'under_review' as any, 'u1', '', mockTx as any);
+      const result = await updateClaimStatus('MISSING', 'under_review' as unknown, 'u1', '', mockTx as unknown);
       expect(result).toEqual({ success: false, error: 'Claim not found' });
     });
 
@@ -446,7 +446,7 @@ describe('workflow-engine', () => {
         insert: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatus('CLM-001', 'closed' as any, 'u1', '', mockTx as any);
+      const result = await updateClaimStatus('CLM-001', 'closed' as unknown, 'u1', '', mockTx as unknown);
       expect(result.success).toBe(false);
       expect(result.error).toBe('Not allowed');
     });
@@ -493,7 +493,7 @@ describe('workflow-engine', () => {
         insert: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatus('CLM-001', 'resolved' as any, 'user1', 'done', mockTx as any);
+      const result = await updateClaimStatus('CLM-001', 'resolved' as unknown, 'user1', 'done', mockTx as unknown);
       expect(result.success).toBe(true);
       expect(mocks.mockGenerateDefPack).toHaveBeenCalled();
     });
@@ -517,7 +517,7 @@ describe('workflow-engine', () => {
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatusById('missing', 'under_review' as any, 'user1', 'note', mockTx as any);
+      const result = await updateClaimStatusById('missing', 'under_review' as unknown, 'user1', 'note', mockTx as unknown);
       expect(result).toEqual({ success: false, error: 'Claim not found' });
     });
 
@@ -529,7 +529,7 @@ describe('workflow-engine', () => {
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatusById('uuid-1', 'under_review' as any, 'user1', 'note', mockTx as any);
+      const result = await updateClaimStatusById('uuid-1', 'under_review' as unknown, 'user1', 'note', mockTx as unknown);
       expect(result.success).toBe(false);
       expect(result.error).toContain('missing claimNumber');
     });
@@ -549,7 +549,7 @@ describe('workflow-engine', () => {
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatusById('uuid-1', 'under_review' as any, 'user1', 'reviewing', mockTx as any);
+      const result = await updateClaimStatusById('uuid-1', 'under_review' as unknown, 'user1', 'reviewing', mockTx as unknown);
       expect(result.success).toBe(true);
     });
   });

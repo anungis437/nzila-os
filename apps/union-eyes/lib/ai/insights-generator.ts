@@ -237,7 +237,7 @@ async function generateTrendInsights(
         estimatedImpact: trendStrength > 0.85 ? 'High' : 'Medium',
         confidence: trendStrength,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataPoints: (trend.visualizationData as any)?.dataPoints || []
+        dataPoints: (trend.visualizationData as unknown)?.dataPoints || []
       });
     }
 
@@ -259,7 +259,7 @@ async function generateTrendInsights(
         estimatedImpact: 'High',
         confidence: 0.8,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataPoints: (trend.visualizationData as any)?.dataPoints || []
+        dataPoints: (trend.visualizationData as unknown)?.dataPoints || []
       });
     }
 
@@ -281,7 +281,7 @@ async function generateTrendInsights(
         estimatedImpact: 'Medium',
         confidence: trendStrength,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataPoints: (trend.visualizationData as any)?.dataPoints || []
+        dataPoints: (trend.visualizationData as unknown)?.dataPoints || []
       });
     }
   }
@@ -331,7 +331,7 @@ async function generateAnomalyInsights(
         estimatedImpact: 'High',
         confidence: 0.9,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataPoints: (analysis.visualizationData as any)?.dataPoints || []
+        dataPoints: (analysis.visualizationData as unknown)?.dataPoints || []
       });
     }
   }

@@ -254,14 +254,14 @@ export class WaveClient {
     `;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await this.graphql<any>(query, {
+    const result = await this.graphql<unknown>(query, {
       businessId: this.config.businessId,
       page,
       pageSize,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const invoices = result.business.invoices.edges.map((edge: any) => edge.node);
+    const invoices = result.business.invoices.edges.map((edge: unknown) => edge.node);
     const hasMore = page < result.business.invoices.pageInfo.totalPages;
 
     return { invoices, hasMore };
@@ -303,14 +303,14 @@ export class WaveClient {
     `;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await this.graphql<any>(query, {
+    const result = await this.graphql<unknown>(query, {
       businessId: this.config.businessId,
       page,
       pageSize,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const customers = result.business.customers.edges.map((edge: any) => ({
+    const customers = result.business.customers.edges.map((edge: unknown) => ({
       ...edge.node,
       currency: edge.node.currency?.code || 'USD',
     }));
@@ -360,7 +360,7 @@ export class WaveClient {
     `;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await this.graphql<any>(query, {
+    const result = await this.graphql<unknown>(query, {
       businessId: this.config.businessId,
       page,
       pageSize,
@@ -368,9 +368,9 @@ export class WaveClient {
 
     const payments = result.business.moneyTransactions.edges
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((edge: any) => edge.node)
+      .map((edge: unknown) => edge.node)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((node: any) => node.invoice); // Only transactions linked to invoices
+      .filter((node: unknown) => node.invoice); // Only transactions linked to invoices
 
     const hasMore = page < result.business.moneyTransactions.pageInfo.totalPages;
 

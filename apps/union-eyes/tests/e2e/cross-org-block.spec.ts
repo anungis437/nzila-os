@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test'
-import { assertNoCrossOrgLeak, assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
+import { test } from '@playwright/test'
+import { assertNoCrossOrgLeak, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
 
 test.describe('UE E2E - cross-org containment', () => {
   test.beforeAll(async ({ request }) => {

@@ -34,7 +34,7 @@ export default function StrategicPlanningBoard({ goals }: StrategicPlanningBoard
         const json = await res.json();
         const items = Array.isArray(json) ? json : json?.goals ?? json?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setFetchedGoals(items.map((g: any) => ({
+        setFetchedGoals(items.map((g: unknown) => ({
           id: g.id ?? "",
           title: g.title ?? "",
           description: g.description ?? "",

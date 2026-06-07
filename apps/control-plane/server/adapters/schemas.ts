@@ -5,7 +5,7 @@
  * Used by Deal Engine adapters to query UE ingestion data without
  * creating a cross-app package dependency.
  */
-import { pgTable, uuid, varchar, integer, timestamp, jsonb, text, real, boolean, index, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, integer, timestamp, jsonb, text, real, boolean, index } from "drizzle-orm/pg-core";
 
 // ── UE Ingestion tables (source: apps/union-eyes/db/schema/ingestion-schema.ts) ──
 

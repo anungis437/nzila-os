@@ -262,7 +262,7 @@ export class PaymentService {
     );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const buffer = await (pdf(doc) as any).toBuffer();
+    const buffer = await (pdf(doc) as unknown).toBuffer();
     const base64 = buffer.toString('base64');
     return `data:application/pdf;base64,${base64}`;
   }
@@ -478,7 +478,7 @@ export class PaymentService {
     processorPaymentId: string,
     processorType: 'stripe' | 'paypal'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const transaction = await db
         .select()
@@ -508,7 +508,7 @@ export class PaymentService {
   static async getTransactionBySessionId(
     sessionId: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       // Query by metadata (session ID stored in metadata)
       const transactions = await db

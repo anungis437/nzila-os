@@ -93,7 +93,7 @@ describe('requestContext', () => {
 
     it('works with plain object headers using get()', () => {
       const headers = { get: (k: string) => (k === 'x-request-id' ? 'obj-id' : null) }
-      const ctx = createRequestContext({ headers } as any)
+      const ctx = createRequestContext({ headers } as { headers: { get: (k: string) => string | null } })
       expect(ctx.requestId).toBe('obj-id')
     })
   })

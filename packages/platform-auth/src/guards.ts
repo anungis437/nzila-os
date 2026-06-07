@@ -21,7 +21,7 @@ import { meetsOrgRoleRequirement } from './authorization'
 // ── Guard Options ───────────────────────────────────────────────────────────
 
 export interface OrgAccessOptions {
-  /** Minimum org role required. Default: any active member. */
+  /** Minimum org role required. Default: unknown active member. */
   minRole?: 'org_admin' | 'org_secretary'
   /** Platform roles that bypass org membership checks. */
   platformBypass?: PlatformRole[]

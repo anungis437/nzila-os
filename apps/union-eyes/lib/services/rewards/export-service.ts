@@ -17,7 +17,7 @@ import { logger } from '@/lib/logger';
  * Convert array of objects to CSV string
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function arrayToCSV(data: any[], headers: string[]): string {
+function arrayToCSV(data: unknown[], headers: string[]): string {
   const csvRows: string[] = [];
   
   // Add header row
@@ -107,7 +107,7 @@ export async function exportAwardsToCSV(
     
     const result = await db.execute(query);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const awards = (result as any[]).map((row: any) => ({
+    const awards = (result as unknown[]).map((row: unknown) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
       status: row.status,
@@ -201,7 +201,7 @@ export async function exportLedgerToCSV(
     
     const result = await db.execute(query);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const entries = (result as any[]).map((row: any) => ({
+    const entries = (result as unknown[]).map((row: unknown) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
       event_type: row.event_type,
@@ -274,7 +274,7 @@ export async function exportBudgetsToCSV(
     
     const result = await db.execute(query);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const budgets = (result as any[]).map((row: any) => {
+    const budgets = (result as unknown[]).map((row: unknown) => {
       const usagePercent = (row.used_credits / row.total_credits) * 100;
       return {
         id: row.id,
@@ -356,7 +356,7 @@ export async function exportRedemptionsToCSV(
     
     const result = await db.execute(query);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const redemptions = (result as any[]).map((row: any) => ({
+    const redemptions = (result as unknown[]).map((row: unknown) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
       status: row.status,
@@ -414,7 +414,7 @@ export async function exportAnalyticsToCSV(
     
     const result = await db.execute(statsQuery);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const stats = (result as any[]).map((row: any) => ({
+    const stats = (result as unknown[]).map((row: unknown) => ({
       date: new Date(row.date).toISOString().split('T')[0],
       awards_issued: row.awards_issued,
       unique_recipients: row.unique_recipients,

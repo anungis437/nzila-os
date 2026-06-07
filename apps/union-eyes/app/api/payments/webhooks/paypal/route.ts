@@ -92,7 +92,7 @@ async function verifyPayPalWebhook(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getTransactionIdFromPayPalEvent(resource: any): string | null {
+function getTransactionIdFromPayPalEvent(resource: unknown): string | null {
   return (
     resource?.custom_id ||
     resource?.invoice_id ||

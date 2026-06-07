@@ -75,7 +75,7 @@ export function HazardReportForm({
 
   const form = useForm<HazardFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(hazardSchema) as any,
+    resolver: zodResolver(hazardSchema) as unknown,
     defaultValues: {
       hazardType: "",
       location: "",
@@ -220,7 +220,7 @@ export function HazardReportForm({
             <div className="space-y-2">
               <Label htmlFor="priority">Priority Level *</Label>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Select onValueChange={(value) => form.setValue("priority", value as any)}>
+              <Select onValueChange={(value) => form.setValue("priority", value as unknown)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>

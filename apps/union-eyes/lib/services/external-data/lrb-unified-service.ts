@@ -502,7 +502,7 @@ export class UnifiedLRBService {
    */
   async search(params: LRBSearchParams): Promise<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    agreements: any[];
+    agreements: unknown[];
     total: number;
     page: number;
     totalPages: number;
@@ -562,7 +562,7 @@ export class UnifiedLRBService {
    * Get agreement by ID
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getById(id: string): Promise<any> {
+  async getById(id: string): Promise<unknown> {
     const result = await db.select()
       .from(lrbAgreements)
       .where(eq(lrbAgreements.id, id))

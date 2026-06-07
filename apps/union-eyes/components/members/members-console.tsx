@@ -303,7 +303,7 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
 
   // Extract members from API response (supports multiple envelope shapes)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rawMembers: any[] = (() => {
+  const rawMembers: unknown[] = (() => {
     if (Array.isArray(responseData?.data?.members)) return responseData.data.members;
     if (Array.isArray(responseData?.members)) return responseData.members;
     if (Array.isArray(responseData?.data?.data?.members)) return responseData.data.data.members;
@@ -317,7 +317,7 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
   })();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const members: Member[] = rawMembers.map((m: any) => {
+  const members: Member[] = rawMembers.map((m: unknown) => {
     const metadata = m?.metadata && typeof m.metadata === 'object' ? m.metadata : {};
     return {
       id: m.id,

@@ -13,7 +13,7 @@
  * It NEVER evaluates individual worker performance, value, or productivity.
  */
 
-import { and, eq, gte, isNotNull, sql } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';

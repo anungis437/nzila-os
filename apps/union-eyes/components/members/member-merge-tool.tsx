@@ -130,7 +130,7 @@ export function MemberMergeTool({
     mergeFields.forEach((field) => {
       const source = selectedValues[field.key] === "primary" ? primaryMember : duplicateMember;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      merged[field.key] = source[field.key] as any;
+      merged[field.key] = source[field.key] as unknown;
     });
 
     // Always sum statistics
@@ -357,9 +357,9 @@ function FieldComparisonRow({
 }: {
   field: MergeField;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  primaryValue: any;
+  primaryValue: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  duplicateValue: any;
+  duplicateValue: unknown;
   selectedSource: string;
   onSelect: (source: "primary" | "duplicate") => void;
 }) {
@@ -367,7 +367,7 @@ function FieldComparisonRow({
   const hasConflict = primaryValue !== duplicateValue && primaryValue && duplicateValue;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const formatValue = (value: any) => {
+  const formatValue = (value: unknown) => {
     if (!value) return "—";
     if (value instanceof Date) return format(value, "PPP");
     return String(value);

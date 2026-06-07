@@ -417,7 +417,7 @@ export class GeofencePrivacyService {
     ipAddress?: string;
     userAgent?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: any;
+    metadata?: unknown;
   }) {
     await db.insert(locationTrackingAudit).values({
       userId: params.userId,

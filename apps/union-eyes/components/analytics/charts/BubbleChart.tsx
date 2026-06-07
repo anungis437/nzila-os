@@ -35,7 +35,7 @@ export interface BubbleChartProps {
     category?: string;
     name?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
   xAxisLabel?: string;
   yAxisLabel?: string;
@@ -45,7 +45,7 @@ export interface BubbleChartProps {
   showGrid?: boolean;
   showLegend?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onBubbleClick?: (data: any) => void;
+  onBubbleClick?: (data: unknown) => void;
   height?: number;
   zRange?: [number, number];
 }
@@ -89,7 +89,7 @@ export function BubbleChart({
     : [{ name: 'Data', data: data, color: colors[0] }];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
 

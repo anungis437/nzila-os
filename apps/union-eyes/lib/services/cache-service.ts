@@ -150,7 +150,7 @@ export async function cacheGet<T>(
 export async function cacheSet(
   key: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: any,
+  value: unknown,
   options?: CacheOptions
 ): Promise<boolean> {
   const redis = getRedis();

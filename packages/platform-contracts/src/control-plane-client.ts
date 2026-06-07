@@ -21,7 +21,6 @@ import type {
   PolicyEvalRequest,
   PolicyEvalResponse,
   DecisionEvent,
-  ControlActionResult,
 } from './control-system.js'
 
 export interface ControlPlaneClientConfig {

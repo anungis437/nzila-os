@@ -79,7 +79,7 @@ export const accessibilityAudits = pgTable(
         name: string;
         version: string;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        config?: any;
+        config?: unknown;
       }>
     >(),
     

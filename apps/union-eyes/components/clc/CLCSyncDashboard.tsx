@@ -36,7 +36,7 @@ export default function CLCSyncDashboard({ organizationId }: CLCSyncDashboardPro
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setSyncStatuses(items.map((s: any) => ({
+        setSyncStatuses(items.map((s: unknown) => ({
           affiliateId: String(s.affiliateId ?? s.affiliate_id ?? s.id),
           affiliateName: s.affiliateName ?? s.affiliate_name ?? '',
           lastSync: s.lastSync ?? s.last_sync ?? '',

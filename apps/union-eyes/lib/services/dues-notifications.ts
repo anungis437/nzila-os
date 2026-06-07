@@ -32,7 +32,7 @@ async function getOrganizationNotificationContext(organizationId: string): Promi
     })
     .from(organizations)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .where(or(eq(organizations.id, organizationId as any), eq(organizations.slug, organizationId)))
+    .where(or(eq(organizations.id, organizationId as unknown), eq(organizations.slug, organizationId)))
     .limit(1);
 
   const orgIdentifiers = new Set<string>();
@@ -143,7 +143,7 @@ export async function sendPaymentConfirmation(
 
     // Send push notification if available
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const metadata = (memberMetadata as any) || {};
+    const metadata = (memberMetadata as unknown) || {};
     if (metadata.firebaseToken) {
       await notificationService.send({
         organizationId: transaction.organizationId,
@@ -260,7 +260,7 @@ export async function sendPaymentFailure(
 
     // Send push notification
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const memberMeta = (memberMetadata as any) || {};
+    const memberMeta = (memberMetadata as unknown) || {};
     if (memberMeta.firebaseToken) {
       await notificationService.send({
         organizationId: transaction.organizationId,

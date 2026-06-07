@@ -92,7 +92,7 @@ function scoreFits(
   sessionCount: number,
   docMomentum: boolean,
   volatility: number,
-  latestScore: number | null,
+  _latestScore: number | null,
 ): Archetypefit[] {
   const fits: Archetypefit[] = [];
 

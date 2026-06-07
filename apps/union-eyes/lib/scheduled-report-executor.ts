@@ -123,7 +123,7 @@ return {
  * Create an export job record
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function createExportJob(schedule: ScheduledReport): Promise<any> {
+async function createExportJob(schedule: ScheduledReport): Promise<unknown> {
   const result = await db.execute(sql`
     INSERT INTO export_jobs (
       report_id,
@@ -144,7 +144,7 @@ async function createExportJob(schedule: ScheduledReport): Promise<any> {
   `);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = result as any[];
+  const rows = result as unknown[];
   return rows[0];
 }
 
@@ -188,7 +188,7 @@ async function fetchReportData(schedule: ScheduledReport): Promise<ReportData> {
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const reportRows = reportResult as any[];
+  const reportRows = reportResult as unknown[];
   if (reportRows.length === 0) {
     throw new Error('Report not found');
   }
@@ -250,7 +250,7 @@ async function executeClaimsQuery(organizationId: string, _config: unknown): Pro
  * Execute analytics report query
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function executeAnalyticsQuery(organizationId: string, config: any): Promise<unknown[]> {
+async function executeAnalyticsQuery(organizationId: string, config: unknown): Promise<unknown[]> {
   const groupBy = config.groupBy || 'status';
 
   // SECURITY FIX: Whitelist validation to prevent SQL injection via GROUP BY column
@@ -281,7 +281,7 @@ async function executeAnalyticsQuery(organizationId: string, config: any): Promi
  * Execute default query
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function executeDefaultQuery(organizationId: string, _config: any): Promise<unknown[]> {
+async function executeDefaultQuery(organizationId: string, _config: unknown): Promise<unknown[]> {
   const result = await db.execute(sql`
     SELECT 
       id,
@@ -307,7 +307,7 @@ async function executeDefaultQuery(organizationId: string, _config: any): Promis
  * Implementation includes strict allowlist validation.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function executeCustomQuery(organizationId: string, config: any): Promise<unknown[]> {
+async function executeCustomQuery(organizationId: string, config: unknown): Promise<unknown[]> {
   const customQuery = config.query || '';
   if (!customQuery) {
     return executeDefaultQuery(organizationId, config);
@@ -409,7 +409,7 @@ function generateCSV(data: ReportData): Buffer {
   for (const row of data.rows) {
     const values = data.columns.map(col => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const value = (row as any)[col];
+      const value = (row as unknown)[col];
       if (value === null || value === undefined) return '';
       const str = String(value);
       // Escape quotes and wrap in quotes if contains comma
@@ -637,7 +637,7 @@ async function generatePDF(data: ReportData): Promise<Buffer> {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const row = data.rows[i] as any;
+      const row = data.rows[i] as unknown;
       doc.setFontSize(8);
       
       displayColumns.forEach((col, colIndex) => {
@@ -685,7 +685,7 @@ async function generatePDF(data: ReportData): Promise<Buffer> {
     data.rows.slice(0, 100).forEach(row => {
       const values = data.columns.map(col => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const val = (row as any)[col];
+        const val = (row as unknown)[col];
         return val === null || val === undefined ? '-' : String(val).substring(0, 20);
       });
       lines.push(values.join(' | '));
@@ -755,7 +755,7 @@ async function deliverReport(
 
   // Also deliver via webhook if configured in parameters
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const params = schedule.parameters as any;
+  const params = schedule.parameters as unknown;
   if (params?.webhookUrl) {
     await deliverViaWebhook(schedule, fileUrl);
 }
@@ -787,7 +787,7 @@ async function deliverViaWebhook(
   fileUrl: string
 ): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const params = schedule.parameters as any;
+  const params = schedule.parameters as unknown;
   const webhookUrl = params?.webhookUrl;
   
   if (!webhookUrl) {
@@ -829,13 +829,13 @@ export async function retryFailedExecution(
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = result as any[];
+  const rows = result as unknown[];
   if (rows.length === 0) {
     throw new Error('Schedule not found');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const schedule = rows[0] as any;
+  const schedule = rows[0] as unknown;
 
   if (schedule.failure_count >= maxRetries) {
 return {

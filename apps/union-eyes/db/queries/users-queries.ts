@@ -11,10 +11,10 @@ import { logger } from "@/lib/logger";
  */
 export const getUserByEmail = async (
   email: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [user] = await dbOrTx
@@ -42,10 +42,10 @@ export const getUserByEmail = async (
  */
 export const getUserById = async (
   userId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [user] = await dbOrTx

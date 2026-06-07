@@ -81,7 +81,7 @@ export function DeadlineCalculator({
         ...data.data,
         deadlineDate: new Date(data.data.deadlineDate),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        breakdown: data.data.breakdown?.map((d: any) => ({
+        breakdown: data.data.breakdown?.map((d: unknown) => ({
           ...d,
           date: new Date(d.date)
         }))

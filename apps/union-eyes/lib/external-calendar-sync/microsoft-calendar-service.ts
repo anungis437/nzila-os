@@ -15,7 +15,6 @@
  */
 
 import { Client } from '@microsoft/microsoft-graph-client';
-import { ConfidentialClientApplication } from '@azure/msal-node';
 import { db } from '@/db/db';
 import { 
   externalCalendarConnections, 
@@ -23,6 +22,7 @@ import {
   calendarEvents 
 } from '@/db/schema/calendar-schema';
 import { eq, and } from 'drizzle-orm';
+import { decryptCalendarToken, encryptCalendarToken } from './token-crypto';
 
 // ============================================================================
 // OAUTH CONFIGURATION
@@ -32,6 +32,7 @@ const MICROSOFT_CLIENT_ID = process.env.MICROSOFT_CALENDAR_CLIENT_ID || '';
 const MICROSOFT_CLIENT_SECRET = process.env.MICROSOFT_CALENDAR_CLIENT_SECRET || '';
 const MICROSOFT_TENANT_ID = process.env.MICROSOFT_TENANT_ID || 'common';
 const MICROSOFT_REDIRECT_URI = process.env.MICROSOFT_CALENDAR_REDIRECT_URI || 'http://localhost:3000/api/calendar-sync/microsoft/callback';
+const MICROSOFT_AUTH_BASE = `https://login.microsoftonline.com/${MICROSOFT_TENANT_ID}/oauth2/v2.0`;
 
 const SCOPES = [
   'Calendars.ReadWrite',
@@ -40,48 +41,114 @@ const SCOPES = [
 ];
 
 /**
- * Get MSAL client
+ * Validate required Microsoft OAuth settings.
  */
-function getMsalClient() {
-  return new ConfidentialClientApplication({
-    auth: {
-      clientId: MICROSOFT_CLIENT_ID,
-      clientSecret: MICROSOFT_CLIENT_SECRET,
-      authority: `https://login.microsoftonline.com/${MICROSOFT_TENANT_ID}`,
+function assertMicrosoftCalendarConfig() {
+  const missing: string[] = [];
+
+  if (!MICROSOFT_CLIENT_ID) missing.push('MICROSOFT_CALENDAR_CLIENT_ID');
+  if (!MICROSOFT_CLIENT_SECRET) missing.push('MICROSOFT_CALENDAR_CLIENT_SECRET');
+  if (!MICROSOFT_REDIRECT_URI) missing.push('MICROSOFT_CALENDAR_REDIRECT_URI');
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required Microsoft calendar OAuth environment variables: ${missing.join(', ')}`);
+  }
+}
+
+type MicrosoftTokenResponse = {
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+  id_token?: string;
+  scope?: string;
+};
+
+function parseJwtPayload(token?: string): Record<string, unknown> | null {
+  if (!token) return null;
+
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+
+  try {
+    const json = Buffer.from(parts[1], 'base64url').toString('utf8');
+    const payload = JSON.parse(json) as Record<string, unknown>;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+async function requestMicrosoftTokens(params: URLSearchParams): Promise<MicrosoftTokenResponse> {
+  const response = await fetch(`${MICROSOFT_AUTH_BASE}/token`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
     },
+    body: params.toString(),
   });
+
+  if (!response.ok) {
+    const raw = await response.text();
+    throw new Error(`Microsoft token exchange failed (${response.status}): ${raw}`);
+  }
+
+  return (await response.json()) as MicrosoftTokenResponse;
 }
 
 /**
  * Generate authorization URL
  */
 export async function getAuthorizationUrl(userId: string): Promise<string> {
-  const msalClient = getMsalClient();
-  
-  return await msalClient.getAuthCodeUrl({
-    scopes: SCOPES,
-    redirectUri: MICROSOFT_REDIRECT_URI,
+  assertMicrosoftCalendarConfig();
+
+  const params = new URLSearchParams({
+    client_id: MICROSOFT_CLIENT_ID,
+    response_type: 'code',
+    redirect_uri: MICROSOFT_REDIRECT_URI,
+    response_mode: 'query',
+    scope: SCOPES.join(' '),
     state: userId,
   });
+
+  return `${MICROSOFT_AUTH_BASE}/authorize?${params.toString()}`;
 }
 
 /**
  * Exchange authorization code for tokens
  */
 export async function exchangeCodeForTokens(code: string) {
-  const msalClient = getMsalClient();
-  
-  const response = await msalClient.acquireTokenByCode({
+  assertMicrosoftCalendarConfig();
+
+  const params = new URLSearchParams({
+    client_id: MICROSOFT_CLIENT_ID,
+    client_secret: MICROSOFT_CLIENT_SECRET,
+    grant_type: 'authorization_code',
     code,
-    scopes: SCOPES,
-    redirectUri: MICROSOFT_REDIRECT_URI,
+    redirect_uri: MICROSOFT_REDIRECT_URI,
+    scope: SCOPES.join(' '),
   });
 
+  const response = await requestMicrosoftTokens(params);
+  if (!response.access_token) {
+    throw new Error('Microsoft token exchange response did not include access_token');
+  }
+
+  const jwtPayload = parseJwtPayload(response.id_token);
+  const providerAccountId =
+    (typeof jwtPayload?.oid === 'string' && jwtPayload.oid) ||
+    (typeof jwtPayload?.sub === 'string' && jwtPayload.sub) ||
+    '';
+  const providerEmail =
+    (typeof jwtPayload?.preferred_username === 'string' && jwtPayload.preferred_username) ||
+    (typeof jwtPayload?.email === 'string' && jwtPayload.email) ||
+    undefined;
+
   return {
-    accessToken: response.accessToken,
-    refreshToken: '', // MSAL manages refresh tokens internally
-    expiresAt: response.expiresOn || new Date(Date.now() + 3600000),
-    providerAccountId: response.account?.homeAccountId || '',
+    accessToken: response.access_token,
+    refreshToken: response.refresh_token || '',
+    expiresAt: new Date(Date.now() + (response.expires_in ?? 3600) * 1000),
+    providerAccountId,
+    providerEmail,
   };
 }
 
@@ -90,6 +157,8 @@ export async function exchangeCodeForTokens(code: string) {
  */
 export async function refreshAccessToken(connectionId: string): Promise<string> {
   try {
+    assertMicrosoftCalendarConfig();
+
     const [connection] = await db
       .select()
       .from(externalCalendarConnections)
@@ -99,26 +168,41 @@ export async function refreshAccessToken(connectionId: string): Promise<string> 
     if (!connection || connection.provider !== 'microsoft') {
       throw new Error('Microsoft Calendar connection not found');
     }
+    const refreshToken = decryptCalendarToken(connection.refreshToken);
 
-    const msalClient = getMsalClient();
-    
-    const response = await msalClient.acquireTokenSilent({
-      scopes: SCOPES,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      account: { homeAccountId: connection.providerAccountId! } as any,
+    if (!refreshToken) {
+      throw new Error('Microsoft Calendar connection is missing refresh token');
+    }
+
+    const params = new URLSearchParams({
+      client_id: MICROSOFT_CLIENT_ID,
+      client_secret: MICROSOFT_CLIENT_SECRET,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      redirect_uri: MICROSOFT_REDIRECT_URI,
+      scope: SCOPES.join(' '),
     });
 
-    // Update connection with new tokens
+    const response = await requestMicrosoftTokens(params);
+    if (!response.access_token) {
+      throw new Error('Microsoft token refresh response did not include access_token');
+    }
+
     await db
       .update(externalCalendarConnections)
       .set({
-        accessToken: response.accessToken,
-        tokenExpiresAt: response.expiresOn || new Date(Date.now() + 3600000),
+        accessToken: encryptCalendarToken(response.access_token),
+        refreshToken: response.refresh_token
+          ? encryptCalendarToken(response.refresh_token)
+          : connection.refreshToken,
+        tokenExpiresAt: new Date(Date.now() + (response.expires_in ?? 3600) * 1000),
+        syncStatus: 'synced',
+        syncError: null,
         updatedAt: new Date(),
       })
       .where(eq(externalCalendarConnections.id, connectionId));
 
-    return response.accessToken;
+    return response.access_token;
   } catch (error) {
 // Mark connection as failed
     await db
@@ -152,7 +236,7 @@ async function getAuthenticatedClient(connectionId: string) {
   const now = new Date();
   const expiresAt = connection.tokenExpiresAt ? new Date(connection.tokenExpiresAt) : new Date(0);
   
-  let accessToken = connection.accessToken;
+  let accessToken = decryptCalendarToken(connection.accessToken);
   
   if (now >= expiresAt) {
     accessToken = await refreshAccessToken(connectionId);
@@ -280,7 +364,7 @@ export async function importMicrosoftEvents(
         } else {
           // Create new event
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await db.insert(calendarEvents).values(eventData as any);
+          await db.insert(calendarEvents).values(eventData as unknown);
           importedCount++;
         }
       } catch (_error) {
@@ -382,7 +466,7 @@ throw error;
  * Map Microsoft Outlook event to local event format
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapMicrosoftEventToLocal(msEvent: any, calendarId: string, organizationId: string) {
+function mapMicrosoftEventToLocal(msEvent: unknown, calendarId: string, organizationId: string) {
   return {
     calendarId,
     organizationId,
@@ -415,9 +499,9 @@ function mapMicrosoftEventToLocal(msEvent: any, calendarId: string, organization
  * Map local event to Microsoft Outlook event format
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapLocalEventToMicrosoft(localEvent: any) {
+function mapLocalEventToMicrosoft(localEvent: unknown) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const msEvent: any = {
+  const msEvent: unknown = {
     subject: localEvent.title,
     body: {
       contentType: 'HTML',
@@ -457,7 +541,7 @@ function mapLocalEventToMicrosoft(localEvent: any) {
  * Map Microsoft recurrence to RRULE
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapMicrosoftRecurrenceToRRule(recurrence: any): string {
+function mapMicrosoftRecurrenceToRRule(recurrence: unknown): string {
   const pattern = recurrence.pattern;
   const range = recurrence.range;
 
@@ -489,10 +573,10 @@ function mapMicrosoftRecurrenceToRRule(recurrence: any): string {
  * Map RRULE to Microsoft recurrence
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapRRuleToMicrosoftRecurrence(rrule: string): any {
+function mapRRuleToMicrosoftRecurrence(rrule: string): unknown {
   const parts = rrule.split(';');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recurrence: any = {
+  const recurrence: unknown = {
     pattern: {},
     range: {},
   };
@@ -594,7 +678,7 @@ async function updateDeltaLink(
     if (!connection) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappings: any = (connection.calendarMappings as any) || {};
+    const mappings: unknown = (connection.calendarMappings as unknown) || {};
     
     if (!mappings[microsoftCalendarId]) {
       mappings[microsoftCalendarId] = {};
@@ -606,7 +690,7 @@ async function updateDeltaLink(
       .update(externalCalendarConnections)
       .set({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        calendarMappings: mappings as any,
+        calendarMappings: mappings as unknown,
         lastSyncAt: new Date(),
         syncStatus: 'synced',
         updatedAt: new Date(),
@@ -620,7 +704,7 @@ async function updateDeltaLink(
  * Get delta link for a calendar
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getDeltaLink(connection: any, microsoftCalendarId: string): string | null {
+export function getDeltaLink(connection: unknown, microsoftCalendarId: string): string | null {
   const mappings = connection.calendarMappings || {};
   return mappings[microsoftCalendarId]?.deltaLink || null;
 }

@@ -26,7 +26,7 @@ interface TrusteeMeeting {
   quorumMet: boolean;
   attendeeIds: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  votingRecords: any[];
+  votingRecords: unknown[];
 }
 
 interface Trustee {
@@ -136,7 +136,7 @@ export default function TrusteePortal({ trustBoardId, memberId: _memberId }: Tru
             <button
               key={tab}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onClick={() => setSelectedTab(tab as any)}
+              onClick={() => setSelectedTab(tab as unknown)}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 selectedTab === tab
                   ? 'border-blue-500 text-blue-600'

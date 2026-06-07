@@ -36,7 +36,7 @@ export interface SunburstChartProps {
   colors?: string[];
   height?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onNodeClick?: (node: any) => void;
+  onNodeClick?: (node: unknown) => void;
 }
 
 // ============================================================================
@@ -54,9 +54,9 @@ const DEFAULT_COLORS = [
 // ============================================================================
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function flattenHierarchy(node: SunburstNode, level: number = 0, colors: string[]): any[] {
+function flattenHierarchy(node: SunburstNode, level: number = 0, colors: string[]): unknown[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any[] = [];
+  const result: unknown[] = [];
   
   if (node.children && node.children.length > 0) {
     node.children.forEach((child, index) => {
@@ -88,7 +88,7 @@ export function SunburstChart({
   
   // Flatten hierarchy into levels
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const levels: any[][] = [];
+  const levels: unknown[][] = [];
   let currentLevel = flattenHierarchy(data, 0, colors);
   
   while (currentLevel.length > 0) {
@@ -99,7 +99,7 @@ export function SunburstChart({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
 
@@ -121,7 +121,7 @@ export function SunburstChart({
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const renderLabel = (entry: any) => {
+  const renderLabel = (entry: unknown) => {
     if (entry.percent < 0.05) return ''; // Hide labels for small slices
     return entry.name;
   };

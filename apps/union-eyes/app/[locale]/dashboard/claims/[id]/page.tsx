@@ -28,7 +28,7 @@ interface Claim {
   description: string;
   desiredOutcome: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attachments: any[];
+  attachments: unknown[];
   witnessesPresent: boolean;
   witnessDetails: string | null;
   filedDate?: string;
@@ -124,7 +124,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
   }, [claimId, trackCaseViewed]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleUploadComplete = (attachment: any) => {
+  const handleUploadComplete = (attachment: unknown) => {
     // Refresh claim data to show new attachment
     if (claim) {
       setClaim({
@@ -140,7 +140,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
       setClaim({
         ...claim,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        attachments: (claim.attachments || []).filter((a: any) => a.url !== url),
+        attachments: (claim.attachments || []).filter((a: unknown) => a.url !== url),
       });
     }
   };
@@ -299,7 +299,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                   <CardContent>
                     <div className="space-y-4">
                       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {workflowHistory.map((update: any, index: number) => (
+                      {workflowHistory.map((update: unknown, index: number) => (
                         <div key={update.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-medium text-gray-900">

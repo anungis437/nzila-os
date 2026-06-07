@@ -10,6 +10,9 @@ const mocks = vi.hoisted(() => ({
   mockInsert: vi.fn(),
   mockUpdate: vi.fn(),
   mockDelete: vi.fn(),
+  mockDownloadBuffer: vi.fn(),
+  mockProcessImageOCR: vi.fn(),
+  mockProcessPDFOCR: vi.fn(),
 }));
 
 vi.mock('@/db/db', () => ({
@@ -52,6 +55,26 @@ vi.mock('@/db/schema', () => ({
     deletedAt: 'deletedAt',
     updatedAt: 'updatedAt',
   },
+  documentVersions: {
+    id: 'id',
+    organizationId: 'organizationId',
+    documentId: 'documentId',
+    versionNo: 'versionNo',
+    storageKey: 'storageKey',
+    contentHash: 'contentHash',
+    uploadedBy: 'uploadedBy',
+    uploadedAt: 'uploadedAt',
+    metadata: 'metadata',
+  },
+}));
+
+vi.mock('@/lib/blob-client', () => ({
+  downloadBuffer: mocks.mockDownloadBuffer,
+}));
+
+vi.mock('@/lib/services/ocr-service', () => ({
+  processImageOCR: mocks.mockProcessImageOCR,
+  processPDFOCR: mocks.mockProcessPDFOCR,
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -77,14 +100,14 @@ vi.mock('@/lib/logger', () => ({
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function chain(result: any = undefined) {
+function chain(result: unknown = undefined) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const c: any = {};
+  const c: unknown = {};
   for (const m of ['from', 'where', 'orderBy', 'limit', 'offset', 'groupBy', 'set', 'values', 'returning']) {
     c[m] = vi.fn(() => c);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  c.then = (resolve: any) => resolve(result);
+  c.then = (resolve: unknown) => resolve(result);
   return c;
 }
 
@@ -147,6 +170,12 @@ const FOLDER = {
 describe('document-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockDownloadBuffer.mockResolvedValue(Buffer.from('document text'));
+    mocks.mockProcessImageOCR.mockResolvedValue({ text: 'image text', confidence: 91 });
+    mocks.mockProcessPDFOCR.mockResolvedValue({
+      fullText: 'pdf text',
+      pages: [{ text: 'pdf text', confidence: 96 }],
+    });
   });
 
   afterEach(() => {
@@ -423,18 +452,50 @@ describe('document-service', () => {
   // Version control
   // ================================================================
   describe('createDocumentVersion', () => {
-    it('returns version with generated fields', async () => {
-      const v = await createDocumentVersion('d1', 'https://example.com/file.pdf', 'u1', 'Initial');
+    it('persists version row and returns mapped payload', async () => {
+      mocks.mockFindFirstDoc.mockResolvedValue({ ...DOC, checksum: 'abc', organizationId: 'org-1' });
+      mocks.mockSelect.mockReturnValue(chain([{ versionNo: 1 }]));
+      mocks.mockInsert.mockReturnValue(chain([{
+        id: 'v-2',
+        documentId: 'd1',
+        versionNo: 2,
+        storageKey: 'https://example.com/file.pdf',
+        uploadedBy: 'u1',
+        uploadedAt: new Date('2026-01-01T00:00:00.000Z'),
+      }]));
+
+      const v = await createDocumentVersion('d1', 'https://example.com/file.pdf', 'u1', 'Initial', 'org-1');
       expect(v.documentId).toBe('d1');
-      expect(v.versionNumber).toBe(1);
+      expect(v.versionNumber).toBe(2);
       expect(v.changeDescription).toBe('Initial');
-      expect(v.id).toMatch(/^version-/);
+      expect(v.id).toBe('v-2');
     });
   });
 
   describe('getDocumentVersions', () => {
-    it('returns empty array', async () => {
-      expect(await getDocumentVersions('d1')).toEqual([]);
+    it('returns mapped versions from storage', async () => {
+      const uploadedAt = new Date('2026-01-01T00:00:00.000Z');
+      mocks.mockSelect.mockReturnValue(chain([{
+        id: 'v-1',
+        documentId: 'd1',
+        versionNo: 1,
+        storageKey: 'documents/org-1/sample.pdf',
+        uploadedBy: 'u1',
+        uploadedAt,
+        metadata: { changeDescription: 'first' },
+      }]));
+
+      expect(await getDocumentVersions('d1', 'org-1')).toEqual([
+        {
+          id: 'v-1',
+          documentId: 'd1',
+          versionNumber: 1,
+          fileUrl: 'documents/org-1/sample.pdf',
+          uploadedBy: 'u1',
+          uploadedAt,
+          changeDescription: 'first',
+        },
+      ]);
     });
   });
 
@@ -443,37 +504,70 @@ describe('document-service', () => {
   // ================================================================
   describe('processDocumentOCR', () => {
     it('processes and updates document', async () => {
+      mocks.mockFindFirstDoc.mockResolvedValue({
+        ...DOC,
+        organizationId: 'org-1',
+        mimeType: 'image/png',
+        metadata: { blobKey: 'documents/org-1/test.png' },
+      });
       mocks.mockUpdate.mockReturnValue(chain([DOC]));
-      const result = await processDocumentOCR('d1');
+      const result = await processDocumentOCR('d1', 'org-1');
       expect(result.documentId).toBe('d1');
       expect(result.language).toBe('en');
       expect(result.processedAt).toBeInstanceOf(Date);
+      expect(result.text).toBe('image text');
     });
   });
 
   describe('bulkProcessOCR', () => {
     it('processes all documents', async () => {
+      mocks.mockFindFirstDoc.mockResolvedValue({
+        ...DOC,
+        organizationId: 'org-1',
+        mimeType: 'image/png',
+        metadata: { blobKey: 'documents/org-1/test.png' },
+      });
       mocks.mockUpdate.mockReturnValue(chain([DOC]));
-      const result = await bulkProcessOCR(['d1', 'd2']);
+      const result = await bulkProcessOCR(['d1', 'd2'], 'org-1');
       expect(result.success).toBe(true);
       expect(result.processed).toBe(2);
     });
 
     it('collects errors for failed documents', async () => {
-      mocks.mockUpdate
-        .mockReturnValueOnce(chain([DOC]))
-        .mockImplementationOnce(() => { throw new Error('oops'); });
+      mocks.mockFindFirstDoc
+        .mockResolvedValueOnce({
+          ...DOC,
+          organizationId: 'org-1',
+          mimeType: 'image/png',
+          metadata: { blobKey: 'documents/org-1/test-1.png' },
+        })
+        .mockResolvedValueOnce({
+          ...DOC,
+          organizationId: 'org-1',
+          mimeType: 'image/png',
+          metadata: { blobKey: 'documents/org-1/test-2.png' },
+        });
+      mocks.mockProcessImageOCR
+        .mockResolvedValueOnce({ text: 'ok', confidence: 90 })
+        .mockRejectedValueOnce(new Error('ocr-fail'));
+      mocks.mockUpdate.mockReturnValue(chain([DOC]));
 
-      const result = await bulkProcessOCR(['d1', 'd2']);
+      const result = await bulkProcessOCR(['d1', 'd2'], 'org-1');
       expect(result.success).toBe(false);
       expect(result.processed).toBe(1);
       expect(result.failed).toBe(1);
     });
 
     it('uses fallback message when non-Error is thrown during OCR', async () => {
-      mocks.mockUpdate.mockImplementationOnce(() => { throw 'bad-ocr'; });
+      mocks.mockFindFirstDoc.mockResolvedValue({
+        ...DOC,
+        organizationId: 'org-1',
+        mimeType: 'image/png',
+        metadata: { blobKey: 'documents/org-1/test.png' },
+      });
+      mocks.mockProcessImageOCR.mockImplementationOnce(() => { throw 'bad-ocr'; });
 
-      const result = await bulkProcessOCR(['d1']);
+      const result = await bulkProcessOCR(['d1'], 'org-1');
       expect(result.success).toBe(false);
       expect(result.errors?.[0].error).toBe('Failed to process document OCR');
     });
@@ -518,14 +612,14 @@ describe('document-service', () => {
   describe('bulkMoveDocuments', () => {
     it('moves documents to target folder', async () => {
       mocks.mockUpdate.mockReturnValue(chain());
-      const result = await bulkMoveDocuments(['d1', 'd2'], 'f2');
+      const result = await bulkMoveDocuments(['d1', 'd2'], 'f2', 'org-1');
       expect(result.success).toBe(true);
       expect(result.processed).toBe(2);
     });
 
     it('returns failure on error', async () => {
       mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
-      const result = await bulkMoveDocuments(['d1'], 'f2');
+      const result = await bulkMoveDocuments(['d1'], 'f2', 'org-1');
       expect(result.success).toBe(false);
     });
   });
@@ -533,21 +627,21 @@ describe('document-service', () => {
   describe('bulkUpdateTags', () => {
     it('replaces tags', async () => {
       mocks.mockUpdate.mockReturnValue(chain());
-      const result = await bulkUpdateTags(['d1'], ['new-tag'], 'replace');
+      const result = await bulkUpdateTags(['d1'], ['new-tag'], 'replace', 'org-1');
       expect(result.success).toBe(true);
     });
 
     it('adds tags to existing', async () => {
       mocks.mockSelect.mockReturnValue(chain([{ ...DOC, tags: ['old'] }]));
       mocks.mockUpdate.mockReturnValue(chain([DOC]));
-      const result = await bulkUpdateTags(['d1'], ['new'], 'add');
+      const result = await bulkUpdateTags(['d1'], ['new'], 'add', 'org-1');
       expect(result.success).toBe(true);
     });
 
     it('removes tags', async () => {
       mocks.mockSelect.mockReturnValue(chain([{ ...DOC, tags: ['keep', 'remove'] }]));
       mocks.mockUpdate.mockReturnValue(chain([DOC]));
-      const result = await bulkUpdateTags(['d1'], ['remove'], 'remove');
+      const result = await bulkUpdateTags(['d1'], ['remove'], 'remove', 'org-1');
       expect(result.success).toBe(true);
     });
 
@@ -555,22 +649,41 @@ describe('document-service', () => {
       mocks.mockSelect.mockReturnValue(chain([{ ...DOC, tags: undefined }]));
       mocks.mockUpdate.mockReturnValue(chain([DOC]));
 
-      const result = await bulkUpdateTags(['d1'], ['first'], 'add');
+      const result = await bulkUpdateTags(['d1'], ['first'], 'add', 'org-1');
       expect(result.success).toBe(true);
     });
   });
 
   describe('bulkDeleteDocuments', () => {
     it('soft deletes documents', async () => {
+      mocks.mockSelect.mockReturnValue(chain([
+        { id: 'd1', metadata: {} },
+        { id: 'd2', metadata: {} },
+      ]));
       mocks.mockUpdate.mockReturnValue(chain());
-      const result = await bulkDeleteDocuments(['d1', 'd2']);
+      const result = await bulkDeleteDocuments(['d1', 'd2'], 'org-1');
       expect(result.success).toBe(true);
       expect(result.processed).toBe(2);
     });
 
+    it('skips retained documents and returns conflict errors', async () => {
+      mocks.mockSelect.mockReturnValue(chain([
+        { id: 'd1', metadata: {} },
+        { id: 'd2', metadata: { legalHoldActive: true } },
+      ]));
+      mocks.mockUpdate.mockReturnValue(chain());
+
+      const result = await bulkDeleteDocuments(['d1', 'd2'], 'org-1');
+      expect(result.success).toBe(false);
+      expect(result.processed).toBe(1);
+      expect(result.failed).toBe(1);
+      expect(result.errors?.[0]?.id).toBe('d2');
+    });
+
     it('returns failure on error', async () => {
+      mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
       mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
-      const result = await bulkDeleteDocuments(['d1']);
+      const result = await bulkDeleteDocuments(['d1'], 'org-1');
       expect(result.success).toBe(false);
     });
   });

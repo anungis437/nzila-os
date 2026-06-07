@@ -520,7 +520,7 @@ export async function addAttachmentToNote(
     if (!note) return null;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const existingAttachments = (note.attachments as any[]) || [];
+    const existingAttachments = (note.attachments as unknown[]) || [];
     const newAttachment = {
       ...attachment,
       uploadedAt: new Date().toISOString(),
@@ -528,7 +528,7 @@ export async function addAttachmentToNote(
 
     const updated = await updateBargainingNote(noteId, {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      attachments: [...existingAttachments, newAttachment] as any,
+      attachments: [...existingAttachments, newAttachment] as unknown,
     });
 
     return updated;

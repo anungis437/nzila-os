@@ -98,9 +98,9 @@ export async function fetchWithCSRF(
  */
 export function setupAxiosCSRF(axiosInstance: unknown): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (axiosInstance as any).interceptors.request.use(
+  (axiosInstance as unknown).interceptors.request.use(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (config: any) => {
+    (config: unknown) => {
       const method = config.method?.toUpperCase();
 
       // Add CSRF token for state-changing requests
@@ -290,7 +290,7 @@ export async function submitJSONWithCSRF<T = any>(
 
   if (!response.ok) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const error: unknown = new Error(`HTTP ${response.status}: ${response.statusText}`);
     error.response = response;
     throw error;
   }

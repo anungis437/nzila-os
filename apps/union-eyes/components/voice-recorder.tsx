@@ -100,7 +100,7 @@ toast({
         variant: "destructive",
       });
     }
-  }, [maxDuration, toast]);
+  }, [maxDuration, t, toast]);
 
   // Stop recording
   const stopRecording = useCallback(() => {
@@ -119,7 +119,7 @@ toast({
         description: `${t("toast.duration")}: ${formatTime(recordingTime)}`,
       });
     }
-  }, [isRecording, recordingTime, toast]);
+  }, [isRecording, recordingTime, t, toast]);
 
   // Pause/Resume recording
   const togglePause = useCallback(() => {

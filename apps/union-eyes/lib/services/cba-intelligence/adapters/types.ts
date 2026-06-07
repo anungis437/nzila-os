@@ -66,3 +66,5 @@ export interface IngestionAdapter {
    */
   fetch(sourceUrl: string, config: Record<string, unknown>): Promise<FetchedContent>;
 }
+
+export const ADAPTER_TYPES_VERSION = "1.0.0";

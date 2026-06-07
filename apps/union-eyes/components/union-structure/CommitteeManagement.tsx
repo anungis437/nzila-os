@@ -138,7 +138,7 @@ export function CommitteeManagement({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<FormData, any, FormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as unknown,
     defaultValues: {
       name: "",
       committeeType: "bargaining",
@@ -254,7 +254,7 @@ export function CommitteeManagement({
     form.reset({
       name: committee.name,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      committeeType: committee.committeeType as any,
+      committeeType: committee.committeeType as unknown,
       status: committee.status,
       unitId: committee.unitId || undefined,
       worksiteId: committee.worksiteId || undefined,

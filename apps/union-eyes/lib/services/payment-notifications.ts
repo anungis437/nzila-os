@@ -13,7 +13,7 @@ import { logger } from "@/lib/logger";
 
 // DB table may have columns (phone, firebaseToken, organizationId) not yet in drizzle schema
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const profiles = profilesSchema as any;
+const profiles = profilesSchema as unknown;
 
 // ============================================================================
 // PAYMENT NOTIFICATION HANDLERS
@@ -485,7 +485,7 @@ export async function sendBulkNotification(
 
     // Build payload for each recipient
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const payloads: any[] = [];
+    const payloads: unknown[] = [];
 
     for (const recipientId of recipientIds) {
       const recipient = recipientMap.get(recipientId);
@@ -495,9 +495,9 @@ export async function sendBulkNotification(
         organizationId,
         recipientId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        type: type as any,
+        type: type as unknown,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        priority: priority as any,
+        priority: priority as unknown,
         subject,
         body: message,
         userId,

@@ -312,7 +312,7 @@ export function ChartConfigPanel({
     onChange({
       ...config,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [key]: { ...(config[key] as any), ...updates },
+      [key]: { ...(config[key] as unknown), ...updates },
     });
   };
 
@@ -560,7 +560,7 @@ export function ChartConfigPanel({
                 <Select
                   value={config.legend?.position || 'bottom'}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onValueChange={(value: any) =>
+                  onValueChange={(value: unknown) =>
                     updateNestedConfig('legend', { position: value })
                   }
                 >
@@ -609,7 +609,7 @@ export function ChartConfigPanel({
                 <Select
                   value={config.dataLabels?.position || 'top'}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onValueChange={(value: any) =>
+                  onValueChange={(value: unknown) =>
                     updateNestedConfig('dataLabels', { position: value })
                   }
                 >

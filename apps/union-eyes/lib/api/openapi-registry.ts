@@ -60,7 +60,7 @@ export function registerApiRoute(
 
   const parameters = options.query
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ? buildQueryParams(options.query) as any
+    ? buildQueryParams(options.query) as unknown
     : undefined;
 
   registerRoute(path, method, {
@@ -112,7 +112,7 @@ function buildQueryParams(schema: z.ZodTypeAny) {
       in: 'query' as const,
       required: !isOptional,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      schema: zodToOpenAPI(zodField as z.ZodType<unknown>) as any,
+      schema: zodToOpenAPI(zodField as z.ZodType<unknown>) as unknown,
     };
   });
 }

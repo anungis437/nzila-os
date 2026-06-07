@@ -115,11 +115,11 @@ class AIPipeline {
       const templateContext: TemplateContext = {
         query,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        jurisdiction: (context.jurisdiction || 'federal') as any,
+        jurisdiction: (context.jurisdiction || 'federal') as unknown,
         userRole: 'member',
         intent: this.classifyIntent(query),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        orgs: [] as any[],
+        orgs: [] as unknown[],
         retrievedContext: sources.map(s => s.chunk.content),
         sla: 'standard',
         organizationId: context.organizationId,
@@ -230,7 +230,7 @@ class AIPipeline {
       metadata: {
         source: metadata.source,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        type: extraction.documentType as any,
+        type: extraction.documentType as unknown,
         jurisdiction: metadata.jurisdiction,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -252,9 +252,9 @@ class AIPipeline {
    */
   private async generateResponse(context: TemplateContext): Promise<string> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const prompt = (templateEngine as any).buildPrompt('general_query', context);
+    const prompt = (templateEngine as unknown).buildPrompt('general_query', context);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await (templateEngine as any).execute(prompt, context);
+    const response = await (templateEngine as unknown).execute(prompt, context);
     return response;
   }
 

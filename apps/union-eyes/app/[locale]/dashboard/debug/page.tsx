@@ -33,7 +33,7 @@ export default async function DebugPage({ params }: PageProps) {
   
   // Get assigned claims — requires org slug; skipped in debug page (dev tool only, no slug available).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const assignedClaims: any[] = [];
+  const assignedClaims: unknown[] = [];
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -90,7 +90,7 @@ export default async function DebugPage({ params }: PageProps) {
           ) : (
             <div className="space-y-2">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {assignedClaims.map((claim: any) => (
+              {assignedClaims.map((claim: unknown) => (
                 <div key={claim.id} className="p-3 border rounded">
                   <p className="font-medium">{claim.claimNumber}</p>
                   <p className="text-sm text-muted-foreground">{claim.title}</p>

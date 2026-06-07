@@ -182,7 +182,7 @@ export class SunLifeAdapter extends BaseIntegration {
         } catch (error) {
           const errorMsg = `Failed to sync ${entity}: ${error instanceof Error ? error.message : 'Unknown'}`;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          errors.push({ entity, error: errorMsg } as any);
+          errors.push({ entity, error: errorMsg } as unknown);
           this.logError('sync', error, { entity });
         }
       }
@@ -206,7 +206,7 @@ export class SunLifeAdapter extends BaseIntegration {
         recordsUpdated,
         recordsFailed,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        errors: [{ entity: 'sync', error: error instanceof Error ? error.message : 'Unknown error' }] as any,
+        errors: [{ entity: 'sync', error: error instanceof Error ? error.message : 'Unknown error' }] as unknown,
       };
     }
   }

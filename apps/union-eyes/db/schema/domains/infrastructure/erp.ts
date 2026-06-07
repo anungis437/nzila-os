@@ -404,7 +404,7 @@ export const syncJobs = pgTable('sync_jobs', {
     errorCode: string;
     errorMessage: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details?: any;
+    details?: unknown;
     timestamp: Date;
   }>>(),
   
@@ -437,9 +437,9 @@ export const financialAuditLog = pgTable('financial_audit_log', {
   changes: jsonb('changes').$type<Array<{
     field: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    oldValue: any;
+    oldValue: unknown;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    newValue: any;
+    newValue: unknown;
   }>>(),
   
   metadata: jsonb('metadata'),

@@ -237,7 +237,7 @@ describe('ComplianceVerifier — verifyChain', () => {
     }
 
     // Corrupt entry 2 to have null previousHash
-    chain[2] = { ...chain[2]!, previousHash: null as any }
+    chain[2] = { ...chain[2]!, previousHash: null as unknown }
 
     const result = await verifier.verifyChain(ORG_ID)
 

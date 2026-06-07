@@ -97,7 +97,7 @@ export function usePWAInstall(): {
     // Check if running in standalone mode
     const _isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        (window.navigator as any).standalone === true;
+                        (window.navigator as unknown).standalone === true;
 
     // Check if can install
     const handleBeforeInstall = (e: Event) => {
@@ -117,9 +117,9 @@ export function usePWAInstall(): {
     if (!deferredPrompt) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (deferredPrompt as any).prompt();
+    (deferredPrompt as unknown).prompt();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { outcome } = await (deferredPrompt as any).userChoice;
+    const { outcome } = await (deferredPrompt as unknown).userChoice;
     
     if (outcome === 'accepted') {
       setCanInstall(false);
@@ -132,7 +132,7 @@ export function usePWAInstall(): {
     isStandalone: typeof window !== 'undefined' && 
       (window.matchMedia('(display-mode: standalone)').matches ||
        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-       (window.navigator as any).standalone === true),
+       (window.navigator as unknown).standalone === true),
     isInstalled: typeof window !== 'undefined' && 
       window.matchMedia('(display-mode: standalone)').matches,
     canInstall,
@@ -159,11 +159,11 @@ export function useNetworkStatus(): {
 
     const updateStatus = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const connection = (navigator as any).connection || 
+      const connection = (navigator as unknown).connection || 
                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                       (navigator as any).mozConnection || 
+                       (navigator as unknown).mozConnection || 
                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                       (navigator as any).webkitConnection;
+                       (navigator as unknown).webkitConnection;
       
       setStatus({
         isOnline: navigator.onLine,
@@ -179,7 +179,7 @@ export function useNetworkStatus(): {
 
     // Listen for connection changes
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const connection = (navigator as any).connection;
+    const connection = (navigator as unknown).connection;
     if (connection) {
       connection.addEventListener('change', updateStatus);
     }

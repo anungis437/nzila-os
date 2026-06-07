@@ -238,7 +238,7 @@ export class LinkedInAPIClient {
     const orgs: LinkedInOrganization[] = [];
     for (const element of response.elements || []) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const org = (element as any)['organization~'];
+      const org = (element as unknown)['organization~'];
       if (org) {
         orgs.push(org as LinkedInOrganization);
       }
@@ -431,7 +431,7 @@ export class LinkedInAPIClient {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await this.makeRequest<any>(
+    const response = await this.makeRequest<unknown>(
       '/assets?action=registerUpload',
       {},
       {

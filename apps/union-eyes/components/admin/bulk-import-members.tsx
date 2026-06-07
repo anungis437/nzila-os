@@ -43,7 +43,7 @@ interface ImportPreview {
   invalidRows: number;
   errors: ValidationError[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  preview: any[];
+  preview: unknown[];
 }
 
 interface BulkImportMembersProps {
@@ -65,7 +65,7 @@ export function BulkImportMembers({
   const [isImporting, setIsImporting] = useState(false);
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [importResult, setImportResult] = useState<any>(null);
+  const [importResult, setImportResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Download CSV template

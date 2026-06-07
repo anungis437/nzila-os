@@ -159,7 +159,7 @@ describe('IndigenousDataService', () => {
 
     it('denies unknown sensitivity', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await service.checkAccessPermission('user-1', 'x', 'unknown' as any);
+      const result = await service.checkAccessPermission('user-1', 'x', 'unknown' as unknown);
       expect(result.hasAccess).toBe(false);
     });
   });

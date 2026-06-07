@@ -75,7 +75,7 @@ export const collectiveAgreements = pgTable("collective_agreements", {
     appendices?: Array<{ name: string; description: string; pageStart: number }>;
     wageGrid?: Array<{ classification: string; step: number; rate: number; effectiveDate: string }>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    benefitSummary?: { [key: string]: any };
+    benefitSummary?: { [key: string]: unknown };
   }>(),
   
   // AI/Search capabilities

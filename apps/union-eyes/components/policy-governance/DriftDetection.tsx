@@ -15,21 +15,29 @@ interface DriftSession {
 
 export default function DriftDetection() {
   const [sessions, setSessions] = useState<DriftSession[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [policyId, setPolicyId] = useState('')
+
+  const loadSessions = useCallback(async (nextPolicyId: string) => {
+    const res = await fetch(`/api/governance/lifecycle/policies/${nextPolicyId}/replay`)
+    const data = await res.json()
+    setSessions((data.sessions ?? []).filter((s: DriftSession) => s.driftCount !== null))
+    setLoading(false)
+  }, [])
 
   const fetchSessions = useCallback(async () => {
     if (!policyId) return
     setLoading(true)
-    const res = await fetch(`/api/governance/lifecycle/policies/${policyId}/replay`)
-    const data = await res.json()
-    setSessions((data.sessions ?? []).filter((s: DriftSession) => s.driftCount !== null))
-    setLoading(false)
-  }, [policyId])
+    await loadSessions(policyId)
+  }, [policyId, loadSessions])
 
   useEffect(() => {
-    if (policyId) { fetchSessions() } else { setLoading(false) }
-  }, [policyId, fetchSessions])
+    if (!policyId) return
+    const timeoutId = window.setTimeout(() => {
+      void loadSessions(policyId)
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
+  }, [policyId, loadSessions])
 
   const driftRate = sessions.length > 0
     ? sessions.reduce((acc, s) => acc + (s.driftCount ?? 0), 0) / sessions.reduce((acc, s) => acc + (s.totalEvents ?? 1), 0)

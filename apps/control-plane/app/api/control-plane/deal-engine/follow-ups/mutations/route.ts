@@ -5,7 +5,6 @@ import { getFollowUpAdapter } from "@/server/adapters";
 import { emitDealEvent, DEAL_ENGINE_EVENTS } from "@/server/adapters";
 import { recordDealAudit } from "@/server/adapters";
 import { logger } from "@/lib/telemetry";
-import { followUpPrioritySchema } from "@nzila/deal-engine/types";
 
 export const dynamic = "force-dynamic";
 

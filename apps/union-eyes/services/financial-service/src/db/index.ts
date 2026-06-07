@@ -54,7 +54,7 @@ function getDb() {
  * Throws on first access if DATABASE_URL is not set.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const db: ReturnType<typeof drizzle<any>> = new Proxy({} as any, {
+export const db: ReturnType<typeof drizzle<typeof schema>> = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
   get(_target, prop) {
     return (getDb() as unknown as Record<string | symbol, unknown>)[prop];
   },

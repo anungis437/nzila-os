@@ -35,7 +35,7 @@ export default function BylawsViewer({ organizationId, canEdit = false }: Bylaws
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setBylaws(items.map((b: any, i: number) => ({
+        setBylaws(items.map((b: unknown, i: number) => ({
           id: String(b.id ?? i + 1),
           article: b.article ?? `Article ${String.fromCharCode(73 + i)}`,
           title: b.title ?? '',

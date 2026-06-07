@@ -424,7 +424,7 @@ async function main() {
       description: CLC_DEMO_ORG.description,
       organizationType: CLC_DEMO_ORG.organizationType,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sectors: CLC_DEMO_ORG.sectors as any,
+      sectors: CLC_DEMO_ORG.sectors as unknown,
       status: CLC_DEMO_ORG.status,
       memberCount: CLC_DEMO_ORG.memberCount,
       website: CLC_DEMO_ORG.website,

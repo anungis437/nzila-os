@@ -81,7 +81,7 @@ describe('Reconstruction Burden Index', () => {
   });
 
   it('classifies moderate for 3 <= score < 5', () => {
-    const r = computeReconstructionBurden({
+    computeReconstructionBurden({
       exposedCarriers: 2,
       institutionCriticalCarriers: 1,
       densityIndex: 0,

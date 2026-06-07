@@ -131,15 +131,16 @@ describe('logger', () => {
 
     it('redacts nested objects', () => {
       const result = redactFields({ user: { email: 'a@b.com', id: '1' } })
-      expect((result.user as any).email).toBe('[REDACTED]')
-      expect((result.user as any).id).toBe('1')
+      const user = result.user as { email?: string; id?: string }
+      expect(user.email).toBe('[REDACTED]')
+      expect(user.id).toBe('1')
     })
 
     it('redacts arrays of objects', () => {
       const result = redactFields({ items: [{ token: 'abc' }, { value: 99 }] })
-      const items = result.items as any[]
-      expect(items[0].token).toBe('[REDACTED]')
-      expect(items[1].value).toBe(99)
+      const items = result.items as Array<{ token?: string; value?: number }>
+      expect(items[0]?.token).toBe('[REDACTED]')
+      expect(items[1]?.value).toBe(99)
     })
 
     it('redacts Bearer tokens in string values', () => {

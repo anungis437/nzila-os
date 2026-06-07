@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      line_items: buildLineItems(tierId, currency) as any,
+      line_items: buildLineItems(tierId, currency) as unknown,
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {

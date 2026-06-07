@@ -34,7 +34,7 @@ const ACTION_COLOR: Record<string, string> = {
   withdrawn: 'text-muted-foreground',
 }
 
-export function ApprovalChainStatusCard({ policyId, status, className }: ApprovalChainStatusProps) {
+export function ApprovalChainStatusCard({ policyId: _policyId, status, className }: ApprovalChainStatusProps) {
   const [expanded, setExpanded] = useState(false)
 
   if (!status) return (
@@ -78,7 +78,7 @@ export function ApprovalChainStatusCard({ policyId, status, className }: Approva
               <span className={cn('font-medium capitalize', ACTION_COLOR[a.action] ?? '')}>{a.action}</span>
               <span className="text-muted-foreground">by {a.actorRole}</span>
               <span className="text-muted-foreground ml-auto">{new Date(a.actedAt).toLocaleDateString()}</span>
-              {a.rationale && <span className="block w-full text-muted-foreground italic pl-2">"{a.rationale}"</span>}
+              {a.rationale && <span className="block w-full text-muted-foreground italic pl-2">&ldquo;{a.rationale}&rdquo;</span>}
             </li>
           ))}
         </ol>

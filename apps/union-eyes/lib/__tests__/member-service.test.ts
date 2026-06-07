@@ -65,14 +65,14 @@ vi.mock('@/lib/logger', () => ({
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function chain(result: any = undefined) {
+function chain(result: unknown = undefined) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const c: any = {};
+  const c: unknown = {};
   for (const m of ['from', 'where', 'orderBy', 'limit', 'offset', 'groupBy', 'set', 'values', 'returning']) {
     c[m] = vi.fn(() => c);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  c.then = (resolve: any) => resolve(result);
+  c.then = (resolve: unknown) => resolve(result);
   return c;
 }
 

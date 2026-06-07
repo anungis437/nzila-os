@@ -317,7 +317,7 @@ function QuestionEditor({
 }: {
   index: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form: any;
+  form: unknown;
   onRemove: () => void;
   onDuplicate: () => void;
   onMoveUp?: () => void;
@@ -445,14 +445,14 @@ function QuestionEditor({
 
 // Multiple Choice Editor
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function MultipleChoiceEditor({ index, form }: { index: number; form: any }) {
+function MultipleChoiceEditor({ index, form }: { index: number; form: unknown }) {
   const options = form.watch(`questions.${index}.options`) || [];
 
   return (
     <div className="space-y-2">
       <Label>Answer Options</Label>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {options.map((_: any, optionIndex: number) => (
+      {options.map((_: unknown, optionIndex: number) => (
         <div key={optionIndex} className="flex gap-2 items-center">
           <FormField
             control={form.control}
@@ -483,7 +483,7 @@ function MultipleChoiceEditor({ index, form }: { index: number; form: any }) {
 
 // True/False Editor
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function TrueFalseEditor({ index, form }: { index: number; form: any }) {
+function TrueFalseEditor({ index, form }: { index: number; form: unknown }) {
   return (
     <FormField
       control={form.control}
@@ -515,7 +515,7 @@ function TrueFalseEditor({ index, form }: { index: number; form: any }) {
 
 // Short Answer Editor
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ShortAnswerEditor({ index, form }: { index: number; form: any }) {
+function ShortAnswerEditor({ index, form }: { index: number; form: unknown }) {
   return (
     <FormField
       control={form.control}

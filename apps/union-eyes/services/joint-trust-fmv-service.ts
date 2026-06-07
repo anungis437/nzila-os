@@ -25,9 +25,9 @@ export interface FMVBenchmarkData {
   fmvMedian: number;
   region: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dataSources?: any[];
+  dataSources?: unknown[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  comparableTransactions?: any[];
+  comparableTransactions?: unknown[];
 }
 
 export interface ProcurementRequestData {
@@ -45,7 +45,7 @@ export interface BidSubmission {
   bidderContact: string;
   bidAmount: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bidDocuments?: any[];
+  bidDocuments?: unknown[];
   bidNotes?: string;
 }
 
@@ -537,7 +537,7 @@ export class JointTrustFMVService {
     performedByRole?: string;
     complianceImpact?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: any;
+    metadata?: unknown;
   }) {
     await db.insert(fmvAuditLog).values({
       actionType: params.actionType,

@@ -32,7 +32,7 @@ export async function downloadMultiple(
   userId: string
 ): Promise<{ stream: Readable; filename: string }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
+  const db = await getDatabase() as unknown;
 
   // Fetch all documents using Drizzle ORM
   const docs = await db
@@ -139,7 +139,7 @@ export async function bulkTag(
   userId: string
 ): Promise<BatchOperationResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
+  const db = await getDatabase() as unknown;
   const _dbConfig = getDatabaseConfig();
 
   const progress: BatchOperationProgress = {
@@ -227,7 +227,7 @@ export async function bulkDelete(
   userRole: string
 ): Promise<BatchOperationResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
+  const db = await getDatabase() as unknown;
 
   const progress: BatchOperationProgress = {
     total: documentIds.length,
@@ -326,7 +326,7 @@ export async function moveToFolder(
   userId: string
 ): Promise<BatchOperationResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
+  const db = await getDatabase() as unknown;
 
   const progress: BatchOperationProgress = {
     total: documentIds.length,
@@ -424,7 +424,7 @@ export async function bulkCopy(
   userId: string
 ): Promise<BatchOperationResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
+  const db = await getDatabase() as unknown;
 
   const progress: BatchOperationProgress = {
     total: documentIds.length,
@@ -544,7 +544,7 @@ export async function bulkUpdateMetadata(
   userId: string
 ): Promise<BatchOperationResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
+  const db = await getDatabase() as unknown;
 
   const progress: BatchOperationProgress = {
     total: documentIds.length,
@@ -636,7 +636,7 @@ export async function validateDocumentPermissions(
   deniedDocuments: string[];
 }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
+  const db = await getDatabase() as unknown;
 
   // Admins and union leaders have access to all documents
   if (userRole === 'admin' || userRole === 'union_leader') {

@@ -24,6 +24,14 @@ import { logger } from '@/lib/logger';
 
 const router = Router();
 
+type AuthUser = {
+  id?: string;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as unknown as { user: AuthUser }).user;
+}
+
 // ============================================================================
 // VALIDATION SCHEMAS
 // ============================================================================
@@ -166,8 +174,7 @@ router.post('/alerts/process', async (req: Request, res: Response) => {
 router.post('/reports/weekly', async (req: Request, res: Response) => {
   try {
     const organizationId = getOrganizationIdFromHeaders(req);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userId = (req as any).user?.id;
+    const userId = getAuthUser(req).id;
 
     if (!userId) {
       return res.status(400).json({

@@ -48,7 +48,7 @@ export function SankeyChart({
   linkOpacity = 0.5,
 }: SankeyChartProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0];
 
@@ -70,9 +70,9 @@ export function SankeyChart({
     // Link tooltip
     if (data.payload.source && data.payload.target) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sourceName = data.nodes.find((n: any) => n.index === data.payload.source)?.name;
+      const sourceName = data.nodes.find((n: unknown) => n.index === data.payload.source)?.name;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const targetName = data.nodes.find((n: any) => n.index === data.payload.target)?.name;
+      const targetName = data.nodes.find((n: unknown) => n.index === data.payload.target)?.name;
 
       return (
         <div className="bg-white p-3 border rounded-lg shadow-lg">
@@ -99,7 +99,7 @@ export function SankeyChart({
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customNode = (props: any) => {
+  const customNode = (props: unknown) => {
     const { x, y, width, height, _index, payload } = props;
     const isOut = x + width + 6 > props.containerWidth;
 
@@ -136,7 +136,7 @@ export function SankeyChart({
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customLink = (props: any) => {
+  const customLink = (props: unknown) => {
     const { sourceX, targetX, sourceY, targetY, sourceControlX, targetControlX, linkWidth, _payload } = props;
 
     return (

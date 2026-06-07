@@ -148,7 +148,7 @@ export class PCIComplianceService {
 
     // Copy to requirements table
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const requirements = templateRequirements.map((template: any) => ({
+    const requirements = templateRequirements.map((template: unknown) => ({
       assessmentId,
       organizationId,
       requirementNumber: template.requirement_number,
@@ -256,7 +256,7 @@ export class PCIComplianceService {
     const { data: orgs } = await this.supabase
       .from('organizations')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .select('id') as any;
+      .select('id') as unknown;
 
     if (!orgs) return [];
 
@@ -264,11 +264,11 @@ export class PCIComplianceService {
 
     for (const org of orgs) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const latestScan = await this.getLatestQuarterlyScan((org as any).id);
+      const latestScan = await this.getLatestQuarterlyScan((org as unknown).id);
       
       if (!latestScan) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        overdue.push({ organizationId: (org as any).id, daysSinceLastScan: 999 });
+        overdue.push({ organizationId: (org as unknown).id, daysSinceLastScan: 999 });
         continue;
       }
 
@@ -278,7 +278,7 @@ export class PCIComplianceService {
 
       if (daysSinceLastScan > 90) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        overdue.push({ organizationId: (org as any).id, daysSinceLastScan });
+        overdue.push({ organizationId: (org as unknown).id, daysSinceLastScan });
       }
     }
 
@@ -326,7 +326,7 @@ export class PCIComplianceService {
 
     for (const key of keys) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const keyAny = key as any;
+      const keyAny = key as unknown;
       const daysSinceRotation = Math.floor(
         (Date.now() - new Date(keyAny.rotated_at).getTime()) / (1000 * 60 * 60 * 24)
       );

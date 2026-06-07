@@ -338,7 +338,7 @@ export class BillingScheduler {
       .select({ id: organizations.id, slug: organizations.slug, email: organizations.email })
       .from(organizations)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(or(eq(organizations.id, organizationId as any), eq(organizations.slug, organizationId)))
+      .where(or(eq(organizations.id, organizationId as unknown), eq(organizations.slug, organizationId)))
       .limit(1);
 
     const orgIdentifiers = new Set<string>();

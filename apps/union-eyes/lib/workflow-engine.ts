@@ -77,7 +77,7 @@ export const PRIORITY_MULTIPLIERS = {
  */
 async function getMemberName(
   memberId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx: RLSTx
 ): Promise<string> {
   try {
@@ -187,12 +187,12 @@ export async function updateClaimStatus(
   newStatus: ClaimStatus,
   userId: string,
   notes?: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ): Promise<{ success: boolean; error?: string; claim?: unknown }> {
   // If no transaction provided, wrap in withRLSContext
   if (!tx) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (transaction: RLSTx) => {
       return updateClaimStatus(claimNumber, newStatus, userId, notes, transaction);
     });
@@ -224,7 +224,7 @@ export async function updateClaimStatus(
       assignedTo: claim.assignedTo || undefined,
       organizationId: claim.organizationId,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any]);
+    } as unknown]);
 
     const hasUnresolvedCriticalSignals = signals.some(
       signal => signal.severity === 'critical' && signal.actionable
@@ -533,11 +533,11 @@ export async function updateClaimStatusById(
   newStatus: ClaimStatus,
   userId: string,
   notes?: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ): Promise<{ success: boolean; error?: string; claim?: unknown }> {
   if (!tx) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (transaction: RLSTx) => {
       return updateClaimStatusById(claimId, newStatus, userId, notes, transaction);
     });
@@ -717,12 +717,12 @@ export async function addClaimNote(
   message: string,
   userId: string,
   isInternal: boolean = true,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ): Promise<{ success: boolean; error?: string }> {
   // If no transaction provided, wrap in withRLSContext
   if (!tx) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (transaction: RLSTx) => {
       return addClaimNote(claimNumber, message, userId, isInternal, transaction);
     });

@@ -128,7 +128,7 @@ export class SignatureService {
         requireAuthentication: data.requireAuthentication || false,
         sequentialSigning: data.sequentialSigning || false,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        metadata: data.metadata as any,
+        metadata: data.metadata as unknown,
       })
       .returning();
 
@@ -284,7 +284,7 @@ return false;
           .update(signatureDocuments)
           .set({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            status: status.status as any,
+            status: status.status as unknown,
             updatedAt: new Date(),
             completedAt:
               status.status === "completed" ? new Date() : undefined,
@@ -389,7 +389,7 @@ return false;
         ipAddress: data.ipAddress,
         userAgent: data.userAgent,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        geolocation: data.geolocation as any,
+        geolocation: data.geolocation as unknown,
         updatedAt: new Date(),
       })
       .where(eq(documentSigners.id, data.signerId))
@@ -614,7 +614,7 @@ export class AuditTrailService {
       ...data,
       timestamp: new Date(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as unknown);
   }
 
   static async getDocumentAudit(documentId: string) {

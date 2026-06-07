@@ -222,7 +222,7 @@ export function GrievanceIntakeForm({
 
   const form = useForm<GrievanceFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(fullSchema) as any,
+    resolver: zodResolver(fullSchema) as unknown,
     defaultValues: defaults,
     mode: "onTouched",
   });
@@ -246,7 +246,7 @@ export function GrievanceIntakeForm({
     const fields = STEP_FIELDS[currentStep];
     if (!fields || fields.length === 0) return true;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return form.trigger(fields as any);
+    return form.trigger(fields as unknown);
   };
 
   const handleNext = async () => {

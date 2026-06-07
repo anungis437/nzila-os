@@ -1,6 +1,6 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-06-02T14:54:33.879Z
+> Generated: 2026-06-05T12:51:08.003Z
 
 ## Summary
 
@@ -2493,13 +2493,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 105 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 108 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 108 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 108 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 108 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 108 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 108 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 108 days old — may be stale
 
 ## missing-required-doc (3)
 

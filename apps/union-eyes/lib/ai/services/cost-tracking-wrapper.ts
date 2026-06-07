@@ -30,7 +30,7 @@ export interface LLMRequest {
   maxTokens?: number;
   temperature?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any; // Allow other provider-specific options
+  [key: string]: unknown; // Allow other provider-specific options
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -232,7 +232,7 @@ export class CostTrackingWrapper {
    */
   private extractTokenUsage(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    response: any,
+    response: unknown,
     provider: 'openai' | 'anthropic' | 'google'
   ): {
     inputTokens: number;
@@ -282,7 +282,7 @@ export class CostTrackingWrapper {
    * Extract response text for token estimation
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private extractResponseText(response: any): string {
+  private extractResponseText(response: unknown): string {
     // OpenAI
     if (response?.choices?.[0]?.message?.content) {
       return response.choices[0].message.content;
@@ -407,7 +407,7 @@ export class CostTrackingWrapper {
         })
         .from(organizations)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .where(or(eq(organizations.id, alert.organizationId as any), eq(organizations.slug, alert.organizationId)))
+        .where(or(eq(organizations.id, alert.organizationId as unknown), eq(organizations.slug, alert.organizationId)))
         .limit(1);
 
       const orgIdentifiers = new Set<string>();

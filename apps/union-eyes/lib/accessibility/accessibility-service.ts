@@ -72,12 +72,12 @@ export class AccessibilityAuditManager {
     try {
       // Run axe-core scan via Playwright (see runAxeScan below).
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const scanResults = await this.runAxeScan(audit[0].targetUrl) as any;
+      const scanResults = await this.runAxeScan(audit[0].targetUrl) as unknown;
       
       // Process and save issues
       const issues: NewAccessibilityIssue[] = scanResults.violations.map(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (violation: any) => ({
+        (violation: unknown) => ({
           auditId,
           organizationId: audit[0].organizationId,
           issueTitle: violation.description,
@@ -212,7 +212,7 @@ export class AccessibilityAuditManager {
     if (options.severity && options.severity.length > 0) {
       query = query.where(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        inArray(accessibilityIssues.severity as any, options.severity)
+        inArray(accessibilityIssues.severity as unknown, options.severity)
       );
     }
     
@@ -225,7 +225,7 @@ export class AccessibilityAuditManager {
     if (options.status) {
       query = query.where(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        eq(accessibilityIssues.status as any, options.status)
+        eq(accessibilityIssues.status as unknown, options.status)
       );
     }
     

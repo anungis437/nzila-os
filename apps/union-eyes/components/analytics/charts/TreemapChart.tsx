@@ -29,16 +29,16 @@ export interface TreemapChartProps {
       name: string;
       size: number;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [key: string]: any;
+      [key: string]: unknown;
     }>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
   title?: string;
   colors?: string[];
   height?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onNodeClick?: (data: any) => void;
+  onNodeClick?: (data: unknown) => void;
 }
 
 // ============================================================================
@@ -63,7 +63,7 @@ export function TreemapChart({
   onNodeClick,
 }: TreemapChartProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
 
@@ -93,7 +93,7 @@ export function TreemapChart({
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomContent = (props: any) => {
+  const CustomContent = (props: unknown) => {
     const { x, y, width, height, index, name, size } = props;
     
     if (width < 40 || height < 40) return null;

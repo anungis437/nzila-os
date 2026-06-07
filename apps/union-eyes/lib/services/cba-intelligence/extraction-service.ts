@@ -9,7 +9,7 @@ import {
   extractionStatusEnum,
   clauseFamilyEnum,
 } from "@/db/schema";
-import { eq, and, desc, sql, type SQL } from "drizzle-orm";
+import { eq, and, desc, ilike, or, sql, type SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { createHash } from "crypto";
 
@@ -48,6 +48,7 @@ export interface AgreementFilters {
   jurisdiction?: string;
   sector?: string;
   reviewStatus?: string;
+  search?: string;
   employerLike?: string;
   unionLike?: string;
 }
@@ -266,6 +267,17 @@ export async function listAgreements(
   if (filters.jurisdiction) conditions.push(eq(cbaIntelAgreements.jurisdiction, filters.jurisdiction));
   if (filters.sector) conditions.push(eq(cbaIntelAgreements.sector, filters.sector));
   if (filters.reviewStatus) conditions.push(eq(cbaIntelAgreements.reviewStatus, filters.reviewStatus));
+  if (filters.search) {
+    const searchTerm = `%${filters.search}%`;
+    conditions.push(
+      or(
+        ilike(cbaIntelAgreements.title, searchTerm),
+        ilike(cbaIntelAgreements.employerNormalized, searchTerm),
+        ilike(cbaIntelAgreements.unionNormalized, searchTerm),
+        ilike(cbaIntelAgreements.localEntity, searchTerm),
+      )!,
+    );
+  }
   if (filters.employerLike) {
     conditions.push(sql`${cbaIntelAgreements.employerNormalized} ILIKE ${'%' + filters.employerLike + '%'}`);
   }

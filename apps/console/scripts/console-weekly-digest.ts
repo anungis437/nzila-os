@@ -20,6 +20,8 @@ interface DigestBundle {
   orgId: string
 }
 
+type EmailProvider = 'resend' | 'sendgrid' | 'mailgun'
+
 function isSchemaCompatibilityError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const maybePg = error as { code?: string; message?: string }
@@ -176,11 +178,13 @@ async function sendEmailDigest(bundle: DigestBundle): Promise<number> {
   const recipients = splitCsv(getEnv('WEEKLY_DIGEST_EMAIL_TO'))
   if (!provider || recipients.length === 0) return 0
 
-  const adapter = provider === 'resend'
+  const providerName = provider as EmailProvider
+
+  const adapter = providerName === 'resend'
     ? resendAdapter
-    : provider === 'sendgrid'
+    : providerName === 'sendgrid'
       ? sendgridAdapter
-      : provider === 'mailgun'
+      : providerName === 'mailgun'
         ? mailgunAdapter
         : null
 
@@ -188,12 +192,12 @@ async function sendEmailDigest(bundle: DigestBundle): Promise<number> {
     throw new Error(`Unsupported WEEKLY_DIGEST_EMAIL_PROVIDER: ${provider}`)
   }
 
-  const credentials = provider === 'resend'
+  const credentials = providerName === 'resend'
     ? {
         apiKey: getEnv('WEEKLY_DIGEST_RESEND_API_KEY', getEnv('RESEND_API_KEY')),
         fromAddress: getEnv('WEEKLY_DIGEST_EMAIL_FROM', getEnv('RESEND_FROM')),
       }
-    : provider === 'sendgrid'
+    : providerName === 'sendgrid'
       ? {
           apiKey: getEnv('WEEKLY_DIGEST_SENDGRID_API_KEY', getEnv('SENDGRID_API_KEY')),
           fromAddress: getEnv('WEEKLY_DIGEST_EMAIL_FROM', getEnv('SENDGRID_FROM')),
@@ -204,6 +208,18 @@ async function sendEmailDigest(bundle: DigestBundle): Promise<number> {
           fromAddress: getEnv('WEEKLY_DIGEST_EMAIL_FROM', getEnv('MAILGUN_FROM')),
           region: getEnv('WEEKLY_DIGEST_MAILGUN_REGION', getEnv('MAILGUN_REGION', 'us')),
         }
+
+  if (providerName === 'resend' || providerName === 'sendgrid') {
+    if (!credentials.apiKey || !credentials.fromAddress) {
+      throw new Error(`Missing email credentials for ${providerName}. Configure API key and from address.`)
+    }
+  }
+
+  if (providerName === 'mailgun') {
+    if (!credentials.apiKey || !credentials.domain || !credentials.fromAddress) {
+      throw new Error('Missing email credentials for mailgun. Configure API key, domain, and from address.')
+    }
+  }
 
   let delivered = 0
   for (const recipient of recipients) {

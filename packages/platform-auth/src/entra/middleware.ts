@@ -49,14 +49,23 @@ export interface AuthMiddlewareOptions {
   signInUrl?: string
 }
 
+type MiddlewareSession = Record<string, unknown> & {
+  user?: { id?: string }
+  activeOrgId?: string
+  orgRole?: string
+}
+
+type MiddlewareRequest = NextRequest & {
+  auth?: MiddlewareSession
+}
+
 /**
  * Create an auth middleware — replaces `clerkMiddleware()`.
  *
  * This wraps NextAuth's `auth()` to provide the same middleware pattern
  * that Clerk uses, with public route matching and custom auth callbacks.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createAuthMiddleware(options: AuthMiddlewareOptions = {}): any {
+export function createAuthMiddleware(options: AuthMiddlewareOptions = {}) {
   const {
     publicRoutes = [],
     onAuth,
@@ -73,11 +82,15 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}): any {
   const isPublic = (pathname: string) =>
     publicMatchers.some(re => re.test(pathname))
 
-  return auth(async (req: any) => {
+  const withAuthMiddleware = auth as unknown as (
+    middleware: (req: MiddlewareRequest) => Promise<NextResponse> | NextResponse,
+  ) => NextResponse | Promise<NextResponse>
+
+  return withAuthMiddleware(async (req: MiddlewareRequest) => {
     const session = req.auth
     const userId = session?.user?.id ?? null
-    const orgId = (session as Record<string, unknown> | null)?.activeOrgId as string | null ?? null
-    const orgRole = (session as Record<string, unknown> | null)?.orgRole as string | null ?? null
+    const orgId = typeof session?.activeOrgId === 'string' ? session.activeOrgId : null
+    const orgRole = typeof session?.orgRole === 'string' ? session.orgRole : null
 
     // Run custom auth handler if provided
     if (onAuth) {

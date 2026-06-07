@@ -47,7 +47,7 @@ import { executeScheduledReport, retryFailedExecution } from '../scheduled-repor
 
 describe('scheduled-report-executor', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const makeSchedule = (overrides: Record<string, unknown> = {}): any => ({
+  const makeSchedule = (overrides: Record<string, unknown> = {}): unknown => ({
     id: 'sched-1',
     reportId: 'report-1',
     organizationId: 'org-1',

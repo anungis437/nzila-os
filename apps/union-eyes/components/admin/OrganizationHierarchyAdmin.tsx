@@ -96,7 +96,7 @@ export function OrganizationHierarchyAdmin({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const orgMap = new Map<string, any>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tree: any[] = [];
+    const tree: unknown[] = [];
 
     // Create nodes
     orgs.forEach(org => {
@@ -182,7 +182,7 @@ export function OrganizationHierarchyAdmin({
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const renderOrganizationNode = (node: any, depth: number = 0) => {
+  const renderOrganizationNode = (node: unknown, depth: number = 0) => {
     return (
       <div key={node.id} className="space-y-2">
         <div 
@@ -248,7 +248,7 @@ export function OrganizationHierarchyAdmin({
         {node.children && node.children.length > 0 && (
           <div className="ml-8 space-y-2">
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {node.children.map((child: any) => renderOrganizationNode(child, depth + 1))}
+            {node.children.map((child: unknown) => renderOrganizationNode(child, depth + 1))}
           </div>
         )}
       </div>

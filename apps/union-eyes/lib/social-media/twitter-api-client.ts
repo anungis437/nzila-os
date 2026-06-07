@@ -488,7 +488,7 @@ export class TwitterAPIClient {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const status = await this.handleResponse<any>(response);
+      const status = await this.handleResponse<unknown>(response);
 
       if (status.processing_info?.state === 'succeeded') {
         return;

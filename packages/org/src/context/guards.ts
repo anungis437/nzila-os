@@ -4,7 +4,7 @@
  * Strict guards that enforce org_scope presence and validity.
  * Used at API boundaries and server action entry points.
  *
- * DENY BY DEFAULT: any request without valid org context fails closed.
+ * DENY BY DEFAULT: unknown request without valid org context fails closed.
  *
  * @invariant FAIL_CLOSED_001
  */

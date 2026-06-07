@@ -25,7 +25,6 @@ import { memberEmployment } from "../schema/domains/member/member-employment";
 import { eq, and, or, desc, asc, sql, gte, lte, inArray, SQL } from "drizzle-orm";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 // =============================================================================
 // SEGMENT CRUD
@@ -37,7 +36,7 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 export async function createSegment(
   data: InsertMemberSegment
 ): Promise<SelectMemberSegment> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [segment] = await tx
@@ -60,7 +59,7 @@ export async function getSegments(
   organizationId: string,
   userId?: string
 ): Promise<SelectMemberSegment[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const conditions: SQL[] = [
@@ -97,7 +96,7 @@ export async function getSegmentById(
   id: string,
   organizationId: string
 ): Promise<SelectMemberSegment | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [segment] = await tx
@@ -126,7 +125,7 @@ export async function updateSegment(
   id: string,
   data: Partial<InsertMemberSegment>
 ): Promise<SelectMemberSegment> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [updated] = await tx
@@ -156,7 +155,7 @@ export async function updateSegment(
 export async function deleteSegment(
   id: string
 ): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       await tx
@@ -189,8 +188,8 @@ export async function searchMembersAdvanced(
     sortOrder?: "asc" | "desc";
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<{ members: any[]; total: number }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<{ members: unknown[]; total: number }> {
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const page = options?.page || 1;
@@ -211,7 +210,7 @@ export async function searchMembersAdvanced(
       }
       if (filters.membershipType && filters.membershipType.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        conditions.push(inArray(organizationMembers.memberCategory, filters.membershipType as any));
+        conditions.push(inArray(organizationMembers.memberCategory, filters.membershipType as unknown));
       }
 
       // Date ranges (using joinedAt which exists)
@@ -268,7 +267,7 @@ export async function searchMembersAdvanced(
       }
       if (filters.employmentStatus && filters.employmentStatus.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        employmentConditions.push(inArray(memberEmployment.employmentStatus, filters.employmentStatus as any));
+        employmentConditions.push(inArray(memberEmployment.employmentStatus, filters.employmentStatus as unknown));
       }
       if (filters.checkoffAuthorized !== undefined) {
         employmentConditions.push(eq(memberEmployment.checkoffAuthorized, filters.checkoffAuthorized));
@@ -347,8 +346,8 @@ export async function executeSegment(
     limit?: number;
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<{ members: any[]; total: number }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<{ members: unknown[]; total: number }> {
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       // Get segment
@@ -377,7 +376,7 @@ export async function executeSegment(
         resultCount: result.total,
         executionTimeMs,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        filtersSnapshot: segment.filters as any,
+        filtersSnapshot: segment.filters as unknown,
       });
 
       // Update segment metadata
@@ -407,7 +406,7 @@ export async function executeSegment(
 export async function logSegmentExecution(
   data: InsertSegmentExecution
 ): Promise<SelectSegmentExecution> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [execution] = await tx
@@ -430,7 +429,7 @@ export async function getSegmentExecutions(
   segmentId: string,
   limit: number = 50
 ): Promise<SelectSegmentExecution[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       return await tx
@@ -456,7 +455,7 @@ export async function getSegmentExecutions(
 export async function logSegmentExport(
   data: InsertSegmentExport
 ): Promise<SelectSegmentExport> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [exportLog] = await tx
@@ -479,7 +478,7 @@ export async function getExportHistory(
   organizationId: string,
   limit: number = 100
 ): Promise<SelectSegmentExport[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       return await tx

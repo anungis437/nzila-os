@@ -116,7 +116,7 @@ export default function ApprenticeshipPortal({
           const enrollmentsData = await enrollmentsResponse.json();
           const memberEnrollment = enrollmentsData.enrollments.find(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (e: any) => e.memberId === memberId
+            (e: unknown) => e.memberId === memberId
           );
 
           if (memberEnrollment) {
@@ -169,7 +169,7 @@ export default function ApprenticeshipPortal({
       const data = await response.json();
       const members = data.members || data;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mentor = members.find((m: any) => m.id === mentorId);
+      const mentor = members.find((m: unknown) => m.id === mentorId);
 
       if (mentor) {
         setMentors((prev) => ({

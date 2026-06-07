@@ -61,9 +61,19 @@ export async function getSecret(name: string): Promise<SecretValue> {
 
 async function fetchFromKeyVault(vaultUri: string, name: string): Promise<SecretValue> {
   // Dynamic import keeps the package optional at install time
-  let SecretClient: any
+  let SecretClient: new (
+    vaultUrl: string,
+    credential: unknown,
+  ) => {
+    getSecret: (secretName: string) => Promise<{
+      value?: string
+      properties: { expiresOn?: Date; version?: string }
+    }>
+  }
   try {
-    const mod = await import('@azure/keyvault-secrets')
+    const mod = (await import('@azure/keyvault-secrets')) as {
+      SecretClient: typeof SecretClient
+    }
     SecretClient = mod.SecretClient
   } catch {
     throw new Error(
@@ -72,7 +82,9 @@ async function fetchFromKeyVault(vaultUri: string, name: string): Promise<Secret
     )
   }
 
-  const { DefaultAzureCredential } = await import('@azure/identity')
+  const { DefaultAzureCredential } = (await import('@azure/identity')) as {
+    DefaultAzureCredential: new () => unknown
+  }
   const client = new SecretClient(vaultUri, new DefaultAzureCredential())
 
   const response = await client.getSecret(name)

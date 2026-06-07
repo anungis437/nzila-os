@@ -401,7 +401,7 @@ export default async function CLCStaffDashboardPage() {
               revalidatePath('/dashboard/clc/staff');
             },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any}
+          } as unknown}
         />
       </div>
 
@@ -425,7 +425,7 @@ export default async function CLCStaffDashboardPage() {
           ) : (
             <div className="space-y-2">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {(metrics.recentActivity as any[]).map((activity: { description: string; timestamp: string; status: string }, index: number) => (
+              {(metrics.recentActivity as unknown[]).map((activity: { description: string; timestamp: string; status: string }, index: number) => (
                 <div key={index} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-accent transition-colors">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Database className="h-4 w-4 text-primary" />

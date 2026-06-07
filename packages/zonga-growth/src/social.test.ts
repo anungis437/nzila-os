@@ -25,7 +25,7 @@ function makeActivity(overrides: Partial<UserActivity> = {}): UserActivity {
     orgId: 'o1',
     userId: 'u1',
     userType: 'listener',
-    activityType: 'follow' as any,
+    activityType: 'follow' as UserActivity['activityType'],
     entityType: 'creator',
     contentId: 'u2',
     metadata: {},
@@ -179,7 +179,7 @@ describe('createSocialGraphService', () => {
       const svc = createSocialGraphService({ repo })
       const result = await svc.recordActivity({
         orgId: 'o1', userId: 'u1', userType: 'listener',
-        activityType: 'stream' as any, entityType: 'track', contentId: 'a1', metadata: {},
+        activityType: 'stream' as UserActivity['activityType'], entityType: 'track', contentId: 'a1', metadata: {},
       })
       expect(result.id).toBe('act1')
     })

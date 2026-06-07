@@ -69,7 +69,7 @@ export function ArbitratorSuccessRates({
       
       // Calculate rates
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const statsWithRates = data.arbitrators?.map((arb: any) => ({
+      const statsWithRates = data.arbitrators?.map((arb: unknown) => ({
         ...arb,
         unionWinRate: arb.totalDecisions > 0 ? (arb.unionWins / arb.totalDecisions) * 100 : 0,
         employerWinRate: arb.totalDecisions > 0 ? (arb.employerWins / arb.totalDecisions) * 100 : 0,

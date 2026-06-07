@@ -279,7 +279,7 @@ Five new platform packages delivered end-to-end with 154 unit tests and 59 contr
 All 5 packages enforce:
 
 - **"org" nomenclature** — zero "tenant" references in source code
-- **Strict TypeScript** — no `any`, no `as any`, no `@ts-ignore`
+- **Strict TypeScript** — no `any`, no `as unknown`, no `@ts-ignore`
 - **Zod validation** — all external boundaries schema-validated
 - **No `console.*`** — structured logger only (`createLogger`)
 - **Port/adapter pattern** — no direct DB access in service layers

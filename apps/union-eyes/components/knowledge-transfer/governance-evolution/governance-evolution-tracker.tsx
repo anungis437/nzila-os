@@ -111,7 +111,7 @@ function LearningInsightCard({ insight }: { insight: LearningInsight }) {
 export function GovernanceEvolutionTracker() {
   const [activeTab, setActiveTab] = useState<TabKey>('learning');
   const [learning, setLearning] = useState<InstitutionalLearningReport | null>(null);
-  const [adaptive, setAdaptive] = useState<AdaptiveResilienceResult | null>(null);
+  const [_adaptive, setAdaptive] = useState<AdaptiveResilienceResult | null>(null);
   const [adaptation, setAdaptation] = useState<GovernanceAdaptationReport | null>(null);
   const [effectiveness, setEffectiveness] = useState<MitigationEffectivenessReport | null>(null);
   const [benchmark, setBenchmark] = useState<FederatedBenchmarkResult | null>(null);

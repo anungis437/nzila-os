@@ -82,7 +82,7 @@ function ensure(condition: unknown, message: string): asserts condition {
   }
 }
 
-function runJsonCommand(command: string): any {
+function runJsonCommand(command: string): unknown {
   const output = execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
   return JSON.parse(output)
 }

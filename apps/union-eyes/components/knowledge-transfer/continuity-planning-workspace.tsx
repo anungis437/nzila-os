@@ -10,7 +10,7 @@
  * All planning is organizational — not individual workforce management.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 type PlanningTab = 'brief' | 'roadmap' | 'actions';
 
@@ -159,7 +159,7 @@ export function ContinuityPlanningWorkspace() {
 
   const [actions, setActions] = useState<PlanningAction[]>([]);
 
-  const fetchBrief = async () => {
+  const fetchBrief = useCallback(async () => {
     try {
       setBriefLoading(true);
       const res = await fetch('/api/exit-interviews/decision-brief');
@@ -182,9 +182,9 @@ export function ContinuityPlanningWorkspace() {
     } finally {
       setBriefLoading(false);
     }
-  };
+  }, []);
 
-  const fetchRoadmap = async () => {
+  const fetchRoadmap = useCallback(async () => {
     if (roadmapData) return;
     try {
       setRoadmapLoading(true);
@@ -197,15 +197,17 @@ export function ContinuityPlanningWorkspace() {
     } finally {
       setRoadmapLoading(false);
     }
-  };
+  }, [roadmapData]);
 
   useEffect(() => {
-    fetchBrief();
-  }, []);
+    void fetchBrief();
+  }, [fetchBrief]);
 
   useEffect(() => {
-    if (activeTab === 'roadmap') fetchRoadmap();
-  }, [activeTab]);
+    if (activeTab === 'roadmap') {
+      void fetchRoadmap();
+    }
+  }, [activeTab, fetchRoadmap]);
 
   const updateActionStatus = (id: string, status: ActionStatus) => {
     setActions((prev) => prev.map((a) => a.id === id ? { ...a, status } : a));
@@ -306,7 +308,7 @@ export function ContinuityPlanningWorkspace() {
                         onClick={() => setExpandedRecId(expandedRecId === rec.id ? null : rec.id)}
                       >
                         <span
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
                           style={{ background: URGENCY_COLORS[rec.urgency] ?? '#94a3b8' }}
                         />
                         <span className="flex-1 text-sm font-medium text-slate-800">{rec.headline}</span>
@@ -339,7 +341,7 @@ export function ContinuityPlanningWorkspace() {
                               <h4 className="text-xs font-semibold text-slate-700 mb-1">Reasoning Chain</h4>
                               {rec.reasoningChain.map((r) => (
                                 <div key={r.step} className="text-xs text-slate-600 flex gap-2 mb-1">
-                                  <span className="text-slate-400 w-4 flex-shrink-0">{r.step}.</span>
+                                  <span className="w-4 shrink-0 text-slate-400">{r.step}.</span>
                                   <span><span className="text-slate-500">{r.evaluation}</span> → {r.conclusion}</span>
                                 </div>
                               ))}
@@ -471,7 +473,7 @@ export function ContinuityPlanningWorkspace() {
                             <h4 className="text-xs font-semibold text-slate-700 mb-1.5">Milestones</h4>
                             {s.milestones.map((m, mi) => (
                               <div key={mi} className="flex gap-2 text-xs text-slate-600 mb-1">
-                                <span className="text-slate-400 w-12 flex-shrink-0">Wk {m.week}</span>
+                                <span className="w-12 shrink-0 text-slate-400">Wk {m.week}</span>
                                 <span className="flex-1">{m.description}</span>
                               </div>
                             ))}
@@ -532,7 +534,7 @@ export function ContinuityPlanningWorkspace() {
                     }`}
                   >
                     <span
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ background: URGENCY_COLORS[action.urgency] ?? '#94a3b8' }}
                     />
                     <span className={`flex-1 text-sm ${action.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-800'}`}>

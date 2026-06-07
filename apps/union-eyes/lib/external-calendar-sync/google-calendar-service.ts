@@ -13,14 +13,16 @@
  * @module google-calendar-service
  */
 
-import { google } from 'googleapis';
+import { google, calendar_v3 } from 'googleapis';
 import { db } from '@/db/db';
 import { 
   externalCalendarConnections, 
   calendars, 
-  calendarEvents 
+  calendarEvents,
+  type CalendarEvent,
 } from '@/db/schema/calendar-schema';
 import { eq, and } from 'drizzle-orm';
+import { decryptCalendarToken, encryptCalendarToken } from './token-crypto';
 
 const calendar = google.calendar('v3');
 
@@ -36,6 +38,13 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar.readonly',
   'https://www.googleapis.com/auth/calendar.events',
 ];
+
+type CalendarMapping = {
+  externalId: string;
+  localCalendarId: string;
+  syncToken?: string;
+  deltaLink?: string;
+};
 
 /**
  * Get OAuth2 client
@@ -95,7 +104,7 @@ export async function refreshAccessToken(connectionId: string): Promise<string> 
 
     const oauth2Client = getOAuth2Client();
     oauth2Client.setCredentials({
-      refresh_token: connection.refreshToken,
+      refresh_token: decryptCalendarToken(connection.refreshToken),
     });
 
     const { credentials } = await oauth2Client.refreshAccessToken();
@@ -104,7 +113,10 @@ export async function refreshAccessToken(connectionId: string): Promise<string> 
     await db
       .update(externalCalendarConnections)
       .set({
-        accessToken: credentials.access_token!,
+        accessToken: encryptCalendarToken(credentials.access_token!),
+        refreshToken: credentials.refresh_token
+          ? encryptCalendarToken(credentials.refresh_token)
+          : undefined,
         tokenExpiresAt: new Date(credentials.expiry_date!),
         updatedAt: new Date(),
       })
@@ -149,10 +161,13 @@ async function getAuthenticatedClient(connectionId: string) {
     accessToken = await refreshAccessToken(connectionId);
   }
 
+  const resolvedAccessToken = decryptCalendarToken(accessToken);
+  const resolvedRefreshToken = decryptCalendarToken(connection.refreshToken);
+
   const oauth2Client = getOAuth2Client();
   oauth2Client.setCredentials({
-    access_token: accessToken,
-    refresh_token: connection.refreshToken,
+    access_token: resolvedAccessToken,
+    refresh_token: resolvedRefreshToken,
   });
 
   return oauth2Client;
@@ -200,7 +215,7 @@ export async function importGoogleEvents(
   try {
     const oauth2Client = await getAuthenticatedClient(connectionId);
     
-    const params: unknown = {
+    const params: calendar_v3.Params$Resource$Events$List = {
       auth: oauth2Client,
       calendarId: googleCalendarId,
       singleEvents: true,
@@ -381,9 +396,15 @@ throw error;
 /**
  * Map Google Calendar event to local event format
  */
-function mapGoogleEventToLocal(googleEvent: unknown, calendarId: string, organizationId: string) {
+function mapGoogleEventToLocal(
+  googleEvent: calendar_v3.Schema$Event,
+  calendarId: string,
+  organizationId: string,
+) {
   const startTime = googleEvent.start?.dateTime || googleEvent.start?.date;
   const endTime = googleEvent.end?.dateTime || googleEvent.end?.date;
+  const startDate = startTime ? new Date(startTime) : new Date();
+  const endDate = endTime ? new Date(endTime) : new Date(startDate.getTime() + 60 * 60 * 1000);
   
   return {
     calendarId,
@@ -392,8 +413,8 @@ function mapGoogleEventToLocal(googleEvent: unknown, calendarId: string, organiz
     description: googleEvent.description || null,
     location: googleEvent.location || null,
     locationUrl: googleEvent.hangoutLink || null,
-    startTime: new Date(startTime),
-    endTime: new Date(endTime),
+    startTime: startDate,
+    endTime: endDate,
     isAllDay: !!googleEvent.start?.date,
     isRecurring: !!googleEvent.recurrence,
     recurrenceRule: googleEvent.recurrence?.[0] || null,
@@ -414,8 +435,8 @@ function mapGoogleEventToLocal(googleEvent: unknown, calendarId: string, organiz
 /**
  * Map local event to Google Calendar event format
  */
-function mapLocalEventToGoogle(localEvent: unknown) {
-  const googleEvent: unknown = {
+function mapLocalEventToGoogle(localEvent: CalendarEvent): calendar_v3.Schema$Event {
+  const googleEvent: calendar_v3.Schema$Event = {
     summary: localEvent.title,
     description: localEvent.description,
     location: localEvent.location,
@@ -489,25 +510,32 @@ async function updateSyncToken(
 ) {
   try {
     const [connection] = await db
-      .select()
+      .select({ calendarMappings: externalCalendarConnections.calendarMappings })
       .from(externalCalendarConnections)
       .where(eq(externalCalendarConnections.id, connectionId))
       .limit(1);
 
-    if (!connection) return;
+    const mappings: CalendarMapping[] = Array.isArray(connection?.calendarMappings)
+      ? (connection.calendarMappings as CalendarMapping[])
+      : [];
 
-    const mappings = (connection.calendarMappings as unknown) || {};
-    
-    if (!mappings[googleCalendarId]) {
-      mappings[googleCalendarId] = {};
-    }
-    
-    mappings[googleCalendarId].syncToken = syncToken;
+    let found = false;
+    const updatedMappings = mappings.map((mapping) => {
+      if (mapping.externalId !== googleCalendarId) {
+        return mapping;
+      }
+
+      found = true;
+      return {
+        ...mapping,
+        syncToken: syncToken || undefined,
+      };
+    });
 
     await db
       .update(externalCalendarConnections)
       .set({
-        calendarMappings: mappings,
+        calendarMappings: found ? updatedMappings : mappings,
         lastSyncAt: new Date(),
         syncStatus: 'synced',
         updatedAt: new Date(),
@@ -520,8 +548,10 @@ async function updateSyncToken(
 /**
  * Get sync token for a calendar
  */
-export function getSyncToken(connection: unknown, googleCalendarId: string): string | null {
-  const mappings = connection.calendarMappings || {};
-  return mappings[googleCalendarId]?.syncToken || null;
+export function getSyncToken(_connection: unknown, _googleCalendarId: string): string | null {
+  const connection = _connection as { calendarMappings?: CalendarMapping[] | null };
+  const mappings = Array.isArray(connection.calendarMappings) ? connection.calendarMappings : [];
+  const mapping = mappings.find((item) => item.externalId === _googleCalendarId);
+  return mapping?.syncToken || null;
 }
 

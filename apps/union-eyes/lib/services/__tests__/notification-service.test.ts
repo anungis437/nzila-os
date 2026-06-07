@@ -414,7 +414,7 @@ describe('NotificationService', () => {
     it('creates audit log when userId present', async () => {
       // Register a mock provider manually for testing
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
+      (service as unknown).providers.set('email', {
         name: 'mock',
         send: vi.fn().mockResolvedValue({ id: 'msg-1', status: 'sent', sentAt: new Date() }),
       });
@@ -449,7 +449,7 @@ describe('NotificationService', () => {
   describe('sendBulk', () => {
     it('sends multiple notifications', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
+      (service as unknown).providers.set('email', {
         name: 'mock',
         send: vi.fn().mockResolvedValue({ id: 'msg-1', status: 'sent', sentAt: new Date() }),
       });
@@ -464,7 +464,7 @@ describe('NotificationService', () => {
 
     it('returns failed status for errored notifications', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
+      (service as unknown).providers.set('email', {
         name: 'mock',
         send: vi.fn().mockRejectedValue(new Error('bulk fail')),
       });
@@ -481,7 +481,7 @@ describe('NotificationService', () => {
   describe('sendFromTemplate', () => {
     it('sends notification from database template', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
+      (service as unknown).providers.set('email', {
         name: 'mock',
         send: vi.fn().mockResolvedValue({ id: 'tmpl-msg', status: 'sent', sentAt: new Date() }),
       });
@@ -526,7 +526,7 @@ describe('NotificationService', () => {
        
       const mockSend = vi.fn().mockResolvedValue({ id: 'sms-msg', status: 'sent', sentAt: new Date() });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('sms', { name: 'twilio', send: mockSend });
+      (service as unknown).providers.set('sms', { name: 'twilio', send: mockSend });
 
       mocks.mockLimit.mockResolvedValue([{
         id: 'tmpl-sms',
@@ -551,7 +551,7 @@ describe('NotificationService', () => {
     it('retries failed notifications from queue', async () => {
       // Mock provider
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
+      (service as unknown).providers.set('email', {
         name: 'mock',
         send: vi.fn().mockResolvedValue({ id: 'retry-msg', status: 'sent', sentAt: new Date() }),
       });

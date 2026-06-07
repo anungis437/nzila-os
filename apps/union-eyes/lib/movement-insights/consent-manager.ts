@@ -104,7 +104,7 @@ export async function createConsentRecord(
       categories: [],
       expiresAt: null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    } as unknown)
     .returning();
 
   return consent as unknown as DataAggregationConsent;
@@ -124,7 +124,7 @@ export async function revokeConsent(
       consentGiven: false,
       updatedAt: new Date(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    } as unknown)
     .where(eq(dataAggregationConsent.id, consentId))
     .returning();
 
@@ -153,7 +153,7 @@ export async function updateConsentPreferences(
   // Merge preferences
   const _updatedPreferences = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...((current as any).preferences as ConsentPreferences),
+    ...((current as unknown).preferences as ConsentPreferences),
     ...newPreferences,
   };
 
@@ -163,7 +163,7 @@ export async function updateConsentPreferences(
     .set({
       updatedAt: new Date(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    } as unknown)
     .where(eq(dataAggregationConsent.id, consentId))
     .returning();
 

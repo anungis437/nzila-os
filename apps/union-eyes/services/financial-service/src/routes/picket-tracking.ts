@@ -9,6 +9,15 @@ import * as PicketService from '../services/picket-tracking';
 
 const router = Router();
 
+type AuthUser = {
+  organizationId: string;
+  role?: string;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as unknown as { user: AuthUser }).user;
+}
+
 // Validation schemas
 const checkInSchema = z.object({
   strikeFundId: z.string().uuid(),
@@ -49,8 +58,7 @@ const coordinatorOverrideSchema = z.object({
  */
 router.post('/check-in', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, _role } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
 
     const validatedData = checkInSchema.parse(req.body);
 
@@ -89,7 +97,7 @@ router.post('/check-in', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    if (error.name === 'ZodError') {
+    if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
@@ -109,8 +117,7 @@ router.post('/check-in', async (req: Request, res: Response) => {
  */
 router.post('/check-out', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
 
     const validatedData = checkOutSchema.parse(req.body);
 
@@ -136,7 +143,7 @@ router.post('/check-out', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    if (error.name === 'ZodError') {
+    if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
@@ -156,8 +163,7 @@ router.post('/check-out', async (req: Request, res: Response) => {
  */
 router.get('/active', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { strikeFundId } = req.query;
 
     if (!strikeFundId || typeof strikeFundId !== 'string') {
@@ -188,8 +194,7 @@ router.get('/active', async (req: Request, res: Response) => {
  */
 router.get('/history', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { strikeFundId, startDate, endDate, memberId } = req.query;
 
     if (!strikeFundId || typeof strikeFundId !== 'string') {
@@ -243,8 +248,7 @@ router.get('/history', async (req: Request, res: Response) => {
  */
 router.get('/summary', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { strikeFundId, startDate, endDate, memberId } = req.query;
 
     if (!strikeFundId || typeof strikeFundId !== 'string') {
@@ -369,11 +373,11 @@ router.post('/validate-qr', async (req: Request, res: Response) => {
  */
 router.post('/coordinator-override', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
+    const effectiveRole = role ?? '';
 
     // Only coordinators and admins can use this endpoint
-    if (!['admin', 'coordinator', 'financial_admin'].includes(role)) {
+    if (!['admin', 'coordinator', 'financial_admin'].includes(effectiveRole)) {
       return res.status(403).json({
         success: false,
         error: 'Insufficient permissions. Coordinator role required.',
@@ -406,7 +410,7 @@ router.post('/coordinator-override', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    if (error.name === 'ZodError') {
+    if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
         error: 'Validation error',

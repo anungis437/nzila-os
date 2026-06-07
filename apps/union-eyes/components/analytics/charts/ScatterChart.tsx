@@ -35,7 +35,7 @@ export interface ScatterChartProps {
     category?: string;
     name?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
   xAxisLabel?: string;
   yAxisLabel?: string;
@@ -44,7 +44,7 @@ export interface ScatterChartProps {
   showGrid?: boolean;
   showLegend?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onPointClick?: (data: any) => void;
+  onPointClick?: (data: unknown) => void;
   height?: number;
   xDomain?: [number | 'auto', number | 'auto'];
   yDomain?: [number | 'auto', number | 'auto'];
@@ -101,7 +101,7 @@ export function ScatterChart({
 
   // Custom tooltip
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (!active || !payload || !payload.length) return null;
 
     const data = payload[0].payload;
@@ -139,7 +139,7 @@ export function ScatterChart({
 
   // Handle point click
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleClick = (data: any) => {
+  const handleClick = (data: unknown) => {
     if (onPointClick) {
       onPointClick(data);
     }

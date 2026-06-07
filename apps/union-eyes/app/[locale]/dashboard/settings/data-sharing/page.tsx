@@ -57,11 +57,11 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
       and(
         eq(dataAggregationConsent.organizationId, organizationId),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        eq((dataAggregationConsent as any).status, 'active')
+        eq((dataAggregationConsent as unknown).status, 'active')
       )
     )
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .limit(1) as any[];
+    .limit(1) as unknown[];
 
   // Get consent history
   const consentHistory = await db
@@ -69,9 +69,9 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
     .from(dataAggregationConsent)
     .where(eq(dataAggregationConsent.organizationId, organizationId))
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .orderBy(desc((dataAggregationConsent as any).createdAt))
+    .orderBy(desc((dataAggregationConsent as unknown).createdAt))
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .limit(10) as any[];
+    .limit(10) as unknown[];
 
   const hasActiveConsent = consent !== undefined;
 

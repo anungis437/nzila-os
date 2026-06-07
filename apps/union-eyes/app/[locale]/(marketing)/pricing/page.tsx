@@ -10,9 +10,9 @@
  * bundling. Every layer is readable, procurement-friendly, and assumes human
  * oversight. Pricing ranges are starting points for joint scoping with leaders.
  */
+import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Users } from 'lucide-react';
@@ -642,7 +642,7 @@ export default async function LocalePricingPage({
     <div className="organization-shell min-h-screen">
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger -- structured data; values are static literals
+         
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingServiceSchema) }}
       />
       <MarketingHeroSection

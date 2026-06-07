@@ -647,6 +647,24 @@ describe('ApiAuthGuard', () => {
       delete process.env.CRON_SECRET_KEY;
     });
 
+    it('passes cron route with CRON_SECRET fallback', async () => {
+      process.env.CRON_SECRET = 'legacy-secret';
+      delete process.env.CRON_SECRET_KEY;
+      mocks.mockIsCronRoute.mockReturnValue(true);
+
+      const handler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
+      const wrapped = withApiAuth(handler);
+      const req = {
+        nextUrl: { pathname: '/api/cron/test' },
+        headers: { get: vi.fn().mockReturnValue('legacy-secret') },
+      } as unknown as NextRequest;
+
+      await wrapped(req, {} as never);
+      expect(handler).toHaveBeenCalled();
+
+      delete process.env.CRON_SECRET;
+    });
+
     it('returns 401 on auth error', async () => {
       mocks.mockAuth.mockRejectedValue(new Error('auth provider down'));
       const handler = vi.fn();

@@ -7,9 +7,6 @@ interface Props {
 }
 
 export function UnitEconomicsCard({ economics }: Props) {
-  const ltvCacColor =
-    economics.ltvCacRatio >= 3 ? "text-green-600" : "text-amber-500";
-
   return (
     <SummaryCard
       title="Unit Economics"

@@ -41,7 +41,7 @@ export default async function AdminRewardsMembersPage({
   const offset = (page - 1) * perPage;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let members: any[] = [];
+  let members: unknown[] = [];
   let totalCount = 0;
 
   try {

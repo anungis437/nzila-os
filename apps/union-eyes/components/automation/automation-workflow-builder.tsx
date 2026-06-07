@@ -499,7 +499,7 @@ export default function AutomationWorkflowBuilder() {
                     variant={workflow.triggerType === type ? 'default' : 'outline'}
                     size="sm"
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => setWorkflow({ ...workflow, triggerType: type as any, triggerConfig: {} })}
+                    onClick={() => setWorkflow({ ...workflow, triggerType: type as unknown, triggerConfig: {} })}
                     className="justify-start"
                   >
                     <Icon className="h-4 w-4 mr-2" />
@@ -586,7 +586,7 @@ export default function AutomationWorkflowBuilder() {
                     variant="outline"
                     size="sm"
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => addStep(type as any)}
+                    onClick={() => addStep(type as unknown)}
                     className="justify-start"
                   >
                     <div className={`h-2 w-2 rounded-full ${color} mr-2`} />

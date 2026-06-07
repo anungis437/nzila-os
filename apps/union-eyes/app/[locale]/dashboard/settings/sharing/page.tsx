@@ -15,7 +15,7 @@ export default function SharingSettingsPage() {
   const params = useParams();
   const organizationId = params?.id as string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSettings = async () => {
@@ -39,7 +39,7 @@ export default function SharingSettingsPage() {
   }, [organizationId]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSave = (updatedSettings: any) => {
+  const handleSave = (updatedSettings: unknown) => {
     setSettings(updatedSettings);
   };
 

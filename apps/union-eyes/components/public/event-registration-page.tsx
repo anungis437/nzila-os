@@ -69,7 +69,7 @@ function EventCheckoutForm({
   eventId: string;
   totalAmount: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attendeeData: any;
+  attendeeData: unknown;
   onSuccess: (ticket: EventTicket) => void;
 }) {
   const stripe = useStripe();

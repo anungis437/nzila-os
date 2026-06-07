@@ -797,7 +797,7 @@ A serious methodology specification acknowledges the threats to its measurement 
 
 **v1 mitigation.** Engagement scope documents specify the measurement window. Snapshots carry a `recorded_at` timestamp. Re-engagement is the operational mitigation.
 
-**v2 mitigation roadmap.** A "measurement-currency caution" surfacing rule is planned at v1.1.0: any framework result older than a configured threshold (default 180 days) will be re-surfaced with an explicit currency caution.
+**v2 mitigation roadmap.** A "measurement-currency caution" surfacing rule is planned at v1.1.0: unknown framework result older than a configured threshold (default 180 days) will be re-surfaced with an explicit currency caution.
 
 **Residual risk.** Snapshot lag is a property of any measurement methodology that is not continuously sampled. Continuous sampling would conflict with the reviewer-led posture; the methodology accepts the lag and surfaces it in the v1.1.0 surfacing rule.
 

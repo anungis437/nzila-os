@@ -404,7 +404,7 @@ export class ProvincialPrivacyService {
     assignedTo?: string
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = { status, updatedAt: new Date() };
+    const updateData: unknown = { status, updatedAt: new Date() };
     if (assignedTo) updateData.assignedTo = assignedTo;
 
     if (status === "completed") {

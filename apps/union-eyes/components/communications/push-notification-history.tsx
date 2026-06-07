@@ -102,7 +102,7 @@ export function PushNotificationHistory({
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setFetchedNotifications(items.map((n: any) => ({
+        setFetchedNotifications(items.map((n: unknown) => ({
           ...n,
           sentAt: new Date(n.sentAt ?? n.sent_at),
           scheduledAt: n.scheduledAt ?? n.scheduled_at ? new Date(n.scheduledAt ?? n.scheduled_at) : undefined,

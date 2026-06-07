@@ -18,7 +18,6 @@
  * /platform/organizational-memory — Wave 6 ontology collapse.
  * Canonical: /platform#organizational-memory (eight-pillar overview).
  */
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 

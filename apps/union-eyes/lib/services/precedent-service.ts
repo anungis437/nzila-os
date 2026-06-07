@@ -84,7 +84,7 @@ export async function getPrecedentById(
     // Optionally exclude full text if not needed
     if (!options.includeFullText) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return { ...decision, fullText: undefined } as any;
+      return { ...decision, fullText: undefined } as unknown;
     }
 
     return decision;
@@ -134,22 +134,22 @@ export async function listPrecedents(
 
     if (filters.tribunal && filters.tribunal.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as any));
+      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as unknown));
     }
 
     if (filters.decisionType && filters.decisionType.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.decisionType, filters.decisionType as any));
+      conditions.push(inArray(arbitrationDecisions.decisionType, filters.decisionType as unknown));
     }
 
     if (filters.outcome && filters.outcome.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.outcome, filters.outcome as any));
+      conditions.push(inArray(arbitrationDecisions.outcome, filters.outcome as unknown));
     }
 
     if (filters.precedentValue && filters.precedentValue.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.precedentValue, filters.precedentValue as any));
+      conditions.push(inArray(arbitrationDecisions.precedentValue, filters.precedentValue as unknown));
     }
 
     if (filters.arbitrator) {
@@ -238,7 +238,7 @@ export async function listPrecedents(
 
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      precedents: precedents as any,
+      precedents: precedents as unknown,
       total: count,
       page,
       limit
@@ -340,12 +340,12 @@ export async function searchPrecedents(
 
     if (filters.precedentValue && filters.precedentValue.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.precedentValue, filters.precedentValue as any));
+      conditions.push(inArray(arbitrationDecisions.precedentValue, filters.precedentValue as unknown));
     }
 
     if (filters.tribunal && filters.tribunal.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as any));
+      conditions.push(inArray(arbitrationDecisions.tribunal, filters.tribunal as unknown));
     }
 
     const results = await db
@@ -375,7 +375,7 @@ export async function searchPrecedents(
       .limit(limit);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return results as any;
+    return results as unknown;
   } catch (error) {
     logger.error("Error searching precedents", { error, query, filters, limit });
     throw new Error("Failed to search precedents");
@@ -449,7 +449,7 @@ export async function getRelatedPrecedents(
       .limit(limit);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return related as any;
+    return related as unknown;
   } catch (error) {
     logger.error("Error fetching related precedents", { error, decisionId, limit });
     throw new Error("Failed to fetch related precedents");
@@ -506,7 +506,7 @@ export async function updateArbitratorStats(arbitratorName: string): Promise<voi
     const monetaryAwards = decisions
       .filter(d => d.remedy && typeof d.remedy === 'object' && 'monetaryAward' in d.remedy)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map(d => (d.remedy as any).monetaryAward)
+      .map(d => (d.remedy as unknown).monetaryAward)
       .filter(a => typeof a === 'number');
 
     const averageAward = monetaryAwards.length > 0

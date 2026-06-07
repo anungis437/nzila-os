@@ -32,7 +32,7 @@ All Critical and Medium violations from Rev 1 have been remediated:
 
 - **C-1**: `MovementRiskPosture` contract aligned with implementation (`'steady' | 'vigilant' | 'heightened'`, `string[]` fields)
 - **C-2**: `ConfidenceBand` named type exported and used in `ConfidenceResult`, `ExecutiveBriefingCard`, `DecisionInsight`
-- **C-3**: `DecisionPromptContract.buildInput` signature fixed (`(data: any) => Record<string, unknown>`)
+- **C-3**: `DecisionPromptContract.buildInput` signature fixed (`(data: unknown) => Record<string, unknown>`)
 - **C-4**: `BargainingWatch.signalStrength` type fixed in UI from `number` to `'weak' | 'moderate' | 'strong'`, rendering fixed
 - **C-5**: `typecheck` script already present in package.json
 - **M-1**: All `noUncheckedIndexedAccess` violations in test files fixed with `!` assertions and type casts
@@ -499,7 +499,7 @@ All `.find()` and array-index accesses in test files now use `!` non-null assert
 
 #### C-3: Fix DecisionPromptContract.buildInput signature — ✅ RESOLVED
 
-**Fix applied**: Changed to `(data: any) => Record<string, unknown>` for polymorphic contract compatibility
+**Fix applied**: Changed to `(data: unknown) => Record<string, unknown>` for polymorphic contract compatibility
 
 #### C-4: Fix BargainingWatch UI type — ✅ RESOLVED
 

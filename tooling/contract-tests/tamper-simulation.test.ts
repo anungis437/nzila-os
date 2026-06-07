@@ -152,7 +152,7 @@ describe('TAMPER_SIM_001 — Seal detects post-seal field mutation', () => {
   it('detects injected metadata field', () => {
     const pack = makeAbrDecisionPack()
     const seal = generateSeal(pack, { sealedAt: SEALED_AT })
-    const tampered = { ...pack, _attackerNote: 'this record was modified', seal } as any
+    const tampered = { ...pack, _attackerNote: 'this record was modified', seal } as unknown
 
     const result = verifySeal(tampered)
     expect(result.valid).toBe(false)

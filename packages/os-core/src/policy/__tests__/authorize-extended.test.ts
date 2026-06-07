@@ -39,6 +39,7 @@ import {
   withAuth,
   authorizeOrgAccess,
 } from '../../policy/authorize'
+import { ConsoleRole } from '../../policy/roles'
 
 describe('authorize extended', () => {
   beforeEach(() => {
@@ -69,7 +70,7 @@ describe('authorize extended', () => {
 
       const wrapped = withAuth({}, mockHandler)
       const mockReq = { url: 'http://localhost/api/test', method: 'GET', headers: new Map() }
-      await wrapped(mockReq as any)
+      await wrapped(mockReq as unknown as Parameters<typeof wrapped>[0])
 
       expect(mockHandler).toHaveBeenCalled()
     })
@@ -81,13 +82,13 @@ describe('authorize extended', () => {
         userId: null,
         orgId: null,
         sessionClaims: {},
-      } as any)
+      } as Awaited<ReturnType<typeof authMod.auth>>)
 
       const mockHandler = vi.fn()
-      const wrapped = withAuth({ requiredRole: 'super_admin' as any }, mockHandler)
+      const wrapped = withAuth({ requiredRole: ConsoleRole.ADMIN }, mockHandler)
       const mockReq = { url: 'http://localhost/api/test', method: 'GET', headers: new Map() }
 
-      const result = await wrapped(mockReq as any)
+      const result = await wrapped(mockReq as unknown as Parameters<typeof wrapped>[0])
 
       // When auth fails, handler should not be called
       // Either handler wasn't called or the response is an error
@@ -100,7 +101,7 @@ describe('authorize extended', () => {
   describe('authorize', () => {
     it('returns auth context for authenticated user', async () => {
       const mockReq = { url: 'http://localhost/api/test', method: 'GET', headers: new Map() }
-      const ctx = await authorize(mockReq as any, {})
+      const ctx = await authorize(mockReq as unknown as Parameters<typeof authorize>[0], {})
 
       expect(ctx.userId).toBeTruthy()
     })
@@ -111,11 +112,11 @@ describe('authorize extended', () => {
         userId: null,
         orgId: null,
         sessionClaims: {},
-      } as any)
+      } as Awaited<ReturnType<typeof authMod.auth>>)
 
       const mockReq = { url: 'http://localhost/api/test', method: 'GET', headers: new Map() }
 
-      await expect(authorize(mockReq as any, {} as any)).rejects.toThrow()
+      await expect(authorize(mockReq as unknown as Parameters<typeof authorize>[0], {})).rejects.toThrow()
     })
   })
 })

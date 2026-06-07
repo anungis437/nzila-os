@@ -223,7 +223,7 @@ describe('spans — withSpan success path', () => {
 
 // ── logger.ts — trace context in log entries ────────────────────────────────
 
-import { TracedLogger, createLogger, type LogEntry } from '../logger'
+import { TracedLogger, type LogEntry } from '../logger'
 
 describe('logger — trace context injection', () => {
   it('includes trace context when inside AsyncLocalStorage', async () => {
@@ -468,7 +468,6 @@ describe('sdk — initObservability logging', () => {
 
   it('logs observability.initialized with exporter name', async () => {
     const mod = await import('../sdk')
-    const sink = vi.fn()
     const fakeExporter = {
       name: 'test-exporter',
       exportSpan: vi.fn(),

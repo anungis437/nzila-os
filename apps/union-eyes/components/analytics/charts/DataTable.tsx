@@ -23,13 +23,13 @@ export interface Column {
   sortable?: boolean;
   filterable?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: unknown, row: unknown) => React.ReactNode;
   width?: string;
 }
 
 export interface DataTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any[];
+  data: unknown[];
   columns: Column[];
   title?: string;
   pageSize?: number;
@@ -37,9 +37,9 @@ export interface DataTableProps {
   exportable?: boolean;
   selectable?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onRowSelect?: (selectedRows: any[]) => void;
+  onRowSelect?: (selectedRows: unknown[]) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onExport?: (data: any[]) => void;
+  onExport?: (data: unknown[]) => void;
 }
 
 // ============================================================================

@@ -96,7 +96,7 @@ export function BoxPlotChart({
   }));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
 
@@ -119,7 +119,7 @@ export function BoxPlotChart({
 
   // Custom box plot rendering
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomBox = (props: any) => {
+  const CustomBox = (props: unknown) => {
     const { x, _y, width, _height, payload } = props;
     const yScale = props.yAxis.scale;
     
