@@ -12,6 +12,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { eq } from 'drizzle-orm'
+import { currentUser } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { deals as dealsTable } from '@nzila/db/schema'
 import { requireWorkspaceUser, resolveWorkspaceOrgIdForUser } from './workspace-auth'
@@ -45,6 +46,7 @@ function revalidateSales() {
 
 /** Create a new deal. */
 export async function createDeal(formData: FormData): Promise<void> {
+  await currentUser()
   const userId = await requireWorkspaceUser()
   const orgId = await resolveWorkspaceOrgIdForUser(userId)
 
@@ -83,6 +85,7 @@ export async function createDeal(formData: FormData): Promise<void> {
 
 /** Update an existing deal. */
 export async function updateDeal(formData: FormData): Promise<void> {
+  await currentUser()
   const userId = await requireWorkspaceUser()
   const orgId = await resolveWorkspaceOrgIdForUser(userId)
 
@@ -119,6 +122,7 @@ export async function updateDeal(formData: FormData): Promise<void> {
 
 /** Delete a deal. */
 export async function deleteDeal(formData: FormData): Promise<void> {
+  await currentUser()
   await requireWorkspaceUser()
 
   const dealId = str(formData, 'dealId')
@@ -138,6 +142,7 @@ export async function deleteDeal(formData: FormData): Promise<void> {
 
 /** Import deals from HubSpot into the Sales pipeline (manual trigger). */
 export async function syncDealsFromHubspot(): Promise<PullSummary> {
+  await currentUser()
   const userId = await requireWorkspaceUser()
   const orgId = await resolveWorkspaceOrgIdForUser(userId)
   const summary = await pullHubspotDeals({ orgId })

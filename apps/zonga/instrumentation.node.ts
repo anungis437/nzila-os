@@ -16,8 +16,7 @@ export function registerNodeProcessHandlers(): void {
     logger.info('SIGTERM received, draining connections', { graceMs: 30_000 })
 
     setTimeout(() => {
-      logger.info('Grace period expired, exiting process')
-      process.exit(0)
+      logger.warn('Grace period expired; awaiting external process supervisor termination')
     }, 30_000)
   }
 
@@ -36,6 +35,8 @@ export function registerNodeProcessHandlers(): void {
   process.on('uncaughtException', (err) => {
     logger.error('Uncaught exception', { err })
     // Let the process crash after logging; Node is in an undefined state.
-    process.exit(1)
+    setImmediate(() => {
+      throw err
+    })
   })
 }
