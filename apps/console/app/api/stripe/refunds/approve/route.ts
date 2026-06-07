@@ -10,7 +10,7 @@ import { platformDb } from '@nzila/db/platform'
 import { stripeRefunds, stripePayments } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { executeRefund } from '@nzila/payments-stripe/primitives'
-import { authenticateUser } from '@/lib/api-guards'
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 import { createLogger } from '@nzila/os-core'
 
@@ -52,6 +52,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!refund) {
     return NextResponse.json({ error: 'Refund not found' }, { status: 404 })
   }
+  if (refund.orgId !== orgId) {
+    return NextResponse.json({ error: 'Forbidden: refund does not belong to organization' }, { status: 403 })
+  }
+
+  const orgAccess = await requireOrgAccess(refund.orgId, {
+    minRole: 'org_admin',
+    platformBypass: ['platform_admin', 'studio_admin'],
+  })
+  if (!orgAccess.ok) return orgAccess.response
 
   if (refund.status !== 'pending_approval') {
     return NextResponse.json(
@@ -72,7 +81,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       .where(eq(stripeRefunds.id, refundId))
 
     await recordAuditEvent({
-      orgId,
+        orgId: refund.orgId,
       actorClerkUserId: auth.userId,
       actorRole: auth.platformRole,
       action: 'stripe.refund_denied',
@@ -118,7 +127,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       .where(eq(stripeRefunds.id, refundId))
 
     await recordAuditEvent({
-      orgId,
+        orgId: refund.orgId,
       actorClerkUserId: auth.userId,
       actorRole: auth.platformRole,
       action: 'stripe.refund_approved',
@@ -132,7 +141,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     })
 
     await recordAuditEvent({
-      orgId,
+        orgId: refund.orgId,
       actorClerkUserId: auth.userId,
       actorRole: auth.platformRole,
       action: 'stripe.refund_executed',

@@ -5,6 +5,7 @@ import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import { checkOrgRateLimit, orgRateLimitHeaders } from '@nzila/os-core/orgRateLimit'
 import createIntlMiddleware from 'next-intl/middleware'
 import { locales, defaultLocale } from './lib/locales'
+import { hasTrustedSecurityContext } from './lib/security-context'
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -19,6 +20,7 @@ type ProxyRequest = NextRequest & { auth?: unknown }
 
 export const proxy = auth((request: unknown) => {
   const req = request as ProxyRequest
+  const trustedSecurityContext = hasTrustedSecurityContext(req)
   // ── Legacy route redirects (entity → org migration) ──────────────────
   const pathname = req.nextUrl.pathname
   if (pathname.startsWith('/business/orgs')) {
@@ -57,7 +59,7 @@ export const proxy = auth((request: unknown) => {
   }
 
   // ── Org-scoped rate limiting (per-org + route-group buckets) ────────
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== 'development' && trustedSecurityContext) {
     const orgId = req.headers.get('x-org-id')
     if (orgId && req.nextUrl.pathname.startsWith('/api')) {
       const orgRl = checkOrgRateLimit(orgId, req.nextUrl.pathname, req.method)
@@ -102,7 +104,11 @@ export const proxy = auth((request: unknown) => {
   }
 
   // ── Cost budget enforcement (denial-of-wallet) ────────────────────────
-  if (process.env.NODE_ENV !== 'development' && req.nextUrl.pathname.startsWith('/api')) {
+  if (
+    process.env.NODE_ENV !== 'development' &&
+    trustedSecurityContext &&
+    req.nextUrl.pathname.startsWith('/api')
+  ) {
     const orgId = req.headers.get('x-org-id')
     if (orgId) {
       const budgetExemptRoutes = ['/api/admin/', '/api/export/', '/api/proof/', '/api/health']
@@ -126,6 +132,7 @@ export const proxy = auth((request: unknown) => {
 
   // ── Sovereign egress enforcement (block unapproved outbound hosts) ──
   if (
+    trustedSecurityContext &&
     process.env.SOVEREIGN_EGRESS_ENFORCED === 'true' &&
     req.nextUrl.pathname.startsWith('/api') &&
     (req.nextUrl.pathname.includes('/integrations') ||

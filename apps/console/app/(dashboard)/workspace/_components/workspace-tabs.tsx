@@ -35,7 +35,7 @@ export function WorkspaceTabs() {
   return (
     <nav className="border-b border-gray-200 bg-white">
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
-        <div className="-mx-3 flex h-[61px] gap-1 overflow-x-auto">
+        <div className="-mx-3 flex h-15.25 gap-1 overflow-x-auto">
           {WORKSPACES.map((w) => {
             const active = pathname === w.href || pathname.startsWith(w.href + '/')
             const Icon = ICONS[w.icon]

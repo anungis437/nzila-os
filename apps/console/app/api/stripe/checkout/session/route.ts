@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createCheckoutSession } from '@nzila/payments-stripe/primitives'
-import { authenticateUser } from '@/lib/api-guards'
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 import { createLogger } from '@nzila/os-core'
 
@@ -39,6 +39,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const input = parsed.data
+
+  const orgAccess = await requireOrgAccess(input.orgId, {
+    minRole: 'org_secretary',
+    platformBypass: ['platform_admin', 'studio_admin'],
+  })
+  if (!orgAccess.ok) return orgAccess.response
 
   try {
     const session = await createCheckoutSession({

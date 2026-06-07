@@ -5,7 +5,7 @@
  * Platform admin sees all; org-scoped users see only their org.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { authenticateUser } from '@/lib/api-guards'
+import { authenticateUser, getOrgMembership } from '@/lib/api-guards'
 import { platformDb } from '@nzila/db/platform'
 import { auditEvents, orgs } from '@nzila/db/schema'
 import { eq, count, desc, sql } from 'drizzle-orm'
@@ -19,12 +19,19 @@ export async function GET(req: NextRequest) {
   const authResult = await authenticateUser()
   if (!authResult.ok) return authResult.response
 
-  const { platformRole } = authResult
+  const { platformRole, userId } = authResult
   const isPlatformAdmin = platformRole === 'platform_admin' || platformRole === 'studio_admin'
   const orgId = req.nextUrl.searchParams.get('orgId')
 
   if (!isPlatformAdmin && !orgId) {
     return NextResponse.json({ error: 'orgId is required for non-platform users' }, { status: 400 })
+  }
+
+  if (!isPlatformAdmin && orgId) {
+    const membership = await getOrgMembership(orgId, userId)
+    if (!membership) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
   }
 
   const baseQuery = platformDb

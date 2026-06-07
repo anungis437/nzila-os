@@ -9,12 +9,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createPortalSession } from '@nzila/payments-stripe/primitives'
-import { authenticateUser } from '@/lib/api-guards'
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
+import { platformDb } from '@nzila/db/platform'
+import { stripeSubscriptions } from '@nzila/db/schema'
+import { and, eq } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('stripe:customer-portal')
 
 const CreatePortalSchema = z.object({
+  orgId: z.string().uuid(),
   customerId: z.string().min(1),
   returnUrl: z.string().url(),
 })
@@ -32,7 +36,29 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const { customerId, returnUrl } = parsed.data
+  const { orgId, customerId, returnUrl } = parsed.data
+
+  const orgAccess = await requireOrgAccess(orgId, {
+    platformBypass: ['platform_admin', 'studio_admin'],
+  })
+  if (!orgAccess.ok) return orgAccess.response
+
+  const [linkedCustomer] = await platformDb
+    .select({ id: stripeSubscriptions.id })
+    .from(stripeSubscriptions)
+    .where(
+      and(
+        eq(stripeSubscriptions.orgId, orgId),
+        eq(stripeSubscriptions.stripeCustomerId, customerId),
+      ),
+    )
+    .limit(1)
+  if (!linkedCustomer) {
+    return NextResponse.json(
+      { error: 'Forbidden: customer is not linked to organization' },
+      { status: 403 },
+    )
+  }
 
   try {
     const session = await createPortalSession({ customerId, returnUrl })

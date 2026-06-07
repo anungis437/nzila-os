@@ -16,6 +16,7 @@ export default defineProject({
       // pointing to .ts files without these aliases.
       '@nzila/os-core/hash': resolve(ROOT, 'packages/os-core/src/hash.ts'),
       '@nzila/os-core/rateLimit': resolve(ROOT, 'packages/os-core/src/rateLimit.ts'),
+      '@nzila/os-core/orgRateLimit': resolve(ROOT, 'packages/os-core/src/orgRateLimit.ts'),
       '@nzila/os-core/telemetry': resolve(ROOT, 'packages/os-core/src/telemetry/index.ts'),
       '@nzila/os-core/policy': resolve(ROOT, 'packages/os-core/src/policy/index.ts'),
       '@nzila/os-core/config': resolve(ROOT, 'packages/os-core/src/config/env.ts'),

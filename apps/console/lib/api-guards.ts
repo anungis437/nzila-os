@@ -117,14 +117,6 @@ export async function requireOrgAccess(
 
   const { userId, platformRole } = authResult
 
-  // Service accounts bypass org membership (inter-service AI calls)
-  if ('isService' in authResult && authResult.isService) {
-    return {
-      ok: true,
-      context: { userId, platformRole, membership: null },
-    }
-  }
-
   // Platform admins can bypass org membership
   if (options?.platformBypass?.includes(platformRole)) {
     return {
