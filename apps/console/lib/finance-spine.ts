@@ -143,7 +143,9 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
         logger.warn('commerce_invoices missing; using empty receivables')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`commerce_invoices query failed; using empty receivables (${message})`)
+      return []
     })
 
   const quotePromise = platformDb
@@ -160,7 +162,9 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
         logger.warn('commerce_quotes missing; using empty pipeline snapshot')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`commerce_quotes query failed; using empty pipeline snapshot (${message})`)
+      return []
     })
 
   const revenuePromise = platformDb
@@ -175,7 +179,9 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
         logger.warn('zonga_revenue_events missing; using zero external revenue events')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`zonga_revenue_events query failed; using zero external revenue events (${message})`)
+      return []
     })
 
   const burnPromise = platformDb
@@ -212,7 +218,9 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
         logger.warn('stripe_subscriptions missing; using zero active subscriptions')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`stripe_subscriptions query failed; using zero active subscriptions (${message})`)
+      return []
     })
 
   const [latestTreasury, invoiceRows, quoteRows, revenueRows, burnRows, subscriptionRows] = await Promise.all([
