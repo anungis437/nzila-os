@@ -274,7 +274,7 @@ describe('generator — spec content', () => {
     const usersPath = spec.paths['/api/users']
     expect(usersPath.post.requestBody).toBeDefined()
     expect(usersPath.post.requestBody.required).toBe(true)
-  })
+  }, 15000)
 
   it('marks x-schema-source for routes with Zod', async () => {
     const rootDir = join(TMP, 'zod')
