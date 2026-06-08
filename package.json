@@ -81,7 +81,7 @@
     "uec:report": "pnpm --filter @nzila/ue-cognition report",
     "governance:check": "tsx scripts/governance-check.ts",
     "governance:check-db-imports": "tsx scripts/check-ue-db-import-guard.ts",
-    "readiness:union-eyes": "pnpm typecheck --filter @nzila/union-eyes && pnpm governance:check-db-imports && pnpm test:fast --filter @nzila/union-eyes && node -e \"JSON.parse(require('fs').readFileSync('reports/runtime/platform-runtime-truth-latest.json','utf8'))\" && echo '✓ Union Eyes readiness gates: PASS'",
+    "readiness:union-eyes": "pnpm typecheck --filter @nzila/union-eyes && pnpm governance:check-db-imports && pnpm --filter @nzila/union-eyes test && node -e \"JSON.parse(require('fs').readFileSync('reports/runtime/platform-runtime-truth-latest.json','utf8'))\" && echo '✓ Union Eyes readiness gates: PASS'",
     "governance:cognition": "tsx tooling/governance/cognition-governance-ci.ts",
     "ai:analyze": "tsx scripts/ai-agent-runner.ts --phase=analyze",
     "ai:implement": "tsx scripts/ai-agent-runner.ts --phase=implement",

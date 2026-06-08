@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-06-05T11:24:41.264Z
+Generated: 2026-06-08T01:29:35.644Z
 
-Total documents indexed: 1179
+Total documents indexed: 1226
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -15,8 +15,8 @@ Stale documents (>90 days since repo validation): 0
 | architecture | 3 | 0 |
 | backlog | 1 | 0 |
 | categories | 925 | 0 |
-| compliance | 4 | 0 |
-| doctrine | 17 | 0 |
+| compliance | 6 | 0 |
+| doctrine | 61 | 0 |
 | documentation-index.md | 1 | 0 |
 | governance | 1 | 0 |
 | hardening | 1 | 0 |
@@ -33,7 +33,7 @@ Stale documents (>90 days since repo validation): 0
 | proof-center | 1 | 0 |
 | public | 1 | 0 |
 | root | 4 | 0 |
-| union-eyes | 28 | 0 |
+| union-eyes | 29 | 0 |
 | zonga | 2 | 0 |
 
 ## Documents
@@ -965,34 +965,80 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/stakeholders/personas/03-auditor.md](docs/categories/stakeholders/personas/03-auditor.md) | categories | 2026-06-05 | current |
 | [docs/categories/stakeholders/public/procurement-statements.md](docs/categories/stakeholders/public/procurement-statements.md) | categories | 2026-05-27 | current |
 | [docs/categories/stakeholders/public/restore-readiness-summary.md](docs/categories/stakeholders/public/restore-readiness-summary.md) | categories | 2026-05-27 | current |
-| [docs/categories/stakeholders/public/trust-center.md](docs/categories/stakeholders/public/trust-center.md) | categories | 2026-05-25 | current |
+| [docs/categories/stakeholders/public/trust-center.md](docs/categories/stakeholders/public/trust-center.md) | categories | 2026-06-07 | current |
 | [docs/categories/stakeholders/README.md](docs/categories/stakeholders/README.md) | categories | 2026-05-25 | current |
 | [docs/categories/stakeholders/tutorials/adding-ai.md](docs/categories/stakeholders/tutorials/adding-ai.md) | categories | 2026-05-25 | current |
 | [docs/categories/stakeholders/tutorials/first-app.md](docs/categories/stakeholders/tutorials/first-app.md) | categories | 2026-05-25 | current |
 | [docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md](docs/categories/stakeholders/tutorials/MULTI_ORG_DEMO_FLOW.md) | categories | 2026-05-25 | current |
 | [docs/categories/stakeholders/tutorials/README.md](docs/categories/stakeholders/tutorials/README.md) | categories | 2026-05-25 | current |
-| [docs/compliance/soc2/control-mapping.md](docs/compliance/soc2/control-mapping.md) | compliance | 2026-05-27 | current |
-| [docs/compliance/soc2/evidence-inventory.md](docs/compliance/soc2/evidence-inventory.md) | compliance | 2026-05-27 | current |
-| [docs/compliance/soc2/gap-log.md](docs/compliance/soc2/gap-log.md) | compliance | 2026-05-25 | current |
+| [docs/compliance/soc2/capacity-scaling-thresholds.md](docs/compliance/soc2/capacity-scaling-thresholds.md) | compliance | 2026-06-07 | current |
+| [docs/compliance/soc2/control-mapping.md](docs/compliance/soc2/control-mapping.md) | compliance | 2026-06-07 | current |
+| [docs/compliance/soc2/evidence-inventory.md](docs/compliance/soc2/evidence-inventory.md) | compliance | 2026-06-07 | current |
+| [docs/compliance/soc2/gap-log.md](docs/compliance/soc2/gap-log.md) | compliance | 2026-06-07 | current |
 | [docs/compliance/soc2/README.md](docs/compliance/soc2/README.md) | compliance | 2026-05-25 | current |
+| [docs/compliance/soc2/vendor-assurance-index.md](docs/compliance/soc2/vendor-assurance-index.md) | compliance | 2026-06-07 | current |
 | [docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md](docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md) | doctrine | 2026-05-25 | current |
 | [docs/doctrine/constitution.md](docs/doctrine/constitution.md) | doctrine | 2026-05-25 | current |
-| [docs/doctrine/DOCTRINE_GOVERNANCE.md](docs/doctrine/DOCTRINE_GOVERNANCE.md) | doctrine | 2026-05-25 | current |
+| [docs/doctrine/DOCTRINE_GOVERNANCE.md](docs/doctrine/DOCTRINE_GOVERNANCE.md) | doctrine | 2026-06-06 | current |
 | [docs/doctrine/DOCTRINE_STRESS_TEST.md](docs/doctrine/DOCTRINE_STRESS_TEST.md) | doctrine | 2026-05-25 | current |
 | [docs/doctrine/DOCTRINE_TRACEABILITY.md](docs/doctrine/DOCTRINE_TRACEABILITY.md) | doctrine | 2026-05-25 | current |
 | [docs/doctrine/DOCTRINE.md](docs/doctrine/DOCTRINE.md) | doctrine | 2026-05-25 | current |
 | [docs/doctrine/FIRST_CONTACT_MESSAGING.md](docs/doctrine/FIRST_CONTACT_MESSAGING.md) | doctrine | 2026-05-25 | current |
 | [docs/doctrine/frameworks.md](docs/doctrine/frameworks.md) | doctrine | 2026-05-25 | current |
+| [docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md](docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CATEGORY_VALIDATION_KIT.md](docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CATEGORY_VALIDATION_KIT.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_CYCLE1_PACKAGE.md](docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_CYCLE1_PACKAGE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_EXEC_READOUT.md](docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_EXEC_READOUT.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_INTERVIEW_TRACKER.md](docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_INTERVIEW_TRACKER.md) | doctrine | 2026-06-06 | current |
 | [docs/doctrine/narrative-playbooks.md](docs/doctrine/narrative-playbooks.md) | doctrine | 2026-05-25 | current |
+| [docs/doctrine/NZILA_CONSOLE_TAB_SCHEMA.md](docs/doctrine/NZILA_CONSOLE_TAB_SCHEMA.md) | doctrine | 2026-06-07 | current |
+| [docs/doctrine/NZILA_CONSOLE_TELEMETRY_SCHEMA.md](docs/doctrine/NZILA_CONSOLE_TELEMETRY_SCHEMA.md) | doctrine | 2026-06-07 | current |
+| [docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md](docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md) | doctrine | 2026-06-07 | current |
+| [docs/doctrine/NZILA_CONSOLE_WORKSPACE_MAP.md](docs/doctrine/NZILA_CONSOLE_WORKSPACE_MAP.md) | doctrine | 2026-06-07 | current |
 | [docs/doctrine/positioning.md](docs/doctrine/positioning.md) | doctrine | 2026-05-25 | current |
 | [docs/doctrine/principles.md](docs/doctrine/principles.md) | doctrine | 2026-05-25 | current |
+| [docs/doctrine/programs/FIRST_BENCHMARK_REPORT_SPEC.md](docs/doctrine/programs/FIRST_BENCHMARK_REPORT_SPEC.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/IIA_90_DAY_RECOMMENDATIONS_TEMPLATE.md](docs/doctrine/programs/IIA_90_DAY_RECOMMENDATIONS_TEMPLATE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/IIA_EXECUTIVE_READOUT_TEMPLATE.md](docs/doctrine/programs/IIA_EXECUTIVE_READOUT_TEMPLATE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/IIA_EXECUTIVE_WORKSHOP_DECK.md](docs/doctrine/programs/IIA_EXECUTIVE_WORKSHOP_DECK.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/IIA_HEATMAP_VISUALIZATION_SPEC.md](docs/doctrine/programs/IIA_HEATMAP_VISUALIZATION_SPEC.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/IIA_SCORING_WORKBOOK_TEMPLATE.md](docs/doctrine/programs/IIA_SCORING_WORKBOOK_TEMPLATE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/IIA_WORKSHOP_FACILITATOR_GUIDE.md](docs/doctrine/programs/IIA_WORKSHOP_FACILITATOR_GUIDE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/01-IIA-OFFER-SHEET.md](docs/doctrine/programs/iia-commercial-pack/01-IIA-OFFER-SHEET.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/02-IIA-OUTREACH-EMAIL.md](docs/doctrine/programs/iia-commercial-pack/02-IIA-OUTREACH-EMAIL.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/03-IIA-DISCOVERY-CALL-SCRIPT.md](docs/doctrine/programs/iia-commercial-pack/03-IIA-DISCOVERY-CALL-SCRIPT.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/04-IIA-30MIN-SALES-DECK.md](docs/doctrine/programs/iia-commercial-pack/04-IIA-30MIN-SALES-DECK.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/05-IIA-PRICING-AND-TIERS.md](docs/doctrine/programs/iia-commercial-pack/05-IIA-PRICING-AND-TIERS.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/06-IIA-PROPOSAL-TEMPLATE.md](docs/doctrine/programs/iia-commercial-pack/06-IIA-PROPOSAL-TEMPLATE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/07-IIA-SOW-TEMPLATE.md](docs/doctrine/programs/iia-commercial-pack/07-IIA-SOW-TEMPLATE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/08-IIA-POST-WORKSHOP-UPSELL-PATH.md](docs/doctrine/programs/iia-commercial-pack/08-IIA-POST-WORKSHOP-UPSELL-PATH.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/iia-commercial-pack/README.md](docs/doctrine/programs/iia-commercial-pack/README.md) | doctrine | 2026-06-06 | current |
 | [docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md](docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md) | doctrine | 2026-05-25 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT_WORKSHOP.md](docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT_WORKSHOP.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_OBSERVATORY_SCHEMA.md](docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_OBSERVATORY_SCHEMA.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_PRODUCT_ARCHITECTURE.md](docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_PRODUCT_ARCHITECTURE.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_PRODUCT_QUALIFICATION_MATRIX.md](docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_PRODUCT_QUALIFICATION_MATRIX.md) | doctrine | 2026-06-06 | current |
 | [docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md](docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md) | doctrine | 2026-05-25 | current |
+| [docs/doctrine/programs/OBSERVATORY_DATA_COLLECTION_STANDARD.md](docs/doctrine/programs/OBSERVATORY_DATA_COLLECTION_STANDARD.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/OBSERVATORY_OPERATING_MODEL.md](docs/doctrine/programs/OBSERVATORY_OPERATING_MODEL.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/pilot-launch-pack/01-TARGET-OUTREACH-CUPE4373-BRANDON.md](docs/doctrine/programs/pilot-launch-pack/01-TARGET-OUTREACH-CUPE4373-BRANDON.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/pilot-launch-pack/02-TARGET-OUTREACH-UNA-HEATHER.md](docs/doctrine/programs/pilot-launch-pack/02-TARGET-OUTREACH-UNA-HEATHER.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/pilot-launch-pack/03-TARGET-OUTREACH-ASSOCIATION-NONPROFIT.md](docs/doctrine/programs/pilot-launch-pack/03-TARGET-OUTREACH-ASSOCIATION-NONPROFIT.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/pilot-launch-pack/04-PILOT-INTAKE-FORM.md](docs/doctrine/programs/pilot-launch-pack/04-PILOT-INTAKE-FORM.md) | doctrine | 2026-06-07 | current |
+| [docs/doctrine/programs/pilot-launch-pack/05-CONSENT-LANGUAGE-C0-C3.md](docs/doctrine/programs/pilot-launch-pack/05-CONSENT-LANGUAGE-C0-C3.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/pilot-launch-pack/06-PILOT-TRACKING-TABLE.md](docs/doctrine/programs/pilot-launch-pack/06-PILOT-TRACKING-TABLE.md) | doctrine | 2026-06-07 | current |
+| [docs/doctrine/programs/pilot-launch-pack/07-FIRST-THREE-CASE-STUDY-OBJECTIVES.md](docs/doctrine/programs/pilot-launch-pack/07-FIRST-THREE-CASE-STUDY-OBJECTIVES.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/programs/pilot-launch-pack/08-ROUTE-DECISION-RECORD.md](docs/doctrine/programs/pilot-launch-pack/08-ROUTE-DECISION-RECORD.md) | doctrine | 2026-06-07 | current |
+| [docs/doctrine/programs/pilot-launch-pack/README.md](docs/doctrine/programs/pilot-launch-pack/README.md) | doctrine | 2026-06-06 | current |
 | [docs/doctrine/SCORING_MODELS.md](docs/doctrine/SCORING_MODELS.md) | doctrine | 2026-05-25 | current |
 | [docs/doctrine/vocabulary.md](docs/doctrine/vocabulary.md) | doctrine | 2026-05-25 | current |
 | [docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md](docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md) | doctrine | 2026-05-27 | current |
+| [docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT.md](docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_PRIMER.md](docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_PRIMER.md) | doctrine | 2026-06-06 | current |
+| [docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-06-06 | current |
 | [docs/doctrine/whitepapers/README.md](docs/doctrine/whitepapers/README.md) | doctrine | 2026-05-27 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-06-05 | current |
+| [docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-06-06 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-06-08 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-25 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-25 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-25 | current |
@@ -1176,8 +1222,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-05-27 | current |
 | [docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md](docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md) | ops | 2026-05-25 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-27 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-06-05 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-06-05 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-06-08 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-06-08 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-27 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-25 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-25 | current |
@@ -1187,6 +1233,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md) | proof-center | 2026-05-27 | current |
 | [docs/public/restore-readiness-summary.md](docs/public/restore-readiness-summary.md) | public | 2026-05-25 | current |
 | [docs/README.md](docs/README.md) | README.md | 2026-05-25 | current |
+| [docs/union-eyes/any-elimination.md](docs/union-eyes/any-elimination.md) | union-eyes | 2026-06-07 | current |
 | [docs/union-eyes/dr/restore-drill-runbook.md](docs/union-eyes/dr/restore-drill-runbook.md) | union-eyes | 2026-05-27 | current |
 | [docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md](docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md) | union-eyes | 2026-05-27 | current |
 | [docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md](docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md) | union-eyes | 2026-06-05 | current |

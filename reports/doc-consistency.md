@@ -1,22 +1,22 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-06-05T12:51:08.003Z
+> Generated: 2026-06-08T01:29:34.168Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1829 |
-| Total Findings | 2574 |
+| Files Scanned | 1883 |
+| Total Findings | 2581 |
 | Errors | 0 |
 | Warnings | 1212 |
-| Info | 1362 |
+| Info | 1369 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1355 |
+| naming-inconsistency | 1362 |
 | stale-reference | 1041 |
 | missing-package-readme | 105 |
 | stale-package-ref | 63 |
@@ -1133,7 +1133,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1355)
+## naming-inconsistency (1362)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2207,6 +2207,10 @@
 - ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:170` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:182` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/DOCTRINE_TRACEABILITY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md:12` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md:38` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md:129` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/NZILA_CONSOLE_WORKSPACE_MAP.md:8` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/SCORING_MODELS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/constitution.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/constitution.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2380,6 +2384,7 @@
 - ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/portfolio-matrix.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/proof-center/portfolio-proof-index.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/any-elimination.md:158` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md:43` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:63` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:67` — "orgId" should be "org_id" (tenant identifier)
@@ -2467,10 +2472,12 @@
 - ℹ️ `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:249` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:295` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:296` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `governance/ga/GA_CHECK_REPORT.md:49` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `governance/ga/GA_CHECK_REPORT.md:52` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/privacy/README.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/privacy/ai-pia/README.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/privacy/dpia/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `governance/privacy/incidents/exercises/2026-Q2/README.md:3` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `governance/privacy/policies/data-classification-policy.md:17` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/privacy/policies/data-classification-standard.md:25` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/reports/ALIGNMENT_REPORT.md:3` — "NZILAOS" should be "NzilaOS" (platform name)
@@ -2493,13 +2500,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 108 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 108 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 108 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 108 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 108 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 108 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 108 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 110 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 110 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 110 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 110 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 110 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 110 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 110 days old — may be stale
 
 ## missing-required-doc (3)
 
