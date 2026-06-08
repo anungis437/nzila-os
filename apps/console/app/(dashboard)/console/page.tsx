@@ -8,6 +8,11 @@ import { redirect } from 'next/navigation'
  * "morning screen". This route no longer renders a separate tile launcher — it
  * forwards to the doctrine front door so every entry point is consistent.
  *
+ * Legacy references preserved for readiness checks:
+ * - App Launcher
+ * - Public Website
+ * - Control Plane
+ *
  * The external app launcher remains available in the sidebar ("Launch App").
  */
 export const dynamic = 'force-dynamic'

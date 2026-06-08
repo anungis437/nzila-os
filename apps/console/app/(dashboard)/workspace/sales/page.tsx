@@ -38,7 +38,7 @@ export default async function SalesWorkspace({
   const orgId = await resolveWorkspaceOrgIdForUser(userId)
 
   const { tab } = await searchParams
-  const activeTab = resolveSubTab('sales', tab)
+  const activeTab = tab ? resolveSubTab('sales', tab) : 'opportunities'
 
   const { deals: allDeals, editable } = await loadSalesView()
   const sales = summarizeSales(allDeals)

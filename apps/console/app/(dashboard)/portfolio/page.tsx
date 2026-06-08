@@ -24,8 +24,11 @@ import {
 import { getAttributionDiagnostics, getCapitalPriorityRows } from '@/lib/executive-intelligence'
 import { CommandPageShell } from '@/components/command-page-shell'
 import { PortfolioWidgets, type PortfolioOpsProduct } from './_components/portfolio-widgets'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.portfolio')
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -110,7 +113,29 @@ export default async function PortfolioPage() {
 
   const { products, version } = loadCatalog()
   const freshnessStatus = products.length > 0 ? 'daily sync' : 'stale'
-  const [capitalRows, attribution] = await Promise.all([getCapitalPriorityRows(), getAttributionDiagnostics()])
+  const [capitalRows, attribution] = await Promise.all([
+    getCapitalPriorityRows().catch((error) => {
+      logger.warn('capital priority rows load failed; returning empty fallback', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return []
+    }),
+    getAttributionDiagnostics().catch((error) => {
+      logger.warn('attribution diagnostics load failed; returning empty fallback', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return {
+        quoteAttributionRate: 0,
+        invoiceAttributionRate: 0,
+        unattributedPipelineUsd: 0,
+        unattributedPaidRevenueUsd: 0,
+        unattributedQuoteCount: 0,
+        unattributedPaidInvoiceCount: 0,
+        sampleUnattributedQuotes: [],
+        sampleUnattributedInvoices: [],
+      }
+    }),
+  ])
   const capitalByVenture = new Map(capitalRows.map((row) => [row.ventureId, row]))
 
   for (const product of products) {

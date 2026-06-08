@@ -1,14 +1,12 @@
 /**
  * Console workspace — venture/portfolio data loader.
  *
- * Single source: governance/portfolio/product-catalog.json (the only editable
- * portfolio truth source). Read on the server, deterministic, no DB dependency.
+ * The workspace starts clean: no demo portfolio rows are projected into the
+ * console surface until a real venture source is wired in.
  *
  * Shared by the Overview, Portfolio, and Ventures workspaces so directive logic
  * and maturity signals stay consistent across the surface.
  */
-import fs from 'node:fs'
-import path from 'node:path'
 
 export interface CatalogProduct {
   id: string
@@ -91,32 +89,9 @@ export function directiveTone(d: Directive): 'green' | 'blue' | 'gray' | 'amber'
   }
 }
 
-function catalogPath(): string {
-  // apps/console/app/(dashboard)/workspace/_lib → repo root is five levels up.
-  return path.join(process.cwd(), '../../governance/portfolio/product-catalog.json')
-}
-
-/** Load all catalog products with directive + maturity resolved. Never throws. */
+/** Load all ventures for the console workspace. Never throws. */
 export function loadVentures(): VentureRow[] {
-  try {
-    const raw = fs.readFileSync(catalogPath(), 'utf-8')
-    const catalog = JSON.parse(raw) as ProductCatalog
-    const products = catalog.products ?? []
-    return products
-      .map((p) => ({
-        ...p,
-        directive: resolveDirective(p),
-        maturity: resolveMaturity(p),
-      }))
-      .sort((a, b) => {
-        const ta = a.tier ?? 99
-        const tb = b.tier ?? 99
-        if (ta !== tb) return ta - tb
-        return a.name.localeCompare(b.name)
-      })
-  } catch {
-    return []
-  }
+  return []
 }
 
 export interface PortfolioHealth {

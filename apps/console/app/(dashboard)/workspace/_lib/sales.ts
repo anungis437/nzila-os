@@ -7,10 +7,6 @@
  * when no rows exist or the DB is unavailable. The stage vocabulary is never
  * re-declared locally.
  */
-import { platformDb } from '@nzila/db/platform'
-import { deals as dealsTable } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
-import { seedDeals } from '@nzila/deal-engine/seed'
 import {
   STAGE_METADATA,
   isActiveStage,
@@ -19,6 +15,11 @@ import {
   type DealProduct,
   type DealStage,
 } from '@nzila/deal-engine'
+import { hubspotOpportunitySeed } from './hubspot-opportunity'
+import { platformDb } from '@nzila/db/platform'
+import { deals as dealsTable } from '@nzila/db/schema'
+import { eq } from 'drizzle-orm'
+import { getHousePartnerId } from './house-partner'
 
 export type { Deal, DealStage }
 export { STAGE_METADATA }
@@ -75,7 +76,9 @@ function daysSince(date: Date | null | undefined, now: number): number {
 
 /** Map a persisted partner-deal row onto the canonical Deal shape. */
 function toDeal(row: typeof dealsTable.$inferSelect, now: number): Deal | null {
-  const stage = PARTNER_STAGE_MAP[row.stage]
+  const metadata = row.metadata && typeof row.metadata === 'object' ? (row.metadata as Record<string, unknown>) : null
+  const isHubspotOpportunity = Boolean(metadata?.hubspotOpportunity)
+  const stage = isHubspotOpportunity && row.stage === 'submitted' ? 'demo_completed' : PARTNER_STAGE_MAP[row.stage]
   if (!stage) return null
   return {
     id: row.id,
@@ -119,7 +122,7 @@ export const PIPELINE_COLUMNS: { key: string; label: string; stages: DealStage[]
 ]
 
 export function loadDeals(): Deal[] {
-  return seedDeals
+  return hubspotOpportunitySeed
 }
 
 /** Raw, editable projection of a persisted deal row (drives edit forms). */
@@ -150,6 +153,41 @@ function toEditable(row: typeof dealsTable.$inferSelect): EditableDeal {
   }
 }
 
+function isSeededHubspotOpportunity(row: typeof dealsTable.$inferSelect): boolean {
+  if (row.accountName !== hubspotOpportunitySeed[0]?.accountName) return false
+  const metadata = row.metadata && typeof row.metadata === 'object' ? (row.metadata as Record<string, unknown>) : null
+  return Boolean(metadata?.hubspotOpportunity)
+}
+
+async function materializeHubspotOpportunitySeed(): Promise<void> {
+  const existing = await platformDb
+    .select({ id: dealsTable.id })
+    .from(dealsTable)
+    .where(eq(dealsTable.accountName, hubspotOpportunitySeed[0]!.accountName))
+    .limit(1)
+
+  if (existing.length > 0) return
+
+  const partnerId = await getHousePartnerId()
+  const seed = hubspotOpportunitySeed[0]!
+  await platformDb.insert(dealsTable).values({
+    partnerId,
+    accountName: seed.accountName,
+    contactName: seed.contactName ?? 'CUPE4373 contact',
+    contactEmail: seed.contactEmail ?? 'cupe4373@hubspot.local',
+    vertical: seed.product,
+    estimatedArr: String(seed.estimatedValue.toFixed(2)),
+    stage: 'submitted',
+    expectedCloseDate: null,
+    notes: 'HubSpot-sourced Union Eyes opportunity',
+    nzilaReviewerId: seed.owner,
+    metadata: {
+      hubspotOpportunity: true,
+      source: 'hubspot',
+    },
+  })
+}
+
 export interface SalesView {
   /** `db` when at least one real deal exists; `seed` when falling back. */
   source: 'db' | 'seed'
@@ -168,6 +206,20 @@ export async function loadSalesView(): Promise<SalesView> {
   try {
     const now = Date.now()
     const rows = await platformDb.select().from(dealsTable)
+
+    if (rows.length === 0) {
+      await materializeHubspotOpportunitySeed()
+      const seededRows = await platformDb.select().from(dealsTable)
+      const seededDeals = seededRows
+        .map((r) => toDeal(r, now))
+        .filter((d): d is Deal => d !== null)
+      if (seededDeals.length > 0) {
+        const editable: Record<string, EditableDeal> = {}
+        for (const r of seededRows) editable[r.id] = toEditable(r)
+        return { source: 'db', deals: seededDeals, editable }
+      }
+    }
+
     const mapped = rows
       .map((r) => toDeal(r, now))
       .filter((d): d is Deal => d !== null)
@@ -179,7 +231,8 @@ export async function loadSalesView(): Promise<SalesView> {
   } catch {
     // DB unavailable or table missing — fall back to the deterministic seed.
   }
-  return { source: 'seed', deals: seedDeals, editable: {} }
+
+  return { source: 'seed', deals: hubspotOpportunitySeed, editable: {} }
 }
 
 /**

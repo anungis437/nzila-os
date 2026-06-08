@@ -25,8 +25,11 @@ import {
 } from '@nzila/db/schema'
 import { securityAgent, type SecuritySignal, type VulnFinding } from '@nzila/executive-os'
 import { getExecutiveOrgId, runAndPersist } from '../../../../../lib/executive-os'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.platform.security')
 
 const SEVERITY_BADGE: Record<string, string> = {
   info: 'bg-slate-100 text-slate-700',
@@ -44,11 +47,19 @@ function coerceStatus(s: string): VulnFinding['status'] {
 }
 
 async function loadSignal(orgId: string): Promise<{ signal: SecuritySignal; total: number }> {
-  const findings = await platformDb
-    .select()
-    .from(securityFindings)
-    .where(eq(securityFindings.organizationId, orgId))
-    .limit(2000)
+  let findings: Array<typeof securityFindings.$inferSelect> = []
+  try {
+    findings = await platformDb
+      .select()
+      .from(securityFindings)
+      .where(eq(securityFindings.organizationId, orgId))
+      .limit(2000)
+  } catch (error) {
+    logger.warn('security findings load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { signal: { findings: [] }, total: 0 }
+  }
 
   const findingIds = findings.map((f) => f.id)
   const waivers =
@@ -110,18 +121,25 @@ async function loadSignal(orgId: string): Promise<{ signal: SecuritySignal; tota
 }
 
 async function lastInsights(orgId: string) {
-  const [run] = await platformDb
-    .select()
-    .from(executiveAgentRuns)
-    .where(and(eq(executiveAgentRuns.orgId, orgId), eq(executiveAgentRuns.agentKey, 'security')))
-    .orderBy(desc(executiveAgentRuns.startedAt))
-    .limit(1)
-  if (!run) return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
-  const insights = await platformDb
-    .select()
-    .from(executiveAgentInsights)
-    .where(eq(executiveAgentInsights.runId, run.id))
-  return { run, insights }
+  try {
+    const [run] = await platformDb
+      .select()
+      .from(executiveAgentRuns)
+      .where(and(eq(executiveAgentRuns.orgId, orgId), eq(executiveAgentRuns.agentKey, 'security')))
+      .orderBy(desc(executiveAgentRuns.startedAt))
+      .limit(1)
+    if (!run) return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
+    const insights = await platformDb
+      .select()
+      .from(executiveAgentInsights)
+      .where(eq(executiveAgentInsights.runId, run.id))
+    return { run, insights }
+  } catch (error) {
+    logger.warn('security run history load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
+  }
 }
 
 export default async function SecurityPage() {
