@@ -12,7 +12,12 @@
 import { and, eq, ilike, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import type { ExitInterviewSensitivityLevel } from '@/db/schema';
 
@@ -46,7 +51,10 @@ export interface HybridSearchOptions {
   semanticWeight?: number;
 }
 
-async function generateQueryEmbedding(query: string): Promise<number[] | null> {
+async function generateQueryEmbedding(
+  query: string,
+  _orgId?: string,
+): Promise<number[] | null> {
   try {
     const cached = await embeddingCache.getCachedEmbedding(query, 'ai-sdk');
     if (cached) return cached;
@@ -172,7 +180,7 @@ export async function hybridKnowledgeSearch(
 
   const [keywordResults, queryEmbedding] = await Promise.all([
     keywordSearch(query, orgId, allowedSensitivityLevels, limit * 2),
-    generateQueryEmbedding(query),
+    generateQueryEmbedding(query, orgId),
   ]);
 
   let semanticScores = new Map<string, number>();

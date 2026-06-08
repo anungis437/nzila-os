@@ -23,7 +23,7 @@ import {
 import { eq, and, desc, sql } from "drizzle-orm";
 import { embeddingCache } from "@/lib/services/ai/embedding-cache";
 import { logger } from "@/lib/logger";
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import type { ChatMessage as _AiChatMessage } from '@nzila/ai-sdk/types';
 
@@ -36,12 +36,14 @@ import type { ChatMessage as _AiChatMessage } from '@nzila/ai-sdk/types';
  */
 async function aiGenerate(
   messages: Array<{ role: string; content: string }>,
+  organizationId?: string,
   _options?: { temperature?: number; maxTokens?: number; model?: string },
 ): Promise<{ content: string; tokensUsed: number; model: string }> {
   const ai = getAiClient();
   const input = messages.map(m => ({ role: m.role as 'system' | 'user' | 'assistant', content: m.content }));
   const response = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.CHATBOT,
     input,
@@ -54,7 +56,7 @@ async function aiGenerate(
   };
 }
 
-async function aiEmbed(text: string): Promise<number[]> {
+async function aiEmbed(text: string, organizationId?: string): Promise<number[]> {
   // Check cache first
   const cachedEmbedding = await embeddingCache.getCachedEmbedding(text, 'ai-sdk');
   if (cachedEmbedding) {
@@ -399,7 +401,7 @@ export class ChatbotService {
     // Get AI response
     let response: { content: string; tokensUsed: number; model: string };
     try {
-      response = await aiGenerate(conversationMessages, {
+      response = await aiGenerate(conversationMessages, session.organizationId, {
         temperature: parseFloat(session.temperature || "0.7"),
         model: session.model,
       });

@@ -11,7 +11,13 @@
  */
 
 import { logger } from '@/lib/logger';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 
 // Mamba configuration
 export interface MambaConfig {
@@ -76,6 +82,7 @@ export class MambaModel {
     maxTokens?: number;
     temperature?: number;
     systemPrompt?: string;
+    organizationId?: string;
   }): Promise<MambaResponse> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -123,7 +130,12 @@ export class MambaModel {
    */
   private async runInference(
     input: string,
-    options?: { systemPrompt?: string; maxTokens?: number; temperature?: number }
+    options?: {
+      systemPrompt?: string;
+      maxTokens?: number;
+      temperature?: number;
+      organizationId?: string;
+    }
   ): Promise<{ output: string; tokens: number }> {
     const prompt = options?.systemPrompt
       ? `${options.systemPrompt}\n\nInput: ${input}\nOutput:`
@@ -142,6 +154,7 @@ export class MambaModel {
 
     const result = await ai.generate({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(options?.organizationId),
       appKey: UE_APP_KEY,
       profileKey,
       input: prompt,

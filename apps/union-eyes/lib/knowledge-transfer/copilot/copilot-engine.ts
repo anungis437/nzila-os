@@ -17,7 +17,12 @@
 import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
-import { getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
@@ -212,6 +217,7 @@ export async function processCopilotQuery(
   const ai = getAiClient();
   const aiResult = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(orgId),
     appKey: UE_APP_KEY,
     profileKey: COPILOT_PROFILE,
     input: messages,

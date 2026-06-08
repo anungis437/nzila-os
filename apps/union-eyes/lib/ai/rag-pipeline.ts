@@ -9,7 +9,12 @@
  */
 
 import { logger } from '@/lib/logger';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 
 // Document types
 export interface Document {
@@ -19,6 +24,7 @@ export interface Document {
 }
 
 export interface DocumentMetadata {
+  organizationId?: string;
   source: string;
   type: 'policy' | 'contract' | 'faq' | 'grievance' | 'legal' | 'procedure';
   jurisdiction?: string;
@@ -66,7 +72,10 @@ interface BM25Index {
 }
 
 // Real embedding via the AI SDK
-async function generateEmbedding(text: string): Promise<number[]> {
+async function generateEmbedding(
+  text: string,
+  _organizationId?: string,
+): Promise<number[]> {
   const ai = getAiClient();
   const result = await ai.embed({
     orgId: UE_SYSTEM_ORG_ID,
@@ -128,7 +137,7 @@ class RAGPipeline {
       const chunks = this.chunkDocument(doc);
       
       for (const chunk of chunks) {
-        chunk.embedding = await generateEmbedding(chunk.content);
+        chunk.embedding = await generateEmbedding(chunk.content, chunk.metadata.organizationId);
         this.chunks.set(chunk.id, chunk);
         this.addToBM25Index(chunk);
         addedCount++;

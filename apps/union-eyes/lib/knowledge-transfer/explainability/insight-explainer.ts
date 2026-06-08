@@ -17,7 +17,13 @@
  * INV-01: All AI calls via getAiClient()
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 
 export type InsightType =
   | 'risk_flag'
@@ -141,6 +147,7 @@ export async function explainInsights(params: {
 
   const result = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(orgId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.TOPIC_EXTRACTION,
     input: [

@@ -11,7 +11,13 @@
  * - Cross-reference detection
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 import type { PrecedentValueEnum, OutcomeEnum } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
@@ -213,7 +219,8 @@ ${clauseContent}`
  */
 export async function generateClauseTags(
   clauseContent: string,
-  clauseType: ClauseType
+  clauseType: ClauseType,
+  organizationId?: string,
 ): Promise<TagGenerationResult> {
   const systemPrompt = `Generate 5-10 relevant, specific tags for this collective bargaining agreement clause.
 
@@ -233,6 +240,7 @@ Return JSON with:
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.TAG_GENERATION,
       promptKey: UE_PROFILES.TAG_GENERATION,
@@ -259,7 +267,8 @@ Return JSON with:
  * Detect cross-references to other clauses
  */
 export async function detectCrossReferences(
-  clauseContent: string
+  clauseContent: string,
+  organizationId?: string,
 ): Promise<CrossReferenceResult> {
   const systemPrompt = `Identify all cross-references to other clauses in this CBA clause.
 
@@ -276,6 +285,7 @@ Return JSON with:
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CROSS_REFERENCE,
       promptKey: UE_PROFILES.CROSS_REFERENCE,
@@ -305,7 +315,8 @@ export async function classifyPrecedent(
   caseTitle: string,
   facts: string,
   reasoning: string,
-  decision: string
+  decision: string,
+  organizationId?: string,
 ): Promise<PrecedentClassification> {
   const systemPrompt = `You are a labour arbitration expert. Analyze this arbitration decision and classify it.
 
@@ -344,6 +355,7 @@ Return JSON with:
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,
       promptKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,

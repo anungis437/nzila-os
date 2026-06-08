@@ -14,7 +14,13 @@
  * - Legal argument generation
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { arbitrationDecisions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -65,6 +71,7 @@ export interface PrecedentMatchOptions {
 }
 
 interface ClaimInput {
+  organizationId?: string;
   facts: string;
   issueType: string;
   jurisdiction?: string;
@@ -90,6 +97,7 @@ interface PrecedentInput {
  */
 export async function matchClaimToPrecedents(
   claim: {
+    organizationId?: string;
     facts: string;
     issueType: string;
     jurisdiction?: string;
@@ -125,7 +133,7 @@ export async function matchClaimToPrecedents(
     });
 
     // Step 2: Extract keywords from claim
-    const keywords = await extractClaimKeywords(claim.facts);
+    const keywords = await extractClaimKeywords(claim.facts, claim.organizationId);
 
     // Step 3: Score each precedent using hybrid approach
     const scoredMatches = await Promise.all(
@@ -209,11 +217,15 @@ export async function matchClaimToPrecedents(
 /**
  * Extract key terms from claim using AI
  */
-async function extractClaimKeywords(claimText: string): Promise<string[]> {
+async function extractClaimKeywords(
+  claimText: string,
+  organizationId?: string,
+): Promise<string[]> {
   try {
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.PRECEDENT_KEYWORDS,
       promptKey: UE_PROFILES.PRECEDENT_KEYWORDS,
@@ -302,6 +314,7 @@ async function analyzePrecedentApplicability(
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(claim.organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.PRECEDENT_APPLICABILITY,
       promptKey: UE_PROFILES.PRECEDENT_APPLICABILITY,
@@ -338,6 +351,7 @@ Outcome: ${precedent.outcome}`,
  */
 export async function analyzeClaimWithPrecedents(
   claim: {
+    organizationId?: string;
     facts: string;
     issueType: string;
     jurisdiction?: string;
@@ -412,6 +426,7 @@ async function generateClaimAnalysis(
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(claim.organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAIM_ANALYSIS,
       promptKey: UE_PROFILES.CLAIM_ANALYSIS,
@@ -465,6 +480,7 @@ export async function generateLegalMemorandum(
     const ai = getAiClient();
     const response = await ai.generate({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(claim.organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.LEGAL_MEMORANDUM,
       input: `Generate a professional legal memorandum for a labour arbitration case.

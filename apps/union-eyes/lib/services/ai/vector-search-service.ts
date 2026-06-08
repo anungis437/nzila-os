@@ -11,7 +11,12 @@
  * - Hybrid search (vector + keyword)
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { cbaClause } from '@/db/schema';
 import { eq, sql, and, or, SQL } from 'drizzle-orm';
@@ -49,7 +54,10 @@ export interface SemanticSearchOptions {
  * Generate embedding vector for text using OpenAI
  * Uses Redis cache to reduce API calls and costs
  */
-export async function generateEmbedding(text: string): Promise<number[]> {
+export async function generateEmbedding(
+  text: string,
+  _organizationId?: string,
+): Promise<number[]> {
   try {
     // Check cache first
     const cachedEmbedding = await embeddingCache.getCachedEmbedding(text, EMBEDDING_MODEL);
@@ -108,7 +116,7 @@ export async function semanticClauseSearch(
 
   try {
     // Generate embedding for search query
-    const queryEmbedding = await generateEmbedding(query);
+    const queryEmbedding = await generateEmbedding(query, filters.organizationId);
     const embeddingString = `[${queryEmbedding.join(',')}]`;
 
     // Build WHERE clause based on filters
@@ -184,7 +192,7 @@ export async function findSimilarClauses(
     }
 
     // Get embedding for source clause
-    const queryEmbedding = await generateEmbedding(sourceClause.content);
+    const queryEmbedding = await generateEmbedding(sourceClause.content, sourceClause.organizationId);
     const embeddingString = `[${queryEmbedding.join(',')}]`;
 
     // Build query with optional same-type filter
@@ -341,7 +349,8 @@ export async function generateClauseEmbeddings(
       const embeddingPromises = batch.map(async clause => {
         try {
           const embedding = await generateEmbedding(
-            `${clause.title} ${clause.content}`
+            `${clause.title} ${clause.content}`,
+            clause.organizationId,
           );
           
           await db.execute(sql`
