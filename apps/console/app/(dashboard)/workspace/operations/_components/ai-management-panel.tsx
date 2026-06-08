@@ -22,70 +22,90 @@ function statusTone(status: string): 'green' | 'amber' | 'red' | 'gray' {
   return 'gray'
 }
 
-interface Capability {
+interface SurfaceCard {
   key: string
   name: string
   description: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
-  status: 'live' | 'roadmap'
+  href: string
+  value: string
+  sublabel: string
 }
-
-const CAPABILITIES: Capability[] = [
-  {
-    key: 'models',
-    name: 'Models',
-    description: 'Registered models, versions, and approval state across the ML fleet.',
-    icon: CpuChipIcon,
-    status: 'live',
-  },
-  {
-    key: 'runs',
-    name: 'Runs & inference',
-    description: 'Training and inference run history with anomaly detection on Stripe tracks.',
-    icon: BoltIcon,
-    status: 'live',
-  },
-  {
-    key: 'agents',
-    name: 'Agents',
-    description: 'Registry of operating AI agents, their tools, and autonomy scope. Not yet wired.',
-    icon: SparklesIcon,
-    status: 'roadmap',
-  },
-  {
-    key: 'evals',
-    name: 'Evaluations',
-    description: 'Quality, regression, and safety evals per model and agent release. Not yet wired.',
-    icon: BeakerIcon,
-    status: 'roadmap',
-  },
-  {
-    key: 'guardrails',
-    name: 'Guardrails',
-    description: 'Content, policy, and rate-limit guardrails applied to AI surfaces. Not yet wired.',
-    icon: ShieldCheckIcon,
-    status: 'roadmap',
-  },
-  {
-    key: 'spend',
-    name: 'Spend & quotas',
-    description: 'Token spend, model cost allocation, and per-tenant quotas. Not yet wired.',
-    icon: CurrencyDollarIcon,
-    status: 'roadmap',
-  },
-]
 
 export async function AiManagementPanel() {
   const ai = await loadAiManagement()
   const bridge = bridgeFor('operations', 'ai')
 
+  const budgetSummary =
+    ai.budgetCount > 0
+      ? `$${ai.budgetSpentUsd.toFixed(2)} / $${ai.budgetCapUsd.toFixed(2)}`
+      : 'No budgets configured'
+
+  const surfaceCards: SurfaceCard[] = [
+    {
+      key: 'ml-fleet',
+      name: 'Live ML fleet',
+      description: 'Active models, serving runs, and anomaly posture from the Console ML subsystem.',
+      icon: CpuChipIcon,
+      href: '/console/ml/overview',
+      value: ai.available ? String(ai.activeModels.length) : '—',
+      sublabel: ai.available
+        ? `${ai.recentInference.length} recent inference runs`
+        : 'ML platform unavailable',
+    },
+    {
+      key: 'registry',
+      name: 'Model registry',
+      description: 'Registered model families and approved deployment configurations.',
+      icon: BeakerIcon,
+      href: '/console/ai/models',
+      value: `${ai.modelRegistryCount}`,
+      sublabel: `${ai.deploymentCount} deployments`,
+    },
+    {
+      key: 'routes',
+      name: 'Deployment routes',
+      description: 'Real app/profile/feature routing into the live AI deployments.',
+      icon: SparklesIcon,
+      href: '/console/ai/models',
+      value: `${ai.deploymentRouteCount}`,
+      sublabel: 'Routing is DB-backed',
+    },
+    {
+      key: 'usage',
+      name: 'Usage analytics',
+      description: 'Request volume, cost, latency, and refusal posture across the entity.',
+      icon: CurrencyDollarIcon,
+      href: '/console/ai/usage',
+      value: `${ai.requestCount}`,
+      sublabel: `$${ai.requestCostUsd.toFixed(4)} spend · ${ai.requestRefusedCount} refusals`,
+    },
+    {
+      key: 'actions',
+      name: 'Actions & approvals',
+      description: 'Deterministic action proposals, approvals, and execution readiness.',
+      icon: ShieldCheckIcon,
+      href: '/console/ai/actions',
+      value: `${ai.actionCount}`,
+      sublabel: `${ai.actionPendingCount} pending or running`,
+    },
+    {
+      key: 'knowledge',
+      name: 'Knowledge sources',
+      description: 'Ingestion-backed sources feeding retrieval and grounded responses.',
+      icon: BoltIcon,
+      href: '/console/ai/knowledge',
+      value: `${ai.knowledgeSourceCount}`,
+      sublabel: budgetSummary,
+    },
+  ]
+
   return (
     <div className="space-y-8">
       <p className="text-sm text-gray-500">
-        The control surface for the platform&rsquo;s AI/ML fleet — models, runs, and the governed
-        capabilities layered on top. Live fleet state is sourced from the ML platform; capabilities
-        marked <span className="font-medium text-gray-700">Roadmap</span> are scaffolded and awaiting
-        their backend.
+        The control surface for the platform&rsquo;s AI/ML fleet — models, runs, routing, usage, and
+        the live governance surfaces layered on top. Everything shown here is backed by real data
+        or a real page in Console.
       </p>
 
       {/* Live fleet KPIs */}
@@ -97,44 +117,54 @@ export async function AiManagementPanel() {
           icon={<CpuChipIcon className="h-5 w-5" />}
         />
         <KpiTile
-          label="Inference runs"
-          value={ai.available ? ai.recentInference.length : '—'}
-          sublabel="Most recent batch"
+          label="Requests"
+          value={ai.available ? ai.requestCount : '—'}
+          sublabel="AI request ledger"
           icon={<BoltIcon className="h-5 w-5" />}
         />
         <KpiTile
-          label="Daily anomalies"
-          value={ai.available ? ai.dailyAnomalies : '—'}
-          sublabel="Stripe daily · 90d"
+          label="Actions"
+          value={ai.available ? ai.actionCount : '—'}
+          sublabel="Proposed / approved / executed"
           icon={<ExclamationTriangleIcon className="h-5 w-5" />}
         />
         <KpiTile
-          label="Txn anomalies"
-          value={ai.available ? ai.txnAnomalies : '—'}
-          sublabel="Stripe transactions · 90d"
-          icon={<ExclamationTriangleIcon className="h-5 w-5" />}
+          label="Budget posture"
+          value={budgetSummary}
+          sublabel={ai.budgetCount > 0 ? `${ai.budgetCount} budgets tracked` : 'No budget rows yet'}
+          icon={<CurrencyDollarIcon className="h-5 w-5" />}
         />
       </div>
 
-      {/* Capability grid */}
+      {/* Real capability grid */}
       <div>
-        <h3 className="mb-4 text-base font-semibold text-gray-900">Governed capabilities</h3>
+        <h3 className="mb-4 text-base font-semibold text-gray-900">Live AI surfaces</h3>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {CAPABILITIES.map((c) => {
+          {surfaceCards.map((c) => {
             const Icon = c.icon
             return (
               <Card key={c.key} className="h-full">
                 <CardBody>
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <Icon className="h-5 w-5 text-gray-300" />
                       <span className="text-sm font-semibold text-gray-900">{c.name}</span>
                     </div>
-                    <Badge tone={c.status === 'live' ? 'green' : 'gray'}>
-                      {c.status === 'live' ? 'Live' : 'Roadmap'}
-                    </Badge>
+                    <Badge tone="green">Live</Badge>
                   </div>
                   <p className="mt-2 text-sm text-gray-500">{c.description}</p>
+                  <div className="mt-4 flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{c.value}</p>
+                      <p className="text-xs text-gray-400">{c.sublabel}</p>
+                    </div>
+                    <Link
+                      href={c.href}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      Open <ArrowRightIcon className="h-4 w-4" />
+                    </Link>
+                  </div>
                 </CardBody>
               </Card>
             )

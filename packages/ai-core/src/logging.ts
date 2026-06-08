@@ -62,6 +62,40 @@ export interface LogAiRequestInput {
   fallbackAttempts?: number
 }
 
+export function buildAiRequestAuditAfterJson(input: Pick<
+  LogAiRequestInput,
+  | 'appKey'
+  | 'feature'
+  | 'provider'
+  | 'modelOrDeployment'
+  | 'status'
+  | 'tokensIn'
+  | 'tokensOut'
+  | 'costUsd'
+  | 'latencyMs'
+  | 'trace'
+> & {
+  requestHash: string
+  responseHash: string
+}): Record<string, unknown> {
+  return {
+    appKey: input.appKey,
+    feature: input.feature,
+    provider: input.provider,
+    model: input.modelOrDeployment,
+    status: input.status,
+    requestHash: input.requestHash.slice(0, 12),
+    responseHash: input.responseHash.slice(0, 12),
+    tokensIn: input.tokensIn,
+    tokensOut: input.tokensOut,
+    costUsd: input.costUsd,
+    latencyMs: input.latencyMs,
+    correlationId: input.trace?.correlationId,
+    domainType: input.trace?.domainType,
+    domainId: input.trace?.domainId,
+  }
+}
+
 /**
  * Log an AI request with hashes and optionally store payloads.
  * Also appends a hash-chained audit_event.
@@ -134,20 +168,20 @@ export async function logAiRequest(
     action: 'ai.request_executed',
     targetType: 'ai_request',
     targetId: row.id,
-    afterJson: {
+    afterJson: buildAiRequestAuditAfterJson({
       appKey: input.appKey,
       feature: input.feature,
       provider: input.provider,
-      model: input.modelOrDeployment,
+      modelOrDeployment: input.modelOrDeployment,
       status: input.status,
-      requestHash: requestHash.slice(0, 12),
-      responseHash: responseHash.slice(0, 12),
       tokensIn: input.tokensIn,
       tokensOut: input.tokensOut,
       costUsd: input.costUsd,
       latencyMs: input.latencyMs,
-      correlationId: input.trace?.correlationId,
-    },
+      trace: input.trace,
+      requestHash,
+      responseHash,
+    }),
   })
 
   return { requestId: row.id, requestHash, responseHash }

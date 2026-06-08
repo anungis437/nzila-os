@@ -20,7 +20,7 @@
 
 import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiGrievanceTriages, type AiGrievanceTriageInsert } from '@/db/schema/domains/ml/ai-grievance-triage';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
@@ -102,6 +102,7 @@ export async function analyzeGrievance(
   const prompt = buildTriagePrompt(grievance);
   const aiResult = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.GRIEVANCE_TRIAGE,
     input: prompt,

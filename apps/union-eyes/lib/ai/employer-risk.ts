@@ -19,7 +19,7 @@
 
 import { db } from '@/db/db';
 import { eq, and, gte, desc, count, sql as _sql } from 'drizzle-orm';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { employerRiskScores, type EmployerRiskScoreInsert } from '@/db/schema/domains/ml/employer-risk-scores';
 import { employers } from '@/db/schema/domains/compliance/employer-compliance';
 import { complianceAlerts } from '@/db/schema/domains/compliance/employer-compliance';
@@ -82,6 +82,7 @@ export async function calculateEmployerRisk(
   const prompt = buildRiskPrompt(employer, signals);
   const aiResult = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EMPLOYER_RISK,
     input: prompt,

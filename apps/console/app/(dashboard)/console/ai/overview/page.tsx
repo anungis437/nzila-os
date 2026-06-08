@@ -20,10 +20,10 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createLogger } from '@nzila/os-core/telemetry'
+import { resolveConsoleEntityId } from '@/lib/entity-context'
 
 export const dynamic = 'force-dynamic'
 
-const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 const logger = createLogger('console.ai.overview')
 
 interface OverviewMetrics {
@@ -273,11 +273,12 @@ function formatNumber(n: number): string {
 export default async function AiOverviewPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
-  if (!DEFAULT_ENTITY_ID) {
-    return <div className="p-8 text-red-600">NZILA_DEFAULT_ENTITY_ID not configured</div>
+  const orgId = await resolveConsoleEntityId(userId)
+  if (!orgId) {
+    return <div className="p-8 text-red-600">No active org membership or fallback entity configured</div>
   }
 
-  const m = await getOverviewMetrics(DEFAULT_ENTITY_ID)
+  const m = await getOverviewMetrics(orgId)
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-2 pb-8 sm:px-4">
