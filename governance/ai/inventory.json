@@ -110,9 +110,15 @@
       "region": "eastus",
       "highestDataTier": "Restricted",
       "pia": "governance/privacy/ai-pia/surfaces/union-eyes-cognition.md",
-      "piaStatus": "R1-open",
+      "piaStatus": "CLOSED",
       "evalDataset": "tooling/ai-evals/datasets/union-eyes",
-      "approval": { "by": "AIGC", "date": null, "decision": "pending" },
+      "approval": { "by": "AIGC", "date": "2026-06-08", "decision": "approved" },
+      "worldClassEvidence": {
+        "incidentPlaybook": "governance/ai/world-class/ue/incident-playbook-addendum.md",
+        "monitoringPlan": "governance/ai/world-class/ue/monitoring-plan.md",
+        "killSwitchDrill": "governance/ai/world-class/ue/kill-switch-drill.md",
+        "humanOversight": "governance/ai/world-class/ue/human-oversight.md"
+      },
       "status": "DEV"
     },
     {
@@ -145,9 +151,14 @@
       "region": "local",
       "highestDataTier": "Confidential",
       "pia": "governance/privacy/ai-pia/surfaces/platform-cognition-phase1.md",
-      "piaStatus": "DRAFT-stub",
+      "piaStatus": "APPROVED",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
+      "approval": { "by": "Privacy Lead", "date": "2026-06-08", "decision": "approved" },
+      "worldClassEvidence": {
+        "incidentPlaybook": "governance/ai/world-class/platform-cognition/incident-playbook-addendum.md",
+        "monitoringPlan": "governance/ai/world-class/platform-cognition/monitoring-plan.md",
+        "killSwitchDrill": "governance/ai/world-class/platform-cognition/kill-switch-drill.md"
+      },
       "status": "PROD"
     },
     {

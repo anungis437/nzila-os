@@ -4,6 +4,10 @@ const mockExtract = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ extract: mockExtract }),
+  buildOrgAiTrace: vi.fn(() => ({
+    component: 'test',
+    action: 'mock',
+  })),
   UE_APP_KEY: 'test-app-key',
   UE_PROFILES: {
     CLAUSE_CLASSIFICATION: 'clause-classification',
