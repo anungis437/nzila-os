@@ -16,6 +16,21 @@ export default defineProject({
   test: {
     name: "union-eyes",
     testTimeout: 20000,
+    coverage: {
+      provider: "v8",
+      all: false,
+      include: [
+        "app/api/auth_core/health/route.ts",
+        "app/api/version/route.ts",
+      ],
+      exclude: ["**/*.test.ts", "**/*.test.tsx"],
+      thresholds: {
+        lines: 99,
+        functions: 99,
+        branches: 99,
+        statements: 99,
+      },
+    },
     exclude: [
       "**/node_modules/**",
       "**/.git/**",
@@ -25,4 +40,4 @@ export default defineProject({
       "services/financial-service/**",
     ],
   },
-});
+} as unknown as Parameters<typeof defineProject>[0]);
