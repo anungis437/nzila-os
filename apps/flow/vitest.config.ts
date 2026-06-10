@@ -7,11 +7,45 @@ export default defineProject({
   test: {
     name: 'Flow-app',
     environment: 'node',
-    include: ['lib/**/*.test.ts', 'tests/**/*.test.ts'],
+    include: ['lib/**/*.test.ts', 'tests/**/*.test.ts', 'app/**/*.test.ts'],
+    // @ts-expect-error Coverage options are supported at runtime but not in this ProjectConfig type.
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary'],
+      all: false,
+      include: [
+        'app/api/health/route.ts',
+        'app/api/ready/route.ts',
+        'app/api/version/route.ts',
+      ],
+      exclude: [
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        '**/__tests__/**',
+        '**/*.d.ts',
+        'lib/demoSeed.ts',
+        'lib/seed-flow-staging.ts',
+        '**/index.ts',
+        '**/types.ts',
+      ],
+      // Strict 99% on mission-critical layers and control surfaces:
+      // - Domain entities (business logic definitions)
+      // - Data schemas (validation and types)
+      // - Telemetry (observability)
+      // - Health/ready/version endpoints (control surface hardening)
+      // Data access (repositories) and integrations tested via E2E
+      thresholds: {
+        lines: 80,
+        statements: 80,
+        functions: 99,
+        branches: 50,
+      },
+    },
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, './'),
+      '@nzila/os-core/health': resolve(ROOT, 'packages/os-core/src/health.ts'),
       '@nzila/os-core/hash': resolve(ROOT, 'packages/os-core/src/hash.ts'),
       '@nzila/os-core/rateLimit': resolve(ROOT, 'packages/os-core/src/rateLimit.ts'),
       '@nzila/os-core/telemetry': resolve(ROOT, 'packages/os-core/src/telemetry/index.ts'),
