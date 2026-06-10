@@ -24,7 +24,7 @@ async function checkDb(): Promise<boolean> {
 }
 
 export async function GET() {
-  const dbResult = await checkDb().catch(() => false)
+  const dbResult = await checkDb()
 
   const checks = { db: dbResult }
   const allHealthy = Object.values(checks).every(Boolean)
