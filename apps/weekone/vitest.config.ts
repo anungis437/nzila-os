@@ -7,7 +7,23 @@ export default defineProject({
   test: {
     name: "weekone",
     environment: "node",
-    include: ["lib/**/*.test.ts", "tests/**/*.test.ts"],
+    include: ["lib/**/*.test.ts", "tests/**/*.test.ts", "app/**/*.test.ts"],
+    coverage: {
+      provider: 'v8',
+      all: false,
+      include: [
+        'lib/db.ts',
+        'app/api/onboarding/activation/route.ts',
+        'app/api/priorities/route.ts',
+      ],
+      exclude: ['**/*.test.ts', '**/*.test.tsx'],
+      thresholds: {
+        lines: 99,
+        functions: 99,
+        branches: 99,
+        statements: 99,
+      },
+    },
   },
   resolve: {
     alias: {
@@ -17,7 +33,11 @@ export default defineProject({
         __dirname,
         "./__mocks__/platform-auth-server.ts"
       ),
+      "@nzila/os-core/telemetry": resolve(
+        ROOT,
+        "packages/os-core/src/telemetry/index.ts"
+      ),
       "@nzila/os-core": resolve(ROOT, "packages/os-core/src/index.ts"),
     },
   },
-});
+} as unknown as Parameters<typeof defineProject>[0]);
