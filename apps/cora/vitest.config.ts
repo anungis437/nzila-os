@@ -9,9 +9,9 @@ export default defineProject({
       provider: 'v8',
       all: false,
       include: [
-        'lib/resolve-org.ts',
-        'proxy.ts',
         'app/api/health/route.ts',
+        'app/api/ready/route.ts',
+        'app/api/version/route.ts',
       ],
       exclude: ['**/*.test.ts', '**/*.test.tsx'],
       thresholds: {
