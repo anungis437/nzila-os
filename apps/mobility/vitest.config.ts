@@ -9,7 +9,6 @@ export default defineProject({
       provider: 'v8',
       all: false,
       include: [
-        'proxy.ts',
         'app/api/health/route.ts',
         'app/api/ready/route.ts',
         'app/api/version/route.ts',
