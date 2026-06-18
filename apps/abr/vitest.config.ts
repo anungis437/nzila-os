@@ -11,7 +11,6 @@ export default defineProject({
     name: "abr",
     coverage: {
       provider: 'v8',
-      all: false,
       include: [
         'lib/org-context.ts',
         'lib/api-guards.ts',

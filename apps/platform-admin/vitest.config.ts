@@ -13,7 +13,6 @@ export default defineProject({
     include: ['lib/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      all: false,
       include: [
         'lib/org-scope-guard.ts',
         'lib/boot-env.ts',

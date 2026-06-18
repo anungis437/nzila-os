@@ -10,7 +10,6 @@ export default defineProject({
     include: ["lib/**/*.test.ts", "tests/**/*.test.ts", "app/**/*.test.ts"],
     coverage: {
       provider: 'v8',
-      all: false,
       include: [
         'lib/db.ts',
         'app/api/onboarding/activation/route.ts',

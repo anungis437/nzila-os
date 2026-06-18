@@ -9,7 +9,6 @@ export default defineProject({
     ],
     coverage: {
       provider: 'v8',
-      all: false,
       include: [
         'lib/resolve-org.ts',
         'lib/api-guards.ts',

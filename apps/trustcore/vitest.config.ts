@@ -13,7 +13,6 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       provider: 'v8',
-      all: false,
       include: [
         'lib/api-guards.ts',
         'lib/rbac/requireRole.ts',

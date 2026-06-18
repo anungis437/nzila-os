@@ -7,7 +7,6 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      all: false,
       include: ['app/api/mandates/[mandateId]/transition/route.ts'],
       exclude: ['**/*.test.ts', '**/__tests__/**', '**/__mocks__/**'],
       // Strict coverage on the mission-critical mandate transition gate.

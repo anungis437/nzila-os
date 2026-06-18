@@ -6,7 +6,6 @@ export default defineProject({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary'],
-      all: false,
       include: [
         'src/contract.ts',
         'src/telemetry-hooks.ts',

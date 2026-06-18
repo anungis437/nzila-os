@@ -22,7 +22,6 @@ export default defineProject({
     testTimeout: 60000,
     coverage: {
       provider: "v8",
-      all: false,
       include: [
         "app/api/auth_core/health/route.ts",
         "app/api/version/route.ts",

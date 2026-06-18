@@ -12,7 +12,6 @@ export default defineProject({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary'],
-      all: false,
       include: [
         'app/api/health/route.ts',
         'app/api/ready/route.ts',

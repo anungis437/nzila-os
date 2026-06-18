@@ -85,4 +85,18 @@ describe('GET /api/health', () => {
     expect(response.status).toBe(200)
     expect(body.buildInfo).toEqual({ version: '0.0.0', commit: 'github-sha' })
   })
+
+  it('uses local fallback when no sha env vars are set', async () => {
+    vi.resetModules()
+    delete process.env.VERCEL_GIT_COMMIT_SHA
+    delete process.env.GITHUB_SHA
+    delete process.env.npm_package_version
+
+    const GET = await loadRoute()
+    const response = await GET()
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.buildInfo).toEqual({ version: '0.0.0', commit: 'local' })
+  })
 })

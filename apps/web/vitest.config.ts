@@ -7,7 +7,6 @@ export default defineProject({
     include: ['lib/**/*.test.ts', 'tests/**/*.test.ts', 'app/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      all: false,
       include: [
         'app/api/health/route.ts',
         'app/api/ready/route.ts',

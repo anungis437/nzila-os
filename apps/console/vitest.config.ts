@@ -11,7 +11,6 @@ export default defineProject({
     // @ts-expect-error Coverage options are supported at runtime but not in this ProjectConfig type.
     coverage: {
       provider: 'v8',
-      all: false,
       include: [
         'app/api/health/route.ts',
         'app/api/ready/route.ts',

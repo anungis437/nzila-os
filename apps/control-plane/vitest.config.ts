@@ -15,7 +15,6 @@ export default defineConfig({
     exclude: ["node_modules", ".next", "e2e"],
     coverage: {
       provider: 'v8',
-      all: false,
       include: [
         'app/api/health/route.ts',
         'app/api/ready/route.ts',
