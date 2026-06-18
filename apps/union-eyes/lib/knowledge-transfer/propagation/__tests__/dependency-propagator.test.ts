@@ -110,7 +110,7 @@ describe('buildDependencyPropagationMap', () => {
       // frequency === 2 branches
       node('gov_two', 2, 'governance', ['VP']), // high
       node('system_two', 2, 'system', ['IT']), // medium
-      node('other_two', 2, 'process', ['Clerk']), // medium (else)
+      node('other_two', 2, 'process', ['Recorder']), // medium (else)
       // frequency <= 4 branches
       node('gov_four', 4, 'governance', ['Board']), // medium (governance)
       node('proc_three', 3, 'process', ['Coord']), // medium (else)
@@ -240,7 +240,7 @@ describe('buildDependencyPropagationMap', () => {
   it('produces upstream critical fragility when single-source deps are few', async () => {
     mocks.interviews = [{ id: 'i1', roleInUnion: 'President', yearsOfService: 5, topics: [], expertiseTags: [], summary: 's' }];
     const nodes: TopicNode[] = [
-      node('dependent', 2, 'process', ['Clerk']),
+      node('dependent', 2, 'process', ['Recorder']),
       node('sole_dep', 1, 'governance', ['President']), // single source + critical
     ];
     // dependent(freq2) depends on sole_dep(freq1): source freq1 <= target freq2 => target(dependent) depends on source(sole_dep)

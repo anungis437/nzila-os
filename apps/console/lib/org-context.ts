@@ -10,6 +10,7 @@
 import { eq } from 'drizzle-orm'
 import { platformDb } from '@nzila/db/platform'
 import { orgMembers } from '@nzila/db/schema'
+import { logger } from '@nzila/os-core/telemetry'
 
 /**
  * Resolve the active app-level organization UUID for a console user.
@@ -28,7 +29,7 @@ export async function resolveActiveOrgId(userId: string): Promise<string | null>
   } catch (error) {
     // Keep org resolution fail-open so callers can fallback to executive/default context.
     if (process.env.NODE_ENV !== 'production') {
-      console.warn('[org-context] unable to resolve active org membership', {
+      logger.warn('[org-context] unable to resolve active org membership', {
         userId,
         error,
       })

@@ -65,7 +65,7 @@ const AUTH_CALL_PATTERNS = [
 
 /** Public routes that are intentionally exempt from auth requirements. */
 function isPublicRoute(routeFile: string): boolean {
-  const normalized = routeFile.replace(/\\/g, '/')
+  const normalized = routeFile.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
   return normalized.includes('/api/health/') || normalized.endsWith('/api/health/route.ts')
     || normalized.includes('/api/ready/') || normalized.endsWith('/api/ready/route.ts')  // Kubernetes readiness probe
     || normalized.includes('/api/version/') || normalized.endsWith('/api/version/route.ts')  // Build version metadata (public)

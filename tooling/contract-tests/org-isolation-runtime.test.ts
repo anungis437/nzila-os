@@ -127,7 +127,8 @@ const PUBLIC_ROUTE_SEGMENTS = [
 ]
 
 function isPublicRoute(path: string): boolean {
-  return PUBLIC_ROUTE_SEGMENTS.some((seg) => path.replace(/\\/g, '/').includes(seg))
+  // decode URL-encoded underscore (%5F) so _perf/_telemetry routes match
+  return PUBLIC_ROUTE_SEGMENTS.some((seg) => path.replace(/\\/g, '/').replace(/%5F/gi, '_').includes(seg))
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
