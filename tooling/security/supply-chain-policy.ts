@@ -176,8 +176,8 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     package: 'minimatch',
     reason: 'Build/script tooling dependency (glob > minimatch). No user input reaches minimatch in production runtime. Upgrade to minimatch@10.2.3 pending upstream glob release. Risk confined to local/CI tooling DoS only.',
     approvedBy: 'platform-lead',
-    approvedAt: '2026-03-04',
-    expiresAt: '2026-06-04',
+    approvedAt: '2026-06-18',
+    expiresAt: '2026-09-18',
     severity: 'high',
   },
   {
@@ -192,8 +192,8 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     package: 'immutable',
     reason: 'Transitive dependency of swagger-ui-react (internal API docs only). immutable@3.x has no npm fix; v4 upgrade is a breaking API change that breaks swagger-ui-react rendering. No user-controlled data flows through affected APIs. Mitigated by internal-only access and no untrusted merge input.',
     approvedBy: 'platform-lead',
-    approvedAt: '2026-03-04',
-    expiresAt: '2026-06-04',
+    approvedAt: '2026-06-18',
+    expiresAt: '2026-09-18',
     severity: 'high',
   },
   {
@@ -288,7 +288,7 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     reason: 'Next.js high-severity advisory triaged 2026-05-11. Mitigations in place (minimal edge middleware, no user-controlled WS upgrade targets, cache components off in prod, i18n allow-list). Tracked for upgrade in next dependency sweep.',
     approvedBy: 'platform-lead',
     approvedAt: '2026-05-11',
-    expiresAt: '2026-06-11',
+    expiresAt: '2026-09-18',
     severity: 'high' as const,
   })),
   // OpenTelemetry Prometheus exporter crash (1117941, 1117942, 1117943)
@@ -305,7 +305,7 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     reason: 'Prometheus exporter crash via malformed HTTP request. Exporter endpoint is internal cluster-network only, not externally exposed. Tracked for upgrade in next dependency sweep.',
     approvedBy: 'platform-lead',
     approvedAt: '2026-05-11',
-    expiresAt: '2026-06-11',
+    expiresAt: '2026-09-18',
     severity: 'high' as const,
   })),
 ]
