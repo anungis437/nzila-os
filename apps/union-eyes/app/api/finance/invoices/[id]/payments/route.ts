@@ -56,7 +56,7 @@ export const POST = withMinRole('admin', async (
 
   const { id: invoiceId } = await context.params;
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {

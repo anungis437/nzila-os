@@ -33,7 +33,7 @@ export interface PredictionResult {
   factors: {
     name: string;
     impact: number; // -100 to +100
-    value: unknown;
+    value: any;
   }[];
   recommendations: string[];
 }

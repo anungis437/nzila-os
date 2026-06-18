@@ -32,27 +32,6 @@ import {
 // Base styles (shared across components)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const base = StyleSheet.create({
-  sectionLabel: {
-    fontFamily: FONTS.sans,
-    ...TYPE.sectionLabel,
-    color: COLORS.ink40,
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    marginBottom: SPACE.sm,
-  },
-  body: {
-    fontFamily: FONTS.sans,
-    ...TYPE.body,
-    color: COLORS.ink,
-  },
-  caption: {
-    fontFamily: FONTS.sans,
-    ...TYPE.caption,
-    color: COLORS.ink40,
-  },
-});
-
 // ─────────────────────────────────────────────────────────────────────────────
 // CompositeScoreDisplay — large centred score with band name
 // ─────────────────────────────────────────────────────────────────────────────
@@ -518,7 +497,7 @@ export function OciMotif({ text, attribution }: OciMotifProps) {
   return (
     <View style={motifStyles.container}>
       <View style={motifStyles.line} />
-      <Text style={motifStyles.text}>"{text}"</Text>
+      <Text style={motifStyles.text}>&ldquo;{text}&rdquo;</Text>
       {attribution && <Text style={motifStyles.attribution}>{attribution}</Text>}
     </View>
   );

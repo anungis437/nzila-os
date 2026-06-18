@@ -25,8 +25,11 @@ import {
   type CooMilestone,
 } from '@nzila/executive-os'
 import { getExecutiveOrgId, runAndPersist } from '../../../../lib/executive-os'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.ops.coo')
 
 const SEVERITY_BADGE: Record<string, string> = {
   info: 'bg-slate-100 text-slate-700',
@@ -52,24 +55,35 @@ function bucketStatus(s: string): CooTicket['status'] {
 
 async function loadSignal(orgId: string): Promise<CooSignal> {
   const now = new Date()
-  const [inits, tickets, milestoneRows] = await Promise.all([
-    platformDb.select().from(executionInitiatives).where(eq(executionInitiatives.orgId, orgId)),
-    platformDb
-      .select()
-      .from(itsmTickets)
-      .where(
-        and(
-          eq(itsmTickets.orgId, orgId),
-          notInArray(itsmTickets.status, ['resolved', 'closed']),
-        ),
-      )
-      .limit(500),
-    platformDb
-      .select()
-      .from(customerOnboardingMilestones)
-      .where(eq(customerOnboardingMilestones.organizationId, orgId))
-      .limit(500),
-  ])
+  let inits: Array<typeof executionInitiatives.$inferSelect> = []
+  let tickets: Array<typeof itsmTickets.$inferSelect> = []
+  let milestoneRows: Array<typeof customerOnboardingMilestones.$inferSelect> = []
+
+  try {
+    ;[inits, tickets, milestoneRows] = await Promise.all([
+      platformDb.select().from(executionInitiatives).where(eq(executionInitiatives.orgId, orgId)),
+      platformDb
+        .select()
+        .from(itsmTickets)
+        .where(
+          and(
+            eq(itsmTickets.orgId, orgId),
+            notInArray(itsmTickets.status, ['resolved', 'closed']),
+          ),
+        )
+        .limit(500),
+      platformDb
+        .select()
+        .from(customerOnboardingMilestones)
+        .where(eq(customerOnboardingMilestones.organizationId, orgId))
+        .limit(500),
+    ])
+  } catch (error) {
+    logger.warn('coo signal load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { initiatives: [], openTickets: [], milestones: [], stalledInitiativeDays: 21 }
+  }
 
   // Milestones: schema has no dueDate column. Use 14-day onboarding SLA from
   // created_at as the implied due date; daysLate accumulates beyond that for
@@ -115,18 +129,25 @@ async function loadSignal(orgId: string): Promise<CooSignal> {
 }
 
 async function lastInsights(orgId: string) {
-  const [run] = await platformDb
-    .select()
-    .from(executiveAgentRuns)
-    .where(and(eq(executiveAgentRuns.orgId, orgId), eq(executiveAgentRuns.agentKey, 'coo')))
-    .orderBy(desc(executiveAgentRuns.startedAt))
-    .limit(1)
-  if (!run) return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
-  const insights = await platformDb
-    .select()
-    .from(executiveAgentInsights)
-    .where(eq(executiveAgentInsights.runId, run.id))
-  return { run, insights }
+  try {
+    const [run] = await platformDb
+      .select()
+      .from(executiveAgentRuns)
+      .where(and(eq(executiveAgentRuns.orgId, orgId), eq(executiveAgentRuns.agentKey, 'coo')))
+      .orderBy(desc(executiveAgentRuns.startedAt))
+      .limit(1)
+    if (!run) return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
+    const insights = await platformDb
+      .select()
+      .from(executiveAgentInsights)
+      .where(eq(executiveAgentInsights.runId, run.id))
+    return { run, insights }
+  } catch (error) {
+    logger.warn('coo run history load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
+  }
 }
 
 export default async function CooPage() {

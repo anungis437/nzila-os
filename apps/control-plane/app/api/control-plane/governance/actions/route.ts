@@ -19,6 +19,7 @@ import {
   decideApproval,
   executeGovernanceAction,
 } from '@/server/governance/state-machine'
+import type { GovernanceActionType } from '@nzila/os-core'
 import { platformDb } from '@nzila/db/platform'
 import { governanceActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
@@ -183,8 +184,7 @@ export async function POST(request: NextRequest) {
       case 'create': {
         const result = await createGovernanceAction({
           orgId: req.orgId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          actionType: req.actionType as any,
+          actionType: req.actionType as GovernanceActionType,
           payload: req.payload,
           createdBy: req.createdBy,
         })

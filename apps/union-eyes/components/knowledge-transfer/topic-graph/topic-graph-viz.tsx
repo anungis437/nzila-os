@@ -381,7 +381,7 @@ export function TopicGraphViz({ graph, categoryFilter = null, onNodeClick }: Pro
         <div className="absolute bottom-3 left-3 max-w-xs rounded-lg border bg-white shadow-md p-4 space-y-2 text-sm">
           <div className="flex items-center gap-2">
             <span
-              className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+              className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ background: CATEGORY_COLORS[selectedNodeData.category] ?? '#6b7280' }}
             />
             <span className="font-semibold text-slate-800">{selectedNodeData.label}</span>
@@ -454,7 +454,7 @@ export function TopicGraphContainer({
   const [loading, setLoading] = useState(!initialGraph);
   const [error, setError] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const [selectedNode, setSelectedNode] = useState<TopicNode | null>(null);
+  const [, setSelectedNode] = useState<TopicNode | null>(null);
 
   useEffect(() => {
     if (initialGraph) return;

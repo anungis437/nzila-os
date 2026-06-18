@@ -78,8 +78,7 @@ export function WaterfallChart({
     };
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name?: string; isPositive?: boolean; actualValue: number; isTotal?: boolean; end: number } }> }) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
 
@@ -104,8 +103,7 @@ export function WaterfallChart({
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getBarColor = (entry: any) => {
+  const getBarColor = (entry: { isTotal?: boolean; isPositive?: boolean }) => {
     if (entry.isTotal) return totalColor;
     return entry.isPositive ? positiveColor : negativeColor;
   };

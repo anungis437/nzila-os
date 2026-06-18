@@ -12,16 +12,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
-const { mockSelectWhere, mockInsertValues } = vi.hoisted(() => ({
+const { mockSelectWhere, mockInsertValues, mockLimit } = vi.hoisted(() => ({
   mockSelectWhere: vi.fn(),
   mockInsertValues: vi.fn(),
+  mockLimit: vi.fn(),
 }));
 
 vi.mock('@/db', () => ({
   db: {
     select: vi.fn(() => ({
       from: vi.fn(() => ({
-        where: mockSelectWhere,
+        where: (...args: unknown[]) => {
+          const whereValue = mockSelectWhere(...args);
+          return {
+            limit: (...limitArgs: unknown[]) => mockLimit(...limitArgs),
+            then: (onFulfilled: (value: unknown) => unknown, onRejected?: (reason: unknown) => unknown) =>
+              Promise.resolve(whereValue).then(onFulfilled, onRejected),
+            catch: (onRejected: (reason: unknown) => unknown) =>
+              Promise.resolve(whereValue).catch(onRejected),
+          };
+        },
       })),
     })),
     insert: vi.fn(() => ({ values: mockInsertValues })),
@@ -68,6 +78,7 @@ describe('PolicyEngine', () => {
     vi.clearAllMocks();
     engine = new PolicyEngine();
     mockSelectWhere.mockResolvedValue([]);
+    mockLimit.mockResolvedValue([]);
     mockInsertValues.mockResolvedValue(undefined);
   });
 
@@ -135,5 +146,79 @@ describe('PolicyEngine', () => {
 
     expect(result.passed).toBe(true);
     expect(result.actionTaken).toBe('allowed');
+  });
+
+  it('supports numeric and string comparison operators', async () => {
+    mockSelectWhere
+      .mockResolvedValueOnce([
+        {
+          id: 'rule-3',
+          ruleType: 'risk',
+          category: 'screening',
+          status: 'active',
+          enforced: true,
+          conditions: [
+            { field: 'score', operator: 'greater_or_equal', value: 80 },
+            { field: 'tier', operator: 'less_than', value: 'z' },
+          ],
+        },
+      ])
+      .mockResolvedValueOnce([]);
+
+    const result = await engine.evaluate('risk', 'screening', {
+      subjectType: 'member',
+      subjectId: 'member-2',
+      inputData: { score: 85, tier: 'm' },
+    });
+
+    expect(result.passed).toBe(true);
+  });
+
+  it('returns retention policy or null', async () => {
+    mockLimit.mockResolvedValueOnce([{ id: 'ret-1', retentionPeriodYears: 3 }]);
+    const found = await engine.getRetentionPolicy('org-1', 'claims');
+    expect(found).toMatchObject({ id: 'ret-1', retentionPeriodYears: 3 });
+
+    mockLimit.mockResolvedValueOnce([]);
+    const missing = await engine.getRetentionPolicy('org-1', 'claims');
+    expect(missing).toBeNull();
+  });
+
+  it('checkLegalHold returns true when active hold exists and false otherwise', async () => {
+    mockSelectWhere.mockResolvedValueOnce([{ id: 'hold-1' }]);
+    await expect(engine.checkLegalHold('org-1', 'claims', new Date('2026-01-01'))).resolves.toBe(true);
+
+    mockSelectWhere.mockResolvedValueOnce([]);
+    await expect(engine.checkLegalHold('org-1', 'claims')).resolves.toBe(false);
+  });
+
+  it('canDelete denies for legal hold, missing policy, or unexpired retention and allows after expiry', async () => {
+    const date = new Date('2026-01-01');
+
+    // Case 1: legal hold
+    mockSelectWhere.mockResolvedValueOnce([{ id: 'hold-1' }]);
+    let result = await engine.canDelete('org-1', 'claims', date);
+    expect(result.canDelete).toBe(false);
+    expect(result.reason).toContain('legal hold');
+
+    // Case 2: no legal hold, no policy
+    mockSelectWhere.mockResolvedValueOnce([]);
+    mockLimit.mockResolvedValueOnce([]);
+    result = await engine.canDelete('org-1', 'claims', date);
+    expect(result.canDelete).toBe(false);
+    expect(result.reason).toContain('No retention policy');
+
+    // Case 3: no legal hold, policy exists but not expired
+    mockSelectWhere.mockResolvedValueOnce([]);
+    mockLimit.mockResolvedValueOnce([{ retentionPeriodYears: 50 }]);
+    result = await engine.canDelete('org-1', 'claims', date);
+    expect(result.canDelete).toBe(false);
+    expect(result.reason).toContain('Retention period not expired');
+
+    // Case 4: no legal hold, policy exists and expired
+    mockSelectWhere.mockResolvedValueOnce([]);
+    mockLimit.mockResolvedValueOnce([{ retentionPeriodYears: 1 }]);
+    result = await engine.canDelete('org-1', 'claims', new Date('2000-01-01'));
+    expect(result.canDelete).toBe(true);
   });
 });

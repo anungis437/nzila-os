@@ -43,7 +43,7 @@ export function OrgSwitcher({
   organizations = [],
   onOrgChange,
   className = '',
-  hidePersonal = true,
+  hidePersonal: _hidePersonal = true,
 }: OrgSwitcherProps) {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)

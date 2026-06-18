@@ -14,10 +14,10 @@ const mocks = vi.hoisted(() => ({
   mockDelete: vi.fn(),
 }));
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -176,7 +176,7 @@ describe('LocationTrackingService', () => {
       mocks.locationFindMany.mockImplementation((opts: Record<string, unknown>) => {
         // invoke the orderBy callback so v8 sees function coverage
         if (typeof opts?.orderBy === 'function') {
-          (opts.orderBy as (...args: unknown[]) => unknown)({}, { desc: (col: unknown) => col });
+          (opts.orderBy as (...args: any[]) => unknown)({}, { desc: (col: any) => col });
         }
         return Promise.resolve([{ id: 'loc-1' }, { id: 'loc-2' }]);
       });

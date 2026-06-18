@@ -30,7 +30,8 @@ function getDb(): DbType {
 
 export const db = new Proxy({} as DbType, {
   get(_target, prop) {
-    return (getDb() as any)[prop]
+    const runtimeDb = getDb() as unknown as Record<PropertyKey, unknown>
+    return runtimeDb[prop]
   },
   has(_target, prop) {
     return prop in getDb()

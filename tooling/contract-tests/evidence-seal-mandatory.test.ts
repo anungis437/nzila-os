@@ -107,7 +107,7 @@ describe('INV-13 — verifySeal CI verification', () => {
 
   it('verifySeal rejects missing seal', () => {
     const pack = makePack()
-    const result = verifySeal(pack as any)
+    const result = verifySeal(pack as unknown)
     expect(result.valid).toBe(false)
     expect(result.errors).toContain('No seal found on evidence pack index')
   })

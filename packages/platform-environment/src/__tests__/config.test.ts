@@ -34,7 +34,7 @@ import {
   saveGovernanceSnapshot,
   loadGovernanceSnapshots,
 } from '../config';
-import type { DeploymentArtifact, GovernanceSnapshot } from '../types';
+import type { DeploymentArtifact, GovernanceSnapshot, EnvironmentName } from '../types';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -168,7 +168,7 @@ describe('config', () => {
         });
         fsMocks.readFileSync.mockReturnValue(`ENV=${envName}\n`);
 
-        const vars = loadEnvFile(envName as any, BASE_DIR);
+        const vars = loadEnvFile(envName as EnvironmentName, BASE_DIR);
         expect(vars.ENV).toBe(envName);
       }
     });

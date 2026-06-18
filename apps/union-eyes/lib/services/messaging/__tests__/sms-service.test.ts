@@ -12,6 +12,9 @@ import {
   SMSService,
   TwilioAdapter,
   MockSMSAdapter,
+  createSMSServiceFromEnv,
+  getSMSService,
+  formatToE164,
   type SMSProvider,
   type SMSMessage,
   type SMSResult,
@@ -202,6 +205,48 @@ describe('TwilioAdapter', () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true });
     expect(await adapter.verifyConnection()).toBe(true);
   });
+
+  it('send includes MMS media URLs when provided', async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ sid: 'SM_MEDIA', num_segments: 2 }),
+    });
+
+    const result = await adapter.send({
+      to: '+15551234567',
+      body: 'With media',
+      mediaUrl: ['https://example.com/1.jpg', 'https://example.com/2.jpg'],
+    });
+
+    expect(result.success).toBe(true);
+    const fetchArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]?.[1] as { body: string };
+    expect(fetchArgs.body).toContain('MediaUrl=');
+  });
+
+  it('sendBatch sends sequentially and returns all results', async () => {
+    const sendSpy = vi.spyOn(adapter, 'send')
+      .mockResolvedValueOnce({ success: true, messageId: 'm1' })
+      .mockResolvedValueOnce({ success: true, messageId: 'm2' });
+
+    const results = await adapter.sendBatch([
+      { to: '+15551234567', body: 'one' },
+      { to: '+15557654321', body: 'two' },
+    ]);
+
+    expect(sendSpy).toHaveBeenCalledTimes(2);
+    expect(results).toHaveLength(2);
+  });
+
+  it('checkBalance returns parsed balance and falls back to zero on error', async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ balance: '123.45' }),
+    });
+    expect(await adapter.checkBalance()).toBe(123.45);
+
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: false, status: 500 });
+    expect(await adapter.checkBalance()).toBe(0);
+  });
 });
 
 describe('MockSMSAdapter', () => {
@@ -221,5 +266,51 @@ describe('MockSMSAdapter', () => {
   it('checkBalance returns 1000', async () => {
     const mock = new MockSMSAdapter();
     expect(await mock.checkBalance()).toBe(1000);
+  });
+
+  it('sendBatch and verifyConnection work', async () => {
+    const mock = new MockSMSAdapter();
+    const results = await mock.sendBatch([
+      { to: '+15551234567', body: 'a' },
+      { to: '+15557654321', body: 'b' },
+    ]);
+    expect(results).toHaveLength(2);
+    expect(await mock.verifyConnection()).toBe(true);
+  });
+});
+
+describe('sms-service factory/helpers', () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.SMS_PROVIDER;
+    delete process.env.TWILIO_ACCOUNT_SID;
+    delete process.env.TWILIO_AUTH_TOKEN;
+    delete process.env.TWILIO_PHONE_NUMBER;
+  });
+
+  it('createSMSServiceFromEnv returns mock provider when twilio credentials missing', () => {
+    process.env.SMS_PROVIDER = 'twilio';
+    const svc = createSMSServiceFromEnv();
+    expect(svc).toBeInstanceOf(SMSService);
+  });
+
+  it('createSMSServiceFromEnv throws for unsupported provider', () => {
+    process.env.SMS_PROVIDER = 'unknown-provider';
+    expect(() => createSMSServiceFromEnv()).toThrow('Unsupported SMS provider');
+  });
+
+  it('getSMSService returns singleton', () => {
+    process.env.SMS_PROVIDER = 'mock';
+    const a = getSMSService();
+    const b = getSMSService();
+    expect(a).toBe(b);
+  });
+
+  it('formatToE164 handles common input formats', () => {
+    expect(formatToE164('(555) 123-4567')).toBe('+15551234567');
+    expect(formatToE164('15551234567')).toBe('+15551234567');
+    expect(formatToE164('44 20 1234 5678', '+44')).toBe('+442012345678');
   });
 });

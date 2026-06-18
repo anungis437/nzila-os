@@ -32,8 +32,8 @@ vi.mock('@/db/schema/clc-partnership-schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
   sql: vi.fn(),
   relations: vi.fn(() => ({})),

@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { ClaimListTable, type ClaimRow } from '@/components/claims/claim-list-table';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, Plus, RefreshCw } from 'lucide-react';
 
 export function ClaimsConsole() {
-  const t = useTranslations('claimsPage');
   const locale = useLocale();
   const router = useRouter();
 

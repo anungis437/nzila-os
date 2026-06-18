@@ -77,8 +77,7 @@ export class WageEnrichmentService {
     source: string,
     sourceType: string,
     status: 'running' | 'completed' | 'failed' = 'running',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    parameters?: Record<string, any>
+    parameters?: Record<string, unknown>
   ): Promise<string> {
     const syncId = this.generateSyncId();
     
@@ -188,11 +187,9 @@ export class WageEnrichmentService {
                   naicsCode: record.NAICS || null,
                   naicsName: record.NAICSName || null,
                   wageValue,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  wageUnit: record.Wages.UOM.toLowerCase() as any,
+                  wageUnit: record.Wages.UOM.toLowerCase() as (typeof wageBenchmarks.wageUnit)['_']['data'],
                   wageType: this.mapStatisticsToWageType(record.Statistics),
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  sex: record.Sex as any,
+                  sex: record.Sex as (typeof wageBenchmarks.sex)['_']['data'],
                   ageGroup: record.AgeGroup || null,
                   ageGroupName: record.AgeGroupName || null,
                   educationLevel: record.Education || null,
@@ -304,8 +301,7 @@ export class WageEnrichmentService {
               naicsName: record.NAICSName || null,
               nocCode: record.NOC || null,
               nocName: record.NOCName || null,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              sex: record.Sex as any,
+              sex: record.Sex as (typeof unionDensityTable.sex)['_']['data'],
               ageGroup: record.AgeGroup || null,
               ageGroupName: record.AgeGroupName || null,
               citizenship: record.Citizenship || null,

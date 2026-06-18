@@ -414,8 +414,13 @@ export const externalCalendarConnections = pgTable('external_calendar_connection
   syncFutureDays: integer('sync_future_days').default(365),
   syncOnlyFreeTime: boolean('sync_only_free_time').default(false),
   
-  // Mapped Calendars (array of { externalId, localCalendarId })
-  calendarMappings: jsonb('calendar_mappings').$type<Array<{ externalId: string; localCalendarId: string }>>(),
+  // Mapped Calendars with optional provider sync metadata
+  calendarMappings: jsonb('calendar_mappings').$type<Array<{
+    externalId: string;
+    localCalendarId: string;
+    syncToken?: string;
+    deltaLink?: string;
+  }>>(),
   
   // Status
   isActive: boolean('is_active').default(true),

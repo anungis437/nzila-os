@@ -258,7 +258,7 @@ describe('SelectiveContextManager', () => {
       });
       it('typeWeights fallback to 0.5 for unregistered type', () => {
         // Pass a type string not in typeWeights to trigger `|| 0.5` fallback
-        manager.addItem({ id: 'unk', content: 'Unknown type content here', type: 'CUSTOM' as unknown as ContextItem['type'], timestamp: Date.now() });
+        manager.addItem({ id: 'unk', content: 'Unknown type content here', type: 'CUSTOM' as any as ContextItem['type'], timestamp: Date.now() });
         // calculateImportance is called on addItem — typeWeights['CUSTOM'] = undefined → || 0.5
         expect(manager.getInfo().itemCount).toBe(1);
         const results = manager.selectForQuery('content');

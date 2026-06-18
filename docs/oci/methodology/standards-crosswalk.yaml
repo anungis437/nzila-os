@@ -13,6 +13,18 @@
 #   not-equivalent   Surface similarity only; the two are doing
 #                    different work and should not be substituted.
 #
+# A separate `measurement_traditions` block (below `standards`) positions OCI
+# against established measurement-theory traditions rather than substitutable
+# standards. It uses a distinct relationship class:
+#
+#   structurally-consistent   The tradition establishes that self-assessed
+#                             capability is a recognized evidence form; OCI's
+#                             treatment is consistent with — but NOT derived
+#                             from or empirically validated by — the tradition.
+#                             OCI is deliberately more conservative (self-report
+#                             capped to a minority tier, subordinated to
+#                             behavioral evidence, contradiction-checked).
+#
 # This file is the authoritative source for whitepaper §12 (Standards
 # Positioning). Audit gate Phase-4 step 15 verifies that no whitepaper
 # prose claims "equivalent to ISO ...", "ISO-equivalent", or similar.
@@ -151,6 +163,53 @@ standards:
       Gini measures inequality across a population. SDI measures exposure
       concentration weighted by criticality and tenure. Different
       mathematical objects; equivalence claims are unsupported.
+
+# Measurement-theory lineage (NOT standards substitutability). These rows
+# establish that admitting self-assessed capability as a bounded evidence form
+# is recognized assessment practice. OCI claims structural consistency only —
+# never derivation, instrument adoption, or empirical-validation inheritance.
+# OCI is deliberately MORE conservative than instruments that rely on self-report
+# more heavily (see whitepaper §4.6 Construct Invariant and §7.6).
+measurement_traditions:
+
+  - tradition: 'Self-efficacy (perceived-capability construct, associated with Bandura)'
+    treats_as_evidence: 'Perceived capability measured as a predictor of performance.'
+    relationship: 'structurally-consistent'
+    notes: >
+      OCI treats perceived recoverability as the weakest evidence tier of the
+      continuity construct — never, unlike pure self-efficacy measurement, as
+      the dominant or sole signal. Consistency, not derivation.
+
+  - tradition: 'Organizational readiness for change (collective-readiness construct, associated with Weiner)'
+    treats_as_evidence: 'Organizations self-rate collective capability and commitment as a readiness signal.'
+    relationship: 'structurally-consistent'
+    notes: >
+      OCI confidence signals sense collective continuity readiness, subordinated
+      to behavioral maturity evidence and capped to a minority weight.
+
+  - tradition: 'Safety climate / safety culture instruments (perception-survey tradition, associated with Zohar)'
+    treats_as_evidence: 'Self-reported perceptions of safety accepted as evidence in safety-critical domains.'
+    relationship: 'structurally-consistent'
+    notes: >
+      OCI uses perception as a sensing layer in a continuity-critical domain,
+      observing the same "perception is not proof" caution. Consistency, not
+      instrument adoption.
+
+  - tradition: 'Control self-assessment (CSA) (recognized internal-audit practice, e.g. IIA guidance)'
+    treats_as_evidence: 'Process owners self-assess control effectiveness as audit-relevant evidence, subject to corroboration.'
+    relationship: 'structurally-consistent'
+    notes: >
+      Closest in spirit: auditors treat self-assessment as evidence that MUST be
+      corroborated. OCI's downward-only contradiction engine is exactly that
+      corroboration discipline.
+
+  - tradition: 'Organizational resilience self-assessment (self-assessment of resilience attributes, ISO 22316 tradition)'
+    treats_as_evidence: 'Resilience attributes partly assessed through structured organizational self-assessment.'
+    relationship: 'structurally-consistent'
+    notes: >
+      OCI reads continuity (a resilience-adjacent construct) partly through
+      structured self-assessment, bounded as the weakest evidence tier. OCI does
+      not certify against, and is not equivalent to, ISO 22316.
 
 # v2 roadmap: this crosswalk is a living artifact. Each standards body
 # revision triggers a crosswalk audit; revisions are recorded in

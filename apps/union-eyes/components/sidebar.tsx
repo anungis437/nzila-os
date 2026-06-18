@@ -99,20 +99,28 @@ export default function Sidebar({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    try {
-      const c = window.localStorage.getItem(LS_COLLAPSED);
-      if (c === "1") setCollapsed(true);
-      const g = window.localStorage.getItem(LS_GROUPS);
-      if (g) setCollapsedGroups(new Set(JSON.parse(g) as string[]));
-    } catch {
-      /* ignore storage errors */
-    }
+    const timeoutId = window.setTimeout(() => {
+      setIsMounted(true);
+      try {
+        const c = window.localStorage.getItem(LS_COLLAPSED);
+        if (c === "1") setCollapsed(true);
+        const g = window.localStorage.getItem(LS_GROUPS);
+        if (g) setCollapsedGroups(new Set(JSON.parse(g) as string[]));
+      } catch {
+        /* ignore storage errors */
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   // Close drawer on route change
   useEffect(() => {
-    setMobileOpen(false);
+    const timeoutId = window.setTimeout(() => {
+      setMobileOpen(false);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [pathname]);
 
   const isViewingTenantOrg = !!(

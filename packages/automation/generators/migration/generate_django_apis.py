@@ -269,7 +269,7 @@ async function getApiClient() {{
 /**
  * {endpoint['description']}
  */
-export async function get{class_name}List(filters?: any) {{
+export async function get{class_name}List(filters?: unknown) {{
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -310,7 +310,7 @@ export async function get{class_name}ById(id: string) {{
 /**
  * {endpoint['description']}
  */
-export async function create{class_name}(data: any) {{
+export async function create{class_name}(data: unknown) {{
   const client = await getApiClient();
   
   const response = await fetch(`${{API_URL}}/api{endpoint['path']}`, {{
@@ -331,7 +331,7 @@ export async function create{class_name}(data: any) {{
 /**
  * {endpoint['description']}
  */
-export async function update{class_name}(id: string, data: any) {{
+export async function update{class_name}(id: string, data: unknown) {{
   const client = await getApiClient();
   
   const response = await fetch(`${{API_URL}}/api{endpoint['path'].replace('{id}', '${{id}}')}`, {{
@@ -373,7 +373,7 @@ export async function delete{class_name}(id: string) {{
 /**
  * {endpoint['description']}
  */
-export async function {func_name}(data: any) {{
+export async function {func_name}(data: unknown) {{
   const client = await getApiClient();
   
   const response = await fetch(`${{API_URL}}/api{endpoint['path']}`, {{

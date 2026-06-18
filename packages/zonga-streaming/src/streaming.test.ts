@@ -3,7 +3,6 @@ import {
   validateUpload,
   parseAudioMetadata,
   computeUploadKey,
-  DEFAULT_UPLOAD_POLICY,
   type AudioMetadata,
 } from './upload/index'
 import {
@@ -287,7 +286,6 @@ describe('selectOptimalQuality', () => {
 describe('computeCdnSignedUrl', () => {
   it('generates a deterministic token for the same input', () => {
     const a = computeCdnSignedUrl('path/to/file.m3u8', testCdn)
-    const b = computeCdnSignedUrl('path/to/file.m3u8', testCdn)
     // Token includes expiry so they may differ slightly if wall-clock ticks
     // but the path and structure should be consistent
     expect(a.path).toBe('path/to/file.m3u8')

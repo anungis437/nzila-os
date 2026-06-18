@@ -202,27 +202,19 @@ export async function processWeeklyStipends(params: {
         await db.insert(stipendDisbursements).values({
           tenantId,
           memberId,
-          fundId: rules.fundId,
+          strikeFundId: rules.fundId,
           weekStartDate: weekStartDate.toISOString().split('T')[0],
           weekEndDate: weekEndDate.toISOString().split('T')[0],
           daysWorked: data.qualifyingDays,
           hoursWorked: data.totalHours.toString(),
-          dailyRate: rules.dailyRate.toString(),
           calculatedAmount: stipendAmount.toString(),
-          approvedAmount: needsApproval ? null : stipendAmount.toString(),
+          baseStipendAmount: stipendAmount.toString(),
+          totalAmount: stipendAmount.toString(),
           status,
-          calculatedAt: new Date(),
-          approvedAt: needsApproval ? null : new Date(),
+          approvedAt: needsApproval ? null : new Date().toISOString(),
           approvedBy: needsApproval ? null : 'auto-approved',
-          metadata: {
-            compensableDays,
-            qualifyingDays: data.qualifyingDays,
-            weeklyMaxDays: rules.weeklyMaxDays,
-            weeklyMaxAmount: rules.weeklyMaxAmount,
-            autoApproved: !needsApproval,
-          },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any);
+          notes: `Compensable days: ${compensableDays}; qualifying days: ${data.qualifyingDays}; autoApproved: ${!needsApproval}`,
+        });
 
         stipendsCalculated++;
         totalAmount += stipendAmount;
@@ -421,10 +413,9 @@ export async function processDisbursements(params: {
           .update(stipendDisbursements)
           .set({
             status: 'disbursed',
-            paymentDate: new Date(),
+            paymentDate: new Date().toISOString(),
             notes: `Stripe payment: ${paymentIntentId}`,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any)
+          })
           .where(eq(stipendDisbursements.id, stipend.id));
           
         // Send notification
@@ -463,8 +454,7 @@ export async function processDisbursements(params: {
           .set({
             status: 'failed',
             notes: `Error: ${String(disbursementError)}`,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any)
+          })
           .where(eq(stipendDisbursements.id, stipend.id));
 
         failed++;

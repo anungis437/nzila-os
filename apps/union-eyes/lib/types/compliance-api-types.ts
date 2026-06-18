@@ -29,7 +29,7 @@ export interface ProvincialPrivacyResponse {
     days: number;
     reason: string;
   };
-  result?: unknown;
+  result?: any;
   error?: string;
 }
 

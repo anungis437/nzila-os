@@ -294,7 +294,7 @@ export async function exportTrustMetricsPDF(metrics: TrustMetrics): Promise<Blob
   const element = React.createElement(
     TrustMetricsPdfDocument,
     { metrics },
-  ) as ReactElement<DocumentProps, string | JSXElementConstructor<unknown>>;
+  ) as ReactElement<DocumentProps, string | JSXElementConstructor<any>>;
   const buffer = await renderToBuffer(element);
   return new Blob([new Uint8Array(buffer)], { type: 'application/pdf' });
 }

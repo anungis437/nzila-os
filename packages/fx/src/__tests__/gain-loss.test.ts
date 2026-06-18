@@ -12,6 +12,7 @@ import {
   ITA_S39_PERSONAL_EXEMPTION,
 } from '../gain-loss'
 import type { FxTransaction, FxSettlement, OpenPosition } from '../gain-loss'
+import type { CurrencyCode } from '../types'
 
 describe('ITA_S39_PERSONAL_EXEMPTION', () => {
   it('is $200', () => {
@@ -264,7 +265,7 @@ describe('revaluePositions', () => {
   ]
 
   it('revalues all positions and aggregates', () => {
-    const rates = new Map<any, number>([
+    const rates = new Map<CurrencyCode, number>([
       ['USD', 1.35],
       ['EUR', 1.50],
     ])
@@ -283,7 +284,7 @@ describe('revaluePositions', () => {
   })
 
   it('handles mixed gains and losses', () => {
-    const rates = new Map<any, number>([
+    const rates = new Map<CurrencyCode, number>([
       ['USD', 1.25], // USD depreciated → loss
       ['EUR', 1.55], // EUR appreciated → gain
     ])
@@ -311,14 +312,14 @@ describe('revaluePositions', () => {
     expect(() =>
       revaluePositions(
         mixedPositions,
-        new Map([['USD', 1.35], ['EUR', 1.50]] as any),
+        new Map<CurrencyCode, number>([['USD', 1.35], ['EUR', 1.50]]),
         '2025-12-31',
       ),
     ).toThrow('Mixed functional currencies')
   })
 
   it('throws for missing rate', () => {
-    const rates = new Map<any, number>([['USD', 1.35]]) // Missing EUR
+    const rates = new Map<CurrencyCode, number>([['USD', 1.35]]) // Missing EUR
     expect(() => revaluePositions(positions, rates, '2025-12-31')).toThrow('No current rate')
   })
 })

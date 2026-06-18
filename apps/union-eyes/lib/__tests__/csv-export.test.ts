@@ -69,7 +69,7 @@ describe('csv-export', () => {
         overdueAcknowledgement: 1,
         overdueResolution: 2,
       };
-      const rows = kpiCardsToRows(kpis as unknown as Parameters<typeof kpiCardsToRows>[0]);
+      const rows = kpiCardsToRows(kpis as any as Parameters<typeof kpiCardsToRows>[0]);
       expect(rows).toHaveLength(4);
       expect(rows[0]).toEqual({ metric: 'Total Open', value: 10 });
     });
@@ -81,8 +81,8 @@ describe('csv-export', () => {
     });
 
     it('handles boolean values', () => {
-      expect(escapeCSVValue(true as unknown as string)).toBe('true');
-      expect(escapeCSVValue(false as unknown as string)).toBe('false');
+      expect(escapeCSVValue(true as any as string)).toBe('true');
+      expect(escapeCSVValue(false as any as string)).toBe('false');
     });
 
     it('handles zero', () => {
@@ -188,6 +188,41 @@ describe('csv-export', () => {
       for (const col of KPI_COLUMNS) {
         expect(typeof col.accessor).toBe('function');
       }
+    });
+
+    it('all predefined column accessors are exercised through CSV generation', () => {
+      const caseCsv = generateCSV([
+        {
+          id: 'C-1',
+          status: 'open',
+          priority: 'high',
+          type: 'grievance',
+          assignee: 'Alice',
+          worksite: 'Plant A',
+          createdAt: new Date('2026-01-01T00:00:00.000Z'),
+          resolvedAt: new Date('2026-01-02T00:00:00.000Z'),
+        },
+      ] as any, CASE_COLUMNS as any);
+      expect(caseCsv).toContain('C-1');
+      expect(caseCsv).toContain('2026-01-01T00:00:00.000Z');
+
+      const kpiCsv = generateCSV([{ metric: 'Total Open', value: 7 }], KPI_COLUMNS);
+      expect(kpiCsv).toContain('Total Open');
+
+      const agingCsv = generateCSV([{ label: '0-7', count: 4 }] as any, AGING_COLUMNS as any);
+      expect(agingCsv).toContain('0-7');
+
+      const categoryCsv = generateCSV([{ type: 'Safety', count: 2 }] as any, CATEGORY_COLUMNS as any);
+      expect(categoryCsv).toContain('Safety');
+
+      const worksiteCsv = generateCSV([{ worksite: 'Plant A', count: 9 }] as any, WORKSITE_COLUMNS as any);
+      expect(worksiteCsv).toContain('Plant A');
+
+      const assigneeCsv = generateCSV([{ assignee: 'Alice', count: 3 }] as any, ASSIGNEE_COLUMNS as any);
+      expect(assigneeCsv).toContain('Alice');
+
+      const trendCsv = generateCSV([{ week: '2026-01-01', closedCount: 5 }] as any, TREND_COLUMNS as any);
+      expect(trendCsv).toContain('2026-01-01');
     });
   });
 });

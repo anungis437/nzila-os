@@ -64,3 +64,10 @@ Operational signals tracked:
 1. Close with structured summary
 2. Preserve lessons learned
 3. End engagement cleanly
+
+---
+
+## Companion Finance Collateral
+
+1. Brandon ROI and Business Case Sheet: `brandon-roi-business-case.md`
+2. Use this sheet for pilot investment framing, payback logic, and conversion decision economics.

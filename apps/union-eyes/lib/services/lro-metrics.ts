@@ -152,11 +152,9 @@ const FLUSH_INTERVAL_MS = 60000; // 1 minute
 if (typeof window === 'undefined') {
   // Server-side only
   setInterval(() => {
-    if (metricBuffer.length > 0) {
-      flushMetrics().catch(err => {
-        logger.error('[LROMetrics] Flush error', { error: err });
-      });
-    }
+    flushMetrics().catch(err => {
+      logger.error('[LROMetrics] Flush error', { error: err });
+    });
   }, FLUSH_INTERVAL_MS);
 }
 

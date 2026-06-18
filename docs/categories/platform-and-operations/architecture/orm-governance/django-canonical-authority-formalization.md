@@ -14,7 +14,7 @@ where Django backends are present).
 
 Django is the only canonical owner of institutional operational entities.
 
-This statement is constitutive: any other ORM, tool, or process that
+This statement is constitutive: unknown other ORM, tool, or process that
 attempts to own an institutional operational entity is operating
 outside canonical authority and must be reconciled.
 

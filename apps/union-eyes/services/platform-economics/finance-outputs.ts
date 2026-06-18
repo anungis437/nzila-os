@@ -137,7 +137,7 @@ export interface EvidencePack {
 // Helpers
 // ============================================================================
 
-function computeHash(data: unknown): string {
+function computeHash(data: any): string {
   return createHash('sha256')
     .update(JSON.stringify(data))
     .digest('hex');
@@ -148,7 +148,7 @@ function makeMeta(
   organizationId: string,
   periodId: string,
   rowCount: number,
-  data: unknown,
+  data: any,
 ): ExportMeta {
   return {
     exportId: crypto.randomUUID(),
@@ -194,7 +194,7 @@ export async function exportMasterInvoice(
     ORDER BY line_number
   `);
 
-  const rows = lineItems as unknown as Array<Record<string, unknown>>;
+  const rows = lineItems as any as Array<Record<string, unknown>>;
 
   const result: MasterInvoiceExport['invoice'] = {
     invoiceNumber: String(invoice.invoice_number),
@@ -275,7 +275,7 @@ export async function exportAllocationStatement(
     ORDER BY arl.allocated_amount_cad DESC
   `);
 
-  const rows = lines as unknown as Array<Record<string, unknown>>;
+  const rows = lines as any as Array<Record<string, unknown>>;
 
   const meta = makeMeta(
     'allocation_statement',
@@ -342,7 +342,7 @@ export async function exportChargebackReport(
     ORDER BY bp.start_date DESC
   `);
 
-  const data = rows as unknown as Array<Record<string, unknown>>;
+  const data = rows as any as Array<Record<string, unknown>>;
   const localName = data.length > 0 ? String(data[0].local_name) : localId;
 
   let totalGrossCents = 0;
@@ -421,7 +421,7 @@ export async function exportGlJournal(
     ORDER BY pl.created_at ASC
   `);
 
-  const data = rows as unknown as Array<Record<string, unknown>>;
+  const data = rows as any as Array<Record<string, unknown>>;
 
   const meta = makeMeta('gl_journal_csv', organizationId, periodId, data.length, data);
 
@@ -484,7 +484,7 @@ export async function generateEvidencePack(
     WHERE organization_id = ${organizationId}
       AND billing_period_id = ${periodId}
   `);
-  const invoiceIds = (invoiceRows as unknown as Array<{ id: string }>).map((r) => r.id);
+  const invoiceIds = (invoiceRows as any as Array<{ id: string }>).map((r) => r.id);
 
   const invoices: MasterInvoiceExport[] = [];
   for (const id of invoiceIds) {
@@ -498,7 +498,7 @@ export async function generateEvidencePack(
       AND billing_period_id = ${periodId}
       AND is_simulation = false
   `);
-  const allocationIds = (allocationRows as unknown as Array<{ id: string }>).map((r) => r.id);
+  const allocationIds = (allocationRows as any as Array<{ id: string }>).map((r) => r.id);
 
   const allocations: AllocationStatementExport[] = [];
   for (const id of allocationIds) {
@@ -511,7 +511,7 @@ export async function generateEvidencePack(
     WHERE organization_id = ${organizationId}
       AND billing_period_id = ${periodId}
   `);
-  const localIds = (localRows as unknown as Array<{ local_id: string }>).map((r) => r.local_id);
+  const localIds = (localRows as any as Array<{ local_id: string }>).map((r) => r.local_id);
 
   const chargebacks: ChargebackReportExport[] = [];
   for (const lid of localIds) {

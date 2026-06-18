@@ -11,6 +11,17 @@ import { logger } from '@/lib/logger';
 
 const router = Router();
 
+type AuthUser = {
+  organizationId?: string;
+  tenantId?: string;
+  userId?: string;
+  role: string;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as any as { user: AuthUser }).user;
+}
+
 // ============================================================================
 // VALIDATION SCHEMAS
 // ============================================================================
@@ -67,10 +78,13 @@ const createDuesRuleSchema = z.object({
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
+    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = getAuthUser(req);
     const organizationId = organizationIdFromUser ?? legacyTenantId;
     const { active, _category, _status } = req.query;
+
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
 
     // Build query conditions
     const conditions = [eq(schema.duesRules.organizationId, organizationId)];
@@ -102,10 +116,13 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
+    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = getAuthUser(req);
     const organizationId = organizationIdFromUser ?? legacyTenantId;
     const { id } = req.params;
+
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
 
     const [rule] = await db
       .select()
@@ -133,9 +150,12 @@ router.get('/:id', async (req: Request, res: Response) => {
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, userId, role } = (req as any).user!;
+    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, userId, role } = getAuthUser(req);
     const organizationId = organizationIdFromUser ?? legacyTenantId;
+
+    if (!organizationId || !userId) {
+      return res.status(401).json({ success: false, error: 'Missing auth context' });
+    }
 
     // Check permissions
     if (!['admin', 'financial_admin'].includes(role)) {
@@ -151,8 +171,7 @@ router.post('/', async (req: Request, res: Response) => {
         ...validatedData,
         organizationId: organizationId,
         createdBy: userId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as any as typeof schema.duesRules.$inferInsert)
       .returning();
 
     res.status(201).json({ success: true, data: newRule });
@@ -171,10 +190,13 @@ router.post('/', async (req: Request, res: Response) => {
  */
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, _userId, role } = (req as any).user!;
+    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, role } = getAuthUser(req);
     const organizationId = organizationIdFromUser ?? legacyTenantId;
     const { id } = req.params;
+
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
 
     // Check permissions
     if (!['admin', 'financial_admin'].includes(role)) {
@@ -185,8 +207,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const validatedData = createDuesRuleSchema.partial().parse(req.body);
 
     // Convert numeric fields to strings for database
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = { ...validatedData };
+    const updateData: Record<string, unknown> = { ...validatedData };
     ['percentageRate', 'flatAmount', 'hourlyRate', 'minimumAmount', 'maximumAmount', 
      'copePercentage', 'pacPercentage', 'strikeFundPercentage', 'lateFeeAmount', 'lateFeePercentage'].forEach(field => {
       if (updateData[field] !== undefined && typeof updateData[field] === 'number') {
@@ -196,7 +217,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     const [updatedRule] = await db
       .update(schema.duesRules)
-      .set(updateData)
+      .set(updateData as any as Partial<typeof schema.duesRules.$inferInsert>)
       .where(and(
         eq(schema.duesRules.id, id),
         eq(schema.duesRules.organizationId, organizationId)
@@ -223,10 +244,13 @@ router.put('/:id', async (req: Request, res: Response) => {
  */
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, role } = (req as any).user!;
+    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, role } = getAuthUser(req);
     const organizationId = organizationIdFromUser ?? legacyTenantId;
     const { id } = req.params;
+
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
 
     // Check permissions (admin only)
     if (role !== 'admin') {
@@ -238,8 +262,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
       .set({
         isActive: false,
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as any as Partial<typeof schema.duesRules.$inferInsert>)
       .where(and(
         eq(schema.duesRules.id, id),
         eq(schema.duesRules.organizationId, organizationId)
@@ -263,11 +286,14 @@ router.delete('/:id', async (req: Request, res: Response) => {
  */
 router.post('/:id/duplicate', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, userId, role } = (req as any).user!;
+    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, userId, role } = getAuthUser(req);
     const organizationId = organizationIdFromUser ?? legacyTenantId;
     const { id } = req.params;
     const { newCode, newName } = req.body;
+
+    if (!organizationId || !userId) {
+      return res.status(401).json({ success: false, error: 'Missing auth context' });
+    }
 
     // Check permissions
     if (!['admin', 'financial_admin'].includes(role)) {
@@ -306,8 +332,7 @@ router.post('/:id/duplicate', async (req: Request, res: Response) => {
         ruleName: newName,
         organizationId: organizationId,
         createdBy: userId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as any as typeof schema.duesRules.$inferInsert)
       .returning();
 
     res.status(201).json({ success: true, data: duplicatedRule });

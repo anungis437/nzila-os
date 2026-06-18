@@ -197,7 +197,7 @@ describe('UE Governed Mutation — Full Pipeline Proof', () => {
   })
 
   it('audit chain is valid from genesis', () => {
-    const chain = verifyChain(evidence.auditEntries as any)
+    const chain = verifyChain(evidence.auditEntries as unknown)
     expect(chain.valid).toBe(true)
     expect(chain.entriesChecked).toBe(evidence.auditEntries.length)
   })
@@ -209,7 +209,7 @@ describe('UE Governed Mutation — Full Pipeline Proof', () => {
 
   it('writes proof artifacts', () => {
     const govDecision = evidence.governanceDecision!
-    const chain = verifyChain(evidence.auditEntries as any)
+    const chain = verifyChain(evidence.auditEntries as unknown)
 
     const paths = writeProofBundle(SCENARIO, {
       summary: buildSummary(SCENARIO, {
@@ -217,7 +217,7 @@ describe('UE Governed Mutation — Full Pipeline Proof', () => {
         actor_id: evidence.actorId,
         org_id: evidence.orgId,
         governance_decision_id: govDecision.matchedRuleId,
-        audit_event_id: (evidence.auditEntries[0] as any)?.id ?? null,
+        audit_event_id: (evidence.auditEntries[0] as unknown)?.id ?? null,
         audit_chain_valid: chain.valid,
       }),
       trace: {

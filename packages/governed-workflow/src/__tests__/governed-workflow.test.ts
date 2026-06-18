@@ -309,7 +309,7 @@ describe('executeGovernedWorkflow', () => {
         pipelineName: 'claim-ingestion',
         pipelineVersion: '1.0.0',
         outcome: 'failed',
-        entity: null as any,
+        entity: null as unknown as Claim,
         stages: [{ stage: 'normalize', outcome: 'failed', durationMs: 0 }],
         startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
@@ -330,7 +330,7 @@ describe('executeGovernedWorkflow', () => {
         completedAt: new Date().toISOString(),
         durationMs: 0,
       },
-    } as any)
+    } as Awaited<ReturnType<typeof executePipeline>>)
 
     const def: GovernedWorkflowDef<RawClaim, Claim, ClaimState, OrgRole> = {
       name: 'claim-silent-fail',

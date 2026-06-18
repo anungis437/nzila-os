@@ -10,7 +10,7 @@ vi.mock('../logger', () => ({
 
 vi.mock('next/server', () => ({
   NextResponse: {
-    json: (body: unknown, init?: { status?: number }) => ({
+    json: (body: any, init?: { status?: number }) => ({
       body,
       status: init?.status ?? 200,
     }),

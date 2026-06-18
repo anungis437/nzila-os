@@ -47,7 +47,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return new NextResponse(null, { status: 204 })
   }
 
-  let body: unknown
+  let body: any
   try {
     body = await req.json()
   } catch {

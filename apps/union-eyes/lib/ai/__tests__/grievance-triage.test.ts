@@ -22,6 +22,10 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: vi.fn(() => ({ generate: mockGenerate })),
+  buildOrgAiTrace: vi.fn(() => ({
+    component: 'test',
+    action: 'mock',
+  })),
   UE_APP_KEY: 'union-eyes',
   UE_PROFILES: { GRIEVANCE_TRIAGE: 'ue-grievance-triage' },
   UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000',
@@ -37,7 +41,7 @@ vi.mock('@/db/schema/domains/claims/grievances', () => ({
 
 vi.mock('./ai-feature-guard', () => ({
   auditAiInteraction: vi.fn(async () => 'ai-triage-ref-123'),
-  buildAiEnvelope: vi.fn((data: unknown, meta: Record<string, unknown>) => ({
+  buildAiEnvelope: vi.fn((data: any, meta: Record<string, unknown>) => ({
     available: true, data, ...meta, disclaimer: 'AI disclaimer',
   })),
 }));

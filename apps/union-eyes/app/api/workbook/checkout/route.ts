@@ -34,7 +34,7 @@ const bodySchema = z.object({
 const SELF_GUIDED_TIER_ID = 'workbook_self_guided' as const;
 
 export async function POST(request: NextRequest) {
-  let body: unknown;
+  let body: any;
   try {
     body = await request.json();
   } catch {

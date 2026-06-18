@@ -154,9 +154,9 @@ export async function invalidateCSRFToken(sessionId: string): Promise<void> {
  * @returns Protected handler with CSRF validation
  */
 export function withCSRFProtection(
-  handler: (req: NextRequest, ...args: unknown[]) => Promise<NextResponse>
+  handler: (req: NextRequest, ...args: any[]) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest, ...args: unknown[]): Promise<NextResponse> => {
+  return async (req: NextRequest, ...args: any[]): Promise<NextResponse> => {
     const method = req.method;
 
     // Only validate state-changing methods

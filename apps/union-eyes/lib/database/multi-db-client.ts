@@ -12,7 +12,7 @@ import { drizzle as drizzleMssql } from 'drizzle-orm/node-postgres';
 import postgres from 'postgres';
 import { Pool } from 'pg';
 import * as schema from '@/db/schema';
-import { eq, and, or, sql, inArray, isNull, desc, asc, ilike, gte, lte } from 'drizzle-orm';
+import { eq, and, or, sql, inArray, isNull, desc, asc, ilike, gte, lte, type AnyColumn } from 'drizzle-orm';
 import { safeColumnName } from '@/lib/safe-sql-identifiers';
 
 // Database types
@@ -32,13 +32,13 @@ interface DatabaseConfig {
 
 // Unified database client interface
 export interface UnifiedDatabaseClient {
-  query: unknown;
-  insert: unknown;
-  update: unknown;
-  delete: unknown;
-  select: unknown;
-  transaction: unknown;
-  execute: unknown;
+  query: (...args: unknown[]) => unknown;
+  insert: (...args: unknown[]) => unknown;
+  update: (...args: unknown[]) => unknown;
+  delete: (...args: unknown[]) => unknown;
+  select: (...args: unknown[]) => unknown;
+  transaction: (...args: unknown[]) => unknown;
+  execute: (...args: unknown[]) => unknown;
 }
 
 /**
@@ -94,7 +94,7 @@ function createPostgresClient(config: DatabaseConfig): UnifiedDatabaseClient {
     prepare: false,
   });
 
-  return drizzlePg(client, { schema }) as UnifiedDatabaseClient;
+  return drizzlePg(client, { schema }) as unknown as UnifiedDatabaseClient;
 }
 
 /**
@@ -109,15 +109,14 @@ function createAzureSqlClient(config: DatabaseConfig): UnifiedDatabaseClient {
     ssl: config.options?.ssl ? { rejectUnauthorized: false } : undefined,
   });
 
-  return drizzleMssql(pool, { schema }) as UnifiedDatabaseClient;
+  return drizzleMssql(pool, { schema }) as unknown as UnifiedDatabaseClient;
 }
 
 /**
  * Execute query with database abstraction
  * Handles differences between PostgreSQL and Azure SQL syntax
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function executeQuery<T = any>(
+export async function executeQuery<T = unknown>(
   db: UnifiedDatabaseClient,
   queryFn: (db: UnifiedDatabaseClient) => Promise<T>
 ): Promise<T> {
@@ -197,8 +196,7 @@ export function arrayAppend(
  * Handle ILIKE vs LIKE differences
  */
 export function createLikeQuery(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any,
+  column: AnyColumn,
   pattern: string,
   dbType: DatabaseType = 'postgresql'
 ) {
@@ -278,8 +276,7 @@ export function createPaginationQuery(
  * Handle boolean type differences
  */
 export function createBooleanQuery(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any,
+  column: AnyColumn,
   value: boolean,
   dbType: DatabaseType = 'postgresql'
 ) {
@@ -296,8 +293,7 @@ export function createBooleanQuery(
  * Handle NULL checks differences
  */
 export function createNullCheck(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any,
+  column: AnyColumn,
   checkNull: boolean = true,
   dbType: DatabaseType = 'postgresql'
 ) {
@@ -346,11 +342,9 @@ export async function checkDatabaseHealth(): Promise<{
     // Simple health check query
     await executeQuery(db, async (db) => {
       if (config.type === 'azure-sql' || config.type === 'mssql') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return await (db as any).execute(sql`SELECT 1`);
+        return await db.execute(sql`SELECT 1`);
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return await (db as any).execute(sql`SELECT 1`);
+        return await db.execute(sql`SELECT 1`);
       }
     });
     

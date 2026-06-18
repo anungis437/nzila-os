@@ -46,8 +46,8 @@ Output: chosenAction, rejectedOptions, reasoning, confidence, tradeoffs.`,
       'Use sector-level aggregates only',
       'Refer to affiliate types not specific organizations',
     ],
-    buildInput: (data: { conflictingSignals: unknown[] }) => ({
-      signals: data.conflictingSignals,
+    buildInput: (data: unknown) => ({
+      signals: (data as { conflictingSignals: unknown[] }).conflictingSignals,
     }),
   },
   {
@@ -62,8 +62,8 @@ Rules: Never override governance. Never invent data. Cite evidence.`,
       'Never name individual affiliates',
       'Use sector-level aggregates only',
     ],
-    buildInput: (data: { recommendations: unknown[] }) => ({
-      recommendations: data.recommendations,
+    buildInput: (data: unknown) => ({
+      recommendations: (data as { recommendations: unknown[] }).recommendations,
     }),
   },
   {
@@ -78,9 +78,9 @@ Rules: Never override governance. Never invent data. Cite evidence.`,
       'Never name individual affiliates',
       'Use sector-level aggregates only',
     ],
-    buildInput: (data: { actions: unknown[]; constraints: unknown }) => ({
-      actions: data.actions,
-      constraints: data.constraints,
+    buildInput: (data: unknown) => ({
+      actions: (data as { actions: unknown[] }).actions,
+      constraints: (data as { constraints: unknown }).constraints,
     }),
   },
 ];

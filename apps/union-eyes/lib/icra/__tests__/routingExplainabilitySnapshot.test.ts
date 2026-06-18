@@ -29,7 +29,7 @@ const SMALL_LOCAL_UNION = {
 describe('buildRoutingExplainabilitySnapshot', () => {
   const profile = classifyOrgContext({ rawForm: SMALL_LOCAL_UNION });
   const bank = routeQuestionBank(
-    ALL_QUESTIONS as unknown as RoutableQuestion[],
+    ALL_QUESTIONS as any as RoutableQuestion[],
     profile,
   );
   const snap = buildRoutingExplainabilitySnapshot(profile, bank);

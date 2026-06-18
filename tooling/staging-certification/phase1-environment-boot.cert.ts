@@ -27,7 +27,7 @@ function runCommand(cmd: string): { stdout: string; exitCode: number } {
   try {
     const stdout = execSync(cmd, { cwd: ROOT, encoding: 'utf-8', timeout: 30_000, stdio: ['pipe', 'pipe', 'pipe'] })
     return { stdout, exitCode: 0 }
-  } catch (err: any) {
+  } catch (err: unknown) {
     return { stdout: err.stdout ?? '', exitCode: err.status ?? 1 }
   }
 }

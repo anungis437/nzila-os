@@ -54,7 +54,7 @@ function parseOtelHeaders(raw: string | undefined): Record<string, string> {
   }
 
   try {
-    const parsed = JSON.parse(raw) as unknown;
+    const parsed = JSON.parse(raw) as any;
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return Object.fromEntries(
         Object.entries(parsed as Record<string, unknown>).map(([key, value]) => [key, String(value)]),

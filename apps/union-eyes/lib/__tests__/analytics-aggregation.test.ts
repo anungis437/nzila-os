@@ -27,10 +27,10 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => ({ op: 'eq', args })),
-  and: vi.fn((...args: unknown[]) => ({ op: 'and', args })),
-  gte: vi.fn((...args: unknown[]) => ({ op: 'gte', args })),
-  sql: vi.fn((strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values })),
+  eq: vi.fn((...args: any[]) => ({ op: 'eq', args })),
+  and: vi.fn((...args: any[]) => ({ op: 'and', args })),
+  gte: vi.fn((...args: any[]) => ({ op: 'gte', args })),
+  sql: vi.fn((strings: TemplateStringsArray, ...values: any[]) => ({ strings, values })),
   count: vi.fn(() => 'count'),
   relations: vi.fn(() => ({})),
 }));

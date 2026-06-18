@@ -6,12 +6,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
-  sql: Object.assign(vi.fn((...args: unknown[]) => args), {
-    join: vi.fn((...args: unknown[]) => args),
+  sql: Object.assign(vi.fn((...args: any[]) => args), {
+    join: vi.fn((...args: any[]) => args),
   }),
   asc: vi.fn(),
   gt: vi.fn(),

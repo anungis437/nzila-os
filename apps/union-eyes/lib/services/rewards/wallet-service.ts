@@ -10,7 +10,7 @@ import {
   rewardWalletLedger,
   type RewardWalletLedgerEntry,
 } from '@/db/schema/domains/infrastructure/rewards';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, type SQL } from 'drizzle-orm';
 
 type DbTransaction = PgTransaction<
   PostgresJsQueryResultHKT,
@@ -28,6 +28,15 @@ export interface LedgerEntryOptions {
   sourceType: 'award' | 'redemption' | 'admin_adjustment' | 'system';
   sourceId?: string;
   memo?: string;
+}
+
+interface OutstandingBalanceRow {
+  total: number;
+}
+
+interface BulkBalanceRow {
+  user_id: string;
+  balance_after: number;
 }
 
 /**
@@ -185,16 +194,17 @@ export async function getLedgerSummary(
   totalCreditsOutstanding: number;
   activeMembers: number;
 }> {
-  let whereClause = eq(rewardWalletLedger.orgId, orgId);
+  const conditions: SQL<any>[] = [eq(rewardWalletLedger.orgId, orgId)];
 
-  if (startDate && endDate) {
-    whereClause = and(
-      whereClause,
-      sql`${rewardWalletLedger.createdAt} >= ${startDate}`,
-      sql`${rewardWalletLedger.createdAt} <= ${endDate}`
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any;
+  if (startDate) {
+    conditions.push(sql`${rewardWalletLedger.createdAt} >= ${startDate}`);
   }
+
+  if (endDate) {
+    conditions.push(sql`${rewardWalletLedger.createdAt} <= ${endDate}`);
+  }
+
+  const whereClause = and(...conditions) ?? eq(rewardWalletLedger.orgId, orgId);
 
   const [summary] = await db
     .select({
@@ -206,7 +216,7 @@ export async function getLedgerSummary(
     .where(whereClause);
 
   // Get total outstanding (sum of all latest balances)
-  const [outstanding] = await db.execute(sql`
+  const [outstanding] = (await db.execute(sql`
     WITH latest_balances AS (
       SELECT DISTINCT ON (user_id)
         user_id,
@@ -217,13 +227,12 @@ export async function getLedgerSummary(
     )
     SELECT COALESCE(SUM(balance_after), 0)::int AS total
     FROM latest_balances
-  `);
+  `)) as any as OutstandingBalanceRow[];
 
   return {
     totalCreditsIssued: summary.totalIssued,
     totalCreditsSpent: summary.totalSpent,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    totalCreditsOutstanding: (outstanding as any).total,
+    totalCreditsOutstanding: outstanding?.total ?? 0,
     activeMembers: summary.activeMembers,
   };
 }
@@ -254,8 +263,7 @@ export async function getBulkBalances(
 
   const balanceMap = new Map<string, number>();
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const row of results as any) {
+  for (const row of results as any as BulkBalanceRow[]) {
     balanceMap.set(row.user_id, row.balance_after);
   }
 

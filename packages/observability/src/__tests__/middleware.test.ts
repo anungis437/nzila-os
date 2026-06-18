@@ -1,7 +1,7 @@
 /**
  * @nzila/observability — Middleware tests
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 
 // We need to mock next/server before importing middleware
 vi.mock('next/server', () => {
@@ -44,7 +44,7 @@ describe('createTraceMiddleware', () => {
       method: 'GET',
       url: '/api/health',
       headers: {
-        get: (name: string) => null,
+        get: (_name: string) => null,
       },
     }
 

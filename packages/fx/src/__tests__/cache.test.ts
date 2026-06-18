@@ -9,8 +9,8 @@ import type { ExchangeRate } from '../types'
 
 function makeRate(base: string, quote: string, rate: number, date: string): ExchangeRate {
   return {
-    baseCurrency: base as any,
-    quoteCurrency: quote as any,
+    baseCurrency: base as ExchangeRate['baseCurrency'],
+    quoteCurrency: quote as ExchangeRate['quoteCurrency'],
     rate,
     rateDate: date,
     source: 'bank_of_canada',

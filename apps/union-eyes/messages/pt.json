@@ -185,6 +185,15 @@
         "history": "Histórico de Pagamentos",
         "manualPayment": "Pagamento Manual"
       },
+        },
+        "thresholds": {
+          "title": "Limites",
+          "description": "Ajuste os limites de atualização usados no resumo",
+          "agingDays": "Dias para envelhecer",
+          "staleDays": "Dias para ficar obsoleto",
+          "expiredDays": "Dias para expirar",
+          "apply": "Aplicar limites",
+          "reset": "Restaurar padrões"
       "manualPaymentNote": "Nota:",
       "manualPaymentNoteBody": "A maioria dos membros tem as contribuições deduzidas automaticamente da folha de pagamento. O pagamento manual é necessário apenas para casos excepcionais, como pagamentos de regularização, liquidação de atrasos, taxas especiais ou membros sem folha de pagamento.",
       "loading": "Carregando...",
@@ -9914,6 +9923,7 @@
     "filters": {
       "jurisdictionPlaceholder": "Jurisdição",
       "allJurisdictions": "Todas as jurisdições",
+      "sectorPlaceholder": "Filtro de setor...",
       "reviewPlaceholder": "Revisão",
       "allReviews": "Todas as revisões"
     },
@@ -9935,6 +9945,9 @@
     "loading": "Carregando acordos...",
     "errorLoad": "Falha ao carregar acordos",
     "empty": "Nenhum acordo encontrado",
+    "actions": {
+      "exportCsv": "Exportar CSV"
+    },
     "pagination": {
       "count": "{count} acordo",
       "countPlural": "{count} acordos",

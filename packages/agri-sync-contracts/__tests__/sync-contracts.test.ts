@@ -29,10 +29,10 @@ function makeConflict<T>(
   const localMeta = createSyncMetadata('local_a', overrides?.localDeviceId ?? 'd1')
   const remoteMeta = createSyncMetadata('remote_a', overrides?.remoteDeviceId ?? 'd2')
   if (overrides?.localVersion) {
-    ;(localMeta as any).version = overrides.localVersion
+    ;(localMeta as unknown).version = overrides.localVersion
   }
   if (overrides?.remoteVersion) {
-    ;(remoteMeta as any).version = overrides.remoteVersion
+    ;(remoteMeta as unknown).version = overrides.remoteVersion
   }
   return {
     localRecord: { data: localData, metadata: localMeta },

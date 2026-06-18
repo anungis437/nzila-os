@@ -49,8 +49,8 @@ vi.mock('../document-storage-service', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   desc: vi.fn((col) => ({ column: col, direction: 'desc' })),
   asc: vi.fn((col) => ({ column: col, direction: 'asc' })),
   sql: vi.fn(),
@@ -88,6 +88,16 @@ import {
   voidWorkflow,
   sendSignerReminders,
 } from '../signature-workflow-service';
+
+function queryChain(resolveValue: any): any {
+  const handler: ProxyHandler<object> = {
+    get: (_target, prop) => {
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
+      return vi.fn(() => new Proxy({}, handler));
+    },
+  };
+  return new Proxy({}, handler);
+}
 
 // ── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -159,8 +169,8 @@ function setupDefaultMocks() {
   }]);
 }
 
-function setupSelectResult(rows: unknown[]) {
-  mocks.mockWhere.mockResolvedValue(rows);
+function setupSelectResult(rows: any[]) {
+  mocks.mockWhere.mockReturnValue(queryChain(rows));
   mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
   mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
 }
@@ -261,7 +271,7 @@ describe('handleSignerCompleted', () => {
     mocks.mockWhere.mockImplementation(() => {
       callCount++;
       if (callCount === 1) {
-        return Promise.resolve([{
+        return queryChain([{
           id: 'wf-1', status: 'sent', organizationId: 'org-1',
           externalEnvelopeId: 'env-1', provider: 'docusign',
           workflowData: { documentName: 'contract.pdf' },
@@ -269,7 +279,7 @@ describe('handleSignerCompleted', () => {
         }]);
       }
       // signers — not all completed
-      return Promise.resolve([
+      return queryChain([
         { id: 's-1', email: 'alice@test.com', status: 'signed' },
         { id: 's-2', email: 'bob@test.com', status: 'pending' },
       ]);
@@ -294,7 +304,7 @@ describe('handleSignerCompleted', () => {
       callCount++;
       if (callCount === 1) {
         // handleSignerCompleted: get workflow
-        return Promise.resolve([{
+        return queryChain([{
           id: 'wf-1', status: 'sent', organizationId: 'org-1',
           externalEnvelopeId: 'env-1', provider: 'docusign',
           workflowData: { documentName: 'contract.pdf' },
@@ -304,12 +314,12 @@ describe('handleSignerCompleted', () => {
       }
       if (callCount === 2) {
         // handleSignerCompleted: get all signers — all signed
-        return Promise.resolve([
+        return queryChain([
           { id: 's-1', email: 'alice@test.com', status: 'signed' },
         ]);
       }
       // completeWorkflow: get workflow
-      return Promise.resolve([{
+      return queryChain([{
         id: 'wf-1', status: 'sent', organizationId: 'org-1',
         externalEnvelopeId: 'env-1', provider: 'docusign',
         workflowData: { documentName: 'contract.pdf', documentHash: 'orig-hash' },

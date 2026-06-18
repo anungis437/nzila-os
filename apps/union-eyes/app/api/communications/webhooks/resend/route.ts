@@ -27,7 +27,7 @@ type MessageStatus =
   | 'unsubscribed'
   | 'complained';
 
-function incrementStat(stats: unknown, key: string): Record<string, unknown> {
+function incrementStat(stats: any, key: string): Record<string, unknown> {
   const current =
     typeof stats === 'object' && stats !== null && !Array.isArray(stats)
       ? (stats as Record<string, unknown>)
@@ -83,12 +83,12 @@ function isEmailEvent(
     return false;
   }
 
-  const data = event.data as unknown;
+  const data = event.data as any;
   return (
     typeof data === 'object'
     && data !== null
     && 'email_id' in data
-    && typeof (data as { email_id?: unknown }).email_id === 'string'
+    && typeof (data as { email_id?: any }).email_id === 'string'
   );
 }
 

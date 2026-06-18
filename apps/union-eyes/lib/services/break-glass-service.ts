@@ -276,7 +276,7 @@ export class BreakGlassService {
   }
 
   private async loadShamirModule(): Promise<LegacyShamirModule> {
-    const mod = await import('secrets.js-grempe') as unknown as { default?: LegacyShamirModule } & Partial<LegacyShamirModule>;
+    const mod = await import('secrets.js-grempe') as any as { default?: LegacyShamirModule } & Partial<LegacyShamirModule>;
     const resolved = mod.default ?? mod;
     if (typeof resolved.combine !== 'function') {
       throw new Error('NZILA_UNIMPLEMENTED: union-eyes.break-glass.threshold-crypto');

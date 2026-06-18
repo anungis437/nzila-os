@@ -246,7 +246,7 @@ function determineOverallStatus(services: ServiceHealth[]): ServiceStatus {
 /**
  * Create failed service health object
  */
-function getFailedService(name: string, error: unknown): ServiceHealth {
+function getFailedService(name: string, error: any): ServiceHealth {
   return {
     name,
     status: 'down',

@@ -44,7 +44,7 @@ export function classifyMovementPosture(
   if (criticalOrHigh.length >= 1 && interventions.length >= 2) return 'heightened';
   if (criticalOrHigh.length >= 1 && highDivergences.length >= 2) return 'heightened';
 
-  // Vigilant: any high+ pattern or multiple elevated signals
+  // Vigilant: unknown high+ pattern or multiple elevated signals
   if (criticalOrHigh.length >= 1) return 'vigilant';
   if (interventions.length >= 1) return 'vigilant';
   const elevatedPatterns = output.patterns.filter((p) => p.watchLevel === 'elevated');

@@ -271,6 +271,18 @@ export const cbaIntelAgreementsTotal = new Gauge({
   registers: [register],
 });
 
+export function updateReviewQueueDepthMetrics(counts: {
+  findings: number;
+  agreements: number;
+  wageAdjustments: number;
+  clauses: number;
+}): void {
+  cbaIntelReviewQueueDepth.set({ target_type: 'finding' }, counts.findings);
+  cbaIntelReviewQueueDepth.set({ target_type: 'agreement' }, counts.agreements);
+  cbaIntelReviewQueueDepth.set({ target_type: 'wage_adjustment' }, counts.wageAdjustments);
+  cbaIntelReviewQueueDepth.set({ target_type: 'clause' }, counts.clauses);
+}
+
 // ============================================
 // Export Registry
 // ============================================
@@ -285,7 +297,7 @@ export async function getMetrics(): Promise<string> {
 /**
  * Get metrics as JSON (for internal use)
  */
-export async function getMetricsJSON(): Promise<unknown> {
+export async function getMetricsJSON(): Promise<any> {
   return register.getMetricsAsJSON();
 }
 

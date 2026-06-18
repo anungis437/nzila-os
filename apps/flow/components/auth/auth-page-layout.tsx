@@ -63,6 +63,7 @@ export function AuthPageLayout({
           src={heroImage}
           alt={appName}
           fill
+          sizes="(max-width: 1024px) 0px, 55vw"
           className="object-cover"
           priority
         />

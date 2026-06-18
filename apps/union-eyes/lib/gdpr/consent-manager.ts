@@ -50,7 +50,7 @@ export class ConsentManager {
     ipAddress?: string;
     userAgent?: string;
     expiresAt?: Date;
-    metadata?: unknown;
+    metadata?: any;
   }): Promise<typeof userConsents.$inferSelect> {
     const { organizationId, ...rest } = data;
     const [consent] = await db
@@ -231,7 +231,7 @@ export class GdprRequestManager {
   static async requestDataAccess(data: {
     userId: string;
     organizationId: string;
-    requestDetails?: unknown;
+    requestDetails?: any;
     verificationMethod?: string;
   }): Promise<typeof gdprDataRequests.$inferSelect> {
     const deadline = new Date();
@@ -291,7 +291,7 @@ export class GdprRequestManager {
   static async requestDataErasure(data: {
     userId: string;
     organizationId: string;
-    requestDetails?: unknown;
+    requestDetails?: any;
     verificationMethod?: string;
   }): Promise<typeof gdprDataRequests.$inferSelect> {
     const deadline = new Date();
@@ -321,7 +321,7 @@ export class GdprRequestManager {
     userId: string;
     organizationId: string;
     preferredFormat?: "json" | "csv" | "xml";
-    requestDetails?: unknown;
+    requestDetails?: any;
   }): Promise<typeof gdprDataRequests.$inferSelect> {
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + 30);
@@ -385,7 +385,7 @@ export class GdprRequestManager {
     status: "in_progress" | "completed" | "rejected",
     data?: {
       processedBy?: string;
-      responseData?: unknown;
+      responseData?: any;
       rejectionReason?: string;
     }
   ) {
@@ -425,7 +425,7 @@ export class DataExportService {
     userId: string,
     organizationId: string,
     format: "json" | "csv" | "xml" = "json"
-  ): Promise<unknown> {
+  ): Promise<any> {
     // Collect all user data from various tables
     const userData = {
       exportDate: new Date().toISOString(),
@@ -549,7 +549,7 @@ export class DataExportService {
 
       // Query claim updates/notes for user's claims
       const claimIds = userClaims.map(c => c.claimId);
-      let claimNotes: unknown[] = [];
+      let claimNotes: any[] = [];
       
       if (claimIds.length > 0) {
         claimNotes = await db.query.claimUpdates.findMany({

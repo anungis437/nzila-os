@@ -273,7 +273,7 @@ export function formatValidationError(error: ZodError): NextResponse {
  * Validate request parameters
  */
 export function validateParams<T extends ZodSchema>(
-  params: unknown,
+  params: any,
   schema: T
 ): z.infer<T> | NextResponse {
   try {

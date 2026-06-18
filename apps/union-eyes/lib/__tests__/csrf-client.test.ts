@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 describe('csrf-client', () => {
-  const browserGlobal = globalThis as unknown as { document: { cookie: string } };
+  const browserGlobal = globalThis as any as { document: { cookie: string } };
 
   beforeEach(() => {
     vi.clearAllMocks();

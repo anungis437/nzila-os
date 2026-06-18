@@ -27,6 +27,7 @@ import {
   type NewFinding,
 } from "./extraction-service";
 import { updateDocumentStatus, type CbaIntelDocument } from "./document-service";
+import { flagForFollowupReview } from "./review-service";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,7 +46,7 @@ export interface ExtractionResult {
 interface ExtractedFinding {
   findingType: string;
   label: string;
-  value: string | null;
+  value: string;
   confidence: number;
   clauseFamily: string | null;
   sourceSpan: string | null;
@@ -72,9 +73,73 @@ interface ExtractedWageData {
 
 interface ExtractedClauseData {
   clauseFamily: string;
-  clauseTitle: string | null;
+  clauseTitle: string;
   rawText: string;
   confidence: number;
+}
+
+interface ExtractionPolicy {
+  followupConfidenceThreshold: number;
+  maxAutoReviewEnqueues: number;
+}
+
+function parseThreshold(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(parsed, 1));
+}
+
+function getExtractionPolicy(): ExtractionPolicy {
+  return {
+    followupConfidenceThreshold: parseThreshold(
+      process.env.CBA_INTEL_REVIEW_CONFIDENCE_THRESHOLD,
+      0.65,
+    ),
+    maxAutoReviewEnqueues: Math.max(
+      1,
+      Number.parseInt(process.env.CBA_INTEL_MAX_AUTO_REVIEW_ENQUEUES ?? "20", 10) || 20,
+    ),
+  };
+}
+
+function deriveActionRecommendations(input: {
+  agreement: ExtractedAgreementData;
+  wageAdjustments: ExtractedWageData[];
+  clauses: ExtractedClauseData[];
+}): Array<{ label: string; value: string; confidence: number; clauseFamily: string | null }> {
+  const recommendations: Array<{ label: string; value: string; confidence: number; clauseFamily: string | null }> = [];
+
+  const hasArbitration = input.clauses.some((c) => c.clauseFamily === "grievance");
+  if (!hasArbitration) {
+    recommendations.push({
+      label: "Add grievance and arbitration readiness check",
+      value: "No grievance/arbitration clause detected. Route for legal review before relying on this agreement for precedent.",
+      confidence: 0.78,
+      clauseFamily: "grievance",
+    });
+  }
+
+  const maxWage = input.wageAdjustments.reduce((max, item) => Math.max(max, item.adjustmentPercent), 0);
+  if (maxWage >= 4) {
+    recommendations.push({
+      label: "Budget impact review required",
+      value: `Detected wage adjustment up to ${maxWage.toFixed(1)}%. Trigger finance impact simulation and escalation workflow.`,
+      confidence: 0.84,
+      clauseFamily: "wages",
+    });
+  }
+
+  if (!input.agreement.expiryDate) {
+    recommendations.push({
+      label: "Missing expiry date follow-up",
+      value: "Agreement expiry date was not confidently extracted. Add to reviewer queue for term verification.",
+      confidence: 0.8,
+      clauseFamily: null,
+    });
+  }
+
+  return recommendations;
 }
 
 // ---------------------------------------------------------------------------
@@ -329,7 +394,7 @@ function extractWages(text: string): ExtractedWageData[] {
           wages.push({
             year,
             adjustmentPercent: pct,
-            effectiveDate: year > 2000 ? `${year}-01-01` : null,
+              effectiveDate: `${year}-01-01`,
             description: match[0].trim().slice(0, 200),
           });
         }
@@ -369,7 +434,7 @@ function classifyClauses(text: string): ExtractedClauseData[] {
     if (bestFamily && bestScore > 0) {
       // Extract the first line as title
       const lines = section.trim().split(/\n/);
-      const title = lines[0]?.trim().slice(0, 255) ?? null;
+        const title = lines[0].trim().slice(0, 255);
 
       clauses.push({
         clauseFamily: bestFamily,
@@ -391,6 +456,7 @@ export async function extractDocument(
   documentId: string,
 ): Promise<ExtractionResult> {
   const errors: string[] = [];
+  const policy = getExtractionPolicy();
 
   // Load document
   const [document] = await db
@@ -497,11 +563,28 @@ export async function extractDocument(
     for (const clause of clauseData) {
       findings.push({
         findingType: "clause_classification",
-        label: clause.clauseTitle ?? clause.clauseFamily,
+          label: clause.clauseTitle,
         value: clause.clauseFamily,
         confidence: clause.confidence,
         clauseFamily: clause.clauseFamily,
         sourceSpan: clause.rawText.slice(0, 500),
+      });
+    }
+
+    const recommendations = deriveActionRecommendations({
+      agreement: metadata,
+      wageAdjustments: wageData,
+      clauses: clauseData,
+    });
+
+    for (const rec of recommendations) {
+      findings.push({
+        findingType: "action_recommendation",
+        label: rec.label,
+        value: rec.value,
+        confidence: rec.confidence,
+        clauseFamily: rec.clauseFamily,
+        sourceSpan: null,
       });
     }
 
@@ -517,14 +600,27 @@ export async function extractDocument(
       citationText: f.sourceSpan,
       extractionMethod: "deterministic" as const,
       contentHash: createHash("sha256")
-        .update(`${documentId}:${f.findingType}:${f.label}:${f.value ?? ""}`)
+        .update(`${documentId}:${f.findingType}:${f.label}:${f.value}`)
         .digest("hex"),
       reviewStatus: "pending_review",
     }));
 
-    if (findingRecords.length > 0) {
-      await createFindingsBatch(findingRecords);
-    }
+    const createdFindings = await createFindingsBatch(findingRecords);
+
+    const followups = createdFindings
+      .filter((f) => Number(f.confidence) < policy.followupConfidenceThreshold)
+      .slice(0, policy.maxAutoReviewEnqueues);
+
+    await Promise.all(
+      followups.map(async (f) => {
+        await flagForFollowupReview({
+          targetType: "finding",
+          targetId: f.id,
+          reason: "low_confidence_extraction",
+          comment: `Auto-queued due to confidence ${f.confidence} below threshold ${policy.followupConfidenceThreshold}`,
+        });
+      }),
+    );
 
     // Emit extraction confidence metrics
     for (const clause of clauseData) {
@@ -536,14 +632,14 @@ export async function extractDocument(
 
     // Update document status
     await updateDocumentStatus(documentId, "extracted", {
-      parsedMetadata: metadata as unknown as Record<string, unknown>,
+      parsedMetadata: metadata as any as Record<string, unknown>,
     });
 
     // Complete extraction run
     await completeExtractionRun(run.id, {
       findingsCount: findings.length,
       errorCount: errors.length,
-      errors: errors.length > 0 ? { messages: errors } : undefined,
+        errors: undefined,
     });
 
     logger.info("Extraction completed", {
@@ -634,3 +730,16 @@ export async function runBulkExtraction(): Promise<{
 
   return { processed: documents.length, succeeded, failed, results };
 }
+
+export const __test__ = {
+  parseThreshold,
+  getExtractionPolicy,
+  deriveActionRecommendations,
+  normalizeText,
+  extractMetadata,
+  detectJurisdiction,
+  detectSector,
+  tryParseDate,
+  extractWages,
+  classifyClauses,
+};

@@ -19,7 +19,7 @@ const calculateDuesSchema = z.object({
 });
 
 export const POST = withRoleAuth('steward', async (request, context: BaseAuthContext) => {
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch (error) {

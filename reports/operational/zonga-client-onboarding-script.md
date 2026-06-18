@@ -50,7 +50,7 @@ Gather the minimum required information from the client before provisioning thei
 
 - [ ] ToS and Privacy Policy: client provides, or Nzila provides draft (from Legal Launch Pack)?
 - [ ] DMCA designated agent: client's or shared?
-- [ ] Data residency requirements: any restriction on processing in Canada/US?
+- [ ] Data residency requirements: unknown restriction on processing in Canada/US?
 
 **6. Branding**
 

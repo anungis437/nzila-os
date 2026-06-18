@@ -137,7 +137,7 @@ export async function assessBreachNotification(
         LIMIT 1
       `);
       const resultRows = (result as { rows?: Array<{ province?: string }> }).rows;
-      const rows = resultRows ?? (result as unknown as Array<{ province?: string }>);
+      const rows = resultRows ?? (result as any as Array<{ province?: string }>);
       if (rows?.[0]?.province) {
         province = rows[0].province;
       }

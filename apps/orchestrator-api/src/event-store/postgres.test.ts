@@ -207,5 +207,17 @@ describe('createPostgresEventStore', () => {
 
       expect(result).toEqual([])
     })
+
+    it('returns an empty array when the DB returns an unexpected non-array shape', async () => {
+      const { db } = makeMockDb(async () => ({}))
+      const store = createPostgresEventStore(db)
+
+      const result = await store.query(
+        'workflow.started',
+        '2026-05-20T00:00:00.000Z',
+      )
+
+      expect(result).toEqual([])
+    })
   })
 })

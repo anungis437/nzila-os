@@ -50,4 +50,4 @@ This strategy reduces single-vendor concentration risk by requiring explicit sec
 
 - Owner: Platform Architecture
 - Review: quarterly
-- Triggered review: any Sev 1 outage involving provider dependency
+- Triggered review: unknown Sev 1 outage involving provider dependency

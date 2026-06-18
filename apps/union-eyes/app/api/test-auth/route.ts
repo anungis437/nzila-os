@@ -30,7 +30,7 @@ export async function GET(_req: NextRequest) {
 
   // ── Step 2: Django health (no auth) ────────────────────────────────────────
   let healthStatus = 0;
-  let healthBody: unknown = null;
+  let healthBody: any = null;
   try {
     const r = await fetch(`${DJANGO}/api/auth_core/health/`, { cache: 'no-store' });
     healthStatus = r.status;
@@ -41,7 +41,7 @@ export async function GET(_req: NextRequest) {
 
   // ── Step 3: Django /me/ (JWT required) ─────────────────────────────────────
   let meStatus = 0;
-  let meBody: unknown = null;
+  let meBody: any = null;
   try {
     const r = await fetch(`${DJANGO}/api/auth_core/me/`, {
       headers: { Authorization: `Bearer ${token}` },

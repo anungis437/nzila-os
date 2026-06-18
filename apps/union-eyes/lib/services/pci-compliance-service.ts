@@ -15,6 +15,42 @@ import {
 import { eq, desc } from 'drizzle-orm';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+interface TemplateRequirementRow {
+  requirement_number: string;
+  requirement_description: string;
+}
+
+interface SupabaseOrganizationRow {
+  id: string;
+}
+
+interface EncryptionKeyRow {
+  organization_id: string;
+  key_type: string;
+  rotated_at: string;
+}
+
+function isTemplateRequirementRow(value: unknown): value is TemplateRequirementRow {
+  return typeof value === 'object'
+    && value !== null
+    && typeof (value as { requirement_number?: unknown }).requirement_number === 'string'
+    && typeof (value as { requirement_description?: unknown }).requirement_description === 'string';
+}
+
+function isOrganizationRow(value: unknown): value is SupabaseOrganizationRow {
+  return typeof value === 'object'
+    && value !== null
+    && typeof (value as { id?: unknown }).id === 'string';
+}
+
+function isEncryptionKeyRow(value: unknown): value is EncryptionKeyRow {
+  return typeof value === 'object'
+    && value !== null
+    && typeof (value as { organization_id?: unknown }).organization_id === 'string'
+    && typeof (value as { key_type?: unknown }).key_type === 'string'
+    && typeof (value as { rotated_at?: unknown }).rotated_at === 'string';
+}
+
 
 export interface PCIAssessmentResult {
   id: string;
@@ -139,16 +175,19 @@ export class PCIComplianceService {
     organizationId: string
   ): Promise<void> {
     // Get template requirements
-    const { data: templateRequirements } = await this.supabase
+    const templateResponse = await this.supabase
       .from('pci_dss_saq_a_requirements_template')
       .select('*')
       .order('requirement_number');
 
-    if (!templateRequirements) return;
+    const templateRequirements = Array.isArray(templateResponse.data)
+      ? templateResponse.data.filter(isTemplateRequirementRow)
+      : [];
+
+    if (templateRequirements.length === 0) return;
 
     // Copy to requirements table
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const requirements = templateRequirements.map((template: any) => ({
+    const requirements = templateRequirements.map((template) => ({
       assessmentId,
       organizationId,
       requirementNumber: template.requirement_number,
@@ -253,22 +292,23 @@ export class PCIComplianceService {
    * Get all overdue quarterly scans
    */
   async getOverdueScans(): Promise<Array<{ organizationId: string; daysSinceLastScan: number }>> {
-    const { data: orgs } = await this.supabase
+    const orgResponse = await this.supabase
       .from('organizations')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .select('id') as any;
+      .select('id');
 
-    if (!orgs) return [];
+    const orgs = Array.isArray(orgResponse.data)
+      ? orgResponse.data.filter(isOrganizationRow)
+      : [];
+
+    if (orgs.length === 0) return [];
 
     const overdue: Array<{ organizationId: string; daysSinceLastScan: number }> = [];
 
     for (const org of orgs) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const latestScan = await this.getLatestQuarterlyScan((org as any).id);
+      const latestScan = await this.getLatestQuarterlyScan(org.id);
       
       if (!latestScan) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        overdue.push({ organizationId: (org as any).id, daysSinceLastScan: 999 });
+        overdue.push({ organizationId: org.id, daysSinceLastScan: 999 });
         continue;
       }
 
@@ -277,8 +317,7 @@ export class PCIComplianceService {
       );
 
       if (daysSinceLastScan > 90) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        overdue.push({ organizationId: (org as any).id, daysSinceLastScan });
+        overdue.push({ organizationId: org.id, daysSinceLastScan });
       }
     }
 
@@ -311,12 +350,16 @@ export class PCIComplianceService {
     keyType: string;
     daysSinceRotation: number;
   }>> {
-    const { data: keys } = await this.supabase
+    const keyResponse = await this.supabase
       .from('pci_dss_encryption_keys')
       .select('*')
       .order('rotated_at', { ascending: false });
 
-    if (!keys) return [];
+    const keys = Array.isArray(keyResponse.data)
+      ? keyResponse.data.filter(isEncryptionKeyRow)
+      : [];
+
+    if (keys.length === 0) return [];
 
     const needsRotation: Array<{
       organizationId: string;
@@ -325,16 +368,14 @@ export class PCIComplianceService {
     }> = [];
 
     for (const key of keys) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const keyAny = key as any;
       const daysSinceRotation = Math.floor(
-        (Date.now() - new Date(keyAny.rotated_at).getTime()) / (1000 * 60 * 60 * 24)
+        (Date.now() - new Date(key.rotated_at).getTime()) / (1000 * 60 * 60 * 24)
       );
 
       if (daysSinceRotation > 90) {
         needsRotation.push({
-          organizationId: keyAny.organization_id,
-          keyType: keyAny.key_type,
+          organizationId: key.organization_id,
+          keyType: key.key_type,
           daysSinceRotation
         });
       }

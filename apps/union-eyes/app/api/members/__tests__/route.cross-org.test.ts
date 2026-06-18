@@ -96,22 +96,6 @@ function makeRequest(params: Record<string, string>) {
   return new NextRequest(url);
 }
 
-/**
- * Build a chainable drizzle-style mock:
- * db.select().from().where().limit() → resolves to `rows`
- */
-function buildSelectChain(rows: unknown[]) {
-  const chain = {
-    from: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    offset: vi.fn().mockResolvedValue(rows),
-  };
-  chain.limit.mockResolvedValue(rows);
-  mockDbSelect.mockReturnValue(chain);
-  return chain;
-}
-
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('GET /api/members — cross-org access control', () => {

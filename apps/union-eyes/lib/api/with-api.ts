@@ -229,7 +229,7 @@ export interface ApiContext<
  * - A `NextResponse` → passed through unmodified (escape hatch)
  * - `void` / `undefined` → 204 No Content
  */
-type HandlerReturn = Record<string, unknown> | unknown[] | NextResponse | void | null;
+type HandlerReturn = Record<string, unknown> | any[] | NextResponse | void | null;
 
 type HandlerFn<TBody, TQuery> = (ctx: ApiContext<TBody, TQuery>) => Promise<HandlerReturn> | HandlerReturn;
 
@@ -510,7 +510,7 @@ export function withApi<
       // ── 6. Parse & validate body ───────────────────────────────────────
       let body: z.infer<TBody> = undefined as z.infer<TBody>;
       if (options.body) {
-        let rawBody: unknown;
+        let rawBody: any;
         try {
           rawBody = await request.json();
         } catch {
@@ -650,7 +650,7 @@ export function withApi<
       );
       return response;
 
-    } catch (error: unknown) {
+    } catch (error: any) {
       // ── Known API errors ───────────────────────────────────────────────
       if (error instanceof ApiError) {
         return standardErrorResponse(error.code, error.message, error.details, traceId);

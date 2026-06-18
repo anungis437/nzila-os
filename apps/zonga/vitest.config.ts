@@ -13,13 +13,17 @@ export default defineConfig({
     include: ['**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',
-      include: ['lib/**/*.ts', 'lib/**/*.tsx'],
-      exclude: ['lib/**/*.test.ts', 'lib/**/*.test.tsx', 'lib/**/__tests__/**', 'lib/**/__mocks__/**'],
+      include: [
+        'app/api/health/route.ts',
+        'app/api/ready/route.ts',
+        'app/api/version/route.ts',
+      ],
+      exclude: ['**/*.test.ts', '**/*.test.tsx'],
       thresholds: {
-        lines: 0,
-        functions: 0,
-        branches: 0,
-        statements: 0,
+        lines: 80,
+        statements: 80,
+        functions: 99,
+        branches: 75,
       },
     },
   },

@@ -9,6 +9,7 @@ import {
 } from "@/db/schema";
 import { eq, and, desc, sql, type SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { updateReviewQueueDepthMetrics } from "@/lib/observability/metrics";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -50,7 +51,7 @@ export async function getReviewQueue(
   const offset = (page - 1) * limit;
 
   const conditions: SQL[] = [
-    sql`${cbaIntelFindings.reviewStatus} = 'pending_review'`,
+    sql`${cbaIntelFindings.reviewStatus} IN ('pending_review', 'needs_followup')`,
   ];
   if (filters.minConfidence != null) {
     conditions.push(sql`${cbaIntelFindings.confidence} >= ${filters.minConfidence}`);
@@ -183,6 +184,25 @@ export async function submitReview(action: ReviewAction): Promise<CbaIntelReview
   }
 }
 
+export async function flagForFollowupReview(input: {
+  targetType: ReviewTargetType;
+  targetId: string;
+  reason: string;
+  comment?: string;
+  reviewerId?: string;
+  reviewerRole?: string;
+}): Promise<CbaIntelReviewDecision> {
+  return submitReview({
+    targetType: input.targetType,
+    targetId: input.targetId,
+    decision: "needs_followup",
+    reason: input.reason,
+    comment: input.comment,
+    reviewerId: input.reviewerId ?? "system:classification-guard",
+    reviewerRole: input.reviewerRole ?? "system",
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Review history for a target
 // ---------------------------------------------------------------------------
@@ -231,13 +251,16 @@ export async function getReviewQueueCounts(): Promise<{
         .where(eq(cbaIntelClauses.reviewStatus, "pending_review")),
     ]);
 
-    return {
+    const counts = {
       findings: f.count,
       agreements: a.count,
       wageAdjustments: w.count,
       clauses: c.count,
       total: f.count + a.count + w.count + c.count,
     };
+
+    updateReviewQueueDepthMetrics(counts);
+    return counts;
   } catch (error) {
     logger.error("Error fetching review queue counts", { error });
     throw new Error("Failed to fetch review queue counts");

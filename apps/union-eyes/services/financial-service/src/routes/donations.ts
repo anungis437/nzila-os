@@ -22,12 +22,60 @@ type StripePaymentIntentLike = {
 type StripeWebhookEventLike = {
   type: string;
   data: {
-    object: unknown;
+    object: any;
   };
+};
+
+type FundRow = {
+  id: string;
+  fund_name: string;
+  tenant_id: string;
+  status: string;
+  current_balance: string;
+  target_amount: string;
+};
+
+type DonationInsertRow = {
+  id: string;
+};
+
+type CampaignRow = {
+  id: string;
+  fund_name: string;
+  description: string | null;
+  target_amount: string;
+  current_balance: string;
+  strike_start_date: string | null;
+  strike_end_date: string | null;
+  status: string;
+  donor_count: string;
+  total_donations: string;
+};
+
+type DonationStatusRow = {
+  id: string;
+  amount: string;
+  donor_name: string | null;
+  is_anonymous: boolean;
+  status: string;
+  transaction_id: string | null;
+  created_at: string;
+  fund_name: string;
 };
 
 // Initialize Stripe via platform wrapper
 const stripe = getStripeClient();
+
+function toRows<T extends Record<string, unknown>>(result: any): T[] {
+  if (Array.isArray(result)) {
+    return result as T[];
+  }
+  if (typeof result === 'object' && result !== null && 'rows' in result) {
+    const rows = (result as { rows?: any }).rows;
+    return Array.isArray(rows) ? (rows as T[]) : [];
+  }
+  return [];
+}
 
 /** Validates a route :param is a UUID before it reaches any query. */
 const uuidParam = z.string().uuid();
@@ -61,7 +109,7 @@ router.post('/', async (req: Request, res: Response) => {
       LIMIT 1
     `);
 
-    const funds = Array.isArray(fundResult) ? fundResult : (fundResult.rows || fundResult);
+    const funds = toRows<FundRow>(fundResult);
 
     if (funds.length === 0) {
       return res.status(404).json({
@@ -109,7 +157,7 @@ router.post('/', async (req: Request, res: Response) => {
       RETURNING *
     `);
 
-    const donations = Array.isArray(donationResult) ? donationResult : (donationResult.rows || donationResult);
+    const donations = toRows<DonationInsertRow>(donationResult);
 
     res.status(201).json({
       success: true,
@@ -168,7 +216,7 @@ router.post(
         req.body,
         sig,
         webhookSecret
-      ) as unknown as StripeWebhookEventLike;
+      ) as any as StripeWebhookEventLike;
     } catch (err) {
       const errMessage = err instanceof Error ? err.message : 'unknown webhook verification error';
       logger.error('Webhook signature verification failed', { error: err });
@@ -245,7 +293,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
     `);
 
     // postgres-js with drizzle returns array directly, not wrapped in .rows
-    const rows = Array.isArray(fundResult) ? fundResult : (fundResult.rows || fundResult);
+    const rows = toRows<CampaignRow>(fundResult);
 
     if (rows.length === 0) {
       return res.status(404).json({
@@ -272,7 +320,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
       LIMIT 10
     `);
 
-    const recentDonations = Array.isArray(recentDonationsResult) ? recentDonationsResult : (recentDonationsResult.rows || recentDonationsResult);
+    const recentDonations = toRows<Record<string, unknown>>(recentDonationsResult);
 
     res.json({
       success: true,
@@ -324,7 +372,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
       LIMIT 1
     `);
 
-    const donations = Array.isArray(result) ? result : (result.rows || result);
+    const donations = toRows<DonationStatusRow>(result);
 
     if (donations.length === 0) {
       return res.status(404).json({

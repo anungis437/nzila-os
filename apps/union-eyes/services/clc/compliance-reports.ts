@@ -34,8 +34,17 @@ import { organizations, perCapitaRemittances } from '@/db/schema';
 import { eq, and, sql, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
-// Type alias for per capita remittance records
-type _PerCapitaRemittance = typeof perCapitaRemittances.$inferSelect;
+type PerCapitaRemittanceRow = typeof perCapitaRemittances.$inferSelect;
+type PaidRemittanceRow = PerCapitaRemittanceRow & { status: 'paid'; paidDate: string };
+type SubmittedRemittanceRow = PerCapitaRemittanceRow & { submittedDate: string };
+
+function isPaidRemittance(remittance: PerCapitaRemittanceRow): remittance is PaidRemittanceRow {
+  return remittance.status === 'paid' && typeof remittance.paidDate === 'string';
+}
+
+function hasSubmittedDate(remittance: PerCapitaRemittanceRow): remittance is SubmittedRemittanceRow {
+  return typeof remittance.submittedDate === 'string';
+}
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -396,8 +405,7 @@ export async function analyzeMultiYearTrends(options: {
 // ============================================================================
 
 async function generateComplianceSummary(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: PerCapitaRemittanceRow[],
   _year: number
 ): Promise<ComplianceSummary> {
   const totalRemittances = remittances.length;
@@ -424,7 +432,7 @@ async function generateComplianceSummary(
   const complianceRate = totalRemittances > 0 ? (onTimePayments.length / totalRemittances) * 100 : 0;
 
   // Calculate average payment delay
-  const paidRemittances = remittances.filter(r => r.status === 'paid' && r.paidDate);
+  const paidRemittances = remittances.filter(isPaidRemittance);
   const totalDelay = paidRemittances.reduce((sum, r) => {
     const dueDate = new Date(r.dueDate);
     const paidDate = new Date(r.paidDate);
@@ -446,8 +454,7 @@ async function generateComplianceSummary(
 }
 
 export async function analyzeOrganizationPerformance(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: PerCapitaRemittanceRow[],
   year: number
 ): Promise<OrganizationPerformance[]> {
   // Group remittances by organization
@@ -489,7 +496,7 @@ export async function analyzeOrganizationPerformance(
       return r.status !== 'paid' && new Date(r.dueDate) < now;
     }).length;
 
-    const paidRemittances = orgRemittances.filter(r => r.status === 'paid' && r.paidDate);
+    const paidRemittances = orgRemittances.filter(isPaidRemittance);
     const totalDelay = paidRemittances.reduce((sum, r) => {
       const dueDate = new Date(r.dueDate);
       const paidDate = new Date(r.paidDate);
@@ -596,8 +603,7 @@ async function determineOrganizationTrend(
 }
 
 export async function analyzePaymentPatterns(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: PerCapitaRemittanceRow[],
   year: number
 ): Promise<PaymentPatternAnalysis> {
   // Monthly distribution
@@ -616,7 +622,7 @@ export async function analyzePaymentPatterns(
 
     const totalAmount = monthRemittances.reduce((sum, r) => sum + parseFloat(r.totalAmount), 0);
 
-    const paidRemittances = monthRemittances.filter(r => r.status === 'paid' && r.paidDate);
+    const paidRemittances = monthRemittances.filter(isPaidRemittance);
     const totalDelay = paidRemittances.reduce((sum, r) => {
       const dueDate = new Date(r.dueDate);
       const paidDate = new Date(r.paidDate);
@@ -637,7 +643,7 @@ export async function analyzePaymentPatterns(
   }
 
   // Calculate overall rates
-  const paidRemittances = remittances.filter(r => r.status === 'paid' && r.paidDate);
+  const paidRemittances = remittances.filter(isPaidRemittance);
   const totalDelay = paidRemittances.reduce((sum, r) => {
     const dueDate = new Date(r.dueDate);
     const paidDate = new Date(r.paidDate);
@@ -673,7 +679,7 @@ export async function analyzePaymentPatterns(
       ? quarterRemittances.reduce((sum, r) => sum + parseFloat(r.totalAmount), 0) / quarterRemittances.length
       : 0;
 
-    const quarterPaidRemittances = quarterRemittances.filter(r => r.status === 'paid' && r.paidDate);
+    const quarterPaidRemittances = quarterRemittances.filter(isPaidRemittance);
     const quarterDelay = quarterPaidRemittances.reduce((sum, r) => {
       const dueDate = new Date(r.dueDate);
       const paidDate = new Date(r.paidDate);
@@ -707,14 +713,13 @@ export async function analyzePaymentPatterns(
 }
 
 async function calculateComplianceMetrics(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: PerCapitaRemittanceRow[],
   year: number
 ): Promise<ComplianceMetrics> {
   const _now = new Date();
 
   // On-time submission rate (submitted by due date)
-  const submittedRemittances = remittances.filter(r => r.submittedDate);
+  const submittedRemittances = remittances.filter(hasSubmittedDate);
   const onTimeSubmissions = submittedRemittances.filter(r => {
     return new Date(r.submittedDate) <= new Date(r.dueDate);
   });
@@ -723,7 +728,7 @@ async function calculateComplianceMetrics(
     : 0;
 
   // On-time payment rate
-  const paidRemittances = remittances.filter(r => r.status === 'paid' && r.paidDate);
+  const paidRemittances = remittances.filter(isPaidRemittance);
   const onTimePayments = paidRemittances.filter(r => {
     return new Date(r.paidDate) <= new Date(r.dueDate);
   });
@@ -769,16 +774,14 @@ async function calculateComplianceMetrics(
 }
 
 export async function detectComplianceAnomalies(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: PerCapitaRemittanceRow[],
   _year: number
 ): Promise<ComplianceAnomaly[]> {
   const anomalies: ComplianceAnomaly[] = [];
   const now = new Date();
 
   // Detect late submissions (>7 days after due date)
-  const lateSubmissions = remittances.filter(r => {
-    if (!r.submittedDate) return false;
+  const lateSubmissions = remittances.filter(hasSubmittedDate).filter(r => {
     const dueDate = new Date(r.dueDate);
     const submittedDate = new Date(r.submittedDate);
     const delay = Math.floor((submittedDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -812,8 +815,7 @@ export async function detectComplianceAnomalies(
   }
 
   // Detect late payments (>14 days after due date)
-  const latePayments = remittances.filter(r => {
-    if (r.status !== 'paid' || !r.paidDate) return false;
+  const latePayments = remittances.filter(isPaidRemittance).filter(r => {
     const dueDate = new Date(r.dueDate);
     const paidDate = new Date(r.paidDate);
     const delay = Math.floor((paidDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -921,8 +923,7 @@ function generateRecommendations(
 // ============================================================================
 
 async function aggregateStatCanFinancialData(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: PerCapitaRemittanceRow[],
   _fiscalYear: number
 ): Promise<StatCanFinancialSummary> {
   // Aggregate per-capita revenue (category 020) — this is the only StatCan financial
@@ -961,8 +962,7 @@ async function aggregateStatCanFinancialData(
 }
 
 async function aggregateStatCanMembershipData(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  remittances: any[],
+  remittances: PerCapitaRemittanceRow[],
   _fiscalYear: number
 ): Promise<StatCanMembershipData> {
   // Aggregate membership data from remittances
@@ -985,8 +985,7 @@ async function aggregateStatCanMembershipData(
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function generateStatCanComplianceNotes(remittances: any[], fiscalYear: number): string {
+function generateStatCanComplianceNotes(remittances: PerCapitaRemittanceRow[], fiscalYear: number): string {
   const totalRemittances = remittances.length;
   const paidCount = remittances.filter(r => r.status === 'paid').length;
   const complianceRate = totalRemittances > 0 ? (paidCount / totalRemittances) * 100 : 0;
@@ -998,8 +997,7 @@ function generateStatCanComplianceNotes(remittances: any[], fiscalYear: number):
 // TREND ANALYSIS & FORECASTING
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function calculateYearlyComplianceRate(remittances: any[]): number {
+function calculateYearlyComplianceRate(remittances: PerCapitaRemittanceRow[]): number {
   if (remittances.length === 0) return 0;
 
   const onTimePayments = remittances.filter(r => {

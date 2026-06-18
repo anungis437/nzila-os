@@ -33,7 +33,7 @@ type TransitionPayload = {
   applyReferenceTemplate?: 'CUPE4373' | null;
 };
 
-function parseTargetState(value: unknown): CommercialState | null {
+function parseTargetState(value: any): CommercialState | null {
   if (typeof value !== 'string') return null;
   if (!COMMERCIAL_STATE_ORDER.includes(value as CommercialState)) return null;
   return value as CommercialState;
@@ -327,7 +327,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       }
 
       const transitionHistory = Array.isArray(responses.commercialTransitionHistory)
-        ? [...(responses.commercialTransitionHistory as unknown[])]
+        ? [...(responses.commercialTransitionHistory as any[])]
         : [];
 
       transitionHistory.push({

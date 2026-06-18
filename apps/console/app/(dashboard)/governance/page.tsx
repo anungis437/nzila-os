@@ -12,6 +12,7 @@ import { requireRole } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
 import { governanceActions, auditEvents, resolutions, meetings } from '@nzila/db/schema'
 import { count, desc } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core/telemetry'
 import {
   ShieldCheckIcon,
   BeakerIcon,
@@ -24,6 +25,8 @@ import {
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.governance')
 
 interface GovernanceItem {
   label: string
@@ -43,31 +46,45 @@ interface LiveGovernanceSnapshot {
 }
 
 async function getLiveGovernanceSnapshot(): Promise<LiveGovernanceSnapshot> {
-  const [actions, audits, resolutionsTotal, meetingsTotal, latestAudit, latestAction] =
-    await Promise.all([
-      platformDb.select({ total: count() }).from(governanceActions),
-      platformDb.select({ total: count() }).from(auditEvents),
-      platformDb.select({ total: count() }).from(resolutions),
-      platformDb.select({ total: count() }).from(meetings),
-      platformDb
-        .select({ createdAt: auditEvents.createdAt })
-        .from(auditEvents)
-        .orderBy(desc(auditEvents.createdAt))
-        .limit(1),
-      platformDb
-        .select({ createdAt: governanceActions.createdAt })
-        .from(governanceActions)
-        .orderBy(desc(governanceActions.createdAt))
-        .limit(1),
-    ])
+  try {
+    const [actions, audits, resolutionsTotal, meetingsTotal, latestAudit, latestAction] =
+      await Promise.all([
+        platformDb.select({ total: count() }).from(governanceActions),
+        platformDb.select({ total: count() }).from(auditEvents),
+        platformDb.select({ total: count() }).from(resolutions),
+        platformDb.select({ total: count() }).from(meetings),
+        platformDb
+          .select({ createdAt: auditEvents.createdAt })
+          .from(auditEvents)
+          .orderBy(desc(auditEvents.createdAt))
+          .limit(1),
+        platformDb
+          .select({ createdAt: governanceActions.createdAt })
+          .from(governanceActions)
+          .orderBy(desc(governanceActions.createdAt))
+          .limit(1),
+      ])
 
-  return {
-    governanceActionsCount: Number(actions[0]?.total ?? 0),
-    auditEventsCount: Number(audits[0]?.total ?? 0),
-    resolutionsCount: Number(resolutionsTotal[0]?.total ?? 0),
-    meetingsCount: Number(meetingsTotal[0]?.total ?? 0),
-    latestAuditEventAt: latestAudit[0]?.createdAt?.toISOString?.() ?? null,
-    latestGovernanceActionAt: latestAction[0]?.createdAt?.toISOString?.() ?? null,
+    return {
+      governanceActionsCount: Number(actions[0]?.total ?? 0),
+      auditEventsCount: Number(audits[0]?.total ?? 0),
+      resolutionsCount: Number(resolutionsTotal[0]?.total ?? 0),
+      meetingsCount: Number(meetingsTotal[0]?.total ?? 0),
+      latestAuditEventAt: latestAudit[0]?.createdAt?.toISOString?.() ?? null,
+      latestGovernanceActionAt: latestAction[0]?.createdAt?.toISOString?.() ?? null,
+    }
+  } catch (error) {
+    logger.warn('governance snapshot load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return {
+      governanceActionsCount: 0,
+      auditEventsCount: 0,
+      resolutionsCount: 0,
+      meetingsCount: 0,
+      latestAuditEventAt: null,
+      latestGovernanceActionAt: null,
+    }
   }
 }
 

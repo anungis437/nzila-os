@@ -18,7 +18,6 @@
  * /platform/explainable-intelligence — Wave 6 ontology collapse.
  * Canonical: /platform#trust (audit/explainability pillar).
  */
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 

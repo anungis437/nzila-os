@@ -13,8 +13,11 @@ import {
 } from '@heroicons/react/24/outline'
 import { getFounderFocusData } from '@/lib/executive-intelligence'
 import { CommandPageShell } from '@/components/command-page-shell'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.focus')
 
 async function addFounderLog(formData: FormData) {
   'use server'
@@ -31,15 +34,24 @@ async function addFounderLog(formData: FormData) {
     return
   }
 
-  await platformDb.insert(founderTimeLogs).values({
-    orgId,
-    ventureId,
-    category,
-    hours,
-    date: new Date(date),
-    notes: notes || null,
-    impactScore: impactScoreRaw ? Number(impactScoreRaw) : null,
-  })
+  try {
+    await platformDb.insert(founderTimeLogs).values({
+      orgId,
+      ventureId,
+      category,
+      hours,
+      date: new Date(date),
+      notes: notes || null,
+      impactScore: impactScoreRaw ? Number(impactScoreRaw) : null,
+    })
+  } catch (error) {
+    logger.warn('add founder log failed; skipping write', {
+      orgId,
+      ventureId,
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return
+  }
 
   revalidatePath('/focus')
   revalidatePath('/today')
@@ -65,23 +77,32 @@ async function upsertWeeklyTarget(formData: FormData) {
   weekStart.setDate(weekStart.getDate() + diff)
   weekStart.setHours(0, 0, 0, 0)
 
-  await platformDb
-    .insert(weeklyFocusTargets)
-    .values({
-      orgId,
-      ventureId,
-      weekStart,
-      targetHours,
-      rationale: rationale || null,
-    })
-    .onConflictDoUpdate({
-      target: [weeklyFocusTargets.orgId, weeklyFocusTargets.ventureId, weeklyFocusTargets.weekStart],
-      set: {
+  try {
+    await platformDb
+      .insert(weeklyFocusTargets)
+      .values({
+        orgId,
+        ventureId,
+        weekStart,
         targetHours,
         rationale: rationale || null,
-        updatedAt: new Date(),
-      },
+      })
+      .onConflictDoUpdate({
+        target: [weeklyFocusTargets.orgId, weeklyFocusTargets.ventureId, weeklyFocusTargets.weekStart],
+        set: {
+          targetHours,
+          rationale: rationale || null,
+          updatedAt: new Date(),
+        },
+      })
+  } catch (error) {
+    logger.warn('upsert weekly target failed; skipping write', {
+      orgId,
+      ventureId,
+      error: error instanceof Error ? error.message : String(error),
     })
+    return
+  }
 
   revalidatePath('/focus')
   revalidatePath('/today')

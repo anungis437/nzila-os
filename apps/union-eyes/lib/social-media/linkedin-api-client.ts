@@ -557,8 +557,8 @@ export class LinkedInAPIClient {
     organizationId: string,
     count: number = 20,
     start: number = 0
-  ): Promise<{ elements: LinkedInShare[]; paging: unknown }> {
-    const response = await this.makeRequest<{ elements: LinkedInShare[]; paging: unknown }>(
+  ): Promise<{ elements: LinkedInShare[]; paging: any }> {
+    const response = await this.makeRequest<{ elements: LinkedInShare[]; paging: any }>(
       '/ugcPosts',
       {
         q: 'authors',

@@ -14,7 +14,13 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-import { MultiProviderGeocodingService, getGeocodingService } from '../multi-provider-geocoding-service';
+import {
+  MultiProviderGeocodingService,
+  getGeocodingService,
+  geocodeAddress,
+  reverseGeocodeCoordinates,
+  batchGeocodeAddresses,
+} from '../multi-provider-geocoding-service';
 
 describe('MultiProviderGeocodingService', () => {
   let service: MultiProviderGeocodingService;
@@ -151,6 +157,25 @@ describe('MultiProviderGeocodingService', () => {
       const s1 = getGeocodingService();
       const s2 = getGeocodingService();
       expect(s1).toBe(s2);
+    });
+  });
+
+  describe('convenience functions', () => {
+    it('geocodeAddress delegates to singleton', async () => {
+      const result = await geocodeAddress(testAddress);
+      expect(result).not.toBeNull();
+      expect(result!.latitude).toBe(43.6532);
+    });
+
+    it('reverseGeocodeCoordinates delegates to singleton', async () => {
+      const result = await reverseGeocodeCoordinates(43.6532, -79.3832);
+      expect(result).not.toBeNull();
+      expect(result!.address.locality).toBe('Toronto');
+    });
+
+    it('batchGeocodeAddresses delegates to singleton', async () => {
+      const results = await batchGeocodeAddresses([testAddress]);
+      expect(results.size).toBe(1);
     });
   });
 });

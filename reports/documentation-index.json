@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-02T14:54:34.999Z",
-  "totalDocuments": 1179,
+  "generatedAt": "2026-06-10T03:02:06.524Z",
+  "totalDocuments": 1226,
   "staleDocuments": 0,
   "categories": [
     {
@@ -35,12 +35,12 @@
     },
     {
       "category": "compliance",
-      "count": 4,
+      "count": 6,
       "staleCount": 0
     },
     {
       "category": "doctrine",
-      "count": 17,
+      "count": 61,
       "staleCount": 0
     },
     {
@@ -125,7 +125,7 @@
     },
     {
       "category": "union-eyes",
-      "count": 28,
+      "count": 29,
       "staleCount": 0
     },
     {
@@ -198,7 +198,7 @@
     {
       "path": "docs/categories/historical-archive/archive/audit-reports/DECISION_INTELLIGENCE_AUDIT_2026-07-06.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -306,7 +306,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-cognition-doctrine/global-anti-surveillance-enforcement.md",
       "category": "categories",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -1656,7 +1656,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/plans/IMPLEMENTATION_PLAN_FINAL.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -1800,7 +1800,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/AUDIT_ENFORCEMENT.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -1986,7 +1986,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -2010,7 +2010,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/orm-governance/governance-attachment-to-orm-authority.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -2400,7 +2400,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/platform-readiness.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -3288,7 +3288,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/VENDOR_DIVERSIFICATION_STRATEGY.md",
       "category": "categories",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -4866,7 +4866,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/wave9-constitutional-runtime-finalization-review.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -5112,7 +5112,7 @@
     {
       "path": "docs/categories/stakeholders/commercial/FOUNDER_REVENUE_COCKPIT.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -5670,7 +5670,7 @@
     {
       "path": "docs/categories/stakeholders/personas/03-auditor.md",
       "category": "categories",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -5688,7 +5688,7 @@
     {
       "path": "docs/categories/stakeholders/public/trust-center.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-07",
       "stale": false
     },
     {
@@ -5722,27 +5722,39 @@
       "stale": false
     },
     {
+      "path": "docs/compliance/soc2/capacity-scaling-thresholds.md",
+      "category": "compliance",
+      "lastValidated": "2026-06-07",
+      "stale": false
+    },
+    {
       "path": "docs/compliance/soc2/control-mapping.md",
       "category": "compliance",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-07",
       "stale": false
     },
     {
       "path": "docs/compliance/soc2/evidence-inventory.md",
       "category": "compliance",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-07",
       "stale": false
     },
     {
       "path": "docs/compliance/soc2/gap-log.md",
       "category": "compliance",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-07",
       "stale": false
     },
     {
       "path": "docs/compliance/soc2/README.md",
       "category": "compliance",
       "lastValidated": "2026-05-25",
+      "stale": false
+    },
+    {
+      "path": "docs/compliance/soc2/vendor-assurance-index.md",
+      "category": "compliance",
+      "lastValidated": "2026-06-07",
       "stale": false
     },
     {
@@ -5760,7 +5772,7 @@
     {
       "path": "docs/doctrine/DOCTRINE_GOVERNANCE.md",
       "category": "doctrine",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-06",
       "stale": false
     },
     {
@@ -5794,9 +5806,63 @@
       "stale": false
     },
     {
+      "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CATEGORY_VALIDATION_KIT.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_CYCLE1_PACKAGE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_EXEC_READOUT.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_INTERVIEW_TRACKER.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
       "path": "docs/doctrine/narrative-playbooks.md",
       "category": "doctrine",
       "lastValidated": "2026-05-25",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/NZILA_CONSOLE_TAB_SCHEMA.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-07",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/NZILA_CONSOLE_TELEMETRY_SCHEMA.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-07",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-07",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/NZILA_CONSOLE_WORKSPACE_MAP.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-07",
       "stale": false
     },
     {
@@ -5812,15 +5878,201 @@
       "stale": false
     },
     {
+      "path": "docs/doctrine/programs/FIRST_BENCHMARK_REPORT_SPEC.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/IIA_90_DAY_RECOMMENDATIONS_TEMPLATE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/IIA_EXECUTIVE_READOUT_TEMPLATE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/IIA_EXECUTIVE_WORKSHOP_DECK.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/IIA_HEATMAP_VISUALIZATION_SPEC.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/IIA_SCORING_WORKBOOK_TEMPLATE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/IIA_WORKSHOP_FACILITATOR_GUIDE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/01-IIA-OFFER-SHEET.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/02-IIA-OUTREACH-EMAIL.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/03-IIA-DISCOVERY-CALL-SCRIPT.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/04-IIA-30MIN-SALES-DECK.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/05-IIA-PRICING-AND-TIERS.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/06-IIA-PROPOSAL-TEMPLATE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/07-IIA-SOW-TEMPLATE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/08-IIA-POST-WORKSHOP-UPSELL-PATH.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/iia-commercial-pack/README.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
       "path": "docs/doctrine/programs/INSTITUTIONAL_CONTINUITY_RISK_ASSESSMENT.md",
       "category": "doctrine",
       "lastValidated": "2026-05-25",
       "stale": false
     },
     {
+      "path": "docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT_WORKSHOP.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_OBSERVATORY_SCHEMA.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_PRODUCT_ARCHITECTURE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_PRODUCT_QUALIFICATION_MATRIX.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
       "path": "docs/doctrine/programs/INSTITUTIONAL_VALIDATION_ENGINE.md",
       "category": "doctrine",
       "lastValidated": "2026-05-25",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/OBSERVATORY_DATA_COLLECTION_STANDARD.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/OBSERVATORY_OPERATING_MODEL.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/01-TARGET-OUTREACH-CUPE4373-BRANDON.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/02-TARGET-OUTREACH-UNA-HEATHER.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/03-TARGET-OUTREACH-ASSOCIATION-NONPROFIT.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/04-PILOT-INTAKE-FORM.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-07",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/05-CONSENT-LANGUAGE-C0-C3.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/06-PILOT-TRACKING-TABLE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-07",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/07-FIRST-THREE-CASE-STUDY-OBJECTIVES.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/08-ROUTE-DECISION-RECORD.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-07",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/programs/pilot-launch-pack/README.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
       "stale": false
     },
     {
@@ -5842,15 +6094,39 @@
       "stale": false
     },
     {
+      "path": "docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_PRIMER.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
       "path": "docs/doctrine/whitepapers/README.md",
       "category": "doctrine",
       "lastValidated": "2026-05-27",
       "stale": false
     },
     {
+      "path": "docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-06-06",
+      "stale": false
+    },
+    {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-06-02",
+      "lastValidated": "2026-06-10",
       "stale": false
     },
     {
@@ -6276,7 +6552,7 @@
     {
       "path": "docs/oci/audit/QUESTION_ARCHITECTURE_GOVERNANCE.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -6402,7 +6678,7 @@
     {
       "path": "docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {
@@ -6954,13 +7230,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-06-02",
+      "lastValidated": "2026-06-10",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-06-02",
+      "lastValidated": "2026-06-10",
       "stale": false
     },
     {
@@ -7018,6 +7294,12 @@
       "stale": false
     },
     {
+      "path": "docs/union-eyes/any-elimination.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-06-07",
+      "stale": false
+    },
+    {
       "path": "docs/union-eyes/dr/restore-drill-runbook.md",
       "category": "union-eyes",
       "lastValidated": "2026-05-27",
@@ -7032,7 +7314,7 @@
     {
       "path": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-27",
+      "lastValidated": "2026-06-05",
       "stale": false
     },
     {

@@ -22,8 +22,11 @@ import {
   type ControllerSignal,
 } from '@nzila/executive-os'
 import { getExecutiveOrgId, runAndPersist } from '../../../../lib/executive-os'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.finance.recon')
 
 const SEVERITY_BADGE: Record<string, string> = {
   info: 'bg-slate-100 text-slate-700',
@@ -35,10 +38,18 @@ async function loadSignal(orgId: string): Promise<ControllerSignal> {
   const today = new Date()
   const todayIso = today.toISOString().slice(0, 10)
 
-  const periods = await platformDb
-    .select()
-    .from(closePeriods)
-    .where(and(eq(closePeriods.orgId, orgId), ne(closePeriods.status, 'closed')))
+  let periods: Array<typeof closePeriods.$inferSelect> = []
+  try {
+    periods = await platformDb
+      .select()
+      .from(closePeriods)
+      .where(and(eq(closePeriods.orgId, orgId), ne(closePeriods.status, 'closed')))
+  } catch (error) {
+    logger.warn('recon periods load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { openPeriods: [], overdueTasks: [], openExceptions: [] }
+  }
 
   const openPeriods = periods.map((p) => {
     const end = new Date(p.endDate)
@@ -120,8 +131,11 @@ export default async function ReconPage() {
     revalidatePath('/actions')
   }
 
-  const lastRun = orgId
-    ? (
+  let lastRun: typeof executiveAgentRuns.$inferSelect | undefined
+  let insights: Array<typeof executiveAgentInsights.$inferSelect> = []
+  if (orgId) {
+    try {
+      lastRun = (
         await platformDb
           .select()
           .from(executiveAgentRuns)
@@ -129,11 +143,18 @@ export default async function ReconPage() {
           .orderBy(desc(executiveAgentRuns.startedAt))
           .limit(1)
       )[0]
-    : undefined
-
-  const insights = lastRun
-    ? await platformDb.select().from(executiveAgentInsights).where(eq(executiveAgentInsights.runId, lastRun.id))
-    : []
+      if (lastRun) {
+        insights = await platformDb
+          .select()
+          .from(executiveAgentInsights)
+          .where(eq(executiveAgentInsights.runId, lastRun.id))
+      }
+    } catch (error) {
+      logger.warn('recon run history load failed; returning empty fallback', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">

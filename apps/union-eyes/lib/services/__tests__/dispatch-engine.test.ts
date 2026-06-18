@@ -51,7 +51,7 @@ vi.mock("@/db/schema/domains/dispatch/dispatch", () => ({
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
-  and: vi.fn((...a: unknown[]) => ({ _type: "and", a })),
+  and: vi.fn((...a: any[]) => ({ _type: "and", a })),
   asc: vi.fn((c) => ({ _type: "asc", c })),
   desc: vi.fn((c) => ({ _type: "desc", c })),
 }));

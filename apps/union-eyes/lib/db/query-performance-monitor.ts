@@ -47,7 +47,7 @@ export interface SlowQueryLog {
   query: string;
   durationMs: number;
   timestamp: Date;
-  parameters?: unknown[];
+  parameters?: any[];
   stackTrace?: string;
   recommendation?: string;
 }
@@ -267,7 +267,7 @@ export async function getCurrentlyRunningQueries(): Promise<Array<{
     ORDER BY query_start
   `);
   
-  return result as unknown as Array<{
+  return result as any as Array<{
     pid: number;
     duration_sec: number;
     query: string;
@@ -302,7 +302,7 @@ export async function getQueryPerformanceStats(): Promise<Array<{
       LIMIT 20
     `);
     
-    return result as unknown as Array<{
+    return result as any as Array<{
       query: string;
       calls: number;
       total_time_ms: number;

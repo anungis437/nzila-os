@@ -30,6 +30,26 @@ const DEFAULT_THRESHOLDS: FreshnessThresholds = {
   expiredDays: 90,
 };
 
+function positiveInt(value: number, fallback: number): number {
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
+export function normalizeFreshnessThresholds(
+  thresholds: FreshnessThresholds = DEFAULT_THRESHOLDS,
+): FreshnessThresholds {
+  const agingDays = positiveInt(thresholds.agingDays, DEFAULT_THRESHOLDS.agingDays);
+  const staleDays = Math.max(
+    positiveInt(thresholds.staleDays, DEFAULT_THRESHOLDS.staleDays),
+    agingDays + 1,
+  );
+  const expiredDays = Math.max(
+    positiveInt(thresholds.expiredDays, DEFAULT_THRESHOLDS.expiredDays),
+    staleDays + 1,
+  );
+
+  return { agingDays, staleDays, expiredDays };
+}
+
 export interface FreshnessOverview {
   sources: SourceFreshness[];
   summary: {
@@ -63,10 +83,12 @@ export function computeFreshnessStatus(
   daysSinceLastSuccess: number | null,
   thresholds: FreshnessThresholds = DEFAULT_THRESHOLDS,
 ): FreshnessStatus {
+  const normalized = normalizeFreshnessThresholds(thresholds);
+
   if (daysSinceLastSuccess == null) return "unknown";
-  if (daysSinceLastSuccess >= thresholds.expiredDays) return "expired";
-  if (daysSinceLastSuccess >= thresholds.staleDays) return "stale";
-  if (daysSinceLastSuccess >= thresholds.agingDays) return "aging";
+  if (daysSinceLastSuccess >= normalized.expiredDays) return "expired";
+  if (daysSinceLastSuccess >= normalized.staleDays) return "stale";
+  if (daysSinceLastSuccess >= normalized.agingDays) return "aging";
   return "fresh";
 }
 
@@ -78,6 +100,8 @@ export async function computeSourceFreshness(
   sourceId: string,
   thresholds: FreshnessThresholds = DEFAULT_THRESHOLDS,
 ): Promise<SourceFreshness> {
+  const normalizedThresholds = normalizeFreshnessThresholds(thresholds);
+
   try {
     const [source] = await db
       .select()
@@ -107,13 +131,13 @@ export async function computeSourceFreshness(
             eq(cbaIntelDocuments.sourceId, sourceId),
             lt(
               cbaIntelDocuments.lastSeenAt,
-              sql`now() - interval '${sql.raw(String(thresholds.staleDays))} days'`,
+              sql`now() - interval '${sql.raw(String(normalizedThresholds.staleDays))} days'`,
             ),
           ),
         ),
     ]);
 
-    const freshnessStatus = computeFreshnessStatus(daysSinceLastSuccess, thresholds);
+    const freshnessStatus = computeFreshnessStatus(daysSinceLastSuccess, normalizedThresholds);
 
     return {
       sourceId: source.id,

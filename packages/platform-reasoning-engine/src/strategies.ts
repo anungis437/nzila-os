@@ -10,7 +10,6 @@ import type {
   ReasoningStep,
   ReasoningConclusion,
   Citation,
-  ReasoningType,
 } from './types'
 import type { ContextEnvelope } from '@nzila/platform-context-orchestrator'
 

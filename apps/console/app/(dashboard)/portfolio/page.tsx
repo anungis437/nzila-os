@@ -19,15 +19,16 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {
   BuildingOffice2Icon,
-  ArrowRightIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
-import { getCapitalPriorityRows } from '@/lib/executive-intelligence'
-import { PRODUCT_SCORE_LABELS } from '@nzila/itsm-core'
-import type { PortfolioProduct, ProductScoreCategory } from '@nzila/itsm-core'
+import { getAttributionDiagnostics, getCapitalPriorityRows } from '@/lib/executive-intelligence'
 import { CommandPageShell } from '@/components/command-page-shell'
+import { PortfolioWidgets, type PortfolioOpsProduct } from './_components/portfolio-widgets'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.portfolio')
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -73,27 +74,6 @@ function resolveDirective(p: CatalogProduct): Directive {
   return 'HOLD'
 }
 
-function directiveStyle(d: Directive): string {
-  if (d === 'SELL NOW') return 'bg-emerald-100 text-emerald-700 font-bold'
-  if (d === 'BUILD NEXT') return 'bg-blue-100 text-blue-700 font-semibold'
-  if (d === 'MAINTAIN') return 'bg-gray-100 text-gray-500'
-  if (d === 'HOLD') return 'bg-amber-100 text-amber-600'
-  return 'bg-red-100 text-red-600 font-bold'
-}
-
-function codeBar(c?: string) {
-  if (c === 'full') return <span className="text-emerald-600 font-semibold text-xs">●●●</span>
-  if (c === 'partial') return <span className="text-amber-500 font-semibold text-xs">●●○</span>
-  if (c === 'scaffold') return <span className="text-gray-400 text-xs">●○○</span>
-  return <span className="text-gray-300 text-xs">○○○</span>
-}
-
-function evidenceDot(e?: string) {
-  if (e === 'complete') return <span className="text-emerald-600 text-xs font-semibold">complete</span>
-  if (e === 'partial') return <span className="text-amber-500 text-xs">partial</span>
-  return <span className="text-red-400 text-xs">none</span>
-}
-
 function priorityLabel(p?: number): string {
   if (p === 1) return '#1 — Anchor'
   if (p === 2) return '#2 — Growth'
@@ -133,7 +113,29 @@ export default async function PortfolioPage() {
 
   const { products, version } = loadCatalog()
   const freshnessStatus = products.length > 0 ? 'daily sync' : 'stale'
-  const capitalRows = await getCapitalPriorityRows()
+  const [capitalRows, attribution] = await Promise.all([
+    getCapitalPriorityRows().catch((error) => {
+      logger.warn('capital priority rows load failed; returning empty fallback', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return []
+    }),
+    getAttributionDiagnostics().catch((error) => {
+      logger.warn('attribution diagnostics load failed; returning empty fallback', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return {
+        quoteAttributionRate: 0,
+        invoiceAttributionRate: 0,
+        unattributedPipelineUsd: 0,
+        unattributedPaidRevenueUsd: 0,
+        unattributedQuoteCount: 0,
+        unattributedPaidInvoiceCount: 0,
+        sampleUnattributedQuotes: [],
+        sampleUnattributedInvoices: [],
+      }
+    }),
+  ])
   const capitalByVenture = new Map(capitalRows.map((row) => [row.ventureId, row]))
 
   for (const product of products) {
@@ -173,14 +175,14 @@ export default async function PortfolioPage() {
   const hold = products.filter((p) => p.capitalAction === 'Hold')
   const cutReview = products.filter((p) => p.capitalAction === 'Cut review')
 
-  const opsProductsRaw: PortfolioProduct[] | null = null
-  const opsProducts: PortfolioProduct[] = opsProductsRaw ?? [
-    { key: 'union_eyes' as const, label: 'Union Eyes', revenueScore: 85, closeabilityScore: 75, supportBurden: 30, founderEnergy: 40, strategicFit: 90, marketPull: 80, buildMaturity: 70, recommendation: 'double_down' as const, recommendationNote: 'Anchor product. COSATU + union segment. Double down on sales.' },
-    { key: 'flow' as const, label: 'Flow', revenueScore: 70, closeabilityScore: 60, supportBurden: 20, founderEnergy: 30, strategicFit: 75, marketPull: 65, buildMaturity: 80, recommendation: 'maintain' as const, recommendationNote: 'Clean product. Low burden. Maintain and keep pipeline warm.' },
-    { key: 'faircase' as const, label: 'FairCase', revenueScore: 60, closeabilityScore: 55, supportBurden: 70, founderEnergy: 60, strategicFit: 65, marketPull: 50, buildMaturity: 55, recommendation: 'incubate' as const, recommendationNote: 'High support burden this quarter. Invest in quality before scaling.' },
-    { key: 'agrimo' as const, label: 'Agrimo', revenueScore: 80, closeabilityScore: 45, supportBurden: 50, founderEnergy: 55, strategicFit: 70, marketPull: 70, buildMaturity: 50, recommendation: 'incubate' as const, recommendationNote: 'Strong market pull but incomplete build. Hold cadence at current client.' },
-    { key: 'zonga' as const, label: 'Zonga', revenueScore: 65, closeabilityScore: 40, supportBurden: 45, founderEnergy: 50, strategicFit: 60, marketPull: 55, buildMaturity: 40, recommendation: 'incubate' as const, recommendationNote: 'Pilot stalled. Need to unblock onboarding before next sale.' },
-    { key: 'platform' as const, label: 'Platform', revenueScore: 40, closeabilityScore: 20, supportBurden: 15, founderEnergy: 25, strategicFit: 95, marketPull: 30, buildMaturity: 85, recommendation: 'maintain' as const, recommendationNote: 'Critical infrastructure. Maintain. Not a revenue product.' },
+  const opsProductsRaw: PortfolioOpsProduct[] | null = null
+  const opsProducts: PortfolioOpsProduct[] = opsProductsRaw ?? [
+    { key: 'union_eyes', label: 'Union Eyes', revenueScore: 85, closeabilityScore: 75, supportBurden: 30, founderEnergy: 40, strategicFit: 90, marketPull: 80, buildMaturity: 70, recommendation: 'double_down', recommendationNote: 'Anchor product. COSATU + union segment. Double down on sales.' },
+    { key: 'flow', label: 'Flow', revenueScore: 70, closeabilityScore: 60, supportBurden: 20, founderEnergy: 30, strategicFit: 75, marketPull: 65, buildMaturity: 80, recommendation: 'maintain', recommendationNote: 'Clean product. Low burden. Maintain and keep pipeline warm.' },
+    { key: 'faircase', label: 'FairCase', revenueScore: 60, closeabilityScore: 55, supportBurden: 70, founderEnergy: 60, strategicFit: 65, marketPull: 50, buildMaturity: 55, recommendation: 'incubate', recommendationNote: 'High support burden this quarter. Invest in quality before scaling.' },
+    { key: 'agrimo', label: 'Agrimo', revenueScore: 80, closeabilityScore: 45, supportBurden: 50, founderEnergy: 55, strategicFit: 70, marketPull: 70, buildMaturity: 50, recommendation: 'incubate', recommendationNote: 'Strong market pull but incomplete build. Hold cadence at current client.' },
+    { key: 'zonga', label: 'Zonga', revenueScore: 65, closeabilityScore: 40, supportBurden: 45, founderEnergy: 50, strategicFit: 60, marketPull: 55, buildMaturity: 40, recommendation: 'incubate', recommendationNote: 'Pilot stalled. Need to unblock onboarding before next sale.' },
+    { key: 'platform', label: 'Platform', revenueScore: 40, closeabilityScore: 20, supportBurden: 15, founderEnergy: 25, strategicFit: 95, marketPull: 30, buildMaturity: 85, recommendation: 'maintain', recommendationNote: 'Critical infrastructure. Maintain. Not a revenue product.' },
   ]
 
   return (
@@ -241,79 +243,78 @@ export default async function PortfolioPage() {
         </div>
       )}
 
-      {/* Full Venture Table */}
-      {products.length > 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">All Ventures</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Sorted by commercial priority. Click a venture to navigate to its docs.</p>
+      <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-semibold text-gray-900">Attribution Health</h2>
+            <p className="text-xs text-gray-400 mt-1">Commerce telemetry coverage feeding the capital scoring engine.</p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  <th className="px-4 py-3 w-6">#</th>
-                  <th className="px-4 py-3">Venture</th>
-                  <th className="px-4 py-3">Capital Score</th>
-                  <th className="px-4 py-3">Capital Action</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Directive</th>
-                  <th className="px-4 py-3">Code</th>
-                  <th className="px-4 py-3">Evidence</th>
-                  <th className="px-4 py-3 hidden md:table-cell">GA Gates</th>
-                  <th className="px-4 py-3 w-6"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {products.map((p, i) => (
-                  <tr key={p.name} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-3 text-xs font-mono text-gray-300">{i + 1}</td>
-                    <td className="px-4 py-3">
-                      <div>
-                        <span className="font-medium text-gray-900 capitalize">{p.name.replace(/-/g, ' ')}</span>
-                        <span className="ml-2 text-xs text-gray-400">{p.priorityLabel}</span>
-                      </div>
-                      {p.value_prop && (
-                        <p className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{p.value_prop}</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-sm font-semibold text-gray-900">{p.capitalPriorityScore ?? 0}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div>
-                        <span className={`text-xs px-2 py-1 rounded-full ${p.capitalAction === 'Double down' ? 'bg-emerald-100 text-emerald-700 font-semibold' : p.capitalAction === 'Maintain' ? 'bg-blue-100 text-blue-700 font-semibold' : p.capitalAction === 'Cut review' ? 'bg-red-100 text-red-700 font-semibold' : 'bg-gray-100 text-gray-600'}`}>
-                          {p.capitalAction}
-                        </span>
-                        {p.capitalRationale && <p className="text-xs text-gray-400 mt-1 max-w-xs">{p.capitalRationale}</p>}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs font-mono text-gray-500 capitalize">{p.status}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full ${directiveStyle(p.directive)}`}>
-                        {p.directive}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">{codeBar(p.code_presence)}</td>
-                    <td className="px-4 py-3">{evidenceDot(p.evidence_status)}</td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-xs font-mono text-gray-400">{p.ga_gate_count ?? '—'}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {p.docs_entrypoint ? (
-                        <Link href={`/docs`} className="text-blue-400 hover:text-blue-600">
-                          <ArrowRightIcon className="h-4 w-4" />
-                        </Link>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="text-xs text-gray-500">
+            Target: &gt;95% quote and paid invoice attribution
           </div>
         </div>
+
+        <div className="grid md:grid-cols-4 gap-3">
+          <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
+            <p className="text-xs text-gray-500">Quote attribution</p>
+            <p className="text-lg font-semibold text-gray-900">{Math.round(attribution.quoteAttributionRate * 100)}%</p>
+          </div>
+          <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
+            <p className="text-xs text-gray-500">Paid invoice attribution</p>
+            <p className="text-lg font-semibold text-gray-900">{Math.round(attribution.invoiceAttributionRate * 100)}%</p>
+          </div>
+          <div className="rounded-lg border border-amber-200 p-3 bg-amber-50">
+            <p className="text-xs text-amber-700">Unattributed pipeline</p>
+            <p className="text-lg font-semibold text-amber-900">${attribution.unattributedPipelineUsd.toLocaleString()}</p>
+            <p className="text-[11px] text-amber-700 mt-1">{attribution.unattributedQuoteCount} quotes</p>
+          </div>
+          <div className="rounded-lg border border-amber-200 p-3 bg-amber-50">
+            <p className="text-xs text-amber-700">Unattributed paid revenue</p>
+            <p className="text-lg font-semibold text-amber-900">${attribution.unattributedPaidRevenueUsd.toLocaleString()}</p>
+            <p className="text-[11px] text-amber-700 mt-1">{attribution.unattributedPaidInvoiceCount} invoices</p>
+          </div>
+        </div>
+
+        {(attribution.sampleUnattributedQuotes.length > 0 || attribution.sampleUnattributedInvoices.length > 0) && (
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="rounded-lg border border-gray-200 p-3">
+              <p className="text-xs font-semibold text-gray-700 mb-2">Top unattributed quotes</p>
+              {attribution.sampleUnattributedQuotes.length === 0 ? (
+                <p className="text-xs text-gray-500">None</p>
+              ) : (
+                <ul className="space-y-1 text-xs text-gray-700">
+                  {attribution.sampleUnattributedQuotes.map((row) => (
+                    <li key={row.ref} className="flex items-center justify-between gap-2">
+                      <span className="truncate">{row.ref}</span>
+                      <span className="font-mono">${Math.round(row.totalUsd).toLocaleString()}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-gray-200 p-3">
+              <p className="text-xs font-semibold text-gray-700 mb-2">Top unattributed paid invoices</p>
+              {attribution.sampleUnattributedInvoices.length === 0 ? (
+                <p className="text-xs text-gray-500">None</p>
+              ) : (
+                <ul className="space-y-1 text-xs text-gray-700">
+                  {attribution.sampleUnattributedInvoices.map((row) => (
+                    <li key={row.ref} className="flex items-center justify-between gap-2">
+                      <span className="truncate">{row.ref}</span>
+                      <span className="font-mono">${Math.round(row.totalUsd).toLocaleString()}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Unified paginated widgets */}
+      {products.length > 0 ? (
+        <PortfolioWidgets products={products} opsProducts={opsProducts} />
       ) : (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 flex items-center gap-3">
           <ExclamationTriangleIcon className="h-5 w-5 text-amber-500 shrink-0" />
@@ -323,70 +324,6 @@ export default async function PortfolioPage() {
           </div>
         </div>
       )}
-
-      {/* Ops Product Allocation */}
-      <div className="bg-slate-950 border border-slate-800 rounded-xl p-6">
-        <div className="mb-4">
-          <h2 className="font-semibold text-white text-sm">Ops Product Allocation — 7-Dimension Scoring</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Revenue potential · Closeability · Support burden (↓) · Founder energy (↓) · Strategic fit · Market pull · Build maturity</p>
-        </div>
-        <div className="space-y-3">
-          {opsProducts.map((product: PortfolioProduct) => {
-            const recColor: Record<ProductScoreCategory, string> = {
-              double_down: 'bg-emerald-900/60 text-emerald-300 border border-emerald-700',
-              maintain: 'bg-blue-900/60 text-blue-300 border border-blue-700',
-              incubate: 'bg-amber-900/60 text-amber-300 border border-amber-600',
-              pause: 'bg-slate-800 text-slate-400 border border-slate-700',
-            }
-            const dimensions: { key: keyof PortfolioProduct; label: string; invert?: boolean }[] = [
-              { key: 'revenueScore', label: 'Revenue' },
-              { key: 'closeabilityScore', label: 'Closeable' },
-              { key: 'supportBurden', label: 'Support', invert: true },
-              { key: 'founderEnergy', label: 'Energy', invert: true },
-              { key: 'strategicFit', label: 'Strategic' },
-              { key: 'marketPull', label: 'Market' },
-              { key: 'buildMaturity', label: 'Build' },
-            ]
-            return (
-              <div key={product.key} className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <div>
-                    <p className="text-sm font-semibold text-white">{product.label}</p>
-                    {product.recommendationNote && (
-                      <p className="text-xs text-slate-400 mt-0.5">{product.recommendationNote}</p>
-                    )}
-                  </div>
-                  <span className={`text-xs px-2 py-0.5 rounded font-medium shrink-0 ${recColor[product.recommendation]}`}>
-                    {PRODUCT_SCORE_LABELS[product.recommendation]}
-                  </span>
-                </div>
-                <div className="grid grid-cols-7 gap-1.5">
-                  {dimensions.map(dim => {
-                    const rawVal = product[dim.key] as number
-                    const displayVal = dim.invert ? 100 - rawVal : rawVal
-                    const barColor =
-                      displayVal >= 70 ? 'bg-emerald-500' :
-                      displayVal >= 40 ? 'bg-amber-500' :
-                      'bg-red-500'
-                    return (
-                      <div key={dim.key} className="flex flex-col items-center gap-1">
-                        <div className="h-16 w-full bg-slate-800 rounded flex flex-col justify-end overflow-hidden">
-                          <div
-                            className={`w-full rounded-sm ${barColor} transition-all`}
-                            style={{ height: `${displayVal}%` }}
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-500 text-center leading-tight">{dim.label}</p>
-                        <p className={`text-[10px] font-medium ${barColor.replace('bg-', 'text-')}`}>{rawVal}</p>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
 
       {/* Decision Framework */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">

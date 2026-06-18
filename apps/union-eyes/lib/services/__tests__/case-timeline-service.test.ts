@@ -38,7 +38,7 @@ vi.mock("@/db/schema", () => ({
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
-  and: vi.fn((...a: unknown[]) => ({ _type: "and", a })),
+  and: vi.fn((...a: any[]) => ({ _type: "and", a })),
   inArray: vi.fn((_c, v) => ({ _type: "inArray", v })),
   desc: vi.fn((c) => ({ _type: "desc", c })),
 }));
@@ -47,7 +47,10 @@ vi.mock("@/lib/logger", () => ({
 }));
 vi.mock("../lro-signals", () => ({ detectSignals: mocks.mockDetectSignals }));
 vi.mock("@/lib/services/notification-service", () => ({
-  NotificationService: vi.fn().mockImplementation(() => ({ send: mocks.mockSend })),
+  NotificationService: vi.fn(function NotificationServiceMock(this: unknown) {
+    void this;
+    return { send: mocks.mockSend };
+  }),
 }));
 
 import { getMemberVisibleTimeline, getLroVisibleTimeline, addCaseEvent, getVisibleScopesForRole } from "../case-timeline-service";
@@ -233,6 +236,114 @@ describe("case-timeline-service", () => {
         createdBy: "staff-1",
         visibilityScope: "system",
       });
+      expect(result).toBe("u1");
+    });
+
+    it("recompute maps update types and sends critical notifications", async () => {
+      const claimLimit = vi.fn().mockResolvedValue([
+        {
+          claimId: "c1",
+          memberId: "m1",
+          organizationId: "org-1",
+          description: "Test case",
+          status: "open",
+          priority: "high",
+          createdAt: new Date("2026-01-01T00:00:00Z"),
+          updatedAt: new Date("2026-01-02T00:00:00Z"),
+          assignedTo: "officer-1",
+        },
+      ]);
+      const claimWhere = vi.fn().mockReturnValue({ limit: claimLimit });
+      const claimFrom = vi.fn().mockReturnValue({ where: claimWhere });
+
+      const updatesOrderBy = vi.fn().mockResolvedValue([
+        { createdAt: new Date("2026-01-01T00:00:00Z"), updateType: "claim_submitted" },
+        { createdAt: new Date("2026-01-01T01:00:00Z"), updateType: "claim_acknowledged" },
+        { createdAt: new Date("2026-01-01T02:00:00Z"), updateType: "first_response" },
+        { createdAt: new Date("2026-01-01T03:00:00Z"), updateType: "investigation_complete" },
+        { createdAt: new Date("2026-01-01T04:00:00Z"), updateType: "unknown_type" },
+      ]);
+      const updatesWhere = vi.fn().mockReturnValue({ orderBy: updatesOrderBy });
+      const updatesFrom = vi.fn().mockReturnValue({ where: updatesWhere });
+
+      const memberLimit = vi.fn().mockResolvedValue([{ name: "Member Name" }]);
+      const memberWhere = vi.fn().mockReturnValue({ limit: memberLimit });
+      const memberFrom = vi.fn().mockReturnValue({ where: memberWhere });
+
+      let n = 0;
+      mocks.mockDb.select.mockImplementation(() => {
+        n++;
+        if (n === 1) return { from: claimFrom };
+        if (n === 2) return { from: updatesFrom };
+        return { from: memberFrom };
+      });
+
+      mocks.mockDetectSignals.mockReturnValue([
+        { severity: "critical", title: "Immediate risk" },
+        { severity: "urgent", title: "Needs action" },
+        { severity: "warning", title: "Watch closely" },
+      ]);
+      mocks.mockDb.query.users.findFirst.mockResolvedValue({ userId: "officer-1", email: "officer@test.com" });
+
+      const result = await addCaseEvent({
+        claimId: "c1",
+        updateType: "status_change",
+        message: "status",
+        createdBy: "staff-1",
+      });
+
+      expect(result).toBe("u1");
+      expect(mocks.mockSend).toHaveBeenCalledTimes(1);
+      expect(mocks.mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subject: expect.stringContaining("CRITICAL Signals Detected"),
+          metadata: expect.objectContaining({ signalCount: 1, signalTitles: ["Immediate risk"] }),
+        }),
+      );
+    });
+
+    it("recompute tolerates notification send failures", async () => {
+      const claimLimit = vi.fn().mockResolvedValue([
+        {
+          claimId: "c1",
+          memberId: "m1",
+          organizationId: "org-1",
+          description: "Test case",
+          status: "open",
+          priority: "high",
+          createdAt: new Date("2026-01-01T00:00:00Z"),
+          updatedAt: new Date("2026-01-02T00:00:00Z"),
+          assignedTo: "officer-1",
+        },
+      ]);
+      const claimWhere = vi.fn().mockReturnValue({ limit: claimLimit });
+      const claimFrom = vi.fn().mockReturnValue({ where: claimWhere });
+      const updatesOrderBy = vi.fn().mockResolvedValue([{ createdAt: new Date(), updateType: "status_change" }]);
+      const updatesWhere = vi.fn().mockReturnValue({ orderBy: updatesOrderBy });
+      const updatesFrom = vi.fn().mockReturnValue({ where: updatesWhere });
+      const memberLimit = vi.fn().mockResolvedValue([{ name: "Member Name" }]);
+      const memberWhere = vi.fn().mockReturnValue({ limit: memberLimit });
+      const memberFrom = vi.fn().mockReturnValue({ where: memberWhere });
+
+      let n = 0;
+      mocks.mockDb.select.mockImplementation(() => {
+        n++;
+        if (n === 1) return { from: claimFrom };
+        if (n === 2) return { from: updatesFrom };
+        return { from: memberFrom };
+      });
+
+      mocks.mockDetectSignals.mockReturnValue([{ severity: "critical", title: "Immediate risk" }]);
+      mocks.mockDb.query.users.findFirst.mockResolvedValue({ userId: "officer-1", email: "officer@test.com" });
+      mocks.mockSend.mockRejectedValueOnce(new Error("smtp down"));
+
+      const result = await addCaseEvent({
+        claimId: "c1",
+        updateType: "status_change",
+        message: "status",
+        createdBy: "staff-1",
+      });
+
       expect(result).toBe("u1");
     });
   });

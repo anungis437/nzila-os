@@ -10,7 +10,7 @@ import type {
   RuleScope,
 } from "./types";
 
-function toNumber(value: unknown): number | null {
+function toNumber(value: any): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim().length > 0) {
     const parsed = Number(value);
@@ -27,7 +27,7 @@ function fromRuleJson(rulesJson: Record<string, unknown>, keys: string[], fallba
   return fallback;
 }
 
-function normalizeCompositionMode(value: unknown, fallback: RuleCompositionMode): RuleCompositionMode {
+function normalizeCompositionMode(value: any, fallback: RuleCompositionMode): RuleCompositionMode {
   if (value === "replace" || value === "augment" || value === "stack" || value === "suppress") {
     return value;
   }

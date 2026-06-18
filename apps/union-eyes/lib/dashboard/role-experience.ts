@@ -106,6 +106,7 @@ export function getCupe4373DemoGroups(): NavigationGroup[] {
 
 const CUPE4373_DEMO_ALLOWED_PREFIXES = [
   '/dashboard',
+  '/dashboard/workspace',
   '/dashboard/work',
   '/dashboard/inbox',
   '/dashboard/cases',
@@ -169,6 +170,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 
   if (experience === 'member') {
     return [
+      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard' },
       { label: 'Home', href: '/dashboard/inbox' },
       { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
       { label: 'Open Representation Case', href: '/dashboard/claims/new' },
@@ -181,6 +183,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 
   if (experience === 'staff') {
     return [
+      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
       { label: 'Operations (Casework Console)', href: '/dashboard/work', group: 'Operations' },
       { label: 'Operations Queue (Representation Cases)', href: '/dashboard/inbox?type=intake', group: 'Operations' },
       { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/priorities', group: 'Operations' },
@@ -195,6 +198,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 
   if (experience === 'executive') {
     return [
+      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
       { label: 'OCRA Intelligence (Executive Overview)', href: '/dashboard/intelligence?scope=executive', group: 'OCRA' },
       { label: 'OCRA Signals (Continuity Insights)', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
       { label: 'Operations Continuity', href: '/dashboard/executive-operating-intelligence', group: 'Operations' },
@@ -209,6 +213,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 
   if (experience === 'governance') {
     return [
+      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
       { label: 'Governance Continuity Overview', href: '/dashboard/governance', group: 'Governance Continuity' },
       { label: 'Governance Trust & Explainability', href: '/dashboard/trust', group: 'Governance Continuity' },
       { label: 'Governance Continuity Review', href: '/dashboard/workbench', group: 'Governance Continuity' },
@@ -221,6 +226,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
   }
 
   return [
+    { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard' },
     { label: 'Organization', href: '/dashboard/admin/organizations' },
     { label: 'Users & Roles', href: '/dashboard/admin/members' },
     { label: 'Pilot Configuration', href: '/dashboard/admin/onboarding' },
@@ -236,6 +242,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   member: [
     '/dashboard',
+    '/dashboard/workspace',
     '/dashboard/inbox',
     '/dashboard/claims/new',
     '/dashboard/documents',
@@ -245,6 +252,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   ],
   staff: [
     '/dashboard',
+    '/dashboard/workspace',
     '/dashboard/workbench',
     '/dashboard/work',
     '/dashboard/inbox',
@@ -259,6 +267,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   ],
   executive: [
     '/dashboard',
+    '/dashboard/workspace',
     '/dashboard/intelligence',
     '/dashboard/continuity-intelligence',
     '/dashboard/executive-operating-intelligence',
@@ -273,6 +282,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   ],
   governance: [
     '/dashboard',
+    '/dashboard/workspace',
     '/dashboard/governance',
     '/dashboard/trust',
     '/dashboard/workbench',
@@ -284,6 +294,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   ],
   admin: [
     '/dashboard',
+    '/dashboard/workspace',
     '/dashboard/admin',
     '/dashboard/admin/organizations',
     '/dashboard/admin/members',

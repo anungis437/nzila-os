@@ -139,7 +139,7 @@ describe('Compliance-Sensitive Action — Strict Governance Proof', () => {
       route: '/api/claims/claim-001/approve',
       headers: { authorization: 'Bearer tok_junior' },
     })
-    ;(denyCtx as any).traceId = evidence.traceId
+    ;(denyCtx as unknown).traceId = evidence.traceId
 
     const denyHandler = buildPipeline('user_junior_001', 'org_abr', ['viewer'])
     evidence.denyResult = await denyHandler(denyCtx)
@@ -161,7 +161,7 @@ describe('Compliance-Sensitive Action — Strict Governance Proof', () => {
       route: '/api/claims/claim-001/approve',
       headers: { authorization: 'Bearer tok_compliance' },
     })
-    ;(allowCtx as any).traceId = evidence.traceId
+    ;(allowCtx as unknown).traceId = evidence.traceId
 
     const allowHandler = buildPipeline('user_compliance_001', 'org_abr', ['compliance-officer'])
     evidence.allowResult = await allowHandler(allowCtx)

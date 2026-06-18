@@ -251,7 +251,7 @@ function toArtifactMarkdown(title: string, sections: Array<{ heading: string; it
   return lines.join('\n').trim();
 }
 
-function stableStringify(value: unknown): string {
+function stableStringify(value: any): string {
   if (value === null || value === undefined) return 'null';
   if (typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) {
@@ -546,7 +546,7 @@ export function getRecommendedEconomicsTier(memberCount: number): PilotEconomics
   return PILOT_ECONOMICS_LADDER[PILOT_ECONOMICS_LADDER.length - 1];
 }
 
-export function normalizeCommercialState(value: unknown): CommercialState {
+export function normalizeCommercialState(value: any): CommercialState {
   if (typeof value === 'string' && COMMERCIAL_STATE_ORDER.includes(value as CommercialState)) {
     return value as CommercialState;
   }

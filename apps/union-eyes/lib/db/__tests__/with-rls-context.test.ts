@@ -23,7 +23,7 @@ vi.mock("@/lib/api-auth-guard", () => ({
 
 vi.mock("@/db/db", () => ({
   db: {
-    transaction: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => {
+    transaction: vi.fn(async (fn: (tx: any) => Promise<any>) => {
       return fn({ execute: mocks.mockTxExecute });
     }),
     execute: mocks.mockDbExecute,
@@ -31,7 +31,7 @@ vi.mock("@/db/db", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  sql: vi.fn((_s: unknown, ..._v: unknown[]) => ({ _tag: "sql" })),
+  sql: vi.fn((_s: any, ..._v: any[]) => ({ _tag: "sql" })),
 }));
 
 vi.mock("@/lib/logger", () => ({

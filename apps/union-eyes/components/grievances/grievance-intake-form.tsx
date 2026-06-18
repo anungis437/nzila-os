@@ -203,7 +203,7 @@ export function GrievanceIntakeForm({
     branch: "",
     supervisorName: "",
     grievanceType: "",
-    issueDate: undefined as unknown as Date,
+    issueDate: undefined as any as Date,
     urgency: "medium",
     cbaArticle: "",
     cbaSection: "",

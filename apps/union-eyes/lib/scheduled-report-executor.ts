@@ -21,6 +21,9 @@ import DocumentStorageService from '@/lib/services/document-storage-service';
 // Types
 // ============================================================================
 
+/** Row shape returned by raw `db.execute(sql`...`)` queries. */
+type SqlRow = Record<string, unknown>;
+
 interface ExecutionResult {
   success: boolean;
   scheduleId: string;
@@ -34,7 +37,7 @@ interface ExecutionResult {
 
 interface ReportData {
   columns: string[];
-  rows: unknown[];
+  rows: SqlRow[];
   totalCount: number;
 }
 
@@ -80,7 +83,7 @@ const fileUrl = await uploadFile(
     const processingDurationMs = Date.now() - startTime;
 
     // 5. Update export job with success
-    await updateExportJob(exportJob.id, {
+    await updateExportJob(String(exportJob.id), {
       status: 'completed',
       fileUrl,
       fileSizeBytes: fileBuffer.length,
@@ -96,7 +99,7 @@ await deliverReport(schedule, fileUrl, fileBuffer);
 return {
       success: true,
       scheduleId: schedule.id,
-      exportJobId: exportJob.id,
+      exportJobId: String(exportJob.id),
       rowCount: reportData.rows.length,
       fileUrl,
       fileSizeBytes: fileBuffer.length,
@@ -122,8 +125,7 @@ return {
 /**
  * Create an export job record
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function createExportJob(schedule: ScheduledReport): Promise<any> {
+async function createExportJob(schedule: ScheduledReport): Promise<SqlRow> {
   const result = await db.execute(sql`
     INSERT INTO export_jobs (
       report_id,
@@ -143,8 +145,7 @@ async function createExportJob(schedule: ScheduledReport): Promise<any> {
     RETURNING *
   `);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = result as any[];
+  const rows = result as unknown as SqlRow[];
   return rows[0];
 }
 
@@ -187,19 +188,18 @@ async function fetchReportData(schedule: ScheduledReport): Promise<ReportData> {
     SELECT config FROM reports WHERE id = ${schedule.reportId}
   `);
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const reportRows = reportResult as any[];
+  const reportRows = reportResult as unknown as SqlRow[];
   if (reportRows.length === 0) {
     throw new Error('Report not found');
   }
 
   const reportConfig = reportRows[0];
-  const config = reportConfig.config;
+  const config = (reportConfig.config ?? {}) as Record<string, unknown>;
 
   // Execute the report query based on its type
-  let result: unknown[];
+  let result: SqlRow[];
 
-  switch (config.reportType || config.type) {
+  switch (String(config.reportType ?? config.type ?? '')) {
     case 'claims':
       result = await executeClaimsQuery(schedule.organizationId, config);
       break;
@@ -223,7 +223,7 @@ async function fetchReportData(schedule: ScheduledReport): Promise<ReportData> {
 /**
  * Execute claims report query
  */
-async function executeClaimsQuery(organizationId: string, _config: unknown): Promise<unknown[]> {
+async function executeClaimsQuery(organizationId: string, _config: Record<string, unknown>): Promise<SqlRow[]> {
   const result = await db.execute(sql`
     SELECT 
       c.claim_number,
@@ -243,15 +243,14 @@ async function executeClaimsQuery(organizationId: string, _config: unknown): Pro
     LIMIT 1000
   `);
   
-  return result as unknown[];
+  return result as unknown as SqlRow[];
 }
 
 /**
  * Execute analytics report query
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function executeAnalyticsQuery(organizationId: string, config: any): Promise<unknown[]> {
-  const groupBy = config.groupBy || 'status';
+async function executeAnalyticsQuery(organizationId: string, config: Record<string, unknown>): Promise<SqlRow[]> {
+  const groupBy = String(config.groupBy ?? 'status');
 
   // SECURITY FIX: Whitelist validation to prevent SQL injection via GROUP BY column
   const ALLOWED_COLUMNS = ['status', 'priority', 'claim_type', 'created_at', 'updated_at', 'member_id'];
@@ -274,14 +273,13 @@ async function executeAnalyticsQuery(organizationId: string, config: any): Promi
     LIMIT 100
   `);
   
-  return result as unknown[];
+  return result as unknown as SqlRow[];
 }
 
 /**
  * Execute default query
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function executeDefaultQuery(organizationId: string, _config: any): Promise<unknown[]> {
+async function executeDefaultQuery(organizationId: string, _config: Record<string, unknown>): Promise<SqlRow[]> {
   const result = await db.execute(sql`
     SELECT 
       id,
@@ -296,7 +294,7 @@ async function executeDefaultQuery(organizationId: string, _config: any): Promis
     LIMIT 500
   `);
   
-  return result as unknown[];
+  return result as unknown as SqlRow[];
 }
 
 /**
@@ -306,9 +304,8 @@ async function executeDefaultQuery(organizationId: string, _config: any): Promis
  * security risk. It should ONLY be used with pre-approved, validated SQL queries.
  * Implementation includes strict allowlist validation.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function executeCustomQuery(organizationId: string, config: any): Promise<unknown[]> {
-  const customQuery = config.query || '';
+async function executeCustomQuery(organizationId: string, config: Record<string, unknown>): Promise<SqlRow[]> {
+  const customQuery = config.query ?? '';
   if (!customQuery) {
     return executeDefaultQuery(organizationId, config);
   }
@@ -330,7 +327,7 @@ async function executeCustomQuery(organizationId: string, config: any): Promise<
     }
   };
   
-  const queryKey = config.queryKey;
+  const queryKey = typeof config.queryKey === 'string' ? config.queryKey : undefined;
   if (!queryKey || !APPROVED_QUERIES[queryKey]) {
     throw new Error(
       `Invalid or unapproved custom query. Must use queryKey with one of: ${Object.keys(APPROVED_QUERIES).join(', ')}`
@@ -338,7 +335,7 @@ async function executeCustomQuery(organizationId: string, config: any): Promise<
   }
   
   // SECURITY FIX: Use proper parameterization instead of string replacement
-  let result: unknown[];
+  let result: SqlRow[];
   switch (queryKey) {
     case 'claims_summary':
       result = await db.execute(sql`
@@ -367,7 +364,7 @@ async function executeCustomQuery(organizationId: string, config: any): Promise<
       throw new Error(`Query not implemented: ${queryKey}`);
   }
   
-  return result as unknown[];
+  return result as unknown as SqlRow[];
 }
 
 // ============================================================================
@@ -408,8 +405,7 @@ function generateCSV(data: ReportData): Buffer {
   // Data rows
   for (const row of data.rows) {
     const values = data.columns.map(col => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const value = (row as any)[col];
+      const value = row[col];
       if (value === null || value === undefined) return '';
       const str = String(value);
       // Escape quotes and wrap in quotes if contains comma
@@ -636,14 +632,12 @@ async function generatePDF(data: ReportData): Promise<Buffer> {
         doc.rect(margin, currentY - 4, usableWidth, 6, 'F');
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const row = data.rows[i] as any;
+      const row = data.rows[i];
       doc.setFontSize(8);
       
       displayColumns.forEach((col, colIndex) => {
-        let value = row[col];
-        if (value === null || value === undefined) value = '-';
-        value = String(value);
+        const raw = row[col];
+        let value = raw === null || raw === undefined ? '-' : String(raw);
         
         // Truncate long values
         const maxLen = Math.floor(colWidth / 2);
@@ -684,8 +678,7 @@ async function generatePDF(data: ReportData): Promise<Buffer> {
 
     data.rows.slice(0, 100).forEach(row => {
       const values = data.columns.map(col => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const val = (row as any)[col];
+        const val = row[col];
         return val === null || val === undefined ? '-' : String(val).substring(0, 20);
       });
       lines.push(values.join(' | '));
@@ -754,8 +747,7 @@ async function deliverReport(
   }
 
   // Also deliver via webhook if configured in parameters
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const params = schedule.parameters as any;
+  const params = schedule.parameters;
   if (params?.webhookUrl) {
     await deliverViaWebhook(schedule, fileUrl);
 }
@@ -786,9 +778,8 @@ async function deliverViaWebhook(
   schedule: ScheduledReport,
   fileUrl: string
 ): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const params = schedule.parameters as any;
-  const webhookUrl = params?.webhookUrl;
+  const params = schedule.parameters;
+  const webhookUrl = params?.webhookUrl ? String(params.webhookUrl) : undefined;
   
   if (!webhookUrl) {
     throw new Error('Webhook URL not configured');
@@ -828,22 +819,20 @@ export async function retryFailedExecution(
     SELECT * FROM scheduled_reports WHERE id = ${scheduleId}
   `);
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = result as any[];
+  const rows = result as unknown as SqlRow[];
   if (rows.length === 0) {
     throw new Error('Schedule not found');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const schedule = rows[0] as any;
+  const schedule = rows[0];
 
-  if (schedule.failure_count >= maxRetries) {
+  if (Number(schedule.failure_count) >= maxRetries) {
 return {
       success: false,
       scheduleId,
       error: 'Max retries exceeded',
     };
   }
-return await executeScheduledReport(schedule as ScheduledReport);
+return await executeScheduledReport(schedule as unknown as ScheduledReport);
 }
 

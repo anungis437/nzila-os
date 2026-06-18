@@ -113,14 +113,22 @@ export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
     .catch(async (error) => {
       if (isMissingColumnError(error, 'last_event_at')) {
         // Legacy schema compatibility: use connected_at when last_event_at is absent.
-        const fallback = await platformDb
-          .select({ connectedAt: stripeConnections.connectedAt })
-          .from(stripeConnections)
-          .orderBy(desc(stripeConnections.updatedAt))
-          .limit(1)
-        return fallback.map((row) => ({ last: null, connectedAt: row.connectedAt }))
+        try {
+          const fallback = await platformDb
+            .select({ connectedAt: stripeConnections.connectedAt })
+            .from(stripeConnections)
+            .orderBy(desc(stripeConnections.updatedAt))
+            .limit(1)
+          return fallback.map((row) => ({ last: null, connectedAt: row.connectedAt }))
+        } catch (fallbackError) {
+          const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+          logger.warn(`stripe_connections fallback query failed; using unknown state for Stripe freshness (${fallbackMessage})`)
+          return []
+        }
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`stripe_connections freshness query failed; using unknown state for Stripe freshness (${message})`)
+      return []
     })
 
   const m365ValidationPromise = platformDb
@@ -139,7 +147,9 @@ export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
         logger.warn('platform_integration_connections missing; using unknown state for M365 validation')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`M365 validation freshness query failed; using unknown state (${message})`)
+      return []
     })
 
   const googleValidationPromise = platformDb
@@ -158,7 +168,9 @@ export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
         logger.warn('platform_integration_connections missing; using unknown state for Google validation')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`Google validation freshness query failed; using unknown state (${message})`)
+      return []
     })
 
   const costFreshnessPromise = platformDb
@@ -171,7 +183,9 @@ export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
         logger.warn('platform_cost_rollups not available for freshness probe; using unknown state for Capital module')
         return []
       }
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`platform_cost_rollups freshness query failed; using unknown state for Capital module (${message})`)
+      return []
     })
 
   const [
@@ -187,21 +201,67 @@ export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
     latestGoogleValidation,
   ] = await Promise.all([
     costFreshnessPromise,
-    platformDb.select({ last: treasurySnapshots.date }).from(treasurySnapshots).orderBy(desc(treasurySnapshots.date)).limit(1),
-    platformDb.select({ last: commerceQuotes.createdAt }).from(commerceQuotes).orderBy(desc(commerceQuotes.createdAt)).limit(1),
-    platformDb.select({ last: executionInitiatives.updatedAt }).from(executionInitiatives).orderBy(desc(executionInitiatives.updatedAt)).limit(1),
-    platformDb.select({ last: auditEvents.createdAt }).from(auditEvents).orderBy(desc(auditEvents.createdAt)).limit(1),
+    platformDb
+      .select({ last: treasurySnapshots.date })
+      .from(treasurySnapshots)
+      .orderBy(desc(treasurySnapshots.date))
+      .limit(1)
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        logger.warn(`treasurySnapshots freshness query failed; using unknown state for Treasury module (${message})`)
+        return []
+      }),
+    platformDb
+      .select({ last: commerceQuotes.createdAt })
+      .from(commerceQuotes)
+      .orderBy(desc(commerceQuotes.createdAt))
+      .limit(1)
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        logger.warn(`commerceQuotes freshness query failed; using unknown state for Revenue Pipeline module (${message})`)
+        return []
+      }),
+    platformDb
+      .select({ last: executionInitiatives.updatedAt })
+      .from(executionInitiatives)
+      .orderBy(desc(executionInitiatives.updatedAt))
+      .limit(1)
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        logger.warn(`executionInitiatives freshness query failed; using unknown state for Execution module (${message})`)
+        return []
+      }),
+    platformDb
+      .select({ last: auditEvents.createdAt })
+      .from(auditEvents)
+      .orderBy(desc(auditEvents.createdAt))
+      .limit(1)
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        logger.warn(`auditEvents freshness query failed; using unknown state for Governance module (${message})`)
+        return []
+      }),
     platformDb
       .select({ last: qboConnections.connectedAt })
       .from(qboConnections)
       .where(eq(qboConnections.isActive, true))
       .orderBy(desc(qboConnections.connectedAt))
-      .limit(1),
+      .limit(1)
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        logger.warn(`qboConnections freshness query failed; using unknown state for QuickBooks module (${message})`)
+        return []
+      }),
     platformDb
       .select({ last: qboSyncRuns.completedAt })
       .from(qboSyncRuns)
       .orderBy(desc(qboSyncRuns.completedAt))
-      .limit(1),
+      .limit(1)
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        logger.warn(`qboSyncRuns freshness query failed; using unknown state for QuickBooks module (${message})`)
+        return []
+      }),
     stripeFreshnessPromise,
     m365ValidationPromise,
     googleValidationPromise,

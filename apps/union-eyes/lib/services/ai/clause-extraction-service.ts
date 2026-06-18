@@ -6,7 +6,13 @@
  */
 
 import { createHash } from 'crypto';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { cbaClause, collectiveAgreements } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -59,12 +65,13 @@ export async function extractClausesFromPDF(
     }
 
     // Extract text content using GPT-4 Vision
-    const extractedText = await extractTextFromPDF(pdfUrl);
+    const extractedText = await extractTextFromPDF(pdfUrl, options.organizationId);
 
     // Process text in chunks to identify clauses
     const clauses = await identifyClausesInText(extractedText, {
       jurisdiction: cba.jurisdiction,
       sector: cba.sector || 'Unknown',
+      organizationId: options.organizationId,
     });
 
     // Save clauses if auto-save is enabled
@@ -102,11 +109,15 @@ export async function extractClausesFromPDF(
 /**
  * Extract text content from PDF using GPT-4 Vision
  */
-async function extractTextFromPDF(pdfUrl: string): Promise<string> {
+async function extractTextFromPDF(
+  pdfUrl: string,
+  organizationId?: string,
+): Promise<string> {
   try {
     const ai = getAiClient();
     const response = await ai.generate({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       input: `Extract all text from this collective bargaining agreement document at URL: ${pdfUrl}. Maintain the structure including article numbers, section numbers, and clause text. Format as plain text with clear section breaks.`,
@@ -128,6 +139,7 @@ async function identifyClausesInText(
   context: {
     jurisdiction: string;
     sector: string;
+    organizationId?: string;
   }
 ): Promise<ExtractedClause[]> {
   const systemPrompt = `You are an expert labour law analyst specializing in Canadian collective bargaining agreements.
@@ -178,6 +190,7 @@ Return a JSON array of extracted clauses.`;
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(context.organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       promptKey: UE_PROFILES.CLAUSE_EXTRACTION,
@@ -294,12 +307,14 @@ export async function reExtractClause(
   context: {
     fullAgreementText: string;
     surroundingClauses: string[];
+    organizationId?: string;
   }
 ): Promise<ExtractedClause | null> {
   try {
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(context.organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       promptKey: UE_PROFILES.CLAUSE_EXTRACTION,
@@ -318,11 +333,15 @@ export async function reExtractClause(
 /**
  * Generate clause summary using AI
  */
-export async function generateClauseSummary(clauseContent: string): Promise<string> {
+export async function generateClauseSummary(
+  clauseContent: string,
+  organizationId?: string,
+): Promise<string> {
   try {
     const ai = getAiClient();
     const response = await ai.generate({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_SUMMARY,
       input: `Provide a concise 1-2 sentence summary of this collective bargaining agreement clause:\n\n${clauseContent}`,
@@ -344,6 +363,7 @@ export async function analyzeClauseQuality(
   context: {
     clauseType: ClauseType;
     jurisdiction: string;
+    organizationId?: string;
   }
 ): Promise<{
   quality: 'excellent' | 'good' | 'fair' | 'poor';
@@ -354,6 +374,7 @@ export async function analyzeClauseQuality(
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(context.organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_QUALITY,
       promptKey: UE_PROFILES.CLAUSE_QUALITY,

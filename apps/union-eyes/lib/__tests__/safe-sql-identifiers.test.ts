@@ -2,14 +2,14 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('drizzle-orm', () => ({
   sql: Object.assign(
-    (strings: TemplateStringsArray, ...values: unknown[]) => ({
+    (strings: TemplateStringsArray, ...values: any[]) => ({
       strings,
       values,
       type: 'sql',
     }),
     {
       raw: (s: string) => ({ rawValue: s, type: 'sql-raw' }),
-      join: (fragments: unknown[], separator: unknown) => ({ fragments, separator, type: 'sql-join' }),
+      join: (fragments: any[], separator: any) => ({ fragments, separator, type: 'sql-join' }),
     }
   ),
   SQL: class SQL {},

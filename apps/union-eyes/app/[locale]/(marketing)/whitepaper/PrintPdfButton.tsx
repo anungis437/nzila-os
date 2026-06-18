@@ -89,7 +89,7 @@ export function PrintPdfButton({
       let pageIndex = 0;
 
       for (const target of captureTargets) {
-        // eslint-disable-next-line no-await-in-loop
+         
         const canvas = await html2canvas(target, {
           scale: 2,
           useCORS: true,

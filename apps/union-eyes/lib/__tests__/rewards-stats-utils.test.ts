@@ -42,14 +42,14 @@ import {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function setupSelectGroupByChain(rows: unknown[]) {
+function setupSelectGroupByChain(rows: any[]) {
   mocks.mockGroupBy.mockResolvedValue(rows);
   mocks.mockWhere.mockReturnValue({ groupBy: mocks.mockGroupBy });
   mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
   mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
 }
 
-function setupSelectChain(rows: unknown[]) {
+function setupSelectChain(rows: any[]) {
   mocks.mockWhere.mockResolvedValue(rows);
   mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
   mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });

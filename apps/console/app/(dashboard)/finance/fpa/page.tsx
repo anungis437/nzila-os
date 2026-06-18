@@ -22,8 +22,11 @@ import { platformDb } from '@nzila/db/platform'
 import { executiveAgentRuns, executiveAgentInsights, budgetLines } from '@nzila/db/schema'
 import { fpaAgent, type FpaSignal } from '@nzila/executive-os'
 import { getExecutiveOrgId, runAndPersist } from '../../../../lib/executive-os'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.finance.fpa')
 
 const SEVERITY_BADGE: Record<string, string> = {
   info: 'bg-slate-100 text-slate-700',
@@ -32,11 +35,19 @@ const SEVERITY_BADGE: Record<string, string> = {
 }
 
 async function loadSignal(orgId: string): Promise<{ signal: FpaSignal; rowCount: number; missingActuals: number }> {
-  const rows = await platformDb
-    .select()
-    .from(budgetLines)
-    .where(eq(budgetLines.organizationId, orgId))
-    .orderBy(asc(budgetLines.category), asc(budgetLines.periodKey))
+  let rows: Array<typeof budgetLines.$inferSelect> = []
+  try {
+    rows = await platformDb
+      .select()
+      .from(budgetLines)
+      .where(eq(budgetLines.organizationId, orgId))
+      .orderBy(asc(budgetLines.category), asc(budgetLines.periodKey))
+  } catch (error) {
+    logger.warn('fpa signal load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { signal: { lines: [] }, rowCount: 0, missingActuals: 0 }
+  }
 
   if (rows.length === 0) return { signal: { lines: [] }, rowCount: 0, missingActuals: 0 }
 
@@ -87,8 +98,11 @@ export default async function FpaPage() {
     revalidatePath('/actions')
   }
 
-  const lastRun = orgId
-    ? (
+  let lastRun: typeof executiveAgentRuns.$inferSelect | undefined
+  let insights: Array<typeof executiveAgentInsights.$inferSelect> = []
+  if (orgId) {
+    try {
+      lastRun = (
         await platformDb
           .select()
           .from(executiveAgentRuns)
@@ -96,11 +110,19 @@ export default async function FpaPage() {
           .orderBy(desc(executiveAgentRuns.startedAt))
           .limit(1)
       )[0]
-    : undefined
 
-  const insights = lastRun
-    ? await platformDb.select().from(executiveAgentInsights).where(eq(executiveAgentInsights.runId, lastRun.id))
-    : []
+      if (lastRun) {
+        insights = await platformDb
+          .select()
+          .from(executiveAgentInsights)
+          .where(eq(executiveAgentInsights.runId, lastRun.id))
+      }
+    } catch (error) {
+      logger.warn('fpa run history load failed; returning empty fallback', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">

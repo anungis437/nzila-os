@@ -197,13 +197,13 @@ describe('isStrictEnvironment', () => {
 
   it('falls back to NODE_ENV when NZILA_ENV is not set', () => {
     delete process.env.NZILA_ENV
-    ;(process.env as any).NODE_ENV = 'production'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'production'
     expect(isStrictEnvironment()).toBe(true)
   })
 
   it('returns false when NODE_ENV=test and no NZILA_ENV', () => {
     delete process.env.NZILA_ENV
-    ;(process.env as any).NODE_ENV = 'test'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'test'
     expect(isStrictEnvironment()).toBe(false)
   })
 })

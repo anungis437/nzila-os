@@ -14,10 +14,10 @@ const mocks = vi.hoisted(() => ({
   mockGetNotificationService: vi.fn(),
 }));
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };

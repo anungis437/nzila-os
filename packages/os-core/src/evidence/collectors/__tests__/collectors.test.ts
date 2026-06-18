@@ -75,14 +75,16 @@ describe('collectIncidentSimEvidence', () => {
 
   it('passes when all RTO/RPO within targets', () => {
     const arts = collectIncidentSimEvidence({ periodLabel: 'Q2', simRecords: [sim] })
-    expect((arts[0] as any).rto.allPassed).toBe(true)
-    expect((arts[0] as any).rpo.allPassed).toBe(true)
+    const incidentSummary = arts[0] as unknown as { rto: { allPassed: boolean }; rpo: { allPassed: boolean } }
+    expect(incidentSummary.rto.allPassed).toBe(true)
+    expect(incidentSummary.rpo.allPassed).toBe(true)
   })
 
   it('fails when RTO exceeds target', () => {
     const slow = { ...sim, rtoAchievedMinutes: 300 }
     const arts = collectIncidentSimEvidence({ periodLabel: 'Q2', simRecords: [slow] })
-    expect((arts[0] as any).rto.allPassed).toBe(false)
+    const incidentSummary = arts[0] as unknown as { rto: { allPassed: boolean } }
+    expect(incidentSummary.rto.allPassed).toBe(false)
   })
 
   it('handles empty simRecords', () => {
@@ -141,7 +143,8 @@ describe('collectStripeCloseEvidence', () => {
       disputeCount: 0,
     })
     expect(arts[0]!.type).toBe('stripe-month-close')
-    expect((arts[0] as any).reconciled).toBe(true)
+    const stripeSummary = arts[0] as unknown as { reconciled: boolean }
+    expect(stripeSummary.reconciled).toBe(true)
     expect(arts[0]!.passed).toBe(true) // reconciled AND 0 disputes
   })
 
@@ -154,7 +157,8 @@ describe('collectStripeCloseEvidence', () => {
       refundCount: 0,
       disputeCount: 0,
     })
-    expect((arts[0] as any).reconciled).toBe(false)
+    const stripeSummary = arts[0] as unknown as { reconciled: boolean }
+    expect(stripeSummary.reconciled).toBe(false)
     expect(arts[0]!.passed).toBe(false)
   })
 
@@ -179,7 +183,8 @@ describe('collectStripeCloseEvidence', () => {
       refundCount: 0,
       disputeCount: 0,
     })
-    expect((arts[0] as any).reconciled).toBe(true)
+    const stripeSummary = arts[0] as unknown as { reconciled: boolean }
+    expect(stripeSummary.reconciled).toBe(true)
   })
 })
 
@@ -203,32 +208,38 @@ describe('collectYearEndEvidence', () => {
   it('passes when all checks are green', () => {
     const arts = collectYearEndEvidence(passingOpts)
     expect(arts[0]!.type).toBe('year-end-summary')
-    expect((arts[0] as any).overallPassed).toBe(true)
+    const yearEndSummary = arts[0] as unknown as { overallPassed: boolean }
+    expect(yearEndSummary.overallPassed).toBe(true)
   })
 
   it('fails when security not passed', () => {
     const arts = collectYearEndEvidence({ ...passingOpts, securityPassed: false })
-    expect((arts[0] as any).overallPassed).toBe(false)
+    const yearEndSummary = arts[0] as unknown as { overallPassed: boolean }
+    expect(yearEndSummary.overallPassed).toBe(false)
   })
 
   it('fails when schema drift detected', () => {
     const arts = collectYearEndEvidence({ ...passingOpts, schemaDriftDetected: true })
-    expect((arts[0] as any).overallPassed).toBe(false)
+    const yearEndSummary = arts[0] as unknown as { overallPassed: boolean }
+    expect(yearEndSummary.overallPassed).toBe(false)
   })
 
   it('fails when ML models have drift', () => {
     const arts = collectYearEndEvidence({ ...passingOpts, mlDriftedModelCount: 2 })
-    expect((arts[0] as any).overallPassed).toBe(false)
+    const yearEndSummary = arts[0] as unknown as { overallPassed: boolean }
+    expect(yearEndSummary.overallPassed).toBe(false)
   })
 
   it('fails when AI eval pass rate below 0.9', () => {
     const arts = collectYearEndEvidence({ ...passingOpts, aiEvalPassRate: 0.85 })
-    expect((arts[0] as any).overallPassed).toBe(false)
+    const yearEndSummary = arts[0] as unknown as { overallPassed: boolean }
+    expect(yearEndSummary.overallPassed).toBe(false)
   })
 
   it('fails when stripe not reconciled', () => {
     const arts = collectYearEndEvidence({ ...passingOpts, stripeReconciled: false })
-    expect((arts[0] as any).overallPassed).toBe(false)
+    const yearEndSummary = arts[0] as unknown as { overallPassed: boolean }
+    expect(yearEndSummary.overallPassed).toBe(false)
   })
 })
 

@@ -15,17 +15,17 @@
  * Pivot data from rows to columns
  */
 export function pivotData(
-  data: unknown[],
+  data: any[],
   rowKey: string,
   columnKey: string,
   valueKey: string
-): unknown[] {
-  const result: unknown[] = [];
+): any[] {
+  const result: any[] = [];
   const rows = new Set(data.map(d => d[rowKey]));
   const columns = new Set(data.map(d => d[columnKey]));
 
   rows.forEach(row => {
-    const rowData: unknown = { [rowKey]: row };
+    const rowData: any = { [rowKey]: row };
     columns.forEach(column => {
       const match = data.find(d => d[rowKey] === row && d[columnKey] === column);
       rowData[column] = match ? match[valueKey] : 0;
@@ -40,11 +40,11 @@ export function pivotData(
  * Aggregate data by key with specified operation
  */
 export function aggregateData(
-  data: unknown[],
+  data: any[],
   groupKey: string,
   valueKey: string,
   operation: 'sum' | 'avg' | 'min' | 'max' | 'count' = 'sum'
-): unknown[] {
+): any[] {
   const groups = new Map<string, number[]>();
 
   data.forEach(item => {
@@ -53,7 +53,7 @@ export function aggregateData(
     groups.get(key)!.push(item[valueKey]);
   });
 
-  const result: unknown[] = [];
+  const result: any[] = [];
   groups.forEach((values, key) => {
     let aggregatedValue: number;
     switch (operation) {
@@ -82,8 +82,8 @@ export function aggregateData(
 /**
  * Group data by multiple keys
  */
-export function groupByMultiple(data: unknown[], keys: string[]): Map<string, unknown[]> {
-  const groups = new Map<string, unknown[]>();
+export function groupByMultiple(data: any[], keys: string[]): Map<string, any[]> {
+  const groups = new Map<string, any[]>();
 
   data.forEach(item => {
     const groupKey = keys.map(k => item[k]).join('|');
@@ -233,7 +233,7 @@ export function calculateTrendLine(data: Array<{ x: number; y: number }>): { slo
 /**
  * Validate chart data structure
  */
-export function validateChartData(data: unknown[], requiredKeys: string[]): { valid: boolean; errors: string[] } {
+export function validateChartData(data: any[], requiredKeys: string[]): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   
   if (!Array.isArray(data)) {

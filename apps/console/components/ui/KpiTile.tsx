@@ -52,13 +52,13 @@ export function KpiTile({
       </div>
       <p
         className={cn(
-          'mt-2 text-2xl font-semibold text-gray-900',
+          'mt-3 text-2xl font-semibold text-gray-900',
           numeric && 'tabular-nums',
         )}
       >
         {value}
       </p>
-      <div className="mt-2 flex items-center gap-2">
+      <div className="mt-3 flex items-center gap-2">
         {delta ? (
           <span
             className={cn(
@@ -76,7 +76,7 @@ export function KpiTile({
   )
 
   const base = cn(
-    'block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition',
+    'block rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition',
     href && 'hover:shadow-md hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900',
     className,
   )

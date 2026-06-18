@@ -19,6 +19,7 @@ describe('DocumentStorageService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
+    vi.doUnmock('module');
     mocks.mockRandomBytes.mockReturnValue(Buffer.from('deadbeef', 'hex'));
 
     // Clear env vars
@@ -26,7 +27,12 @@ describe('DocumentStorageService', () => {
     delete process.env.AZURE_STORAGE_CONTAINER;
     delete process.env.CLOUDFLARE_R2_ENDPOINT;
     delete process.env.CLOUDFLARE_R2_BUCKET;
+    delete process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
+    delete process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
     delete process.env.AWS_SIGNATURES_BUCKET;
+    delete process.env.AWS_ACCESS_KEY_ID;
+    delete process.env.AWS_SECRET_ACCESS_KEY;
+    delete process.env.AWS_REGION;
   });
 
   // ── Constructor / getBackendInfo ─────────────────────────────────────────
@@ -68,6 +74,26 @@ describe('DocumentStorageService', () => {
       const service = new mod.default();
       expect(service.getBackendInfo().backend).toBe('azure');
     });
+
+    it('selects r2 backend and preserves endpoint info', async () => {
+      process.env.CLOUDFLARE_R2_ENDPOINT = 'https://r2.example.com';
+      process.env.CLOUDFLARE_R2_BUCKET = 'r2-bucket';
+      const mod = await import('../document-storage-service');
+      const service = new mod.default();
+      expect(service.getBackendInfo()).toEqual({
+        backend: 'r2',
+        bucket: 'r2-bucket',
+        endpoint: 'https://r2.example.com',
+      });
+    });
+
+    it('uses default r2 bucket name when CLOUDFLARE_R2_BUCKET is not set', async () => {
+      process.env.CLOUDFLARE_R2_ENDPOINT = 'https://r2.example.com';
+      // no CLOUDFLARE_R2_BUCKET set
+      const mod = await import('../document-storage-service');
+      const service = new mod.default();
+      expect(service.getBackendInfo().bucket).toBe('union-eyes-signatures');
+    });
   });
 
   describe('getDocumentStorageService singleton', () => {
@@ -76,6 +102,158 @@ describe('DocumentStorageService', () => {
       const a = mod.getDocumentStorageService();
       const b = mod.getDocumentStorageService();
       expect(a).toBe(b);
+    });
+  });
+
+  describe('internal client initialization', () => {
+    it('initializes and caches Azure Blob client via dynamic module require', async () => {
+      process.env.AZURE_STORAGE_CONNECTION_STRING = 'UseDevelopmentStorage=true';
+
+      const fakeBlobClient = { getContainerClient: vi.fn(), url: 'https://blob.test/' };
+      const fromConnectionString = vi.fn().mockReturnValue(fakeBlobClient);
+      const createRequire = vi.fn().mockReturnValue((id: string) => {
+        if (id === '@azure/storage-blob') {
+          return {
+            BlobServiceClient: { fromConnectionString },
+          };
+        }
+        throw new Error(`unexpected require: ${id}`);
+      });
+
+      vi.doMock('module', () => ({ createRequire }));
+
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      const first = await service.ensureAzureClient();
+      const second = await service.ensureAzureClient();
+
+      expect(first).toBe(fakeBlobClient);
+      expect(second).toBe(fakeBlobClient);
+      expect(fromConnectionString).toHaveBeenCalledTimes(1);
+    });
+
+    it('initializes S3 client with AWS credentials', async () => {
+      process.env.AWS_ACCESS_KEY_ID = 'aws-key';
+      process.env.AWS_SECRET_ACCESS_KEY = 'aws-secret';
+      process.env.AWS_REGION = 'us-west-2';
+
+      const S3Client = vi.fn(function S3Client(this: { send: ReturnType<typeof vi.fn>; config: unknown }, config: unknown) {
+        this.config = config;
+        this.send = vi.fn();
+      });
+      const PutObjectCommand = vi.fn();
+      const GetObjectCommand = vi.fn();
+      const DeleteObjectCommand = vi.fn();
+      const getSignedUrl = vi.fn();
+      const createRequire = vi.fn().mockReturnValue((id: string) => {
+        if (id === '@aws-sdk/client-s3') {
+          return { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand };
+        }
+        if (id === '@aws-sdk/s3-request-presigner') {
+          return { getSignedUrl };
+        }
+        throw new Error(`unexpected require: ${id}`);
+      });
+
+      vi.doMock('module', () => ({ createRequire }));
+
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      const sdk = await service.ensureS3Client();
+
+      expect(sdk.getSignedUrl).toBe(getSignedUrl);
+      expect(S3Client).toHaveBeenCalledWith({
+        region: 'us-west-2',
+        credentials: {
+          accessKeyId: 'aws-key',
+          secretAccessKey: 'aws-secret',
+        },
+      });
+    });
+
+    it('defaults AWS region to us-east-1 when AWS_REGION is unset', async () => {
+      process.env.AWS_ACCESS_KEY_ID = 'aws-key';
+      process.env.AWS_SECRET_ACCESS_KEY = 'aws-secret';
+      delete process.env.AWS_REGION;
+
+      const S3Client = vi.fn(function S3Client(this: { send: ReturnType<typeof vi.fn>; config: unknown }, config: unknown) {
+        this.config = config;
+        this.send = vi.fn();
+      });
+      const PutObjectCommand = vi.fn();
+      const GetObjectCommand = vi.fn();
+      const DeleteObjectCommand = vi.fn();
+      const getSignedUrl = vi.fn();
+      const createRequire = vi.fn().mockReturnValue((id: string) => {
+        if (id === '@aws-sdk/client-s3') {
+          return { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand };
+        }
+        if (id === '@aws-sdk/s3-request-presigner') {
+          return { getSignedUrl };
+        }
+        throw new Error(`unexpected require: ${id}`);
+      });
+
+      vi.doMock('module', () => ({ createRequire }));
+
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      await service.ensureS3Client();
+
+      expect(S3Client).toHaveBeenCalledWith({
+        region: 'us-east-1',
+        credentials: {
+          accessKeyId: 'aws-key',
+          secretAccessKey: 'aws-secret',
+        },
+      });
+    });
+
+    it('initializes S3 client in R2 mode with endpoint credentials', async () => {
+      process.env.CLOUDFLARE_R2_ENDPOINT = 'https://r2.example.com';
+      process.env.CLOUDFLARE_R2_ACCESS_KEY_ID = 'r2-key';
+      process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY = 'r2-secret';
+
+      const S3Client = vi.fn(function S3Client(this: { send: ReturnType<typeof vi.fn>; config: unknown }, config: unknown) {
+        this.config = config;
+        this.send = vi.fn();
+      });
+      const PutObjectCommand = vi.fn();
+      const GetObjectCommand = vi.fn();
+      const DeleteObjectCommand = vi.fn();
+      const getSignedUrl = vi.fn();
+      const createRequire = vi.fn().mockReturnValue((id: string) => {
+        if (id === '@aws-sdk/client-s3') {
+          return { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand };
+        }
+        if (id === '@aws-sdk/s3-request-presigner') {
+          return { getSignedUrl };
+        }
+        throw new Error(`unexpected require: ${id}`);
+      });
+
+      vi.doMock('module', () => ({ createRequire }));
+
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      await service.ensureS3Client();
+
+      expect(S3Client).toHaveBeenCalledWith({
+        region: 'us-east-1',
+        endpoint: 'https://r2.example.com',
+        credentials: {
+          accessKeyId: 'r2-key',
+          secretAccessKey: 'r2-secret',
+        },
+      });
     });
   });
 
@@ -132,6 +310,20 @@ describe('DocumentStorageService', () => {
         }),
       ).rejects.toThrow('S3 fail');
     });
+
+    it('throws when AWS credentials are missing', async () => {
+      process.env.AWS_SIGNATURES_BUCKET = 'bucket';
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      await expect(service.uploadDocument({
+        organizationId: 'org-1',
+        documentName: 'x.pdf',
+        documentBuffer: Buffer.from('data'),
+        documentType: 'contract',
+      })).rejects.toThrow('Missing required environment variables: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY');
+    });
   });
 
   describe('uploadDocument — Azure', () => {
@@ -156,6 +348,23 @@ describe('DocumentStorageService', () => {
       expect(result.url).toContain('https://test.blob.core.windows.net/');
       expect(result.size).toBe(10);
       expect(mockUpload).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('uploadDocument — R2', () => {
+    it('throws when R2 credentials are missing', async () => {
+      process.env.CLOUDFLARE_R2_ENDPOINT = 'https://r2.example.com';
+      process.env.CLOUDFLARE_R2_BUCKET = 'r2-bucket';
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      await expect(service.uploadDocument({
+        organizationId: 'org-1',
+        documentName: 'r2.pdf',
+        documentBuffer: Buffer.from('r2-data'),
+        documentType: 'contract',
+      })).rejects.toThrow('Missing required environment variables: CLOUDFLARE_R2_ACCESS_KEY_ID, CLOUDFLARE_R2_SECRET_ACCESS_KEY');
     });
   });
 
@@ -193,6 +402,84 @@ describe('DocumentStorageService', () => {
       };
 
       await expect(service.downloadDocument('key')).rejects.toThrow('Download fail');
+    });
+
+    it('supports transformToByteArray body objects', async () => {
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      service.s3Client = {
+        send: vi.fn().mockResolvedValue({
+          Body: {
+            transformToByteArray: async () => new Uint8Array(Buffer.from('typed-body')),
+          },
+        }),
+      };
+      service.s3Sdk = {
+        PutObjectCommand: vi.fn(),
+        GetObjectCommand: vi.fn(),
+        DeleteObjectCommand: vi.fn(),
+        getSignedUrl: vi.fn(),
+      };
+
+      const result = await service.downloadDocument('key');
+      expect(result.toString()).toBe('typed-body');
+    });
+
+    it('throws for unsupported body objects', async () => {
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      service.s3Client = { send: vi.fn().mockResolvedValue({ Body: {} }) };
+      service.s3Sdk = {
+        PutObjectCommand: vi.fn(),
+        GetObjectCommand: vi.fn(),
+        DeleteObjectCommand: vi.fn(),
+        getSignedUrl: vi.fn(),
+      };
+
+      await expect(service.downloadDocument('key')).rejects.toThrow('Unsupported object body stream type');
+    });
+
+    it('handles Uint8Array body', async () => {
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+
+      service.s3Client = {
+        send: vi.fn().mockResolvedValue({ Body: new Uint8Array([72, 101, 108, 108, 111]) }),
+      };
+      service.s3Sdk = {
+        PutObjectCommand: vi.fn(),
+        GetObjectCommand: vi.fn(),
+        DeleteObjectCommand: vi.fn(),
+        getSignedUrl: vi.fn(),
+      };
+
+      const result = await service.downloadDocument('key');
+      expect(result.toString()).toBe('Hello');
+    });
+
+    it('handles ArrayBuffer body', async () => {
+      const mod = await import('../document-storage-service');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = new mod.default() as any;
+      const ab = new TextEncoder().encode('World').buffer;
+
+      service.s3Client = {
+        send: vi.fn().mockResolvedValue({ Body: ab }),
+      };
+      service.s3Sdk = {
+        PutObjectCommand: vi.fn(),
+        GetObjectCommand: vi.fn(),
+        DeleteObjectCommand: vi.fn(),
+        getSignedUrl: vi.fn(),
+      };
+
+      const result = await service.downloadDocument('key');
+      expect(result.toString()).toBe('World');
     });
   });
 

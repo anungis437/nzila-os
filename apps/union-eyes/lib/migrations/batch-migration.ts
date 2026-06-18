@@ -31,7 +31,7 @@ interface TableMigrationConfig {
   organizationIdColumn: string;
   batchSize: number;
   dependencies: string[]; // Tables that must be migrated first
-  validate?: (row: unknown) => Promise<boolean>;
+  validate?: (row: any) => Promise<boolean>;
 }
 
 // Migration result tracking
@@ -41,7 +41,7 @@ interface MigrationResult {
   migratedRows: number;
   failedRows: number;
   skippedRows: number;
-  errors: Array<{ row: unknown; error: string }>;
+  errors: Array<{ row: any; error: string }>;
   duration: number;
   status: "pending" | "in_progress" | "completed" | "failed";
 }
@@ -179,7 +179,7 @@ export async function migrateTable(
 
       // Get unique tenant IDs from batch
       const tenantIds = Array.from(new Set(
-        batch.map((row: unknown) => (row as Record<string, unknown>)[config.tenantIdColumn]).filter(Boolean)
+        batch.map((row: any) => (row as Record<string, unknown>)[config.tenantIdColumn]).filter(Boolean)
       )) as string[];
 
       // Batch map tenant IDs to organization IDs

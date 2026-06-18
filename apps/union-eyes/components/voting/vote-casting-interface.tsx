@@ -234,11 +234,9 @@ export function VoteCastingInterface({
             <CandidateQuestion
               question={currentQuestion}
               selectedVotes={votes[currentQuestion.id] || []}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onVoteChange={(value: any) => handleVoteChange(currentQuestion.id, value)}
+              onVoteChange={(value) => handleVoteChange(currentQuestion.id, value)}
               writeInValue={writeIns[currentQuestion.id] || ""}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onWriteInChange={(value: any) => handleWriteInChange(currentQuestion.id, value)}
+              onWriteInChange={(value) => handleWriteInChange(currentQuestion.id, value)}
             />
           )}
 
@@ -246,8 +244,7 @@ export function VoteCastingInterface({
             <YesNoQuestion
               question={currentQuestion}
               selectedVote={votes[currentQuestion.id]?.[0]}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onVoteChange={(value: any) => handleVoteChange(currentQuestion.id, [value])}
+              onVoteChange={(value) => handleVoteChange(currentQuestion.id, [value])}
             />
           )}
 
@@ -255,8 +252,7 @@ export function VoteCastingInterface({
             <MultipleChoiceQuestion
               question={currentQuestion}
               selectedVotes={votes[currentQuestion.id] || []}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onVoteChange={(value: any) => handleVoteChange(currentQuestion.id, value)}
+              onVoteChange={(value) => handleVoteChange(currentQuestion.id, value)}
             />
           )}
 
@@ -305,21 +301,29 @@ export function VoteCastingInterface({
   );
 }
 
+type BallotCandidate = NonNullable<BallotQuestion['candidates']>[number];
+
+interface CandidateQuestionProps {
+  question: BallotQuestion;
+  selectedVotes: string[];
+  onVoteChange: (value: string[]) => void;
+  writeInValue: string;
+  onWriteInChange: (value: string) => void;
+}
+
 function CandidateQuestion({
   question,
   selectedVotes,
   onVoteChange,
   writeInValue,
   onWriteInChange,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: any) {
+}: CandidateQuestionProps) {
   const t = useTranslations("voting.casting");
   const multiSelect = question.maxSelections > 1;
 
   return (
     <div className="space-y-3">
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {question.candidates?.map((candidate: any) => (
+      {question.candidates?.map((candidate: BallotCandidate) => (
         <div
           key={candidate.id}
           className={cn(
@@ -375,8 +379,13 @@ function CandidateQuestion({
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function YesNoQuestion({ _question, selectedVote, onVoteChange }: any) {
+interface YesNoQuestionProps {
+  question?: BallotQuestion;
+  selectedVote?: string;
+  onVoteChange: (value: string) => void;
+}
+
+function YesNoQuestion({ question: _question, selectedVote, onVoteChange }: YesNoQuestionProps) {
   const t = useTranslations("voting.casting");
   return (
     <RadioGroup value={selectedVote} onValueChange={onVoteChange}>
@@ -403,8 +412,13 @@ function YesNoQuestion({ _question, selectedVote, onVoteChange }: any) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function MultipleChoiceQuestion({ question, selectedVotes, onVoteChange }: any) {
+interface MultipleChoiceQuestionProps {
+  question: BallotQuestion;
+  selectedVotes: string[];
+  onVoteChange: (value: string[]) => void;
+}
+
+function MultipleChoiceQuestion({ question, selectedVotes, onVoteChange }: MultipleChoiceQuestionProps) {
   const multiSelect = question.maxSelections > 1;
 
   return (
@@ -443,16 +457,25 @@ function MultipleChoiceQuestion({ question, selectedVotes, onVoteChange }: any) 
   );
 }
 
+interface ReviewDialogProps {
+  ballot: Ballot;
+  votes: Record<string, string[]>;
+  writeIns: Record<string, string>;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: () => void;
+  isSubmitting: boolean;
+}
+
 function ReviewDialog({
   ballot,
   votes,
-  _writeIns,
+  writeIns: _writeIns,
   isOpen,
   onClose,
   onSubmit,
   isSubmitting,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: any) {
+}: ReviewDialogProps) {
   const t = useTranslations("voting.casting");
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

@@ -16,8 +16,11 @@ import {
 import { getWeeklyBriefingData } from '@/lib/executive-intelligence'
 import { loadIntelligenceDigest } from '@/lib/executive-intelligence-digest'
 import { CommandPageShell } from '@/components/command-page-shell'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.briefing')
 
 async function approveDecisionAction(formData: FormData) {
   'use server'
@@ -39,32 +42,41 @@ async function approveDecisionAction(formData: FormData) {
   dueDate.setDate(dueDate.getDate() + (Number.isFinite(dueDays) ? dueDays : 7))
   const dueDateIso = dueDate.toISOString().slice(0, 10)
 
-  const initiative = await platformDb
-    .insert(executionInitiatives)
-    .values({
+  try {
+    const initiative = await platformDb
+      .insert(executionInitiatives)
+      .values({
+        orgId,
+        title: `[Decision] ${title}`,
+        venture: ventureId,
+        zone: category,
+        owner,
+        dueDate: dueDateIso,
+        status: 'not-started',
+        urgent: priority === 'p0',
+      })
+      .returning({ id: executionInitiatives.id })
+
+    await platformDb.insert(executiveDecisions).values({
       orgId,
-      title: `[Decision] ${title}`,
-      venture: ventureId,
-      zone: category,
+      title,
+      rationale,
+      ventureId,
+      category,
+      priority,
       owner,
       dueDate: dueDateIso,
-      status: 'not-started',
-      urgent: priority === 'p0',
+      status: 'approved',
+      linkedInitiativeId: initiative[0]?.id,
     })
-    .returning({ id: executionInitiatives.id })
-
-  await platformDb.insert(executiveDecisions).values({
-    orgId,
-    title,
-    rationale,
-    ventureId,
-    category,
-    priority,
-    owner,
-    dueDate: dueDateIso,
-    status: 'approved',
-    linkedInitiativeId: initiative[0]?.id,
-  })
+  } catch (error) {
+    logger.warn('approve decision action failed; skipping write', {
+      orgId,
+      title,
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return
+  }
 
   revalidatePath('/briefing')
   revalidatePath('/execution')
@@ -82,15 +94,22 @@ export default async function BriefingPage() {
     : null
   const recentDecisions = data.executiveOrgId
     ? await platformDb
-      .select({
-        id: executiveDecisions.id,
-        title: executiveDecisions.title,
-        status: executiveDecisions.status,
-        priority: executiveDecisions.priority,
-      })
-      .from(executiveDecisions)
-      .where(eq(executiveDecisions.orgId, data.executiveOrgId))
-      .limit(8)
+        .select({
+          id: executiveDecisions.id,
+          title: executiveDecisions.title,
+          status: executiveDecisions.status,
+          priority: executiveDecisions.priority,
+        })
+        .from(executiveDecisions)
+        .where(eq(executiveDecisions.orgId, data.executiveOrgId))
+        .limit(8)
+        .catch((error) => {
+          logger.warn('recent decisions load failed; returning empty fallback', {
+            orgId: data.executiveOrgId,
+            error: error instanceof Error ? error.message : String(error),
+          })
+          return []
+        })
     : []
 
   return (

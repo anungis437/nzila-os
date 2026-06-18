@@ -14,7 +14,6 @@
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * organizational trust for democratic infrastructure.
  */
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ShieldCheck, Users, Eye, Scale, HeartHandshake, ArrowRight, ArrowLeft } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
@@ -122,7 +121,7 @@ export default async function LabourLeadershipPage({ params }: { params: Promise
             <ul className="space-y-3">
               {copy.challenges.map((c) => (
                 <li key={c} className="flex items-start gap-3 text-gray-700 text-sm leading-relaxed">
-                  <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
+                  <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-electric" />
                   {c}
                 </li>
               ))}

@@ -108,11 +108,11 @@ export function buildEvidencePack(input: {
   return { ...unsealedPack, seal };
 }
 
-function sha256Of(value: unknown): string {
+function sha256Of(value: any): string {
   return createHash('sha256').update(JSON.stringify(value)).digest('hex');
 }
 
-function byteSizeOf(value: unknown): number {
+function byteSizeOf(value: any): number {
   return Buffer.byteLength(JSON.stringify(value), 'utf8');
 }
 

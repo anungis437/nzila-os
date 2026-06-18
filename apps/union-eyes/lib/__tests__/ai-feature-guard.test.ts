@@ -9,12 +9,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockIsFeatureEnabled = vi.fn();
 vi.mock("@/lib/services/feature-flags", () => ({
-  isFeatureEnabled: (...args: unknown[]) => mockIsFeatureEnabled(...args),
+  isFeatureEnabled: (...args: any[]) => mockIsFeatureEnabled(...args),
 }));
 
 const mockAuditLog = vi.fn();
 vi.mock("@/lib/audit-logger", () => ({
-  auditLog: (...args: unknown[]) => mockAuditLog(...args),
+  auditLog: (...args: any[]) => mockAuditLog(...args),
   AuditSeverity: { LOW: "low", MEDIUM: "medium", HIGH: "high", CRITICAL: "critical" },
 }));
 

@@ -123,7 +123,6 @@ export function generateExecutiveSummary(
 ): string[] {
   const inst = institution(persona);
   const lead = leadership(persona);
-  const holders = continuityHolders(persona);
   const icScore = dim(dimensions, 'institutional_continuity');
   const opMemScore = dim(dimensions, 'operational_memory');
   const govFragScore = dim(dimensions, 'governance_fragility');
@@ -227,7 +226,6 @@ export function generateGovernanceEntropyAnalysis(
   const govBand = scoreBand(govFragScore);
   const driftInsight = insights.find((i) => i.category === 'governance_drift');
   const observedSigs = observedSignals(signals);
-
   // ── Paragraph 1: Entropy framing ──────────────────────────────────────────
 
   const entropyFramings: Partial<Record<Band, string>> = {
@@ -291,10 +289,8 @@ export function generateMemoryHoldersAnalysis(
   const holders = continuityHolders(persona);
   const opMemScore = dim(dimensions, 'operational_memory');
   const trScore = dim(dimensions, 'transition_readiness');
-  const icScore = dim(dimensions, 'institutional_continuity');
   const burdenScore = burden?.score ?? 50;
   const elevatedSignals = stewardshipSignals.filter((s) => s.severity === 'elevated');
-  const observedSigs = observedSignals(signals);
 
   const memBand = scoreBand(opMemScore);
 
@@ -361,7 +357,6 @@ export function generateModernizationReview(
   const lead = leadership(persona);
   const icScore = dim(dimensions, 'institutional_continuity');
   const opMemScore = dim(dimensions, 'operational_memory');
-  const govFragScore = dim(dimensions, 'governance_fragility');
   const trustDebtScore = dim(dimensions, 'trust_debt');
 
   const modernizationInsight = insights.find(
@@ -427,7 +422,6 @@ export function generateRecommendations(
   const inst = institution(persona);
   const lead = leadership(persona);
   const bandId = band.id as MaturityBandId;
-  const icScore = dim(dimensions, 'institutional_continuity');
   const opMemScore = dim(dimensions, 'operational_memory');
   const govFragScore = dim(dimensions, 'governance_fragility');
   const trScore = dim(dimensions, 'transition_readiness');

@@ -20,7 +20,6 @@
  * Exposes executive-grade operational clarity.
  * Hides internal cognition complexity.
  */
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BarChart3, FileText, Users, TrendingUp, ShieldCheck, Layers } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';

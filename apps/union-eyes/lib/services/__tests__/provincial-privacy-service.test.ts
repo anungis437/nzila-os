@@ -18,7 +18,7 @@ const mocks = vi.hoisted(() => {
 
 vi.mock("@/db", () => ({ db: mocks.mockDb }));
 vi.mock("drizzle-orm", () => ({
-  sql: Object.assign(vi.fn((...args: unknown[]) => args), { raw: vi.fn() }),
+  sql: Object.assign(vi.fn((...args: any[]) => args), { raw: vi.fn() }),
 }));
 vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },

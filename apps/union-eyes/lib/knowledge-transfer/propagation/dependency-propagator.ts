@@ -25,7 +25,6 @@ import {
   computeImpactScore,
   estimateRecoveryTime,
 } from './propagation-models';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 
 /**
  * Build organizational dependency graph from topic graph and expertise profiles.
@@ -138,7 +137,7 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
     const sourceNode = nodes.find((n) => n.id === edge.source);
     const targetNode = nodes.find((n) => n.id === edge.target);
 
-    if (!sourceNode || !targetNode) return null as any;
+    if (!sourceNode || !targetNode) return null;
 
     // Heuristic: if source has lower frequency, target may depend on source
     // (i.e., target is more common knowledge that builds on source expertise)
@@ -163,13 +162,12 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
       evidenceCount: edge.weight,
       rationale: `Topics co-occur in ${edge.weight} interviews; indicates operational coupling`,
     };
-  }).filter(Boolean);
+  }).filter((edge): edge is DependencyEdge => edge !== null);
 
   // Identify bottlenecks
   const bottlenecks = nodes
     .filter((n) => n.isSingleSource || n.continuitySensitivity === 'critical')
     .map((n) => {
-      const dependents = edges.filter((e) => e.dependsOnId === n.id);
       return {
         nodeId: n.id,
         reason: (n.isSingleSource ? 'single_source' :

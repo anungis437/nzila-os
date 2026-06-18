@@ -46,7 +46,7 @@ describe('useCUPEVocabulary', () => {
       ok: true,
       json: async () => mockVocabulary,
     });
-    globalThis.fetch = mocks.mockFetch as unknown as typeof fetch;
+    globalThis.fetch = mocks.mockFetch as any as typeof fetch;
   });
 
   it('fetches vocabulary on mount and returns it', async () => {

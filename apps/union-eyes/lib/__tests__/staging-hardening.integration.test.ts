@@ -296,7 +296,7 @@ describe('Event Bus Integration', () => {
 
   it('EventBus handles claim_events subscriptions', async () => {
     const { eventBus } = await import('@/lib/events/event-bus')
-    const received: unknown[] = []
+    const received: any[] = []
     const unsub = eventBus.on('claim_events', (event) => {
       received.push(event.data)
     })

@@ -299,7 +299,7 @@ export interface ReplayResult {
  */
 export function replayDecisionEvent(
   event: DecisionEventRow,
-  targetPolicy: GovernedPolicyRow,
+  _targetPolicy: GovernedPolicyRow,
 ): ReplayResult {
   // Reconstruct context from stored evaluated_context
   const ctx = event.evaluatedContext as Record<string, unknown>

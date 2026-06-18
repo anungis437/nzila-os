@@ -78,12 +78,16 @@ export function Cupe4373GovernancePage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      const raw = window.sessionStorage.getItem(STORAGE_KEY);
-      if (raw) setDrafts(JSON.parse(raw) as DraftDecision[]);
-    } catch {
-      /* no-op */
-    }
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const raw = window.sessionStorage.getItem(STORAGE_KEY);
+        if (raw) setDrafts(JSON.parse(raw) as DraftDecision[]);
+      } catch {
+        /* no-op */
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   function persist(next: DraftDecision[]) {
@@ -139,7 +143,7 @@ export function Cupe4373GovernancePage() {
             </Badge>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Governance</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              CUPE Local 4373's bounded record of decisions and motions: who decided what,
+              CUPE Local 4373&apos;s bounded record of decisions and motions: who decided what,
               when, and with what majority. Foundation tier focuses on the operating record;
               policy enforcement and weighted voting live in the Governance Operations tier.
             </p>

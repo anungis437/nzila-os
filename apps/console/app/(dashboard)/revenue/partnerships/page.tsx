@@ -7,7 +7,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { and, eq, desc, ne } from 'drizzle-orm'
+import { and, eq, desc } from 'drizzle-orm'
 import { currentUser } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { CommandPageShell } from '@/components/command-page-shell'

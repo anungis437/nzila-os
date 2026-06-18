@@ -1302,9 +1302,9 @@ class CodeGenerator:
                             "field_count": len(t.columns),
                             "source": t.source_type,
                             "source_file": t.source_file,
-                            "has_fk": any(c.is_foreign_key for c in t.columns),
-                            "has_enum": any(c.choices for c in t.columns),
-                            "has_jsonb": any("JSON" in c.django_field for c in t.columns),
+                            "has_fk": unknown(c.is_foreign_key for c in t.columns),
+                            "has_enum": unknown(c.choices for c in t.columns),
+                            "has_jsonb": unknown("JSON" in c.django_field for c in t.columns),
                         }
                         for t in tables
                     ],

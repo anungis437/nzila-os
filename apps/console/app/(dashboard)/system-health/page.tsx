@@ -12,6 +12,7 @@ import { platformDb } from '@nzila/db/platform'
 import { automationCommands, zongaOutbox, nacpOutbox, pipelineAlerts } from '@nzila/db/schema'
 import { and, count, eq, gte, isNull, or, sql } from 'drizzle-orm'
 import { getOutboxBacklogs, getWorkerMetrics } from '@nzila/platform-ops'
+import { createLogger } from '@nzila/os-core/telemetry'
 import {
   ServerIcon,
   QueueListIcon,
@@ -23,6 +24,8 @@ import {
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.system-health')
 
 interface HealthCheck {
   label: string
@@ -136,8 +139,6 @@ async function gatherHealthChecks(): Promise<HealthCheck[]> {
     icon: ClockIcon,
   })
 
-  return checks
-
   // 7. Pipeline alerting — unresolved critical alerts in last 24h
   try {
     const recentAlerts = await platformDb
@@ -166,6 +167,8 @@ async function gatherHealthChecks(): Promise<HealthCheck[]> {
       icon: BellAlertIcon,
     })
   }
+
+  return checks
 }
 
 const statusColors = {
@@ -190,8 +193,18 @@ export default async function SystemHealthPage({
   const params = await searchParams
   const isExecutive = params.mode === 'executive'
   const checks = await gatherHealthChecks()
-  const outboxBacklogs = await getOutboxBacklogs()
-  const workerMetrics = await getWorkerMetrics()
+  const outboxBacklogs = await getOutboxBacklogs().catch((error) => {
+    logger.warn('outbox backlog load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return []
+  })
+  const workerMetrics = await getWorkerMetrics().catch((error) => {
+    logger.warn('worker metrics load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return []
+  })
 
   // Pipeline alerts detail for the alerts section
   const recentPipelineAlerts = await platformDb

@@ -57,7 +57,7 @@ describe('selectOptedIn', () => {
   it('does not coerce truthy values into opt-in', () => {
     const intakes = [
       // Force a non-boolean to verify the strict equality check.
-      makeIntake({ aggregateOptIn: 'yes' as unknown as boolean }),
+      makeIntake({ aggregateOptIn: 'yes' as any as boolean }),
     ];
     expect(selectOptedIn(intakes)).toEqual([]);
   });
@@ -72,7 +72,7 @@ describe('assertNoIndividualIdentifiers', () => {
     const dirty = {
       ...makeIntake(),
       email: 'someone@example.com',
-    } as unknown as AggregateIntake;
+    } as any as AggregateIntake;
     expect(() => assertNoIndividualIdentifiers(dirty)).toThrow(
       BoundaryBreachError,
     );
@@ -82,7 +82,7 @@ describe('assertNoIndividualIdentifiers', () => {
     const dirty = {
       ...makeIntake(),
       chairName: 'A. Person',
-    } as unknown as AggregateIntake;
+    } as any as AggregateIntake;
     expect(() => assertNoIndividualIdentifiers(dirty)).toThrow(
       BoundaryBreachError,
     );
@@ -91,7 +91,7 @@ describe('assertNoIndividualIdentifiers', () => {
   it('requires an explicit boolean opt-in flag', () => {
     const dirty = {
       ...makeIntake(),
-      aggregateOptIn: 1 as unknown as boolean,
+      aggregateOptIn: 1 as any as boolean,
     };
     expect(() => assertNoIndividualIdentifiers(dirty)).toThrow(
       BoundaryBreachError,
@@ -154,7 +154,7 @@ describe('aggregateBySector', () => {
   it('runs the boundary guard before any aggregation', () => {
     const intakes = [
       ...makeCohort('healthcare-clinical-governance', 5),
-      { ...makeIntake(), notes: 'free text' } as unknown as AggregateIntake,
+      { ...makeIntake(), notes: 'free text' } as any as AggregateIntake,
     ];
     expect(() => aggregateBySector(intakes)).toThrow(BoundaryBreachError);
   });

@@ -123,7 +123,7 @@ export async function loadCognitionMemory(
     LIMIT ${options.limit ?? 50}
   `);
 
-  const entries = (rows as unknown as Record<string, unknown>[]).map(rowToEntry);
+  const entries = (rows as any as Record<string, unknown>[]).map(rowToEntry);
 
   // Build resilience timeline from snapshots with scores
   const withScores = [...entries]
@@ -167,7 +167,7 @@ export async function getCognitionMemoryEntry(
     WHERE id = ${entryId} AND org_id = ${orgId}
     LIMIT 1
   `);
-  const result = rows as unknown as Record<string, unknown>[];
+  const result = rows as any as Record<string, unknown>[];
   if (result.length === 0) return null;
   return rowToEntry(result[0]);
 }

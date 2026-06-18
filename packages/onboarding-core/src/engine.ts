@@ -34,7 +34,7 @@ export function deriveStatus(
 
   if (allRequiredDone) return 'completed'
 
-  // Check for blockers: any required step whose dependencies are met but has a failing canStart
+  // Check for blockers: unknown required step whose dependencies are met but has a failing canStart
   const hasBlocker = flow.steps.some((s) => {
     if (!s.required || completed.includes(s.name)) return false
     if (s.canStart) {

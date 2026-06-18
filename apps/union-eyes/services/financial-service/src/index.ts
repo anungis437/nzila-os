@@ -145,7 +145,7 @@ const authenticate = async (
       try {
         req.user = JSON.parse(req.headers['x-test-user'] as string);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        logger.info('Development auth bypass used', { userId: (req as any).user?.id });
+        logger.info('Development auth bypass used', { userId: req.user?.id });
         return next();
       } catch (_error) {
         return res.status(400).json({

@@ -66,13 +66,13 @@ TBD — session not yet conducted.
 
 TBD — session not yet conducted.
 
-*Capture: any moment the tester expressed doubt about data accuracy, system reliability, or vendor credibility.*
+*Capture: unknown moment the tester expressed doubt about data accuracy, system reliability, or vendor credibility.*
 
 #### Performance Perception
 
 TBD — session not yet conducted.
 
-*Capture: any comment on page load speed, export speed, or perceived responsiveness.*
+*Capture: unknown comment on page load speed, export speed, or perceived responsiveness.*
 
 #### Severity Summary
 

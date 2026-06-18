@@ -118,7 +118,7 @@ export const GET = withRoleAuth('officer', async (request, _context) => {
       LIMIT ${limit}
     `);
 
-    const predictions: ChurnPrediction[] = ((result as unknown as Record<string, unknown>[]) || []).map((row: Record<string, unknown>) => {
+    const predictions: ChurnPrediction[] = ((result as any as Record<string, unknown>[]) || []).map((row: Record<string, unknown>) => {
       const daysInactive = parseFloat(String(row.days_since_last_activity || '0'));
       const lastActivity = new Date();
       lastActivity.setDate(lastActivity.getDate() - daysInactive);
@@ -291,14 +291,14 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
       FROM member_features
     `);
 
-    if ((result as unknown as Record<string, unknown>[] || []).length === 0) {
+    if ((result as any as Record<string, unknown>[] || []).length === 0) {
       return standardErrorResponse(
       ErrorCode.RESOURCE_NOT_FOUND,
       'Member not found'
     );
     }
 
-    const features = (result as unknown as Record<string, unknown>[])?.[0];
+    const features = (result as any as Record<string, unknown>[])?.[0];
 
     // ===== ML MODEL PREDICTION =====
     // Use trained TensorFlow.js model instead of rule-based scoring

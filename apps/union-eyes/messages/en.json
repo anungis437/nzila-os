@@ -9565,6 +9565,7 @@
     "filters": {
       "jurisdictionPlaceholder": "Jurisdiction",
       "allJurisdictions": "All jurisdictions",
+      "sectorPlaceholder": "Sector filter...",
       "reviewPlaceholder": "Review",
       "allReviews": "All reviews"
     },
@@ -9586,6 +9587,9 @@
     "loading": "Loading agreements...",
     "errorLoad": "Failed to load agreements",
     "empty": "No agreements found",
+    "actions": {
+      "exportCsv": "Export CSV"
+    },
     "pagination": {
       "count": "{count} agreement",
       "countPlural": "{count} agreements",
@@ -9724,6 +9728,15 @@
         "lastSuccess": "Last Success",
         "documents": "Documents",
         "staleDocs": "Stale Docs"
+        },
+        "thresholds": {
+          "title": "Thresholds",
+          "description": "Adjust the freshness thresholds used by the overview",
+          "agingDays": "Aging days",
+          "staleDays": "Stale days",
+          "expiredDays": "Expired days",
+          "apply": "Apply thresholds",
+          "reset": "Reset defaults"
       }
     },
     "bargainingTeam": {

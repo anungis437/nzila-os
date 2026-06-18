@@ -29,7 +29,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push('/console');
+      router.push('/workspace/overview');
       router.refresh();
     } catch {
       setError('Something went wrong. Please try again.');

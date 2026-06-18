@@ -56,7 +56,7 @@ export interface SystemStats {
 export interface SystemConfig {
   category: string;
   key: string;
-  value: unknown;
+  value: any;
   description: string | null;
 }
 
@@ -111,7 +111,7 @@ export interface UserProfile {
   nextCreditRenewal: Date | string | null;
   billingCycleEnd: Date | string | null;
   /** Allow extra DB columns to pass through without type errors */
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface CreditCheckResult {

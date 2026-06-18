@@ -63,7 +63,6 @@ function throwStep(name: string): SagaStep {
 function throwNonErrorStep(name: string): SagaStep {
   return {
     name,
-    // eslint-disable-next-line @typescript-eslint/only-throw-error
     execute: vi.fn(async () => { throw 'string crash' }),
     compensate: vi.fn(async () => ({ ok: true as const, data: {} })),
   }

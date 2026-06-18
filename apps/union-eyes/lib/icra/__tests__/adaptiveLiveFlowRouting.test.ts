@@ -69,7 +69,7 @@ describe('OCRA live adaptive routing', () => {
   it('routeQuestionBank preserves the full question count when no adaptive metadata is present', () => {
     const profile = classifyOrgContext({ rawForm: SMALL_LOCAL_UNION });
     const bank = routeQuestionBank(
-      ALL_QUESTIONS as unknown as RoutableQuestion[],
+      ALL_QUESTIONS as any as RoutableQuestion[],
       profile,
     );
     expect(bank.routeVersion).toBe(ROUTING_ENGINE_VERSION);
@@ -82,11 +82,11 @@ describe('OCRA live adaptive routing', () => {
     const profileA = classifyOrgContext({ rawForm: SMALL_LOCAL_UNION });
     const profileB = classifyOrgContext({ rawForm: SMALL_LOCAL_UNION });
     const bankA = routeQuestionBank(
-      ALL_QUESTIONS as unknown as RoutableQuestion[],
+      ALL_QUESTIONS as any as RoutableQuestion[],
       profileA,
     );
     const bankB = routeQuestionBank(
-      ALL_QUESTIONS as unknown as RoutableQuestion[],
+      ALL_QUESTIONS as any as RoutableQuestion[],
       profileB,
     );
     expect(bankA.selectionFingerprint).toBe(bankB.selectionFingerprint);

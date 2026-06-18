@@ -158,12 +158,11 @@ export async function createArrearsCases(
           totalOwed: arrears.totalOwing.toString(),
           remainingBalance: arrears.totalOwing.toString(),
           oldestDebtDate: arrears.oldestDebtDate.toISOString().split('T')[0],
-          daysOverdue: arrears.daysOverdue.toString(),
+          daysOverdue: arrears.daysOverdue,
           transactionIds: arrears.transactionIds,
-          escalationLevel: Math.floor(arrears.daysOverdue / 30).toString(),
-          updatedAt: new Date(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+          escalationLevel: Math.floor(arrears.daysOverdue / 30),
+          updatedAt: new Date().toISOString(),
+        })
         .where(eq(schema.arrearsCases.id, existingCase.id));
 
       createdCaseIds.push(existingCase.id);
@@ -181,15 +180,14 @@ export async function createArrearsCases(
           totalOwed: arrears.totalOwing.toString(),
           remainingBalance: arrears.totalOwing.toString(),
           oldestDebtDate: arrears.oldestDebtDate.toISOString().split('T')[0],
-          daysOverdue: arrears.daysOverdue.toString(),
+          daysOverdue: arrears.daysOverdue,
           transactionIds: arrears.transactionIds,
-          escalationLevel: Math.floor(arrears.daysOverdue / 30).toString(),
+          escalationLevel: Math.floor(arrears.daysOverdue / 30),
           status: 'open',
           notes: `Auto-generated case: ${arrears.transactionCount} overdue transaction(s), ${arrears.daysOverdue} days overdue`,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
         .returning();
 
       createdCaseIds.push(newCase.id);
@@ -229,9 +227,8 @@ export async function applyLateFees(
           .set({
             lateFeeAmount: lateFee.toString(),
             totalAmount: newTotal.toString(),
-            updatedAt: new Date(),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any)
+            updatedAt: new Date().toISOString(),
+          })
           .where(eq(schema.duesTransactions.id, transactionId));
 
         totalFeesApplied += lateFee;

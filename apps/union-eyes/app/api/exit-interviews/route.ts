@@ -1,6 +1,6 @@
 // cognition-governance-ci: allow-route-bypass — Exit-interview entity CRUD (not a cognition engine).
 import { and, desc, eq, inArray } from 'drizzle-orm';
-import { withApi, z } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import {
   exitInterviews,

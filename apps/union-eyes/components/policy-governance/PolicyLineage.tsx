@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { LifecycleBadge } from './LifecycleBadge'
 
 interface LineageNode {
   id: string
@@ -33,8 +32,6 @@ interface LineageGraph {
 const NODE_W = 180
 const NODE_H = 72
 const COL_GAP = 60
-const ROW_GAP = 40
-
 function layoutNodes(nodes: LineageNode[], edges: LineageEdge[]): Map<string, { x: number; y: number }> {
   // Topological order: nodes with no incoming edges first
   const inDegree = new Map(nodes.map((n) => [n.id, 0]))

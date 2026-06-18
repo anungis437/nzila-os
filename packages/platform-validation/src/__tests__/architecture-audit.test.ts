@@ -149,7 +149,7 @@ describe('runArchitectureAudit', () => {
 
   it('flags req.body.orgId in API route', () => {
     writeFile(tmpDir, 'apps/web/src/app/api/users/route.ts',
-      `export async function POST(req: any) {\n  const orgId = req.body.orgId\n  return new Response('ok')\n}\n`,
+      `export async function POST(req: unknown) {\n  const orgId = req.body.orgId\n  return new Response('ok')\n}\n`,
     )
     const report = runArchitectureAudit(tmpDir)
     const findings = report.findings.filter(f => f.rule === 'org-isolation')
@@ -160,7 +160,7 @@ describe('runArchitectureAudit', () => {
 
   it('flags request.body.org_id in API route', () => {
     writeFile(tmpDir, 'apps/console/src/app/api/data/route.ts',
-      `export async function POST(request: any) {\n  const id = request.body.org_id\n}\n`,
+      `export async function POST(request: unknown) {\n  const id = request.body.org_id\n}\n`,
     )
     const report = runArchitectureAudit(tmpDir)
     const findings = report.findings.filter(f => f.rule === 'org-isolation')
@@ -169,7 +169,7 @@ describe('runArchitectureAudit', () => {
 
   it('does not flag non-route files for org-isolation', () => {
     writeFile(tmpDir, 'apps/web/src/utils/parser.ts',
-      `function parse(req: any) { return req.body.orgId; }\n`,
+      `function parse(req: unknown) { return req.body.orgId; }\n`,
     )
     const report = runArchitectureAudit(tmpDir)
     const findings = report.findings.filter(f => f.rule === 'org-isolation')

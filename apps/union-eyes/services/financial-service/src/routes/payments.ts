@@ -18,6 +18,14 @@ import { logger } from '@/lib/logger';
 
 const router = Router();
 
+type AuthUser = {
+  organizationId?: string;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as any as { user?: AuthUser }).user ?? {};
+}
+
 // Validation schemas
 const CreateDuesPaymentSchema = z.object({
   memberId: z.string().uuid(),
@@ -81,8 +89,10 @@ const PaymentSummaryQuerySchema = z.object({
  */
 router.post('/dues/intent', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as any).user.organizationId;
+    const organizationId = getAuthUser(req).organizationId;
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
     const validatedData = CreateDuesPaymentSchema.parse(req.body);
 
     const paymentIntent = await PaymentService.createDuesPaymentIntent({
@@ -114,8 +124,10 @@ router.post('/dues/intent', async (req: Request, res: Response) => {
  */
 router.post('/dues/confirm', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as any).user.organizationId;
+    const organizationId = getAuthUser(req).organizationId;
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
     const validatedData = ConfirmDuesPaymentSchema.parse(req.body);
 
     await PaymentService.confirmDuesPayment({
@@ -147,8 +159,10 @@ router.post('/dues/confirm', async (req: Request, res: Response) => {
  */
 router.post('/stipends/payout', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as any).user.organizationId;
+    const organizationId = getAuthUser(req).organizationId;
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
     const validatedData = CreateStipendPayoutSchema.parse(req.body);
 
     const payout = await PaymentService.createStipendPayout({
@@ -183,8 +197,10 @@ router.post('/stipends/payout', async (req: Request, res: Response) => {
  */
 router.post('/stipends/payout/batch', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as any).user.organizationId;
+    const organizationId = getAuthUser(req).organizationId;
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
     const validatedData = BatchStipendPayoutSchema.parse(req.body);
 
     const results = await PaymentService.batchProcessStipendPayouts({
@@ -216,8 +232,7 @@ router.post('/stipends/payout/batch', async (req: Request, res: Response) => {
  */
 router.post('/donations/intent', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as any).user?.organizationId || req.body.organizationId; // Allow public access
+    const organizationId = getAuthUser(req).organizationId || req.body.organizationId;
     const validatedData = CreateDonationSchema.parse(req.body);
 
     const paymentIntent = await PaymentService.createDonationPaymentIntent({
@@ -251,8 +266,7 @@ router.post('/donations/intent', async (req: Request, res: Response) => {
  */
 router.post('/donations/confirm', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as any).user?.organizationId || req.body.organizationId; // Allow public access
+    const organizationId = getAuthUser(req).organizationId || req.body.organizationId;
     const validatedData = ConfirmDonationSchema.parse(req.body);
 
     const donationId = await PaymentService.confirmDonationPayment({
@@ -323,8 +337,10 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
  */
 router.get('/summary', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const organizationId = (req as any).user.organizationId;
+    const organizationId = getAuthUser(req).organizationId;
+    if (!organizationId) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
     const { strikeFundId, startDate, endDate } = PaymentSummaryQuerySchema.parse(req.query);
 
     const summary = await PaymentService.getPaymentSummary(

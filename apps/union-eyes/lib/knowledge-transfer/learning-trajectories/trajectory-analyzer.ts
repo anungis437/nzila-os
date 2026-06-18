@@ -68,7 +68,6 @@ function buildForecast(
 
   const latest = points[points.length - 1].resilienceScore;
   const trend = points[points.length - 1].resilienceScore - points[0].resilienceScore;
-  const periodsCount = Math.max(points.length - 1, 1);
 
   // Monthly rate of change based on full span
   const firstDate = new Date(points[0].capturedAt).getTime();

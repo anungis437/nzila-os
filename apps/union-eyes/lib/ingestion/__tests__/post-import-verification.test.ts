@@ -25,7 +25,7 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/db/db', () => ({
   db: {
-    execute: (...a: unknown[]) => mocks.mockExecute(...a),
+    execute: (...a: any[]) => mocks.mockExecute(...a),
   },
 }));
 

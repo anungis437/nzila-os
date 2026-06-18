@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { computeTrendingScores, CACHE_TTL } from './recommendations'
 import type { TrendingSignal } from './recommendations'
 

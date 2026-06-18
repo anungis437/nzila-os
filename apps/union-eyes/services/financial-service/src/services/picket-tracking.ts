@@ -238,8 +238,7 @@ export async function checkIn(
         coordinatorOverride: request.coordinatorOverride || false,
         overrideReason: request.overrideReason,
         verifiedBy: request.verifiedBy,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .returning();
 
     return {
@@ -296,14 +295,13 @@ export async function checkOut(
     await db
       .update(schema.picketAttendance)
       .set({
-        checkOutTime,
+        checkOutTime: checkOutTime.toISOString(),
         checkOutLatitude: request.latitude?.toString(),
         checkOutLongitude: request.longitude?.toString(),
-        durationMinutes: durationMinutes.toString(),
+        durationMinutes,
         hoursWorked: hoursWorked.toString(),
-        updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+        updatedAt: new Date().toISOString(),
+      })
       .where(eq(schema.picketAttendance.id, request.attendanceId));
 
     return {
@@ -454,12 +452,11 @@ export async function coordinatorOverride(
         checkOutTime: checkOutTime.toISOString(),
         checkInMethod: 'manual',
         hoursWorked: hours.toString(),
-        durationMinutes: Math.floor(hours * 60).toString(),
+        durationMinutes: Math.floor(hours * 60),
         locationVerified: true, // Coordinator verified
         coordinatorOverride: true,
         overrideReason: reason,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .returning();
 
     return {

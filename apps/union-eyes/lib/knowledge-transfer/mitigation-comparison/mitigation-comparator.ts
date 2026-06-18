@@ -134,11 +134,11 @@ async function evaluateMitigationScenario(
 
   // Find affected nodes
   const affectedNodes = scenario.targetNodeIds.length > 0
-    ? propagationMap.nodes.filter((n: any) => scenario.targetNodeIds.includes(n.id))
-    : propagationMap.nodes.filter((n: any) => n.isSingleSource || n.continuitySensitivity === 'critical');
+    ? propagationMap.nodes.filter((node) => scenario.targetNodeIds.includes(node.id))
+    : propagationMap.nodes.filter((node) => node.isSingleSource || node.continuitySensitivity === 'critical');
 
   // Compute domain-level impact deltas
-  const domainDeltas: MitigationImpactDelta[] = affectedNodes.map((node: any) => {
+  const domainDeltas: MitigationImpactDelta[] = affectedNodes.map((node) => {
     const effectiveness = getMitigationEffectivenessMultiplier(
       scenario.mitigationType,
       node.nodeType,
@@ -171,13 +171,13 @@ async function evaluateMitigationScenario(
   const exposureReductionPct = Math.round(avgExposureReduction);
 
   // Governance stabilization: how much does this help governance nodes?
-  const govNodes = affectedNodes.filter((n: any) => n.category === 'governance' || n.category === 'compliance');
+  const govNodes = affectedNodes.filter((node) => node.category === 'governance' || node.category === 'compliance');
   const governanceStabilizationGain = govNodes.length > 0
     ? Math.round(getMitigationEffectivenessMultiplier(scenario.mitigationType, 'governance') * 60)
     : 0;
 
   // Dependency concentration reduction
-  const singleSourceAffected = affectedNodes.filter((n: any) => n.isSingleSource).length;
+  const singleSourceAffected = affectedNodes.filter((node) => node.isSingleSource).length;
   const dependencyConcentrationReduction = singleSourceAffected > 0
     ? Math.round(Math.min(50, singleSourceAffected * 10))
     : 0;
@@ -239,10 +239,10 @@ export async function compareMitigations(
   // Identify residual risks: single-source nodes not targeted by any scenario
   const allTargeted = new Set(scenarios.flatMap((s) => s.targetNodeIds));
   const residualNodes = propagationMap.nodes.filter(
-    (n: any) => n.isSingleSource && !allTargeted.has(n.id),
+    (node) => node.isSingleSource && !allTargeted.has(node.id),
   );
   const residualRisks = residualNodes.slice(0, 5).map(
-    (n: any) => `${n.label} remains single-source (${n.continuitySensitivity} sensitivity)`,
+    (node) => `${node.label} remains single-source (${node.continuitySensitivity} sensitivity)`,
   );
 
   const rationaleParts: string[] = [

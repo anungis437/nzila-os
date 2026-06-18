@@ -22,10 +22,10 @@ const mocks = vi.hoisted(() => ({
   mockExecute: vi.fn(),
 }));
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -39,9 +39,9 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/db/db', () => ({
   db: {
-    select: (...a: unknown[]) => mocks.mockSelect(...a),
-    insert: (...a: unknown[]) => mocks.mockInsert(...a),
-    execute: (...a: unknown[]) => mocks.mockExecute(...a),
+    select: (...a: any[]) => mocks.mockSelect(...a),
+    insert: (...a: any[]) => mocks.mockInsert(...a),
+    execute: (...a: any[]) => mocks.mockExecute(...a),
   },
 }));
 

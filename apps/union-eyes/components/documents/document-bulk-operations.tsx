@@ -89,6 +89,7 @@ export function DocumentBulkOperations({
   const [dialogType, setDialogType] = React.useState<string>("");
   const [selectedFolder, setSelectedFolder] = React.useState("");
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
+  const [selectedPermission, setSelectedPermission] = React.useState("view");
   const [newTag, setNewTag] = React.useState("");
 
   if (selectedCount === 0) return null;
@@ -153,11 +154,17 @@ export function DocumentBulkOperations({
           await handleOperation("download", onBulkDownload);
         }
         break;
+      case "share":
+        if (onBulkShare) {
+          await handleOperation("share", () => onBulkShare(selectedPermission));
+        }
+        break;
     }
 
     // Reset dialog state
     setSelectedFolder("");
     setSelectedTags([]);
+    setSelectedPermission("view");
     setNewTag("");
   };
 
@@ -293,6 +300,7 @@ export function DocumentBulkOperations({
               {dialogType === "move" && "Move Documents"}
               {dialogType === "copy" && "Copy Documents"}
               {dialogType === "tag" && "Add Tags"}
+              {dialogType === "share" && "Share Documents"}
               {dialogType === "delete" && "Delete Documents"}
               {dialogType === "download" && "Download Documents"}
             </DialogTitle>
@@ -382,6 +390,23 @@ export function DocumentBulkOperations({
               </div>
             )}
 
+            {dialogType === "share" && (
+              <div>
+                <Label>Permission Level</Label>
+                <Select value={selectedPermission} onValueChange={setSelectedPermission}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose permission..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="view">View</SelectItem>
+                    <SelectItem value="comment">Comment</SelectItem>
+                    <SelectItem value="edit">Edit</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {dialogType === "delete" && (
               <Alert variant="destructive">
                 <AlertDescription>
@@ -417,6 +442,7 @@ export function DocumentBulkOperations({
               {dialogType === "move" && "Move"}
               {dialogType === "copy" && "Copy"}
               {dialogType === "tag" && "Add Tags"}
+              {dialogType === "share" && "Share"}
               {dialogType === "download" && "Download"}
             </Button>
           </DialogFooter>

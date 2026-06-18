@@ -94,7 +94,7 @@ export const treasuryAgent: ExecutiveAgent<TreasurySignal> = {
       }
     }
 
-    // ── Concentration: any single week with outflows > 30% of cash today
+    // ── Concentration: unknown single week with outflows > 30% of cash today
     const concentrationWeeks = s.weeks.filter((w) => w.outflows > s.cashToday * 0.3)
     if (concentrationWeeks.length > 0) {
       insights.push({

@@ -85,7 +85,7 @@ describe('SQLInjectionScanner.scanMethod', () => {
 
   it('returns false for empty/undefined', () => {
     expect(SQLInjectionScanner.scanMethod('')).toBe(false);
-    expect(SQLInjectionScanner.scanMethod(undefined as unknown as string)).toBe(false);
+    expect(SQLInjectionScanner.scanMethod(undefined as any as string)).toBe(false);
   });
 
   it('detects suspicious characters', () => {

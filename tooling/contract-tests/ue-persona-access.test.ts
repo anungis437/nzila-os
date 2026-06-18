@@ -103,6 +103,7 @@ interface PageRule {
 const PAGE_ACCESS_MATRIX: PageRule[] = [
   // ── Base pages (any authenticated user) ────────────────────────────────
   { path: 'page.tsx',                                    minRole: 'member',               description: 'Main dashboard' },
+  { path: 'workspace/page.tsx',                          minRole: 'member',               description: 'Unified workspace shell (any authenticated member)' },
   { path: 'inbox/page.tsx',                              minRole: 'member',               description: 'Unified inbox' },
   { path: 'work/page.tsx',                               minRole: 'member',               description: 'Work surface' },
   { path: 'priorities/page.tsx',                         minRole: 'member',               description: 'Priorities console' },

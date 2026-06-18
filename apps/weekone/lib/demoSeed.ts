@@ -84,7 +84,7 @@ export interface DemoWeekonePriority {
  * - Weekly brief showing founder priorities (cash, growth, risk)
  */
 
-export function createDemoWeeköneUser(orgId: number): DemoWeeköneUser {
+export function createDemoWeeköneUser(_orgId: number): DemoWeeköneUser {
   return {
     id: 1,
     authId: 'demo-founder-weekone',

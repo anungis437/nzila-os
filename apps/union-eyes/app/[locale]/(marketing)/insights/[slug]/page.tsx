@@ -162,7 +162,7 @@ export default async function InsightArticlePage({ params, searchParams }: Insig
     <>
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
+         
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
       <InsightArticleView

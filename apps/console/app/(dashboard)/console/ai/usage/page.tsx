@@ -6,14 +6,13 @@
  */
 import { platformDb } from '@nzila/db/platform'
 import { aiRequests } from '@nzila/db/schema'
-import { eq, desc, and, count, sum, avg } from 'drizzle-orm'
+import { eq, desc, and, count, sum, avg, sql } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { resolveConsoleEntityId } from '@/lib/entity-context'
 
 export const dynamic = 'force-dynamic'
-
-const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 
 interface UsageRow {
   appKey: string
@@ -25,6 +24,14 @@ interface UsageRow {
   costUsd: number
   avgLatencyMs: number
   refusedCount: number
+}
+
+interface ClientAttributedUsageRow {
+  clientOrgId: string
+  appKey: string
+  requestCount: number
+  costUsd: number
+  lastOccurredAt: Date | null
 }
 
 async function getUsageData(orgId: string) {
@@ -96,7 +103,36 @@ async function getUsageData(orgId: string) {
     .orderBy(desc(aiRequests.occurredAt))
     .limit(25)
 
-  return { usage, recent }
+  const clientAttributedRaw = await platformDb.execute(sql`
+    SELECT
+      after_json->>'domainId' AS "clientOrgId",
+      after_json->>'appKey' AS "appKey",
+      COUNT(*)::int AS "requestCount",
+      COALESCE(SUM(COALESCE(NULLIF(after_json->>'costUsd', ''), '0')::numeric), 0)::text AS "costUsd",
+      MAX(created_at) AS "lastOccurredAt"
+    FROM audit_events
+    WHERE org_id = ${orgId}::uuid
+      AND action = 'ai.request_executed'
+      AND after_json->>'domainType' = 'organization'
+      AND COALESCE(after_json->>'domainId', '') <> ''
+    GROUP BY 1, 2
+    ORDER BY MAX(created_at) DESC
+    LIMIT 25
+  `)
+
+  const clientAttributedUsage: ClientAttributedUsageRow[] = (clientAttributedRaw as Array<Record<string, unknown>>).map((row) => ({
+    clientOrgId: String(row.clientOrgId ?? ''),
+    appKey: String(row.appKey ?? ''),
+    requestCount: Number(row.requestCount ?? 0),
+    costUsd: Number(row.costUsd ?? 0),
+    lastOccurredAt: row.lastOccurredAt instanceof Date
+      ? row.lastOccurredAt
+      : typeof row.lastOccurredAt === 'string'
+        ? new Date(row.lastOccurredAt)
+        : null,
+  }))
+
+  return { usage, recent, clientAttributedUsage }
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -108,11 +144,12 @@ const STATUS_COLORS: Record<string, string> = {
 export default async function AiUsagePage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
-  if (!DEFAULT_ENTITY_ID) {
-    return <div className="p-8 text-red-600">NZILA_DEFAULT_ENTITY_ID not configured</div>
+  const orgId = await resolveConsoleEntityId(userId)
+  if (!orgId) {
+    return <div className="p-8 text-red-600">No active org membership or fallback entity configured</div>
   }
 
-  const { usage, recent } = await getUsageData(DEFAULT_ENTITY_ID)
+  const { usage, recent, clientAttributedUsage } = await getUsageData(orgId)
 
   const totalCost = usage.reduce((s, u) => s + u.costUsd, 0)
   const totalTokens = usage.reduce((s, u) => s + u.tokensIn + u.tokensOut, 0)
@@ -241,6 +278,43 @@ export default async function AiUsagePage() {
               ))}
               {recent.length === 0 && (
                 <tr><td colSpan={9} className="px-4 py-6 text-center text-muted-foreground">No requests yet</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-base font-semibold tracking-tight">Client-Attributed Activity</h2>
+        <div className="overflow-x-auto rounded-2xl border bg-card shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="px-4 py-3 text-left font-medium">Client Org</th>
+                <th className="px-4 py-3 text-left font-medium">App</th>
+                <th className="px-4 py-3 text-right font-medium">Requests</th>
+                <th className="px-4 py-3 text-right font-medium">Cost</th>
+                <th className="px-4 py-3 text-left font-medium">Last Seen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clientAttributedUsage.map((row) => (
+                <tr key={`${row.appKey}:${row.clientOrgId}`} className="border-b hover:bg-muted/30">
+                  <td className="px-4 py-3 font-mono text-xs">{row.clientOrgId}</td>
+                  <td className="px-4 py-3 text-xs">{row.appKey}</td>
+                  <td className="px-4 py-3 text-right">{row.requestCount}</td>
+                  <td className="px-4 py-3 text-right">${row.costUsd.toFixed(4)}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    {row.lastOccurredAt ? row.lastOccurredAt.toISOString().slice(0, 19).replace('T', ' ') : '—'}
+                  </td>
+                </tr>
+              ))}
+              {clientAttributedUsage.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
+                    No client-attributed AI activity yet. New Union Eyes requests will appear here once traced traffic lands.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

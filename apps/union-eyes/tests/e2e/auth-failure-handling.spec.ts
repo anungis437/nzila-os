@@ -22,7 +22,7 @@ import {
 import { UE_TEST_USERS } from '../fixtures/test-users'
 
 /** Critical API surfaces that must reject unauthenticated requests */
-const PROTECTED_ROUTES: Array<{ method: 'get' | 'post'; path: string; body?: unknown }> = [
+const PROTECTED_ROUTES: Array<{ method: 'get' | 'post'; path: string; body?: any }> = [
   { method: 'get', path: '/api/claims/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1' },
   { method: 'get', path: '/api/workbench/assigned' },
   { method: 'get', path: '/api/audits' },

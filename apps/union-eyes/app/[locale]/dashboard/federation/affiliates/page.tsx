@@ -273,7 +273,7 @@ export default async function FederationAffiliatesPage({
             </div>
           ) : (
             <div className="space-y-4">
-              {(data.affiliates as unknown as AffiliateData[]).map((affiliate: AffiliateData) => (
+              {(data.affiliates as any as AffiliateData[]).map((affiliate: AffiliateData) => (
                 <div 
                   key={affiliate.id} 
                   className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"

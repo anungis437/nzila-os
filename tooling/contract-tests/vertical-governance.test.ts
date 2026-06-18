@@ -189,7 +189,7 @@ describe('INV-11 — Every API route has authorization', () => {
 
     for (const route of routes) {
       const relPath = relative(ROOT, route)
-      const normalizedPath = relPath.replace(/\\/g, '/')
+      const normalizedPath = relPath.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
       const isPublic = PUBLIC_ROUTE_PATTERNS.some((p) => normalizedPath.includes(p))
 
       if (isPublic) continue

@@ -91,7 +91,7 @@
 
 | Category | Control | Evidence | Status |
 |----------|---------|----------|--------|
-| A1.1 Capacity | Resource monitoring | Azure metrics | 🟡 |
+| A1.1 Capacity | Resource monitoring + explicit thresholds | Azure metrics + `docs/compliance/soc2/capacity-scaling-thresholds.md` | ✅ |
 | A1.2 Backups | Azure-managed backups | Azure attestation | ✅ (inherited) |
 | C1.1 Confidentiality | TLS 1.3, AES-256-at-rest, HMAC seal | Azure, `apps/union-eyes/lib/evidence-export.ts` | ✅ |
 | C1.2 Disposal | Data retention policy | `docs/categories/platform-and-operations/governance/data-retention.md` (if present) | 🟡 |

@@ -20,7 +20,7 @@ type IntelligencePayload = {
   source?: string;
 };
 
-function toStringArray(value: unknown): string[] {
+function toStringArray(value: any): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === 'string');
 }

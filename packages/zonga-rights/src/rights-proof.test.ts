@@ -346,7 +346,7 @@ describe('RGT-3: Signature tracking enforced', () => {
     expect(computeAgreementStatus(signatories)).toBe(AgreementStatus.ACTIVE)
   })
 
-  it('computeAgreementStatus: any rejection → TERMINATED', () => {
+  it('computeAgreementStatus: unknown rejection → TERMINATED', () => {
     const signatories = [
       makeSignatory({ holderId: 'h1', status: 'signed', signedAt: new Date() }),
       makeSignatory({ holderId: 'h2', status: 'rejected' }),

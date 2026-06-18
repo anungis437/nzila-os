@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       );
     }
 
-    let body: unknown;
+    let body: any;
     try {
       body = await request.json();
     } catch {

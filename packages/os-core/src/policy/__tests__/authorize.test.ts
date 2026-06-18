@@ -23,6 +23,8 @@ import {
   type AuthContext,
   type AuthorizeOptions,
 } from '../authorize'
+import type { NzilaRole } from '../roles'
+import type { Scope } from '../scopes'
 
 describe('AuthorizationError', () => {
   it('creates error with default 403 status', () => {
@@ -112,7 +114,7 @@ describe('authorize', () => {
     })
 
     await expect(
-      authorize(mockRequest(), { requiredRole: 'admin' as any }),
+      authorize(mockRequest(), { requiredRole: 'admin' as NzilaRole }),
     ).rejects.toThrow('lacks required role')
   })
 
@@ -123,7 +125,7 @@ describe('authorize', () => {
     })
 
     await expect(
-      authorize(mockRequest(), { requiredScope: 'governance:write' as any }),
+      authorize(mockRequest(), { requiredScope: 'governance:write' as Scope }),
     ).rejects.toThrow('lacks required scope')
   })
 

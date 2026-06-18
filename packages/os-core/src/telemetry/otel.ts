@@ -31,9 +31,21 @@ export async function initOtel(config: OtelConfig): Promise<void> {
 
   // Dynamic import to avoid bundling OTel in non-server contexts
   try {
-    const { NodeSDK } = await import('@opentelemetry/sdk-node')
+    type NodeSdkLike = {
+      start: () => void
+      shutdown: () => Promise<void>
+    }
+    const { NodeSDK } = (await import('@opentelemetry/sdk-node')) as {
+      NodeSDK: new (config: {
+        resource: unknown
+        traceExporter?: unknown
+        instrumentations?: unknown[]
+      }) => NodeSdkLike
+    }
     const { getNodeAutoInstrumentations } = await import('@opentelemetry/auto-instrumentations-node')
-    const { OTLPTraceExporter } = await import('@opentelemetry/exporter-trace-otlp-http')
+    const { OTLPTraceExporter } = (await import('@opentelemetry/exporter-trace-otlp-http')) as {
+      OTLPTraceExporter: new (config: { url: string }) => unknown
+    }
     const { resourceFromAttributes } = await import('@opentelemetry/resources')
     const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } = await import(
       '@opentelemetry/semantic-conventions'
@@ -51,8 +63,7 @@ export async function initOtel(config: OtelConfig): Promise<void> {
         'deployment.environment': process.env.NODE_ENV ?? 'development',
         ...config.attributes,
       }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      traceExporter: new OTLPTraceExporter({ url: `${endpoint}/v1/traces` }) as any,
+      traceExporter: new OTLPTraceExporter({ url: `${endpoint}/v1/traces` }),
       instrumentations: [
         getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-http': { enabled: true },
@@ -85,7 +96,22 @@ export async function withSpan<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
   try {
-    const { trace, context, SpanStatusCode } = await import('@opentelemetry/api')
+    const { trace, context, SpanStatusCode } = (await import('@opentelemetry/api')) as {
+      trace: {
+        getTracer: (name: string) => {
+          startSpan: (spanName: string, options: { attributes: Record<string, string | number | boolean> }) => {
+            setStatus: (status: { code: number; message?: string }) => void
+            end: () => void
+          }
+        }
+        setSpan: (ctx: unknown, span: unknown) => unknown
+      }
+      context: {
+        active: () => unknown
+        with: <U>(ctx: unknown, fn: () => Promise<U>) => Promise<U>
+      }
+      SpanStatusCode: { OK: number; ERROR: number }
+    }
     const tracer = trace.getTracer('nzila-os')
     const span = tracer.startSpan(name, { attributes })
     try {

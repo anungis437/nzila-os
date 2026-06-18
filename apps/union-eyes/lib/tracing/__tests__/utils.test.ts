@@ -167,6 +167,6 @@ describe('recordException', () => {
   });
 
   it('handles string error', () => {
-    expect(() => recordException('test error' as unknown as Error)).not.toThrow();
+    expect(() => recordException('test error' as any as Error)).not.toThrow();
   });
 });

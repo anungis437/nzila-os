@@ -83,7 +83,7 @@ const EXEMPT_ROUTES = new Set([
 ])
 
 function isExemptRoute(filePath: string): boolean {
-  const rel = filePath.replace(/\\/g, '/')
+  const rel = filePath.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
   // Token-based public routes (e.g. quote/[token]/respond)
   if (rel.includes('[token]')) return true
   // Match both /api/EXEMPT and embedded /EXEMPT/ segments (e.g. /payments/webhooks/stripe)

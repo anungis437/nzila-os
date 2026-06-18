@@ -13,7 +13,6 @@ import { platformDb } from '@nzila/db/platform'
 import {
   orgs,
   zongaRevenueEvents,
-  auditEvents,
 } from '@nzila/db/schema'
 import { count, sql, and, gte, lte, eq } from 'drizzle-orm'
 

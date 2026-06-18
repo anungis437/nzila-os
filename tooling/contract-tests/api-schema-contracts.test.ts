@@ -90,7 +90,7 @@ describe('PR16: API schema — mutation routes validate payloads', () => {
       })
 
       for (const routeFile of mutationRoutes) {
-        const normalized = routeFile.replace(/\\/g, '/')
+        const normalized = routeFile.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
         if (SCHEMA_EXEMPT_PATHS.some(p => normalized.includes(p))) continue
         const content = readContent(routeFile)
         const hasValidation = SCHEMA_VALIDATION_PATTERNS.some(p => p.test(content))

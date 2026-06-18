@@ -18,6 +18,11 @@ import type { Metric } from 'web-vitals';
 import type { RUMEvent, WebVitalName, RUMReporterOptions } from './types.js';
 import { WEB_VITAL_THRESHOLDS } from './types.js';
 
+type NavigatorWithDeviceInfo = Navigator & {
+  connection?: { effectiveType?: string };
+  deviceMemory?: number;
+};
+
 function rateMetric(name: WebVitalName, value: number): 'good' | 'needs-improvement' | 'poor' {
   const thresholds = WEB_VITAL_THRESHOLDS[name];
   if (value <= thresholds.good) return 'good';
@@ -28,8 +33,7 @@ function rateMetric(name: WebVitalName, value: number): 'good' | 'needs-improvem
 function getDeviceInfo(): { connectionType?: string; deviceMemory?: number } {
   const info: { connectionType?: string; deviceMemory?: number } = {};
   if (typeof navigator !== 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nav = navigator as any;
+    const nav = navigator as NavigatorWithDeviceInfo;
     if (nav.connection?.effectiveType) {
       info.connectionType = nav.connection.effectiveType;
     }

@@ -19,10 +19,12 @@ import { eq, desc, count, sum, avg } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { createLogger } from '@nzila/os-core/telemetry'
+import { resolveConsoleEntityId } from '@/lib/entity-context'
 
 export const dynamic = 'force-dynamic'
 
-const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
+const logger = createLogger('console.ai.overview')
 
 interface OverviewMetrics {
   totalRequests: number
@@ -53,30 +55,84 @@ interface OverviewMetrics {
   knowledgeSourceCount: number
 }
 
+const EMPTY_OVERVIEW_METRICS: OverviewMetrics = {
+  totalRequests: 0,
+  totalTokensIn: 0,
+  totalTokensOut: 0,
+  estimatedCostUsd: 0,
+  avgLatencyMs: 0,
+  successCount: 0,
+  refusedCount: 0,
+  failedCount: 0,
+  requestsByApp: [],
+  requestsByFeature: [],
+  actionSummary: {
+    total: 0,
+    executed: 0,
+    failed: 0,
+    pending: 0,
+  },
+  budgetSummary: [],
+  deploymentRouteCount: 0,
+  knowledgeSourceCount: 0,
+}
+
+function isMissingDbObjectError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const maybePg = error as { code?: string; message?: string }
+  if (maybePg.code === '42P01' || maybePg.code === '42703') return true
+  return typeof maybePg.message === 'string' && maybePg.message.toLowerCase().includes('does not exist')
+}
+
+async function safeQuery<T>(
+  label: string,
+  query: Promise<T>,
+  fallback: T,
+): Promise<T> {
+  try {
+    return await query
+  } catch (error) {
+    if (isMissingDbObjectError(error)) {
+      const message = error instanceof Error ? error.message : String(error)
+      logger.warn(`${label} unavailable; falling back (${message})`)
+      return fallback
+    }
+    throw error
+  }
+}
+
 async function getOverviewMetrics(orgId: string): Promise<OverviewMetrics> {
   // Request metrics
-  const requestStats = await platformDb
-    .select({
-      total: count(),
-      tokensIn: sum(aiRequests.tokensIn),
-      tokensOut: sum(aiRequests.tokensOut),
-      costUsd: sum(aiRequests.costUsd),
-      avgLatency: avg(aiRequests.latencyMs),
-    })
-    .from(aiRequests)
-    .where(eq(aiRequests.orgId, orgId))
+  const requestStats = await safeQuery(
+    'request stats query',
+    platformDb
+      .select({
+        total: count(),
+        tokensIn: sum(aiRequests.tokensIn),
+        tokensOut: sum(aiRequests.tokensOut),
+        costUsd: sum(aiRequests.costUsd),
+        avgLatency: avg(aiRequests.latencyMs),
+      })
+      .from(aiRequests)
+      .where(eq(aiRequests.orgId, orgId)),
+    [],
+  )
 
   const stats = requestStats[0] ?? { total: 0, tokensIn: '0', tokensOut: '0', costUsd: '0', avgLatency: '0' }
 
   // Request status breakdown
-  const statusCounts = await platformDb
-    .select({
-      status: aiRequests.status,
-      count: count(),
-    })
-    .from(aiRequests)
-    .where(eq(aiRequests.orgId, orgId))
-    .groupBy(aiRequests.status)
+  const statusCounts = await safeQuery(
+    'request status breakdown query',
+    platformDb
+      .select({
+        status: aiRequests.status,
+        count: count(),
+      })
+      .from(aiRequests)
+      .where(eq(aiRequests.orgId, orgId))
+      .groupBy(aiRequests.status),
+    [],
+  )
 
   const statusMap: Record<string, number> = {}
   for (const s of statusCounts) {
@@ -84,37 +140,49 @@ async function getOverviewMetrics(orgId: string): Promise<OverviewMetrics> {
   }
 
   // Requests by appKey
-  const byApp = await platformDb
-    .select({
-      appKey: aiRequests.appKey,
-      count: count(),
-    })
-    .from(aiRequests)
-    .where(eq(aiRequests.orgId, orgId))
-    .groupBy(aiRequests.appKey)
-    .orderBy(desc(count()))
-    .limit(10)
+  const byApp = await safeQuery(
+    'requests by app query',
+    platformDb
+      .select({
+        appKey: aiRequests.appKey,
+        count: count(),
+      })
+      .from(aiRequests)
+      .where(eq(aiRequests.orgId, orgId))
+      .groupBy(aiRequests.appKey)
+      .orderBy(desc(count()))
+      .limit(10),
+    [],
+  )
 
   // Requests by feature
-  const byFeature = await platformDb
-    .select({
-      feature: aiRequests.feature,
-      count: count(),
-    })
-    .from(aiRequests)
-    .where(eq(aiRequests.orgId, orgId))
-    .groupBy(aiRequests.feature)
-    .orderBy(desc(count()))
+  const byFeature = await safeQuery(
+    'requests by feature query',
+    platformDb
+      .select({
+        feature: aiRequests.feature,
+        count: count(),
+      })
+      .from(aiRequests)
+      .where(eq(aiRequests.orgId, orgId))
+      .groupBy(aiRequests.feature)
+      .orderBy(desc(count())),
+    [],
+  )
 
   // Action summary
-  const allActions = await platformDb
-    .select({
-      status: aiActions.status,
-      count: count(),
-    })
-    .from(aiActions)
-    .where(eq(aiActions.orgId, orgId))
-    .groupBy(aiActions.status)
+  const allActions = await safeQuery(
+    'action summary query',
+    platformDb
+      .select({
+        status: aiActions.status,
+        count: count(),
+      })
+      .from(aiActions)
+      .where(eq(aiActions.orgId, orgId))
+      .groupBy(aiActions.status),
+    [],
+  )
 
   let actionTotal = 0
   let actionExecuted = 0
@@ -130,12 +198,16 @@ async function getOverviewMetrics(orgId: string): Promise<OverviewMetrics> {
   }
 
   // Budget summary
-  const budgets = await platformDb
-    .select()
-    .from(aiUsageBudgets)
-    .where(eq(aiUsageBudgets.orgId, orgId))
-    .orderBy(desc(aiUsageBudgets.month))
-    .limit(10)
+  const budgets = await safeQuery(
+    'budget summary query',
+    platformDb
+      .select()
+      .from(aiUsageBudgets)
+      .where(eq(aiUsageBudgets.orgId, orgId))
+      .orderBy(desc(aiUsageBudgets.month))
+      .limit(10),
+    [],
+  )
 
   const budgetSummary = budgets.map((b) => ({
     appKey: b.appKey,
@@ -147,18 +219,27 @@ async function getOverviewMetrics(orgId: string): Promise<OverviewMetrics> {
   }))
 
   // Deployment route count
-  const [routeCount] = await platformDb
-    .select({ count: count() })
-    .from(aiDeploymentRoutes)
-    .where(eq(aiDeploymentRoutes.orgId, orgId))
+  const [routeCount] = await safeQuery(
+    'deployment route count query',
+    platformDb
+      .select({ count: count() })
+      .from(aiDeploymentRoutes)
+      .where(eq(aiDeploymentRoutes.orgId, orgId)),
+    [],
+  )
 
   // Knowledge source count
-  const [ksCount] = await platformDb
-    .select({ count: count() })
-    .from(aiKnowledgeSources)
-    .where(eq(aiKnowledgeSources.orgId, orgId))
+  const [ksCount] = await safeQuery(
+    'knowledge source count query',
+    platformDb
+      .select({ count: count() })
+      .from(aiKnowledgeSources)
+      .where(eq(aiKnowledgeSources.orgId, orgId)),
+    [],
+  )
 
   return {
+    ...EMPTY_OVERVIEW_METRICS,
     totalRequests: stats.total,
     totalTokensIn: Number(stats.tokensIn ?? 0),
     totalTokensOut: Number(stats.tokensOut ?? 0),
@@ -192,11 +273,12 @@ function formatNumber(n: number): string {
 export default async function AiOverviewPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
-  if (!DEFAULT_ENTITY_ID) {
-    return <div className="p-8 text-red-600">NZILA_DEFAULT_ENTITY_ID not configured</div>
+  const orgId = await resolveConsoleEntityId(userId)
+  if (!orgId) {
+    return <div className="p-8 text-red-600">No active org membership or fallback entity configured</div>
   }
 
-  const m = await getOverviewMetrics(DEFAULT_ENTITY_ID)
+  const m = await getOverviewMetrics(orgId)
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-2 pb-8 sm:px-4">

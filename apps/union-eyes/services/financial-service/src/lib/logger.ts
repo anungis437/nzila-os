@@ -19,7 +19,7 @@ const baseLogger = winston.createLogger({
 })
 
 // Keep error serialization consistent and payload-safe at runtime boundaries.
-const toErrorMeta = (error: unknown): Record<string, unknown> => {
+const toErrorMeta = (error: any): Record<string, unknown> => {
   if (error instanceof Error) {
     return {
       name: error.name,
@@ -40,7 +40,7 @@ export const financialLogger = {
   warn: (message: string, meta: FinancialLogMeta = {}) => {
     baseLogger.warn(message, meta)
   },
-  error: (message: string, error?: unknown, meta: FinancialLogMeta = {}) => {
+  error: (message: string, error?: any, meta: FinancialLogMeta = {}) => {
     const errMeta = error === undefined ? {} : { error: toErrorMeta(error) }
     baseLogger.error(message, { ...meta, ...errMeta })
   },

@@ -44,12 +44,12 @@ Given the movement summary data (posture, headline, dominant signals, why-now co
 Use authoritative but accessible language. Avoid jargon. Maximum 4 sentences.`,
     requiredOutputFields: ['headline', 'summary', 'keyTakeaway'],
     anonymizationRules: EXECUTIVE_ANONYMIZATION,
-    buildInput: (data: { movementSummary: MovementSummary }) => ({
-      posture: data.movementSummary.posture,
-      headline: data.movementSummary.headline,
-      dominantSignals: data.movementSummary.dominantSignals,
-      whyNow: data.movementSummary.whyNow,
-      confidence: data.movementSummary.confidence,
+    buildInput: (data: unknown) => ({
+      posture: (data as { movementSummary: MovementSummary }).movementSummary.posture,
+      headline: (data as { movementSummary: MovementSummary }).movementSummary.headline,
+      dominantSignals: (data as { movementSummary: MovementSummary }).movementSummary.dominantSignals,
+      whyNow: (data as { movementSummary: MovementSummary }).movementSummary.whyNow,
+      confidence: (data as { movementSummary: MovementSummary }).movementSummary.confidence,
     }),
   },
   {
@@ -65,8 +65,8 @@ Given ranked executive priorities (title, watchLevel, recommendedAction, timefra
 Keep response concise: 3-4 sentences maximum.`,
     requiredOutputFields: ['summary', 'keyTakeaway', 'recommendedNextStep'],
     anonymizationRules: EXECUTIVE_ANONYMIZATION,
-    buildInput: (data: { priorities: ExecutivePriority[] }) => ({
-      priorities: data.priorities.map((p) => ({
+    buildInput: (data: unknown) => ({
+      priorities: (data as { priorities: ExecutivePriority[] }).priorities.map((p) => ({
         title: p.title,
         watchLevel: p.watchLevel,
         recommendedAction: p.recommendedAction,
@@ -89,18 +89,22 @@ Given the movement posture, top priorities, and dominant signals, produce a conc
 Maximum 3 sentences. Direct, factual tone.`,
     requiredOutputFields: ['summary', 'keyTakeaway'],
     anonymizationRules: EXECUTIVE_ANONYMIZATION,
-    buildInput: (data: { summary: MovementSummary; priorities: ExecutivePriority[] }) => ({
-      posture: data.summary.posture,
-      whyNow: data.summary.whyNow,
-      dominantSignals: data.summary.dominantSignals,
-      topPriority: data.priorities[0]
-        ? {
-            title: data.priorities[0].title,
-            watchLevel: data.priorities[0].watchLevel,
-            timeframe: data.priorities[0].timeframe,
-          }
-        : null,
-    }),
+    buildInput: (data: unknown) => {
+      const summary = (data as { summary: MovementSummary }).summary;
+      const top = (data as { priorities: ExecutivePriority[] }).priorities[0];
+      return {
+        posture: summary.posture,
+        whyNow: summary.whyNow,
+        dominantSignals: summary.dominantSignals,
+        topPriority: top
+          ? {
+              title: top.title,
+              watchLevel: top.watchLevel,
+              timeframe: top.timeframe,
+            }
+          : null,
+      };
+    },
   },
   {
     useCase: 'summarize_changes_since_last_snapshot',
@@ -115,8 +119,8 @@ Given a list of deltas (direction, title, explanation), produce a concise change
 Maximum 4 sentences. If no changes, say so clearly.`,
     requiredOutputFields: ['summary', 'keyTakeaway'],
     anonymizationRules: EXECUTIVE_ANONYMIZATION,
-    buildInput: (data: { deltas: ExecutiveDelta[] }) => ({
-      deltas: data.deltas.map((d) => ({
+    buildInput: (data: unknown) => ({
+      deltas: (data as { deltas: ExecutiveDelta[] }).deltas.map((d) => ({
         direction: d.direction,
         title: d.title,
         explanation: d.explanation,
@@ -136,24 +140,19 @@ Given the movement posture, top priorities, what-changed deltas, and recommended
 The brief should be suitable for a leadership dashboard — concise, authoritative, and actionable.`,
     requiredOutputFields: ['headline', 'summary', 'recommendedNextStep'],
     anonymizationRules: EXECUTIVE_ANONYMIZATION,
-    buildInput: (data: {
-      summary: MovementSummary;
-      priorities: ExecutivePriority[];
-      deltas: ExecutiveDelta[];
-      nextSteps: string[];
-    }) => ({
-      posture: data.summary.posture,
-      headline: data.summary.headline,
-      topPriorities: data.priorities.slice(0, 3).map((p) => ({
+    buildInput: (data: unknown) => ({
+      posture: (data as { summary: MovementSummary }).summary.posture,
+      headline: (data as { summary: MovementSummary }).summary.headline,
+      topPriorities: (data as { priorities: ExecutivePriority[] }).priorities.slice(0, 3).map((p) => ({
         title: p.title,
         watchLevel: p.watchLevel,
         recommendedAction: p.recommendedAction,
       })),
-      deltas: data.deltas.map((d) => ({
+      deltas: (data as { deltas: ExecutiveDelta[] }).deltas.map((d) => ({
         direction: d.direction,
         title: d.title,
       })),
-      nextSteps: data.nextSteps,
+      nextSteps: (data as { nextSteps: string[] }).nextSteps,
     }),
   },
 ];

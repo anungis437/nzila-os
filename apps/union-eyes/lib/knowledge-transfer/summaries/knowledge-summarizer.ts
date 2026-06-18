@@ -10,7 +10,13 @@
  * INV-01: All AI calls routed through @nzila/ai-sdk via getAiClient()
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import type { ExitInterview } from '@/db/schema';
 
 export interface KnowledgeSummary {
@@ -59,9 +65,14 @@ function buildSummaryInput(interview: ExitInterview): string {
 }
 
 export async function generateKnowledgeSummary(interview: ExitInterview): Promise<KnowledgeSummary> {
+  const organizationId =
+    typeof (interview as { organizationId?: unknown }).organizationId === 'string'
+      ? ((interview as { organizationId?: string }).organizationId ?? undefined)
+      : undefined;
   const ai = getAiClient();
   const result = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.KNOWLEDGE_SUMMARY,
     input: [

@@ -25,7 +25,7 @@ export function embedPersistedAdaptiveReportAISlot(
 }
 
 export function extractPersistedAdaptiveReportAISlot(
-  organizationContext: unknown,
+  organizationContext: any,
 ): AdaptiveReportAISlot | null {
   if (!organizationContext || typeof organizationContext !== 'object') {
     return null;
@@ -42,7 +42,7 @@ export function extractPersistedAdaptiveReportAISlot(
 
 export function resolveAdaptiveReportAISlot(input: {
   rawProfile: OrganizationalContinuityProfile;
-  organizationContext: unknown;
+  organizationContext: any;
   questionBank: readonly RoutableQuestion[];
   locale: SupportedLocale;
   generatedAt?: string;

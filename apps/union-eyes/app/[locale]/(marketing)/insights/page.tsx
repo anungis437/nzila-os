@@ -14,13 +14,13 @@
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * organizational trust for democratic infrastructure.
  */
+import type { Metadata } from 'next';
 /**
  * Insights — Organizational Thought Leadership Hub
  *
  * Category authority through organizational thought leadership.
  * Governance modernization, continuity intelligence, labour-safe AI.
  */
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { InsightsHubSubmenu, getInsightsHubSections } from '@/components/marketing/insights-hub-navigation';

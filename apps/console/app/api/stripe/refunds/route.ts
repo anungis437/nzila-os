@@ -15,7 +15,7 @@ import { platformDb } from '@nzila/db/platform'
 import { stripeRefunds, stripePayments } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { requiresApproval, executeRefund } from '@nzila/payments-stripe/primitives'
-import { authenticateUser } from '@/lib/api-guards'
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 import { createLogger } from '@nzila/os-core'
 
@@ -40,6 +40,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   const { orgId, paymentId, amountCents, reason } = parsed.data
 
+  const orgAccess = await requireOrgAccess(orgId, {
+    minRole: 'org_secretary',
+    platformBypass: ['platform_admin', 'studio_admin'],
+  })
+  if (!orgAccess.ok) return orgAccess.response
+
   // Look up the payment to get the Stripe object ID
   const [payment] = await platformDb
     .select()
@@ -49,6 +55,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   if (!payment) {
     return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
+  }
+  if (payment.orgId !== orgId) {
+    return NextResponse.json({ error: 'Forbidden: payment does not belong to organization' }, { status: 403 })
   }
 
   // Audit: refund requested

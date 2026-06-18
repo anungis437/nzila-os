@@ -177,6 +177,11 @@ export const CRON_API_ROUTES: PublicRouteConfig[] = [
     reason: 'Rewards processing cron job (authenticates via X-Cron-Secret header)',
     category: 'webhook',
   },
+  {
+    pattern: '/api/cron/calendar-sync',
+    reason: 'Calendar sync scheduler cron job (authenticates via X-Cron-Secret header)',
+    category: 'webhook',
+  },
 ];
 
 /**

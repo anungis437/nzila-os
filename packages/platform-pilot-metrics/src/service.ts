@@ -5,8 +5,6 @@ import {
   PilotAlertEscalationPolicySchema,
   PilotAlertOpsMetricsSchema,
   PilotAlertRuleSchema,
-  PilotAlertSeveritySchema,
-  PilotAlertStateSchema,
   PilotDefinitionSchema,
   PilotMetricEventSchema,
   PilotMetricNameSchema,

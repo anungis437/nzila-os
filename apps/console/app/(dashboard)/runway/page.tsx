@@ -10,8 +10,11 @@ import {
   ShieldExclamationIcon,
 } from '@heroicons/react/24/outline'
 import { getRunwayData } from '@/lib/executive-intelligence'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.runway')
 
 async function addTreasurySnapshot(formData: FormData) {
   'use server'
@@ -20,15 +23,23 @@ async function addTreasurySnapshot(formData: FormData) {
   const date = String(formData.get('date') ?? '')
   if (!orgId || !date) return
 
-  await platformDb.insert(treasurySnapshots).values({
-    orgId,
-    date: new Date(date),
-    cashOnHand: String(Number(formData.get('cashOnHand') ?? 0) || 0),
-    restrictedCash: String(Number(formData.get('restrictedCash') ?? 0) || 0),
-    receivables: String(Number(formData.get('receivables') ?? 0) || 0),
-    liabilitiesDue30d: String(Number(formData.get('liabilitiesDue30d') ?? 0) || 0),
-    notes: String(formData.get('notes') ?? '').trim() || null,
-  })
+  try {
+    await platformDb.insert(treasurySnapshots).values({
+      orgId,
+      date: new Date(date),
+      cashOnHand: String(Number(formData.get('cashOnHand') ?? 0) || 0),
+      restrictedCash: String(Number(formData.get('restrictedCash') ?? 0) || 0),
+      receivables: String(Number(formData.get('receivables') ?? 0) || 0),
+      liabilitiesDue30d: String(Number(formData.get('liabilitiesDue30d') ?? 0) || 0),
+      notes: String(formData.get('notes') ?? '').trim() || null,
+    })
+  } catch (error) {
+    logger.warn('add treasury snapshot failed; skipping write', {
+      orgId,
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return
+  }
 
   revalidatePath('/runway')
   revalidatePath('/today')
@@ -46,24 +57,33 @@ async function upsertRunwayAssumption(formData: FormData) {
   const plannedHires = Number(formData.get('plannedHires') ?? 0) || 0
   const discretionarySpend = Number(formData.get('discretionarySpend') ?? 0) || 0
 
-  await platformDb
-    .insert(runwayAssumptions)
-    .values({
-      orgId,
-      mode,
-      expectedMonthlyRevenue: String(expectedMonthlyRevenue),
-      plannedHires,
-      discretionarySpend: String(discretionarySpend),
-    })
-    .onConflictDoUpdate({
-      target: [runwayAssumptions.orgId, runwayAssumptions.mode],
-      set: {
+  try {
+    await platformDb
+      .insert(runwayAssumptions)
+      .values({
+        orgId,
+        mode,
         expectedMonthlyRevenue: String(expectedMonthlyRevenue),
         plannedHires,
         discretionarySpend: String(discretionarySpend),
-        updatedAt: new Date(),
-      },
+      })
+      .onConflictDoUpdate({
+        target: [runwayAssumptions.orgId, runwayAssumptions.mode],
+        set: {
+          expectedMonthlyRevenue: String(expectedMonthlyRevenue),
+          plannedHires,
+          discretionarySpend: String(discretionarySpend),
+          updatedAt: new Date(),
+        },
+      })
+  } catch (error) {
+    logger.warn('upsert runway assumption failed; skipping write', {
+      orgId,
+      mode,
+      error: error instanceof Error ? error.message : String(error),
     })
+    return
+  }
 
   revalidatePath('/runway')
   revalidatePath('/today')

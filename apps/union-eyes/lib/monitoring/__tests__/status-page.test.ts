@@ -21,7 +21,7 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 vi.mock('react', () => ({
-  cache: <T extends (...args: unknown[]) => unknown>(fn: T) => fn,
+  cache: <T extends (...args: any[]) => unknown>(fn: T) => fn,
 }));
 
 /* ------------------------------------------------------------------ */

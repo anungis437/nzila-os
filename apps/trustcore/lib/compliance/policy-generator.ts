@@ -30,7 +30,7 @@ const DATA_TYPE_LABELS: Record<string, string> = {
 }
 
 const VENDOR_LABELS: Record<string, string> = {
-  google_workspace: 'Google LLC (United States) — Google Workspace productivity suite',
+  ue_docs: 'Nzila internal documentation platform (Canada) — UE Docs repository',
   microsoft_365: 'Microsoft Corporation (United States) — Microsoft 365 productivity suite',
   stripe: 'Stripe Inc. (United States) — Payment processing',
   shopify: 'Shopify Inc. (Canada) — E-commerce platform',

@@ -15,7 +15,7 @@ import { buildCanonicalAiOutput } from '@nzila/ai-sdk';
 import { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
@@ -109,6 +109,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     const ai = getAiClient();
     const result = await ai.generate({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(orgId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_SUMMARY,
       input: [

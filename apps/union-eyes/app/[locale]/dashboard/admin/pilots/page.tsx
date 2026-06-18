@@ -77,7 +77,7 @@ const statusClass: Record<PilotStatus, string> = {
   declined: 'bg-rose-100 text-rose-700 border-rose-200',
 };
 
-function toArrayPayload(payload: unknown): PilotApplicationRecord[] {
+function toArrayPayload(payload: any): PilotApplicationRecord[] {
   if (Array.isArray(payload)) return payload as PilotApplicationRecord[];
   if (payload && typeof payload === 'object') {
     const obj = payload as Record<string, unknown>;

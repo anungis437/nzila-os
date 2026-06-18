@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 interface MfaStatus {
@@ -25,7 +25,7 @@ export function MfaSettings() {
   const [verifyCode, setVerifyCode] = useState("");
   const [confirmedCodes, setConfirmedCodes] = useState(false);
 
-  async function loadStatus() {
+  const loadStatus = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -40,11 +40,11 @@ export function MfaSettings() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [t]);
 
   useEffect(() => {
     void loadStatus();
-  }, []);
+  }, [loadStatus]);
 
   async function startEnrollment() {
     setError(null);

@@ -255,16 +255,6 @@ function partnerStatusIcon(status: string) {
   }
 }
 
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
-}
-
 function formatNumber(n: number) {
   return n.toLocaleString();
 }
@@ -321,9 +311,15 @@ export default async function IntegrationsDashboard({
   }
 
   const stats = computeStats(apiKeys, webhooks, partners);
+  const referenceTimeMs = Math.max(
+    0,
+    ...apiKeys.map((k) => Date.parse(k.lastUsedAt ?? k.createdAt)),
+    ...webhooks.map((w) => Date.parse(w.lastTriggeredAt ?? w.createdAt)),
+    ...partners.map((p) => Date.parse(p.lastSyncAt ?? p.createdAt)),
+  );
 
   const relativeTime = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const diff = Math.max(referenceTimeMs - new Date(dateStr).getTime(), 0);
     const mins = Math.floor(diff / 60000);
     if (mins < 60) return t('minutesAgo', { count: mins });
     const hours = Math.floor(mins / 60);

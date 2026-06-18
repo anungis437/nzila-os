@@ -62,6 +62,7 @@ interface OCRFile {
 
 interface OCRUploadProps {
   onUploadComplete?: (files: OCRFile[]) => void;
+  organizationId: string;
   folderId?: string;
   maxFiles?: number;
   acceptedFormats?: string[];
@@ -70,6 +71,7 @@ interface OCRUploadProps {
 
 export function OCRUpload({
   onUploadComplete,
+  organizationId,
   folderId,
   maxFiles = 10,
   acceptedFormats = ["image/*", "application/pdf"],
@@ -79,6 +81,26 @@ export function OCRUpload({
   const [selectedFile, setSelectedFile] = useState<OCRFile | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
+
+  const updateFileStatus = useCallback((fileId: string, updates: Partial<OCRFile>) => {
+    setFiles((prev) =>
+      prev.map((file) =>
+        file.id === fileId ? { ...file, ...updates } : file
+      )
+    );
+  }, []);
+
+  const getErrorMessage = async (response: Response, fallback: string) => {
+    try {
+      const body = await response.json();
+      if (typeof body?.error === "string") return body.error;
+      if (typeof body?.message === "string") return body.message;
+    } catch {
+      // Ignore JSON parse failures and fall back to default message.
+    }
+
+    return fallback;
+  };
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -122,29 +144,36 @@ export function OCRUpload({
     updateFileStatus(ocrFile.id, { status: "uploading", progress: 0 });
 
     try {
+      if (!organizationId) {
+        throw new Error('organizationId is required for document uploads');
+      }
+
       const formData = new FormData();
       formData.append("file", ocrFile.file);
+      formData.append("organizationId", organizationId);
       if (folderId) {
         formData.append("folderId", folderId);
       }
-      formData.append("title", ocrFile.file.name);
+      formData.append("name", ocrFile.file.name);
+      formData.append("description", `OCR upload for ${ocrFile.file.name}`);
+      formData.append("accessLevel", "standard");
 
-      // Simulate upload progress
-      for (let i = 0; i <= 50; i += 10) {
-        updateFileStatus(ocrFile.id, { progress: i });
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-
-      const uploadResponse = await fetch("/api/documents", {
+      const uploadResponse = await fetch("/api/documents/upload", {
         method: "POST",
         body: formData,
       });
 
       if (!uploadResponse.ok) {
-        throw new Error("Upload failed");
+        throw new Error(await getErrorMessage(uploadResponse, "Upload failed"));
       }
 
-      const { document } = await uploadResponse.json();
+      const uploadBody = await uploadResponse.json();
+      const document = uploadBody?.document ?? uploadBody?.data ?? uploadBody;
+
+      if (!document?.id) {
+        throw new Error("Upload succeeded but document identifier was not returned");
+      }
+
       updateFileStatus(ocrFile.id, {
         documentId: document.id,
         progress: 60,
@@ -161,10 +190,12 @@ export function OCRUpload({
       });
 
       if (!ocrResponse.ok) {
-        throw new Error("OCR processing failed");
+        throw new Error(await getErrorMessage(ocrResponse, "OCR processing failed"));
       }
 
-      const { text, confidence } = await ocrResponse.json();
+      const ocrBody = await ocrResponse.json();
+      const text = ocrBody?.text ?? ocrBody?.data?.text ?? "";
+      const confidence = ocrBody?.confidence ?? ocrBody?.data?.confidence;
 
       updateFileStatus(ocrFile.id, {
         status: "completed",
@@ -177,6 +208,14 @@ export function OCRUpload({
         title: "Processing complete",
         description: `${ocrFile.file.name} has been uploaded and processed.`,
       });
+
+      if (onUploadComplete) {
+        setFiles((prev) => {
+          const completed = prev.filter((file) => file.status === "completed" || file.id === ocrFile.id);
+          onUploadComplete(completed);
+          return prev;
+        });
+      }
     } catch (error) {
       updateFileStatus(ocrFile.id, {
         status: "error",
@@ -191,16 +230,14 @@ export function OCRUpload({
     }
   };
 
-  const updateFileStatus = (fileId: string, updates: Partial<OCRFile>) => {
-    setFiles((prev) =>
-      prev.map((file) =>
-        file.id === fileId ? { ...file, ...updates } : file
-      )
-    );
-  };
-
   const removeFile = (fileId: string) => {
-    setFiles((prev) => prev.filter((file) => file.id !== fileId));
+    setFiles((prev) => {
+      const target = prev.find((file) => file.id === fileId);
+      if (target?.preview) {
+        URL.revokeObjectURL(target.preview);
+      }
+      return prev.filter((file) => file.id !== fileId);
+    });
   };
 
   const retryFile = (fileId: string) => {
@@ -559,7 +596,7 @@ function OCRPreviewDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4 h-[500px]">
+        <div className="grid grid-cols-2 gap-4 h-125">
           <div>
             <h4 className="font-medium mb-2">Original Document</h4>
             <ScrollArea className="h-full border rounded">

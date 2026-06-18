@@ -81,6 +81,22 @@ export async function fetchWithCSRF(
   return fetch(url, options);
 }
 
+interface AxiosLikeConfig {
+  method?: string;
+  headers: Record<string, string>;
+}
+
+interface AxiosLikeInstance {
+  interceptors: {
+    request: {
+      use: (
+        onFulfilled: (config: AxiosLikeConfig) => AxiosLikeConfig,
+        onRejected: (error: unknown) => unknown
+      ) => void;
+    };
+  };
+}
+
 /**
  * Axios interceptor for CSRF protection
  * 
@@ -96,11 +112,9 @@ export async function fetchWithCSRF(
  * setupAxiosCSRF(api);
  * ```
  */
-export function setupAxiosCSRF(axiosInstance: unknown): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (axiosInstance as any).interceptors.request.use(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (config: any) => {
+export function setupAxiosCSRF(axiosInstance: AxiosLikeInstance): void {
+  axiosInstance.interceptors.request.use(
+    (config: AxiosLikeConfig) => {
       const method = config.method?.toUpperCase();
 
       // Add CSRF token for state-changing requests
@@ -267,8 +281,7 @@ export async function submitFormWithCSRF(
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function submitJSONWithCSRF<T = any>(
+export async function submitJSONWithCSRF<T = unknown>(
   url: string,
   data: unknown,
   method: string = 'POST'
@@ -289,8 +302,7 @@ export async function submitJSONWithCSRF<T = any>(
   });
 
   if (!response.ok) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as Error & { response?: Response };
     error.response = response;
     throw error;
   }

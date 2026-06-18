@@ -150,7 +150,7 @@ Phase 4 elevates these into first-class primitives (§5.3).
 - CBA ratification cycles.
 - Negotiation-session participation transitions.
 
-Out of scope: any transition tied to protected mechanics (§ Phase 3 fence).
+Out of scope: unknown transition tied to protected mechanics (§ Phase 3 fence).
 
 ### Q6. What institutional states should become explainable?
 

@@ -25,12 +25,12 @@
  * Continuity posture: organizational memory preservation, succession-aware handoff,
  * stewardship of representational records, and procedural continuity across mandates.
  */
+import type { Metadata } from 'next';
 /**
  * Locale-aware For CLC page.
  */
 export const dynamic = 'force-dynamic';
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, QrCode, Users, ShieldCheck, ClipboardList } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';

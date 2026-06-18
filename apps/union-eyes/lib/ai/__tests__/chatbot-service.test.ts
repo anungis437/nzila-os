@@ -31,7 +31,7 @@ vi.mock("@/db", () => ({
         returning: mocks.mockInsertReturning,
       }),
     })),
-    select: vi.fn((_cols?: unknown) => ({
+    select: vi.fn((_cols?: any) => ({
       from: mocks.mockSelectFrom.mockReturnValue({
         where: mocks.mockSelectWhere.mockReturnValue({
           orderBy: mocks.mockSelectOrderBy.mockReturnValue({
@@ -83,11 +83,11 @@ vi.mock("@/db/schema", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  desc: vi.fn((a: unknown) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  desc: vi.fn((a: any) => a),
   sql: Object.assign(
-    vi.fn((_s: unknown, ..._v: unknown[]) => ({ _tag: "sql" })),
+    vi.fn((_s: any, ..._v: any[]) => ({ _tag: "sql" })),
     { raw: vi.fn() },
   ),
 }));
@@ -123,7 +123,7 @@ import { ChatSessionManager, RAGService, ChatbotService } from "../chatbot-servi
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
-function limitResult(data: unknown[]) {
+function limitResult(data: any[]) {
   return Object.assign(Promise.resolve(data), { offset: mocks.mockSelectOffset });
 }
 

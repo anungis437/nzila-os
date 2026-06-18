@@ -358,10 +358,10 @@ import { isPublicRoute, isCronRoute } from './public-routes';
  */
 function verifyCronAuth(request: NextRequest): boolean {
   const cronSecret = request.headers.get('x-cron-secret');
-  const expectedSecret = process.env.CRON_SECRET_KEY;
+  const expectedSecret = process.env.CRON_SECRET_KEY || process.env.CRON_SECRET;
   
   if (!expectedSecret) {
-    logger.error('CRON_SECRET_KEY not configured', undefined, { context: 'Auth' });
+    logger.error('CRON_SECRET_KEY/CRON_SECRET not configured', undefined, { context: 'Auth' });
     return false;
   }
   
@@ -570,11 +570,12 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     logger.error('CRITICAL: Authentication system error', error instanceof Error ? error : new Error(String(error)), { context: 'Auth' });
     
     // Throw standardized error (doesn&apos;t leak system details)
-    const authError = new Error('Service temporarily unavailable');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (authError as any).statusCode = 503;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (authError as any).code = 'AUTH_SERVICE_ERROR';
+    const authError = new Error('Service temporarily unavailable') as Error & {
+      statusCode?: number;
+      code?: string;
+    };
+    authError.statusCode = 503;
+    authError.code = 'AUTH_SERVICE_ERROR';
     throw authError;
   }
 }
@@ -1131,10 +1132,8 @@ export async function hasMinRole(minRole: string): Promise<boolean> {
     const resolvedOrgId = await getOrganizationIdForUser(userId);
 
     const resolvedRole = await getRole(userId, resolvedOrgId);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userLevel = getRoleLevel(resolvedRole as any);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const minLevel = getRoleLevel(minRole as any);
+    const userLevel = getRoleLevel(resolvedRole as Parameters<typeof getRoleLevel>[0]);
+    const minLevel = getRoleLevel(minRole as Parameters<typeof getRoleLevel>[0]);
 
     return userLevel >= minLevel;
   } catch {
@@ -1389,8 +1388,7 @@ export function withSystemAdminAuth<TContext extends Record<string, unknown> = B
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withEnhancedRoleAuth<T = any>(
+export function withEnhancedRoleAuth<T = unknown>(
   minRoleLevel: number,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
   options: {
@@ -1401,7 +1399,7 @@ export function withEnhancedRoleAuth<T = any>(
     isSensitive?: boolean;
   } = {}
 ) {
-  return withApiAuth(async (request: NextRequest, _baseContext: unknown) => {
+  return withApiAuth(async (request: NextRequest, _baseContext: BaseAuthContext) => {
     const startTime = Date.now();
     const authResult = await auth();
     const userId = authResult?.userId;
@@ -1538,8 +1536,7 @@ export function withEnhancedRoleAuth<T = any>(
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withPermission<T = any>(
+export function withPermission<T = unknown>(
   requiredPermission: string,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
   options: {
@@ -1550,7 +1547,7 @@ export function withPermission<T = any>(
     allowExceptions?: boolean;
   } = {}
 ) {
-  return withApiAuth(async (request: NextRequest, _baseContext: unknown) => {
+  return withApiAuth(async (request: NextRequest, _baseContext: BaseAuthContext) => {
     const startTime = Date.now();
     const authResult = await auth();
     const userId = authResult?.userId;
@@ -1660,8 +1657,7 @@ export function withPermission<T = any>(
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withScopedRoleAuth<T = any>(
+export function withScopedRoleAuth<T = unknown>(
   roleCode: string,
   scopeType: string,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
@@ -1672,7 +1668,7 @@ export function withScopedRoleAuth<T = any>(
     isSensitive?: boolean;
   } = {}
 ) {
-  return withApiAuth(async (request: NextRequest, _baseContext: unknown) => {
+  return withApiAuth(async (request: NextRequest, _baseContext: BaseAuthContext) => {
     const startTime = Date.now();
     const authResult = await auth();
     const userId = authResult?.userId;

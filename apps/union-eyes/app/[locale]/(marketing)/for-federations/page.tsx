@@ -25,12 +25,12 @@
  * Continuity posture: organizational memory preservation, succession-aware handoff,
  * stewardship of representational records, and procedural continuity across mandates.
  */
+import type { Metadata } from 'next';
 /**
  * Locale-aware For Federations page.
  */
 export const dynamic = 'force-dynamic';
 
-import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import LocaleRolePageContent from '../locale-role-page-content';

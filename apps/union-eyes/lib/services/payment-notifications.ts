@@ -6,14 +6,43 @@
  */
 
 import { getNotificationService } from "@/lib/services/notification-service";
+import type { NotificationPayload } from "@/lib/services/notification-service";
 import { db } from "@/db/db";
 import { profiles as profilesSchema } from "@/db/schema/profiles-schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
-// DB table may have columns (phone, firebaseToken, organizationId) not yet in drizzle schema
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const profiles = profilesSchema as any;
+interface ProfileContactRow {
+  id: string;
+  email: string | null;
+  phone: string | null;
+  firebaseToken: string | null;
+  organizationId: string | null;
+}
+
+const profileContactSelection = {
+  id: profilesSchema.id,
+  email: profilesSchema.email,
+  phone: sql<string | null>`phone`,
+  firebaseToken: sql<string | null>`firebase_token`,
+  organizationId: sql<string | null>`organization_id`,
+};
+
+async function getRecipientProfile(recipientId: string): Promise<ProfileContactRow | null> {
+  const [recipient] = await db
+    .select(profileContactSelection)
+    .from(profilesSchema)
+    .where(eq(profilesSchema.id, recipientId));
+
+  return recipient ?? null;
+}
+
+async function getOrganizationProfiles(organizationId: string): Promise<ProfileContactRow[]> {
+  return db
+    .select(profileContactSelection)
+    .from(profilesSchema)
+    .where(sql`${sql.raw('organization_id')} = ${organizationId}`);
+}
 
 // ============================================================================
 // PAYMENT NOTIFICATION HANDLERS
@@ -35,10 +64,7 @@ export async function sendPaymentReceivedNotification(
     const notificationService = getNotificationService();
 
     // Get recipient email
-    const [recipient] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.id, recipientId));
+    const recipient = await getRecipientProfile(recipientId);
 
     if (!recipient?.email) {
       logger.warn("Recipient email not found for payment notification", { recipientId });
@@ -119,10 +145,7 @@ export async function sendPaymentFailedNotification(
     const notificationService = getNotificationService();
 
     // Get recipient email
-    const [recipient] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.id, recipientId));
+    const recipient = await getRecipientProfile(recipientId);
 
     if (!recipient?.email) {
       logger.warn("Recipient email not found for payment failure notification", {
@@ -207,10 +230,7 @@ export async function sendDuesReminderNotification(
     const notificationService = getNotificationService();
 
     // Get recipient
-    const [recipient] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.id, recipientId));
+    const recipient = await getRecipientProfile(recipientId);
 
     if (!recipient?.email) {
       logger.warn("Recipient email not found for dues reminder", { recipientId });
@@ -292,10 +312,7 @@ export async function sendDuesOverdueNotification(
     const notificationService = getNotificationService();
 
     // Get recipient
-    const [recipient] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.id, recipientId));
+    const recipient = await getRecipientProfile(recipientId);
 
     if (!recipient?.email) {
       logger.warn("Recipient email not found for overdue dues", { recipientId });
@@ -383,10 +400,7 @@ export async function sendStrikeBenefitNotification(
     const notificationService = getNotificationService();
 
     // Get recipient
-    const [recipient] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.id, recipientId));
+    const recipient = await getRecipientProfile(recipientId);
 
     if (!recipient?.email) {
       logger.warn("Recipient email not found for strike benefit notification", {
@@ -476,16 +490,12 @@ export async function sendBulkNotification(
     });
 
     // Get all recipient contact info
-    const recipients = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.organizationId, organizationId));
+    const recipients = await getOrganizationProfiles(organizationId);
 
     const recipientMap = new Map(recipients.map((r) => [r.id, r]));
 
     // Build payload for each recipient
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const payloads: any[] = [];
+    const payloads: NotificationPayload[] = [];
 
     for (const recipientId of recipientIds) {
       const recipient = recipientMap.get(recipientId);
@@ -494,10 +504,8 @@ export async function sendBulkNotification(
       const basePayload = {
         organizationId,
         recipientId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        type: type as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        priority: priority as any,
+        type,
+        priority,
         subject,
         body: message,
         userId,

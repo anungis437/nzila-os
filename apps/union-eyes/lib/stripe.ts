@@ -14,7 +14,7 @@ import type StripeType from 'stripe'
 
 export const stripe: StripeType = new Proxy({} as StripeType, {
   get(_target, prop) {
-    return (getStripeClient() as unknown as Record<string | symbol, unknown>)[prop];
+    return (getStripeClient() as any as Record<string | symbol, unknown>)[prop];
   },
 });
 export { verifyWebhookSignature }

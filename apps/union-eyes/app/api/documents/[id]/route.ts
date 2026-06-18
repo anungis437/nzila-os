@@ -2,39 +2,36 @@
  * CRUD item route for documents
  * Adds download audit logging + confidentiality enforcement + immutability guard
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
 import { documents, caseDocuments } from '@/db/schema';
 import { withApi } from '@/lib/api/with-api';
 import { db } from '@/db/db';
 import { eq, and } from 'drizzle-orm';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
+import { ApiError } from '@/lib/api/errors';
+import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 
 export const dynamic = 'force-dynamic';
 
-const crud = crudRoutes({
-  table: documents,
-  pk: 'id',
-  tags: ["Content"],
-  orgScoped: true,
-  itemRoute: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
+const LEGACY_DOCUMENT_API_ENABLED = process.env.LEGACY_DOCUMENT_API_ENABLED === 'true';
 
 /** GET with download audit trail + confidentiality enforcement */
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    auth: { required: true, minRole: 'app_owner' },
     openapi: { tags: ['Content'], summary: 'Get document by ID' },
   },
   async ({ request, organizationId, userId, user }) => {
+    if (!LEGACY_DOCUMENT_API_ENABLED) {
+      throw ApiError.notImplemented('Legacy documents endpoint is disabled. Use /api/documents/repository.');
+    }
+
     const id = request.url.split('/documents/')[1]?.split('?')[0]?.split('/')[0];
-    if (!id) return { error: 'Document ID required' };
+    if (!id) throw ApiError.badRequest('Document ID required');
 
     const doc = await db.query.documents.findFirst({
       where: and(eq(documents.id, id), eq(documents.organizationId, organizationId!)),
     });
-    if (!doc || doc.deletedAt) return { error: 'Document not found' };
+    if (!doc || doc.deletedAt) throw ApiError.notFound('Document', id);
 
     // Confidentiality enforcement: restricted/confidential docs require steward+
     if (doc.isConfidential || doc.accessLevel === 'confidential' || doc.accessLevel === 'restricted') {
@@ -42,7 +39,7 @@ export const GET = withApi(
       const roleHierarchy: Record<string, number> = { member: 20, steward: 50, admin: 140, super_admin: 160, app_owner: 200 };
       const currentRole = user?.role ?? '';
       if ((roleHierarchy[currentRole] ?? 0) < (roleHierarchy[minRole] ?? 0)) {
-        return { error: 'Insufficient access level for this document' };
+        throw ApiError.forbidden('Insufficient access level for this document');
       }
     }
 
@@ -68,17 +65,86 @@ export const GET = withApi(
   },
 );
 
-export const PATCH = crud.PATCH;
+export const PATCH = withApi(
+  {
+    auth: { required: true, minRole: 'app_owner' },
+    openapi: { tags: ['Content'], summary: 'Update legacy document by ID' },
+  },
+  async ({ request, organizationId }) => {
+    if (!LEGACY_DOCUMENT_API_ENABLED) {
+      throw ApiError.notImplemented('Legacy documents endpoint is disabled. Use /api/documents/repository.');
+    }
+
+    const id = request.url.split('/documents/')[1]?.split('?')[0]?.split('/')[0];
+    if (!id) throw ApiError.badRequest('Document ID required');
+
+    const existing = await db.query.documents.findFirst({
+      where: and(eq(documents.id, id), eq(documents.organizationId, organizationId!)),
+    });
+
+    if (!existing || existing.deletedAt) {
+      throw ApiError.notFound('Document', id);
+    }
+
+    const blockedReason = getDocumentMutabilityBlockReason({ metadata: existing.metadata });
+    if (blockedReason) {
+      throw ApiError.conflict(`Document update blocked: ${blockedReason}`);
+    }
+
+    const payload = await request.json();
+    const updates = payload && typeof payload === 'object' && !Array.isArray(payload)
+      ? payload as Record<string, unknown>
+      : {};
+
+    // Prevent modifying identity/scope fields from legacy endpoint.
+    delete updates.id;
+    delete updates.organizationId;
+    delete updates.uploadedBy;
+    delete updates.deletedAt;
+
+    const [updated] = await db
+      .update(documents)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(documents.id, id), eq(documents.organizationId, organizationId!)))
+      .returning();
+
+    if (!updated) {
+      throw ApiError.notFound('Document', id);
+    }
+
+    return { data: updated };
+  },
+);
 
 /** DELETE with immutability guard for evidence-linked documents */
 export const DELETE = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, minRole: 'app_owner' },
     openapi: { tags: ['Content'], summary: 'Delete document (soft)' },
   },
   async ({ request, organizationId }) => {
+    if (!LEGACY_DOCUMENT_API_ENABLED) {
+      throw ApiError.notImplemented('Legacy documents endpoint is disabled. Use /api/documents/repository.');
+    }
+
     const id = request.url.split('/documents/')[1]?.split('?')[0]?.split('/')[0];
-    if (!id) return { error: 'Document ID required' };
+    if (!id) throw ApiError.badRequest('Document ID required');
+
+    const document = await db.query.documents.findFirst({
+      where: and(eq(documents.id, id), eq(documents.organizationId, organizationId!)),
+    });
+
+    if (!document || document.deletedAt) {
+      throw ApiError.notFound('Document', id);
+    }
+
+    const blockedReason = getDocumentMutabilityBlockReason({ metadata: document.metadata });
+    if (blockedReason) {
+      throw ApiError.conflict(`Document delete blocked: ${blockedReason}`);
+    }
 
     // Check if document is immutable (linked as evidence)
     const immutableLink = await db.query.caseDocuments.findFirst({
@@ -89,7 +155,7 @@ export const DELETE = withApi(
     });
 
     if (immutableLink) {
-      return { error: 'Cannot delete: document is linked as immutable evidence' };
+      throw ApiError.conflict('Cannot delete: document is linked as immutable evidence');
     }
 
     // Soft delete

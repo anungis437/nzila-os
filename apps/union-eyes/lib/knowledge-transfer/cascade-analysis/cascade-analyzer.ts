@@ -27,12 +27,16 @@ export interface GovernanceCascadeAnalysis {
 export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCascadeAnalysis> {
   const propagationMap = await buildDependencyPropagationMap(orgId);
 
-  const governanceNodes = propagationMap.nodes
-    .filter((n: any) => n.category === 'governance' || n.category === 'compliance')
-    .map((n: any) => ({ id: n.id, label: n.label, criticality: n.continuitySensitivity }));
+  const governanceNodes: GovernanceCascadeAnalysis['governanceNodes'] = propagationMap.nodes
+    .filter((node) => node.category === 'governance' || node.category === 'compliance')
+    .map((node) => ({
+      id: node.id,
+      label: node.label,
+      criticality: node.continuitySensitivity === 'critical' ? 'critical' : 'high',
+    }));
 
-  const cascadeRisks = governanceNodes.map((gov: any) => {
-    const impact = propagationMap.downstreamImpacts.find((d: any) => d.nodeId === gov.id);
+  const cascadeRisks = governanceNodes.map((gov) => {
+    const impact = propagationMap.downstreamImpacts.find((downstreamImpact) => downstreamImpact.nodeId === gov.id);
     const severity = (gov.criticality === 'critical' ? 'critical' : 'high') as 'high' | 'critical';
     return {
       governanceGap: gov.label,
@@ -43,8 +47,8 @@ export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCasc
   });
 
   const regulatoryRisks = [
-    ...new Set(cascadeRisks.flatMap((c: any) => c.impactedAreas)),
-  ].map((area: any) => `Regulatory continuity risk: ${area}`);
+    ...new Set(cascadeRisks.flatMap((risk) => risk.impactedAreas)),
+  ].map((area) => `Regulatory continuity risk: ${area}`);
 
   return {
     organizationId: orgId,

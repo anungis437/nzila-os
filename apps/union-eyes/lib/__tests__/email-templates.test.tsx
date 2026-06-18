@@ -71,4 +71,18 @@ describe('email-templates', () => {
 
     expect(element).toBeDefined();
   });
+
+  it('renderClaimStatusEmail returns the rendered HTML string', async () => {
+    const { renderClaimStatusEmail } = await import('../email-templates');
+    const html = await renderClaimStatusEmail({
+      claimId: 'CLM-002',
+      claimTitle: 'Render Claim',
+      claimType: 'grievance',
+      newStatus: 'submitted',
+      memberName: 'Jane Doe',
+      claimUrl: 'https://example.com/claims/CLM-002',
+    });
+
+    expect(html).toBe('<html>rendered</html>');
+  });
 });

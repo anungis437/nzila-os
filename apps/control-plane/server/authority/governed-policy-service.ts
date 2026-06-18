@@ -16,12 +16,11 @@ import 'server-only'
 import { createLogger } from '@nzila/os-core'
 import {
   governedPolicies,
-  policyGovernanceEvents,
   type GovernedPolicyRow,
   type NewGovernedPolicyRow,
   type NewPolicyGovernanceEventRow,
 } from '@nzila/db/schema'
-import { eq, and, isNull, desc, sql } from 'drizzle-orm'
+import { eq, and, desc, sql } from 'drizzle-orm'
 
 import {
   validateTransition,

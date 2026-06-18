@@ -31,8 +31,10 @@ paths = [
   '''db/seeds/.*\.sql$''',             # Seed files use env-var placeholders, not real secrets
   '''auth_core/tests_clerk_webhooks\.py$''',  # Test file with synthetic webhook secret
   '''__tests__/.*\.test\.ts$''',       # Unit tests with mock env values
+  '''__tests__/.*fixtures.*\.ts$''',   # Test fixtures (e.g. self-signed PKI keys for unit tests)
   '''\.test\.ts$''',                   # Test files with mock values
   '''\.spec\.ts$''',                   # Spec files with mock values
+  '''playwright\.config\.ts$''',       # Playwright configs use local test DB defaults + test secrets
   '''tests/test_.*\.py$''',            # Python test files with mock values
   '''Dockerfile$''',                   # Build-time placeholder ARGs
   '''docker-compose.*\.yml$''',        # Dev compose files with local credentials

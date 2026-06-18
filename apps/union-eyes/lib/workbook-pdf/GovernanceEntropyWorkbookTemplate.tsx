@@ -36,7 +36,6 @@ import type {
   ModuleNarrative,
 } from './workbookNarrativeEngine';
 import {
-  buildLandscapeNarrative,
   buildLineageNarrative,
   buildBreakpointNarrative,
   buildModernizationNarrative,

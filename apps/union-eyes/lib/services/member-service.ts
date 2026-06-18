@@ -25,6 +25,9 @@ import { logger } from "@/lib/logger";
 export type NewMember = typeof organizationMembers.$inferInsert;
 export type Member = typeof organizationMembers.$inferSelect;
 
+type MemberStatusValue = (typeof organizationMembers.status)['_']['data'];
+type MemberRoleValue = (typeof organizationMembers.role)['_']['data'];
+
 export interface MemberFilters {
   organizationId?: string;
   status?: string[];
@@ -143,13 +146,11 @@ export async function listMembers(
     }
 
     if (filters.status && filters.status.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(organizationMembers.status, filters.status as any));
+      conditions.push(inArray(organizationMembers.status, filters.status as MemberStatusValue[]));
     }
 
     if (filters.role && filters.role.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(organizationMembers.role, filters.role as any));
+      conditions.push(inArray(organizationMembers.role, filters.role as MemberRoleValue[]));
     }
 
     if (filters.department) {
@@ -353,8 +354,7 @@ export async function bulkUpdateMemberStatus(
     await db
       .update(organizationMembers)
       .set({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        status: status as any,
+        status: status as MemberStatusValue,
         updatedAt: new Date(),
       })
       .where(inArray(organizationMembers.id, memberIds));
@@ -390,8 +390,7 @@ export async function bulkUpdateMemberRole(
     await db
       .update(organizationMembers)
       .set({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        role: role as any,
+        role: role as MemberRoleValue,
         updatedAt: new Date(),
       })
       .where(inArray(organizationMembers.id, memberIds));
@@ -457,13 +456,11 @@ export async function searchMembers(
     }
 
     if (filters?.status && filters.status.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(organizationMembers.status, filters.status as any));
+      conditions.push(inArray(organizationMembers.status, filters.status as MemberStatusValue[]));
     }
 
     if (filters?.role && filters.role.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(organizationMembers.role, filters.role as any));
+      conditions.push(inArray(organizationMembers.role, filters.role as MemberRoleValue[]));
     }
 
     if (filters?.department) {
@@ -659,8 +656,7 @@ export async function getMembersByRole(
       .where(
         and(
           eq(organizationMembers.organizationId, organizationId),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq(organizationMembers.role, role as any),
+          eq(organizationMembers.role, role as MemberRoleValue),
           sql`${organizationMembers.deletedAt} IS NULL`
         )
       );

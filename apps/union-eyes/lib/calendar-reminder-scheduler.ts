@@ -31,6 +31,9 @@ export interface ReminderConfig {
   channels: ('email' | 'sms' | 'push' | 'in-app')[];
 }
 
+type CalendarEventRow = typeof calendarEvents.$inferSelect;
+type EventAttendeeRow = typeof eventAttendees.$inferSelect;
+
 export const REMINDER_PRESETS = {
   AT_TIME: 0,
   FIFTEEN_MINUTES: 15,
@@ -103,10 +106,8 @@ export async function scheduleEventReminders(
             .insert(eventReminders)
             .values({
               eventId,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              organizationId: (event as any).organizationId,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              userId: (attendee as any).userId || (attendee as any).email,
+              organizationId: event.organizationId,
+              userId: attendee.userId || attendee.email,
               reminderMinutes: minutes as number,
               reminderType: channel,
               scheduledFor: reminderTime,
@@ -133,18 +134,16 @@ throw error;
  */
 async function scheduleReminderJob(
   reminderId: string,
-  event: unknown,
-  attendee: unknown,
+  event: CalendarEventRow,
+  attendee: EventAttendeeRow,
   minutes: number,
   channel: 'email' | 'sms' | 'push' | 'in-app',
   scheduledFor: Date
 ) {
   try {
     const timeUntilReminder = getTimeDescription(minutes);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const evt = event as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const att = attendee as any;
+    const evt = event;
+    const att = attendee;
 
     // Prepare notification content
     const notification = {
@@ -207,12 +206,12 @@ export async function cancelEventReminders(eventId: string): Promise<number> {
       
       if (queue) {
         // Get all jobs in the queue
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const jobs = await (queue as any).getJobs(['waiting', 'delayed', 'active']);
+        const jobs = await (queue as {
+          getJobs: (states: string[]) => Promise<Array<{ data: { metadata?: { eventId?: string } }; remove: () => Promise<void> }>>;
+        }).getJobs(['waiting', 'delayed', 'active']);
         
         // Filter jobs related to this event
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const eventJobs = jobs.filter((job: any) => 
+        const eventJobs = jobs.filter((job) => 
           job.data.metadata?.eventId === eventId
         );
         
@@ -338,7 +337,7 @@ throw error;
 export async function getPendingReminders(options?: {
   limit?: number;
   lookAheadMinutes?: number;
-}): Promise<unknown[]> {
+}): Promise<Array<typeof eventReminders.$inferSelect>> {
   try {
     const limit = options?.limit || 100;
     const lookAhead = options?.lookAheadMinutes || 15;

@@ -50,7 +50,6 @@ function ResilienceSparkline({ points }: { points: ResilienceSnapshotPoint[] }) 
   const xs = points.map((_, i) => padding + ((i / (points.length - 1)) * (width - padding * 2)));
   const ys = points.map((p) => height - padding - ((p.resilienceScore - min) / range) * (height - padding * 2));
 
-  const pathD = xs.map((x, i) => `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${ys[i].toFixed(1)}`).join(' ');
   const latest = scores[scores.length - 1];
   const first = scores[0];
   const delta = latest - first;
@@ -166,16 +165,20 @@ export function CognitionTimeline() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoading(true);
-    setError(null);
-    fetch('/api/exit-interviews/cognition-memory')
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.data) setStore(json.data as CognitionMemoryStore);
-        else setError(json.error ?? 'Failed to load cognition memory');
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setIsLoading(false));
+    const timeoutId = window.setTimeout(() => {
+      setIsLoading(true);
+      setError(null);
+      fetch('/api/exit-interviews/cognition-memory')
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.data) setStore(json.data as CognitionMemoryStore);
+          else setError(json.error ?? 'Failed to load cognition memory');
+        })
+        .catch((e) => setError(e.message))
+        .finally(() => setIsLoading(false));
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const filteredEntries = store

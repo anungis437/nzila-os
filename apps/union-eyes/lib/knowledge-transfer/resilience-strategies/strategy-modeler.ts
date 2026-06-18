@@ -13,7 +13,6 @@ import {
   type StrategyType,
   type ResilienceStrategyModel,
   type ResilienceRoadmap,
-  type StrategyMilestone,
   type MaturityStage,
 } from './strategy-models';
 
@@ -143,7 +142,7 @@ const STRATEGY_CATALOG: Record<StrategyType, Omit<ResilienceStrategyModel,
 
 function inferCurrentMaturity(
   resilienceScore: number,
-  strategyType: StrategyType,
+  _strategyType: StrategyType,
 ): MaturityStage {
   if (resilienceScore >= 75) return 'managed';
   if (resilienceScore >= 60) return 'developing';
@@ -187,7 +186,7 @@ export async function buildResilienceRoadmap(orgId: string): Promise<ResilienceR
     calculateResilienceIndex(orgId),
   ]);
 
-  const nodes = propagationMap.nodes as any[];
+  const nodes = propagationMap.nodes;
   const singleSourceCount = nodes.filter((n) => n.isSingleSource).length;
   const govSingleSource = nodes.filter((n) => (n.category === 'governance' || n.category === 'compliance') && n.isSingleSource).length;
   const vendorSingleSource = nodes.filter((n) => (n.category === 'vendor' || n.nodeType === 'vendor') && n.isSingleSource).length;

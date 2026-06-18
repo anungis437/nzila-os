@@ -1,8 +1,8 @@
 /**
  * @nzila/observability — App Telemetry Factory tests
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createAppTelemetry, type AppTelemetryConfig } from '../app-telemetry'
+import { describe, it, expect, vi } from 'vitest'
+import { createAppTelemetry } from '../app-telemetry'
 
 describe('createAppTelemetry', () => {
   it('creates a telemetry stack with correct appId', () => {

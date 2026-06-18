@@ -16,9 +16,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock('drizzle-orm', () => ({
   like: vi.fn(),
   ilike: vi.fn(),
   not: vi.fn(),
-  ne: vi.fn((...a: unknown[]) => a),
+  ne: vi.fn((...a: any[]) => a),
   count: vi.fn(),
   sum: vi.fn(),
   avg: vi.fn(),
@@ -112,7 +112,7 @@ describe('redemption-service', () => {
     it('creates a redemption within a transaction', async () => {
       const redemption = { id: 'r-1', status: 'initiated', creditsSpent: 100 };
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           insert: vi.fn().mockReturnValue({
             values: vi.fn().mockReturnValue({
@@ -186,7 +186,7 @@ describe('redemption-service', () => {
         providerPayloadJson: {},
       };
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: {
             rewardRedemptions: {
@@ -212,7 +212,7 @@ describe('redemption-service', () => {
     });
 
     it('throws when redemption not found', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(null) } },
         };
@@ -223,7 +223,7 @@ describe('redemption-service', () => {
     });
 
     it('throws when trying to cancel ordered redemption', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: {
             rewardRedemptions: {
@@ -252,7 +252,7 @@ describe('redemption-service', () => {
         providerPayloadJson: {},
       };
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: {
             rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) },
@@ -278,7 +278,7 @@ describe('redemption-service', () => {
     it('returns existing if already refunded (idempotent)', async () => {
       const redemption = { id: 'r-1', status: 'refunded', orgId: 'org-1', userId: 'u-1', creditsSpent: 100, providerPayloadJson: {} };
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
         };
@@ -374,7 +374,7 @@ describe('redemption-service', () => {
         status: 'initiated', providerPayloadJson: null,
       };
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
           update: vi.fn().mockReturnValue({
@@ -399,7 +399,7 @@ describe('redemption-service', () => {
         status: 'cancelled', providerPayloadJson: {},
       };
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
         };
@@ -418,7 +418,7 @@ describe('redemption-service', () => {
         status: 'ordered', providerPayloadJson: null,
       };
 
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
           update: vi.fn().mockReturnValue({
@@ -438,7 +438,7 @@ describe('redemption-service', () => {
     });
 
     it('throws when redemption not found', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const tx = {
           query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(null) } },
         };

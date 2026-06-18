@@ -2,7 +2,7 @@
  * Tests for ShellProvider and useShell hook.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, act, fireEvent, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import React from 'react'
 import { ShellProvider, useShell } from './provider'
 import { ModuleRegistry } from '../registry/registry'

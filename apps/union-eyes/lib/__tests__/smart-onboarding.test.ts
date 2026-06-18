@@ -16,20 +16,20 @@ vi.mock('@/db/db', () => ({
     query: {
       organizations: {
         findFirst: mocks.mockOrgFindFirst,
-        findMany: (...args: unknown[]) => {
+        findMany: (...args: any[]) => {
           // Execute orderBy callback for coverage (drizzle passes it as function)
           const opts = args[0] as Record<string, unknown> | undefined;
           if (opts && typeof opts.orderBy === 'function') {
-            (opts.orderBy as (...args: unknown[]) => unknown)({}, { desc: (x: unknown) => x, asc: (x: unknown) => x });
+            (opts.orderBy as (...args: any[]) => unknown)({}, { desc: (x: any) => x, asc: (x: any) => x });
           }
           return mocks.mockOrgFindMany();
         },
       },
       sharedClauseLibrary: {
-        findMany: (...args: unknown[]) => {
+        findMany: (...args: any[]) => {
           const opts = args[0] as Record<string, unknown> | undefined;
           if (opts && typeof opts.orderBy === 'function') {
-            (opts.orderBy as (...args: unknown[]) => unknown)({}, { desc: (x: unknown) => x, asc: (x: unknown) => x });
+            (opts.orderBy as (...args: any[]) => unknown)({}, { desc: (x: any) => x, asc: (x: any) => x });
           }
           return mocks.mockClauseFindMany();
         },
@@ -53,12 +53,12 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => ({ _t: 'eq', _a: a })),
-  and: vi.fn((...a: unknown[]) => ({ _t: 'and', _a: a })),
-  or: vi.fn((...a: unknown[]) => ({ _t: 'or', _a: a })),
-  inArray: vi.fn((...a: unknown[]) => ({ _t: 'inArray', _a: a })),
-  gte: vi.fn((...a: unknown[]) => ({ _t: 'gte', _a: a })),
-  sql: Object.assign(vi.fn((...a: unknown[]) => ({ _t: 'sql', _a: a })), { raw: vi.fn() }),
+  eq: vi.fn((...a: any[]) => ({ _t: 'eq', _a: a })),
+  and: vi.fn((...a: any[]) => ({ _t: 'and', _a: a })),
+  or: vi.fn((...a: any[]) => ({ _t: 'or', _a: a })),
+  inArray: vi.fn((...a: any[]) => ({ _t: 'inArray', _a: a })),
+  gte: vi.fn((...a: any[]) => ({ _t: 'gte', _a: a })),
+  sql: Object.assign(vi.fn((...a: any[]) => ({ _t: 'sql', _a: a })), { raw: vi.fn() }),
 }));
 
 vi.mock('@/lib/logger', () => ({

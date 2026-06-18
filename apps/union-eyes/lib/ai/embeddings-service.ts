@@ -6,7 +6,12 @@
  */
 
 import { logger } from '@/lib/logger';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 
 // Embedding configuration
 export interface EmbeddingsConfig {
@@ -71,12 +76,15 @@ export class EmbeddingsService {
   /**
    * Generate embedding for a single text
    */
-  async embed(text: string): Promise<Embedding> {
+  async embed(
+    text: string,
+    options?: { organizationId?: string },
+  ): Promise<Embedding> {
     if (!this.isInitialized) {
       await this.initialize();
     }
 
-    const vector = await this.generateEmbedding(text);
+    const vector = await this.generateEmbedding(text, options?.organizationId);
 
     return {
       id: this.generateId(),
@@ -93,7 +101,10 @@ export class EmbeddingsService {
   /**
    * Generate embeddings for multiple texts
    */
-  async embedBatch(texts: string[]): Promise<Embedding[]> {
+  async embedBatch(
+    texts: string[],
+    options?: { organizationId?: string },
+  ): Promise<Embedding[]> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -103,7 +114,7 @@ export class EmbeddingsService {
     // Process in batches
     for (let i = 0; i < texts.length; i += this.config.batchSize) {
       const batch = texts.slice(i, i + this.config.batchSize);
-      const vectors = await this.generateBatchEmbeddings(batch);
+      const vectors = await this.generateBatchEmbeddings(batch, options?.organizationId);
       
       for (let j = 0; j < batch.length; j++) {
         embeddings.push({
@@ -149,7 +160,10 @@ export class EmbeddingsService {
   /**
    * Generate embedding using @nzila/ai-sdk (INV-01 compliant)
    */
-  private async generateEmbedding(text: string): Promise<number[]> {
+  private async generateEmbedding(
+    text: string,
+    _organizationId?: string,
+  ): Promise<number[]> {
     const ai = getAiClient();
     const response = await ai.embed({
       orgId: UE_SYSTEM_ORG_ID,
@@ -164,7 +178,10 @@ export class EmbeddingsService {
   /**
    * Generate batch embeddings via @nzila/ai-sdk
    */
-  private async generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
+  private async generateBatchEmbeddings(
+    texts: string[],
+    _organizationId?: string,
+  ): Promise<number[][]> {
     const ai = getAiClient();
     const response = await ai.embed({
       orgId: UE_SYSTEM_ORG_ID,

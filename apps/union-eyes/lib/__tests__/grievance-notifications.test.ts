@@ -37,10 +37,10 @@ vi.mock('@/lib/services/notification-service', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => ({ _t: 'eq', _a: a })),
-  relations: vi.fn((...a: unknown[]) => a),
-  sql: Object.assign(vi.fn((...a: unknown[]) => a), {
-    raw: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => ({ _t: 'eq', _a: a })),
+  relations: vi.fn((...a: any[]) => a),
+  sql: Object.assign(vi.fn((...a: any[]) => a), {
+    raw: vi.fn((...a: any[]) => a),
   }),
 }));
 

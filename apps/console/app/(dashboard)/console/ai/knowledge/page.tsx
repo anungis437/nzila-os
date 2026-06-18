@@ -15,10 +15,9 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { IngestButton } from './ingest-button'
+import { resolveConsoleEntityId } from '@/lib/entity-context'
 
 export const dynamic = 'force-dynamic'
-
-const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 
 async function getKnowledgeData(orgId: string) {
   const sources = await platformDb
@@ -64,11 +63,12 @@ const INGESTION_STATUS_COLORS: Record<string, string> = {
 export default async function AiKnowledgePage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
-  if (!DEFAULT_ENTITY_ID) {
-    return <div className="p-8 text-red-600">NZILA_DEFAULT_ENTITY_ID not configured</div>
+  const orgId = await resolveConsoleEntityId(userId)
+  if (!orgId) {
+    return <div className="p-8 text-red-600">No active org membership or fallback entity configured</div>
   }
 
-  const { sources, ingestionRuns, profileCount, routeCount } = await getKnowledgeData(DEFAULT_ENTITY_ID)
+  const { sources, ingestionRuns, profileCount, routeCount } = await getKnowledgeData(orgId)
 
   const runsBySource = new Map<string, typeof ingestionRuns>()
   for (const run of ingestionRuns) {
@@ -128,7 +128,7 @@ export default async function AiKnowledgePage() {
             Create a low-risk action proposal to ingest text content into the knowledge index.
           </p>
           <div className="mt-4">
-            <IngestButton orgId={DEFAULT_ENTITY_ID} />
+            <IngestButton orgId={orgId} />
           </div>
         </div>
 

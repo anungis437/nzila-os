@@ -75,7 +75,6 @@ type DraftBroadcast = {
 };
 
 export function Cupe4373CommunicationsPage() {
-  const locale = useLocale();
   const [drafts, setDrafts] = useState<DraftBroadcast[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -87,12 +86,16 @@ export function Cupe4373CommunicationsPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      const raw = window.sessionStorage.getItem(STORAGE_KEY);
-      if (raw) setDrafts(JSON.parse(raw) as DraftBroadcast[]);
-    } catch {
-      /* no-op */
-    }
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const raw = window.sessionStorage.getItem(STORAGE_KEY);
+        if (raw) setDrafts(JSON.parse(raw) as DraftBroadcast[]);
+      } catch {
+        /* no-op */
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   function persist(next: DraftBroadcast[]) {
@@ -149,7 +152,7 @@ export function Cupe4373CommunicationsPage() {
             </Badge>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Communications</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              The local's broadcast outbox. Every message is attributable, audience-scoped, and
+              The local&apos;s broadcast outbox. Every message is attributable, audience-scoped, and
               retained under the same operational memory policy as the rest of the file.
             </p>
           </div>

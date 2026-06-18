@@ -19,6 +19,8 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+
+const LEGACY_DOCUMENT_API_ENABLED = process.env.LEGACY_DOCUMENT_API_ENABLED === 'true';
 /**
  * Validation schemas for bulk operations
  */
@@ -64,7 +66,14 @@ const bulkOperationSchema = z.discriminatedUnion('operation', [
  * - tagOperation: "add" | "remove" | "replace" (for tag operation)
  */
 export const POST = withRoleAuth('steward', async (request, context) => {
-  let rawBody: unknown;
+  if (!LEGACY_DOCUMENT_API_ENABLED) {
+    return standardErrorResponse(
+      ErrorCode.NOT_IMPLEMENTED,
+      'Legacy documents bulk endpoint is disabled. Use /api/documents/repository.',
+    );
+  }
+
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch (error) {
@@ -85,7 +94,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
   }
 
   const body = parsed.data;
-  const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
+  const { userId, organizationId } = context as { userId: string; organizationId: string };
 
   const orgId = (body as Record<string, unknown>)["organizationId"] ?? (body as Record<string, unknown>)["orgId"] ?? (body as Record<string, unknown>)["organization_id"] ?? (body as Record<string, unknown>)["org_id"] ?? (body as Record<string, unknown>)["unionId"] ?? (body as Record<string, unknown>)["union_id"] ?? (body as Record<string, unknown>)["localId"] ?? (body as Record<string, unknown>)["local_id"];
   if (typeof orgId === 'string' && orgId.length > 0 && orgId !== context.organizationId) {
@@ -100,7 +109,7 @@ try {
 
       switch (body.operation) {
         case "move":
-          result = await bulkMoveDocuments(body.documentIds, body.targetFolderId);
+          result = await bulkMoveDocuments(body.documentIds, body.targetFolderId, organizationId);
           logApiAuditEvent({
             timestamp: new Date().toISOString(), userId,
             endpoint: '/api/documents/bulk',
@@ -112,7 +121,7 @@ try {
           break;
 
         case "tag":
-          result = await bulkUpdateTags(body.documentIds, body.tags, body.tagOperation);
+          result = await bulkUpdateTags(body.documentIds, body.tags, body.tagOperation, organizationId);
           logApiAuditEvent({
             timestamp: new Date().toISOString(), userId,
             endpoint: '/api/documents/bulk',
@@ -124,7 +133,7 @@ try {
           break;
 
         case "delete":
-          result = await bulkDeleteDocuments(body.documentIds);
+          result = await bulkDeleteDocuments(body.documentIds, organizationId);
           logApiAuditEvent({
             timestamp: new Date().toISOString(), userId,
             endpoint: '/api/documents/bulk',
@@ -136,7 +145,7 @@ try {
           break;
 
         case "ocr":
-          result = await bulkProcessOCR(body.documentIds);
+          result = await bulkProcessOCR(body.documentIds, organizationId);
           logApiAuditEvent({
             timestamp: new Date().toISOString(), userId,
             endpoint: '/api/documents/bulk',
@@ -166,4 +175,4 @@ return standardErrorResponse(
     }
 });
 
-
+

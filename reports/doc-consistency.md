@@ -1,29 +1,29 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-06-02T14:54:33.879Z
+> Generated: 2026-06-17T18:00:08.326Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 1829 |
-| Total Findings | 2574 |
+| Files Scanned | 2003 |
+| Total Findings | 2583 |
 | Errors | 0 |
-| Warnings | 1212 |
-| Info | 1362 |
+| Warnings | 1214 |
+| Info | 1369 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1355 |
-| stale-reference | 1041 |
+| naming-inconsistency | 1362 |
+| stale-reference | 1043 |
 | missing-package-readme | 105 |
 | stale-package-ref | 63 |
 | stale-date | 7 |
 | missing-required-doc | 3 |
 
-## stale-reference (1041)
+## stale-reference (1043)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -835,6 +835,8 @@
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:137` — Possible broken link: [Reference: AI Gateway](../reference/ai-gateway.md)
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:138` — Possible broken link: [Explanation: AI Risk Management](../explanation/ai-risk-management.md)
 - 🟡 `docs/categories/stakeholders/tutorials/first-app.md:135` — Possible broken link: [Reference: Package Catalogue](../reference/packages.md)
+- 🟡 `docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md:8` — Possible broken link: [RICHARD_SHARPE_VALIDATION_PROTOCOL.md](./RICHARD_SHARPE_VALIDATION_PROTOCOL.md)
+- 🟡 `docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md:278` — Possible broken link: [GOVERNMENT_VALIDATION_REPORT_V1.md](./GOVERNMENT_VALIDATION_REPORT_V1.md)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 - 🟡 `governance/business/README.md:158` — Possible broken link: [Portfolio Deep Dive Analysis](../PORTFOLIO_DEEP_DIVE.md)
 - 🟡 `governance/business/README.md:159` — Possible broken link: [Migration Plan](../MIGRATION_PLAN.md)
@@ -1133,7 +1135,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1355)
+## naming-inconsistency (1362)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2207,6 +2209,10 @@
 - ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:170` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/DOCTRINE_STRESS_TEST.md:182` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/DOCTRINE_TRACEABILITY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md:12` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md:38` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md:129` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/doctrine/NZILA_CONSOLE_WORKSPACE_MAP.md:8` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/SCORING_MODELS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/constitution.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/constitution.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2354,7 +2360,7 @@
 - ℹ️ `docs/nzila-tier3-operating-infrastructure/full-tier3-operating-infrastructure-review.md:62` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/OCI_METHOD.md:321` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md:107` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md:118` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2380,6 +2386,7 @@
 - ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/portfolio-matrix.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/proof-center/portfolio-proof-index.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/any-elimination.md:158` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md:43` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:63` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:67` — "orgId" should be "org_id" (tenant identifier)
@@ -2467,10 +2474,12 @@
 - ℹ️ `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:249` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:295` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:296` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `governance/ga/GA_CHECK_REPORT.md:49` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `governance/ga/GA_CHECK_REPORT.md:52` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/privacy/README.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/privacy/ai-pia/README.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/privacy/dpia/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `governance/privacy/incidents/exercises/2026-Q2/README.md:3` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `governance/privacy/policies/data-classification-policy.md:17` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/privacy/policies/data-classification-standard.md:25` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/reports/ALIGNMENT_REPORT.md:3` — "NZILAOS" should be "NzilaOS" (platform name)
@@ -2493,13 +2502,13 @@
 
 ## stale-date (7)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 105 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 105 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 120 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 120 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 120 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 120 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 120 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 120 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 120 days old — may be stale
 
 ## missing-required-doc (3)
 

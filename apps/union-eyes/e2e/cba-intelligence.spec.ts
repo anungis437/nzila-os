@@ -9,7 +9,7 @@
  * page is behind platform authentication and commercial_reporting
  * entitlement.
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { ensureServerReady, seedOrVerifyTestState } from '../tests/e2e/_helpers';
 import { loginAsRole } from './helpers/auth';
 
@@ -23,13 +23,13 @@ test.describe("Labor continuity intelligence page", () => {
     await seedOrVerifyTestState(request);
   });
 
-  async function authenticateExecutiveSession(page: Parameters<typeof test>[0] extends never ? never : any) {
+  async function authenticateExecutiveSession(page: Page) {
     // Use loginAsRole so cookie injection works in CI (PLAYWRIGHT_TEST_AUTH=true path)
     // avoids the real /api/auth/login call which is unreliable in test environments.
     await loginAsRole(page, 'executive');
   }
 
-  async function hasCommercialReportingAccess(page: Parameters<typeof test>[0] extends never ? never : any) {
+  async function hasCommercialReportingAccess(page: Page) {
     const accessResponse = await page.request.get('/api/cba-intelligence/sources');
     expect([200, 403]).toContain(accessResponse.status());
     return accessResponse.status() === 200;
@@ -76,7 +76,68 @@ test.describe("Labor continuity intelligence page", () => {
     const sourcesTab = primaryTabList.getByRole("tab", { name: "Sources" });
     await expect(sourcesTab).toHaveAttribute("aria-selected", "true", { timeout: 10_000 });
 
-    for (const tabName of ["Ingestion", "Agreements", "Review", "Benchmark", "Freshness"]) {
+    await primaryTabList.getByRole("tab", { name: "Ingestion" }).click();
+    await expect(page).toHaveURL(/\/dashboard\/cba-intelligence/);
+    await expect(page.getByRole("tabpanel")).toBeVisible();
+
+    await primaryTabList.getByRole("tab", { name: "Agreements" }).click();
+    await expect(page).toHaveURL(/\/dashboard\/cba-intelligence/);
+    await expect(page.getByRole("tabpanel")).toBeVisible();
+    const searchInput = page.getByPlaceholder("Search agreements...");
+    const sectorInput = page.getByPlaceholder("Sector filter...");
+    const exportLink = page.getByRole("link", { name: "Export CSV" });
+    await expect(searchInput).toBeVisible();
+    await expect(sectorInput).toBeVisible();
+    await expect(exportLink).toBeVisible();
+    await expect(exportLink).toHaveAttribute("href", /\/api\/cba-intelligence\/agreements\/export/);
+
+    await searchInput.fill("PSAC");
+    await expect(exportLink).toHaveAttribute("href", /search=PSAC/);
+
+    await sectorInput.fill("public services");
+    await expect(exportLink).toHaveAttribute(
+      "href",
+      /search=PSAC.*sector=public(?:%20|\+)services|sector=public(?:%20|\+)services.*search=PSAC/,
+    );
+
+    await searchInput.fill("");
+    await sectorInput.fill("");
+    await expect(exportLink).toHaveAttribute("href", /\/api\/cba-intelligence\/agreements\/export$/);
+
+    await primaryTabList.getByRole("tab", { name: "Benchmark" }).click();
+    await expect(page.getByPlaceholder("Paste agreement UUID...")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Run Benchmark" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Save Snapshot" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Show History" })).toBeVisible();
+
+    await primaryTabList.getByRole("tab", { name: "Freshness" }).click();
+    await expect(page.getByRole("heading", { name: "Thresholds" })).toBeVisible();
+    const agingDaysInput = page.getByLabel("Aging days");
+    const staleDaysInput = page.getByLabel("Stale days");
+    const expiredDaysInput = page.getByLabel("Expired days");
+    await expect(agingDaysInput).toBeVisible();
+    await expect(staleDaysInput).toBeVisible();
+    await expect(expiredDaysInput).toBeVisible();
+    await expect(page.getByRole("button", { name: "Apply thresholds" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Reset defaults" })).toBeVisible();
+
+    await agingDaysInput.fill("30");
+    await staleDaysInput.fill("20");
+    await expiredDaysInput.fill("10");
+    await page.getByRole("button", { name: "Apply thresholds" }).click();
+    await expect(agingDaysInput).toHaveValue("30");
+    await expect(staleDaysInput).toHaveValue("31");
+    await expect(expiredDaysInput).toHaveValue("32");
+
+    await page.getByRole("button", { name: "Reset defaults" }).click();
+    await expect(agingDaysInput).toHaveValue("14");
+    await expect(staleDaysInput).toHaveValue("30");
+    await expect(expiredDaysInput).toHaveValue("90");
+
+    await expect(page.getByText("Source Freshness", { exact: true })).toBeVisible();
+    await expect(page.getByText("Distribution", { exact: true })).toBeVisible();
+
+    for (const tabName of ["Review", "Benchmark", "Freshness"]) {
       const tab = primaryTabList.getByRole("tab", { name: tabName });
       await tab.click();
       await expect(page).toHaveURL(/\/dashboard\/cba-intelligence/);

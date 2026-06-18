@@ -59,7 +59,7 @@ function pixelResponse(): NextResponse {
   });
 }
 
-function incrementStat(stats: unknown, key: string): Record<string, unknown> {
+function incrementStat(stats: any, key: string): Record<string, unknown> {
   const current =
     typeof stats === 'object' && stats !== null && !Array.isArray(stats)
       ? (stats as Record<string, unknown>)

@@ -40,7 +40,11 @@ export function Cupe4373CasesConsole({ cases: casesProp, dataSource = "static" }
   const [sessionCases, setSessionCases] = useState<NewDemoCase[]>([]);
 
   useEffect(() => {
-    setSessionCases(loadSessionCases());
+    const timeoutId = window.setTimeout(() => {
+      setSessionCases(loadSessionCases());
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const baseCases = casesProp ?? staticDemoCases;

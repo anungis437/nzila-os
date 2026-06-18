@@ -37,7 +37,7 @@ export const POST = withMinRole('admin', async (request, context: BaseAuthContex
     return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
   }
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {
@@ -54,7 +54,7 @@ export const POST = withMinRole('admin', async (request, context: BaseAuthContex
       organizationId,
       billingPeriodId: parsed.data.billingPeriodId,
       ruleId: parsed.data.ruleId,
-      localBasis: parsed.data.localBasisData as unknown as Parameters<typeof runAllocation>[0]['localBasis'],
+      localBasis: parsed.data.localBasisData as any as Parameters<typeof runAllocation>[0]['localBasis'],
       isSimulation: false,
       createdBy: userId,
     });

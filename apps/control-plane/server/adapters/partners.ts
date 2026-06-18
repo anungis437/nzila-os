@@ -5,8 +5,8 @@ import "server-only";
 
 import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
-import { auditLog, tradeCommissions, tradeDeals, tradeParties } from "@nzila/db";
-import { desc, eq, sql } from "drizzle-orm";
+import { auditLog, tradeCommissions, tradeParties } from "@nzila/db";
+import { desc, eq } from "drizzle-orm";
 import type { PartnerReferral } from "@nzila/deal-engine/types";
 import type {
   PartnerReferralAdapter as IPartnerReferralAdapter,

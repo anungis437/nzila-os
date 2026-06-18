@@ -23,11 +23,11 @@ const mocks = vi.hoisted(() => ({
 }));
 
 /** Recursive chain: every method returns the chain; await resolves to value */
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
       if (prop === 'then') {
-        return (resolve: (v: unknown) => void) => resolve(resolveValue);
+        return (resolve: (v: any) => void) => resolve(resolveValue);
       }
       return vi.fn(() => new Proxy({}, handler));
     },
@@ -69,14 +69,14 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  desc: vi.fn((a: unknown) => a),
-  asc: vi.fn((a: unknown) => a),
-  inArray: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  desc: vi.fn((a: any) => a),
+  asc: vi.fn((a: any) => a),
+  inArray: vi.fn((...a: any[]) => a),
   count: vi.fn(() => 'count_fn'),
-  gte: vi.fn((...a: unknown[]) => a),
-  lte: vi.fn((...a: unknown[]) => a),
+  gte: vi.fn((...a: any[]) => a),
+  lte: vi.fn((...a: any[]) => a),
   relations: vi.fn(() => ({})),
 }));
 
@@ -160,6 +160,7 @@ const baseEligibility = {
 describe('VotingService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockSelect.mockReset();
     mocks.mockSessionsFindFirst.mockResolvedValue(baseSession);
     mocks.mockVotesFindFirst.mockResolvedValue(null);
     mocks.mockEligibilityFindFirst.mockResolvedValue(baseEligibility);
@@ -208,12 +209,32 @@ describe('VotingService', () => {
       expect(r.page).toBe(1);
     });
 
+    it('falls back to 0 when count is missing', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{}]))
+        .mockReturnValueOnce(chain([]));
+      const r = await listVotingSessions({});
+      expect(r.total).toBe(0);
+    });
+
     it('applies filters', async () => {
       mocks.mockSelect
         .mockReturnValueOnce(chain([{ count: 1 }]))
         .mockReturnValueOnce(chain([baseSession]));
       const r = await listVotingSessions({ organizationId: 'org-1', status: ['active'] });
       expect(r.total).toBe(1);
+    });
+
+    it('applies type and date range filters', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ count: 2 }]))
+        .mockReturnValueOnce(chain([baseSession]));
+      const r = await listVotingSessions({
+        type: 'election',
+        startDateFrom: new Date('2026-01-01'),
+        startDateTo: new Date('2026-12-31'),
+      });
+      expect(r.total).toBe(2);
     });
 
     it('throws on error', async () => {
@@ -294,12 +315,22 @@ describe('VotingService', () => {
       mocks.mockUpdateReturning.mockResolvedValue([undefined]);
       expect(await updateVotingOption('x', {} as never)).toBeNull();
     });
+
+    it('throws on error', async () => {
+      mocks.mockUpdateReturning.mockRejectedValue(new Error('DB'));
+      await expect(updateVotingOption('x', {} as never)).rejects.toThrow('Failed to update voting option');
+    });
   });
 
   // ── deleteVotingOption ────────────────────────────────────────────
   describe('deleteVotingOption', () => {
     it('deletes and returns true', async () => {
       expect(await deleteVotingOption('opt-1')).toBe(true);
+    });
+
+    it('throws on error', async () => {
+      mocks.mockDeleteWhere.mockRejectedValue(new Error('DB'));
+      await expect(deleteVotingOption('opt-1')).rejects.toThrow('Failed to delete voting option');
     });
   });
 
@@ -309,6 +340,11 @@ describe('VotingService', () => {
       mocks.mockInsertReturning.mockResolvedValue([baseEligibility]);
       const r = await addVoterEligibility(baseEligibility as never);
       expect(r.memberId).toBe('member-1');
+    });
+
+    it('throws on error', async () => {
+      mocks.mockInsertReturning.mockRejectedValue(new Error('DB'));
+      await expect(addVoterEligibility(baseEligibility as never)).rejects.toThrow('Failed to add voter eligibility');
     });
   });
 
@@ -356,6 +392,11 @@ describe('VotingService', () => {
       mocks.mockUpdateReturning.mockResolvedValue([undefined]);
       expect(await updateVoterEligibility('x', {} as never)).toBeNull();
     });
+
+    it('throws on error', async () => {
+      mocks.mockUpdateReturning.mockRejectedValue(new Error('DB'));
+      await expect(updateVoterEligibility('x', {} as never)).rejects.toThrow('Failed to update voter eligibility');
+    });
   });
 
   // ── castVote ──────────────────────────────────────────────────────
@@ -382,6 +423,29 @@ describe('VotingService', () => {
       mocks.mockInsertReturning.mockResolvedValue([vote]);
       const r = await castVote('session-1', 'opt-1', 'member-1', false);
       expect(r.id).toBe('vote-1');
+    });
+
+    it('throws when VOTING_SECRET is not configured', async () => {
+      vi.doMock('@/lib/config/env-validation', () => ({ env: { VOTING_SECRET: undefined } }));
+      vi.resetModules();
+      const { castVote: freshCastVote } = await import('../voting-service');
+      await expect(freshCastVote('s', 'o', 'm')).rejects.toThrow();
+      vi.doUnmock('@/lib/config/env-validation');
+      vi.resetModules();
+    });
+
+    it('throws when VOTING_SECRET is too short', async () => {
+      vi.doMock('@/lib/config/env-validation', () => ({ env: { VOTING_SECRET: 'short' } }));
+      vi.resetModules();
+      const { castVote: freshCastVote } = await import('../voting-service');
+      await expect(freshCastVote('s', 'o', 'm')).rejects.toThrow();
+      vi.doUnmock('@/lib/config/env-validation');
+      vi.resetModules();
+    });
+
+    it('throws generic failure when non-Error is thrown internally', async () => {
+      mocks.mockInsertReturning.mockRejectedValue('boom');
+      await expect(castVote('session-1', 'opt-1', 'member-1')).rejects.toThrow('Failed to cast vote');
     });
   });
 
@@ -420,9 +484,60 @@ describe('VotingService', () => {
       expect(r.winner).toBe('opt-1');
     });
 
+    it('marks quorum as met when the session does not require quorum', async () => {
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, requiresQuorum: false, totalEligibleVoters: 0 });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([baseOption]))
+        .mockReturnValueOnce(chain([{ count: 0 }]))
+        .mockReturnValueOnce(chain([{ optionId: 'opt-1', count: 0 }]));
+
+      const r = await calculateResults('session-1');
+      expect(r.quorumMet).toBe(true);
+      expect(r.turnoutPercentage).toBe(0);
+    });
+
     it('throws when session not found', async () => {
       mocks.mockSessionsFindFirst.mockResolvedValue(null);
       await expect(calculateResults('x')).rejects.toThrow('Failed to calculate');
+    });
+
+    it('marks quorum unmet when turnout is below threshold', async () => {
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, requiresQuorum: true, quorumThreshold: 80, totalEligibleVoters: 100 });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([baseOption]))
+        .mockReturnValueOnce(chain([{ count: 50 }]))
+        .mockReturnValueOnce(chain([{ optionId: 'opt-1', count: 50 }]));
+
+      const r = await calculateResults('session-1');
+      expect(r.quorumMet).toBe(false);
+      expect(r.turnoutPercentage).toBe(50);
+    });
+
+    it('handles missing options and defaults quorum threshold to 50', async () => {
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, requiresQuorum: true, quorumThreshold: undefined, totalEligibleVoters: 100 });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(null))
+        .mockReturnValueOnce(chain([{ count: 0 }]))
+        .mockReturnValueOnce(chain([{ optionId: 'opt-1', count: 60 }]));
+
+      const r = await calculateResults('session-1');
+      expect(r.options).toEqual([]);
+      expect(r.quorumMet).toBe(true);
+    });
+
+    it('computes zero percentage for options that have no votes in a non-zero total', async () => {
+      const options = [
+        { id: 'opt-1', text: 'Yes', orderIndex: 0 },
+        { id: 'opt-2', text: 'No', orderIndex: 1 },
+      ];
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, options, totalEligibleVoters: 100 });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(options))
+        .mockReturnValueOnce(chain([{ count: 40 }]))
+        .mockReturnValueOnce(chain([{ optionId: 'opt-1', count: 40 }]));
+
+      const r = await calculateResults('session-1');
+      expect(r.options.find((o) => o.optionId === 'opt-2')?.percentage).toBe(0);
     });
   });
 
@@ -447,12 +562,143 @@ describe('VotingService', () => {
       expect(r.rounds.length).toBeGreaterThanOrEqual(1);
     });
 
+    it('runs elimination rounds until a winner emerges', async () => {
+      const options = [
+        { id: 'a', text: 'Alice', orderIndex: 0 },
+        { id: 'b', text: 'Bob', orderIndex: 1 },
+        { id: 'c', text: 'Carol', orderIndex: 2 },
+      ];
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, options });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(options))
+        .mockReturnValueOnce(chain([{ count: 3 }]))
+        .mockReturnValueOnce(chain([
+          { optionId: 'a', voterMetadata: { preferences: ['a', 'b', 'c'] } },
+          { optionId: 'b', voterMetadata: { preferences: ['b', 'c', 'a'] } },
+          { optionId: 'c', voterMetadata: { preferences: ['c', 'b', 'a'] } },
+        ]));
+
+      const r = await calculateRankedChoiceResults('session-1');
+      expect(r.rounds.length).toBeGreaterThanOrEqual(2);
+      expect(r.winner).toBe('Bob');
+      expect(r.runnerUp).toBe('Carol');
+    });
+
     it('throws when no votes', async () => {
       mocks.mockSelect
         .mockReturnValueOnce(chain([baseOption]))      // options
         .mockReturnValueOnce(chain([{ count: 0 }]))    // total votes count
         .mockReturnValueOnce(chain([]));               // no votes
       await expect(calculateRankedChoiceResults('session-1')).rejects.toThrow('Failed to calculate');
+    });
+
+    it('throws when session not found', async () => {
+      mocks.mockSessionsFindFirst.mockResolvedValue(null);
+      await expect(calculateRankedChoiceResults('session-1')).rejects.toThrow('Failed to calculate');
+    });
+
+    it('handles votes without preferences (falls back to optionId)', async () => {
+      const options = [
+        { id: 'a', text: 'Alice', orderIndex: 0 },
+        { id: 'b', text: 'Bob', orderIndex: 1 },
+      ];
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, options });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(options))
+        .mockReturnValueOnce(chain([{ count: 3 }]))
+        .mockReturnValueOnce(chain([
+          { optionId: 'a', voterMetadata: null },
+          { optionId: 'a', voterMetadata: null },
+          { optionId: 'b', voterMetadata: { preferences: ['x', 'y'] } }, // all prefs inactive after elimination
+        ]));
+
+      const r = await calculateRankedChoiceResults('session-1');
+      expect(r.winner).toBe('Alice');
+    });
+
+    it('exits loop naturally when options eliminate down to one winner', async () => {
+      const options = [
+        { id: 'a', text: 'Alpha', orderIndex: 0 },
+        { id: 'b', text: 'Beta', orderIndex: 1 },
+      ];
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, options });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(options))
+        .mockReturnValueOnce(chain([{ count: 2 }]))
+        .mockReturnValueOnce(chain([
+          // Perfectly split — a voter votes only for 'a', b voter votes only for 'b'
+          { optionId: 'a', voterMetadata: { preferences: ['a'] } },
+          { optionId: 'b', voterMetadata: { preferences: ['b'] } },
+        ]));
+
+      const r = await calculateRankedChoiceResults('session-1');
+      // One option is eliminated, the remaining option is returned via the exit-loop path
+      expect(['Alpha', 'Beta']).toContain(r.winner);
+    });
+
+    it('returns empty winner when session has no options', async () => {
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(null))
+        .mockReturnValueOnce(chain([{ count: 1 }]))
+        .mockReturnValueOnce(chain([{ optionId: 'a', voterMetadata: null }]));
+
+      const r = await calculateRankedChoiceResults('session-1');
+      expect(r.winner).toBe('');
+      expect(r.runnerUp).toBe('');
+    });
+
+    it('falls back to eliminated option id when eliminated option has no text', async () => {
+      const options = [
+        { id: 'a', text: 'Alpha', orderIndex: 0 },
+        { id: 'c', orderIndex: 1 },
+        { id: 'b', text: 'Beta', orderIndex: 2 },
+      ] as never;
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, options });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(options))
+        .mockReturnValueOnce(chain([{ count: 4 }]))
+        .mockReturnValueOnce(chain([
+          { optionId: 'a', voterMetadata: { preferences: ['a', 'c', 'b'] } },
+          { optionId: 'a', voterMetadata: { preferences: ['a', 'c', 'b'] } },
+          { optionId: 'b', voterMetadata: { preferences: ['b', 'a', 'c'] } },
+          { optionId: 'c', voterMetadata: { preferences: ['c', 'a', 'b'] } },
+        ]));
+
+      const r = await calculateRankedChoiceResults('session-1');
+      expect(r.rounds[0]?.eliminated).toBe('c');
+    });
+
+    it('falls back to option id when option text is missing', async () => {
+      const options = [
+        { id: 'a', orderIndex: 0 },
+        { id: 'b', orderIndex: 1 },
+      ] as never;
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, options });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(options))
+        .mockReturnValueOnce(chain([{ count: 3 }]))
+        .mockReturnValueOnce(chain([
+          { optionId: 'a', voterMetadata: { preferences: ['a', 'b'] } },
+          { optionId: 'b', voterMetadata: { preferences: ['b', 'a'] } },
+          { optionId: 'a', voterMetadata: { preferences: ['a', 'b'] } },
+        ]));
+
+      const r = await calculateRankedChoiceResults('session-1');
+      expect(typeof r.winner).toBe('string');
+    });
+
+    it('triggers IRV safety check after >50 rounds', async () => {
+      const options = Array.from({ length: 51 }, (_, i) => ({ id: `o${i}`, text: `Opt ${i}`, orderIndex: i }));
+      const votes = options.map((o) => ({ optionId: o.id, voterMetadata: { preferences: [o.id] } }));
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, options });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(options))
+        .mockReturnValueOnce(chain([{ count: votes.length }]))
+        .mockReturnValueOnce(chain(votes));
+
+      const r = await calculateRankedChoiceResults('session-1');
+      expect(r.rounds.length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -506,9 +752,31 @@ describe('VotingService', () => {
       expect(r.votesByHour).toBeDefined();
     });
 
+    it('returns zero turnout when no eligible voters exist', async () => {
+      mocks.mockSessionsFindFirst.mockResolvedValue({ ...baseSession, totalEligibleVoters: 0 });
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ count: 0 }]))
+        .mockReturnValueOnce(chain([]));
+
+      const r = await getSessionStatistics('session-1');
+      expect(r.turnoutPercentage).toBe(0);
+      expect(r.totalVoted).toBe(0);
+    });
+
     it('throws when session not found', async () => {
       mocks.mockSessionsFindFirst.mockResolvedValue(null);
       await expect(getSessionStatistics('x')).rejects.toThrow('Failed to get');
+    });
+
+    it('skips votes without castAt in hour bucketing', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ count: 2 }]))
+        .mockReturnValueOnce(chain([
+          { castAt: new Date('2025-06-01T10:00:00') },
+          { castAt: null },
+        ]));
+      const r = await getSessionStatistics('session-1');
+      expect(Object.keys(r.votesByHour)).toHaveLength(1);
     });
   });
 });

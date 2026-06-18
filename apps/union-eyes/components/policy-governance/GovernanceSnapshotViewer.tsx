@@ -24,15 +24,24 @@ export default function GovernanceSnapshotViewer() {
   const [queryAt, setQueryAt] = useState('')
   const [queried, setQueried] = useState<Snapshot | null>(null)
 
-  const fetchSnapshots = useCallback(async () => {
-    setLoading(true)
+  const loadSnapshots = useCallback(async () => {
     const res = await fetch('/api/governance/lifecycle/snapshots?limit=20')
     const data = await res.json()
     setSnapshots(data.snapshots ?? [])
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchSnapshots() }, [fetchSnapshots])
+  const fetchSnapshots = useCallback(async () => {
+    setLoading(true)
+    await loadSnapshots()
+  }, [loadSnapshots])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadSnapshots()
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
+  }, [loadSnapshots])
 
   const triggerSnapshot = async () => {
     setTriggering(true)
@@ -42,7 +51,7 @@ export default function GovernanceSnapshotViewer() {
       body: JSON.stringify({}),
     })
     setTriggering(false)
-    fetchSnapshots()
+    await fetchSnapshots()
   }
 
   const querySnapshot = async () => {

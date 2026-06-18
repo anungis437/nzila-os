@@ -6,13 +6,11 @@
  */
 import type {
   PipelineDefinition,
-  PipelineContext,
   PipelineResult,
   IngestionRecord,
 } from '@nzila/ingestion-core'
 import type {
   MachineDefinition,
-  TransitionContext,
   TransitionRecord,
   TransitionResult,
   GuardResolver,

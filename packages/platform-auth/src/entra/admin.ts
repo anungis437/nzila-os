@@ -10,8 +10,6 @@
  *   import { adminClient } from '@nzila/platform-auth/entra/server'
  */
 
-import { logger } from './logger-shim'
-
 // ── Graph API Helpers ───────────────────────────────────────────────────────
 
 async function getGraphToken(): Promise<string> {

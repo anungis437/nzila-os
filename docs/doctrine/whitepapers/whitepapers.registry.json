@@ -1,8 +1,118 @@
 {
   "$schema": "./whitepapers.registry.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2026-05-22",
+  "lastUpdated": "2026-06-06",
   "whitepapers": [
+    {
+      "id": "artifact.001.institutional-intelligence.v1",
+      "title": "Introducing Institutional Intelligence",
+      "edition": "Draft v1.0",
+      "publisher": "Nzila Ventures",
+      "publishedDate": null,
+      "ingestedDate": "2026-06-06",
+      "doctrineVersion": "1.1.0-draft",
+      "status": "internal-review",
+      "knowledgeType": "category-definition",
+      "domainScope": "doctrine.institutional-intelligence",
+      "tenantScope": "platform",
+      "canonicalMarkdown": "docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md",
+      "tags": [
+        "institutional-intelligence",
+        "category-formation",
+        "continuity",
+        "governance",
+        "trust",
+        "memory",
+        "resilience",
+        "artifact-001"
+      ],
+      "relatedDoctrine": [
+        "docs/doctrine/DOCTRINE.md",
+        "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CATEGORY_VALIDATION_KIT.md",
+        "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_EXEC_READOUT.md"
+      ],
+      "introduces": [
+        "Institutional Intelligence (category definition)",
+        "Canonical causal model: Memory > Continuity > Governance > Trust > Institutional Intelligence > Resilience",
+        "Institutional evolution epoch framework (Oral through Institutional Intelligence)",
+        "Core problem statement: organizations are becoming more digitally capable while becoming more institutionally fragile"
+      ],
+      "sequenceRole": "category-seed",
+      "precedes": [
+        "artifact.002.what-is-institutional-intelligence",
+        "artifact.003.institutional-intelligence-primer"
+      ]
+    },
+    {
+      "id": "artifact.002.what-is-institutional-intelligence.v1",
+      "title": "What Is Institutional Intelligence?",
+      "edition": "Draft v1.0",
+      "publisher": "Nzila Ventures",
+      "publishedDate": null,
+      "ingestedDate": "2026-06-06",
+      "doctrineVersion": "1.1.0-draft",
+      "status": "internal-review",
+      "knowledgeType": "category-article",
+      "domainScope": "doctrine.institutional-intelligence",
+      "tenantScope": "platform",
+      "canonicalMarkdown": "docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md",
+      "tags": [
+        "institutional-intelligence",
+        "category-formation",
+        "continuity",
+        "governance",
+        "legitimacy",
+        "memory",
+        "resilience",
+        "artifact-002",
+        "public-article"
+      ],
+      "relatedDoctrine": [
+        "docs/doctrine/DOCTRINE.md",
+        "docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md"
+      ],
+      "sequenceRole": "category-narrative",
+      "follows": "artifact.001.institutional-intelligence.v1",
+      "precedes": [
+        "artifact.003.institutional-intelligence-primer"
+      ]
+    },
+    {
+      "id": "artifact.003.institutional-intelligence-primer.v1",
+      "title": "Institutional Intelligence Primer",
+      "edition": "Draft v1.0",
+      "publisher": "Nzila Ventures",
+      "publishedDate": null,
+      "ingestedDate": "2026-06-06",
+      "doctrineVersion": "1.1.0-draft",
+      "status": "internal-review",
+      "knowledgeType": "implementation-primer",
+      "domainScope": "doctrine.institutional-intelligence",
+      "tenantScope": "platform",
+      "canonicalMarkdown": "docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_PRIMER.md",
+      "tags": ["institutional-intelligence","maturity-model","iia","adoption-roadmap","sector-applications","measurement","artifact-003","primer"],
+      "relatedDoctrine": ["docs/doctrine/DOCTRINE.md","docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md","docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md","docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md"],
+      "sequenceRole": "implementation-guide",
+      "follows": "artifact.002.what-is-institutional-intelligence.v1",
+      "precedes": []
+    },
+    {
+      "id": "artifact.iia.v1",
+      "title": "Institutional Intelligence Assessment (IIA)",
+      "edition": "Draft v1.0",
+      "publisher": "Nzila Ventures",
+      "publishedDate": null,
+      "ingestedDate": "2026-06-06",
+      "doctrineVersion": "1.1.0-draft",
+      "status": "internal-review",
+      "knowledgeType": "assessment-framework",
+      "domainScope": "doctrine.institutional-intelligence",
+      "tenantScope": "platform",
+      "canonicalMarkdown": "docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT.md",
+      "tags": ["institutional-intelligence","assessment","iia","maturity-model","diagnostic","scoring"],
+      "relatedDoctrine": ["docs/doctrine/SCORING_MODELS.md","docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md","docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_PRIMER.md"],
+      "sequenceRole": "standalone-diagnostic"
+    },
     {
       "id": "wp.continuity-gap.v3",
       "title": "The Continuity Gap — Master Whitepaper",

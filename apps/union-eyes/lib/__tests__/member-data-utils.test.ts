@@ -41,14 +41,14 @@ import {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function setupSelectChain(rows: unknown[]) {
+function setupSelectChain(rows: any[]) {
   mocks.mockLimit.mockResolvedValue(rows);
   mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
   mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
   mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
 }
 
-function setupBatchSelectChain(rows: unknown[]) {
+function setupBatchSelectChain(rows: any[]) {
   // batchGetMemberDetails doesn't use .limit()
   mocks.mockWhere.mockResolvedValue(rows);
   mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });

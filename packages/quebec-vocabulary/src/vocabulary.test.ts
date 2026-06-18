@@ -72,7 +72,7 @@ describe('quebec-vocabulary', () => {
 
   it('returns undefined for unknown lookups', () => {
     expect(getCaseTypeById('missing')).toBeUndefined()
-    expect(getPriorityById('missing' as any)).toBeUndefined()
+    expect(getPriorityById('missing' as unknown)).toBeUndefined()
     expect(getStatusById('missing')).toBeUndefined()
     expect(getRoleById('missing')).toBeUndefined()
     expect(getTribunal('missing')).toBeUndefined()

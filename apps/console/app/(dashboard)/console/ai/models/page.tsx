@@ -13,10 +13,9 @@ import {
 import { eq, desc } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
+import { resolveConsoleEntityId } from '@/lib/entity-context'
 
 export const dynamic = 'force-dynamic'
-
-const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 
 async function getModelRegistryData(orgId: string) {
   const models = await platformDb
@@ -68,11 +67,12 @@ async function getModelRegistryData(orgId: string) {
 export default async function AiModelsPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
-  if (!DEFAULT_ENTITY_ID) {
-    return <div className="p-8 text-red-600">NZILA_DEFAULT_ENTITY_ID not configured</div>
+  const orgId = await resolveConsoleEntityId(userId)
+  if (!orgId) {
+    return <div className="p-8 text-red-600">No active org membership or fallback entity configured</div>
   }
 
-  const { models, deployments, routes } = await getModelRegistryData(DEFAULT_ENTITY_ID)
+  const { models, deployments, routes } = await getModelRegistryData(orgId)
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-2 pb-8 sm:px-4">

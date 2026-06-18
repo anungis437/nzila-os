@@ -39,7 +39,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
     return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
   }
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {

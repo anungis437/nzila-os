@@ -54,13 +54,13 @@ class MockDb {
 
   insert(table: TableRef) {
     return {
-      values: async (values: any[]) => {
+      values: async (values: unknown[]) => {
         this.rows.set(table.name, values.map((row) => ({ ...row })))
       },
     }
   }
 
-  getRows(tableName: string): any[] {
+  getRows(tableName: string): unknown[] {
     return (this.rows.get(tableName) ?? []).map((row) => ({ ...row }))
   }
 }

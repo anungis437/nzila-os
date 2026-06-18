@@ -235,7 +235,7 @@ export async function withDatabaseErrorHandling<T>(
  * Handle API route errors consistently
  * Returns a properly formatted error response
  */
-export function handleAPIError(error: unknown): {
+export function handleAPIError(error: any): {
   error: string;
   type: ErrorType;
   statusCode: number;
@@ -295,7 +295,7 @@ export async function errorBoundary<T>(
 /**
  * Type guard to check if error is operational
  */
-export function isOperationalError(error: unknown): boolean {
+export function isOperationalError(error: any): boolean {
   if (error instanceof AppError) {
     return error.isOperational;
   }

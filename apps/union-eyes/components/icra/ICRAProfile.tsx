@@ -112,12 +112,6 @@ const OBSERVATION_CATEGORY_META: Record<
   },
 };
 
-const SEVERITY_ORDER: Record<ContinuityInsight['severity'], number> = {
-  material: 0,
-  notable: 1,
-  observed: 2,
-};
-
 const OBSERVATION_SEVERITY_ORDER: Record<ContinuityObservation['severity'], number> = {
   material: 0,
   attention: 1,
@@ -220,7 +214,7 @@ function InsightBlock({
       aria-label={`Insight ${index + 1} of ${total}: ${meta.label}`}
     >
       {/* Severity accent rail */}
-      <span aria-hidden className={`absolute inset-y-0 left-0 w-[3px] ${accentBar}`} />
+      <span aria-hidden className={`absolute inset-y-0 left-0 w-0.75 ${accentBar}`} />
 
       <div className="space-y-5 px-7 py-7 md:px-8">
         {/* Eyebrow row */}
@@ -507,7 +501,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
           ].map((col) => (
             <article
               key={col.title}
-              className={`group relative overflow-hidden rounded-2xl border border-stone-200 bg-white px-6 py-6 shadow-[0_1px_0_0_rgba(0,0,0,0.02)] before:absolute before:inset-y-0 before:left-0 before:w-[3px] ${col.accent}`}
+              className={`group relative overflow-hidden rounded-2xl border border-stone-200 bg-white px-6 py-6 shadow-[0_1px_0_0_rgba(0,0,0,0.02)] before:absolute before:inset-y-0 before:left-0 before:w-0.75 ${col.accent}`}
             >
               <header className="mb-4 space-y-1.5">
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-400">
@@ -521,7 +515,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
               <ol className="space-y-3 text-[13.5px] leading-relaxed text-stone-700">
                 {col.items.map((c, i) => (
                   <li key={i} className="flex gap-3">
-                    <span className="mt-[3px] inline-block w-5 shrink-0 font-mono text-[11px] tabular-nums text-stone-400">
+                    <span className="mt-0.75 inline-block w-5 shrink-0 font-mono text-[11px] tabular-nums text-stone-400">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     <span>{c}</span>
@@ -706,7 +700,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                     key={obs.id}
                     className="group relative overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.02)]"
                   >
-                    <span aria-hidden className={`absolute inset-y-0 left-0 w-[3px] ${accent}`} />
+                    <span aria-hidden className={`absolute inset-y-0 left-0 w-0.75 ${accent}`} />
                     <div className="space-y-3 px-7 py-6 md:px-8">
                       <header className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.22em]">
                         <span className="font-mono tabular-nums text-stone-400">

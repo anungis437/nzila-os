@@ -78,7 +78,7 @@ export async function ensurePriorityModel(): Promise<string | null> {
          AND model_key = ${PRIORITY_MODEL_KEY}::text
          AND version = ${PRIORITY_MODEL_VERSION}
        LIMIT 1;
-    `)) as unknown as Array<{ id: string }>;
+    `)) as any as Array<{ id: string }>;
     return rows[0]?.id ?? null;
   } catch (err) {
     log.warn('ensurePriorityModel failed', { error: err });
@@ -142,7 +142,7 @@ export async function recordPriorityScore(
        AND case_id   = ${caseUuid}::uuid
        AND model_id  = ${modelId}::uuid
      LIMIT 1;
-  `)) as unknown as Array<{ id: string; occurred_at: string | Date }>;
+  `)) as any as Array<{ id: string; occurred_at: string | Date }>;
 
   return {
     ...computed,
@@ -176,7 +176,7 @@ export async function getLatestPriorityScoreForCase(
          AND s.case_id   = ${caseUuid}::uuid
        ORDER BY s.occurred_at DESC
        LIMIT 1;
-    `)) as unknown as Array<{
+    `)) as any as Array<{
       id: string;
       score: string | number;
       predicted_priority: 'p0' | 'p1' | 'p2' | 'p3';
@@ -190,7 +190,7 @@ export async function getLatestPriorityScoreForCase(
     if (!r) return null;
     const features =
       (r.features_json?.features as PriorityFeatures | undefined) ??
-      (r.features_json as unknown as PriorityFeatures);
+      (r.features_json as any as PriorityFeatures);
     return {
       score: typeof r.score === 'string' ? Number(r.score) : r.score,
       predictedPriority: r.predicted_priority,

@@ -83,12 +83,12 @@ function getDb() {
 }
 
 export const client = new Proxy({} as ReturnType<typeof postgres>, {
-  get(_target, prop) { return (getClient() as unknown as Record<string | symbol, unknown>)[prop]; },
-  apply(_target, thisArg, args) { return (getClient() as unknown as ((...a: unknown[]) => unknown)).apply(thisArg, args); },
+  get(_target, prop) { return (getClient() as any as Record<string | symbol, unknown>)[prop]; },
+  apply(_target, thisArg, args) { return (getClient() as any as ((...a: any[]) => unknown)).apply(thisArg, args); },
 });
 
 export const db = new Proxy({} as PostgresJsDatabase<typeof schema>, {
-  get(_target, prop) { return (getDb() as unknown as Record<string | symbol, unknown>)[prop]; },
+  get(_target, prop) { return (getDb() as any as Record<string | symbol, unknown>)[prop]; },
 });
 
 // Export unified database client (supports PostgreSQL and Azure SQL)

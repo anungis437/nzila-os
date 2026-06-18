@@ -15,14 +15,14 @@ vi.mock('@/db/db', () => ({
 
 vi.mock('drizzle-orm', () => {
   const sqlFn = Object.assign(
-    (strings: TemplateStringsArray, ...vals: unknown[]) => ({
+    (strings: TemplateStringsArray, ...vals: any[]) => ({
       queryChunks: [strings.reduce((acc, str, i) => acc + str + (vals[i] !== undefined ? String(vals[i]) : ''), '')],
       values: vals,
       _tag: 'sql',
     }),
     {
       raw: (val: string) => val,
-      join: (parts: unknown[], sep: unknown) => ({
+      join: (parts: any[], sep: any) => ({
         queryChunks: parts.map(p => typeof p === 'object' && p !== null && 'queryChunks' in p ? (p as { queryChunks: string[] }).queryChunks.join('') : String(p)),
         _tag: 'sql.join',
         _sep: sep,

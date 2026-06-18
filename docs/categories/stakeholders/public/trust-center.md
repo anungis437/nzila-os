@@ -54,16 +54,17 @@ Every pull request passes:
 
 | Control | Detail |
 |---------|--------|
-| Authentication | Microsoft Entra ID (Azure AD) |
-| Single Sign-On | Enforced — no username/password bypass |
-| Multi-factor authentication | Enforced via Entra policy |
-| SCIM provisioning | Auto-provision/deprovision via Entra SCIM |
+| Authentication | Nzila platform auth (email/password + Entra OIDC) |
+| Single Sign-On | Microsoft Entra OIDC supported |
+| Multi-factor authentication | Entra MFA for Entra users; required for admin access |
+| SCIM provisioning | Planned for enterprise GA (not currently GA) |
 | Role-based access control | 5 tiers: member / steward / LRO / officer / admin |
-| Privileged access review | Quarterly — `reports/compliance/access-review/` |
+| Privileged access review | Quarterly cadence framework active — `reports/compliance/access-review/` |
 | Session management | JWT with secure rotation; no persistent sessions |
 
-No super-admin console exists outside of the provisioned Entra hierarchy.
-Admin accounts are subject to quarterly access review attestations.
+No super-admin console exists outside the governed auth and RBAC hierarchy.
+Admin access is reviewed quarterly; live Entra-backed attestation evidence is
+produced on review cadence.
 
 ---
 

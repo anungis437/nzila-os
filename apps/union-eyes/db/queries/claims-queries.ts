@@ -15,10 +15,10 @@ export type SelectClaim = typeof claims.$inferSelect;
  */
 export const createClaim = async (
   data: Omit<InsertClaim, 'claimId' | 'claimNumber' | 'createdAt' | 'updatedAt'>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Generate claim number (format: CASE-YYYYMMDD-XXXX)
@@ -62,7 +62,7 @@ export const createClaim = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -74,10 +74,10 @@ export const createClaim = async (
 export const getClaimsByMember = async (
   memberId: string,
   organizationId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const memberClaims = await dbOrTx
@@ -96,7 +96,7 @@ export const getClaimsByMember = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -108,10 +108,10 @@ export const getClaimsByMember = async (
 export const getClaimsByOrganization = async (
   organizationSlug: string,
   limit?: number,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Convert organization slug to UUID
@@ -149,7 +149,7 @@ export const getClaimsByOrganization = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -160,10 +160,10 @@ export const getClaimsByOrganization = async (
 export const getClaimById = async (
   claimId: string,
   organizationId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [claim] = await dbOrTx
@@ -186,7 +186,7 @@ export const getClaimById = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -200,10 +200,10 @@ export const updateClaimStatus = async (
   updatedBy: string,
   organizationId: string,
   notes?: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Update the claim, org-scoped to prevent cross-org mutation
@@ -234,7 +234,7 @@ export const updateClaimStatus = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -247,10 +247,10 @@ export const assignClaim = async (
   assignedTo: string,
   assignedBy: string,
   organizationId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [updatedClaim] = await dbOrTx
@@ -281,7 +281,7 @@ export const assignClaim = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -293,10 +293,10 @@ export const assignClaim = async (
 export const getClaimsAssignedToUser = async (
   userId: string,
   organizationSlug: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const conditions = [eq(claims.assignedTo, userId)];
@@ -329,7 +329,7 @@ export const getClaimsAssignedToUser = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -339,10 +339,10 @@ export const getClaimsAssignedToUser = async (
  */
 export const getClaimStatistics = async (
   organizationSlugOrId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Check if input is a UUID (contains hyphens and is 36 chars) or a slug
@@ -425,7 +425,7 @@ export const getClaimStatistics = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -435,10 +435,10 @@ export const getClaimStatistics = async (
  */
 export const getRecentClaimUpdates = async (
   claimId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const updates = await dbOrTx
@@ -458,7 +458,7 @@ export const getRecentClaimUpdates = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -471,10 +471,10 @@ export const addClaimUpdate = async (
   message: string,
   createdBy: string,
   updateType: string = 'note',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [newUpdate] = await dbOrTx
@@ -505,7 +505,7 @@ export const addClaimUpdate = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -515,10 +515,10 @@ export const addClaimUpdate = async (
  */
 export const deleteClaim = async (
   claimId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [deletedClaim] = await dbOrTx
@@ -541,7 +541,7 @@ export const deleteClaim = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };

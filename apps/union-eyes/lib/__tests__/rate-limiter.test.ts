@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => {
     expire: vi.fn(),
     exec: vi.fn(),
   };
-  const mockCircuitExecute = vi.fn((fn: () => Promise<unknown>) => fn());
+  const mockCircuitExecute = vi.fn((fn: () => Promise<any>) => fn());
   return {
     mockPipeline,
     mockCircuitExecute,
@@ -71,7 +71,7 @@ describe('rate-limiter', () => {
     vi.clearAllMocks();
     vi.resetModules();
     // Reset circuit execute to default pass-through
-    mocks.mockCircuitExecute.mockImplementation((fn: () => Promise<unknown>) => fn());
+    mocks.mockCircuitExecute.mockImplementation((fn: () => Promise<any>) => fn());
     // Set Upstash env so redis client is created
     process.env.UPSTASH_REDIS_REST_URL = 'https://test.upstash.io';
     process.env.UPSTASH_REDIS_REST_TOKEN = 'test-token';

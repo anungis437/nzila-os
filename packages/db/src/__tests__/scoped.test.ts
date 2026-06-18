@@ -13,6 +13,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { createScopedDb, ScopedDbError, ReadOnlyViolationError } from '../scoped'
+import type { PgTable, TableConfig } from 'drizzle-orm/pg-core'
 
 // ── Test Constants ──────────────────────────────────────────────────────────
 
@@ -27,8 +28,8 @@ describe('createScopedDb — construction-time validation', () => {
   })
 
   it('throws ScopedDbError when orgId is undefined/null', () => {
-    expect(() => createScopedDb(undefined as any)).toThrow(ScopedDbError)
-    expect(() => createScopedDb(null as any)).toThrow(ScopedDbError)
+    expect(() => createScopedDb(undefined as unknown as string)).toThrow(ScopedDbError)
+    expect(() => createScopedDb(null as unknown as string)).toThrow(ScopedDbError)
   })
 
   it('succeeds with a valid orgId', () => {
@@ -42,7 +43,7 @@ describe('createScopedDb — construction-time validation', () => {
     expect(scopedDb.orgId).toBe(VALID_ENTITY_ID)
     // TypeScript would flag this, but verify at runtime too
     expect(() => {
-      ;(scopedDb as any).orgId = 'other-id'
+      ;(scopedDb as { orgId: string }).orgId = 'other-id'
     }).not.toThrow() // JS objects don't enforce readonly at runtime
     // But the original value should not matter — the internal closure holds it
   })
@@ -66,38 +67,39 @@ describe('createScopedDb — org_id column enforcement', () => {
     orgId: { name: 'org_id' },
     kind: { name: 'kind' },
   }
+  const tableWithoutEntityIdPg = tableWithoutEntityId as unknown as PgTable<TableConfig>
 
   it('throws ScopedDbError when select is called on a table without org_id', () => {
     const scopedDb = createScopedDb(VALID_ENTITY_ID)
-    expect(() => scopedDb.select(tableWithoutEntityId as any)).toThrow(ScopedDbError)
-    expect(() => scopedDb.select(tableWithoutEntityId as any)).toThrow(
+    expect(() => scopedDb.select(tableWithoutEntityIdPg)).toThrow(ScopedDbError)
+    expect(() => scopedDb.select(tableWithoutEntityIdPg)).toThrow(
       'does not have an org_id column',
     )
   })
 
   it('throws ScopedDbError when insert is called on a table without org_id', () => {
     const scopedDb = createScopedDb(VALID_ENTITY_ID)
-    expect(() => scopedDb.insert(tableWithoutEntityId as any, { key: 'test' })).toThrow(
+    expect(() => scopedDb.insert(tableWithoutEntityIdPg, { key: 'test' })).toThrow(
       ScopedDbError,
     )
   })
 
   it('throws ScopedDbError when update is called on a table without org_id', () => {
     const scopedDb = createScopedDb(VALID_ENTITY_ID)
-    expect(() => scopedDb.update(tableWithoutEntityId as any, { value: 'test' })).toThrow(
+    expect(() => scopedDb.update(tableWithoutEntityIdPg, { value: 'test' })).toThrow(
       ScopedDbError,
     )
   })
 
   it('throws ScopedDbError when delete is called on a table without org_id', () => {
     const scopedDb = createScopedDb(VALID_ENTITY_ID)
-    expect(() => scopedDb.delete(tableWithoutEntityId as any)).toThrow(ScopedDbError)
+    expect(() => scopedDb.delete(tableWithoutEntityIdPg)).toThrow(ScopedDbError)
   })
 
   it('error message includes table name', () => {
     const scopedDb = createScopedDb(VALID_ENTITY_ID)
     try {
-      scopedDb.select(tableWithoutEntityId as any)
+      scopedDb.select(tableWithoutEntityIdPg)
       expect.fail('Should have thrown')
     } catch (err) {
       expect((err as Error).message).toContain('system_config')
@@ -150,6 +152,7 @@ describe('createScopedDb — object form and CRUD behavior', () => {
     id: { name: 'id' },
     orgId: { name: 'org_id' },
   }
+  const tableWithEntityIdPg = tableWithEntityId as unknown as PgTable<TableConfig>
 
   it('supports object-form read-only createScopedDb with correlationId', () => {
     const whereArg: unknown[] = []
@@ -179,14 +182,18 @@ describe('createScopedDb — object form and CRUD behavior', () => {
       },
     }
 
-    const scopedDb = (createScopedDb as any)(
+    const createScopedDbWithClient = createScopedDb as unknown as (
+      opts: { orgId: string; correlationId?: string },
+      client: unknown,
+    ) => { orgId: string; correlationId?: string; select: (table: PgTable<TableConfig>) => unknown }
+    const scopedDb = createScopedDbWithClient(
       { orgId: VALID_ENTITY_ID, correlationId: 'corr-1' },
       fakeClient,
     )
 
     expect(scopedDb.orgId).toBe(VALID_ENTITY_ID)
     expect(scopedDb.correlationId).toBe('corr-1')
-    expect(() => scopedDb.select(tableWithEntityId as any)).not.toThrow()
+    expect(() => scopedDb.select(tableWithEntityIdPg)).not.toThrow()
     expect(whereArg.length).toBe(1)
   })
 
@@ -206,11 +213,18 @@ describe('createScopedDb — object form and CRUD behavior', () => {
       },
     }
 
-    const scopedDb = (createScopedDb as any)({ orgId: VALID_ENTITY_ID }, txClient)
+    type TxScopedDb = {
+      transaction: (fn: (tx: TxScopedDb) => Promise<unknown>) => Promise<unknown>
+    }
+    const createScopedDbWithClient = createScopedDb as unknown as (
+      opts: { orgId: string },
+      client: unknown,
+    ) => TxScopedDb
+    const scopedDb = createScopedDbWithClient({ orgId: VALID_ENTITY_ID }, txClient)
 
     await expect(
-      scopedDb.transaction(async (tx: any) =>
-        tx.transaction(async (nested: any) => nested.transaction(async () => null)),
+      scopedDb.transaction(async (tx) =>
+        tx.transaction(async (nested) => nested.transaction(async () => null)),
       ),
     ).rejects.toThrow('Nested transactions beyond 2 levels not supported')
   })
@@ -243,11 +257,19 @@ describe('createScopedDb — object form and CRUD behavior', () => {
       transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(fakeClient),
     }
 
-    const scopedDb = (createScopedDb as any)(VALID_ENTITY_ID, fakeClient)
-    scopedDb.insert(tableWithEntityId as any, { id: '1', orgId: 'wrong' })
-    scopedDb.insert(tableWithEntityId as any, [{ id: '2' }, { id: '3' }])
-    scopedDb.update(tableWithEntityId as any, { status: 'updated' })
-    scopedDb.delete(tableWithEntityId as any)
+    const createScopedDbWithClient = createScopedDb as unknown as (
+      orgId: string,
+      client: unknown,
+    ) => {
+      insert: (table: PgTable<TableConfig>, values: Record<string, unknown> | Array<Record<string, unknown>>) => unknown
+      update: (table: PgTable<TableConfig>, values: Record<string, unknown>) => unknown
+      delete: (table: PgTable<TableConfig>) => unknown
+    }
+    const scopedDb = createScopedDbWithClient(VALID_ENTITY_ID, fakeClient)
+    scopedDb.insert(tableWithEntityIdPg, { id: '1', orgId: 'wrong' })
+    scopedDb.insert(tableWithEntityIdPg, [{ id: '2' }, { id: '3' }])
+    scopedDb.update(tableWithEntityIdPg, { status: 'updated' })
+    scopedDb.delete(tableWithEntityIdPg)
 
     expect(insertValues).toHaveLength(2)
     expect((insertValues[0] as Record<string, unknown>).orgId).toBe(VALID_ENTITY_ID)

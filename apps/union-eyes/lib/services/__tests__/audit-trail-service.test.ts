@@ -10,10 +10,10 @@ const mocks = vi.hoisted(() => ({
   mockSelect: vi.fn(),
 }));
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -40,7 +40,7 @@ vi.mock('@/db/schema/audit-security-schema', () => ({
 }));
 
 vi.mock('@/lib/decimal-safe', () => ({
-  moneyToNumber: vi.fn((v: unknown) => Number(v)),
+  moneyToNumber: vi.fn((v: any) => Number(v)),
 }));
 
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -423,7 +423,7 @@ describe('AuditTrailService', () => {
       const report = await AuditTrailService.generateComplianceReport(
         'org-1', new Date('2026-01-01'), new Date(),
       );
-      const sus = report.suspiciousActivities.find((s: unknown) => (s as { type: string }).type === 'large_modification');
+      const sus = report.suspiciousActivities.find((s: any) => (s as { type: string }).type === 'large_modification');
       expect(sus).toBeDefined();
     });
 
@@ -437,7 +437,7 @@ describe('AuditTrailService', () => {
       const report = await AuditTrailService.generateComplianceReport(
         'org-1', new Date('2026-01-01'), new Date(),
       );
-      const sus = report.suspiciousActivities.find((s: unknown) => (s as { type: string }).type === 'large_modification');
+      const sus = report.suspiciousActivities.find((s: any) => (s as { type: string }).type === 'large_modification');
       expect(sus).toBeUndefined();
     });
 

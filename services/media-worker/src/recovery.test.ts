@@ -6,6 +6,7 @@ import {
   purgeOrphans,
 } from './recovery'
 import { createInMemoryStorageAdapter } from './storage'
+import type { StructuredLogger } from './observability'
 import { MediaWorkerError, createLogger } from './observability'
 
 const logger = createLogger('test', undefined, 'error') // suppress logs in tests
@@ -101,7 +102,7 @@ describe('cleanupPartialArtifacts', () => {
       },
     }
 
-    const result = await cleanupPartialArtifacts(storage, 'asset-2', noisyLogger as any)
+    const result = await cleanupPartialArtifacts(storage, 'asset-2', noisyLogger as StructuredLogger)
 
     expect(result.cleaned).toBe(0)
     expect(result.errors).toBeGreaterThanOrEqual(4)
@@ -145,7 +146,7 @@ describe('detectOrphans', () => {
       list: vi.fn().mockRejectedValue(new Error('scan failed')),
     }
 
-    const orphans = await detectOrphans(storage, 'audio/processed/', new Set(['known-1']), noisyLogger as any)
+    const orphans = await detectOrphans(storage, 'audio/processed/', new Set(['known-1']), noisyLogger as StructuredLogger)
 
     expect(orphans).toEqual([])
     expect(errors).toHaveLength(1)
@@ -187,7 +188,7 @@ describe('purgeOrphans', () => {
         { key: 'a/b', sizeBytes: 1, lastModified: new Date() },
         { key: 'a/c', sizeBytes: 1, lastModified: new Date() },
       ],
-      noisyLogger as any,
+      noisyLogger as StructuredLogger,
     )
 
     expect(deleted).toBe(0)

@@ -10,10 +10,9 @@ import { eq, desc, count } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { resolveConsoleEntityId } from '@/lib/entity-context'
 
 export const dynamic = 'force-dynamic'
-
-const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 
 async function getActionsData(orgId: string) {
   const actions = await platformDb
@@ -71,11 +70,12 @@ const STATUS_COLORS: Record<string, string> = {
 export default async function AiActionsPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
-  if (!DEFAULT_ENTITY_ID) {
-    return <div className="p-8 text-red-600">NZILA_DEFAULT_ENTITY_ID not configured</div>
+  const orgId = await resolveConsoleEntityId(userId)
+  if (!orgId) {
+    return <div className="p-8 text-red-600">No active org membership or fallback entity configured</div>
   }
 
-  const { actions, runs, actionSummary, profileCount, routeCount } = await getActionsData(DEFAULT_ENTITY_ID)
+  const { actions, runs, actionSummary, profileCount, routeCount } = await getActionsData(orgId)
 
   const runsByAction = new Map<string, typeof runs>()
   for (const run of runs) {

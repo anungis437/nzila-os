@@ -79,6 +79,25 @@ export interface SendNotificationResult {
   }[];
 }
 
+function isNotificationChannel(value: string): value is NotificationChannel {
+  return value === 'email' || value === 'sms' || value === 'push' || value === 'in_app';
+}
+
+function isNotificationType(value: string): value is NotificationType {
+  return [
+    'payment_confirmation',
+    'payment_failed',
+    'payment_reminder',
+    'donation_received',
+    'stipend_approved',
+    'stipend_disbursed',
+    'low_balance_alert',
+    'arrears_warning',
+    'strike_announcement',
+    'picket_reminder',
+  ].includes(value);
+}
+
 // ============================================================================
 // NOTIFICATION QUEUE MANAGEMENT
 // ============================================================================
@@ -114,8 +133,7 @@ export async function queueNotification(request: NotificationRequest): Promise<s
     scheduledFor: (scheduledFor || new Date()).toISOString(),
     attempts: '0',
     createdAt: new Date().toISOString(),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any).returning();
+  } as any as typeof notificationQueue.$inferInsert).returning();
 
   return notification.id;
 }
@@ -176,50 +194,47 @@ export async function sendNotification(notificationId: string): Promise<SendNoti
     .set({ 
       attempts: notification.attempts + 1,
       lastAttemptAt: new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    } as any as Partial<typeof notificationQueue.$inferInsert>)
     .where(eq(notificationQueue.id, notificationId));
 
   const channelResults: SendNotificationResult['channelResults'] = [];
-  let data;
+  let data: Record<string, unknown>;
   try {
-    data = JSON.parse(notification.data);
+    data = JSON.parse(notification.data) as Record<string, unknown>;
   } catch {
     throw new Error('Invalid notification data format');
   }
 
   // Send through each channel
   for (const channel of notification.channels) {
+    if (!isNotificationChannel(channel) || !isNotificationType(notification.type)) {
+      continue;
+    }
     try {
       await sendThroughChannel(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        channel as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        notification.type as any,
+        channel,
+        notification.type,
         notification.userId,
         notification.tenantId,
-        data
+        data as Record<string, any>
       );
       
       channelResults.push({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        channel: channel as any,
+        channel,
         success: true,
       });
 
       // Log successful delivery
       await logNotification(
         notificationId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        channel as any,
+        channel,
         'delivered',
         undefined
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       channelResults.push({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        channel: channel as any,
+        channel,
         success: false,
         error: errorMessage,
       });
@@ -227,8 +242,7 @@ export async function sendNotification(notificationId: string): Promise<SendNoti
       // Log failed delivery
       await logNotification(
         notificationId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        channel as any,
+        channel,
         'failed',
         errorMessage
       );
@@ -248,8 +262,7 @@ export async function sendNotification(notificationId: string): Promise<SendNoti
         .filter(r => !r.success)
         .map(r => `${r.channel}: ${r.error}`)
         .join('; '),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    } as any as Partial<typeof notificationQueue.$inferInsert>)
     .where(eq(notificationQueue.id, notificationId));
 
   return {
@@ -695,15 +708,13 @@ export async function updateUserNotificationPreferences(
       userId,
       preferences: JSON.stringify(preferences),
       updatedAt: new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    } as any as typeof userNotificationPreferences.$inferInsert)
     .onConflictDoUpdate({
       target: [userNotificationPreferences.tenantId, userNotificationPreferences.userId],
       set: {
         preferences: JSON.stringify(preferences),
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
+      } as any as Partial<typeof userNotificationPreferences.$inferInsert>,
     });
 }
 
@@ -752,8 +763,7 @@ async function logNotification(
     error,
     deliveredAt: status === 'delivered' ? new Date() : undefined,
     createdAt: new Date(),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
+  } as any as typeof notificationLog.$inferInsert);
 }
 
 /**

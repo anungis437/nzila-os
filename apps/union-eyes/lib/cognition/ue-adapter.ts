@@ -58,7 +58,7 @@ export function memberSubject(orgId: string, memberId: string): CognitionSubject
  */
 function mapEventToMemory(
   subject: CognitionSubject,
-  row: { id: string; eventType: string | null; createdAt: Date | null; payload?: unknown },
+  row: { id: string; eventType: string | null; createdAt: Date | null; payload?: any },
 ): MemoryEvent {
   const type = (row.eventType ?? 'event').toString();
   const negative = ['sla_missed', 'sla_deadline_missed', 'escalated', 'arbitration_filed', 'rejected', 'denied']

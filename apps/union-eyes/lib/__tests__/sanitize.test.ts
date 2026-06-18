@@ -119,7 +119,7 @@ describe('sanitizeHtml', () => {
     const origURL = globalThis.URL;
     globalThis.URL = class {
       constructor() { throw new TypeError('Invalid URL'); }
-    } as unknown as typeof URL;
+    } as any as typeof URL;
     try {
       expect(validateRedirectUrl('not-a-url')).toBeNull();
     } finally {

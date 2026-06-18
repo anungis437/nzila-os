@@ -28,11 +28,11 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  desc: vi.fn((a: unknown) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  desc: vi.fn((a: any) => a),
   sql: vi.fn(),
-  inArray: vi.fn((...a: unknown[]) => a),
+  inArray: vi.fn((...a: any[]) => a),
   relations: vi.fn(() => ({})),
 }));
 

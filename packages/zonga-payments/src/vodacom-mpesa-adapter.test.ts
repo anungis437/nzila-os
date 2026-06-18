@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createVodacomMpesaAdapter } from './adapters/vodacom-mpesa.adapter'
 import { VodacomMpesaError } from './adapters/vodacom-mpesa.types'
 import { PaymentProvider, PaymentIntentStatus } from './types'
+import type { PayoutInstruction } from './types'
 
 // Mock the client to avoid RSA crypto
 const mockC2bPayment = vi.fn()
@@ -22,6 +23,29 @@ const config = {
   publicKey: 'test-pk',
   serviceProviderCode: 'SP001',
   market: 'TZ' as const,
+}
+
+function makePayoutInstruction(overrides?: Partial<PayoutInstruction>): PayoutInstruction {
+  return {
+    id: 'payout-1',
+    recipientId: 'recipient-1',
+    amount: 5000,
+    currency: 'TZS',
+    method: 'mobile_money',
+    provider: PaymentProvider.VODACOM_MPESA,
+    destination: {
+      type: 'mobile_wallet',
+      accountIdentifier: '+255700000001',
+      accountName: 'Recipient One',
+      mobileNumber: '+255700000001',
+    },
+    status: 'pending',
+    providerPayoutId: null,
+    batchId: null,
+    scheduledAt: new Date('2025-01-01T00:00:00Z'),
+    completedAt: null,
+    ...overrides,
+  }
 }
 
 describe('createVodacomMpesaAdapter', () => {
@@ -151,8 +175,8 @@ describe('createVodacomMpesaAdapter', () => {
 
   describe('createPayout', () => {
     it('throws unsupported operation error', async () => {
-      await expect(adapter.createPayout({} as any)).rejects.toThrow(VodacomMpesaError)
-      await expect(adapter.createPayout({} as any)).rejects.toThrow('not supported')
+      await expect(adapter.createPayout(makePayoutInstruction())).rejects.toThrow(VodacomMpesaError)
+      await expect(adapter.createPayout(makePayoutInstruction())).rejects.toThrow('not supported')
     })
   })
 

@@ -5,7 +5,7 @@
  * Supports ?download=true for JSON file export.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { requirePlatformRole, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { createLogger } from '@nzila/os-core'
 import { gradeFromScore } from '@nzila/platform-assurance'
@@ -18,7 +18,7 @@ const _logger = createLogger('api:assurance')
 export async function GET(req: NextRequest) {
   return withRequestContext(req, () =>
     withSpan('api.assurance.dashboard', {}, async () => {
-      const auth = await authenticateUser()
+      const auth = await requirePlatformRole('platform_admin', 'studio_admin')
       if (!auth.ok) return auth.response
 
       // ── Compliance: evidence pack verification rate ──────────────────

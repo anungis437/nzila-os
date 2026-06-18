@@ -51,7 +51,8 @@
 | Audit chain segments | DB `audit_log` table | CC7.3 | Real-time |
 | Sealed evidence packs | Object storage + HMAC | CC7.3, C1.1 | On-demand |
 | Backup attestations | Azure-managed | A1.2, CC9.1 | Daily |
-| Access reviews | TBD (gap) | CC6.2, CC6.3 | Quarterly target |
+| Access reviews | `reports/compliance/access-review/2026-Q2.json` + `reports/compliance/access-review/captures/2026-Q2/` | CC6.2, CC6.3 | Quarterly |
+| Capacity/scaling thresholds | `docs/compliance/soc2/capacity-scaling-thresholds.md` | A1.1 | Quarterly review |
 
 ## E. Inherited controls (Azure Canada Central)
 

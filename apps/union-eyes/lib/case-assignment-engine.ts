@@ -462,7 +462,7 @@ return [];
  */
 async function scoreOfficers(
   officers: OfficerProfile[],
-  claim: unknown,
+  claim: any,
   criteria: AssignmentCriteria,
   _organizationId: string
 ): Promise<AssignmentRecommendation[]> {

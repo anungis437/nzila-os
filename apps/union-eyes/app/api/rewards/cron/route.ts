@@ -110,7 +110,7 @@ return NextResponse.json({
       success: true,
       data: results,
     });
-  } catch (_error: unknown) {
+  } catch (_error: any) {
     return NextResponse.json(
       { error: 'Failed to execute scheduled tasks' },
       { status: 500 }

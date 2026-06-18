@@ -303,9 +303,9 @@ export default async function InvoicesListPage() {
                       ? `$${Number(inv.amountPaid).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
                       : '—'}
                   </td>
-                  <td
-                    className={`px-5 py-4 text-right font-mono font-semibold ${balance > 0 ? agingColors[inv.agingBracket] ?? 'text-gray-600' : 'text-gray-400'}`}
-                  >
+                    <td
+                      className={`px-5 py-4 text-right font-mono font-semibold ${balance > 0 ? agingColors[inv.agingBracket] : 'text-gray-400'}`}
+                    >
                     {balance > 0
                       ? `$${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
                       : '—'}

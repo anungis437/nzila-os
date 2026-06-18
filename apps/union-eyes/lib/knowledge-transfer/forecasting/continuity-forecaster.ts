@@ -6,31 +6,41 @@
  */
 
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
-import { and, eq, gte } from 'drizzle-orm';
+import type { PropagationMap } from '../propagation/propagation-models';
+import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 import type { ContinuityForecast, ContinuityTrendPoint } from './forecast-models';
 import {
-  calculateConcentrationGrowthRate,
-  projectUndocumentedWorkflowGrowth,
-  projectGovernanceErosion,
-  projectRedundancyErosion,
-  projectVendorConcentrationRisk,
   forecastContinuityHealth,
   identifyApproachingThresholds,
-  estimateCrisisDate,
 } from './forecast-models';
+
+type PublishedInterview = Awaited<ReturnType<typeof loadPublishedInterviews>>[number];
+
+type CurrentMetrics = {
+  singleSourceCount: number;
+  totalNodes: number;
+  averageRedundancy: number;
+  governanceMaturity: number;
+  undocumentedRisk: number;
+  vendorConcentrationRisk: number;
+};
+
+async function loadPublishedInterviews(orgId: string) {
+  return db
+    .select()
+    .from(exitInterviews)
+    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')))
+    .orderBy(exitInterviews.publishedAt);
+}
 
 export async function forecastContinuityTrends(orgId: string): Promise<ContinuityForecast> {
   // Build current dependency map
   const propagationMap = await buildDependencyPropagationMap(orgId);
 
   // Load interviews for trend data
-  const interviews = await db
-    .select()
-    .from(exitInterviews)
-    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')))
-    .orderBy(exitInterviews.publishedAt);
+  const interviews = await loadPublishedInterviews(orgId);
 
   // Build baseline metrics
   const currentMetrics = buildCurrentMetrics(propagationMap, interviews.length);
@@ -74,13 +84,13 @@ export async function forecastContinuityTrends(orgId: string): Promise<Continuit
   };
 }
 
-function buildCurrentMetrics(propagationMap: any, interviewCount: number) {
+function buildCurrentMetrics(propagationMap: PropagationMap, _interviewCount: number): CurrentMetrics {
   const totalNodes = propagationMap.nodes.length;
-  const singleSourceCount = propagationMap.nodes.filter((n: any) => n.isSingleSource).length;
-  const avgFrequency = propagationMap.nodes.reduce((sum: any, n: any) => sum + n.frequency, 0) / totalNodes;
+  const singleSourceCount = propagationMap.nodes.filter((node) => node.isSingleSource).length;
+  const avgFrequency = propagationMap.nodes.reduce((sum, node) => sum + node.frequency, 0) / totalNodes;
 
-  const governanceNodes = propagationMap.nodes.filter((n: any) => n.category === 'governance');
-  const undocumentedCount = propagationMap.nodes.filter((n: any) => n.isSingleSource && n.continuitySensitivity === 'critical').length;
+  const governanceNodes = propagationMap.nodes.filter((node) => node.category === 'governance');
+  const undocumentedCount = propagationMap.nodes.filter((node) => node.isSingleSource && node.continuitySensitivity === 'critical').length;
 
   return {
     singleSourceCount,
@@ -88,11 +98,11 @@ function buildCurrentMetrics(propagationMap: any, interviewCount: number) {
     averageRedundancy: avgFrequency,
     governanceMaturity: Math.min(governanceNodes.length * 20, 80),
     undocumentedRisk: (undocumentedCount / totalNodes) * 100,
-    vendorConcentrationRisk: (propagationMap.nodes.filter((n: any) => n.category === 'vendor' && n.isSingleSource).length / totalNodes) * 100,
+    vendorConcentrationRisk: (propagationMap.nodes.filter((node) => node.category === 'vendor' && node.isSingleSource).length / totalNodes) * 100,
   };
 }
 
-function buildHistoricalTrendData(interviews: any[], propagationMap: any): ContinuityTrendPoint[] {
+function buildHistoricalTrendData(interviews: PublishedInterview[], propagationMap: PropagationMap): ContinuityTrendPoint[] {
   // Build monthly trend points from interview dates
   const now = new Date();
   const trendPoints: ContinuityTrendPoint[] = [];
@@ -103,11 +113,11 @@ function buildHistoricalTrendData(interviews: any[], propagationMap: any): Conti
 
     // Filter interviews up to this month
     const upToThis = interviews.filter(
-      (i: any) => i.publishedAt && new Date(i.publishedAt) <= date,
+      (interview) => interview.publishedAt && new Date(interview.publishedAt) <= date,
     );
 
     if (upToThis.length > 0) {
-      const singleSourceCount = propagationMap.nodes.filter((n: any) => n.frequency <= upToThis.length / 4).length;
+      const singleSourceCount = propagationMap.nodes.filter((node) => node.frequency <= upToThis.length / 4).length;
       const healthScore = 100 - (singleSourceCount / propagationMap.nodes.length) * 50;
 
       trendPoints.push({
@@ -135,7 +145,7 @@ function buildHistoricalTrendData(interviews: any[], propagationMap: any): Conti
   ];
 }
 
-function projectFutureTrends(currentMetrics: any, propagationMap: any): ContinuityTrendPoint[] {
+function projectFutureTrends(currentMetrics: CurrentMetrics, _propagationMap: PropagationMap): ContinuityTrendPoint[] {
   const projections: ContinuityTrendPoint[] = [];
   const now = new Date();
 
@@ -177,7 +187,6 @@ function projectFutureTrends(currentMetrics: any, propagationMap: any): Continui
 }
 
 function determineTrendDirection(historical: ContinuityTrendPoint[], projections: ContinuityTrendPoint[]) {
-  const lastHistorical = historical[historical.length - 1]?.healthScore ?? 50;
   const firstProjection = projections[0]?.healthScore ?? 50;
   const lastProjection = projections[projections.length - 1]?.healthScore ?? 50;
 
@@ -187,7 +196,7 @@ function determineTrendDirection(historical: ContinuityTrendPoint[], projections
   return 'stable' as const;
 }
 
-function buildTrackedRisks(currentMetrics: any, projections: ContinuityTrendPoint[]) {
+function buildTrackedRisks(currentMetrics: CurrentMetrics, projections: ContinuityTrendPoint[]): ContinuityForecast['trackedRisks'] {
   const firstProj = projections[0];
   const lastProj = projections[projections.length - 1];
 
@@ -230,7 +239,7 @@ function buildTrackedRisks(currentMetrics: any, projections: ContinuityTrendPoin
   ];
 }
 
-function generateForecastRecommendations(trackedRisks: any[], thresholds: string[]): string[] {
+function generateForecastRecommendations(trackedRisks: ContinuityForecast['trackedRisks'], thresholds: string[]): string[] {
   const recommendations: string[] = [];
 
   for (const risk of trackedRisks) {

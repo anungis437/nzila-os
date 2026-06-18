@@ -24,6 +24,10 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline'
+import { platformDb } from '@nzila/db/platform'
+import { orgs } from '@nzila/db/schema'
+import { eq } from 'drizzle-orm'
+import { getExecutiveOrgId } from '@/lib/executive-os'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,6 +76,16 @@ function InfoRow({ label, value }: { label: string; value: string | number | nul
 export default async function PilotExportPage() {
   await requireRole('platform_admin', 'studio_admin', 'ops')
 
+  const orgId = await getExecutiveOrgId()
+  const org = orgId
+    ? await platformDb.query.orgs.findFirst({ where: eq(orgs.id, orgId) }).catch(() => null)
+    : null
+  const orgName =
+    (org && 'displayName' in org && org.displayName && String(org.displayName)) ||
+    org?.legalName ||
+    null
+  const exportScope = orgName && orgId ? `${orgName} (${orgId})` : orgId || 'Unscoped preview (no active org resolved)'
+
   const ports = createDefaultPilotPorts()
   const pack: PilotSummaryPack = await generatePilotPack(ports)
   const bundle = pack.bundle
@@ -101,6 +115,10 @@ export default async function PilotExportPage() {
 
       {/* Metadata bar */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-8 flex flex-wrap gap-6 text-sm">
+        <div>
+          <span className="text-gray-500">Export Scope:</span>{' '}
+          <span className="font-semibold">{exportScope}</span>
+        </div>
         <div>
           <span className="text-gray-500">Platform:</span>{' '}
           <span className="font-semibold">{bundle.platformName}</span>

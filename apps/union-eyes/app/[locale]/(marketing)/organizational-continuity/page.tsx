@@ -20,7 +20,6 @@
  * Positions UE as the organizational continuity intelligence substrate.
  * Hides internal engine complexity. Exposes operational outcomes.
  */
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BookOpen, Users, ShieldCheck, BarChart3, Network, RefreshCw, ArrowRight } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';

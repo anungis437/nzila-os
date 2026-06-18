@@ -30,7 +30,7 @@ import {
   authUsers,
   authAuditLog,
 } from '@nzila/db/schema'
-import { eq, and, gt, isNull, sql } from 'drizzle-orm'
+import { eq, and, gt, isNull } from 'drizzle-orm'
 import {
   generateTotpSecret,
   verifyTotp,

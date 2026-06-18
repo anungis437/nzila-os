@@ -26,8 +26,11 @@ import {
   type GovernanceActionStatus,
 } from '@nzila/executive-os'
 import { getExecutiveOrgId, runAndPersist } from '../../../../../lib/executive-os'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.governance.legal')
 
 const SEVERITY_BADGE: Record<string, string> = {
   info: 'bg-slate-100 text-slate-700',
@@ -42,11 +45,22 @@ function daysFromToday(iso: string): number {
 }
 
 async function loadSignal(orgId: string): Promise<LegalSignal> {
-  const [filingRows, taskRows, actionRows] = await Promise.all([
-    platformDb.select().from(filings).where(eq(filings.orgId, orgId)),
-    platformDb.select().from(complianceTasks).where(eq(complianceTasks.orgId, orgId)),
-    platformDb.select().from(governanceActions).where(eq(governanceActions.orgId, orgId)),
-  ])
+  let filingRows: Array<typeof filings.$inferSelect> = []
+  let taskRows: Array<typeof complianceTasks.$inferSelect> = []
+  let actionRows: Array<typeof governanceActions.$inferSelect> = []
+
+  try {
+    ;[filingRows, taskRows, actionRows] = await Promise.all([
+      platformDb.select().from(filings).where(eq(filings.orgId, orgId)),
+      platformDb.select().from(complianceTasks).where(eq(complianceTasks.orgId, orgId)),
+      platformDb.select().from(governanceActions).where(eq(governanceActions.orgId, orgId)),
+    ])
+  } catch (error) {
+    logger.warn('legal signal load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { filings: [], tasks: [], governanceActions: [] }
+  }
 
   const now = new Date()
 
@@ -77,18 +91,25 @@ async function loadSignal(orgId: string): Promise<LegalSignal> {
 }
 
 async function lastInsights(orgId: string) {
-  const [run] = await platformDb
-    .select()
-    .from(executiveAgentRuns)
-    .where(and(eq(executiveAgentRuns.orgId, orgId), eq(executiveAgentRuns.agentKey, 'legal')))
-    .orderBy(desc(executiveAgentRuns.startedAt))
-    .limit(1)
-  if (!run) return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
-  const insights = await platformDb
-    .select()
-    .from(executiveAgentInsights)
-    .where(eq(executiveAgentInsights.runId, run.id))
-  return { run, insights }
+  try {
+    const [run] = await platformDb
+      .select()
+      .from(executiveAgentRuns)
+      .where(and(eq(executiveAgentRuns.orgId, orgId), eq(executiveAgentRuns.agentKey, 'legal')))
+      .orderBy(desc(executiveAgentRuns.startedAt))
+      .limit(1)
+    if (!run) return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
+    const insights = await platformDb
+      .select()
+      .from(executiveAgentInsights)
+      .where(eq(executiveAgentInsights.runId, run.id))
+    return { run, insights }
+  } catch (error) {
+    logger.warn('legal run history load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { run: null, insights: [] as Array<typeof executiveAgentInsights.$inferSelect> }
+  }
 }
 
 export default async function LegalPage() {

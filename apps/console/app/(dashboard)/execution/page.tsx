@@ -30,8 +30,11 @@ import {
   DocumentDuplicateIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.execution')
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -157,6 +160,13 @@ async function updateInitiativeStatus(formData: FormData) {
     .update(executionInitiatives)
     .set({ status, updatedAt: new Date() })
     .where(eq(executionInitiatives.id, id))
+    .catch((error) => {
+      logger.warn('initiative status update failed; skipping write', {
+        id,
+        status,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    })
 
   revalidatePath('/execution')
   revalidatePath('/today')
@@ -174,22 +184,30 @@ async function seedDefaultInitiatives(formData: FormData) {
 
   const now = new Date()
 
-  await platformDb.insert(executionInitiatives).values(
-    DEFAULT_INITIATIVES.map((item) => {
-      const dueDate = new Date(now)
-      dueDate.setDate(now.getDate() + item.dueDaysFromNow)
-      return {
+  await platformDb
+    .insert(executionInitiatives)
+    .values(
+      DEFAULT_INITIATIVES.map((item) => {
+        const dueDate = new Date(now)
+        dueDate.setDate(now.getDate() + item.dueDaysFromNow)
+        return {
+          orgId,
+          title: item.title,
+          venture: item.venture,
+          zone: item.zone,
+          owner: item.owner,
+          dueDate: dueDate.toISOString().slice(0, 10),
+          status: item.status,
+          urgent: item.urgent,
+        }
+      }),
+    )
+    .catch((error) => {
+      logger.warn('seed default initiatives failed; skipping write', {
         orgId,
-        title: item.title,
-        venture: item.venture,
-        zone: item.zone,
-        owner: item.owner,
-        dueDate: dueDate.toISOString().slice(0, 10),
-        status: item.status,
-        urgent: item.urgent,
-      }
-    }),
-  )
+        error: error instanceof Error ? error.message : String(error),
+      })
+    })
 
   revalidatePath('/execution')
   revalidatePath('/today')

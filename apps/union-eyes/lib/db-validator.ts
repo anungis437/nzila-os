@@ -79,8 +79,7 @@ async function performHealthCheck() {
     `);
     
     // Handle both array and rows format
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = Array.isArray(result) ? result : (result as any).rows || [];
+    const rows = (Array.isArray(result) ? result : (result as { rows?: Record<string, unknown>[] }).rows || []) as Record<string, unknown>[];
     const row = rows[0];
     
     return {
@@ -151,8 +150,7 @@ export async function testDatabaseQuery(): Promise<boolean> {
     `);
     
     // Handle both array and rows format
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = Array.isArray(result) ? result : (result as any).rows || [];
+    const rows = (Array.isArray(result) ? result : (result as { rows?: Record<string, unknown>[] }).rows || []) as Record<string, unknown>[];
     const count = rows[0]?.count;
     logger.info('Database query test passed', { tableCount: count });
     return true;
@@ -181,10 +179,8 @@ export async function validateDatabaseSchema(): Promise<{
     `);
     
     // Handle both array and rows format
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = Array.isArray(result) ? result : (result as any).rows || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tables = rows.map((row: any) => row.table_name);
+    const rows = (Array.isArray(result) ? result : (result as { rows?: Record<string, unknown>[] }).rows || []) as Record<string, unknown>[];
+    const tables = rows.map((row) => row.table_name as string);
     const tableCount = tables.length;
     
     // Check for critical tables

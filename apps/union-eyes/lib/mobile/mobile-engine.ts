@@ -26,8 +26,7 @@ import { promisify } from 'util';
 import { brotliCompress, deflate, gzip } from 'zlib';
 
 let firebaseAdmin: typeof import('firebase-admin') | null = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let firebaseApp: any = null;
+let firebaseApp: import('firebase-admin').app.App | null = null;
 
 const gzipAsync = promisify(gzip);
 const deflateAsync = promisify(deflate);

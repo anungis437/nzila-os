@@ -32,7 +32,7 @@ export interface CircuitBreakerConfig {
   successThreshold?: number;
   
   /** Fallback value/function when circuit is open */
-  fallback?: unknown;
+  fallback?: any;
   
   /** Custom error detector - return true if error should count as failure */
   isFailure?: (error: Error) => boolean;

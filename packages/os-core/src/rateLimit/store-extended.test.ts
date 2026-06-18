@@ -2,6 +2,7 @@
  * Extended tests for rateLimit/store.ts — cover RedisRateLimitStore + factory
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import type { RedisLike } from './store'
 
 describe('RedisRateLimitStore', () => {
   beforeEach(() => {
@@ -40,7 +41,7 @@ describe('RedisRateLimitStore', () => {
     }
 
     const { RedisRateLimitStore } = await loadStore()
-    const store = new RedisRateLimitStore(mockRedis as any)
+    const store = new RedisRateLimitStore(mockRedis as unknown as RedisLike)
 
     const result = await store.hit('key:1', 60_000, 10)
     expect(result.allowed).toBe(true)
@@ -67,7 +68,7 @@ describe('RedisRateLimitStore', () => {
     }
 
     const { RedisRateLimitStore } = await loadStore()
-    const store = new RedisRateLimitStore(mockRedis as any)
+    const store = new RedisRateLimitStore(mockRedis as unknown as RedisLike)
 
     const result = await store.hit('key:1', 60_000, 10)
     expect(result.allowed).toBe(false)
@@ -83,7 +84,7 @@ describe('RedisRateLimitStore', () => {
     }
 
     const { RedisRateLimitStore } = await loadStore()
-    const store = new RedisRateLimitStore(mockRedis as any, { keyPrefix: 'test:rl:' })
+    const store = new RedisRateLimitStore(mockRedis as RedisLike, { keyPrefix: 'test:rl:' })
 
     await store.reset('mykey')
     expect(mockRedis.del).toHaveBeenCalledWith('test:rl:mykey')
@@ -108,7 +109,7 @@ describe('RedisRateLimitStore', () => {
     }
 
     const { RedisRateLimitStore } = await loadStore()
-    const store = new RedisRateLimitStore(mockRedis as any)
+    const store = new RedisRateLimitStore(mockRedis as unknown as RedisLike)
 
     const count = await store.peek('key:1', 60_000)
     expect(count).toBe(5)
@@ -122,7 +123,7 @@ describe('RedisRateLimitStore', () => {
     }
 
     const { RedisRateLimitStore } = await loadStore()
-    const store = new RedisRateLimitStore(mockRedis as any)
+    const store = new RedisRateLimitStore(mockRedis as RedisLike)
 
     expect(await store.healthy()).toBe(true)
   })
@@ -135,7 +136,7 @@ describe('RedisRateLimitStore', () => {
     }
 
     const { RedisRateLimitStore } = await loadStore()
-    const store = new RedisRateLimitStore(mockRedis as any)
+    const store = new RedisRateLimitStore(mockRedis as RedisLike)
 
     expect(await store.healthy()).toBe(false)
   })
@@ -149,7 +150,7 @@ describe('RedisRateLimitStore', () => {
     }
 
     const { RedisRateLimitStore } = await loadStore()
-    const store = new RedisRateLimitStore(mockRedis as any)
+    const store = new RedisRateLimitStore(mockRedis as RedisLike)
 
     await store.reset('test')
     expect(mockDel).toHaveBeenCalledWith('nzila:rl:test')
@@ -230,7 +231,7 @@ describe('getRateLimitStore', () => {
     }
 
     const { getRateLimitStore, RedisRateLimitStore } = await loadStore()
-    const store = await getRateLimitStore(mockRedis as any)
+    const store = await getRateLimitStore(mockRedis as RedisLike)
     expect(store).toBeInstanceOf(RedisRateLimitStore)
   })
 

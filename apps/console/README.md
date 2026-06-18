@@ -28,6 +28,8 @@ Copy `.env.example` → `.env.local` and fill required values.
 ## Key Docs
 
 - [docs/DOMAIN_MODEL.md](docs/DOMAIN_MODEL.md) — Domain model reference
+- [docs/production-canary-checklist.md](docs/production-canary-checklist.md) — Post-deploy authz and billing canary gates
+- [docs/fortune500-readiness-assessment.md](docs/fortune500-readiness-assessment.md) — Enterprise readiness gap matrix vs Fortune 500 baseline
 
 ## Dashboard Modules
 

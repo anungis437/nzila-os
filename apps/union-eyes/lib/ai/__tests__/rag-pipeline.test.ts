@@ -318,7 +318,7 @@ describe("RAGPipeline", () => {
 
       it("bm25Search uses tf fallback when termFrequency entry is missing", async () => {
         await pipeline.addDocuments([makeDoc("d-missing-tf", longContent)]);
-        const internals = pipeline as unknown as { bm25Index: { documents: Map<string, unknown>; termFrequency: Map<string, unknown> } };
+        const internals = pipeline as any as { bm25Index: { documents: Map<string, unknown>; termFrequency: Map<string, unknown> } };
         const firstDocId = Array.from(internals.bm25Index.documents.keys())[0];
         internals.bm25Index.termFrequency.delete(firstDocId);
 
@@ -328,7 +328,7 @@ describe("RAGPipeline", () => {
 
       it("bm25Search uses avgDocumentLength fallback denominator when avg is zero", async () => {
         await pipeline.addDocuments([makeDoc("d-avg0", longContent)]);
-        const internals = pipeline as unknown as { bm25Index: { avgDocumentLength: number } };
+        const internals = pipeline as any as { bm25Index: { avgDocumentLength: number } };
         internals.bm25Index.avgDocumentLength = 0;
 
         const results = await pipeline.search("grievance");
@@ -336,7 +336,7 @@ describe("RAGPipeline", () => {
       });
 
       it("rerank sort falls back to zero for missing/zero rerankScore", () => {
-        const internals = pipeline as unknown as { rerank: (query: string, results: unknown[]) => unknown[] };
+        const internals = pipeline as any as { rerank: (query: string, results: any[]) => any[] };
         const fakeChunkA = {
           id: "a",
           content: "alpha beta",

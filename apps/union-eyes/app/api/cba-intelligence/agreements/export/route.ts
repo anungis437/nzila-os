@@ -1,7 +1,5 @@
 import { withApi, z } from "@/lib/api/framework";
-import { db } from "@/db/db";
-import { cbaIntelAgreements } from "@/db/schema";
-import { eq, and, ilike, type SQL } from "drizzle-orm";
+import { listAgreements } from "@/lib/services/cba-intelligence/extraction-service";
 import { NextResponse } from "next/server";
 
 // ---------------------------------------------------------------------------
@@ -9,6 +7,7 @@ import { NextResponse } from "next/server";
 // ---------------------------------------------------------------------------
 
 const exportQuerySchema = z.object({
+  search: z.string().max(200).optional(),
   jurisdiction: z.string().optional(),
   sector: z.string().optional(),
   reviewStatus: z.string().optional(),
@@ -52,23 +51,7 @@ export const GET = withApi(
     },
   },
   async ({ query }) => {
-    const conditions: SQL[] = [];
-
-    if (query.jurisdiction) {
-      conditions.push(eq(cbaIntelAgreements.jurisdiction, query.jurisdiction));
-    }
-    if (query.sector) {
-      conditions.push(ilike(cbaIntelAgreements.sector, query.sector));
-    }
-    if (query.reviewStatus) {
-      conditions.push(eq(cbaIntelAgreements.reviewStatus, query.reviewStatus));
-    }
-
-    const rows = await db
-      .select()
-      .from(cbaIntelAgreements)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .limit(10000);
+    const { items: rows } = await listAgreements(query, { page: 1, limit: 10000 });
 
     const header = CSV_COLUMNS.join(",");
     const lines = rows.map((row) =>

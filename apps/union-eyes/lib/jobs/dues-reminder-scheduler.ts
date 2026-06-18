@@ -55,7 +55,7 @@ interface DuesTransactionRow {
   periodStart: string;
   periodEnd: string;
   status: string;
-  metadata: unknown;
+  metadata: any;
 }
 
 // =============================================================================

@@ -80,7 +80,7 @@ export function validateConsent(
   }
 
   // Check specific data type permission
-  const preferences = (consent.preferences as unknown) as ConsentPreferences;
+  const preferences = consent.preferences as unknown as ConsentPreferences;
   return preferences[dataType] === true;
 }
 
@@ -103,8 +103,7 @@ export async function createConsentRecord(
       consentDate: new Date(),
       categories: [],
       expiresAt: null,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    })
     .returning();
 
   return consent as unknown as DataAggregationConsent;
@@ -123,8 +122,7 @@ export async function revokeConsent(
     .set({
       consentGiven: false,
       updatedAt: new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    })
     .where(eq(dataAggregationConsent.id, consentId))
     .returning();
 
@@ -152,8 +150,7 @@ export async function updateConsentPreferences(
 
   // Merge preferences
   const _updatedPreferences = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...((current as any).preferences as ConsentPreferences),
+    ...((current as unknown as { preferences: ConsentPreferences }).preferences),
     ...newPreferences,
   };
 
@@ -162,8 +159,7 @@ export async function updateConsentPreferences(
     .update(dataAggregationConsent)
     .set({
       updatedAt: new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    })
     .where(eq(dataAggregationConsent.id, consentId))
     .returning();
 
@@ -202,7 +198,7 @@ export function getConsentSummary(consent: DataAggregationConsent): {
   consentDuration: string;
   canRevoke: boolean;
 } {
-  const preferences = (consent.preferences as unknown) as ConsentPreferences;
+  const preferences = consent.preferences as unknown as ConsentPreferences;
   const dataTypesShared: string[] = [];
   const dataTypesNotShared: string[] = [];
 
@@ -260,7 +256,7 @@ export function generateConsentChangeNotification(
   consent: DataAggregationConsent,
   changeType: 'granted' | 'updated' | 'revoked'
 ): string {
-  const preferences = (consent.preferences as unknown) as ConsentPreferences;
+  const preferences = consent.preferences as unknown as ConsentPreferences;
   const sharedTypes = Object.entries(preferences)
     .filter(([, value]) => value)
     .length;

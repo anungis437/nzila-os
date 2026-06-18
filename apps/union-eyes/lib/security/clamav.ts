@@ -27,7 +27,7 @@ function normalizeScanUrl(raw: string): string {
   return parsed.toString();
 }
 
-function mapJsonResponse(payload: unknown): MalwareScanResult {
+function mapJsonResponse(payload: any): MalwareScanResult {
   const now = new Date().toISOString();
   if (!payload || typeof payload !== 'object') {
     return {
@@ -165,6 +165,6 @@ export async function assertBufferSafeForUpload(
   return result;
 }
 
-export function isMalwareScanError(error: unknown): error is MalwareScanError {
+export function isMalwareScanError(error: any): error is MalwareScanError {
   return error instanceof MalwareScanError;
 }

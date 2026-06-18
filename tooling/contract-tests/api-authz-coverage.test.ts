@@ -116,7 +116,7 @@ describe('API Authorization Contract (INV-04)', () => {
         continue
       }
       if (!MUTATION_EXPORTS.test(content)) continue
-      const routeNorm = route.replace(/\\/g, '/')
+      const routeNorm = route.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
       const isPublic = PUBLIC_ROUTE_PATTERNS.some((p) => p.test(routeNorm))
       if (isPublic) continue
       const hasAuth = AUTH_PATTERNS.some((p) => p.test(content))

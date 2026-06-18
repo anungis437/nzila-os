@@ -16,7 +16,12 @@
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews, knowledgeBase } from '@/db/schema';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { logger } from '@/lib/logger';
 import type { ExitInterview } from '@/db/schema';
@@ -24,7 +29,7 @@ import type { ExitInterview } from '@/db/schema';
 // Sensitivity levels that bypass RAG indexing regardless of consent
 const INDEXING_BLOCKED_SENSITIVITY = new Set(['legal_sensitive', 'executive_confidential'] as const);
 
-async function generateEmbedding(text: string): Promise<number[]> {
+async function generateEmbedding(text: string, _orgId?: string): Promise<number[]> {
   const cached = await embeddingCache.getCachedEmbedding(text, 'ai-sdk');
   if (cached) return cached;
 
@@ -112,7 +117,7 @@ export async function indexExitInterview(
     }
 
     const content = buildIndexableContent(interview);
-    const embedding = await generateEmbedding(content);
+    const embedding = await generateEmbedding(content, orgId);
     const now = new Date();
 
     if (interview.knowledgeBaseId) {

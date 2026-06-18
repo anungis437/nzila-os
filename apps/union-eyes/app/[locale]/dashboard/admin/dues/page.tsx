@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
  * @module app/dashboard/admin/dues
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -165,7 +165,7 @@ export default function AdminDuesDashboard() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch overview data
-  const fetchOverview = async () => {
+  const fetchOverview = useCallback(async () => {
     try {
       setRefreshing(true);
       const response = await fetch('/api/admin/dues/overview');
@@ -183,11 +183,11 @@ export default function AdminDuesDashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
-    fetchOverview();
-  }, [t]);
+    void fetchOverview();
+  }, [fetchOverview]);
 
   // Loading state
   if (loading) {

@@ -60,6 +60,7 @@ export default async function WhitepapersHubPage({
   return (
     <div className="min-h-screen bg-white">
       <section className="relative overflow-hidden border-b border-slate-200 bg-[#0f2133]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           aria-hidden="true"
           src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1920&q=80&auto=format"
@@ -68,7 +69,7 @@ export default async function WhitepapersHubPage({
         />
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-br from-[#0f2133]/85 via-[#123451]/75 to-[#0f2133]/90"
+          className="absolute inset-0 bg-linear-to-br from-[#0f2133]/85 via-[#123451]/75 to-[#0f2133]/90"
         />
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-4xl text-center">
@@ -96,7 +97,7 @@ export default async function WhitepapersHubPage({
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <ul className="grid gap-6 lg:grid-cols-2">
           {WHITEPAPER_LIBRARY.map((entry) => {
             const entryCopy = getWhitepaperLocaleContent(entry, locale);
@@ -115,7 +116,7 @@ export default async function WhitepapersHubPage({
                       sizes="(min-width: 1024px) 600px, 100vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f2133]/80 via-[#0f2133]/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-[#0f2133]/80 via-[#0f2133]/20 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 px-5 py-3">
                       <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/80">
                         {entryCopy.format} · {entry.version}

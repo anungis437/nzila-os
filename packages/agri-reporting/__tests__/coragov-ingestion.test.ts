@@ -206,7 +206,7 @@ describe('buildCoraGovPayload', () => {
       report_id: 'bad_1',
       org_id: 'org_bad',
       // intentionally missing required fields
-    } as any
+    } as unknown
 
     const result = buildCoraGovPayload(SourceApp.CORA, [invalidReport])
     expect(result.accepted).toBe(false)
@@ -324,14 +324,14 @@ describe('simulateCoraGovIngestion', () => {
         submitted_at: '2025-04-01T12:00:00.000Z',
         source_app: 'cora',
         datasets: [{}],
-      } as any,
+      } as unknown,
     })
 
     vi.spyOn(ingestionContract.coraGovDatasetSchema, 'safeParse').mockReturnValueOnce({
       success: false,
       error: {
         issues: [{ path: ['unknown_field'], message: 'invalid unknown field' }],
-      } as any,
+      } as unknown,
     })
 
     const result = simulateCoraGovIngestion({})

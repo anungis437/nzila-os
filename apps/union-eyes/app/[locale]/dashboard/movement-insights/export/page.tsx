@@ -85,7 +85,7 @@ export default async function LegislativeBriefExportPage({
     .orderBy(movementTrends.createdAt);
 
   // Note: jurisdiction column doesn't exist on movementTrends; filtering removed
-  const filteredTrends = trends as unknown as MovementTrend[];
+  const filteredTrends = trends as any as MovementTrend[];
 
   // Generate brief
   const brief = generateLegislativeBrief(filteredTrends, focusArea);

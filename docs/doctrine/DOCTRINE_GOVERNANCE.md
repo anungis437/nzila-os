@@ -146,4 +146,5 @@ Any publication, whitepaper, conference presentation, or procurement document th
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 1.1.0-draft | 2026-06-06 | Institutional Intelligence category formation initiated. Wave 1.5 validation complete (discovery basis). Artifact 001 drafted and revised. Artifact 002 drafted. Artifact 003 Primer drafted (maturity model, IIA, sector patterns, roadmap, measurement). IIA standalone assessment drafted. Canonical Package created as constitutional reference. Validation gate kit complete. Canonical model frozen: Memory > Continuity > Governance > Trust > Institutional Intelligence > Resilience. |
 | 1.0.0 | Initial | Canonical doctrine architecture created. All artifact files produced from deduplicated DOCTRINE.md. Humility Doctrine added to constitution. Governance lifecycle established. |

@@ -7,6 +7,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { CircuitBreaker, executeWithFallback, withTimeout, DEFAULT_FALLBACK_STRATEGY } from '../src/fallback'
 
+type ErrorWithCode = Error & { code?: string }
+
 describe('CircuitBreaker', () => {
   let cb: CircuitBreaker
 
@@ -138,8 +140,8 @@ describe('executeWithFallback', () => {
       execute: async (provider) => {
         callLog.push(provider)
         if (provider === 'azure_openai') {
-          const err = new Error('Quota exceeded')
-          ;(err as any).code = 'quota_exceeded'
+          const err: ErrorWithCode = new Error('Quota exceeded')
+          err.code = 'quota_exceeded'
           throw err
         }
         return { result: 'fallback_success', providerUsed: provider }
@@ -162,8 +164,8 @@ describe('executeWithFallback', () => {
         },
         execute: async (provider) => {
           callLog.push(provider)
-          const err = new Error('Auth failed')
-          ;(err as any).code = 'auth_error'
+          const err: ErrorWithCode = new Error('Auth failed')
+          err.code = 'auth_error'
           throw err
         },
       }),
@@ -187,8 +189,8 @@ describe('executeWithFallback', () => {
       },
       execute: async (provider) => {
         callLog.push(provider)
-        const err = new Error('Quota exceeded')
-        ;(err as any).code = 'quota_exceeded'
+        const err: ErrorWithCode = new Error('Quota exceeded')
+        err.code = 'quota_exceeded'
         throw err
       },
     })
@@ -228,8 +230,8 @@ describe('executeWithFallback', () => {
       strategy: DEFAULT_FALLBACK_STRATEGY,
       execute: async (provider) => {
         if (provider === 'azure_openai') {
-          const err = new Error('Connection error')
-          ;(err as any).code = 'connection_error'
+          const err: ErrorWithCode = new Error('Connection error')
+          err.code = 'connection_error'
           throw err
         }
         return { result: 'fallback_success', providerUsed: provider }
@@ -249,8 +251,8 @@ describe('executeWithFallback', () => {
           retryableErrors: ['quota_exceeded'],
         },
         execute: async (provider) => {
-          const err = new Error('All quotas exceeded')
-          ;(err as any).code = 'quota_exceeded'
+          const err: ErrorWithCode = new Error('All quotas exceeded')
+          err.code = 'quota_exceeded'
           throw err
         },
       }),

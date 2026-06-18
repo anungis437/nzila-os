@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type SelectStep = {
-  rows: unknown[];
+  rows: any[];
 };
 
 const selectSteps: SelectStep[] = [];
@@ -21,7 +21,7 @@ const dbMock = {
       orderBy: () => builder,
       where: () => builder,
       limit: async () => step.rows,
-      then: (onFulfilled: (value: unknown[]) => unknown, onRejected?: (reason: unknown) => unknown) =>
+      then: (onFulfilled: (value: any[]) => unknown, onRejected?: (reason: any) => unknown) =>
         Promise.resolve(step.rows).then(onFulfilled, onRejected),
     };
 
@@ -132,5 +132,39 @@ describe('case-intelligence related-documents-service', () => {
     });
 
     expect(result.map((doc) => doc.documentId)).toEqual(['doc-a', 'doc-b']);
+  });
+
+  it('incorporates similar cases when the current case has linkage fields', async () => {
+    queueSelectSteps([
+      {
+        rows: [{
+          id: 'case-3', grievanceNumber: 'G-3', title: 'Termination dispute', description: 'Member terminated',
+          type: 'termination', status: 'new', grievantId: 'member-3', employerId: 'employer-3', employerName: 'Employer',
+          workplaceId: 'worksite-3', workplaceName: 'Plant', cbaId: 'agreement-3', cbaArticle: '5', unionRepId: 'lro-3',
+          createdBy: 'user-9', awardSummary: null, organizationId: 'org-1', createdAt: new Date('2026-01-01T00:00:00Z')
+        }],
+      },
+      {
+        rows: [
+          {
+            id: 'doc-related', title: 'Related', filename: null, name: 'Related', privacyLabel: 'team_confidential',
+            documentType: 'memo', fileUrl: 'https://example.com/related', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: ['termination'], uploadedBy: 'lro-3',
+          },
+        ],
+      },
+      { rows: [{ id: 'case-similar' }] },
+      { rows: [{ userId: 'lro-3' }] },
+    ]);
+    filterAuthorizedDocumentsForActor.mockImplementation(async ({ documents }) => documents);
+
+    const { getRelatedDocuments } = await import('./related-documents-service');
+    const result = await getRelatedDocuments({
+      context: { caseId: 'case-3', orgId: 'org-1', actorId: 'user-1' },
+      actor: { userId: 'user-1', isStewardPlus: false },
+      limit: 10,
+    });
+
+    expect(result.map((doc) => doc.documentId)).toContain('doc-related');
   });
 });

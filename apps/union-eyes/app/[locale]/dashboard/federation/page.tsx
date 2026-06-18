@@ -333,7 +333,7 @@ export default async function FederationDashboardPage({
             </div>
           ) : (
             <div className="space-y-4">
-              {(metrics.memberUnions as unknown as MemberUnionData[]).slice(0, 5).map((union: MemberUnionData) => (
+              {(metrics.memberUnions as any as MemberUnionData[]).slice(0, 5).map((union: MemberUnionData) => (
                 <div key={union.id} className="flex items-center justify-between border-b pb-4 last:border-0">
                   <div>
                     <div className="font-medium">{union.name}</div>

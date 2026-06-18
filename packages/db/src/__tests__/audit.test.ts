@@ -18,6 +18,7 @@ import {
   type AuditEmitter,
 } from '../audit'
 import { createScopedDb, type ScopedDb } from '../scoped'
+import type { PgTable, TableConfig } from 'drizzle-orm/pg-core'
 
 // ── Test Constants ──────────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ const mockTable = {
   id: { name: 'id' },
   orgId: { name: 'org_id' },
 }
+const mockPgTable = mockTable as unknown as PgTable<TableConfig>
 
 // ── 1. Audit emission on mutations ──────────────────────────────────────────
 
@@ -55,7 +57,7 @@ describe('withAudit — automatic audit emission', () => {
     const scopedDb = createMockScopedDb(ENTITY_ID)
     const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
 
-    auditedDb.insert(mockTable as any, { kind: 'board' })
+    auditedDb.insert(mockPgTable, { kind: 'board' })
 
     expect(emitted).toHaveLength(1)
     expect(emitted[0].action).toBe('insert')
@@ -73,7 +75,7 @@ describe('withAudit — automatic audit emission', () => {
     const scopedDb = createMockScopedDb(ENTITY_ID)
     const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
 
-    auditedDb.update(mockTable as any, { status: 'held' })
+    auditedDb.update(mockPgTable, { status: 'held' })
 
     expect(emitted).toHaveLength(1)
     expect(emitted[0].action).toBe('update')
@@ -88,7 +90,7 @@ describe('withAudit — automatic audit emission', () => {
     const scopedDb = createMockScopedDb(ENTITY_ID)
     const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
 
-    auditedDb.delete(mockTable as any)
+    auditedDb.delete(mockPgTable)
 
     expect(emitted).toHaveLength(1)
     expect(emitted[0].action).toBe('delete')
@@ -102,7 +104,7 @@ describe('withAudit — automatic audit emission', () => {
     const scopedDb = createMockScopedDb(ENTITY_ID)
     const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
 
-    auditedDb.select(mockTable as any)
+    auditedDb.select(mockPgTable)
 
     expect(emitted).toHaveLength(0)
   })
@@ -143,7 +145,7 @@ describe('withAudit — correlation ID', () => {
       emitter,
     )
 
-    auditedDb.insert(mockTable as any, { kind: 'board' })
+    auditedDb.insert(mockPgTable, { kind: 'board' })
     expect(emitted[0].correlationId).toBe(correlationId)
   })
 
@@ -158,7 +160,7 @@ describe('withAudit — correlation ID', () => {
       emitter,
     )
 
-    auditedDb.insert(mockTable as any, { kind: 'board' })
+    auditedDb.insert(mockPgTable, { kind: 'board' })
     expect(emitted[0].correlationId).toBeTruthy()
     expect(typeof emitted[0].correlationId).toBe('string')
   })
@@ -174,9 +176,9 @@ describe('withAudit — correlation ID', () => {
       emitter,
     )
 
-    auditedDb.insert(mockTable as any, { kind: 'board' })
-    auditedDb.update(mockTable as any, { status: 'held' })
-    auditedDb.delete(mockTable as any)
+    auditedDb.insert(mockPgTable, { kind: 'board' })
+    auditedDb.update(mockPgTable, { status: 'held' })
+    auditedDb.delete(mockPgTable)
 
     expect(emitted).toHaveLength(3)
     expect(emitted[0].correlationId).toBe(emitted[1].correlationId)
@@ -198,7 +200,7 @@ describe('withAudit — actor role', () => {
       emitter,
     )
 
-    auditedDb.insert(mockTable as any, { kind: 'board' })
+    auditedDb.insert(mockPgTable, { kind: 'board' })
     expect(emitted[0].actorRole).toBe('org_admin')
   })
 
@@ -213,7 +215,7 @@ describe('withAudit — actor role', () => {
       emitter,
     )
 
-    auditedDb.insert(mockTable as any, { kind: 'board' })
+    auditedDb.insert(mockPgTable, { kind: 'board' })
     expect(emitted[0].actorRole).toBeUndefined()
   })
 })
@@ -262,7 +264,7 @@ describe('withAudit — mandatory audit failures for thenable writes', () => {
     }
     const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
 
-    await expect((auditedDb.insert(mockTable as any, { kind: 'board' }) as any).then(() => 'ok')).rejects
+    await expect((auditedDb.insert(mockPgTable, { kind: 'board' }) as unknown as PromiseLike<unknown>).then(() => 'ok')).rejects
       .toThrow('[AUDIT:MANDATORY] Audit emission failed for meetings.insert')
   })
 
@@ -273,7 +275,7 @@ describe('withAudit — mandatory audit failures for thenable writes', () => {
     }
     const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
 
-    await expect((auditedDb.update(mockTable as any, { status: 'held' }) as any).then(() => 'ok')).rejects
+    await expect((auditedDb.update(mockPgTable, { status: 'held' }) as unknown as PromiseLike<unknown>).then(() => 'ok')).rejects
       .toThrow('[AUDIT:MANDATORY] Audit emission failed for meetings.update')
   })
 
@@ -284,20 +286,20 @@ describe('withAudit — mandatory audit failures for thenable writes', () => {
     }
     const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
 
-    await expect((auditedDb.delete(mockTable as any) as any).then(() => 'ok')).rejects
+    await expect((auditedDb.delete(mockPgTable) as PromiseLike<unknown>).then(() => 'ok')).rejects
       .toThrow('[AUDIT:MANDATORY] Audit emission failed for meetings.delete')
   })
 })
 
 describe('createAuditedScopedDb — input validation', () => {
   it('throws when orgId is missing', () => {
-    expect(() => createAuditedScopedDb({ orgId: '' as any, actorId: ACTOR_ID })).toThrow(
+    expect(() => createAuditedScopedDb({ orgId: '' as string, actorId: ACTOR_ID })).toThrow(
       'requires a non-empty orgId',
     )
   })
 
   it('throws when actorId is missing', () => {
-    expect(() => createAuditedScopedDb({ orgId: ENTITY_ID, actorId: '' as any })).toThrow(
+    expect(() => createAuditedScopedDb({ orgId: ENTITY_ID, actorId: '' as string })).toThrow(
       'requires a non-empty actorId',
     )
   })

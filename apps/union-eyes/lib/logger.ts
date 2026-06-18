@@ -174,7 +174,8 @@ class Logger {
     // Structured output — use stdout/stderr (never console.*)
     // Indirect access avoids Next.js Edge Runtime static-analysis warnings
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const _proc = (globalThis as any)['process'];
+    const globalObject = globalThis as any as Record<string, unknown>;
+    const _proc = globalObject.process as { stdout?: { write: (s: string) => void }; stderr?: { write: (s: string) => void }; env?: { NODE_ENV?: string } } | undefined;
     if (_proc?.stdout) {
       // Always emit warn/error to stderr (including production) so that
       // server logs surface 500-causing stack traces; debug/info only emit
@@ -183,7 +184,7 @@ class Logger {
       const isErrorOrWarn = level === 'error' || level === 'warn';
       if (isErrorOrWarn || !isProduction) {
         const stream = isErrorOrWarn ? _proc.stderr : _proc.stdout;
-        stream.write(formatted + '\n');
+        stream?.write(formatted + '\n');
       }
     }
 
@@ -375,7 +376,7 @@ export function setRequestCorrelationId(request: Request): string {
 /**
  * API route wrapper with automatic logging
  */
-export function withLogging<T extends (...args: unknown[]) => Promise<Response>>(
+export function withLogging<T extends (...args: any[]) => Promise<Response>>(
   handler: T,
   routeName: string
 ): T {

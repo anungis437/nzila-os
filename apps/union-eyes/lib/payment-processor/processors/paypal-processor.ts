@@ -552,7 +552,7 @@ export class PayPalProcessor extends BasePaymentProcessor {
     try {
       this.logOperation('updateCustomer', { customerId });
 
-      const patchOps: Array<{ op: 'replace'; path: string; value: unknown }> = [];
+      const patchOps: Array<{ op: 'replace'; path: string; value: any }> = [];
 
       if (updates.email) {
         patchOps.push({ op: 'replace', path: '/email_address', value: updates.email });

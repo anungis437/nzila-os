@@ -24,7 +24,7 @@ import {
   buildClaim,
   buildArtifact,
 } from '../lib/trust-center/evidence.js';
-import type { TrustClaim, TrustCenterManifest } from '../lib/trust-center/types.js';
+import type { TrustClaim } from '../lib/trust-center/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Paths in claim definitions are monorepo-relative (e.g. apps/union-eyes/...)

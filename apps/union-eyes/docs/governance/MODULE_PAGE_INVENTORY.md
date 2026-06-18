@@ -280,7 +280,7 @@ This document is the authoritative page-level reference for the UnionEyes labour
 
 - **Route:** `/[locale]/dashboard/documents`
 - **Module:** Evidence & Documents
-- **Purpose:** FILE NOT FOUND at `dashboard/documents/page.tsx` in the route tree returned — this route is referenced by multiple nav items and `ALLOWED_PREFIXES_BY_EXPERIENCE`. It should display a scoped document library for the authenticated user: members see documents related to their own cases; staff see org-wide document repository.
+- **Purpose:** Governed document operations workspace. Includes repository search, library browsing, versioning, approvals, retention controls, bulk operations, OCR upload, and migration URL import into the governed repository.
 - **Intended Roles:** All authenticated (scoped by role).
 - **Required Data:** Document records from DB, filtered by org and/or user ID; file storage presigned URLs.
 - **Primary Action:** Browse and download documents.
@@ -289,7 +289,7 @@ This document is the authoritative page-level reference for the UnionEyes labour
 - **Error State:** Storage provider unavailable → "Documents temporarily unavailable — file storage is offline. Please try again shortly."
 - **Audit/Governance Relevance:** Document downloads and uploads are audit-logged. HIGH for evidence packs.
 - **Pilot/Demo Relevance:** HIGH — Demo Runbook Scene 4 references the evidence bundle.
-- **Notes:** FILE NOT FOUND — route may be placeholder or the component is rendered within another layout. Verify the route resolves before demo.
+- **Notes:** Route is present and resolves through `dashboard/documents/page.tsx` with server-side auth gate and role-aware demo behavior.
 
 ---
 

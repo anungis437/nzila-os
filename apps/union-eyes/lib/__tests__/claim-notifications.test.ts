@@ -50,8 +50,8 @@ vi.mock('../workflow-engine', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
   relations: vi.fn(() => ({})),
 }));
 

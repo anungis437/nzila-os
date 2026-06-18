@@ -71,7 +71,7 @@ Event N: hash = SHA256({ payload, previousHash: Event[N-1].hash })
 
 This ensures:
 
-- Tamper evidence: any modification breaks the chain
+- Tamper evidence: unknown modification breaks the chain
 - Append-only: deletions are detectable
 - Verifiable: `verifyEntityAuditChain(orgId)` validates the full chain
 

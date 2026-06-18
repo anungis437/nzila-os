@@ -8,9 +8,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
@@ -24,7 +24,7 @@ vi.mock('drizzle-orm', () => ({
   like: vi.fn(),
   ilike: vi.fn(),
   not: vi.fn(),
-  ne: vi.fn((...a: unknown[]) => a),
+  ne: vi.fn((...a: any[]) => a),
   count: vi.fn(),
   sum: vi.fn(),
   avg: vi.fn(),

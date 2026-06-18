@@ -451,7 +451,7 @@ export class MetaAPIClient {
     period: 'day' | 'week' | 'days_28' = 'day',
     since?: Date,
     until?: Date
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       metric: metrics.join(','),
@@ -489,7 +489,7 @@ export class MetaAPIClient {
       'post_comments',
       'post_shares',
     ]
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     const params = {
       metric: metrics.join(','),
       access_token: accessToken,
@@ -517,7 +517,7 @@ export class MetaAPIClient {
     period: 'day' | 'week' | 'days_28' | 'lifetime' = 'day',
     since?: Date,
     until?: Date
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     if (!this.accessToken) {
       throw new Error('Access token required');
     }
@@ -556,7 +556,7 @@ export class MetaAPIClient {
       'reach',
       'saved',
     ]
-  ): Promise<unknown[]> {
+  ): Promise<any[]> {
     if (!this.accessToken) {
       throw new Error('Access token required');
     }

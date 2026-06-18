@@ -10000,6 +10000,7 @@
     "filters": {
       "jurisdictionPlaceholder": "Juridiction",
       "allJurisdictions": "Toutes les juridictions",
+      "sectorPlaceholder": "Filtre de secteur...",
       "reviewPlaceholder": "Revue",
       "allReviews": "Toutes les revues"
     },
@@ -10021,6 +10022,9 @@
     "loading": "Chargement des accords...",
     "errorLoad": "Échec du chargement des accords",
     "empty": "Aucun accord trouvé",
+    "actions": {
+      "exportCsv": "Exporter CSV"
+    },
     "pagination": {
       "count": "{count} accord",
       "countPlural": "{count} accords",
@@ -10159,6 +10163,15 @@
         "lastSuccess": "Dernier succès",
         "documents": "Documents",
         "staleDocs": "Docs périmés"
+        },
+        "thresholds": {
+          "title": "Seuils",
+          "description": "Ajustez les seuils de fraîcheur utilisés par la vue d'ensemble",
+          "agingDays": "Jours de vieillissement",
+          "staleDays": "Jours de péremption",
+          "expiredDays": "Jours d'expiration",
+          "apply": "Appliquer les seuils",
+          "reset": "Réinitialiser les valeurs par défaut"
       }
     },
     "bargainingTeam": {

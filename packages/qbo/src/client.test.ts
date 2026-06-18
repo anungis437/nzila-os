@@ -182,7 +182,7 @@ describe('convenience wrappers', () => {
   })
 
   it('qboJournalEntries.create calls create with JournalEntry', async () => {
-    await qboJournalEntries.create(mockQbo, {} as any)
+    await qboJournalEntries.create(mockQbo, {} as unknown)
     expect(mockQbo.create).toHaveBeenCalledWith('JournalEntry', expect.anything())
   })
 })

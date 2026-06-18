@@ -26,8 +26,7 @@ export default function GovernanceTimeline() {
   const [policyId, setPolicyId] = useState('')
   const [eventType, setEventType] = useState('all')
 
-  const fetchEvents = useCallback(async () => {
-    setLoading(true)
+  const loadEvents = useCallback(async () => {
     const params = new URLSearchParams({ limit: '50' })
     if (policyId) params.set('policyId', policyId)
     if (eventType !== 'all') params.set('eventType', eventType)
@@ -38,7 +37,12 @@ export default function GovernanceTimeline() {
     setLoading(false)
   }, [policyId, eventType])
 
-  useEffect(() => { fetchEvents() }, [fetchEvents])
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadEvents()
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
+  }, [loadEvents])
 
   return (
     <div className="space-y-4">
@@ -73,7 +77,7 @@ export default function GovernanceTimeline() {
         <ol className="relative border-l border-border space-y-4 pl-5">
           {events.map((ev) => (
             <li key={ev.id} className="relative">
-              <span className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-primary border-2 border-background" />
+              <span className="absolute -left-5.25 top-1.5 h-3 w-3 rounded-full border-2 border-background bg-primary" />
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-mono font-medium">{ev.eventType}</span>
@@ -88,7 +92,7 @@ export default function GovernanceTimeline() {
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span>{new Date(ev.occurredAt).toLocaleString()}</span>
                   {ev.actorRole && <span>by {ev.actorRole}</span>}
-                  <span className="font-mono truncate max-w-[200px]">{ev.policyId.slice(0, 8)}…</span>
+                  <span className="font-mono truncate max-w-50">{ev.policyId.slice(0, 8)}…</span>
                 </div>
               </div>
             </li>

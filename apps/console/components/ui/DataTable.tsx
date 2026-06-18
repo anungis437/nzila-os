@@ -37,6 +37,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { cn } from './cn'
 import { EmptyState } from './EmptyState'
+import { PaginationControls } from './PaginationControls'
 
 export interface DataTableColumn<T> {
   /** Stable key — also used for sort + visibility persistence. */
@@ -79,6 +80,10 @@ export interface DataTableProps<T> {
   className?: string
   /** aria-label for the table. */
   caption?: string
+  /** Optional client-side pagination for the filtered/sorted result set. */
+  pagination?: {
+    pageSize?: number
+  }
 }
 
 type SortState = { key: string; dir: 'asc' | 'desc' } | null
@@ -135,6 +140,7 @@ export function DataTable<T>({
   density = 'normal',
   className,
   caption,
+  pagination,
 }: DataTableProps<T>) {
   const tableId = useId()
   const [query, setQuery] = useState('')
@@ -142,27 +148,29 @@ export function DataTable<T>({
   const [sort, setSort] = useState<SortState>(null)
   const [showColPicker, setShowColPicker] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState<number>(-1)
+  const [page, setPage] = useState(1)
   const tbodyRef = useRef<HTMLTableSectionElement | null>(null)
 
   // ── Column visibility ─────────────────────────────────────────────────────
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(() => {
     const initial = new Set<string>()
-    for (const c of columns) if (c.hiddenByDefault) initial.add(c.key)
-    return initial
-  })
-  // Hydrate from storage after mount (avoids SSR mismatch). Reading from
-  // localStorage and seeding state is the canonical sync-from-external-store
-  // pattern; the rule fires but the behavior is intentional.
-  useEffect(() => {
-    if (!storageKey) return
+    for (const c of columns) {
+      if (c.hiddenByDefault) initial.add(c.key)
+    }
+
+    if (!storageKey || typeof window === 'undefined') return initial
+
     try {
       const raw = window.localStorage.getItem(`console:datatable:${storageKey}:hidden`)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (raw) setHiddenCols(new Set(JSON.parse(raw)))
+      if (!raw) return initial
+      const parsed = JSON.parse(raw)
+      if (!Array.isArray(parsed)) return initial
+      return new Set(parsed)
     } catch {
-      /* ignore */
+      return initial
     }
-  }, [storageKey])
+  })
+
   useEffect(() => {
     if (!storageKey) return
     try {
@@ -207,17 +215,27 @@ export function DataTable<T>({
     return copy
   }, [filtered, columns, sort])
 
+  const pageSize = Math.max(1, pagination?.pageSize ?? 10)
+  const pageCount = pagination ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1
+  const clampedPage = pagination ? Math.min(page, pageCount) : 1
+
+  const visibleRows = useMemo(() => {
+    if (!pagination) return sorted
+    const start = (clampedPage - 1) * pageSize
+    return sorted.slice(start, start + pageSize)
+  }, [sorted, pagination, clampedPage, pageSize])
+
   // ── Keyboard nav ──────────────────────────────────────────────────────────
   const onKey = (e: KeyboardEvent<HTMLTableSectionElement>) => {
     if (e.key === 'ArrowDown' || e.key === 'j') {
       e.preventDefault()
-      setFocusedIndex(i => Math.min(sorted.length - 1, i + 1))
+      setFocusedIndex(i => Math.min(visibleRows.length - 1, i + 1))
     } else if (e.key === 'ArrowUp' || e.key === 'k') {
       e.preventDefault()
       setFocusedIndex(i => Math.max(0, i - 1))
-    } else if (e.key === 'Enter' && focusedIndex >= 0 && onRowClick) {
+    } else if (e.key === 'Enter' && focusedIndex >= 0 && onRowClick && visibleRows[focusedIndex]) {
       e.preventDefault()
-      onRowClick(sorted[focusedIndex])
+      onRowClick(visibleRows[focusedIndex])
     }
   }
 
@@ -251,7 +269,7 @@ export function DataTable<T>({
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
         {searchable ? (
-          <div className="relative flex-1 min-w-[200px] max-w-md">
+          <div className="relative flex-1 min-w-50 max-w-md">
             <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="search"
@@ -323,7 +341,7 @@ export function DataTable<T>({
           CSV
         </button>
       </div>
-
+                page={clampedPage}
       {/* Table */}
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
         <div className="max-h-[70vh] overflow-auto">
@@ -332,7 +350,7 @@ export function DataTable<T>({
             aria-label={caption}
             className="w-full text-sm"
           >
-            <thead className="sticky top-0 z-10 bg-gray-50/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/75">
+            <thead className="sticky top-0 z-10 bg-gray-50/95 backdrop-blur supports-backdrop-filter:bg-gray-50/75">
               <tr>
                 {visibleCols.map(c => {
                   const isSorted = sort?.key === c.key
@@ -342,7 +360,7 @@ export function DataTable<T>({
                       key={c.key}
                       scope="col"
                       className={cn(
-                        'px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 border-b border-gray-200',
+                        'px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 border-b border-gray-200',
                         c.width,
                         c.align === 'right' && 'text-right',
                         c.align === 'center' && 'text-center',
@@ -379,7 +397,7 @@ export function DataTable<T>({
               onKeyDown={onRowClick ? onKey : undefined}
               className="focus:outline-none"
             >
-              {sorted.map((row, idx) => {
+              {visibleRows.map((row, idx) => {
                 const id = rowId(row)
                 const isFocused = idx === focusedIndex
                 return (
@@ -397,7 +415,7 @@ export function DataTable<T>({
                       <td
                         key={c.key}
                         className={cn(
-                          density === 'compact' ? 'px-4 py-1.5' : 'px-4 py-2.5',
+                          density === 'compact' ? 'px-5 py-2' : 'px-5 py-3',
                           'text-gray-700 align-middle',
                           c.align === 'right' && 'text-right tabular-nums',
                           c.align === 'center' && 'text-center',
@@ -411,7 +429,7 @@ export function DataTable<T>({
               })}
             </tbody>
           </table>
-          {sorted.length === 0 ? (
+          {visibleRows.length === 0 ? (
             <div className="p-8">
               {empty ?? (
                 <EmptyState
@@ -422,6 +440,15 @@ export function DataTable<T>({
             </div>
           ) : null}
         </div>
+        {pagination ? (
+          <div className="px-5 pb-4">
+            <PaginationControls
+              page={clampedPage}
+              pageCount={pageCount}
+              onPageChange={nextPage => setPage(Math.max(1, Math.min(nextPage, pageCount)))}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   )

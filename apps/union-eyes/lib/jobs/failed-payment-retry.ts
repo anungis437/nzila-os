@@ -44,7 +44,7 @@ interface RetryTransactionRow {
   totalAmount: string;
   dueDate: string;
   status: string;
-  metadata: unknown;
+  metadata: any;
   createdAt: Date | null;
 }
 

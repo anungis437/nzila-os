@@ -2,7 +2,6 @@ import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { getOperatingEvidenceService } from '@nzila/operating-evidence'
 import { getMetricsCommercialService } from '@nzila/metrics-commercial'
-import type { DomainName } from '@nzila/policies'
 
 export interface SyntheticSimulationOptions {
   requestCount: number
@@ -28,7 +27,6 @@ export interface SyntheticSimulationResult {
   }
 }
 
-const domains: DomainName[] = ['labour', 'legal', 'commerce', 'media-rights']
 const features = ['dashboard', 'policy-center', 'automation', 'alerts', 'insights', 'exports']
 
 // codeql[js/insecure-randomness] - used only for simulation/demo data, not security-sensitive
@@ -46,7 +44,7 @@ function latencyMs(): number {
   return Math.max(20, Math.round(base + jitter))
 }
 
-function weightedDomain(): DomainName {
+function weightedDomain(): 'labour' | 'legal' | 'commerce' | 'media-rights' {
   const roll = Math.random()
   if (roll < 0.34) return 'commerce'
   if (roll < 0.57) return 'labour'

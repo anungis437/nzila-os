@@ -5,7 +5,7 @@ import { RequestValidator, createValidator, validateRequest } from '../request-v
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
-function fakeRequest(body: unknown): Request {
+function fakeRequest(body: any): Request {
   return new Request('http://localhost/api/test?page=1&limit=10', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -82,7 +82,7 @@ function pii(s: string): boolean {
   return /@|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(s);
 }
 
-function flatten(obj: unknown): string {
+function flatten(obj: any): string {
   return JSON.stringify(obj);
 }
 

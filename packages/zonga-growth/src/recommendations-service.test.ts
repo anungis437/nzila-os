@@ -3,26 +3,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // ── Mock @nzila/zonga-core ──────────────────────────────────────────────────
 
 vi.mock('@nzila/zonga-core/services', () => ({
-  filterRecommendations: vi.fn((items: any[], _opts: any) => items.slice(0, _opts?.limit ?? 10)),
-  mergeRecommendations: vi.fn((_arrays: any[], _limit: number) => [
+  filterRecommendations: vi.fn((items: unknown[], _opts: { limit?: number }) => items.slice(0, _opts?.limit ?? 10)),
+  mergeRecommendations: vi.fn((_arrays: unknown[], _limit: number) => [
     { assetId: 'merged-1', score: 0.9, reason: 'mood', metadata: { velocity: 4 } },
     { assetId: 'merged-2', score: 0.7, reason: 'artist', metadata: { velocity: 2 } },
   ]),
-  buildSimilarTracksRequest: vi.fn((opts: any) => ({
+  buildSimilarTracksRequest: vi.fn((opts: { listenerId: string; seedAssetId: string; limit: number }) => ({
     listenerId: opts.listenerId,
     type: 'similar',
     context: { seedAssetId: opts.seedAssetId },
     limit: opts.limit,
     excludeAssetIds: [],
   })),
-  buildRegionalDiscoveryRequest: vi.fn((opts: any) => ({
+  buildRegionalDiscoveryRequest: vi.fn((opts: { listenerId: string; region: string; limit: number }) => ({
     listenerId: opts.listenerId,
     type: 'regional',
     context: { region: opts.region },
     limit: opts.limit,
     excludeAssetIds: [],
   })),
-  buildSessionContinuationRequest: vi.fn((opts: any) => ({
+  buildSessionContinuationRequest: vi.fn((opts: { listenerId: string; recentAssetIds: string[]; limit: number }) => ({
     listenerId: opts.listenerId,
     type: 'session',
     context: { recentAssetIds: opts.recentAssetIds },
@@ -33,6 +33,7 @@ vi.mock('@nzila/zonga-core/services', () => ({
 
 import { createRecommendationService, CACHE_TTL } from './recommendations'
 import type { RecommendationCacheStore, TrendingDataPort } from './recommendations'
+import type { RecommendationEngine } from '@nzila/zonga-core/services'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -78,7 +79,7 @@ describe('createRecommendationService', () => {
     engine = makeEngine()
     cache = makeCache()
     trending = makeTrending()
-    service = createRecommendationService({ engine: engine as any, cache, trending })
+    service = createRecommendationService({ engine: engine as unknown as RecommendationEngine, cache, trending })
   })
 
   describe('getForYou', () => {

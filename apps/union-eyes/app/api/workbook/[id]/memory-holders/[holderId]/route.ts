@@ -34,7 +34,7 @@ export async function PATCH(
 ) {
   const { id: workbookId, holderId } = await params;
 
-  let body: unknown;
+  let body: any;
   try {
     body = await request.json();
   } catch {

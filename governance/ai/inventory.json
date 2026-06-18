@@ -110,19 +110,26 @@
       "region": "eastus",
       "highestDataTier": "Restricted",
       "pia": "governance/privacy/ai-pia/surfaces/union-eyes-cognition.md",
-      "piaStatus": "R1-open",
+      "piaStatus": "CLOSED",
       "evalDataset": "tooling/ai-evals/datasets/union-eyes",
-      "approval": { "by": "AIGC", "date": null, "decision": "pending" },
+      "approval": { "by": "AIGC", "date": "2026-06-08", "decision": "approved" },
+      "worldClassEvidence": {
+        "incidentPlaybook": "governance/ai/world-class/ue/incident-playbook-addendum.md",
+        "monitoringPlan": "governance/ai/world-class/ue/monitoring-plan.md",
+        "killSwitchDrill": "governance/ai/world-class/ue/kill-switch-drill.md",
+        "humanOversight": "governance/ai/world-class/ue/human-oversight.md"
+      },
       "status": "DEV"
     },
     {
       "id": "zonga-voice",
-      "name": "Zonga Voice (Whisper)",
+      "name": "Zonga Voice (Whisper, planned)",
       "app": "zonga",
       "package": "@nzila/ai-sdk",
-      "entrypoint": "apps/zonga/app/api/voice-upload",
+      "plannedEntrypoint": "apps/zonga/app/api/voice-upload",
       "owner": "Zonga Lead",
       "riskTier": 2,
+      "tierRationale": "Planned speech-to-text capability; runtime endpoint not launched yet",
       "provider": "Azure OpenAI",
       "models": ["whisper"],
       "region": "eastus2",
@@ -130,8 +137,8 @@
       "pia": "governance/privacy/ai-pia/surfaces/zonga-voice.md",
       "piaStatus": "R1-open",
       "evalDataset": null,
-      "approval": { "by": "Privacy Lead", "date": null, "decision": "draft" },
-      "status": "DEV"
+      "approval": { "by": "AIGC", "date": null, "decision": "required-before-launch" },
+      "status": "DESIGN"
     },
     {
       "id": "platform-cognition-phase1",
@@ -144,19 +151,24 @@
       "region": "local",
       "highestDataTier": "Confidential",
       "pia": "governance/privacy/ai-pia/surfaces/platform-cognition-phase1.md",
-      "piaStatus": "DRAFT-stub",
+      "piaStatus": "APPROVED",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
+      "approval": { "by": "Privacy Lead", "date": "2026-06-08", "decision": "approved" },
+      "worldClassEvidence": {
+        "incidentPlaybook": "governance/ai/world-class/platform-cognition/incident-playbook-addendum.md",
+        "monitoringPlan": "governance/ai/world-class/platform-cognition/monitoring-plan.md",
+        "killSwitchDrill": "governance/ai/world-class/platform-cognition/kill-switch-drill.md"
+      },
       "status": "PROD"
     },
     {
       "id": "abr-ai",
-      "name": "ABR AI surface (unclassified)",
+      "name": "ABR AI surface (planned)",
       "app": "abr",
       "package": "@nzila/ai-sdk",
       "owner": "ABR Lead",
       "riskTier": 3,
-      "tierRationale": "Provisional — awaiting classification workshop",
+      "tierRationale": "Planned surface; no governed runtime entrypoint is active yet",
       "provider": "Azure OpenAI",
       "models": ["gpt-4.1-mini"],
       "region": "eastus",
@@ -164,8 +176,8 @@
       "pia": null,
       "piaStatus": "TODO",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
-      "status": "DEV"
+      "approval": { "by": "AIGC", "date": null, "decision": "required-before-launch" },
+      "status": "DESIGN"
     },
     {
       "id": "cfo-ai",
@@ -205,12 +217,12 @@
     },
     {
       "id": "nacp-exams-ai",
-      "name": "NACP Exams AI surface (unclassified)",
+      "name": "NACP Exams AI surface (planned)",
       "app": "nacp-exams",
       "package": "@nzila/ai-sdk",
       "owner": "NACP Lead",
       "riskTier": 3,
-      "tierRationale": "Provisional — will become Tier 1 if AI affects credentialing/exam outcomes",
+      "tierRationale": "Planned surface; no governed runtime entrypoint is active yet",
       "provider": "Azure OpenAI",
       "models": ["gpt-4.1-mini"],
       "region": "eastus",
@@ -218,17 +230,17 @@
       "pia": null,
       "piaStatus": "TODO",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
-      "status": "DEV"
+      "approval": { "by": "AIGC", "date": null, "decision": "required-before-launch" },
+      "status": "DESIGN"
     },
     {
       "id": "partners-ai",
-      "name": "Partners AI surface (unclassified)",
+      "name": "Partners AI surface (planned)",
       "app": "partners",
       "package": "@nzila/ai-sdk",
       "owner": "Partners Lead",
       "riskTier": 3,
-      "tierRationale": "Provisional — will become Tier 1 if AI affects partner access/terms",
+      "tierRationale": "Planned surface; no governed runtime entrypoint is active yet",
       "provider": "Azure OpenAI",
       "models": ["gpt-4.1-mini"],
       "region": "eastus",
@@ -236,8 +248,8 @@
       "pia": null,
       "piaStatus": "TODO",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
-      "status": "DEV"
+      "approval": { "by": "AIGC", "date": null, "decision": "required-before-launch" },
+      "status": "DESIGN"
     },
     {
       "id": "web-ai",
@@ -254,17 +266,17 @@
       "pia": null,
       "piaStatus": "TODO",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
-      "status": "DEV"
+      "approval": { "by": "AIGC", "date": null, "decision": "required-before-launch" },
+      "status": "DESIGN"
     },
     {
       "id": "weekone-ai",
-      "name": "WeekOne AI surface (unclassified)",
+      "name": "WeekOne AI surface (planned)",
       "app": "weekone",
       "package": "@nzila/ai-sdk",
       "owner": "WeekOne Lead",
       "riskTier": 3,
-      "tierRationale": "Provisional",
+      "tierRationale": "Planned surface; no governed runtime or wiring artifacts detected yet",
       "provider": "Azure OpenAI",
       "models": ["gpt-4.1-mini"],
       "region": "eastus",
@@ -272,17 +284,17 @@
       "pia": null,
       "piaStatus": "TODO",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
-      "status": "DEV"
+      "approval": { "by": "AIGC", "date": null, "decision": "required-before-launch" },
+      "status": "DESIGN"
     },
     {
       "id": "trustcore-ai",
-      "name": "TrustCore AI surface (governance · evidence assist)",
+      "name": "TrustCore AI surface (planned governance assist)",
       "app": "trustcore",
       "package": "@nzila/ai-sdk",
       "owner": "TrustCore Lead",
       "riskTier": 2,
-      "tierRationale": "Provisional — governance/evidence assist surface, no autonomous decisions",
+      "tierRationale": "Planned governance/evidence assist surface; no governed runtime entrypoint is active yet",
       "provider": "Azure OpenAI",
       "models": ["gpt-4.1-mini"],
       "region": "eastus",
@@ -290,17 +302,17 @@
       "pia": null,
       "piaStatus": "TODO",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
-      "status": "DEV"
+      "approval": { "by": "AIGC", "date": null, "decision": "required-before-launch" },
+      "status": "DESIGN"
     },
     {
       "id": "trustcore-trustops-ai",
-      "name": "TrustCore TrustOps AI surface (operations assist)",
+      "name": "TrustCore TrustOps AI surface (planned operations assist)",
       "app": "trustcore-trustops",
       "package": "@nzila/ai-sdk",
       "owner": "TrustCore TrustOps Lead",
       "riskTier": 2,
-      "tierRationale": "Provisional — trust operations assist surface, advisory only",
+      "tierRationale": "Planned trust operations assist surface; no governed runtime entrypoint is active yet",
       "provider": "Azure OpenAI",
       "models": ["gpt-4.1-mini"],
       "region": "eastus",
@@ -308,8 +320,8 @@
       "pia": null,
       "piaStatus": "TODO",
       "evalDataset": null,
-      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
-      "status": "DEV"
+      "approval": { "by": "AIGC", "date": null, "decision": "required-before-launch" },
+      "status": "DESIGN"
     }
   ]
 }

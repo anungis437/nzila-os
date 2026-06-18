@@ -100,7 +100,7 @@ export async function POST(
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     // Parse body
-    let body: unknown;
+    let body: any;
     try {
       body = await request.json();
     } catch {

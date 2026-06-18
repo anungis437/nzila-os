@@ -108,7 +108,7 @@ export async function findOrphanedOrganizations(): Promise<string[]> {
   `);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (result as unknown as { rows: unknown[] }).rows.map((row: any) => row.id);
+  return (result as any as { rows: any[] }).rows.map((row: any) => row.id);
 }
 
 /**

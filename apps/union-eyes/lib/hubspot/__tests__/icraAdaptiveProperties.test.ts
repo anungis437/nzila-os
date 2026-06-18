@@ -36,7 +36,7 @@ const SMALL_LOCAL_UNION = {
 describe('OCRA → HubSpot adaptive property mapping', () => {
   const profile = classifyOrgContext({ rawForm: SMALL_LOCAL_UNION });
   const bank = routeQuestionBank(
-    ALL_QUESTIONS as unknown as RoutableQuestion[],
+    ALL_QUESTIONS as any as RoutableQuestion[],
     profile,
   );
 

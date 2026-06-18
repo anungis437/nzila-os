@@ -326,7 +326,7 @@ async function main(): Promise<void> {
   printSummary(report);
 
   if (ci && (report.summary.hardFails > 0 || report.summary.ruleFailures > 0)) {
-    // eslint-disable-next-line no-console
+     
     console.error(
       `\nNarrative CI failed: ${report.summary.hardFails} hard-fail violations, ${report.summary.ruleFailures} rule failures.`,
     );
@@ -337,7 +337,7 @@ async function main(): Promise<void> {
 // Execute when run as a script (works under tsx).
 if (require.main === module) {
   main().catch((err) => {
-    // eslint-disable-next-line no-console
+     
     console.error(err);
     process.exit(2);
   });

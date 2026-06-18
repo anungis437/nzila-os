@@ -10,22 +10,21 @@
  * Run: `pnpm tsx scripts/generate-governance-summary.ts`
  */
 
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
 import { resolve, join } from 'path';
 
 import { bootstrapPlatformContracts, getAllContracts } from '../lib/governance-policy/registry';
 import { UE_AI_OPERATIONS } from '../lib/governance-policy/ai-governance';
 import { evaluateAIAction } from '../lib/governance-policy/ai-governance';
-import { PLATFORM_CONTRACTS } from '../lib/governance-policy/contracts';
 
 bootstrapPlatformContracts();
 
 // ── Route registry ─────────────────────────────────────────────────────────────
 
 const routeRegistryPath = resolve(__dirname, '../reports/route-registry.json');
-let routeRegistry: { routes?: unknown[] } = {};
+let routeRegistry: { routes?: any[] } = {};
 if (existsSync(routeRegistryPath)) {
-  routeRegistry = JSON.parse(require('fs').readFileSync(routeRegistryPath, 'utf-8'));
+  routeRegistry = JSON.parse(readFileSync(routeRegistryPath, 'utf-8'));
 }
 const routes = (routeRegistry.routes ?? []) as Array<Record<string, unknown>>;
 

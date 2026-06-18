@@ -20,7 +20,9 @@ GES outputs an ordinal entropy classification on a 1–5 scale. For each ordinal
 | **2 — Drift-tolerant** | Some interpretive drift but governance can be reconstructed with effort | `gv_04`, `gis_01`, `orl_02`, `et_01`, `et_05` | **Moderate (5 signals)** |
 | **3 — Interpretation-bound** | Governance reasoning depends on long-tenured interpretation | `gv_03`, `gis_01`, `et_01`, `et_02`, `scs_02` | **Moderate (5 signals — only 1 topology)** |
 | **4 — Reconstruction-burdened** | Significant governance reasoning cannot be reconstructed without specific individuals | `gv_03`, `orl_01`, `et_02`, `tr_02`, `scs_03` | **Weak (5 signals, all maturity_select except scs_03)** |
-| **5 — Entropic** | Governance reasoning is no longer reconstructible at scale; rule-of-person | inferrable only via `gv_03` + `et_02` + `orl_01` co-incidence | **Insufficient (no direct probe)** |
+| **5 — Entropic** | Governance reasoning is no longer reconstructible at scale; rule-of-person | direct probe `et_07` (decision-replay topology, `not_reconstructible` option) corroborated by `gv_03` + `orl_01` + `sg_03` risk-inverted co-incidence and `scs_04` topology | **Direct probe present (v4)** |
+
+> **v4 note.** `et_02` was reframed from a risk-inverted trust-debt sentiment estimate to an observable concern-resolution practice (`riskInverted: false`) and now feeds GES ordinals 3–4. GES-5 gained a purpose-built direct `multiple_choice` probe (`et_07`); the third risk-inverted input required for a bounded GES-5 escalation is supplied by `sg_03` (unauthorized-use protection), keeping the ≥ 3 risk-inverted-input invariant intact without re-weighting the scoring core.
 
 ---
 
@@ -34,7 +36,7 @@ The only path to ordinal 5 today is the **co-occurrence of risk-inverted maturit
 - Reviewer variance on a 5-classification is therefore likely (escalation rules in [confidenceEscalationRules.ts](../../../apps/union-eyes/lib/oci/audit/confidenceEscalationRules.ts) should flag this case → enforced in [`entropyCoverage.test.ts`](../../../apps/union-eyes/lib/icra/__tests__/signal-integrity/entropyCoverage.test.ts)).
 
 **Disposition.** Add 2 GES level-5 probes in v1.2.0:
-- One `multiple_choice` topology prompt with an explicit "no one in the institution can reconstruct this reasoning today" option.
+- One `multiple_choice` topology prompt with an explicit "no one in the institution can reconstruct this reasoning today" option. **Delivered in bank v4 as `et_07`** (decision-replay topology probe; its `not_reconstructible` option is the direct level-5 condition).
 - One `likert_5` confidence statement: *"Governance decisions made before the current leadership cohort can be reconstructed without consulting individuals."*
 
 ### Finding E-2 (High). GES level 4 has only 1 non-maturity probe.

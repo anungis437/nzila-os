@@ -15,7 +15,7 @@ function createMockSocket(): WebSocket {
     onerror: null as ((ev: Event) => void) | null,
     OPEN: 1,
     CLOSED: 3,
-  } as unknown as WebSocket;
+  } as any as WebSocket;
 }
 
 describe('WebSocketManager', () => {

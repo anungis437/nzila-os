@@ -13,10 +13,16 @@
  * It NEVER evaluates individual worker performance, value, or productivity.
  */
 
-import { and, eq, gte, isNotNull, sql } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 
 export interface ContinuityRiskFlag {
   flag: string;
@@ -192,6 +198,7 @@ export async function detectContinuityRisks(orgId: string): Promise<OrgContinuit
     const ai = getAiClient();
     const result = await ai.generate({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(orgId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CONTINUITY_RISK,
       input: [

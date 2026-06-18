@@ -35,7 +35,7 @@ vi.mock('@/lib/rate-limit', () => ({
 
 import { POST } from '@/app/api/icra/telemetry/route';
 
-function makeReq(body: unknown): NextRequest {
+function makeReq(body: any): NextRequest {
   return new NextRequest('http://localhost/api/icra/telemetry', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -124,9 +124,9 @@ describe('Adaptive telemetry privacy regression', () => {
         kind: 'assessment_routed',
         metadata: {
           good: 'ok',
-          bad_obj: { nested: 'leak' } as unknown as string,
-          bad_arr: ['leak'] as unknown as string,
-          bad_null: null as unknown as string,
+          bad_obj: { nested: 'leak' } as any as string,
+          bad_arr: ['leak'] as any as string,
+          bad_null: null as any as string,
         },
       }),
     );

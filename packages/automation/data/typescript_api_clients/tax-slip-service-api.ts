@@ -30,7 +30,7 @@ async function getApiClient() {
 /**
  * List tax-slip-service records
  */
-export async function getTaxSlipServiceList(filters?: any) {
+export async function getTaxSlipServiceList(filters?: unknown) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -67,7 +67,7 @@ export async function getTaxSlipServiceById(id: string) {
 /**
  * Create new tax-slip-service record
  */
-export async function createTaxSlipService(data: any) {
+export async function createTaxSlipService(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/finance/tax-slip-service/`, {
@@ -86,7 +86,7 @@ export async function createTaxSlipService(data: any) {
 /**
  * Update tax-slip-service record
  */
-export async function updateTaxSlipService(id: string, data: any) {
+export async function updateTaxSlipService(id: string, data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/finance/tax-slip-service/${{id}}/`, {

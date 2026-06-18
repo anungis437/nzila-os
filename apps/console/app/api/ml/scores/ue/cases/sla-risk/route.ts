@@ -8,7 +8,7 @@
  * duplicate/skipped rows when multiple records share the same timestamp.
  *
  * RBAC:
- *   - View scores: any active entity member
+ *   - View scores: unknown active entity member
  *   - includeFeatures=true: org_admin only
  *
  * Query params:

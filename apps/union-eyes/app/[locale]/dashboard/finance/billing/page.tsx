@@ -87,7 +87,7 @@ export default function BillingPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { fetchAccount(); }, [fetchAccount]);
 

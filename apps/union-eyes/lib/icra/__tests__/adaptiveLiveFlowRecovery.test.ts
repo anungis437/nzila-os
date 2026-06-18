@@ -35,11 +35,11 @@ describe('OCRA live adaptive flow — recovery', () => {
   it('re-routing a restored profile yields the same fingerprint as the original route', () => {
     const profile = classifyOrgContext({ rawForm: PROFILE_INPUTS });
     const original = routeQuestionBank(
-      ALL_QUESTIONS as unknown as RoutableQuestion[],
+      ALL_QUESTIONS as any as RoutableQuestion[],
       profile,
     );
     const restored = routeQuestionBank(
-      ALL_QUESTIONS as unknown as RoutableQuestion[],
+      ALL_QUESTIONS as any as RoutableQuestion[],
       profile,
     );
     expect(restored.routeVersion).toBe(original.routeVersion);
@@ -53,7 +53,7 @@ describe('OCRA live adaptive flow — recovery', () => {
   it('reroute path produces a non-empty included set for any well-formed profile', () => {
     const profile = classifyOrgContext({ rawForm: PROFILE_INPUTS });
     const bank = routeQuestionBank(
-      ALL_QUESTIONS as unknown as RoutableQuestion[],
+      ALL_QUESTIONS as any as RoutableQuestion[],
       profile,
     );
     expect(bank.includedQuestions.length).toBeGreaterThan(0);
@@ -62,7 +62,7 @@ describe('OCRA live adaptive flow — recovery', () => {
   it('reroute path tolerates an empty raw form (safe default profile)', () => {
     const profile = classifyOrgContext({ rawForm: {} });
     const bank = routeQuestionBank(
-      ALL_QUESTIONS as unknown as RoutableQuestion[],
+      ALL_QUESTIONS as any as RoutableQuestion[],
       profile,
     );
     // Safe default must never strand the respondent with zero questions.

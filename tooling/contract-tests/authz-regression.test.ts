@@ -54,7 +54,7 @@ describe('PR8: AuthZ — no undocumented auth bypass patterns', () => {
       const entries = readdirSync(appDir, { withFileTypes: true, recursive: true })
       const routeFiles = entries
         .filter(e => e.isFile() && e.name === 'route.ts')
-        .map(e => join((e as any).path ?? appDir, e.name))
+        .map(e => join((e as unknown).path ?? appDir, e.name))
 
       for (const routeFile of routeFiles) {
         const content = readContent(routeFile)
@@ -109,7 +109,7 @@ describe('PR8: AuthZ — union-eyes orgId derivation warning', () => {
     const entries = existsSync(ueLib)
       ? readdirSync(ueLib, { withFileTypes: true, recursive: true })
           .filter(e => e.isFile())
-          .map(e => join((e as any).path ?? ueLib, e.name))
+          .map(e => join((e as unknown).path ?? ueLib, e.name))
       : []
 
     // Union-eyes either is session-derived, has a TODO, or the risk is acknowledged in CODEOWNERS

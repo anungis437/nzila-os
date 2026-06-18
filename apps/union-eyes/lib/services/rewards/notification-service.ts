@@ -44,6 +44,29 @@ interface NotificationResult {
   error?: string;
 }
 
+type ExpirationBatchCounter =
+  | 'usersNotified7Days'
+  | 'usersNotified14Days'
+  | 'usersNotified30Days';
+
+type RewardWalletLedgerInsert = typeof rewardWalletLedger.$inferInsert;
+
+function asObject(value: any): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
+}
+
+function readStringProperty(value: any, key: string): string | undefined {
+  const objectValue = asObject(value);
+  const property = objectValue?.[key];
+  return typeof property === 'string' ? property : undefined;
+}
+
+function readNumberProperty(value: any, key: string): number | undefined {
+  const objectValue = asObject(value);
+  const property = objectValue?.[key];
+  return typeof property === 'number' ? property : undefined;
+}
+
 /**
  * Trigger notification when an award is issued
  */
@@ -84,15 +107,12 @@ export async function notifyAwardIssued(awardId: string) {
       recipientName: recipient.email.split('@')[0] || 'Member',
       recipientEmail: recipient.email,
       issuerName: issuer?.email.split('@')[0] || 'A colleague',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      awardTypeName: (award.awardType as any)?.name || 'Award',
+      awardTypeName: readStringProperty(award.awardType, 'name') || 'Award',
       awardTypeIcon: undefined,
       message: award.reason || 'Great work!',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      creditsAwarded: (award.awardType as any)?.defaultCreditAmount || 0,
+      creditsAwarded: readNumberProperty(award.awardType, 'defaultCreditAmount') || 0,
       awardId: award.id,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      orgName: (award.organization as any)?.name || 'Organization',
+      orgName: readStringProperty(award.organization, 'name') || 'Organization',
     });
 
     return { success: true };
@@ -155,16 +175,13 @@ export async function notifyAwardPendingApproval(awardId: string) {
         return sendApprovalRequestEmail({
           adminName: adminUser.displayName || adminUser.email.split('@')[0] || 'Admin',
           adminEmail: adminUser.email,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          awardTypeName: (award.awardType as any)?.name || 'Award',
+          awardTypeName: readStringProperty(award.awardType, 'name') || 'Award',
           recipientName: recipient?.email.split('@')[0] || 'Unknown',
           issuerName: issuer?.email.split('@')[0] || 'Unknown',
           message: award.reason || '',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          creditsToAward: (award.awardType as any)?.defaultCreditAmount || 0,
+          creditsToAward: readNumberProperty(award.awardType, 'defaultCreditAmount') || 0,
           awardId: award.id,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          orgName: (award.organization as any)?.name || 'Organization',
+          orgName: readStringProperty(award.organization, 'name') || 'Organization',
         });
       })
     );
@@ -367,11 +384,11 @@ export async function notifyRedemptionConfirmed(redemptionId: string) {
       recipientName: user.email.split('@')[0] || 'Member',
       recipientEmail: user.email,
       creditsRedeemed: redemption.creditsSpent || 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      checkoutUrl: redemption.providerCheckoutId || (redemption.providerPayloadJson as any)?.checkout_url,
+      checkoutUrl:
+        redemption.providerCheckoutId ||
+        readStringProperty(redemption.providerPayloadJson, 'checkout_url'),
       redemptionId: redemption.id,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      orgName: (redemption.organization as any)?.name || 'Organization',
+      orgName: readStringProperty(redemption.organization, 'name') || 'Organization',
     });
 
     return { success: true };
@@ -399,7 +416,7 @@ export async function sendBatchExpirationWarnings() {
     };
 
     // Send notifications at multiple intervals
-    const intervals = [
+    const intervals: Array<{ days: number; counter: ExpirationBatchCounter }> = [
       { days: 7, counter: 'usersNotified7Days' },
       { days: 14, counter: 'usersNotified14Days' },
       { days: 30, counter: 'usersNotified30Days' },
@@ -409,10 +426,15 @@ export async function sendBatchExpirationWarnings() {
       const result = await notifyExpiringCredits(interval.days);
       
       if (result.success) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (results as any)[interval.counter] = result.sent;
+        results[interval.counter] = result.sent ?? 0;
       } else {
-        results.errors.push(`Failed for ${interval.days} days: ${result.error}`);
+        const errorMessage =
+          result.error instanceof Error
+            ? result.error.message
+            : typeof result.error === 'string'
+              ? result.error
+              : 'Unknown error';
+        results.errors.push(`Failed for ${interval.days} days: ${errorMessage}`);
       }
     }
 
@@ -497,7 +519,7 @@ export async function scheduleExpirationNotifications(
       .orderBy(desc(rewardWalletLedger.createdAt))
       .limit(1);
 
-    await db.insert(rewardWalletLedger).values({
+    const scheduledEntry: RewardWalletLedgerInsert = {
       id: uuidv4(),
       userId,
       transactionType: 'expiration_scheduled',
@@ -506,8 +528,9 @@ export async function scheduleExpirationNotifications(
       expiresAt,
       description: 'Credit expiration scheduled',
       createdAt: new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    };
+
+    await db.insert(rewardWalletLedger).values(scheduledEntry);
 
     return {
       success: true,

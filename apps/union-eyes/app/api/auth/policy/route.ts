@@ -40,7 +40,7 @@ export const PUT = withOrganizationAuth(async (request, context) => {
   if (!allowed) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  let body: unknown
+  let body: any
   try {
     body = await (request as NextRequest).json()
   } catch {

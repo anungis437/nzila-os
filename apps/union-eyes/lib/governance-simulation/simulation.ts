@@ -18,19 +18,10 @@ import type {
   SimulationReplayResult,
   SimulationSeverity,
 } from './types';
-import { getScenario } from './scenarios';
+import { getAllScenarios, getScenario, registerScenario } from './scenarios';
 import { recordSimulationResult } from './ledger';
 import { createCorrelationContext } from '../governance-observability/correlation';
 import { getAllContracts } from '../governance-policy/registry';
-
-// ── Simulation ID generation ──────────────────────────────────────────────────
-
-function generateSimId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `gsim_${crypto.randomUUID().replace(/-/g, '')}`;
-  }
-  return `gsim_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-}
 
 // ── Severity derivation ───────────────────────────────────────────────────────
 
@@ -347,7 +338,6 @@ export function runScenario(
  * Run all scenarios in the catalog and return results.
  */
 export function runAllScenarios(): GovernanceSimulationResult[] {
-  const { getAllScenarios } = require('./scenarios') as typeof import('./scenarios');
   return getAllScenarios().map((s) => runScenario(s.id));
 }
 
@@ -400,7 +390,6 @@ export function replayScenario(
 
     // Temporarily register overridden scenario for replay
     const replayId = `${request.scenarioId}._replay_${Date.now()}`;
-    const { registerScenario } = require('./scenarios') as typeof import('./scenarios');
     registerScenario({ ...overriddenScenario, id: replayId });
 
     const replayed = runScenario(replayId, {

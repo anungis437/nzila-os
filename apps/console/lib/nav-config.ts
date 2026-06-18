@@ -42,10 +42,39 @@ export interface AppLinkConfig {
 }
 
 export const navGroups: NavGroupConfig[] = [
-  // ── Zone 1: TODAY — CEO Daily Pulse ────────────────────────────────────────
+  // ── Workspace — the six-workspace doctrine surface (front door) ─────────────
+  // docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md — Console v1 is exactly six
+  // workspaces + Settings. These are the primary navigation; the groups below are
+  // legacy direct routes, progressively subordinated under these workspaces.
+  {
+    label: 'Workspace',
+    defaultOpen: true,
+    items: [
+      { name: 'Overview', href: '/workspace/overview', icon: 'HomeIcon', badge: 'home', description: 'Portfolio health at a glance — the morning screen. Is the portfolio healthy this morning?' },
+      { name: 'Portfolio', href: '/workspace/portfolio', icon: 'BuildingOffice2Icon', description: 'What exists, what stage it is in, what is healthy or blocked. Overview · Ventures · Pipeline · Funding.' },
+      { name: 'Observatory', href: '/workspace/observatory', icon: 'ChartBarSquareIcon', description: 'What the market-validation engine is telling us. Cohorts · Assessments · Route Decisions · Reassessments · Benchmark Readiness.' },
+      { name: 'Sales', href: '/workspace/sales', icon: 'ArrowTrendingUpIcon', description: 'Unified GTM: leads → opportunities → proposals → pilots → conversions.' },
+      { name: 'Ventures', href: '/workspace/ventures', icon: 'RocketLaunchIcon', description: 'Per-venture maturity, roadmap, revenue, customers, and blockers.' },
+      { name: 'Operations', href: '/workspace/operations', icon: 'WrenchScrewdriverIcon', description: 'Founder cockpit: tasks, risks, decisions, governance, documentation.' },
+      { name: 'Settings', href: '/workspace/settings', icon: 'Cog6ToothIcon', description: 'Account and workspace configuration.' },
+    ],
+  },
+]
+
+/**
+ * Legacy direct routes — NOT rendered in the sidebar.
+ *
+ * Per the Workspace Doctrine (docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md)
+ * the sidebar is exactly the six workspaces + Settings. These ~60 routes remain
+ * fully reachable by URL and through the command palette (⌘K), and are
+ * progressively subordinated under workspace sub-tabs (e.g. Operations).
+ * They are intentionally kept out of the primary navigation tree.
+ */
+export const legacyNavGroups: NavGroupConfig[] = [
+  // Zone 1: TODAY — CEO Daily Pulse
   {
     label: 'Command',
-    defaultOpen: true,
+    defaultOpen: false,
     items: [
       { name: 'CEO One-Screen', href: '/ceo', icon: 'EyeIcon', badge: 'board', description: 'Compressed boardroom summary for founder, partner, or investor conversations.' },
       { name: 'Intelligence', href: '/intelligence', icon: 'SparklesIcon', badge: 'deep', description: 'Cross-domain research surface for funding, deals, partners, products, and strategic signals.' },
@@ -56,12 +85,13 @@ export const navGroups: NavGroupConfig[] = [
       { name: 'Portfolio', href: '/portfolio', icon: 'BuildingOffice2Icon', badge: 'alloc', description: 'Portfolio allocation view showing which ventures deserve build, sell, hold, or maintenance effort.' },
       { name: 'Command Center', href: '/command-center', icon: 'CommandLineIcon', badge: 'ops', description: 'Operating snapshot across clients, renewals, support load, team pressure, and founder priorities.' },
       { name: 'Weekly Review', href: '/weekly-review', icon: 'CalendarDaysIcon', badge: 'cadence', description: 'Same operating review across daily, weekly, and monthly rhythms without changing context.' },
+      { name: 'Intelligence · Focus', href: '/intelligence/focus', icon: 'ClockIcon', description: 'Focused intelligence view on the highest-signal opportunities and risks right now.' },
     ],
   },
   // ── Zone 2: REVENUE — Sales Command Center ─────────────────────────────────
   {
     label: 'Revenue',
-    defaultOpen: true,
+    defaultOpen: false,
     items: [
       { name: 'Pipeline', href: '/revenue', icon: 'ArrowTrendingUpIcon', description: 'Sales command center showing quotes, active pilots, prospect pipeline, and revenue playbooks by account.' },
       { name: 'UE Revenue Cockpit', href: '/ue-revenue-cockpit', icon: 'RocketLaunchIcon', description: 'Union Eyes revenue agent surface tracking commerce opportunities, growth signals, and deal velocity.' },
@@ -72,7 +102,7 @@ export const navGroups: NavGroupConfig[] = [
   // ── Zone 3: CAPITAL — Cash · Burn · Runway ─────────────────────────────────
   {
     label: 'Capital',
-    defaultOpen: true,
+    defaultOpen: false,
     items: [
       { name: 'Burn & Runway', href: '/capital', icon: 'BanknotesIcon', description: 'Cash position, burn rate, and runway visibility across all ventures with path-to-sustainability tracking.' },
       { name: 'Runway', href: '/runway', icon: 'ArrowTrendingUpIcon', description: 'Detailed runway analysis by venture showing months of operating capital and funding milestones.' },
@@ -80,6 +110,9 @@ export const navGroups: NavGroupConfig[] = [
       { name: 'Cost Dashboard', href: '/cost', icon: 'CurrencyDollarIcon', description: 'Cloud and infrastructure cost visibility with optimization recommendations and budget alerts.' },
       { name: 'Economics', href: '/platform-economics', icon: 'ChartBarIcon', description: 'Shared platform economics and cost allocation across ventures.' },
       { name: 'Finance Ops', href: '/business/finance', icon: 'DocumentTextIcon', description: 'Finance operations, invoicing, and transaction records.' },
+      { name: 'Business Compliance', href: '/business/compliance', icon: 'ClipboardDocumentCheckIcon', description: 'Corporate compliance posture, filings, and regulatory obligations.' },
+      { name: 'Year-End Pack', href: '/business/finance/year-end-pack', icon: 'DocumentArrowDownIcon', description: 'Year-end financial close package and accountant-ready export.' },
+      { name: 'Year-End Close', href: '/business/yearend', icon: 'CalendarDaysIcon', description: 'Annual close checklist and fiscal year wrap-up workflow.' },
     ],
   },
   // ── Zone 4: EXECUTION — Initiatives · Owners · Blockers ───────────────────
@@ -133,6 +166,7 @@ export const navGroups: NavGroupConfig[] = [
       { name: 'Corporate Gov', href: '/business/governance', icon: 'EyeIcon', description: 'Corporate governance structure and board meeting management.' },
       { name: 'Equity & Cap Table', href: '/business/equity', icon: 'DocumentDuplicateIcon', description: 'Equity tracking, cap table, and share distribution across ventures.' },
       { name: 'Evidence Packs', href: '/evidence-packs', icon: 'DocumentArrowDownIcon', description: 'Compliance evidence and audit documentation for regulatory requirements.' },
+      { name: 'Governance Experience', href: '/governance-experience', icon: 'ShieldCheckIcon', description: 'End-to-end governance experience surface across policies, evidence, and attestations.' },
       { name: 'Decision Audit', href: '/audit', icon: 'ClipboardDocumentCheckIcon', description: 'Signed decision ledger and verification/export entry points.' },
       { name: 'Decision Intelligence', href: '/intelligence?section=decision-intelligence', icon: 'ChartBarSquareIcon', description: 'Decision analytics, policy drift, and benchmark intelligence monetized by tier.' },
       { name: 'Proof Center', href: '/proof-center', icon: 'FingerPrintIcon', description: 'Cryptographic proof and attestation center for audit trail.' },
@@ -148,7 +182,10 @@ export const navGroups: NavGroupConfig[] = [
       { name: 'UX Performance', href: '/ops/performance', icon: 'BoltIcon', description: 'Web Vitals, server route timings, and failed-action telemetry for the Console itself.' },
       { name: 'Performance', href: '/performance', icon: 'BoltIcon', description: 'Application performance monitoring and optimization insights.' },
       { name: 'Integrations', href: '/integrations', icon: 'PuzzlePieceIcon', description: 'Third-party integrations and API management.' },
+      { name: 'Integration Chaos', href: '/integrations/chaos', icon: 'BoltIcon', description: 'Chaos and fault-injection testing for integration resilience.' },
       { name: 'Control Plane', href: '/integrations-control-plane', icon: 'WrenchScrewdriverIcon', description: 'Advanced integration control and routing configuration.' },
+      { name: 'Automation', href: '/automation', icon: 'BoltIcon', description: 'Automation runs, schedules, and operational workflow orchestration.' },
+      { name: 'Perf Regressions', href: '/performance/regressions', icon: 'BoltIcon', description: 'Detected performance regressions across routes and releases.' },
     ],
   },
   // ── Service Operations Layer ───────────────────────────────────────────────
@@ -162,15 +199,67 @@ export const navGroups: NavGroupConfig[] = [
       { name: 'Change Log', href: '/itsm/changes', icon: 'CalendarIcon', description: 'Change management and deployment tracking.' },
       { name: 'Knowledge Base', href: '/itsm/kb', icon: 'BookOpenIcon', description: 'Support documentation and FAQ knowledge base.' },
       { name: 'Assets & Vendors', href: '/itsm/assets', icon: 'ServerIcon', description: 'IT assets, vendor contracts, and service tracking.' },
+      { name: 'Contracts', href: '/itsm/contracts', icon: 'DocumentTextIcon', description: 'Service contracts, SLAs, and renewal tracking for client accounts.' },
+      { name: 'Problems', href: '/itsm/problems', icon: 'ExclamationTriangleIcon', description: 'Problem management — root-cause analysis behind recurring incidents.' },
     ],
   },
   // ── Admin (minimal) ────────────────────────────────────────────────────────
   {
     label: 'Admin',
     items: [
-      { name: 'Organizations', href: '/orgs', icon: 'UsersIcon', description: 'Multi-tenant organization and workspace management.' },
+      { name: 'Organizations', href: '/orgs', icon: 'UsersIcon', description: 'Client organization registry and workspace management.' },
       { name: 'Docs', href: '/docs', icon: 'DocumentTextIcon', description: 'Internal documentation and knowledge base.' },
       { name: 'Settings', href: '/settings', icon: 'Cog6ToothIcon', description: 'System settings, preferences, and configuration.' },
+      { name: 'Profile', href: '/settings/profile', icon: 'Cog6ToothIcon', description: 'Personal profile, identity, and notification preferences.' },
+      { name: 'Organisation', href: '/settings/organisation', icon: 'BuildingOffice2Icon', description: 'Organisation-level settings, branding, and workspace defaults.' },
+      { name: 'Integration Settings', href: '/settings/integrations', icon: 'PuzzlePieceIcon', description: 'Connect and configure third-party integrations for this workspace.' },
+    ],
+  },
+  // ── Analytics & Growth ─────────────────────────────────────────────────────
+  {
+    label: 'Analytics & Growth',
+    items: [
+      { name: 'Analytics', href: '/analytics', icon: 'ChartBarIcon', description: 'Cross-portfolio analytics, cohort trends, and performance breakdowns.' },
+      { name: 'Growth', href: '/growth', icon: 'ArrowTrendingUpIcon', description: 'Growth experiments, funnel metrics, and acquisition signals.' },
+      { name: 'Audit Graph', href: '/audit-graph', icon: 'ChartBarSquareIcon', description: 'Visual graph of audit events, lineage, and decision provenance.' },
+    ],
+  },
+  // ── Proving & Readiness — operational proving and go/no-go evidence ─────────
+  {
+    label: 'Proving & Readiness',
+    items: [
+      { name: 'Assurance', href: '/assurance', icon: 'ShieldCheckIcon', description: 'Assurance posture across reliability, security, and operational controls.' },
+      { name: 'Proof Pack', href: '/proof-pack', icon: 'FingerPrintIcon', description: 'Compiled cryptographic proof pack for external attestation.' },
+      { name: 'Operational Proving', href: '/operational-proving-summary', icon: 'ClipboardDocumentCheckIcon', description: 'Summary of operational proving runs and readiness evidence.' },
+      { name: 'Rollout Readiness', href: '/rollout-readiness', icon: 'CheckCircleIcon', description: 'Go/no-go readiness checklist for staged rollouts.' },
+      { name: 'Scale Simulation', href: '/scale-simulation', icon: 'BeakerIcon', description: 'Load and scale simulation results for capacity planning.' },
+      { name: 'Failure Simulation', href: '/failure-simulation', icon: 'BeakerIcon', description: 'Failure-mode simulation and resilience validation runs.' },
+      { name: 'Deployment Profile', href: '/deployment-profile', icon: 'ServerIcon', description: 'Deployment topology, environment profile, and release configuration.' },
+      { name: 'Final Go Briefing', href: '/final-go-briefing', icon: 'ClipboardDocumentCheckIcon', description: 'Final go-live briefing pack with sign-off checklist.' },
+      { name: 'Field Operations Briefing', href: '/field-operations-briefing', icon: 'ClipboardDocumentCheckIcon', description: 'Field operations readiness briefing for launch teams.' },
+      { name: 'NACP Integrity', href: '/nacp-integrity', icon: 'ShieldExclamationIcon', description: 'NACP data integrity verification and exam pipeline checks.' },
+      { name: 'Isolation Certification', href: '/isolation-certification', icon: 'LockClosedIcon', description: 'Client-org isolation certification evidence and controls.' },
+    ],
+  },
+  // ── Executive Cockpits — platform & portfolio leadership surfaces ──────────
+  {
+    label: 'Executive Cockpits',
+    items: [
+      { name: 'Platform Cockpit', href: '/platform', icon: 'ServerIcon', description: 'Platform leadership cockpit across reliability, security, and FinOps.' },
+      { name: 'Hiring Cockpit', href: '/portfolio/executive/hiring', icon: 'UsersIcon', description: 'Portfolio-wide hiring plan, open roles, and headcount allocation.' },
+    ],
+  },
+  // ── Platform Admin Console — internal AI/ML & billing admin ────────────────
+  {
+    label: 'Platform Admin Console',
+    items: [
+      { name: 'Admin Console', href: '/console', icon: 'CommandLineIcon', description: 'Internal platform administration home.' },
+      { name: 'Retention Admin', href: '/console/admin/retention', icon: 'CircleStackIcon', description: 'Data retention policy administration and purge controls.' },
+      { name: 'ML Overview', href: '/console/ml/overview', icon: 'CpuChipIcon', description: 'Machine-learning platform overview and model fleet health.' },
+      { name: 'ML Models', href: '/console/ml/models', icon: 'CpuChipIcon', description: 'Registered ML models, versions, and deployment status.' },
+      { name: 'ML Runs', href: '/console/ml/runs', icon: 'BoltIcon', description: 'Training and inference run history with metrics.' },
+      { name: 'ML · Stripe Daily', href: '/console/ml/stripe/daily', icon: 'CurrencyDollarIcon', description: 'Daily Stripe revenue rollups feeding ML billing models.' },
+      { name: 'ML · Stripe Transactions', href: '/console/ml/stripe/transactions', icon: 'CurrencyDollarIcon', description: 'Raw Stripe transaction stream for reconciliation and ML inputs.' },
     ],
   },
 ]
@@ -178,9 +267,7 @@ export const navGroups: NavGroupConfig[] = [
 /** External app launcher — resolved from public env vars at module load. */
 export const appLinks: AppLinkConfig[] = [
   { name: 'Public Web', href: process.env.NEXT_PUBLIC_WEB_URL, badge: '3000' },
-  { name: 'Partner Portal', href: process.env.NEXT_PUBLIC_PARTNERS_URL, badge: '3002' },
   { name: 'Union Eyes', href: process.env.NEXT_PUBLIC_UNION_EYES_URL, badge: '3003' },
-  { name: 'FAIRCASE', href: process.env.NEXT_PUBLIC_ABR_URL, badge: '3004' },
 ]
 
 /**

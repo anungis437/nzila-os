@@ -15,7 +15,7 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
-  const { userId } = context;
+  const userId = typeof context.userId === 'string' ? context.userId : null;
 
   try {
     if (!userId) {

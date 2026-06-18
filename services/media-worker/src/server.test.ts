@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
   createServerMock: vi.fn(),
   incrementMock: vi.fn(),
   createHealthCheckerMock: vi.fn(),
-  requestHandler: undefined as ((req: { url?: string; method?: string }, res: any) => Promise<void> | void) | undefined,
+  requestHandler: undefined as ((req: { url?: string; method?: string }, res: unknown) => Promise<void> | void) | undefined,
   serverMock: {
     listen: vi.fn((_: number, cb?: () => void) => cb?.()),
     close: vi.fn(),
@@ -55,12 +55,12 @@ function makeRes() {
     statusCode: 0,
     headers: {} as Record<string, string>,
     body: '',
-    writeHead: vi.fn(function writeHead(this: any, code: number, headers: Record<string, string>) {
+    writeHead: vi.fn(function writeHead(this: { statusCode: number; headers: Record<string, string> }, code: number, headers: Record<string, string>) {
       this.statusCode = code
       this.headers = headers
       return this
     }),
-    end: vi.fn(function end(this: any, body: string) {
+    end: vi.fn(function end(this: { body: string }, body: string) {
       this.body = body
       return this
     }),
@@ -238,13 +238,13 @@ describe('createHttpServer', () => {
 
 describe('registerShutdownHandlers', () => {
   it('registers process handlers and handles signal once', async () => {
-    const handlers = new Map<string, (...args: any[]) => void>()
-    const onSpy = vi.spyOn(process, 'on').mockImplementation(((event: string, cb: (...args: any[]) => void) => {
-      handlers.set(event, cb)
+    const handlers = new Map<string, (...args: unknown[]) => void>()
+    const onSpy = vi.spyOn(process, 'on').mockImplementation((event, cb) => {
+      handlers.set(String(event), cb as (...args: unknown[]) => void)
       return process
-    }) as any)
+    })
 
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as any)
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => undefined as never) as typeof process.exit)
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: vi.fn() }
     const shutdown = vi.fn().mockResolvedValue(undefined)
 
@@ -264,11 +264,12 @@ describe('registerShutdownHandlers', () => {
   })
 
   it('logs unhandled rejection reason as error', () => {
-    const handlers = new Map<string, (...args: any[]) => void>()
-    const onSpy = vi.spyOn(process, 'on').mockImplementation(((event: string, cb: (...args: any[]) => void) => {
-      handlers.set(event, cb)
+    const handlers = new Map<string, (...args: unknown[]) => void>()
+    const onImpl: typeof process.on = (event: string | symbol, listener: (...args: any[]) => void) => {
+      handlers.set(String(event), listener as (...args: unknown[]) => void)
       return process
-    }) as any)
+    }
+    const onSpy = vi.spyOn(process, 'on').mockImplementation(onImpl)
 
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: vi.fn() }
     registerShutdownHandlers(vi.fn().mockResolvedValue(undefined), logger)

@@ -33,7 +33,7 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   gte: vi.fn(),
   and: vi.fn(),
-  sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }),
+  sql: (strings: TemplateStringsArray, ...values: any[]) => ({ strings, values }),
   relations: vi.fn(() => ({})),
 }));
 
@@ -47,13 +47,19 @@ vi.mock('date-fns', () => ({
   differenceInDays: vi.fn((_a: Date, _b: Date) => 5),
 }));
 
-import { calculateEngagementScore } from '../engagement-scoring';
+import {
+  calculateAllEngagementScores,
+  calculateEngagementScore,
+  getEngagementHistory,
+  getTopEngagedMembers,
+  identifyReEngagementTargets,
+} from '../engagement-scoring';
 
 describe('engagement-scoring', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default: each DB query returns zero counts
-    mocks.mockThen.mockImplementation((fn: (rows: unknown[]) => unknown) =>
+    mocks.mockThen.mockImplementation((fn: (rows: any[]) => unknown) =>
       Promise.resolve(
         fn([{ received: 0, replied: 0, clicked: 0, lastActivity: null, opened: 0, started: 0, completed: 0, voted: 0, delivered: 0, count: 0 }])
       )
@@ -68,7 +74,7 @@ describe('engagement-scoring', () => {
 
   it('assigns highly-engaged tier for high activity', async () => {
     let callCount = 0;
-    mocks.mockThen.mockImplementation((fn: (rows: unknown[]) => unknown) => {
+    mocks.mockThen.mockImplementation((fn: (rows: any[]) => unknown) => {
       callCount++;
       // First 5 calls are main activity queries; then previous-period queries
       if (callCount <= 5) {
@@ -102,3 +108,52 @@ describe('engagement-scoring', () => {
     expect(typeof score.trendPercentage).toBe('number');
   });
 });
+
+describe('engagement-scoring aggregate functions', () => {
+  const baseRow = {
+    id: 'p1', userId: 'p1', email: 'a@b.com', count: 1,
+    received: 0, replied: 0, clicked: 0, lastActivity: null,
+    opened: 0, started: 0, completed: 0, voted: 0, delivered: 0,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Return two profiles / rows for every query so map/find/sort callbacks run
+    mocks.mockThen.mockImplementation((fn: (rows: any[]) => unknown) =>
+      Promise.resolve(
+        fn([
+          { ...baseRow },
+          { ...baseRow, id: 'p2', userId: 'p2', email: 'b@b.com' },
+        ])
+      )
+    );
+  });
+
+  it('calculateAllEngagementScores returns sorted scores', async () => {
+    const scores = await calculateAllEngagementScores('org-1', 90);
+    expect(Array.isArray(scores)).toBe(true);
+    expect(scores.length).toBe(2);
+  });
+
+  it('getEngagementHistory returns monthly history', async () => {
+    const history = await getEngagementHistory('p1', 'org-1', 3);
+    expect(history.length).toBe(3);
+    expect(history[0]).toHaveProperty('activities');
+  });
+
+  it('identifyReEngagementTargets returns prioritized triggers', async () => {
+    const triggers = await identifyReEngagementTargets('org-1');
+    expect(Array.isArray(triggers)).toBe(true);
+    // Null lastActivity => daysSinceLastActivity = lookbackDays (>28) => triggers fire
+    expect(triggers.length).toBeGreaterThan(0);
+    expect(triggers[0]).toHaveProperty('recommendedAction');
+  });
+
+  it('getTopEngagedMembers attaches member details', async () => {
+    const top = await getTopEngagedMembers('org-1', 10);
+    expect(Array.isArray(top)).toBe(true);
+    expect(top[0]).toHaveProperty('memberName');
+    expect(top[0]).toHaveProperty('email');
+  });
+});
+

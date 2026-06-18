@@ -510,7 +510,7 @@ Invoke-RestMethod -Uri 'http://localhost:3007/api/stipends/disbursements/pending
 - All services use Drizzle ORM with postgres-js driver
 - Numeric fields stored as strings (precision requirements)
 - Zod validation on all request bodies
-- Authentication via `(req as any).user` with Clerk bypass
+- Authentication via `(req as unknown).user` with Clerk bypass
 
 ### For Frontend Developers
 
