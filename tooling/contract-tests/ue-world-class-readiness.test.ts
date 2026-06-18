@@ -89,4 +89,4 @@ describe('UE world-class readiness', () => {
     expect(existsSync(resolve(ROOT, evidence.monitoringPlan as string))).toBe(true)
     expect(existsSync(resolve(ROOT, evidence.killSwitchDrill as string))).toBe(true)
   })
-}
+})

@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-06-08T01:29:35.644Z
+Generated: 2026-06-10T03:02:06.524Z
 
 Total documents indexed: 1226
 Stale documents (>90 days since repo validation): 0
@@ -1038,7 +1038,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-06-06 | current |
 | [docs/doctrine/whitepapers/README.md](docs/doctrine/whitepapers/README.md) | doctrine | 2026-05-27 | current |
 | [docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-06-06 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-06-08 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-06-10 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-25 | current |
 | [docs/governance/platform-readiness.md](docs/governance/platform-readiness.md) | governance | 2026-05-25 | current |
 | [docs/hardening/secrets.md](docs/hardening/secrets.md) | hardening | 2026-05-25 | current |
@@ -1222,8 +1222,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-05-27 | current |
 | [docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md](docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md) | ops | 2026-05-25 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-05-27 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-06-08 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-06-08 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-06-10 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-06-10 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-27 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-25 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-25 | current |

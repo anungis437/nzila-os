@@ -23,6 +23,16 @@
 **Source implementation**
 - [apps/union-eyes/lib/oci/frameworks/](../../../apps/union-eyes/lib/oci/frameworks/)
 
+**Government-readiness & validation layer (additive, read-only over the frozen core)**
+
+These artifacts carry OCI/OCRA's procurement-facing validation evidence. Each is an *additive* layer above the scoring core specified in this document: it is specified in doctrine and implemented as a constitutionally-isolated, read-only module that **never imports the scoring engine** and therefore cannot influence a dimension, composite, or maturity band (enforced by the non-regression and isolation suites). An auditor can reconstruct any procurement claim by following these references.
+
+- [Government-readiness program index](../government-readiness/README.md) — the full additive-layer map and the non-negotiable freeze.
+- **Evidence validation binder** — [OCI_OCRA_VALIDATION_BINDER.md](../government-readiness/OCI_OCRA_VALIDATION_BINDER.md): every methodology claim mapped to its specification and to an executable test. Grounded in the evidence-strength ladder ([evidence-strength/evidenceTaxonomy.ts](../../../apps/union-eyes/lib/icra/evidence-strength/evidenceTaxonomy.ts), NONE…CROSS_VALIDATED).
+- **Obligation mapping & source-instrument governance** — [OCI_OCRA_OBLIGATION_TAXONOMY.md](../government-readiness/OCI_OCRA_OBLIGATION_TAXONOMY.md) and [OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md](../government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md): deterministic finding → obligation → source-instrument → citation mapping with a role-gated catalogue lifecycle (add/retire/version/jurisdiction/conflict). Implemented in [obligations/](../../../apps/union-eyes/lib/icra/obligations/), isolated by `obligation-mapping-isolation.test.ts`.
+- **Assessor certification & inter-rater reliability** — [OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md](../government-readiness/OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md) and [OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md](../government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md): a five-level, suspend-by-default assessor standard (calibration gate, recertification cadence) plus the κ/ICC/band-agreement harness. Implemented in [assessors/assessorGovernance.ts](../../../apps/union-eyes/lib/icra/assessors/assessorGovernance.ts) and [reliability/](../../../apps/union-eyes/lib/icra/reliability/).
+- **Senior-validator protocol & verdicts** — [RICHARD_SHARPE_VALIDATION_PROTOCOL.md](../government-readiness/RICHARD_SHARPE_VALIDATION_PROTOCOL.md) and [GOVERNMENT_VALIDATION_REPORT_V1.md](../government-readiness/GOVERNMENT_VALIDATION_REPORT_V1.md): the adversarial public-sector review protocol and its recorded dispositions.
+
 ---
 
 ## Table of contents
@@ -33,6 +43,7 @@
 - [§3 Doctrine lineage](#3-doctrine-lineage)
 - [§4 Methodology philosophy](#4-methodology-philosophy)
 - [§4.5 Methodological Maturity Classification™](#45-methodological-maturity-classification)
+- [§4.6 The Construct Invariant™ (single construct, evidence gradient)](#46-the-construct-invariant-single-construct-evidence-gradient)
 - [§5 Framework overview](#5-framework-overview)
 - [§6 Frameworks in detail](#6-frameworks-in-detail)
 - [§7 Confidence model](#7-confidence-model)
@@ -242,6 +253,34 @@ The advancement protocol is the methodology's mechanism for growing into a highe
 ### 4.5.5 Why this section exists
 
 Methodology specifications that present coefficients without a maturity classification implicitly invite the reader to assume those coefficients are calibrated. OCI's coefficients are *not* calibrated at v1.0.0; the maturity classification makes that explicit at every coefficient site. The classification is the operational counterpart of the §0 disclosure: it converts an honest preface into an honest practice.
+
+---
+
+## §4.6 The Construct Invariant™ (single construct, evidence gradient)
+
+This section states a **constitutional invariant** of the methodology — a rule, not an explanation. It governs what OCI/OCRA measures and how the question modalities relate to that measurement. It is frozen on the same footing as the comparability invariant (§6) and the fairness rule: it may not be altered without a constitutional change-class entry in [METHODOLOGY_CHANGELOG.md](METHODOLOGY_CHANGELOG.md).
+
+> **The Construct Invariant.**
+> OCI/OCRA measures a **single construct: institutional continuity capability.**
+> The question modalities are **different evidence strengths of that one construct**, not different constructs:
+>
+> | Modality | Evidence type | Evidentiary strength |
+> |---|---|---|
+> | `maturity_select` | behavioral / operational evidence | **strongest** (dominant) |
+> | `multiple_choice` | structural / topological evidence | intermediate |
+> | `likert_5` | self-assessed capability evidence | **weakest** (minority) |
+>
+> **Modalities differ in evidentiary strength, not in construct identity.**
+
+Three consequences follow from the invariant, and each is enforced rather than asserted:
+
+1. **Behavioral evidence is dominant by design.** `maturity_select` is the backbone of the instrument (≈ 65–75 % of the scored surface per [OCI_MODALITY_DOCTRINE.md](../assessment/OCI_MODALITY_DOCTRINE.md) §3; measured behavioral share of the `institutional_continuity` composite ≈ 86 %, see §7.6). Self-assessment is admitted only as the weakest evidence tier, never as a parallel construct that could be traded off against behavior.
+
+2. **Self-assessment is capability evidence, not satisfaction.** `likert_5` items are constrained by doctrine to measure *"perceived continuity **reality**, not satisfaction"* — falsifiable statements about institutional reality, rated for truth. Affective and attitudinal forms ("Do you agree?", "How satisfied are you?") are forbidden. Self-report is therefore a low-confidence reading of the *same* continuity the behavioral items read with high confidence — consistent with the declared-vs-evidenced gradient already encoded in the evidence-strength taxonomy ([evidence-strength/evidenceTaxonomy.ts](../../../apps/union-eyes/lib/icra/evidence-strength/evidenceTaxonomy.ts), `NONE…CROSS_VALIDATED`).
+
+3. **Optimism alone cannot manufacture a score.** Because perception is the weakest tier and is capped to a minority weight (§7.6), an institution cannot reach a high-maturity outcome through confident self-report absent corroborating behavioral evidence. This is not only argued; it is proven by an executable guard, [`__tests__/signal-integrity/constructInvariant.test.ts`](../../../apps/union-eyes/lib/icra/__tests__/signal-integrity/constructInvariant.test.ts), which demonstrates that floor-behavioral evidence with maximally-inflated confidence remains in the lowest maturity band, and that the full confidence range moves the composite by at most ≈ 9 points (the realistic honest-neutral → inflated gaming delta is ≈ 4.7 points).
+
+The invariant is the methodology's answer to the first measurement-theory question a reviewer asks — *"what, exactly, is being measured?"* — and to the sharpest follow-up — *"can optimism alone produce a high score?"*. The answer to the first is *institutional continuity capability, read across an evidence gradient*; the answer to the second is *no*, and it is enforced in CI.
 
 ---
 
@@ -515,7 +554,7 @@ The RBI is a composition of practitioner-informed weights bounded by caps. The 0
 
 ## §7 Confidence model
 
-The methodology surfaces results under a confidence model rather than as bare values. This section specifies the confidence states, the input-quantity thresholds, and the surfacing rules.
+The methodology surfaces results under a confidence model rather than as bare values. This section specifies the confidence states, the input-quantity thresholds, the surfacing rules, and the scoring role of perception-based confidence signals relative to behavioral evidence (§7.6).
 
 ### 7.1 Confidence states
 
@@ -557,6 +596,35 @@ The confidence model is a state-classification, not a probability. It does not s
 ### 7.5 Aggregation k-anonymity
 
 The methodology's intelligence layer aggregates structural framework outputs across opted-in institutions. The aggregation respects a k-anonymity threshold of **five contributing institutions per published band**. Below this threshold, the band is not published and the contributing institutions are not exposed to re-identification risk. This threshold is doctrine-canonical and is restated in [docs/oci/OCI_METHOD.md](../OCI_METHOD.md) §9 and in [sample-size-policy.yaml](sample-size-policy.yaml).
+
+### 7.6 Confidence signals vs. maturity evidence (scoring role)
+
+This subsection states, precisely and reproducibly, **how perception-based confidence signals affect scoring** — the question a procurement reviewer asks first. The assessment instrument carries three answer modalities: `maturity_select` (behavioral maturity evidence), `multiple_choice` (structural topology), and `likert_5` **Continuity Confidence Signals** (the institution's own read of its survivability — e.g. *"Operational knowledge is consistently recoverable when key individuals are unavailable."*). Confidence signals are perception statements, not behavioral evidence, and the methodology treats them accordingly through **two separate, bounded roles**.
+
+**Construct basis — why perception is admitted to the score at all.** The prior, sharper question a sophisticated reviewer asks is not *"how much"* but *"why at all"*: why should perception contribute to a maturity composite? The answer is a deliberate construct decision, not an operational accident, and it is stated as a frozen constitutional rule in [§4.6 (The Construct Invariant)](#46-the-construct-invariant-single-construct-evidence-gradient). OCI measures **one construct — institutional continuity capability — read across an evidence gradient**, not "capability plus a separate confidence number." The three modalities are three *evidence tiers* on that single construct: `maturity_select` is behaviorally-evidenced capability (the dominant tier), `multiple_choice` is structurally-evidenced topology, and `likert_5` is **self-assessed capability — the weakest evidence tier of the same continuity construct**. Critically, `likert_5` is constrained by doctrine ([OCI_MODALITY_DOCTRINE.md §4](../assessment/OCI_MODALITY_DOCTRINE.md)) to measure *"perceived continuity **reality**, not satisfaction"*: every confidence item is a falsifiable statement about institutional reality ("operational knowledge **is** recoverable when key people are unavailable") that the institution rates for truth, and affective or attitudinal forms ("Do you agree?", "How satisfied are you?") are **forbidden**. Self-assessed capability is a legitimate but lowest-confidence reading of the same thing behavioral evidence reads with higher confidence — which is precisely why the methodology already distinguishes *declared* continuity from *evidenced* continuity in its evidence-strength taxonomy ([evidence-strength/evidenceTaxonomy.ts](../../../apps/union-eyes/lib/icra/evidence-strength/evidenceTaxonomy.ts), `NONE…CROSS_VALIDATED`). Perception therefore belongs in the construct as a **minority corroboration tier**, never as dominant evidence, and is subordinated to behavior by three explicit disciplines: a capped minority weight (Role 1), a contradiction channel that *reduces* confidence whenever self-report outruns behavior (Role 2), and a per-dimension floor that keeps perception a live *sensing* input rather than a scoring lever (Doctrine floor). This is the methodology's settled position: **Option A — perception is a legitimate, bounded, evidence-graded component of continuity capability — not Option B (perception as a purely diagnostic signal excluded from the composite).** The Option B posture (confidence weight → 0, perception retained only as an envelope/contradiction input) remains a recognized future alternative, but it is a construct-semantics change reserved for the governed migration described under *Honest disclosure* below — it is not the current methodology.
+
+**Role 1 — minority weighted contribution to dimension scores.** Confidence signals carry dimension weights and therefore contribute to the composite, but only as a **minority corroboration input**. The measured share of each dimension's total scoring weight carried by `likert_5` signals is:
+
+| Dimension | `likert_5` (confidence) share | Dominant evidence |
+|---|---:|---|
+| `institutional_continuity` (the composite) | **9.4 %** | `maturity_select` 86.4 %, `multiple_choice` 4.2 % |
+| `governance_fragility` | 7.6 % | behavioral / topology 92.4 % |
+| `trust_debt` | 11.0 % | behavioral / topology 89.0 % |
+| `operational_memory` | 11.4 % | behavioral / topology 88.6 % |
+| `transition_readiness` | 11.1 % | behavioral / topology 88.9 % |
+
+Because confidence never exceeds **~11 %** of any dimension's weight (and 9.4 % of the headline composite), perception **cannot dominate a score and cannot move a maturity band on its own**. Two bounds make this concrete and are both verified by the executable guard [`__tests__/signal-integrity/constructInvariant.test.ts`](../../../apps/union-eyes/lib/icra/__tests__/signal-integrity/constructInvariant.test.ts):
+
+- **Realistic gaming swing ≈ 4.7 points.** An institution that would honestly answer *neutral* (midpoint) but instead answers every Continuity Confidence Signal at the ceiling shifts the `institutional_continuity` composite by at most **≈ 4.7 points** on the 0–100 scale (0.094 × 0.5 × 100). This is the realistic over-claiming delta.
+- **Absolute full-range swing ≈ 9.4 points.** Across the *entire* confidence range — from the floor (every confidence item at the minimum) to the ceiling (every item at the maximum) — the composite moves by at most **≈ 9.4 points** (0.094 × 1.0 × 100). This is the hard upper bound on everything the confidence channel can do.
+
+Both bounds are narrower than the 30-point lowest maturity band. The decisive consequence is proven empirically by the same guard: **floor behavioral evidence combined with maximally-inflated confidence remains in the lowest maturity band** (composite < 30) and cannot approach a high-maturity outcome. Optimism alone cannot manufacture a score. The dominant evidence in every dimension is behavioral (`maturity_select`) and structural (`multiple_choice`).
+
+**Role 2 — primary input to the independent confidence-and-contradiction channel.** Confidence signals are the backbone of the confidence envelope (§7.1–§7.4) and the contradiction-detection engine. This channel is **monotonic-downward by doctrine: contradictions REDUCE confidence; they are never averaged and never inflate a score** (see [`contradictions/confidencePenaltyBridge.ts`](../../../apps/union-eyes/lib/icra/contradictions/confidencePenaltyBridge.ts)). When an institution reports high confidence that contradicts its behavioral or structural answers — e.g. *"operational knowledge is recoverable"* alongside an `undocumented, individually-held` topology selection — the contradiction lowers the **confidence** attached to the reading; it does not silently raise the maturity score.
+
+**Doctrine floor.** Every dimension retains **at least one** confidence-sensitive `likert_5` input by design, enforced by [`confidenceGenerationCoverage.test.ts`](../../../apps/union-eyes/lib/icra/__tests__/signal-integrity/confidenceGenerationCoverage.test.ts). Perception is therefore always *sensed* and always available for contradiction analysis — but never as the dominant evidence for a score.
+
+**Honest disclosure and governed option.** The maintainers deliberately retain a minority confidence weight rather than zeroing it, for two reasons: (a) it guarantees each dimension has a live perception channel for contradiction detection, and (b) it preserves score comparability with every prior assessment (the one-scale comparability invariant of §6). **Fully decoupling confidence from the composite** (confidence weight → 0, confidence retained solely as an envelope/contradiction input) is a recognized and legitimate future posture, but it changes composite semantics for every historical assessment; it is therefore reserved for a **governed scoring-version migration** with a corresponding [METHODOLOGY_CHANGELOG.md](METHODOLOGY_CHANGELOG.md) entry, not a silent toggle. The scoring engine that implements this is [`apps/union-eyes/lib/icra/scoring.ts`](../../../apps/union-eyes/lib/icra/scoring.ts); every contribution is traceable to a question answer, a published dimension weight, and (for risk dimensions) a per-question inversion flag.
 
 ---
 
@@ -848,6 +916,8 @@ The relationships use four classes:
 - **Gap-coverage.** OCI addresses ground the standard does not cover.
 - **Not-equivalent.** Surface similarity only; the two are doing different work and should not be substituted.
 
+These four classes govern the standards-substitutability positioning in §12.1–§12.11. A fifth class, **structurally-consistent**, is used only in §12.12 for *measurement-tradition lineage* (a distinct question — whether self-assessed capability is a recognized evidence form — not a substitutability claim).
+
 OCI is **never described as "equivalent to"** any of the standards below. The full crosswalk by clause is in [standards-crosswalk.yaml](standards-crosswalk.yaml).
 
 ### 12.1 ISO 22301:2019 — Business Continuity Management Systems
@@ -904,7 +974,23 @@ Specific overlap:
 
 **Relationship: not-equivalent.** The Herfindahl–Hirschman Index sums squared market shares to measure market concentration. The Gini coefficient measures inequality across a population. The Stewardship Density Index™ is a weighted exposure ratio, not a sum of squares and not a Lorenz-curve construction. Surface similarity (concentration framing, inequality framing) should not produce equivalence claims.
 
-### 12.12 Summary positioning
+### 12.12 Measurement-tradition positioning — self-assessed capability as evidence
+
+The preceding subsections position OCI against governance, continuity, and risk *standards* (a substitutability question). This subsection answers a different and deeper reviewer question — a **measurement-theory lineage** question: *is it legitimate, in established assessment practice, to treat self-assessed capability as evidence at all?* The Construct Invariant (§4.6) admits `likert_5` self-assessment as the weakest evidence tier of the continuity construct; §7.6 bounds and subordinates it. This subsection shows the *pattern* — self-assessed capability counted as one form of evidence — is well established beyond OCI doctrine, so that the admission rests on recognized practice rather than on OCI's say-so alone.
+
+This is **lineage positioning, not derivation and not validation**. OCI does not adopt the instruments, scoring, or empirical claims of any tradition below; it does not assert that its coefficients inherit their validation (the v1.0.0 maturity disclosure in §0 and §4.5 still governs). The relationship class is **structurally-consistent**: the named traditions establish that admitting self-report as a bounded evidence form is normal assessment practice, and OCI's treatment is *more conservative* than most, because it (a) caps self-assessment to a minority weight, (b) subordinates it to behavioral evidence, and (c) cross-checks it with downward-only contradiction detection (§7.6).
+
+| Established tradition | Where self-assessed capability is treated as evidence | OCI's relationship |
+|---|---|---|
+| **Self-efficacy** (the perceived-capability construct associated with Bandura) | Perceived capability is measured as a predictor of performance in its own right. | **Structurally-consistent.** OCI treats perceived recoverability as one (weakest) evidence tier — but, unlike pure self-efficacy measurement, never as the dominant or sole signal. |
+| **Organizational readiness for change** (the collective-readiness construct associated with Weiner) | Organizations self-rate collective capability and commitment as a measured readiness signal. | **Structurally-consistent.** OCI's confidence signals sense collective continuity readiness; OCI subordinates them to behavioral maturity evidence. |
+| **Safety climate / safety culture instruments** (the perception-survey tradition associated with Zohar) | Self-reported perceptions of safety are accepted evidence in safety-critical domains. | **Structurally-consistent.** OCI uses perception as a sensing layer in a continuity-critical domain, with the same "perception ≠ proof" caution these instruments observe. |
+| **Control self-assessment (CSA)** (a recognized internal-audit practice, e.g. IIA guidance) | Process owners self-assess control effectiveness as audit-relevant evidence, subject to corroboration. | **Structurally-consistent — and closest in spirit.** Auditors themselves treat self-assessment as evidence *that must be corroborated*. OCI's contradiction engine is exactly that corroboration discipline. |
+| **Organizational resilience self-assessment** (the self-assessment of resilience attributes in the ISO 22316 tradition) | Resilience attributes are partly assessed through structured organizational self-assessment. | **Structurally-consistent.** OCI reads continuity (a resilience-adjacent construct) partly through structured self-assessment, bounded as the weakest tier. |
+
+The honest summary for a procurement reviewer: **OCI did not invent the idea that self-assessed capability is evidence.** Treating self-report as a bounded, corroborated evidence form is standard across self-efficacy research, organizational-readiness measurement, safety-climate instruments, internal-audit control self-assessment, and organizational-resilience self-assessment. OCI's contribution is not the idea but the *discipline* around it: self-assessment is admitted only as the weakest evidence tier, capped to a minority weight, subordinated to behavioral evidence, and actively cross-checked for contradiction. The corresponding rows are recorded in [standards-crosswalk.yaml](standards-crosswalk.yaml) under `measurement_traditions`, using the `structurally-consistent` relationship class (distinct from the substitutability classes used for standards).
+
+### 12.13 Summary positioning
 
 OCI sits in the **stewardship-and-continuity-governance** layer that none of the listed standards directly occupies. ISO 22301 occupies the disruption-response layer; ISO 37000 occupies the governance-principles layer; COBIT occupies the enterprise-IT-governance layer; CMMI occupies the process-capability-maturity layer. OCI's contribution is a measurement methodology for the slowly-moving institutional fact that continuity is held by a small number of stewards whose load is not yet named.
 

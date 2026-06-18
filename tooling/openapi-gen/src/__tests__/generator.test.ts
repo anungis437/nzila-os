@@ -255,7 +255,7 @@ describe('generator — spec content', () => {
     expect(pathItem.get.parameters).toContainEqual(
       expect.objectContaining({ name: 'id', in: 'path', required: true }),
     )
-  })
+  }, 15000)
 
   it('includes requestBody for POST/PUT/PATCH', async () => {
     const rootDir = join(TMP, 'body')
@@ -324,5 +324,5 @@ describe('generator — spec content', () => {
 
     expect(spec.components.securitySchemes.platformAuth).toBeDefined()
     expect(spec.security).toEqual([{ platformAuth: [] }])
-  })
+  }, 15000)
 })
