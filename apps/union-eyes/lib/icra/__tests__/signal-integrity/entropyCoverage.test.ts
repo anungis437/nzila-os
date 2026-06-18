@@ -22,7 +22,11 @@ const GES_INPUTS: Record<1 | 2 | 3 | 4 | 5, readonly string[]> = {
   2: ['gv_04', 'gis_01', 'orl_02', 'et_01', 'et_05', 'ccs_02', 'scs_02'],
   3: ['gv_03', 'gis_01', 'et_01', 'et_02', 'scs_02', 'ccs_04'],
   4: ['gv_03', 'orl_01', 'et_02', 'tr_02', 'scs_03', 'ccs_03'],
-  5: ['scs_04', 'gv_03', 'orl_01', 'et_02'],
+  // et_07 is the purpose-built GES-5 multiple_choice topology probe (its
+  // 'not_reconstructible' option is the level-5 condition); sg_03 supplies
+  // the third risk-inverted GES-5 input after et_02 was reframed to an
+  // observable concern-resolution practice in bank v4.
+  5: ['scs_04', 'et_07', 'gv_03', 'orl_01', 'sg_03'],
 };
 
 const byId = new Map<string, Question>(ALL_QUESTIONS.map((q) => [q.id, q]));

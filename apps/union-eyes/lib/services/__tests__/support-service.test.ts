@@ -195,6 +195,79 @@ describe('SupportService', () => {
     expect(result).toEqual(comment);
   });
 
+  // ── getTicketMetrics ────────────────────────────────────────────
+  it('getTicketMetrics returns aggregated metrics', async () => {
+    // 10 db.select calls inside getTicketMetrics
+    mocks.mockSelect
+      .mockReturnValueOnce(chain([{ count: 10 }]))          // totalCount
+      .mockReturnValueOnce(chain([{ count: 4 }]))           // openCount
+      .mockReturnValueOnce(chain([{ count: 2 }]))           // inProgressCount
+      .mockReturnValueOnce(chain([{ count: 3 }]))           // resolvedCount
+      .mockReturnValueOnce(chain([{ count: 1 }]))           // closedCount
+      .mockReturnValueOnce(chain([{ priority: 'high', count: 5 }, { priority: 'low', count: 5 }])) // byPriority
+      .mockReturnValueOnce(chain([{ category: 'general', count: 8 }, { category: 'technical', count: 2 }])) // byCategory
+      .mockReturnValueOnce(chain([{ avgResponseTime: '30', avgResolutionTime: '120' }])) // avgTimes
+      .mockReturnValueOnce(chain([{ count: 1 }]))           // breachedCount
+      .mockReturnValueOnce(chain([{ avgRating: '4.2' }]));  // satisfactionResult
+
+    const { getTicketMetrics } = await import('../support-service');
+    const result = await getTicketMetrics({ organizationId: 'org-1' });
+    expect(result.total).toBe(10);
+    expect(result.open).toBe(4);
+    expect(result.byPriority).toHaveLength(2);
+    expect(result.byCategory).toHaveLength(2);
+    expect(result.avgResponseTimeMinutes).toBe(30);
+    expect(result.slaCompliance).toBeCloseTo(90, 0);
+    expect(result.satisfactionRating).toBe(4.2);
+  });
+
+  it('getTicketMetrics with no filters', async () => {
+    mocks.mockSelect
+      .mockReturnValueOnce(chain([{ count: 0 }]))
+      .mockReturnValueOnce(chain([{ count: 0 }]))
+      .mockReturnValueOnce(chain([{ count: 0 }]))
+      .mockReturnValueOnce(chain([{ count: 0 }]))
+      .mockReturnValueOnce(chain([{ count: 0 }]))
+      .mockReturnValueOnce(chain([]))
+      .mockReturnValueOnce(chain([]))
+      .mockReturnValueOnce(chain([{}]))
+      .mockReturnValueOnce(chain([{ count: 0 }]))
+      .mockReturnValueOnce(chain([{}]));
+
+    const { getTicketMetrics } = await import('../support-service');
+    const result = await getTicketMetrics();
+    expect(result.total).toBe(0);
+    expect(result.slaCompliance).toBe(100);
+  });
+
+  // ── getSLAMetrics ────────────────────────────────────────────────
+  it('getSLAMetrics returns SLA compliance data', async () => {
+    // 3 db.select calls inside getSLAMetrics
+    mocks.mockSelect
+      .mockReturnValueOnce(chain([{ count: 20 }]))
+      .mockReturnValueOnce(chain([{ count: 4 }]))
+      .mockReturnValueOnce(chain([{ avgResponseTime: '45', avgResolutionTime: '200' }]));
+
+    const { getSLAMetrics } = await import('../support-service');
+    const result = await getSLAMetrics({ organizationId: 'org-1' });
+    expect(result.totalTickets).toBe(20);
+    expect(result.breachedSLA).toBe(4);
+    expect(result.withinSLA).toBe(16);
+    expect(result.complianceRate).toBe(80);
+    expect(result.avgResponseTime).toBe(45);
+  });
+
+  it('getSLAMetrics with zero total returns 100% compliance', async () => {
+    mocks.mockSelect
+      .mockReturnValueOnce(chain([{ count: 0 }]))
+      .mockReturnValueOnce(chain([{ count: 0 }]))
+      .mockReturnValueOnce(chain([{}]));
+
+    const { getSLAMetrics } = await import('../support-service');
+    const result = await getSLAMetrics();
+    expect(result.complianceRate).toBe(100);
+  });
+
   // ── getTicketComments ───────────────────────────────────────────
   it('getTicketComments returns comments', async () => {
     const comments = [{ id: 'c-1' }, { id: 'c-2' }];

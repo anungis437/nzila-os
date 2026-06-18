@@ -351,7 +351,12 @@ async function PipelinePanel() {
               ) : (
                 colDeals.map((d) => (
                   <div key={d.id} className="rounded-lg border border-gray-100 bg-white p-2">
-                    <p className="truncate text-xs font-medium text-gray-800">{d.accountName}</p>
+                    <Link
+                      href={`/workspace/sales/${d.id}`}
+                      className="truncate text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline"
+                    >
+                      {d.accountName}
+                    </Link>
                     <p className="mt-0.5 flex items-center justify-between text-[10px] text-gray-400">
                       <span className="uppercase">{d.product}</span>
                       <span>{formatCurrency(d.estimatedValue)}</span>

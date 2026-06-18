@@ -189,5 +189,40 @@ describe('csv-export', () => {
         expect(typeof col.accessor).toBe('function');
       }
     });
+
+    it('all predefined column accessors are exercised through CSV generation', () => {
+      const caseCsv = generateCSV([
+        {
+          id: 'C-1',
+          status: 'open',
+          priority: 'high',
+          type: 'grievance',
+          assignee: 'Alice',
+          worksite: 'Plant A',
+          createdAt: new Date('2026-01-01T00:00:00.000Z'),
+          resolvedAt: new Date('2026-01-02T00:00:00.000Z'),
+        },
+      ] as any, CASE_COLUMNS as any);
+      expect(caseCsv).toContain('C-1');
+      expect(caseCsv).toContain('2026-01-01T00:00:00.000Z');
+
+      const kpiCsv = generateCSV([{ metric: 'Total Open', value: 7 }], KPI_COLUMNS);
+      expect(kpiCsv).toContain('Total Open');
+
+      const agingCsv = generateCSV([{ label: '0-7', count: 4 }] as any, AGING_COLUMNS as any);
+      expect(agingCsv).toContain('0-7');
+
+      const categoryCsv = generateCSV([{ type: 'Safety', count: 2 }] as any, CATEGORY_COLUMNS as any);
+      expect(categoryCsv).toContain('Safety');
+
+      const worksiteCsv = generateCSV([{ worksite: 'Plant A', count: 9 }] as any, WORKSITE_COLUMNS as any);
+      expect(worksiteCsv).toContain('Plant A');
+
+      const assigneeCsv = generateCSV([{ assignee: 'Alice', count: 3 }] as any, ASSIGNEE_COLUMNS as any);
+      expect(assigneeCsv).toContain('Alice');
+
+      const trendCsv = generateCSV([{ week: '2026-01-01', closedCount: 5 }] as any, TREND_COLUMNS as any);
+      expect(trendCsv).toContain('2026-01-01');
+    });
   });
 });

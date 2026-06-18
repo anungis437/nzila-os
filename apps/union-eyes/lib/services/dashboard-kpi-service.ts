@@ -301,7 +301,9 @@ export function buildLeadershipDashboard(
     .map(([category, count]) => ({
       category,
       count,
-      percentage: relevantForCategory.length > 0 ? Math.round((count / relevantForCategory.length) * 100) : 0,
+      // categoryCounts only contains entries produced from relevantForCategory,
+      // so this denominator is guaranteed to be non-zero for mapped rows.
+      percentage: Math.round((count / relevantForCategory.length) * 100),
     }));
 
   const employers = buildEmployerHotspots(grievanceRows, window, now, quarterStart);

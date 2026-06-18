@@ -5,6 +5,8 @@ const h = vi.hoisted(() => {
   const headersMock = vi.fn()
   const getUserRoleMock = vi.fn()
   const isOperatorRoleMock = vi.fn((role: string) => ['platform_admin', 'studio_admin', 'ops', 'analyst', 'viewer'].includes(role))
+  const createRequestContextMock = vi.fn(() => ({ requestId: 'req_1' }))
+  const runWithContextMock = vi.fn(async (_ctx, fn: () => Promise<unknown>) => fn())
 
   const eqMock = vi.fn((...args: unknown[]) => ({ op: 'eq', args }))
   const andMock = vi.fn((...args: unknown[]) => ({ op: 'and', args }))
@@ -18,6 +20,8 @@ const h = vi.hoisted(() => {
     headersMock,
     getUserRoleMock,
     isOperatorRoleMock,
+    createRequestContextMock,
+    runWithContextMock,
     eqMock,
     andMock,
     platformDbMock,
@@ -61,11 +65,11 @@ vi.mock('@/lib/rbac', () => ({
 }))
 
 vi.mock('@nzila/os-core', () => ({
-  createRequestContext: vi.fn(() => ({ requestId: 'req_1' })),
-  runWithContext: vi.fn(async (_ctx, fn: () => Promise<unknown>) => fn()),
+  createRequestContext: h.createRequestContextMock,
+  runWithContext: h.runWithContextMock,
 }))
 
-import { authenticateUser, requireOrgAccess, requirePlatformRole } from '../api-guards'
+import { authenticateUser, requireOrgAccess, requirePlatformRole, withRequestContext } from '../api-guards'
 
 function membershipSelectChain(rows: Array<unknown>) {
   return {
@@ -90,6 +94,18 @@ describe('api-guards authz boundaries', () => {
     expect(result.ok).toBe(false)
     if (!result.ok) {
       expect(result.response.status).toBe(401)
+    }
+  })
+
+  it('returns forbidden when authenticated user lacks operator platform role', async () => {
+    h.authMock.mockResolvedValueOnce({ userId: 'user_1' })
+    h.getUserRoleMock.mockResolvedValueOnce('custom_non_operator')
+    h.isOperatorRoleMock.mockReturnValueOnce(false)
+
+    const result = await authenticateUser()
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.response.status).toBe(403)
     }
   })
 
@@ -190,5 +206,14 @@ describe('api-guards authz boundaries', () => {
 
     const allowed = await requirePlatformRole('platform_admin')
     expect(allowed.ok).toBe(true)
+  })
+
+  it('wraps handler execution in request context', async () => {
+    const request = new Request('https://example.test/api/x')
+    const result = await withRequestContext(request, async () => 'ok')
+
+    expect(result).toBe('ok')
+    expect(h.createRequestContextMock).toHaveBeenCalledWith(request)
+    expect(h.runWithContextMock).toHaveBeenCalledTimes(1)
   })
 })

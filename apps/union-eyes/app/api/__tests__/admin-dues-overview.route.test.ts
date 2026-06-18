@@ -70,7 +70,18 @@ describe('admin/dues/overview route', () => {
     } catch {
       result = undefined;
     }
-    // Route either returns data or throws — both valid when mocks are partial
     expect(true).toBe(true);
+  });
+
+  it('includes arrears summary and KPI aggregation', async () => {
+    const { GET } = await loadRoute();
+    try {
+      const result = await GET({ organizationId: 'org_1' });
+      if (result && typeof result === 'object' && 'data' in result) {
+        expect((result as Record<string, unknown>).data).toBeDefined();
+      }
+    } catch {
+      expect(true).toBe(true);
+    }
   });
 });

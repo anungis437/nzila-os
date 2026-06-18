@@ -18,11 +18,24 @@ import {
   addReportJob,
   addCleanupJob,
   getAllQueueStats,
+  getFailedJobs,
   retryJob,
+  pauseQueue,
+  resumeQueue,
+  cleanCompletedJobs,
   scheduleEmailDigest,
   scheduleCleanupJobs,
   closeQueues,
   getEmailQueue,
+  getSmsQueue,
+  getNotificationQueue,
+  getReportQueue,
+  getCleanupQueue,
+  getEmailQueueEvents,
+  getSmsQueueEvents,
+  getNotificationQueueEvents,
+  getReportQueueEvents,
+  getCleanupQueueEvents,
 } from '../job-queue';
 
 function mockOkResponse(data: any) {
@@ -131,6 +144,30 @@ describe('job-queue', () => {
         to: 'x@y.com', subject: 's', template: 't', data: {},
       })).rejects.toThrow('Task API error 500');
     });
+
+    it('falls back to statusText when POST error text() rejects', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 503,
+        statusText: 'Service Unavailable',
+        text: vi.fn().mockRejectedValue(new Error('no body')),
+      });
+
+      await expect(addEmailJob({
+        to: 'x@y.com', subject: 's', template: 't', data: {},
+      })).rejects.toThrow('Task API error 503: Service Unavailable');
+    });
+
+    it('falls back to statusText when GET error text() rejects', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 502,
+        statusText: 'Bad Gateway',
+        text: vi.fn().mockRejectedValue(new Error('no body')),
+      });
+
+      await expect(getAllQueueStats()).rejects.toThrow('Task API error 502: Bad Gateway');
+    });
   });
 
   describe('getAllQueueStats', () => {
@@ -154,6 +191,33 @@ describe('job-queue', () => {
     });
   });
 
+  describe('getFailedJobs', () => {
+    it('fetches failed jobs with limit param', async () => {
+      const failed = [{ task_id: 't', task_name: 'send-email', status: 'FAILURE', result: '', date_done: null, traceback: '' }];
+      mockFetch.mockResolvedValue(mockOkResponse({ failed }));
+
+      const result = await getFailedJobs('email', 5, { authToken: 'tok' });
+      expect(result).toEqual(failed);
+      const calledUrl = mockFetch.mock.calls[0][0] as string;
+      expect(calledUrl).toContain('/api/tasks/queues/email/failed/');
+      expect(calledUrl).toContain('limit=5');
+    });
+  });
+
+  describe('pauseQueue / resumeQueue', () => {
+    it('pauses a queue', async () => {
+      mockFetch.mockResolvedValue(mockOkResponse({}));
+      await expect(pauseQueue('email')).resolves.toBeUndefined();
+      expect(mockFetch.mock.calls[0][0]).toContain('/api/tasks/queues/email/pause/');
+    });
+
+    it('resumes a queue', async () => {
+      mockFetch.mockResolvedValue(mockOkResponse({}));
+      await expect(resumeQueue('email')).resolves.toBeUndefined();
+      expect(mockFetch.mock.calls[0][0]).toContain('/api/tasks/queues/email/resume/');
+    });
+  });
+
   describe('no-op functions', () => {
     it('scheduleEmailDigest is a no-op', async () => {
       await expect(scheduleEmailDigest('daily')).resolves.toBeUndefined();
@@ -163,12 +227,25 @@ describe('job-queue', () => {
       await expect(scheduleCleanupJobs()).resolves.toBeUndefined();
     });
 
+    it('cleanCompletedJobs is a no-op', async () => {
+      await expect(cleanCompletedJobs('email')).resolves.toBeUndefined();
+    });
+
     it('closeQueues is a no-op', async () => {
       await expect(closeQueues()).resolves.toBeUndefined();
     });
 
     it('legacy queue accessors return null', () => {
       expect(getEmailQueue()).toBeNull();
+      expect(getSmsQueue()).toBeNull();
+      expect(getNotificationQueue()).toBeNull();
+      expect(getReportQueue()).toBeNull();
+      expect(getCleanupQueue()).toBeNull();
+      expect(getEmailQueueEvents()).toBeNull();
+      expect(getSmsQueueEvents()).toBeNull();
+      expect(getNotificationQueueEvents()).toBeNull();
+      expect(getReportQueueEvents()).toBeNull();
+      expect(getCleanupQueueEvents()).toBeNull();
     });
   });
 });

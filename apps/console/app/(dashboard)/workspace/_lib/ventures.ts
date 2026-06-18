@@ -32,11 +32,6 @@ export interface CatalogProduct {
   market_pull_score?: number
 }
 
-interface ProductCatalog {
-  products?: CatalogProduct[]
-  schema_version?: string
-}
-
 export type Directive = 'SELL NOW' | 'BUILD NEXT' | 'MAINTAIN' | 'HOLD' | 'CUT'
 export type Maturity = 'Live' | 'Pilot' | 'Building' | 'Incubating' | 'Frozen'
 

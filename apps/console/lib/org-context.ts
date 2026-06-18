@@ -18,10 +18,21 @@ import { orgMembers } from '@nzila/db/schema'
  */
 export async function resolveActiveOrgId(userId: string): Promise<string | null> {
   if (!userId) return null
-  const [membership] = await platformDb
-    .select({ orgId: orgMembers.orgId })
-    .from(orgMembers)
-    .where(eq(orgMembers.userId, userId))
-    .limit(1)
-  return membership?.orgId ?? null
+  try {
+    const [membership] = await platformDb
+      .select({ orgId: orgMembers.orgId })
+      .from(orgMembers)
+      .where(eq(orgMembers.userId, userId))
+      .limit(1)
+    return membership?.orgId ?? null
+  } catch (error) {
+    // Keep org resolution fail-open so callers can fallback to executive/default context.
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[org-context] unable to resolve active org membership', {
+        userId,
+        error,
+      })
+    }
+    return null
+  }
 }

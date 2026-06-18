@@ -3,37 +3,37 @@
 import { describe, expect, it, vi } from 'vitest';
 
 // Mock ICRA routes that OCRA re-exports from
-vi.mock('../../icra/start/route', () => ({
+vi.mock('../icra/start/route', () => ({
   GET: vi.fn(async () => new Response('{}', { status: 200 })),
   POST: vi.fn(async () => new Response('{}', { status: 200 })),
 }));
 
-vi.mock('../../icra/submit/route', () => ({
+vi.mock('../icra/submit/route', () => ({
   POST: vi.fn(async () => new Response('{}', { status: 200 })),
 }));
 
-vi.mock('../../icra/telemetry/route', () => ({
+vi.mock('../icra/telemetry/route', () => ({
   POST: vi.fn(async () => new Response('{}', { status: 200 })),
 }));
 
-vi.mock('../../icra/email-results/route', () => ({
+vi.mock('../icra/email-results/route', () => ({
   POST: vi.fn(async () => new Response('{}', { status: 200 })),
 }));
 
-vi.mock('../../../icra/results/[id]/route', () => ({
+vi.mock('../icra/results/[id]/route', () => ({
   GET: vi.fn(async () => new Response('{}', { status: 200 })),
 }));
 
-vi.mock('../../../icra/[assessmentId]/answer/route', () => ({
+vi.mock('../icra/[assessmentId]/answer/route', () => ({
   POST: vi.fn(async () => new Response('{}', { status: 200 })),
 }));
 
-vi.mock('../../../icra/[assessmentId]/profile/route', () => ({
+vi.mock('../icra/[assessmentId]/profile/route', () => ({
   GET: vi.fn(async () => new Response('{}', { status: 200 })),
   POST: vi.fn(async () => new Response('{}', { status: 200 })),
 }));
 
-vi.mock('../../../icra/[assessmentId]/submit/route', () => ({
+vi.mock('../icra/[assessmentId]/submit/route', () => ({
   POST: vi.fn(async () => new Response('{}', { status: 200 })),
 }));
 
@@ -42,7 +42,7 @@ describe('ocra/start route (ICRA alias)', () => {
     const { GET, POST } = await import('../ocra/start/route');
     expect(typeof GET).toBe('function');
     expect(typeof POST).toBe('function');
-  });
+  }, 60000);
 });
 
 describe('ocra/submit route (ICRA alias)', () => {

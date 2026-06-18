@@ -62,7 +62,7 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-import { CampaignService } from '../campaign-service';
+import { CampaignService, getCampaignService } from '../campaign-service';
 import type { EmailService } from '../email-service';
 import type { SMSService } from '../sms-service';
 
@@ -73,6 +73,9 @@ describe('CampaignService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockSelect.mockReset();
+    mocks.mockInsert.mockReset();
+    mocks.mockUpdate.mockReset();
 
     mockEmailService = { send: vi.fn().mockResolvedValue('msg-123') } as any as EmailService;
     mockSmsService = { send: vi.fn().mockResolvedValue('sms-456') } as any as SMSService;
@@ -175,6 +178,71 @@ describe('CampaignService', () => {
       expect(result.totalAudience).toBe(1);
       expect(result.estimatedCompletionMinutes).toBeDefined();
     });
+
+    it('queues recipients and marks campaign as sent in non-dry mode', async () => {
+      const campaign = {
+        id: 'c1',
+        status: 'draft',
+        organizationId: 'org-1',
+        channel: 'email',
+        subject: 'Hello',
+        body: 'Body',
+        stats: {},
+      };
+      mocks.mockSelect.mockReturnValue(chain([campaign]));
+      vi.spyOn(service, 'resolveAudience').mockResolvedValue({
+        recipients: [{ userId: 'u1', email: 'a@b.com', name: 'Alice' }],
+        totalCount: 1,
+        eligibleCount: 1,
+        skippedCount: 0,
+        skippedReasons: {},
+      });
+      mocks.mockUpdate.mockReturnValue(chain([]));
+      mocks.mockInsert.mockReturnValue(chain([{ id: 'm1' }]));
+
+      const result = await service.sendCampaign({ campaignId: 'c1', userId: 'u1', dryRun: false });
+      expect(result.success).toBe(true);
+      expect(result.queued).toBe(1);
+      expect(mocks.mockInsert).toHaveBeenCalled();
+    });
+  });
+
+  // ── resolveAudience ───────────────────────────────────────────────────
+  describe('resolveAudience', () => {
+    it('resolves recipients, dedupes, and tracks skipped reasons', async () => {
+      const campaign = {
+        id: 'c1',
+        organizationId: 'org-1',
+        channel: 'email',
+        segmentId: null,
+        segmentQuery: {
+          status: ['active'],
+          role: ['member'],
+          searchQuery: 'ali',
+        },
+      } as any;
+
+      const rawAudience = [
+        { userId: 'u1', email: 'u1@test.com', phone: '111', name: 'U1', firstName: 'U', lastName: 'One' },
+        { userId: 'u1', email: 'u1@test.com', phone: '111', name: 'U1', firstName: 'U', lastName: 'One' },
+        { userId: 'u2', email: null, phone: '222', name: 'U2', firstName: 'U', lastName: 'Two' },
+      ];
+
+      const preferences = [
+        { userId: 'u1', emailEnabled: true, smsEnabled: true, pushEnabled: true },
+        { userId: 'u2', emailEnabled: true, smsEnabled: true, pushEnabled: true },
+      ];
+
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([campaign]))
+        .mockReturnValueOnce(chain(rawAudience))
+        .mockReturnValueOnce(chain(preferences));
+
+      const result = await service.resolveAudience('c1', 'org-1');
+      expect(result.recipients).toHaveLength(1);
+      expect(result.eligibleCount).toBe(1);
+      expect(result.skippedReasons.no_consent).toBe(1);
+    });
   });
 
   // ── cancelCampaign ────────────────────────────────────────────────────
@@ -250,6 +318,30 @@ describe('CampaignService', () => {
 
       await service.processMessageQueue();
       expect(mocks.mockUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── private helpers + singleton ───────────────────────────────────────
+  describe('internal helpers', () => {
+    it('hasConsent handles channel matrix safely', () => {
+      const s = service as any;
+      expect(s.hasConsent(undefined, 'email')).toBe(false);
+      expect(s.hasConsent({ globallyUnsubscribed: true, emailEnabled: true }, 'email')).toBe(false);
+      expect(s.hasConsent({ globallyUnsubscribed: false, emailEnabled: true }, 'email')).toBe(true);
+      expect(s.hasConsent({ globallyUnsubscribed: false, smsEnabled: true }, 'sms')).toBe(true);
+      expect(s.hasConsent({ globallyUnsubscribed: false, pushEnabled: true }, 'push')).toBe(true);
+      expect(s.hasConsent({ globallyUnsubscribed: false }, 'fax')).toBe(false);
+    });
+
+    it('getCampaignService returns singleton instance', () => {
+      const emailA = { send: vi.fn() } as any;
+      const smsA = { send: vi.fn() } as any;
+      const emailB = { send: vi.fn() } as any;
+      const smsB = { send: vi.fn() } as any;
+
+      const first = getCampaignService(emailA, smsA);
+      const second = getCampaignService(emailB, smsB);
+      expect(second).toBe(first);
     });
   });
 });

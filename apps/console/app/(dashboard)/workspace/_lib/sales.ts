@@ -153,12 +153,6 @@ function toEditable(row: typeof dealsTable.$inferSelect): EditableDeal {
   }
 }
 
-function isSeededHubspotOpportunity(row: typeof dealsTable.$inferSelect): boolean {
-  if (row.accountName !== hubspotOpportunitySeed[0]?.accountName) return false
-  const metadata = row.metadata && typeof row.metadata === 'object' ? (row.metadata as Record<string, unknown>) : null
-  return Boolean(metadata?.hubspotOpportunity)
-}
-
 async function materializeHubspotOpportunitySeed(): Promise<void> {
   const existing = await platformDb
     .select({ id: dealsTable.id })
@@ -205,7 +199,14 @@ export interface SalesView {
 export async function loadSalesView(): Promise<SalesView> {
   try {
     const now = Date.now()
-    const rows = await platformDb.select().from(dealsTable)
+    let rows = await platformDb.select().from(dealsTable)
+
+    // Keep CUPE 4373 as a first-class persisted row so it is editable everywhere.
+    const hasCupe = rows.some((r) => r.accountName === hubspotOpportunitySeed[0]?.accountName)
+    if (!hasCupe) {
+      await materializeHubspotOpportunitySeed()
+      rows = await platformDb.select().from(dealsTable)
+    }
 
     if (rows.length === 0) {
       await materializeHubspotOpportunitySeed()

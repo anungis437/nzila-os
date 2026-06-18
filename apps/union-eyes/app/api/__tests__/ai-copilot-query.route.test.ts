@@ -52,7 +52,8 @@ describe('ai/copilot/query route', () => {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ actionType: 'timeline_summary' }),
     }));
-    expect([200, 429, 500]).toContain(response.status);
+    expect(response.status).toBe(429);
+    expect(m.guardAiFeature).not.toHaveBeenCalled();
   });
 
   it('returns validation error for bad body', async () => {
@@ -61,15 +62,31 @@ describe('ai/copilot/query route', () => {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ actionType: 'invalid_action' }),
     }));
-    expect([200, 400, 500]).toContain(response.status);
+    expect(response.status).toBe(400);
+    expect(m.executeCopilotAction).not.toHaveBeenCalled();
   });
 
   it('executes copilot action', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/ai/copilot/query', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ actionType: 'timeline_summary' }),
+      body: JSON.stringify({ actionType: 'timeline_summary', query: 'Summarize the latest timeline' }),
     }));
-    expect([200, 400, 403, 429, 500]).toContain(response.status);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ summary: 'AI response', confidence: 0.9 });
+    expect(m.executeCopilotAction).toHaveBeenCalledWith(expect.objectContaining({ actionType: 'timeline_summary', query: 'Summarize the latest timeline' }));
+    expect(m.auditAIInvocation).toHaveBeenCalled();
+  });
+
+  it('returns history on GET', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new Request('http://localhost/api/ai/copilot/query'));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ sessions: [] });
+    expect(m.getCopilotHistory).toHaveBeenCalledWith('u1', 'org_1');
   });
 });

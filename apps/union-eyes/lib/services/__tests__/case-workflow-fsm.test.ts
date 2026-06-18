@@ -3,6 +3,12 @@ import {
   validateTransition,
   getAllowedTransitions,
   isTerminalState,
+  getInitialState,
+  getRequiredRoles,
+  validateWorkflowPath,
+  isActiveState,
+  requiresUrgentAttention,
+  getStateDescription,
   type TransitionContext,
 } from '../case-workflow-fsm';
 
@@ -137,6 +143,76 @@ describe('case-workflow-fsm', () => {
 
     it('returns false for draft', () => {
       expect(isTerminalState('draft')).toBe(false);
+    });
+  });
+
+  describe('utility helpers', () => {
+    it('getInitialState returns draft', () => {
+      expect(getInitialState()).toBe('draft');
+    });
+
+    it('getRequiredRoles returns roles for submitted state', () => {
+      const roles = getRequiredRoles('submitted');
+      expect(Array.isArray(roles)).toBe(true);
+    });
+
+    it('getRequiredRoles returns undefined for draft', () => {
+      // draft transitions are member-initiated, no role restriction
+      const roles = getRequiredRoles('draft');
+      expect(roles === undefined || Array.isArray(roles)).toBe(true);
+    });
+
+    it('validateWorkflowPath rejects path shorter than 2', () => {
+      const r = validateWorkflowPath(['draft'], []);
+      expect(r.valid).toBe(false);
+    });
+
+    it('validateWorkflowPath rejects mismatched context count', () => {
+      const r = validateWorkflowPath(['draft', 'submitted', 'acknowledged'], [{ actorRole: 'member' }]);
+      expect(r.valid).toBe(false);
+    });
+
+    it('validateWorkflowPath validates a correct two-step path', () => {
+      const r = validateWorkflowPath(
+        ['draft', 'submitted'],
+        [{ actorRole: 'member' }]
+      );
+      expect(r.valid).toBe(true);
+    });
+
+    it('validateWorkflowPath propagates first invalid transition error', () => {
+      const r = validateWorkflowPath(
+        ['draft', 'resolved'],
+        [{ actorRole: 'officer' }]
+      );
+      expect(r.valid).toBe(false);
+      expect(r.message).toContain('draft');
+    });
+
+    it('isActiveState returns true for open states', () => {
+      expect(isActiveState('investigating')).toBe(true);
+      expect(isActiveState('draft')).toBe(true);
+    });
+
+    it('isActiveState returns false for terminal states', () => {
+      expect(isActiveState('resolved')).toBe(false);
+      expect(isActiveState('closed')).toBe(false);
+      expect(isActiveState('withdrawn')).toBe(false);
+    });
+
+    it('requiresUrgentAttention identifies urgent states', () => {
+      expect(requiresUrgentAttention('submitted')).toBe(true);
+      expect(requiresUrgentAttention('escalated')).toBe(true);
+      expect(requiresUrgentAttention('pending_response')).toBe(true);
+      expect(requiresUrgentAttention('draft')).toBe(false);
+      expect(requiresUrgentAttention('closed')).toBe(false);
+    });
+
+    it('getStateDescription returns non-empty string for every state', () => {
+      const states = ['draft','submitted','acknowledged','investigating','pending_response','negotiating','escalated','resolved','withdrawn','closed'] as const;
+      for (const s of states) {
+        expect(getStateDescription(s)).toBeTruthy();
+      }
     });
   });
 });

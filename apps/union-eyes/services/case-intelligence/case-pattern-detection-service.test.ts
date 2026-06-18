@@ -91,4 +91,44 @@ describe('case-intelligence case-pattern-detection-service', () => {
     expect(result[0]?.matchReasons).toContain('Same agreement');
     expect(result[0]?.matchedDimensions.grievanceType).toBe(true);
   });
+
+  it('sorts multiple authorized matches by descending score', async () => {
+    queueSelectSteps([
+      {
+        rows: [{
+          id: 'case-root', grievanceNumber: 'G-100', title: 'Termination', description: 'Termination dispute',
+          type: 'termination', status: 'new', grievantId: 'member-1', employerId: 'employer-1', workplaceId: 'worksite-1',
+          cbaId: 'agreement-1', createdBy: 'user-9', awardSummary: null, organizationId: 'org-1', createdAt: new Date('2026-01-01T00:00:00Z')
+        }],
+      },
+      {
+        rows: [
+          {
+            id: 'case-weak', grievanceNumber: 'G-201', title: 'Weak match', description: 'Different topic entirely',
+            type: 'discipline', status: 'new', grievantId: 'member-9', employerId: 'employer-1', workplaceId: 'worksite-9',
+            cbaId: 'agreement-9', createdBy: 'user-2', awardSummary: null, organizationId: 'org-1', createdAt: new Date('2026-02-01T00:00:00Z')
+          },
+          {
+            id: 'case-strong', grievanceNumber: 'G-202', title: 'Termination follow-up', description: 'Termination dispute with same employer',
+            type: 'termination', status: 'new', grievantId: 'member-1', employerId: 'employer-1', workplaceId: 'worksite-1',
+            cbaId: 'agreement-1', createdBy: 'user-3', awardSummary: null, organizationId: 'org-1', createdAt: new Date('2026-02-01T00:00:00Z')
+          },
+        ],
+      },
+    ]);
+    getEffectiveCaseAccess
+      .mockResolvedValueOnce({ canViewCase: true })
+      .mockResolvedValueOnce({ canViewCase: true });
+
+    const { findSimilarCases } = await import('./case-pattern-detection-service');
+    const result = await findSimilarCases({
+      context: { caseId: 'case-root', orgId: 'org-1', actorId: 'user-1' },
+      actor: { userId: 'user-1', isStewardPlus: false },
+      limit: 10,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result[0]?.caseId).toBe('case-strong');
+    expect(result[0]!.score).toBeGreaterThanOrEqual(result[1]!.score);
+  });
 });

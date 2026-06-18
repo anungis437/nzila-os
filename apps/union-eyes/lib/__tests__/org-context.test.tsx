@@ -15,7 +15,7 @@ vi.mock('@nzila/platform-auth/entra/client', () => ({
   useOrganization: mocks.mockUseOrganization,
 }));
 
-import { OrgProvider, useOrg, useOrgId, useOrgFeatures } from '../org-context';
+import { OrgProvider, useOrg, useOrgId, useOrgFeatures, useOrgTier } from '../org-context';
 
 function makeWrapper() {
   return function Wrapper({ children }: { children: React.ReactNode }) {
@@ -154,6 +154,50 @@ describe('org-context', () => {
         method: 'POST',
       }));
       expect(mocks.mockReload).toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshOrgs', () => {
+    it('re-fetches org info via fetchOrgInfo', async () => {
+      const { result } = renderHook(() => useOrg(), { wrapper: makeWrapper() });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      const callsBefore = mocks.mockFetch.mock.calls.length;
+
+      await act(async () => {
+        await result.current.refreshOrgs();
+      });
+
+      expect(mocks.mockFetch.mock.calls.length).toBeGreaterThan(callsBefore);
+      expect(mocks.mockFetch).toHaveBeenLastCalledWith('/api/org/current', expect.any(Object));
+    });
+  });
+
+  describe('useOrgTier', () => {
+    it('returns the current organization subscription tier', async () => {
+      mocks.mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          org: {
+            organizationId: 'org-1',
+            name: 'Test Org',
+            slug: 'test-org',
+            subscriptionTier: 'enterprise',
+          },
+          availableOrgs: [],
+        }),
+      });
+
+      const { result } = renderHook(() => useOrgTier(), { wrapper: makeWrapper() });
+
+      await waitFor(() => expect(result.current).toBe('enterprise'));
+    });
+
+    it('returns null when no subscription tier is set', async () => {
+      const { result } = renderHook(() => useOrgTier(), { wrapper: makeWrapper() });
+
+      // The default org has no subscriptionTier.
+      await waitFor(() => expect(result.current).toBeNull());
     });
   });
 });

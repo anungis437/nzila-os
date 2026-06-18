@@ -95,4 +95,19 @@ describe('GET /ready — critical-aware readiness', () => {
     expect(body.checks.database.error).toMatch(/connection refused/)
     await app.close()
   })
+
+  it('uses generic DB failure text when thrown value is not an Error', async () => {
+    process.env.GITHUB_TOKEN = 'fake-token'
+    dbExecuteMock.mockRejectedValueOnce('boom')
+    const app = await buildApp()
+
+    const res = await app.inject({ method: 'GET', url: '/ready' })
+
+    expect(res.statusCode).toBe(503)
+    const body = res.json()
+    expect(body.ready).toBe(false)
+    expect(body.readiness).toBe('not_ready')
+    expect(body.checks.database.error).toBe('database check failed')
+    await app.close()
+  })
 })

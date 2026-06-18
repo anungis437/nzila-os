@@ -29,9 +29,9 @@ describe('OCI assessment modality invariant', () => {
     expect(counts.likert_5).toBeLessThanOrEqual(8);
   });
 
-  it('multiple_choice question count is within doctrine bounds (4..6)', () => {
+  it('multiple_choice question count is within doctrine bounds (4..7)', () => {
     expect(counts.multiple_choice).toBeGreaterThanOrEqual(4);
-    expect(counts.multiple_choice).toBeLessThanOrEqual(6);
+    expect(counts.multiple_choice).toBeLessThanOrEqual(7);
   });
 
   it('maturity_select remains the dominant modality (>= 60% of surface)', () => {

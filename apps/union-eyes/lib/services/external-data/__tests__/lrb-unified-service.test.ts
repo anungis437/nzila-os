@@ -237,4 +237,70 @@ describe('UnifiedLRBService', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('getSyncHistory', () => {
+    it('returns sync history without filter', async () => {
+      const history = [{ syncId: 's1' }];
+      mocks.mockSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue(history),
+            }),
+          }),
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue(history),
+          }),
+        }),
+      });
+
+      const result = await service.getSyncHistory();
+      expect(result).toEqual(history);
+    });
+
+    it('returns sync history with source filter', async () => {
+      mocks.mockSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([{ syncId: 's2' }]),
+            }),
+          }),
+        }),
+      });
+
+      const result = await service.getSyncHistory('ontario_lrb');
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('getStatistics', () => {
+    it('returns aggregated stats by source/status/jurisdiction', async () => {
+      const bySource = [{ source: 'ontario_lrb', count: 5 }];
+      const byStatus = [{ status: 'active', count: 3 }];
+      const byJurisdiction = [{ jurisdiction: 'ON', count: 5 }];
+
+      mocks.mockSelect
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            groupBy: vi.fn().mockResolvedValue(bySource),
+          }),
+        })
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            groupBy: vi.fn().mockResolvedValue(byStatus),
+          }),
+        })
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            groupBy: vi.fn().mockResolvedValue(byJurisdiction),
+          }),
+        });
+
+      const result = await service.getStatistics();
+      expect(result.bySource).toEqual(bySource);
+      expect(result.byStatus).toEqual(byStatus);
+      expect(result.totalAgreements).toBe(5);
+    });
+  });
 });

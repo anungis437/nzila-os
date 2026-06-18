@@ -3,8 +3,15 @@ import { eq } from 'drizzle-orm'
 import { platformDb } from '@nzila/db/platform'
 import { orgMembers } from '@nzila/db/schema'
 import { getExecutiveOrgId } from '@/lib/executive-os'
+import { resolveConsoleEntityId } from '@/lib/entity-context'
 import { resolveUserIdWithDevPreview } from '@/lib/dev-preview-auth'
 import { requireOperatorRole } from '@/lib/rbac'
+
+export type WorkspaceOrgResolutionSource =
+  | 'executive-org'
+  | 'console-entity'
+  | 'membership'
+  | 'none'
 
 /**
  * Auth gate for the Console workspace surface.
@@ -28,10 +35,22 @@ export async function requireWorkspaceUser(): Promise<string> {
 
 /**
  * Resolve the org used for workspace-level integration connections.
- * Prefers the signed-in user's first membership, then falls back to the
- * executive org to preserve local/dev behaviour.
+ * Console is executive-operated and should default to the canonical Nzila org.
+ * Falls back to user/entity-derived context only when the executive org cannot
+ * be resolved.
  */
 export async function resolveWorkspaceOrgIdForUser(userId: string): Promise<string | null> {
+  const executiveOrgId = await getExecutiveOrgId()
+  if (executiveOrgId) return executiveOrgId
+
+  // Primary path: app-level membership or configured default entity.
+  try {
+    const consoleEntityId = await resolveConsoleEntityId(userId)
+    if (consoleEntityId) return consoleEntityId
+  } catch {
+    // Ignore resolver failures and continue to fallback paths.
+  }
+
   try {
     const membership = await platformDb.query.orgMembers.findFirst({
       where: eq(orgMembers.userId, userId),
@@ -42,6 +61,34 @@ export async function resolveWorkspaceOrgIdForUser(userId: string): Promise<stri
   }
 
   return getExecutiveOrgId()
+}
+
+/**
+ * Debuggable variant exposing which path provided org context.
+ */
+export async function resolveWorkspaceOrgContextForUser(
+  userId: string,
+): Promise<{ orgId: string | null; source: WorkspaceOrgResolutionSource }> {
+  const executiveOrgId = await getExecutiveOrgId()
+  if (executiveOrgId) return { orgId: executiveOrgId, source: 'executive-org' }
+
+  try {
+    const consoleEntityId = await resolveConsoleEntityId(userId)
+    if (consoleEntityId) return { orgId: consoleEntityId, source: 'console-entity' }
+  } catch {
+    // Ignore resolver failures and continue to fallback paths.
+  }
+
+  try {
+    const membership = await platformDb.query.orgMembers.findFirst({
+      where: eq(orgMembers.userId, userId),
+    })
+    if (membership?.orgId) return { orgId: membership.orgId, source: 'membership' }
+  } catch {
+    // Ignore membership lookup errors.
+  }
+
+  return { orgId: null, source: 'none' }
 }
 
 /**

@@ -4,8 +4,10 @@
  * CHANGE CLASS: Operational
  * CANONICAL DOCTRINE SOURCE: docs/doctrine/DOCTRINE.md
  *
- * ICRA Question Bank — 32 MaturitySelectQuestions across 7 scored sections.
- * Each question uses a five-point organizational maturity scale.
+ * ICRA Question Bank — 45 maturity-select questions across 7 scored
+ * sections, plus 8 continuity-confidence (likert_5) and 7 structural
+ * (multiple_choice) signals.
+ * Each maturity question uses a five-point organizational maturity scale.
  * No opaque logic. Every question maps explicitly to named dimensions.
  * Anti-surveillance by design: no question asks about named individuals,
  * personal behaviour, or productivity metrics.
@@ -13,6 +15,15 @@
  * Every question is replayable: the active QUESTION_BANK_VERSION is
  * snapshotted with each Answer so older assessments stay interpretable
  * if the bank evolves.
+ *
+ * v4 (additive, frozen-core-safe): reframed et_02 from a trust-debt
+ * sentiment estimate to an observable concern-resolution practice; added
+ * obligation-oriented governance-duty questions (gv_05 delegation
+ * authorities, gv_06 obligations-in-procedure, et_06 records retention)
+ * and a decision-replay multiple_choice topology probe (et_07) that also
+ * supplies the direct GES level-5 probe sought in the entropy audit
+ * (ENTROPY_SIGNAL_GAP_REPORT.md Finding E-1). No formula, weight-band,
+ * scale, or comparability change.
  */
 import type {
   LikertQuestion,
@@ -23,7 +34,7 @@ import type {
   SectionId,
 } from './types';
 
-export const QUESTION_BANK_VERSION = 3;
+export const QUESTION_BANK_VERSION = 4;
 
 /** Section display metadata for the assessment UI */
 export interface SectionDefinition {
@@ -305,7 +316,7 @@ const OPERATIONAL_DEPENDENCY: MaturitySelectQuestion[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Section: governance_visibility (4 questions)
+// Section: governance_visibility (7 questions)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GOVERNANCE_VISIBILITY: MaturitySelectQuestion[] = [
@@ -349,6 +360,23 @@ const GOVERNANCE_VISIBILITY: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 0.8, governance_fragility: 1.0 },
     riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Governance interpretation survivability is the quiet test of whether governance continuity is real or nominal.',
+  },
+  // ── New v4 governance-duty questions: obligation-oriented continuity ──
+  {
+    id: 'gv_05', section: 'governance_visibility', order: 6, type: 'maturity_select',
+    prompt: "How consistently are delegated authorities — who may decide, sign, or approve on the organization's behalf — documented and kept current as leadership and role-holders change?",
+    helpText: 'Consider whether a new leader, auditor, or oversight body could establish who holds which authority from records alone, without asking the incumbents.',
+    weights: { institutional_continuity: 1, governance_fragility: 0.8 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Maintained delegation-of-authority records are a core governance-continuity duty; their absence is a leading source of decision paralysis during transitions.',
+  },
+  {
+    id: 'gv_06', section: 'governance_visibility', order: 7, type: 'maturity_select',
+    prompt: 'How clearly are the statutory, regulatory, and policy obligations that govern your organization reflected in the operational procedures staff actually follow?',
+    helpText: 'Consider whether the duties your organization is bound by are traceable into day-to-day practice, rather than living only in legislation, bylaws, or policy documents that operations rarely consult.',
+    weights: { institutional_continuity: 1, governance_fragility: 0.8 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'The distance between governing obligations and operating procedure is where compliance failures and governance fragility originate.',
   },
 ];
 
@@ -530,7 +558,7 @@ const OPERATIONAL_COORDINATION: MaturitySelectQuestion[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Section: explainability_trust (5 questions)
+// Section: explainability_trust (7 questions)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EXPLAINABILITY_TRUST: MaturitySelectQuestion[] = [
@@ -544,11 +572,11 @@ const EXPLAINABILITY_TRUST: MaturitySelectQuestion[] = [
   },
   {
     id: 'et_02', section: 'explainability_trust', order: 2, type: 'maturity_select',
-    prompt: 'How much accumulated organizational trust debt does your organization carry — unresolved grievances, unexplained decisions, or governance conduct that has not been adequately accounted for?',
-    helpText: 'Trust debt is the gap between the governance conduct your organization projects and the organizational memory held by those who experienced it differently.',
+    prompt: 'How consistently does your organization identify, document, and address unresolved governance concerns — grievances, unexplained decisions, or unaccounted-for conduct — before they accumulate?',
+    helpText: 'This measures the observable governance practice of surfacing and resolving concerns through a repeatable process, rather than a subjective estimate of how much trust has been lost.',
     weights: { institutional_continuity: 1, trust_debt: 0.8, governance_fragility: 0.4 },
-    riskInverted: true, options: MATURITY_OPTIONS, allowNote: true,
-    rationale: 'Unacknowledged trust debt compounds and surfaces during transitions.',
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'A documented concern-resolution practice is an observable governance condition — stronger evidence than self-reported trust-debt sentiment — and it prevents accumulation that surfaces during transitions.',
   },
   {
     id: 'et_03', section: 'explainability_trust', order: 3, type: 'maturity_select',
@@ -573,6 +601,15 @@ const EXPLAINABILITY_TRUST: MaturitySelectQuestion[] = [
     weights: { institutional_continuity: 1, trust_debt: 0.8, governance_fragility: 0.4 },
     riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
     rationale: 'Audit readiness reveals the depth and quality of governance documentation discipline.',
+  },
+  // ── New v4 governance-duty + decision-replay questions ──
+  {
+    id: 'et_06', section: 'explainability_trust', order: 6, type: 'maturity_select',
+    prompt: 'How confidently could your organization demonstrate compliance with its records-retention obligations during an external audit?',
+    helpText: 'Consider whether retention schedules are defined, applied, and verifiable across the records that matter — governance decisions, financial records, member or case files — rather than reconstructed after the fact.',
+    weights: { institutional_continuity: 1, governance_fragility: 0.8 },
+    riskInverted: false, options: MATURITY_OPTIONS, allowNote: true,
+    rationale: 'Demonstrable records-retention discipline is a baseline public-sector continuity and auditability duty.',
   },
 ];
 
@@ -1031,11 +1068,57 @@ const STRUCTURAL_CONTINUITY: MultipleChoiceQuestion[] = [
       intelligenceContribution: ['governance_sophistication', 'structural_topology'],
       longitudinalValue: 'medium',
       stabilizationRelevance: 'governance_replay',
-      runtimeRelevance: 'not_applicable',
+      runtimeRelevance: 'replay_continuity',
       intelligenceNetworkRelevance: 'high',
       confidenceSensitivity: false,
       governanceSensitivity: true,
-      archetypeContribution: ['governance_fragmentation', 'modernization_fragility'],
+      archetypeContribution: ['governance_fragmentation', 'institutional_memory_dependency'],
+    },
+  },
+  // ── New v4 decision-replay probe: direct GES level-5 topology probe (Finding E-1) ──
+  {
+    id: 'et_07',
+    section: 'explainability_trust',
+    order: 20,
+    type: 'multiple_choice',
+    prompt:
+      'How reliably could an independent reviewer reconstruct how a significant governance decision was reached — the rationale, evidence, and authority — using organizational records alone?',
+    weights: { institutional_continuity: 0.3, governance_fragility: 0.4 },
+    rationale:
+      'Independent decision replay from records alone is the auditor-general standard for governance explainability and a direct probe for the highest governance-entropy band.',
+    options: [
+      {
+        value: 'records_self_sufficient',
+        label: 'Fully — the decision record (rationale, evidence, authority) stands on its own',
+        score: 1.0,
+      },
+      {
+        value: 'records_mostly',
+        label: 'Mostly — the outcome is recorded, but rationale or evidence needs some interpretation',
+        score: 0.6,
+      },
+      {
+        value: 'people_dependent',
+        label: 'Partially — reconstruction depends on consulting the people who were present',
+        score: 0.25,
+      },
+      {
+        value: 'not_reconstructible',
+        label: 'No one in the institution could fully reconstruct the reasoning from records today',
+        score: 0.0,
+      },
+    ],
+    allowNote: true,
+    intelligence: {
+      modalityRole: 'topology_pattern',
+      intelligenceContribution: ['governance_sophistication', 'reconstruction_confidence'],
+      longitudinalValue: 'high',
+      stabilizationRelevance: 'governance_replay',
+      runtimeRelevance: 'replay_continuity',
+      intelligenceNetworkRelevance: 'high',
+      confidenceSensitivity: false,
+      governanceSensitivity: true,
+      archetypeContribution: ['governance_fragmentation', 'institutional_memory_dependency'],
     },
   },
 ];

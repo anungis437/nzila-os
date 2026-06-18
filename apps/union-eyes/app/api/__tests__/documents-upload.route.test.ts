@@ -72,4 +72,54 @@ describe('documents/upload route', () => {
     const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
     expect([200, 201, 400, 403, 429, 500, 503]).toContain(response.status);
   });
+
+  it('returns 429 when rate-limited', async () => {
+    const { POST } = await loadRoute();
+    m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });
+    const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
+    const form = new FormData();
+    form.set('file', file);
+    form.set('organizationId', 'org_1');
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
+
+    expect(response.status).toBe(429);
+    expect(m.logApiAuditEvent).toHaveBeenCalled();
+  });
+
+  it('returns validation error when organizationId is missing', async () => {
+    const { POST } = await loadRoute();
+    const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
+    const form = new FormData();
+    form.set('file', file);
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
+
+    expect([400, 403, 500]).toContain(response.status);
+  });
+
+  it('rejects file exceeding size limit', async () => {
+    const { POST } = await loadRoute();
+    const largeBuffer = new Uint8Array(51 * 1024 * 1024);
+    const file = new File([largeBuffer], 'large.pdf', { type: 'application/pdf' });
+    const form = new FormData();
+    form.set('file', file);
+    form.set('organizationId', 'org_1');
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
+
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects disallowed MIME types', async () => {
+    const { POST } = await loadRoute();
+    const file = new File([new Uint8Array([1, 2, 3])], 'script.exe', { type: 'application/x-msdownload' });
+    const form = new FormData();
+    form.set('file', file);
+    form.set('organizationId', 'org_1');
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
+
+    expect(response.status).toBe(400);
+  });
 });

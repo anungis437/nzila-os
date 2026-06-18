@@ -8,6 +8,24 @@ export default defineProject({
     name: 'veridian-care',
     environment: 'node',
     include: ['lib/**/*.test.ts', 'app/**/*.test.ts'],
+    // @ts-expect-error Coverage options are supported at runtime but not in this ProjectConfig type.
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary'],
+      all: false,
+      include: [
+        'app/api/health/route.ts',
+        'app/api/ready/route.ts',
+        'app/api/version/route.ts',
+      ],
+      exclude: ['**/*.test.ts', '**/*.spec.ts'],
+      thresholds: {
+        lines: 99,
+        statements: 99,
+        functions: 99,
+        branches: 99,
+      },
+    },
   },
   resolve: {
     alias: {

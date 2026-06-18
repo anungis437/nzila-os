@@ -54,4 +54,34 @@ describe('commercial insights', () => {
 
     expect(clv).toBe(9000)
   })
+
+  it('covers empty and invalid-input branches across insight helpers', () => {
+    expect(calculateAverageQuoteSize([])).toBe(0)
+
+    const mrrInvalidWindow = calculateEstimatedMrr(
+      [{ total: 1200, status: ' PAID ', issuedAt: new Date().toISOString() }],
+      0,
+    )
+    expect(mrrInvalidWindow).toBe(0)
+
+    const mrrNormalizedPaid = calculateEstimatedMrr(
+      [{ total: 900, status: ' PAID ', issuedAt: new Date().toISOString() }],
+      3,
+    )
+    expect(mrrNormalizedPaid).toBe(300)
+
+    const stale = new Date(Date.now() - 120 * 86_400_000).toISOString()
+    const trend = calculateCloseRateTrend([
+      { total: 100, status: 'closed', createdAt: stale },
+    ])
+    expect(trend).toEqual({ recentCloseRate: 0, previousCloseRate: 0, deltaPoints: 0 })
+
+    expect(
+      estimateCustomerLifetimeValue({
+        averageOrderValue: 0,
+        ordersPerMonth: 2,
+        averageLifetimeMonths: 12,
+      }),
+    ).toBe(0)
+  })
 })

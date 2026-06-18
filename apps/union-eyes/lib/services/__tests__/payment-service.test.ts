@@ -306,3 +306,37 @@ describe('PaymentService.generateReceipt', () => {
     ).rejects.toThrow('Transaction not paid: txn-1');
   });
 });
+
+// ─── getTransactionBySessionId ───────────────────────────────────────────────
+
+describe('PaymentService.getTransactionBySessionId', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('returns matching transaction by stripeSessionId in metadata', async () => {
+    const txns = [
+      { id: 'txn-1', processorType: 'stripe', metadata: { stripeSessionId: 'cs_abc' } },
+      { id: 'txn-2', processorType: 'stripe', metadata: { stripeSessionId: 'cs_xyz' } },
+    ];
+    mockDbSelect.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(txns),
+      }),
+    });
+
+    const result = await PaymentService.getTransactionBySessionId('cs_abc');
+    expect(result).toMatchObject({ id: 'txn-1' });
+  });
+
+  it('returns null when no transaction matches session ID', async () => {
+    mockDbSelect.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([
+          { id: 'txn-1', processorType: 'stripe', metadata: { stripeSessionId: 'cs_other' } },
+        ]),
+      }),
+    });
+
+    const result = await PaymentService.getTransactionBySessionId('cs_missing');
+    expect(result).toBeNull();
+  });
+});

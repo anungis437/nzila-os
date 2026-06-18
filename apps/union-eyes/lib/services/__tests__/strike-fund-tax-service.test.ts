@@ -21,6 +21,22 @@ function chain(resolveValue: any): any {
   return new Proxy({}, handler);
 }
 
+// failChain: causes .catch(cb) callbacks to fire, mimicking a rejected DB chain
+function failChain(): any {
+  const err = new Error('DB error');
+  const handler: ProxyHandler<object> = {
+    get: (_target, prop) => {
+      if (prop === 'then') {
+        return (_onFulfilled: any, onRejected?: (e: Error) => void) =>
+          onRejected ? Promise.resolve(onRejected(err)) : Promise.reject(err);
+      }
+      if (prop === 'catch') return (cb: (e: Error) => any) => chain(cb(err));
+      return vi.fn(() => new Proxy({}, handler));
+    },
+  };
+  return new Proxy({}, handler);
+}
+
 vi.mock('@/db', () => ({
   db: {
     query: {
@@ -228,4 +244,40 @@ describe('StrikeFundTaxService', () => {
       expect(report.t4asGenerated).toBe(0);
     });
   });
-});
+  // ── .catch() error-path coverage ────────────────────────────────────────
+  describe('catch callbacks (error paths)', () => {
+    it('generateT4A .catch(→null) fires when findFirst rejects (line 98)', async () => {
+      mocks.usersFindFirst.mockRejectedValueOnce(new Error('DB fail'));
+      await expect(generateT4A('member-1', 2025)).rejects.toThrow('not found');
+    });
+
+    it('generateRL1 .catch(→null) fires when findFirst rejects (line 167)', async () => {
+      mocks.usersFindFirst.mockRejectedValueOnce(new Error('DB fail'));
+      await expect(generateRL1('member-1', 2025)).rejects.toThrow('not found');
+    });
+
+    it('processYearEndTaxSlips .catch(→[]) fires on failing payments query (line 256)', async () => {
+      mocks.mockSelect.mockReturnValueOnce(failChain());
+      const result = await processYearEndTaxSlips(2025);
+      expect(result.processed).toBe(0);
+    });
+
+    it('processYearEndTaxSlips inner-loop user .catch(→null) fires when findFirst rejects (line 278)', async () => {
+      // payments query succeeds
+      mocks.mockSelect.mockReturnValueOnce(
+        chain([{ userId: 'member-1', totalAmount: 1000, province: 'ON' }])
+      );
+      // inner loop user findFirst rejects → catch fires → member=null → log & continue
+      mocks.usersFindFirst.mockRejectedValueOnce(new Error('DB fail'));
+      const result = await processYearEndTaxSlips(2025);
+      expect(result.t4aGenerated).toBe(0);
+    });
+
+    it('getYearlyStrikePay .catch(→default) fires on failing select (line 341)', async () => {
+      // trigger via checkStrikePaymentTaxability which calls getYearlyStrikePay
+      mocks.mockSelect.mockReturnValueOnce(failChain());
+      const result = await checkStrikePaymentTaxability('member-1', 400);
+      // catch returned [{totalAmount:0}] → yearTotal=0 → below thresholds
+      expect(result.requiresT4A).toBe(false);
+    });
+  });});

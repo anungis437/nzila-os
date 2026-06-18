@@ -31,6 +31,7 @@ import {
   ArrowLeftIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
+import { loadDealsLive } from '../workspace/_lib/sales'
 
 export const dynamic = 'force-dynamic'
 
@@ -187,6 +188,11 @@ export default async function RevenuePage() {
   if (!userId) redirect('/sign-in')
 
   const data = await loadRevenueData()
+  const salesDeals = await loadDealsLive()
+  const topSalesDeals = salesDeals
+    .filter((d) => d.estimatedValue > 0)
+    .sort((a, b) => b.estimatedValue - a.estimatedValue)
+    .slice(0, 10)
   const totalPipelineValue = data.openQuotesValue + data.sentQuotesValue
   const freshnessStatus = !data.quotesAvailable || !data.pilotsAvailable
     ? 'manual'
@@ -371,6 +377,43 @@ export default async function RevenuePage() {
                     {q.total ? `$${Number(q.total).toFixed(0)} ${q.currency ?? ''}` : '—'}
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-400">{formatDate(q.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Sales Opportunities (shared with Workspace Sales pipeline) */}
+      {topSalesDeals.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <ArrowTrendingUpIcon className="h-5 w-5 text-blue-400" />
+              <h2 className="font-semibold text-gray-900">Sales Opportunities</h2>
+            </div>
+            <span className="text-xs text-gray-400">Shared with /workspace/sales</span>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase text-left">
+                <th className="px-4 py-3">Account</th>
+                <th className="px-4 py-3">Stage</th>
+                <th className="px-4 py-3">Owner</th>
+                <th className="px-4 py-3">Value</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {topSalesDeals.map((d) => (
+                <tr key={d.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-900">
+                    <Link href={`/workspace/sales/${d.id}`} className="text-blue-700 hover:text-blue-900 hover:underline">
+                      {d.accountName}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-gray-500">{d.stage.replaceAll('_', ' ')}</td>
+                  <td className="px-4 py-3 text-gray-500">{d.owner}</td>
+                  <td className="px-4 py-3 font-medium text-gray-900">${Math.round(d.estimatedValue).toLocaleString('en-CA')} {d.currency}</td>
                 </tr>
               ))}
             </tbody>

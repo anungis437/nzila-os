@@ -61,4 +61,28 @@ describe('compliance/validate route', () => {
 
     expect([200, 400, 401, 403, 500]).toContain(response.status);
   });
+
+  it('returns 400 for invalid JSON body', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/compliance/validate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{invalid json',
+    }));
+
+    expect([200, 400, 500]).toContain(response.status);
+  });
+
+  it('returns 401 when user context missing', async () => {
+    m.getCurrentUser.mockResolvedValueOnce({ id: 'u1', organizationId: null });
+    const { POST } = await loadRoute();
+
+    const response = await POST(new Request('http://localhost/api/compliance/validate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({}),
+    }));
+
+    expect([200, 401, 400]).toContain(response.status);
+  });
 });

@@ -21,4 +21,11 @@ describe('intelligence access', () => {
     })
     expect(() => requireIntelligenceTier(request, 'enterprise')).toThrow('requires enterprise intelligence access')
   })
+
+  it('rejects invalid tier values', () => {
+    const request = new Request('https://example.test/api/intelligence/data', {
+      headers: { 'x-intelligence-tier': 'invalid' },
+    })
+    expect(() => resolveIntelligenceTier(request)).toThrow('Invalid intelligence tier')
+  })
 })

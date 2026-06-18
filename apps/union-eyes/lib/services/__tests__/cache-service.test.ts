@@ -1,7 +1,7 @@
 /**
  * Cache Service — Unit Tests
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
@@ -82,12 +82,31 @@ describe('cache-service', () => {
     vi.resetModules();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   // ── init / singleton / close ──────────────────────────────────────────
   it('initRedis creates Redis instance', async () => {
     const { initRedis } = await import('../cache-service');
     const redis = initRedis('redis://localhost:6379');
     expect(redis).toBeDefined();
     expect(redisMocks.mockOn).toHaveBeenCalled();
+  });
+
+  it('initRedis registers event handlers that are callable', async () => {
+    const { initRedis } = await import('../cache-service');
+    initRedis('redis://localhost:6379');
+
+    const onCalls = redisMocks.mockOn.mock.calls;
+    const handlers = new Map(onCalls.map(([event, handler]) => [event as string, handler as (...args: unknown[]) => void]));
+
+    handlers.get('error')?.(new Error('boom'));
+    handlers.get('connect')?.();
+    handlers.get('ready')?.();
+    handlers.get('close')?.();
+
+    expect(onCalls.map(([event]) => event)).toEqual(expect.arrayContaining(['error', 'connect', 'ready', 'close']));
   });
 
   it('getRedis returns singleton (lazy init)', async () => {
@@ -114,6 +133,26 @@ describe('cache-service', () => {
     initRedis();
     const result = await cacheGet<{ name: string }>('test-key');
     expect(result).toEqual({ name: 'test' });
+  });
+
+  it('cacheGet logs stale-while-revalidate window and serves cached value', async () => {
+    redisMocks.mockGet.mockResolvedValue(JSON.stringify({ stale: true }));
+    redisMocks.mockTtl.mockResolvedValue(5);
+    const { initRedis, cacheGet } = await import('../cache-service');
+    initRedis();
+
+    const result = await cacheGet<{ stale: boolean }>('sw-key', { staleWhileRevalidate: 20 });
+    expect(result).toEqual({ stale: true });
+    expect(redisMocks.mockTtl).toHaveBeenCalled();
+  });
+
+  it('cacheGet returns raw string for non-JSON values', async () => {
+    redisMocks.mockGet.mockResolvedValue('plain-text');
+    const { initRedis, cacheGet } = await import('../cache-service');
+    initRedis();
+
+    const result = await cacheGet<string>('text-key');
+    expect(result).toBe('plain-text');
   });
 
   it('cacheGet returns null for missing key', async () => {
@@ -218,6 +257,49 @@ describe('cache-service', () => {
     expect(result).toEqual({ fresh: true });
     expect(fetchFn).toHaveBeenCalledTimes(1);
     expect(redisMocks.mockSetex).toHaveBeenCalled();
+  });
+
+  it('cacheGetOrSetStale triggers background refresh when ttl is near expiry', async () => {
+    redisMocks.mockGet.mockResolvedValue(JSON.stringify({ cached: true }));
+    redisMocks.mockTtl.mockResolvedValue(2);
+    const { initRedis, cacheGetOrSetStale } = await import('../cache-service');
+    initRedis();
+
+    const fetchFn = vi.fn().mockResolvedValue({ refreshed: true });
+    const result = await cacheGetOrSetStale('stale-key', fetchFn, { staleWhileRevalidate: 10, ttl: 30 });
+
+    expect(result).toEqual({ cached: true });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+
+    await Promise.resolve();
+    expect(redisMocks.mockSetex).toHaveBeenCalled();
+  });
+
+  it('cacheGetOrSetStale logs background refresh failures without throwing', async () => {
+    redisMocks.mockGet.mockResolvedValue(JSON.stringify({ cached: true }));
+    redisMocks.mockTtl.mockResolvedValue(1);
+    const { initRedis, cacheGetOrSetStale } = await import('../cache-service');
+    initRedis();
+
+    const fetchFn = vi.fn().mockRejectedValue(new Error('refresh failed'));
+    const result = await cacheGetOrSetStale('stale-err', fetchFn, { staleWhileRevalidate: 5 });
+
+    expect(result).toEqual({ cached: true });
+    await Promise.resolve();
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('cacheGetOrSetStale falls back to direct fetch when internal redis call fails', async () => {
+    redisMocks.mockGet.mockResolvedValue(JSON.stringify({ cached: true }));
+    redisMocks.mockTtl.mockRejectedValue(new Error('ttl failed'));
+    const { initRedis, cacheGetOrSetStale } = await import('../cache-service');
+    initRedis();
+
+    const fetchFn = vi.fn().mockResolvedValue({ fallback: true });
+    const result = await cacheGetOrSetStale('stale-fallback', fetchFn, { staleWhileRevalidate: 30 });
+
+    expect(result).toEqual({ fallback: true });
+    expect(fetchFn).toHaveBeenCalledTimes(1);
   });
 
   // ── Session caching ───────────────────────────────────────────────────
@@ -382,5 +464,75 @@ describe('cache-service', () => {
     expect(result.total).toBe(1);
     expect(result.succeeded).toBe(1);
     expect(result.failed).toBe(0);
+  });
+
+  it('executeCacheWarmup filters by priority and keeps registry introspection consistent', async () => {
+    const {
+      initRedis,
+      registerCacheWarmup,
+      executeCacheWarmup,
+      getCacheWarmupEntries,
+      clearCacheWarmupRegistry,
+    } = await import('../cache-service');
+
+    initRedis();
+    clearCacheWarmupRegistry();
+
+    registerCacheWarmup({ key: 'warm:high', fetchFn: vi.fn().mockResolvedValue({ ok: 1 }), priority: 1 });
+    registerCacheWarmup({ key: 'warm:low', fetchFn: vi.fn().mockResolvedValue({ ok: 2 }), priority: 9 });
+
+    const entries = getCacheWarmupEntries();
+    expect(entries).toHaveLength(2);
+
+    const filtered = await executeCacheWarmup({ priorityOnly: 3, parallel: 1 });
+    expect(filtered.total).toBe(1);
+    expect(filtered.succeeded).toBe(1);
+
+    clearCacheWarmupRegistry();
+    expect(getCacheWarmupEntries()).toHaveLength(0);
+  });
+
+  it('executeCacheWarmup sorts mixed-priority entries without filter', async () => {
+    const {
+      initRedis,
+      registerCacheWarmup,
+      executeCacheWarmup,
+      clearCacheWarmupRegistry,
+    } = await import('../cache-service');
+
+    initRedis();
+    clearCacheWarmupRegistry();
+
+    const highPriorityFetch = vi.fn().mockResolvedValue({ ok: 'high' });
+    const lowPriorityFetch = vi.fn().mockResolvedValue({ ok: 'low' });
+    registerCacheWarmup({ key: 'warm:low-sort', fetchFn: lowPriorityFetch, priority: 9 });
+    registerCacheWarmup({ key: 'warm:high-sort', fetchFn: highPriorityFetch, priority: 1 });
+
+    const result = await executeCacheWarmup({ parallel: 2 });
+    expect(result.total).toBe(2);
+    expect(result.succeeded).toBe(2);
+    expect(highPriorityFetch).toHaveBeenCalledTimes(1);
+    expect(lowPriorityFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('scheduleCacheWarmup runs periodically and cleanup stops interval', async () => {
+    const {
+      initRedis,
+      registerCacheWarmup,
+      clearCacheWarmupRegistry,
+      scheduleCacheWarmup,
+    } = await import('../cache-service');
+
+    vi.useFakeTimers();
+    initRedis();
+    clearCacheWarmupRegistry();
+
+    registerCacheWarmup({ key: 'warm:timer', fetchFn: vi.fn().mockResolvedValue({ ok: true }), priority: 1 });
+    const stop = scheduleCacheWarmup(20);
+
+    await vi.advanceTimersByTimeAsync(25);
+    stop();
+
+    expect(redisMocks.mockSetex).toHaveBeenCalled();
   });
 });

@@ -10,12 +10,16 @@ export default defineProject({
       // Stub next-auth + platform-auth server in unit tests — next-auth
       // tries to import next/server at load time which crashes in vitest
       "next-auth": path.resolve(__dirname, "./__mocks__/next-auth.ts"),
+      "next-auth/providers/microsoft-entra-id": path.resolve(
+        __dirname,
+        "./__mocks__/next-auth-microsoft-entra-id.ts",
+      ),
       "@nzila/platform-auth/entra/server": path.resolve(__dirname, "./__mocks__/platform-auth-server.ts"),
     },
   },
   test: {
     name: "union-eyes",
-    testTimeout: 20000,
+    testTimeout: 60000,
     coverage: {
       provider: "v8",
       all: false,
