@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-06-08T01:29:34.168Z",
-  "filesScanned": 1883,
-  "totalFindings": 2581,
+  "generatedAt": "2026-06-17T18:00:08.326Z",
+  "filesScanned": 2003,
+  "totalFindings": 2583,
   "findingsByRule": {
-    "stale-reference": 1041,
+    "stale-reference": 1043,
     "stale-package-ref": 63,
     "naming-inconsistency": 1362,
     "stale-date": 7,
@@ -12,7 +12,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1212,
+    "warning": 1214,
     "info": 1369
   },
   "findings": [
@@ -6098,6 +6098,20 @@
       "file": "docs/categories/stakeholders/tutorials/first-app.md",
       "line": 135,
       "message": "Possible broken link: [Reference: Package Catalogue](../reference/packages.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md",
+      "line": 8,
+      "message": "Possible broken link: [RICHARD_SHARPE_VALIDATION_PROTOCOL.md](./RICHARD_SHARPE_VALIDATION_PROTOCOL.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md",
+      "line": 278,
+      "message": "Possible broken link: [GOVERNMENT_VALIDATION_REPORT_V1.md](./GOVERNMENT_VALIDATION_REPORT_V1.md)"
     },
     {
       "rule": "stale-package-ref",
@@ -16309,7 +16323,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md",
-      "line": 107,
+      "line": 118,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -17283,49 +17297,49 @@
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"February 17, 2026\" is 110 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 120 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"February 17, 2026\" is 110 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 120 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"February 17, 2026\" is 110 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 120 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"February 17, 2026\" is 110 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 120 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 110 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 120 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 110 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 120 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"February 17, 2026\" is 110 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 120 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",

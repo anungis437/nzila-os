@@ -251,6 +251,9 @@ coverage-output*.txt
 **/coverage-report*.txt
 pytest-*.txt
 
+# Generated targeted coverage directories created during local branch-gap runs
+**/cov-*/
+
 # Python test / coverage artifacts
 packages/automation/packages/
 packages/automation/generators/checkpoints/

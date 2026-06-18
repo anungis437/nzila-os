@@ -190,3 +190,4 @@ Sprint gate:
 3. Issue pilot packet to board members.
 4. Start Week 0 activation checklist.
 5. Schedule Week 2 signal review and Week 6 midpoint correction.
+6. Include one-slide investment case in board review: `brandon-investment-case-slide.md`.

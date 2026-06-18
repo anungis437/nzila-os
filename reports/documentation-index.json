@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-08T01:29:35.644Z",
+  "generatedAt": "2026-06-10T03:02:06.524Z",
   "totalDocuments": 1226,
   "staleDocuments": 0,
   "categories": [
@@ -6126,7 +6126,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-06-08",
+      "lastValidated": "2026-06-10",
       "stale": false
     },
     {
@@ -7230,13 +7230,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-06-08",
+      "lastValidated": "2026-06-10",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-06-08",
+      "lastValidated": "2026-06-10",
       "stale": false
     },
     {
