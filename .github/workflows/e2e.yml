@@ -72,6 +72,11 @@ jobs:
           # Stub build-time env vars so Next.js doesn't fail
           AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
           NEXT_PUBLIC_APP_URL: http://localhost:${{ matrix.port }}
+          # Build target is served over plain HTTP on localhost — signal the
+          # app config to omit upgrade-insecure-requests / HSTS, which would
+          # force HTTPS chunk fetches the HTTP test server cannot answer
+          # (ERR_SSL_PROTOCOL_ERROR → broken hydration).
+          QA_TEST_ENV: 'true'
 
       - name: Bootstrap Union Eyes E2E database
         if: matrix.app == 'union-eyes'

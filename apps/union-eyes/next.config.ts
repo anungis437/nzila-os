@@ -9,6 +9,21 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 // Gate security headers that break local HTTP dev server
 const isDev = process.env.NODE_ENV === 'development';
 
+// The E2E/QA harness builds and serves the *production* bundle over plain HTTP
+// on localhost. `upgrade-insecure-requests` (CSP) and HSTS force the browser to
+// re-request every `_next/static` JS chunk over HTTPS, which the HTTP test
+// server cannot answer — yielding `ERR_SSL_PROTOCOL_ERROR`, failed chunk loads,
+// and incomplete client hydration (e.g. Radix tabs focus but never activate).
+// Detect that HTTP build and drop the HTTPS-upgrade headers. Defaults to SECURE:
+// the headers are only skipped when an explicit test flag is present at BUILD
+// time or the canonical app URL is http://localhost, so real production builds
+// (https origin, no QA flags) always enforce HTTPS.
+const isHttpTestBuild =
+  process.env.QA_TEST_ENV === 'true' ||
+  process.env.PLAYWRIGHT_TEST_AUTH === 'true' ||
+  (process.env.NEXT_PUBLIC_APP_URL ?? '').startsWith('http://localhost');
+const enforceHttpsUpgrade = !isDev && !isHttpTestBuild;
+
 // Bundle Analyzer - Enable with ANALYZE=true environment variable
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -99,9 +114,10 @@ const ContentSecurityPolicy = [
   // Form submissions: Restrict to same-origin
   "form-action 'self'",
   
-  // Upgrade all HTTP requests to HTTPS — PRODUCTION ONLY
-  // (causes browser to request localhost assets via HTTPS in dev, breaking icon/resource loading)
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  // Upgrade all HTTP requests to HTTPS — PRODUCTION HTTPS ONLY
+  // (over HTTP — dev or the E2E/QA test build — this forces the browser to
+  // re-fetch _next/static chunks via HTTPS, breaking asset loading & hydration)
+  ...(enforceHttpsUpgrade ? ["upgrade-insecure-requests"] : []),
 ].join('; ');
 
 // =============================================================================
@@ -131,9 +147,9 @@ const securityHeaders = [
   // Disable: camera, microphone, payment, USB, geolocation (except same-origin), interest-cohort (FLoC)
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=(), payment=(), usb=()' },
   
-  // HTTP Strict Transport Security (HSTS): Enforce HTTPS for 2 years — PRODUCTION ONLY
-  // NEVER set HSTS on localhost: browser caches it for 2 years, permanently breaking HTTP dev server
-  ...(isDev ? [] : [{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' }]),
+  // HTTP Strict Transport Security (HSTS): Enforce HTTPS for 2 years — PRODUCTION HTTPS ONLY
+  // NEVER set HSTS on localhost: browser caches it for 2 years, permanently breaking HTTP dev/E2E servers
+  ...(enforceHttpsUpgrade ? [{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' }] : []),
   
   // X-DNS-Prefetch-Control: Enable DNS prefetching for performance
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
