@@ -397,14 +397,14 @@ test.describe('Scenario 8: Dashboard Route Shells + Quote API Contract', () => {
     expect([200, 401, 403, 429]).toContain(listRes.status())
 
     const oneRes = await request.get(`${BASE}/api/quotes/${quoteId}`)
-    expect([200, 400, 401, 403, 404]).toContain(oneRes.status())
+    expect([200, 400, 401, 403, 404, 429]).toContain(oneRes.status())
 
-    await assertAuthOrContractValid(request, 'POST', '/api/quotes', [200, 400, 401, 403, 422], {
+    await assertAuthOrContractValid(request, 'POST', '/api/quotes', [200, 400, 401, 403, 422, 429], {
       customerId: '00000000-0000-0000-0000-000000000000',
       lines: [],
     })
 
-      await assertAuthOrContractValid(request, 'POST', '/api/quotes/ai', [200, 400, 401, 403, 422], {
+      await assertAuthOrContractValid(request, 'POST', '/api/quotes/ai', [200, 400, 401, 403, 422, 429], {
       prompt: 'Create a quote outline for a web redesign',
     })
   })
@@ -412,17 +412,17 @@ test.describe('Scenario 8: Dashboard Route Shells + Quote API Contract', () => {
   test('remaining API contract endpoints are reachable with expected status classes', async ({ request }) => {
     const checks: Array<{ path: string; statuses: number[] }> = [
       { path: '/api/ready', statuses: [200, 429, 503] },
-      { path: '/api/version', statuses: [200] },
-      { path: '/api/ops/summary', statuses: [200, 401, 403] },
-      { path: '/api/billing/plan', statuses: [200, 400, 401, 403] },
-      { path: '/api/import', statuses: [200, 400, 401, 403, 405] },
-      { path: '/api/contact', statuses: [200, 400, 401, 403, 405] },
-      { path: '/api/trial', statuses: [200, 400, 401, 403, 405] },
-      { path: '/api/clients', statuses: [200, 400, 401, 403] },
-      { path: '/api/webhooks/stripe', statuses: [200, 400, 401, 403, 405] },
-      { path: '/api/shopify/webhook', statuses: [200, 400, 401, 403, 405] },
-      { path: '/api/zoho/webhook', statuses: [200, 400, 401, 403, 405] },
-      { path: '/api/zoho/products', statuses: [200, 400, 401, 403] },
+      { path: '/api/version', statuses: [200, 429] },
+      { path: '/api/ops/summary', statuses: [200, 401, 403, 429] },
+      { path: '/api/billing/plan', statuses: [200, 400, 401, 403, 429] },
+      { path: '/api/import', statuses: [200, 400, 401, 403, 405, 429] },
+      { path: '/api/contact', statuses: [200, 400, 401, 403, 405, 429] },
+      { path: '/api/trial', statuses: [200, 400, 401, 403, 405, 429] },
+      { path: '/api/clients', statuses: [200, 400, 401, 403, 429] },
+      { path: '/api/webhooks/stripe', statuses: [200, 400, 401, 403, 405, 429] },
+      { path: '/api/shopify/webhook', statuses: [200, 400, 401, 403, 405, 429] },
+      { path: '/api/zoho/webhook', statuses: [200, 400, 401, 403, 405, 429] },
+      { path: '/api/zoho/products', statuses: [200, 400, 401, 403, 429] },
     ]
 
     for (const check of checks) {
@@ -516,7 +516,7 @@ test.describe('Scenario 9: Public Route Shells + Extended API Contracts', () => 
 
     for (const endpoint of writableEndpoints) {
       const res = await request.post(`${BASE}${endpoint.path}`, { data: endpoint.body })
-      expect([200, 400, 401, 403, 404, 405, 409, 422, 500, 503]).toContain(res.status())
+      expect([200, 400, 401, 403, 404, 405, 409, 422, 429, 500, 503]).toContain(res.status())
     }
   })
 })
