@@ -85,4 +85,19 @@ describe('GET /api/health', () => {
     expect(body.buildInfo).toBeDefined()
     expect(body.app).toBe('console')
   })
+
+  it('reports failures when dependency checks settle as rejected', async () => {
+    vi.spyOn(Promise, 'allSettled').mockResolvedValueOnce([
+      { status: 'rejected', reason: new Error('db settle failed') } as PromiseRejectedResult,
+      { status: 'rejected', reason: new Error('blob settle failed') } as PromiseRejectedResult,
+    ])
+
+    const { GET } = await import('./route')
+    const response = await GET()
+    const body = await response.json()
+
+    expect(response.status).toBe(503)
+    expect(body.checks.db).toBe('fail')
+    expect(body.checks.blob).toBe('fail')
+  })
 })
