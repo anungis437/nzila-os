@@ -152,10 +152,9 @@ export function getRoleLandingPath(role?: string | null): string {
 
   const experience = getDashboardExperience(role);
   if (experience === 'member') return '/dashboard/inbox';
-  // staff lands on the Workbench tile, which is the first nav item below
-  // (`/dashboard/work` — the staff/steward work surface). Keeping these in
-  // sync ensures the sidebar's first item resolves as the active route on
-  // first arrival.
+  // Each role lands on its primary surface (not the shared "Workspace" hub,
+  // which is the first sidebar entry). The sidebar highlights the nav item
+  // whose href matches this landing path via `isActive`.
   if (experience === 'staff') return '/dashboard/work';
   if (experience === 'executive') return '/dashboard/intelligence';
   if (experience === 'governance') return '/dashboard/governance';

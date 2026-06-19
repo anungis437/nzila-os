@@ -5,6 +5,7 @@ import {
   REQUIRED_VISIBLE_LABELS,
   STAKEHOLDER_ORDER,
   getExpectedLanding,
+  getExpectedActiveLabel,
   getFixture,
   getExpectedSidebar,
   toLocalizedPath,
@@ -32,15 +33,16 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
       expect(localizedLanding).toContain(getExpectedLanding(role));
 
       const expectedSidebar = getExpectedSidebar(role);
+      const expectedActiveLabel = getExpectedActiveLabel(role);
       await assertVisibleNavLabels(page, expectedSidebar);
       await assertVisibleNavLabels(page, REQUIRED_VISIBLE_LABELS[role]);
       await assertForbiddenNavLabels(page, FORBIDDEN_LABELS[role]);
-      await assertSidebarActiveLabel(page, expectedSidebar[0]);
-      await assertHeadingOrFallback(page, expectedSidebar[0]);
+      await assertSidebarActiveLabel(page, expectedActiveLabel);
+      await assertHeadingOrFallback(page, expectedActiveLabel);
 
       await page.goto(localizedLanding, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL(new RegExp(`${escapeRegExp(localizedLanding)}(?:$|[/?#])`));
-      await assertHeadingOrFallback(page, expectedSidebar[0]);
+      await assertHeadingOrFallback(page, expectedActiveLabel);
 
       // Ensure role-irrelevant groups do not leak through role switches.
       await assertForbiddenNavLabels(page, FORBIDDEN_LABELS[role]);

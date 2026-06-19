@@ -224,6 +224,28 @@ export function getExpectedSidebar(role: StakeholderRole): string[] {
   return getNavigationForExperience(experience).map((item) => item.label);
 }
 
+/**
+ * Returns the sidebar label that should render as the active route once the
+ * role lands on its centralized landing path.
+ *
+ * The first nav item is now the role-agnostic "Workspace" hub, which is NOT
+ * the landing route. The active highlight belongs to the nav item whose href
+ * matches the landing path. This mirrors the sidebar component's `isActive`
+ * logic (query strings stripped, '/dashboard' never prefix-matched).
+ */
+export function getExpectedActiveLabel(role: StakeholderRole): string {
+  const fixture = STAKEHOLDER_FIXTURES[role];
+  const experience = getDashboardExperience(fixture.userRole);
+  const landing = getRoleLandingPath(fixture.userRole).split('?')[0];
+  const nav = getNavigationForExperience(experience);
+  const match = nav.find((item) => {
+    const hrefPath = item.href.split('?')[0];
+    if (hrefPath === landing) return true;
+    return hrefPath !== '/dashboard' && landing.startsWith(`${hrefPath}/`);
+  });
+  return (match ?? nav[0]).label;
+}
+
 export function toLocalizedPath(path: string, locale: string): string {
   return `/${locale}${path}`;
 }
