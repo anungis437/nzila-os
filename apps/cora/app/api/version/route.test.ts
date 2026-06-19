@@ -32,18 +32,30 @@ describe('GET /api/version', () => {
   })
 
   it('uses fallbacks for missing env vars', async () => {
+    const originalVersion = process.env.npm_package_version
+
     // Clear env vars to test fallbacks
     delete process.env.VERCEL_GIT_COMMIT_SHA
     delete process.env.GITHUB_SHA
     delete process.env.BUILD_TIME
     delete process.env.ARTIFACT_ID
+    delete process.env.npm_package_version
 
-    const { GET } = await import('./route')
-    const response = await GET()
-    const body = await response.json()
+    try {
+      const { GET } = await import('./route')
+      const response = await GET()
+      const body = await response.json()
 
-    expect(body.gitSha).toBe('local')
-    expect(body.buildTime).toBe('unknown')
-    expect(body.artifactId).toBe('unknown')
+      expect(body.gitSha).toBe('local')
+      expect(body.buildTime).toBe('unknown')
+      expect(body.artifactId).toBe('unknown')
+      expect(body.appVersion).toBe('0.0.0')
+    } finally {
+      if (originalVersion === undefined) {
+        delete process.env.npm_package_version
+      } else {
+        process.env.npm_package_version = originalVersion
+      }
+    }
   })
 })
