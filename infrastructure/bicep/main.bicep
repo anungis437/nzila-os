@@ -77,6 +77,9 @@ var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 @description('Container image tag deployed to every Container App. Override per release.')
 param imageTag string = 'latest'
 
+@description('Expiration applied to Key Vault connection secrets, as Unix epoch seconds. Defaults to two years from deployment time.')
+param secretExpiryEpoch int = dateTimeToEpoch(dateTimeAdd(utcNow(), 'P2Y'))
+
 // ── Network (VNet + delegated subnets + private DNS) ────────────────────
 module network 'modules/network.bicep' = {
   name: 'network-${env}'
@@ -239,29 +242,35 @@ var pgReadFqdn = !empty(pgReplicas) ? pgReplicas[0] : pgFqdn
 var databaseUrl = 'postgresql://${pgAdminLogin}:${uriComponent(dbAdminPassword)}@${pgFqdn}:${pgPort}/${appDatabaseName}?sslmode=require'
 var databaseReadUrl = 'postgresql://${pgAdminLogin}:${uriComponent(dbAdminPassword)}@${pgReadFqdn}:${pgPort}/${appDatabaseName}?sslmode=require'
 
-resource pgPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = if (dbAdminPassword != '') {
-  name: '${kv_name}/pg-admin-password'
-  properties: {
-    value: dbAdminPassword
-    contentType: 'text/plain'
+module pgPasswordSecret 'modules/keyvault-secret.bicep' = if (dbAdminPassword != '') {
+  name: 'kv-secret-pg-password-${env}'
+  params: {
+    keyVaultName: kv_name
+    secretName: 'pg-admin-password'
+    secretValue: dbAdminPassword
+    expiryEpoch: secretExpiryEpoch
   }
   dependsOn: [keyvault, database]
 }
 
-resource dbUrlSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = if (dbAdminPassword != '') {
-  name: '${kv_name}/database-url'
-  properties: {
-    value: databaseUrl
-    contentType: 'text/plain'
+module dbUrlSecret 'modules/keyvault-secret.bicep' = if (dbAdminPassword != '') {
+  name: 'kv-secret-database-url-${env}'
+  params: {
+    keyVaultName: kv_name
+    secretName: 'database-url'
+    secretValue: databaseUrl
+    expiryEpoch: secretExpiryEpoch
   }
   dependsOn: [keyvault, database]
 }
 
-resource dbReadUrlSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = if (dbAdminPassword != '' && dbReadReplicas > 0) {
-  name: '${kv_name}/database-read-url'
-  properties: {
-    value: databaseReadUrl
-    contentType: 'text/plain'
+module dbReadUrlSecret 'modules/keyvault-secret.bicep' = if (dbAdminPassword != '' && dbReadReplicas > 0) {
+  name: 'kv-secret-database-read-url-${env}'
+  params: {
+    keyVaultName: kv_name
+    secretName: 'database-read-url'
+    secretValue: databaseReadUrl
+    expiryEpoch: secretExpiryEpoch
   }
   dependsOn: [keyvault, database]
 }
