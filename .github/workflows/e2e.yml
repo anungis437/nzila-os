@@ -78,6 +78,35 @@ jobs:
           # (ERR_SSL_PROTOCOL_ERROR → broken hydration).
           QA_TEST_ENV: 'true'
 
+      - name: Stage standalone static assets
+        # Next.js `output: 'standalone'` produces a minimal server bundle but
+        # intentionally does NOT copy `.next/static` or `public` into the
+        # standalone folder (the Dockerfile normally does this). The E2E harness
+        # runs `node .next/standalone/.../server.js` directly, so without this
+        # step every `/_next/static/*` chunk misses on disk, falls through to
+        # route rendering → i18n 307 → 404. The browser then loads no JS, the
+        # page never hydrates, and client-only widgets (e.g. Radix tabs) never
+        # become interactive. Copy the assets the standalone server expects.
+        run: |
+          set -euo pipefail
+          APP_DIR="apps/${{ matrix.app }}"
+          STANDALONE_APP="$APP_DIR/.next/standalone/apps/${{ matrix.app }}"
+          if [ ! -f "$STANDALONE_APP/server.js" ]; then
+            echo "::error::Standalone server not found at $STANDALONE_APP/server.js"
+            exit 1
+          fi
+          mkdir -p "$STANDALONE_APP/.next"
+          cp -r "$APP_DIR/.next/static" "$STANDALONE_APP/.next/static"
+          if [ -d "$APP_DIR/public" ]; then
+            cp -r "$APP_DIR/public" "$STANDALONE_APP/public"
+          fi
+          # Fail fast if chunks are still missing — guards against silent regressions.
+          if [ -z "$(ls -A "$STANDALONE_APP/.next/static/chunks" 2>/dev/null)" ]; then
+            echo "::error::No static chunks staged into standalone output"
+            exit 1
+          fi
+          echo "Staged $(find "$STANDALONE_APP/.next/static" -type f | wc -l) static files into standalone output"
+
       - name: Bootstrap Union Eyes E2E database
         if: matrix.app == 'union-eyes'
         run: |
