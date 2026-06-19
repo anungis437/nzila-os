@@ -185,15 +185,6 @@
         "history": "Historique des paiements",
         "manualPayment": "Paiement manuel"
       },
-        },
-        "thresholds": {
-          "title": "Seuils",
-          "description": "Ajustez les seuils de fraîcheur utilisés par la vue d'ensemble",
-          "agingDays": "Jours de vieillissement",
-          "staleDays": "Jours de péremption",
-          "expiredDays": "Jours d'expiration",
-          "apply": "Appliquer les seuils",
-          "reset": "Réinitialiser les valeurs par défaut"
       "manualPaymentNote": "Remarque :",
       "manualPaymentNoteBody": "La plupart des membres ont leurs cotisations automatiquement déduites de la paie. Le paiement manuel n'est nécessaire que pour des cas particuliers tels que les paiements de rattrapage, le règlement des arriérés, les prélèvements spéciaux ou les membres non salariés.",
       "loading": "Chargement...",

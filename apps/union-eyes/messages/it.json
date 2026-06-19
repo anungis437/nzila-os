@@ -185,15 +185,6 @@
         "history": "Storico dei pagamenti",
         "manualPayment": "Pagamento manuale"
       },
-        },
-        "thresholds": {
-          "title": "Soglie",
-          "description": "Regola le soglie di freschezza usate nella panoramica",
-          "agingDays": "Giorni di invecchiamento",
-          "staleDays": "Giorni di obsolescenza",
-          "expiredDays": "Giorni di scadenza",
-          "apply": "Applica soglie",
-          "reset": "Ripristina predefiniti"
       "manualPaymentNote": "Nota:",
       "manualPaymentNoteBody": "La maggior parte dei membri ha le quote detratte automaticamente dalla busta paga. Il pagamento manuale è necessario solo in casi particolari come pagamenti di recupero, regolamento di arretrati, prelievi speciali o membri non pagati tramite busta paga.",
       "loading": "Caricamento in corso...",

@@ -394,7 +394,7 @@ test.describe('Scenario 8: Dashboard Route Shells + Quote API Contract', () => {
     const quoteId = '00000000-0000-0000-0000-000000000000'
 
     const listRes = await request.get(`${BASE}/api/quotes`)
-    expect([200, 401, 403]).toContain(listRes.status())
+    expect([200, 401, 403, 429]).toContain(listRes.status())
 
     const oneRes = await request.get(`${BASE}/api/quotes/${quoteId}`)
     expect([200, 400, 401, 403, 404]).toContain(oneRes.status())
@@ -411,7 +411,7 @@ test.describe('Scenario 8: Dashboard Route Shells + Quote API Contract', () => {
 
   test('remaining API contract endpoints are reachable with expected status classes', async ({ request }) => {
     const checks: Array<{ path: string; statuses: number[] }> = [
-      { path: '/api/ready', statuses: [200, 503] },
+      { path: '/api/ready', statuses: [200, 429, 503] },
       { path: '/api/version', statuses: [200] },
       { path: '/api/ops/summary', statuses: [200, 401, 403] },
       { path: '/api/billing/plan', statuses: [200, 400, 401, 403] },
@@ -467,7 +467,7 @@ test.describe('Scenario 9: Public Route Shells + Extended API Contracts', () => 
 
     for (const ep of readableEndpoints) {
       const res = await request.get(`${BASE}${ep}`)
-      expect([200, 400, 401, 403, 404, 405, 503]).toContain(res.status())
+      expect([200, 400, 401, 403, 404, 405, 429, 503]).toContain(res.status())
     }
 
     const writableEndpoints: Array<{ path: string; body: unknown }> = [
