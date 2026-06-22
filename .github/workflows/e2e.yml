@@ -156,14 +156,27 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: failure()
+        # Also upload when the job is cancelled (e.g. the 45-min timeout fires
+        # while slow/failing specs retry). Playwright writes per-test artifacts
+        # incrementally, so a cancelled run still yields diagnostics — without
+        # this we get a blind timeout and no way to see which tests failed.
+        if: failure() || cancelled()
         with:
           name: playwright-report-${{ matrix.app }}
           path: apps/${{ matrix.app }}/playwright-report/
           retention-days: 14
 
+      - name: Upload Playwright test-results (traces)
+        uses: actions/upload-artifact@v4
+        if: failure() || cancelled()
+        with:
+          name: playwright-results-${{ matrix.app }}
+          path: apps/${{ matrix.app }}/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
       - name: Dump app server log on failure
-        if: failure()
+        if: failure() || cancelled()
         run: |
           echo '===== app server log (full) ====='
           cat /tmp/app-server.log || true
@@ -173,7 +186,7 @@ jobs:
 
       - name: Upload app server log
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() || cancelled()
         with:
           name: app-server-log-${{ matrix.app }}
           path: /tmp/app-server.log

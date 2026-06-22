@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-05-29 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-06-22 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,41 +9,41 @@
 | Apps | 26 |
 | Packages (packages/*) | 216 |
 | Workspace Packages (apps|packages|services|tooling) | 248 |
-| GitHub Workflows | 48 |
-| Contract Test Files | 253 |
-| TS/JS Test Files | 1586 |
+| GitHub Workflows | 50 |
+| Contract Test Files | 266 |
+| TS/JS Test Files | 2390 |
 | Python Test Files | 32 |
 
 ## Apps
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
-| agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 104 | Agricultural field operations — harvest tracking, production management, logisti |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 251 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 106 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 391 | Internal operations console — platform governance, compliance, analytics, integr |
-| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 322 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
-| cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 39 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
-| flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 346 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
+| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 448 | Internal operations console — platform governance, compliance, analytics, integr |
+| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 325 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
+| cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 43 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
+| flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 436 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | maestria | Next.js | 3021 | ✅ | ✅ | ❌ | ✅ | 73 |  |
-| mobility | Next.js | 3012 | ✅ | ✅ | ✅ | ✅ | 38 | Investment migration advisory platform — case management, program intelligence,  |
+| mobility | Next.js | 3012 | ✅ | ✅ | ✅ | ✅ | 41 | Investment migration advisory platform — case management, program intelligence,  |
 | mobility-client-portal | Next.js | 3013 | ✅ | ✅ | ❌ | ✅ | 32 | Client-facing portal for investment migration applicants to track cases, upload  |
-| nacp-exams | Next.js | 3011 | ✅ | ✅ | ✅ | ✅ | 61 | National Anti-Corruption Programme examination and assessment platform. |
+| nacp-exams | Next.js | 3011 | ✅ | ✅ | ✅ | ✅ | 64 | National Anti-Corruption Programme examination and assessment platform. |
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 105 |  |
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 35 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
-| partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 107 | Partner portal for managing deals, commissions, certifications, and go-to-market |
-| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 62 | Internal admin console for managing platform services — events, knowledge, ontol |
+| partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 110 | Partner portal for managing deals, commissions, certifications, and go-to-market |
+| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 64 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
-| trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
-| trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 96 |  |
+| trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade management — deals, listings, shipments, and commission track |
+| trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4217 | Full-stack union case management platform — grievance lifecycle, collective barg |
-| veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 20 |  |
-| veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 23 |  |
-| veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 24 |  |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 88 | Public marketing site for the Nzila platform — landing pages, resource library,  |
-| weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 97 |  |
-| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 454 | Africa-first music distribution, streaming, and royalty management platform. |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4913 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
+| veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
+| veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 27 |  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 91 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 100 |  |
+| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 458 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
 
@@ -51,6 +51,7 @@
 - agri-core-check.yml
 - ai-governance.yml
 - app-floor-check.yml
+- auto-promote-union-eyes.yml
 - branch-tag-governance.yml
 - canary-deploy.yml
 - capital-discipline.yml
@@ -89,6 +90,7 @@
 - release-train.yml
 - reliability-guard.yml
 - repo-inventory-check.yml
+- retire-legacy-union-eyes-ca.yml
 - runtime-governance-attestation.yml
 - sbom.yml
 - secret-scan.yml
