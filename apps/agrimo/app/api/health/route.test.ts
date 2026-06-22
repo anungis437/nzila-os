@@ -120,4 +120,17 @@ describe('GET /api/health', () => {
     expect(response.status).toBe(200)
     expect(body.buildInfo.version).toBe('0.0.0')
   })
+
+  it('falls back to local when no commit SHA env vars are set', async () => {
+    vi.resetModules()
+    delete process.env.VERCEL_GIT_COMMIT_SHA
+    delete process.env.GITHUB_SHA
+
+    const GET = await loadRoute()
+    const response = await GET()
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.buildInfo.commit).toBe('local')
+  })
 })

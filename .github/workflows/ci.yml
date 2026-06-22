@@ -246,6 +246,13 @@ jobs:
 
       - name: Enforce tier focus labels
         run: pnpm exec tsx scripts/validate-tier-focus.ts
+        env:
+          # Required so the script can read the PR's CURRENT labels via the
+          # GitHub API. Without it, the live lookup returns null and the gate
+          # falls back to the event payload labels, which are frozen at the last
+          # push and miss labels added afterwards — so re-running after applying
+          # 'approved-experiment'/'owner-approved' would never pass.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Start governance runtime timer
         run: echo "GOVERNANCE_JOB_START_TS=$(date +%s)" >> "$GITHUB_ENV"

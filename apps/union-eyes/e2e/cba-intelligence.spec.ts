@@ -9,11 +9,36 @@
  * page is behind platform authentication and commercial_reporting
  * entitlement.
  */
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page, type Locator } from "@playwright/test";
 import { ensureServerReady, seedOrVerifyTestState } from '../tests/e2e/_helpers';
 import { loginAsRole } from './helpers/auth';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
+
+/**
+ * Clicks a Radix tab trigger and waits until it is actually selected.
+ *
+ * Radix activates tabs through React event handlers. When a click lands before
+ * the Tabs subtree finishes hydrating, the trigger receives native focus but
+ * the selection never moves (the snapshot shows the clicked tab `[active]` while
+ * the original tab stays `[selected]`). Re-clicking until `aria-selected="true"`
+ * makes the interaction deterministic without relying on arbitrary timeouts.
+ */
+async function selectTab(tabList: Locator, name: string): Promise<void> {
+  const tab = tabList.getByRole("tab", { name });
+  await expect(tab).toBeVisible({ timeout: 10_000 });
+  await expect
+    .poll(
+      async () => {
+        if ((await tab.getAttribute("aria-selected")) !== "true") {
+          await tab.click();
+        }
+        return tab.getAttribute("aria-selected");
+      },
+      { timeout: 15_000, intervals: [150, 300, 500, 750] },
+    )
+    .toBe("true");
+}
 
 test.describe("Labor continuity intelligence page", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
@@ -76,11 +101,11 @@ test.describe("Labor continuity intelligence page", () => {
     const sourcesTab = primaryTabList.getByRole("tab", { name: "Sources" });
     await expect(sourcesTab).toHaveAttribute("aria-selected", "true", { timeout: 10_000 });
 
-    await primaryTabList.getByRole("tab", { name: "Ingestion" }).click();
+    await selectTab(primaryTabList, "Ingestion");
     await expect(page).toHaveURL(/\/dashboard\/cba-intelligence/);
     await expect(page.getByRole("tabpanel")).toBeVisible();
 
-    await primaryTabList.getByRole("tab", { name: "Agreements" }).click();
+    await selectTab(primaryTabList, "Agreements");
     await expect(page).toHaveURL(/\/dashboard\/cba-intelligence/);
     await expect(page.getByRole("tabpanel")).toBeVisible();
     const searchInput = page.getByPlaceholder("Search agreements...");
@@ -104,13 +129,13 @@ test.describe("Labor continuity intelligence page", () => {
     await sectorInput.fill("");
     await expect(exportLink).toHaveAttribute("href", /\/api\/cba-intelligence\/agreements\/export$/);
 
-    await primaryTabList.getByRole("tab", { name: "Benchmark" }).click();
+    await selectTab(primaryTabList, "Benchmark");
     await expect(page.getByPlaceholder("Paste agreement UUID...")).toBeVisible();
     await expect(page.getByRole("button", { name: "Run Benchmark" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Save Snapshot" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Show History" })).toBeVisible();
 
-    await primaryTabList.getByRole("tab", { name: "Freshness" }).click();
+    await selectTab(primaryTabList, "Freshness");
     await expect(page.getByRole("heading", { name: "Thresholds" })).toBeVisible();
     const agingDaysInput = page.getByLabel("Aging days");
     const staleDaysInput = page.getByLabel("Stale days");
@@ -138,8 +163,7 @@ test.describe("Labor continuity intelligence page", () => {
     await expect(page.getByText("Distribution", { exact: true })).toBeVisible();
 
     for (const tabName of ["Review", "Benchmark", "Freshness"]) {
-      const tab = primaryTabList.getByRole("tab", { name: tabName });
-      await tab.click();
+      await selectTab(primaryTabList, tabName);
       await expect(page).toHaveURL(/\/dashboard\/cba-intelligence/);
       await expect(page.getByRole("tabpanel")).toBeVisible();
     }

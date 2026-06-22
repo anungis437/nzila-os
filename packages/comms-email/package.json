@@ -21,7 +21,7 @@
     "resend": "^6.6.0",
     "@sendgrid/mail": "^8.1.0",
     "mailgun.js": "^12.7.0",
-    "form-data": "^4.0.0",
+    "form-data": "^4.0.6",
     "zod": "^3.24.0"
   },
   "devDependencies": {
