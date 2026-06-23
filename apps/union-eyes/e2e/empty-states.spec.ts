@@ -32,7 +32,7 @@ const SERVER_ERROR_PATTERN = /internal server error|http\s*5\d\d\b|application e
 
 /** Checks that the page body contains a non-trivial empty-state signal. */
 async function assertEmptyStateVisible(page: import('@playwright/test').Page): Promise<void> {
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('load');
   // Use innerText to read only visually rendered text — this excludes
   // <script> tag contents (e.g. the serialized RSC payload) where CSS
   // values and JSON numbers would otherwise trigger false positives.
@@ -103,7 +103,7 @@ test.describe('Empty states', () => {
 
     // Ensure the page body renders something meaningful.
     await expect(page.locator('body')).toBeVisible();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Dashboard itself must load — not a Next.js error page.
     const bodyText = await page.locator('body').innerText();
@@ -124,7 +124,7 @@ test.describe('Empty states', () => {
     // The CI database always contains seeded cases for the steward user, so
     // the reliable invariant is "page loads and renders without crashing",
     // not "empty state appears".
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // InboxConsole always renders an <h1> once mounted — confirms the component
     // rendered successfully (not stuck on spinner or replaced by an error UI).
@@ -154,7 +154,7 @@ test.describe('Empty states', () => {
       toLocalizedPath('/dashboard/grievances', fixture.locale),
       { waitUntil: 'domcontentloaded' },
     );
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const url = page.url();
     // If the route returns 404 entirely, record that as a known gap and skip.
@@ -188,7 +188,7 @@ test.describe('Empty states', () => {
       toLocalizedPath('/dashboard/members', fixture.locale),
       { waitUntil: 'domcontentloaded' },
     );
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const bodyText = (await page.textContent('body')) ?? '';
     if (bodyText.match(/\bpage not found\b|\b404\b/i)) {
@@ -204,7 +204,7 @@ test.describe('Empty states', () => {
     if ((await searchInput.count()) > 0) {
       await searchInput.fill('zzzz-no-results-zzzz');
       await page.keyboard.press('Enter');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
     }
 
     await assertEmptyStateVisible(page);
@@ -223,7 +223,7 @@ test.describe('Empty states', () => {
     });
 
     await page.goto('/en-CA/dashboard/admin', { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Admin panel must render without a server error.
     const bodyText = await page.locator('body').innerText();
@@ -246,7 +246,7 @@ test.describe('Empty states', () => {
       toLocalizedPath('/dashboard/cases', fixture.locale),
       { waitUntil: 'domcontentloaded' },
     );
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const bodyText = (await page.textContent('body')) ?? '';
     if (bodyText.match(/\bpage not found\b|\b404\b/i)) {

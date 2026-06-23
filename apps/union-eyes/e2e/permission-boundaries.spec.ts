@@ -31,7 +31,7 @@ test.describe('Permission boundaries — role gate enforcement', () => {
     test('is redirected away from /dashboard', async ({ page }) => {
       // No login — fresh context with no session cookie.
       await page.goto('/en-CA/dashboard', { waitUntil: 'domcontentloaded' });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       const url = page.url();
       // Must end up on a public route (sign-in, signup, root) — never the dashboard.
       expect(url).toMatch(/sign[-/]?in|login|signup|^https?:\/\/[^/]+\/?$/i);
@@ -39,7 +39,7 @@ test.describe('Permission boundaries — role gate enforcement', () => {
 
     test('is redirected away from /dashboard/admin', async ({ page }) => {
       await page.goto('/en-CA/dashboard/admin', { waitUntil: 'domcontentloaded' });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       const url = page.url();
       expect(url).toMatch(/sign[-/]?in|login|signup|^https?:\/\/[^/]+\/?$/i);
     });

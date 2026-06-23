@@ -182,7 +182,7 @@ test.describe("Pilot readiness checklist", () => {
   });
 
   test("checklist displays all 7 expected items", async ({ page }) => {
-    await page.goto("/en-CA/dashboard/admin/onboarding", { waitUntil: "networkidle" });
+    await page.goto("/en-CA/dashboard/admin/onboarding", { waitUntil: "domcontentloaded" });
     await expect(
       page.getByRole("heading", { name: /Administrator Onboarding/i })
     ).toBeVisible({ timeout: 15_000 });

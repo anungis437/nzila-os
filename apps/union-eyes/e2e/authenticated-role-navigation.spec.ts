@@ -60,7 +60,14 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
       await page.goto(localizedLanding, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL(new RegExp(`${escapeRegExp(localizedLanding)}(?:$|[/?#])`));
 
-      await expect(page.locator('nav, [role="navigation"]').first()).toBeVisible();
+      // On mobile the primary <nav> collapses behind a trigger, so the desktop
+      // sidebar nav is present in the DOM but hidden. Assert the *reachable*
+      // nav affordance — a visible nav, or the control that opens it.
+      const reachableNav = page
+        .locator('nav, [role="navigation"], button[aria-label="Open navigation"]')
+        .filter({ visible: true })
+        .first();
+      await expect(reachableNav).toBeVisible();
       await expect(page.locator('body')).toBeVisible();
       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
     });

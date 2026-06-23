@@ -34,7 +34,7 @@ test.describe('Missing routes — known 404 gaps (pending)', () => {
   test('ops page exists and renders', async ({ page }) => {
     await loginAsRole(page, 'admin');
     await page.goto(`/${LOCALE}/dashboard/ops`, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
     const body = await page.locator('body').innerText();
@@ -54,7 +54,7 @@ test.describe('Existing routes — positive smoke check', () => {
   test('admin: /dashboard renders for admin role', async ({ page }) => {
     await loginAsRole(page, 'admin');
     await page.goto(`/${LOCALE}/dashboard`, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('body')).toBeVisible();
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
   });
@@ -62,7 +62,7 @@ test.describe('Existing routes — positive smoke check', () => {
   test('admin: /dashboard/admin renders for admin role', async ({ page }) => {
     await loginAsRole(page, 'admin');
     await page.goto(`/${LOCALE}/dashboard/admin`, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('body')).toBeVisible();
     // Use innerText() — not textContent() — so that <script> tag content
     // (Next.js build manifests that always reference the "/404" route) is
@@ -74,14 +74,14 @@ test.describe('Existing routes — positive smoke check', () => {
   test('admin: /dashboard/settings renders', async ({ page }) => {
     await loginAsRole(page, 'admin');
     await page.goto(`/${LOCALE}/dashboard/settings`, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('steward: /dashboard/inbox renders (consolidated cases view — Wave 3)', async ({ page }) => {
     await loginAsRole(page, 'steward');
     await page.goto(`/${LOCALE}/dashboard/inbox`, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('body')).toBeVisible();
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
   });
@@ -92,7 +92,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.goto(toLocalizedPath('/dashboard/claims/new', fixture.locale), {
       waitUntil: 'domcontentloaded',
     });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('body')).toBeVisible();
     // intake form should show a heading, not a 404
     const body = await page.locator('body').innerText();
@@ -104,7 +104,7 @@ test.describe('Existing routes — positive smoke check', () => {
     await page.goto(`/${LOCALE}/dashboard/continuity-intelligence`, {
       waitUntil: 'domcontentloaded',
     });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('body')).toBeVisible();
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
   });
@@ -112,7 +112,7 @@ test.describe('Existing routes — positive smoke check', () => {
   test('steward: /dashboard/grievances list page renders (FLOW-003 fixed)', async ({ page }) => {
     await loginAsRole(page, 'steward');
     await page.goto(`/${LOCALE}/dashboard/grievances`, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
     const body = await page.locator('body').innerText();
@@ -122,7 +122,7 @@ test.describe('Existing routes — positive smoke check', () => {
   test('steward: /dashboard/cases list page renders (FLOW-004 fixed)', async ({ page }) => {
     await loginAsRole(page, 'steward');
     await page.goto(`/${LOCALE}/dashboard/cases`, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
     const body = await page.locator('body').innerText();
@@ -132,7 +132,7 @@ test.describe('Existing routes — positive smoke check', () => {
   test('member: /dashboard/claims list page renders (FLOW-005 fixed)', async ({ page }) => {
     await loginAsRole(page, 'member');
     await page.goto(`/${LOCALE}/dashboard/claims`, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
     await expect(page.locator('body')).toBeVisible();
     const body = await page.locator('body').innerText();

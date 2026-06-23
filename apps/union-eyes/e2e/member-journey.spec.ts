@@ -174,7 +174,7 @@ test.describe('Member journey', () => {
   test.describe('GAP-01 — Governance persona: no edit/write controls visible', () => {
     test('governance: cannot see "Open Representation Case" action', async ({ page }) => {
       await gotoDashboardAsRole(page, 'governance');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
 
       // The intake CTA must NOT appear for read-only governance users.
       await expect(
@@ -184,7 +184,7 @@ test.describe('Member journey', () => {
 
     test('governance: no submit/create buttons visible on landing page', async ({ page }) => {
       await gotoDashboardAsRole(page, 'governance');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
 
       const writeButtonLabels = [
         'Submit',
@@ -225,7 +225,7 @@ test.describe('Member journey', () => {
         toLocalizedPath('/dashboard/cases/CASE-GOV-READ-001', fixture.locale),
         { waitUntil: 'domcontentloaded' },
       );
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
 
       // Either the route redirects (governance can't access case detail) OR
       // the page renders without edit controls.
@@ -244,7 +244,7 @@ test.describe('Member journey', () => {
   test('member intake form renders with required fields', async ({ page }) => {
     await loginAsRole(page, 'member');
     await page.goto('/en-CA/dashboard/claims/new', { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // If the route does not exist yet, skip gracefully.
     const body = (await page.textContent('body')) ?? '';
