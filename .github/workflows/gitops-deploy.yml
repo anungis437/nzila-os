@@ -168,11 +168,30 @@ jobs:
             echo "should_build=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Pre-pull the buildkit image with retries so the docker-container driver
+      # doesn't fail when Docker Hub times out (Client.Timeout / DeadlineExceeded).
+      - name: Pre-pull buildkit image (resilient)
+        if: steps.check.outputs.should_build == 'true'
+        run: |
+          attempts=4
+          delay=10
+          for attempt in $(seq 1 "$attempts"); do
+            if docker pull moby/buildkit:buildx-stable-1; then
+              echo "Pulled buildkit image on attempt $attempt."
+              exit 0
+            fi
+            echo "::notice::buildkit image pull attempt $attempt/$attempts failed; retrying in ${delay}s."
+            sleep "$delay"
+            delay=$((delay * 2))
+          done
+          echo "::warning::Could not pre-pull buildkit image after $attempts attempts; buildx setup will retry the pull."
+
       - name: Set up Docker Buildx
         if: steps.check.outputs.should_build == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           driver: docker-container
+          driver-opts: image=moby/buildkit:buildx-stable-1
 
       - name: Azure Login (OIDC)
         if: steps.check.outputs.should_build == 'true' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
@@ -229,15 +248,29 @@ jobs:
 
           # Entra External ID handles multi-app auth via NextAuth — no satellite config needed
 
-          docker buildx build \
-            --target "$APP" \
-            --tag "$IMAGE" \
-            --tag "${{ env.ACR_NAME }}.azurecr.io/nzila/${APP}:latest" \
-            --push \
-            ${BUILD_ARGS} \
-            .
-
-          echo "Built and pushed: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
+          # Retry the build/push to ride out transient registry timeouts
+          # (DeadlineExceeded / context deadline exceeded) on Docker Hub or ACR.
+          attempts=3
+          delay=15
+          for attempt in $(seq 1 "$attempts"); do
+            if docker buildx build \
+              --target "$APP" \
+              --tag "$IMAGE" \
+              --tag "${{ env.ACR_NAME }}.azurecr.io/nzila/${APP}:latest" \
+              --push \
+              ${BUILD_ARGS} \
+              .; then
+              echo "Built and pushed: $IMAGE (attempt $attempt)" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "::notice::buildx build/push attempt $attempt/$attempts failed for $APP; retrying in ${delay}s."
+            # ACR token can expire on long retries; refresh login before next try.
+            az acr login --name ${{ env.ACR_NAME }} || true
+            sleep "$delay"
+            delay=$((delay * 2))
+          done
+          echo "::error::buildx build/push failed for $APP after $attempts attempts."
+          exit 1
 
   # ── Deploy to environment ─────────────────────────────────────────────────
   deploy:
