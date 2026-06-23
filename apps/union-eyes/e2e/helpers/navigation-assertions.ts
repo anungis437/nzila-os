@@ -59,9 +59,16 @@ export async function assertRedirectOrDenied(
 export async function navigateFromSidebarOrGoto(page: Page, label: string, localizedPath: string): Promise<void> {
   const link = page.getByRole('link', { name: label }).first();
   if (await link.count()) {
-    await link.click();
-    await page.waitForLoadState('domcontentloaded');
-    return;
+    try {
+      // The sidebar can re-render during hydration/route transitions, detaching
+      // the resolved <a> mid-click. Bound the click so a detachment race falls
+      // back to a direct navigation instead of burning the full action timeout.
+      await link.click({ timeout: 8_000 });
+      await page.waitForLoadState('domcontentloaded');
+      return;
+    } catch {
+      // fall through to direct navigation below.
+    }
   }
 
   await page.goto(localizedPath, { waitUntil: 'domcontentloaded' });
