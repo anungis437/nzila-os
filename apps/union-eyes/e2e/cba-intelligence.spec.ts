@@ -74,18 +74,21 @@ test.describe("Labor continuity intelligence page", () => {
 
   test("renders tabbed workflow when entitled, otherwise remains stable under module gating", async ({ page }) => {
     await authenticateExecutiveSession(page);
-    // Probe API entitlement only for diagnostic visibility; the page itself is
-    // role-gated (not entitlement-gated) per the canonical implementation in
-    // app/[locale]/dashboard/cba-intelligence/page.tsx — once on route, the
-    // tabbed workflow always renders for any authorized role.
-    await hasCommercialReportingAccess(page);
+    // The page is role-gated server-side, but the client surface is additionally
+    // module-gated on the `commercial_reporting` entitlement: when the session
+    // lacks it, a client guard redirects back to the dashboard shortly after the
+    // initial render. Probe the entitlement up front and use it to choose the
+    // expected outcome instead of racing the late redirect.
+    const entitled = await hasCommercialReportingAccess(page);
 
     await page.goto(PAGE_URL, { waitUntil: "domcontentloaded" });
     const onContinuityRoute = page.url().includes("/dashboard/cba-intelligence");
 
-    if (!onContinuityRoute) {
-      // Role gate redirected away — verify we landed somewhere safe inside the dashboard.
-      await expect(page).toHaveURL(/\/dashboard(\/|$)/);
+    if (!entitled || !onContinuityRoute) {
+      // Module-gated (no commercial_reporting entitlement) or role gate redirected
+      // away — verify we remain stable on a safe dashboard surface. Use a generous
+      // timeout so a late client-side gating redirect has time to settle.
+      await expect(page).toHaveURL(/\/dashboard(\/|$)/, { timeout: 15_000 });
       await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible({ timeout: 10_000 });
       return;
     }

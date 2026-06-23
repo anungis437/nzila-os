@@ -43,14 +43,17 @@ export async function assertRedirectOrDenied(
   expectedLandingPath: string,
 ): Promise<void> {
   await page.goto(targetPath, { waitUntil: 'domcontentloaded' });
-  const current = page.url();
 
-  if (current.includes(expectedLandingPath)) {
-    return;
-  }
-
-  const body = (await page.textContent('body')) ?? '';
-  expect(body).toMatch(/403|404|forbidden|not found|access denied|unauthorized/i);
+  // A blocked surface may settle either as a server redirect (already resolved
+  // by goto) or as a client-side guard that redirects/renders a denial slightly
+  // after DOMContentLoaded. Poll so we don't read an empty body mid-redirect.
+  await expect(async () => {
+    if (page.url().includes(expectedLandingPath)) {
+      return; // redirected to a safe landing — acceptable.
+    }
+    const body = (await page.textContent('body')) ?? '';
+    expect(body).toMatch(/403|404|forbidden|not found|access denied|unauthorized/i);
+  }).toPass({ timeout: 10_000 });
 }
 
 export async function navigateFromSidebarOrGoto(page: Page, label: string, localizedPath: string): Promise<void> {
