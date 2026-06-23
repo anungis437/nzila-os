@@ -610,8 +610,56 @@ jobs:
           PGSSLMODE_VAL=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGSSLMODE") | .value // empty' | head -n1)
           PGPASSWORD_SECRET=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGPASSWORD") | .secretRef // empty' | head -n1)
 
+          # Frontends commonly carry a single DATABASE_URL connection string
+          # (secretref) instead of discrete PG* vars. Derive the backend's PG*
+          # from that secret so Django doesn't fall back to localhost — and so
+          # this deploy doesn't hard-fail on environments that only set DATABASE_URL.
           if [ -z "$PGHOST_VAL" ] || [ -z "$PGUSER_VAL" ] || [ -z "$PGDATABASE_VAL" ]; then
-            echo "::error::Missing PGHOST/PGUSER/PGDATABASE on frontend container env; refusing backend update to avoid localhost DB fallback."
+            DB_URL_SECRET=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="DATABASE_URL") | .secretRef // empty' | head -n1)
+            if [ -n "$DB_URL_SECRET" ]; then
+              DB_URL=$(az containerapp secret show \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --secret-name "$DB_URL_SECRET" \
+                --query value -o tsv)
+              # Parse postgres://user:pass@host:port/db?params with pure bash.
+              # Credentials are percent-encoded in the URL, so splitting on ':'
+              # and '@' is safe; decode after splitting.
+              urldecode() { local d="${1//+/ }"; printf '%b' "${d//%/\\x}"; }
+              UE_REST="${DB_URL#*://}"
+              UE_CREDS="${UE_REST%%@*}"
+              UE_HOSTPART="${UE_REST#*@}"
+              UE_HOSTPORTDB="${UE_HOSTPART%%\?*}"
+              UE_HOSTPORT="${UE_HOSTPORTDB%%/*}"
+              URL_PGHOST="${UE_HOSTPORT%%:*}"
+              URL_PGPORT="${UE_HOSTPORT##*:}"
+              [ "$URL_PGPORT" = "$UE_HOSTPORT" ] && URL_PGPORT="5432"
+              URL_PGDATABASE="${UE_HOSTPORTDB#*/}"
+              URL_PGUSER=$(urldecode "${UE_CREDS%%:*}")
+              URL_PGPASSWORD=$(urldecode "${UE_CREDS#*:}")
+              URL_PGSSLMODE=$(printf '%s' "$DB_URL" | grep -oE 'sslmode=[A-Za-z-]+' | head -n1 | cut -d= -f2)
+              [ -z "$URL_PGSSLMODE" ] && URL_PGSSLMODE="require"
+
+              [ -z "$PGHOST_VAL" ] && PGHOST_VAL="$URL_PGHOST"
+              [ -z "$PGUSER_VAL" ] && PGUSER_VAL="$URL_PGUSER"
+              [ -z "$PGDATABASE_VAL" ] && PGDATABASE_VAL="$URL_PGDATABASE"
+              [ -z "$PGPORT_VAL" ] && PGPORT_VAL="$URL_PGPORT"
+              [ -z "$PGSSLMODE_VAL" ] && PGSSLMODE_VAL="$URL_PGSSLMODE"
+              # Mirror the parsed password into a db-password secret for the
+              # backend's PGPASSWORD secretref (idempotent overwrite).
+              if [ -z "$PGPASSWORD_SECRET" ]; then
+                az containerapp secret set \
+                  --name "$TARGET_APP" \
+                  --resource-group "$TARGET_RG" \
+                  --secrets "db-password=$URL_PGPASSWORD" >/dev/null
+                PGPASSWORD_SECRET="db-password"
+              fi
+              echo "::notice::Derived backend PG* from DATABASE_URL secret ($DB_URL_SECRET)."
+            fi
+          fi
+
+          if [ -z "$PGHOST_VAL" ] || [ -z "$PGUSER_VAL" ] || [ -z "$PGDATABASE_VAL" ]; then
+            echo "::error::Missing PGHOST/PGUSER/PGDATABASE on frontend container env (and no DATABASE_URL secret to derive from); refusing backend update to avoid localhost DB fallback."
             exit 1
           fi
 
