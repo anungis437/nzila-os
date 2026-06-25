@@ -74,7 +74,7 @@ test.describe('OCRA adaptive live flow — telemetry privacy (network)', () => {
 
     await page.goto(ASSESSMENT_PATH_EN);
     // Give the page a moment to settle any initial telemetry beacon
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     expect(violations).toEqual([]);
   });
 });

@@ -43,22 +43,32 @@ export async function assertRedirectOrDenied(
   expectedLandingPath: string,
 ): Promise<void> {
   await page.goto(targetPath, { waitUntil: 'domcontentloaded' });
-  const current = page.url();
 
-  if (current.includes(expectedLandingPath)) {
-    return;
-  }
-
-  const body = (await page.textContent('body')) ?? '';
-  expect(body).toMatch(/403|404|forbidden|not found|access denied|unauthorized/i);
+  // A blocked surface may settle either as a server redirect (already resolved
+  // by goto) or as a client-side guard that redirects/renders a denial slightly
+  // after DOMContentLoaded. Poll so we don't read an empty body mid-redirect.
+  await expect(async () => {
+    if (page.url().includes(expectedLandingPath)) {
+      return; // redirected to a safe landing — acceptable.
+    }
+    const body = (await page.textContent('body')) ?? '';
+    expect(body).toMatch(/403|404|forbidden|not found|access denied|unauthorized/i);
+  }).toPass({ timeout: 10_000 });
 }
 
 export async function navigateFromSidebarOrGoto(page: Page, label: string, localizedPath: string): Promise<void> {
   const link = page.getByRole('link', { name: label }).first();
   if (await link.count()) {
-    await link.click();
-    await page.waitForLoadState('domcontentloaded');
-    return;
+    try {
+      // The sidebar can re-render during hydration/route transitions, detaching
+      // the resolved <a> mid-click. Bound the click so a detachment race falls
+      // back to a direct navigation instead of burning the full action timeout.
+      await link.click({ timeout: 8_000 });
+      await page.waitForLoadState('domcontentloaded');
+      return;
+    } catch {
+      // fall through to direct navigation below.
+    }
   }
 
   await page.goto(localizedPath, { waitUntil: 'domcontentloaded' });
