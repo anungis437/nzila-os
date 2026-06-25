@@ -16,6 +16,9 @@ on:
   schedule:
     # Weekly scan to catch newly published CVEs in base images
     - cron: '0 6 * * 1'
+  # Allow on-demand re-runs (e.g. to confirm a CVE remediation landed on main
+  # without waiting for the weekly schedule or a Dockerfile change).
+  workflow_dispatch: {}
 
 env:
   TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
