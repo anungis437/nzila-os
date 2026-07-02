@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-07-02T11:54:05.341Z
+Generated: 2026-07-02T12:02:43.499Z
 
-Total documents indexed: 1346
+Total documents indexed: 1347
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -16,7 +16,7 @@ Stale documents (>90 days since repo validation): 0
 | backlog | 1 | 0 |
 | categories | 925 | 0 |
 | compliance | 6 | 0 |
-| courtlens | 9 | 0 |
+| courtlens | 10 | 0 |
 | doctrine | 61 | 0 |
 | documentation-index.md | 1 | 0 |
 | governance | 3 | 0 |
@@ -983,6 +983,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/courtlens/legacy-product-inventory.md](docs/courtlens/legacy-product-inventory.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/migration-gap-analysis.md](docs/courtlens/migration-gap-analysis.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/phase-1/abr-reuse-audit.md](docs/courtlens/phase-1/abr-reuse-audit.md) | courtlens | 2026-07-02 | current |
+| [docs/courtlens/phase-2/reviewer-workflow-ui.md](docs/courtlens/phase-2/reviewer-workflow-ui.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/phase-2/tenant-matter-queue-api.md](docs/courtlens/phase-2/tenant-matter-queue-api.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/phase-2/tenant-matter-ui.md](docs/courtlens/phase-2/tenant-matter-ui.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/pilot-readiness-plan.md](docs/courtlens/pilot-readiness-plan.md) | courtlens | 2026-07-02 | current |

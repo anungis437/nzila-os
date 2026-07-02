@@ -4,8 +4,9 @@ import { notFound, redirect } from 'next/navigation';
 
 import { Card } from '@nzila/ui';
 import { verifyAbrOrgMembership } from '@/lib/trusted-auth';
-import { hasPermission } from '@/lib/rbac';
+import { hasPermission, type AbrPermission } from '@/lib/rbac';
 import { getMatterDetail, buildMatterDetailView } from '@/modules/incidents/matter-service';
+import { ReviewerActions } from './ReviewerActions';
 
 /**
  * CourtLens tenant matter detail page — Phase 2D (read-only).
@@ -57,6 +58,12 @@ export default async function CourtLensMatterDetailPage({
   if (!result) notFound();
 
   const view = buildMatterDetailView(result.matter, result.detail!, membership.role);
+
+  // Server-derived permission set for the reviewer actions component.
+  // The client component only uses these to decide which buttons to render;
+  // every mutation route re-enforces permissions server-side.
+  const candidatePermissions: readonly AbrPermission[] = ['incident.update', 'incident.transition'];
+  const permissions = candidatePermissions.filter((p) => hasPermission(membership.role, p));
 
   return (
     <div className="space-y-6" data-testid="courtlens-matter-detail">
@@ -215,6 +222,16 @@ export default async function CourtLensMatterDetailPage({
           <p className="font-medium text-navy">Legal notice</p>
           <p>{view.legalBoundaryNotice}</p>
         </div>
+      </Card>
+
+      <Card>
+        <ReviewerActions
+          matterId={result.matter.id}
+          aiSummaryStatus={result.matter.aiSummaryStatus}
+          referralStatus={result.matter.referralStatus}
+          status={result.matter.status}
+          permissions={permissions}
+        />
       </Card>
     </div>
   );

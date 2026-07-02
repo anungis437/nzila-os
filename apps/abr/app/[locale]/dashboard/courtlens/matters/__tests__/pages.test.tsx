@@ -54,6 +54,7 @@ vi.mock('@/modules/incidents/matter-service', () => ({
 vi.mock('next/navigation', () => ({
   redirect: mocks.redirect,
   notFound: mocks.notFound,
+  useRouter: () => ({ refresh: vi.fn() }),
 }));
 
 vi.mock('@nzila/ui', () => ({
