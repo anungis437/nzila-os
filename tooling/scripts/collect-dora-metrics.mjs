@@ -278,14 +278,21 @@ function linearRegressionSlope(series) {
 const TARGET_REF = resolveTargetRef(TARGET_BRANCH);
 
 // ── Deployment Frequency ─────────────────────────────────────────────────────
-// Count merges to main in the last 30 days
+// Count PR landings on the target branch in the last 30 days.
+//
+// We use `--first-parent` (not `--merges`) so this metric works for repos
+// that squash-merge PRs (GitHub's default). `--merges` only counts two-parent
+// merge commits, which under-reports by an order of magnitude in squash
+// workflows (this repo had 1 --merges vs 11 --first-parent commits in a recent
+// 30-day window). First-parent gives you exactly one commit per PR landed on
+// main, whether it was a merge commit, squash, or rebase-merge.
 const sinceDate = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000)
   .toISOString()
   .split('T')[0];
 const sinceDateObj = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
 const mergeCommits = safeGit(
-  `log "${TARGET_REF}" --merges --since="${sinceDate}" --format="%H %ai %s"`,
+  `log "${TARGET_REF}" --first-parent --since="${sinceDate}" --format="%H %ai %s"`,
   '',
 )
   .split('\n')
@@ -300,7 +307,7 @@ const trendSinceDate = new Date(Date.now() - LOOKBACK_WEEKS * 7 * 24 * 60 * 60 *
   .toISOString()
   .split('T')[0];
 const trendMergeCommits = safeGit(
-  `log "${TARGET_REF}" --merges --since="${trendSinceDate}" --format="%ct %s"`,
+  `log "${TARGET_REF}" --first-parent --since="${trendSinceDate}" --format="%ct %s"`,
   '',
 )
   .split('\n')

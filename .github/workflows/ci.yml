@@ -308,14 +308,13 @@ jobs:
       - name: Collect DORA metrics
         run: node tooling/scripts/collect-dora-metrics.mjs -- --enforce
         env:
-          # NOTE (2026-07-02): threshold lowered from 1.0 → 0.5 (2 deploys / month floor).
-          # Rationale: DORA deployment_frequency is a lagging team-velocity indicator,
-          # not a per-PR quality gate. A 1.0/week floor is self-referential during quiet
-          # periods — it blocks the PRs that would raise velocity above the floor. 0.5
-          # keeps the gate honest as a "we shipped something this month" signal while
-          # letting recovery PRs land. Raise this back to 1.0 (or higher) once the
-          # trailing-4-week average stabilises above target. See PR #591.
-          DORA_MIN_DEPLOYS_PER_WEEK: "0.5"
+          # DORA_MIN_DEPLOYS_PER_WEEK: 1.0 (approx 1 deploy / week floor).
+          # The collector counts PR landings via `git log --first-parent`, which
+          # correctly captures squash-merged PRs (see collect-dora-metrics.mjs
+          # comment for rationale). A 1.0/week floor is a reasonable "we are
+          # shipping" signal without being self-referentially unblockable —
+          # the trailing-30d average is currently ~2.5/week.
+          DORA_MIN_DEPLOYS_PER_WEEK: "1"
           DORA_MAX_LEAD_TIME_HOURS: "720"
           DORA_MAX_CHANGE_FAILURE_RATE_PCT: "15"
 
