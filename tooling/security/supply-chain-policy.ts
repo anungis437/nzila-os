@@ -308,6 +308,24 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     expiresAt: '2026-09-18',
     severity: 'high' as const,
   })),
+  {
+    // LinkifyIt ReDoS — npm advisory 1121797 / GHSA-22p9-wv53-3rq4
+    // Package: linkify-it (<=5.0.0). Quadratic scan-loop complexity in URL matching.
+    // Affected paths (both in @nzila/union-eyes):
+    //   1. Runtime: @tiptap/starter-kit > @tiptap/pm > prosemirror-markdown > markdown-it > linkify-it
+    //      Tiptap runs entirely in the client browser; a ReDoS here would only DoS the user's own
+    //      browser tab, not the server. No server-side linkify pass on untrusted input.
+    //   2. Dev-only: markdownlint-cli > markdown-it > linkify-it — local lint tooling only.
+    // Upstream fix requires markdown-it > linkify-it@>5.0.0; pending markdown-it release upstream.
+    // Risk profile: client-side DoS of untrusted URL text; no server-side amplification path.
+    id: '1121797',
+    package: 'linkify-it',
+    reason: 'ReDoS in URL matching. Transitive via Tiptap (client-side rich-text editor) and markdownlint-cli (dev tooling). No server-side linkify pass on untrusted input — client-side DoS only affects the offending user\'s own browser. Upgrade to linkify-it >5.0.0 pending upstream markdown-it release.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-07-02',
+    expiresAt: '2026-10-02',
+    severity: 'high',
+  },
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────
