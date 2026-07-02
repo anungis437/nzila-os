@@ -17,7 +17,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/components/language-switcher';
 import { parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
+<<<<<<< HEAD
+import { WHITEPAPER_LIBRARY, localizeWhitepaperEntry } from '@/lib/whitepaper/library';
+=======
 import { WHITEPAPER_LIBRARY, getWhitepaperLocaleContent } from '@/lib/whitepaper/library';
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
 
 export default function LocaleSiteNavigation() {
   const t = useTranslations('marketing.nav');
@@ -31,11 +35,22 @@ export default function LocaleSiteNavigation() {
   const whitepaperLibraryLabel = locale === 'fr-CA' ? 'Bibliothèque' : 'Whitepaper Library';
   const whitepaperLibraryDesc = locale === 'fr-CA' ? 'Tous les livres blancs · portail' : 'All whitepapers · hub';
 
+<<<<<<< HEAD
+  const whitepaperLinks = WHITEPAPER_LIBRARY.map((entry) => {
+    const localized = localizeWhitepaperEntry(entry, locale);
+    return {
+      name: localized.title,
+      href: `/${locale}${localized.href}`,
+      desc: `${localized.format} · ${localized.version}`,
+    };
+  });
+=======
   const whitepaperLinks = WHITEPAPER_LIBRARY.map((entry) => ({
     name: getWhitepaperLocaleContent(entry, locale).title,
     href: `/${locale}${entry.href}`,
     desc: `${getWhitepaperLocaleContent(entry, locale).format} · ${entry.version}`,
   }));
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
 
   const solutionsLinks = [
     { name: t('solutionsItems.executive.name'), href: `/${locale}/solutions/executive-leadership`,  desc: t('solutionsItems.executive.desc') },
@@ -98,7 +113,7 @@ export default function LocaleSiteNavigation() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-   
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') setMobileMenuOpen(false);
   }, []);

@@ -26,13 +26,52 @@ export type WhitepaperEntry = {
   readonly slug: string;
   readonly version: string;
   readonly heroImage: string;
+<<<<<<< HEAD
+  readonly heroAlt: string;
+  readonly abstract: string;
+  readonly abstractCallouts: readonly string[];
+  /**
+   * When set, the entry is rendered by the shared markdown renderer using
+   * the file at `docs/oci/whitepapers/<sourceFile>`.
+   * When omitted, the entry is rendered by a bespoke route (currently
+   * only `the-continuity-gap`).
+   */
+  readonly sourceFile?: string;
+  readonly localizedSourceFile?: Partial<Record<'fr-CA', string>>;
+  /**
+   * Public route (relative to `/{locale}`) the hub card should link to.
+   */
+=======
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
   readonly href: string;
+<<<<<<< HEAD
+  readonly localized?: Partial<
+    Record<
+      'fr-CA',
+      {
+        title: string;
+        subtitle: string;
+        format: string;
+        readingTime: string;
+        abstract: string;
+        abstractCallouts: readonly string[];
+      }
+    >
+  >;
+=======
   readonly localized: Readonly<Record<WhitepaperLocale, WhitepaperLocalizedContent>>;
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
 };
 
+<<<<<<< HEAD
+export type LocalizedWhitepaperEntry = Omit<WhitepaperEntry, 'localized'>;
+
+const DOCS_RELATIVE = ['..', '..', 'docs', 'oci', 'whitepapers'] as const;
+=======
 function normalizeWhitepaperLocale(locale: string): WhitepaperLocale {
   return locale === 'fr-CA' ? 'fr-CA' : 'en-CA';
 }
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
 
 export function getWhitepaperLocaleContent(
   entry: WhitepaperEntry,
@@ -41,6 +80,20 @@ export function getWhitepaperLocaleContent(
   return entry.localized[normalizeWhitepaperLocale(locale)] ?? entry.localized['en-CA'];
 }
 
+<<<<<<< HEAD
+export function resolveWhitepaperSourcePathForLocale(
+  entry: WhitepaperEntry,
+  locale: string,
+): string {
+  if (!entry.sourceFile) {
+    throw new Error(`Whitepaper ${entry.slug} does not define a markdown source file`);
+  }
+
+  const localizedSource = locale === 'fr-CA' ? entry.localizedSourceFile?.['fr-CA'] : undefined;
+  return resolveWhitepaperSourcePath(localizedSource ?? entry.sourceFile);
+}
+
+=======
 export function getWhitepaperSourceFile(
   entry: WhitepaperEntry,
   locale: string
@@ -48,6 +101,7 @@ export function getWhitepaperSourceFile(
   return getWhitepaperLocaleContent(entry, locale).sourceFile;
 }
 
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
 export const WHITEPAPER_LIBRARY: readonly WhitepaperEntry[] = [
   {
     slug: 'the-continuity-gap',
@@ -91,7 +145,40 @@ export const WHITEPAPER_LIBRARY: readonly WhitepaperEntry[] = [
     slug: 'operational-reality-edition',
     version: 'Ops Edition',
     heroImage: heroImagery.operationalCoherenceModule,
+<<<<<<< HEAD
+    heroAlt: 'Operational continuity in labour and federated organizations',
+    abstract:
+      'A companion to the Evidence-Enhanced edition, this whitepaper begins from the operational surface rather than the demographic argument. It walks through the lived realities — grievance transitions, executive turnover, modernization fragmentation — that made the continuity category visible inside Union Eyes deployments, and reconstructs the discovery path that produced OCI and OCRA as the structural answer.',
+    abstractCallouts: [
+      'Operational-first framing: continuity discovered through work, not theory.',
+      'Three worked scenarios (grievance, executive, modernization).',
+      'Dual-entry GTM and continuity-aware operations doctrine.',
+    ],
+    sourceFile: 'THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md',
+    localizedSourceFile: {
+      'fr-CA': 'THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md',
+    },
+=======
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
     href: '/whitepapers/operational-reality-edition',
+<<<<<<< HEAD
+    localized: {
+      'fr-CA': {
+        title: 'Le deficit de continuite - Edition realite operationnelle',
+        subtitle:
+          'Comment les systemes operationnels du travail ont revele la categorie de continuite, et pourquoi OCI / OCRA emerge du travail vecu.',
+        format: 'Livre blanc executif',
+        readingTime: '~22 minutes de lecture',
+        abstract:
+          'Compagnon de l edition renforcee par preuves, ce document part de la realite operationnelle. Il retrace les dynamiques vecues qui ont rendu visible la categorie de continuite dans les deployments Union Eyes et reconstruit le chemin qui a mene a OCI et OCRA.',
+        abstractCallouts: [
+          'Cadre operationnel d abord: la continuite emerge du terrain, pas de la theorie.',
+          'Trois scenarios pratiques: griefs, transitions executives et modernisation.',
+          'Doctrine GTM double entree et operations conscientes de la continuite.',
+        ],
+      },
+    },
+=======
     localized: {
       'en-CA': {
         title: 'The Continuity Gap — Ops Edition',
@@ -126,12 +213,46 @@ export const WHITEPAPER_LIBRARY: readonly WhitepaperEntry[] = [
         sourceFile: 'THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md',
       },
     },
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
   },
   {
     slug: 'oci-method-companion',
     version: 'v1.0',
     heroImage: heroImagery.explainableIntelligenceModule,
+<<<<<<< HEAD
+    heroAlt: 'OCI methodology and reviewer-led interpretation',
+    abstract:
+      'Written for procurement officers, governance bodies, legal reviewers, and methodology auditors, the companion whitepaper explains the methodological scaffolding behind the OCI Method: ontology, confidence states, evidence sufficiency, small-sample honesty, reviewer reproducibility, anti-surveillance posture, standards positioning, the reviewer workflow, and a twelve-point procurement evaluation checklist.',
+    abstractCallouts: [
+      'Worked confidence reading and small-sample honesty examples.',
+      'Reviewer reproducibility and two-reviewer divergence doctrine.',
+      'Twelve-item procurement evaluation checklist (every "no" disqualifying).',
+    ],
+    sourceFile: 'OCI_METHOD_COMPANION_WHITEPAPER.md',
+    localizedSourceFile: {
+      'fr-CA': 'OCI_METHOD_COMPANION_WHITEPAPER.fr-CA.md',
+    },
+=======
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
     href: '/whitepapers/oci-method-companion',
+<<<<<<< HEAD
+    localized: {
+      'fr-CA': {
+        title: 'La methode OCI - Livre blanc compagnon',
+        subtitle:
+          'Compagnon methodologique qualifie approvisionnement: echafaudage, doctrine de confiance, flux de revision et verification de conformite.',
+        format: 'Compagnon methodologique',
+        readingTime: '~18 minutes de lecture',
+        abstract:
+          'Destine aux responsables d approvisionnement, aux organes de gouvernance et aux revisrices/reviseurs, ce document explique l echafaudage de la methode OCI: ontologie, etats de confiance, suffisance de preuve, reproductibilite et posture anti-surveillance.',
+        abstractCallouts: [
+          'Lecture de confiance appliquee et honnetete face aux petits echantillons.',
+          'Reproductibilite des reviseurs et doctrine de divergence entre evaluateurs.',
+          'Liste de verification d approvisionnement en douze criteres.',
+        ],
+      },
+    },
+=======
     localized: {
       'en-CA': {
         title: 'The OCI Method — Companion Whitepaper',
@@ -166,12 +287,46 @@ export const WHITEPAPER_LIBRARY: readonly WhitepaperEntry[] = [
         sourceFile: 'OCI_METHOD_COMPANION_WHITEPAPER_fr-CA.md',
       },
     },
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
   },
   {
     slug: 'oci-method-canonical',
     version: 'v1.2',
     heroImage: heroImagery.executiveIntelligenceModule,
+<<<<<<< HEAD
+    heroAlt: 'OCI Method canonical authority',
+    abstract:
+      'The authoritative reference document for the OCI Method. Establishes canonical definitions, the OCI / OCRA layer ontology, reviewer accountability, confidence and evidence doctrine, anti-surveillance posture, standards positioning, brand and enforcement doctrine, and version governance. All public-facing OCI materials must remain consistent with this authority.',
+    abstractCallouts: [
+      'Canonical definitions and OCI / OCRA layer ontology.',
+      'Brand and enforcement doctrine: disqualifying conditions for OCI / OCRA branding.',
+      'Governance, versioning, and conformance to the canonical five-phase OCI Method™.',
+    ],
+    sourceFile: 'OCI_METHOD_WHITEPAPER_v1.md',
+    localizedSourceFile: {
+      'fr-CA': 'OCI_METHOD_WHITEPAPER_v1.fr-CA.md',
+    },
+=======
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
     href: '/whitepapers/oci-method-canonical',
+<<<<<<< HEAD
+    localized: {
+      'fr-CA': {
+        title: 'La methode OCI - Autorite canonique',
+        subtitle:
+          'Autorite methodologique: definitions, ontologie, separation des couches, enforcement et doctrine d integrite de marque.',
+        format: 'Autorite methodologique',
+        readingTime: '~10 minutes de lecture',
+        abstract:
+          'Reference autoritative de la methode OCI. Etablit les definitions canoniques, l ontologie OCI / OCRA, la responsabilite des reviseurs, la doctrine de preuve et de confiance, et la gouvernance de version.',
+        abstractCallouts: [
+          'Definitions canoniques et ontologie des couches OCI / OCRA.',
+          'Doctrine de marque et enforcement: conditions disqualifiantes.',
+          'Conformite a la methode OCI en cinq phases.',
+        ],
+      },
+    },
+=======
     localized: {
       'en-CA': {
         title: 'The OCI Method — Canonical Authority',
@@ -206,9 +361,33 @@ export const WHITEPAPER_LIBRARY: readonly WhitepaperEntry[] = [
         sourceFile: 'OCI_METHOD_WHITEPAPER_v1_fr-CA.md',
       },
     },
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
   },
 ] as const;
 
 export function getWhitepaperBySlug(slug: string): WhitepaperEntry | undefined {
   return WHITEPAPER_LIBRARY.find((entry) => entry.slug === slug);
+}
+
+export function localizeWhitepaperEntry(
+  entry: WhitepaperEntry,
+  locale: string,
+): LocalizedWhitepaperEntry {
+  const localized = locale === 'fr-CA' ? entry.localized?.['fr-CA'] : undefined;
+
+  return {
+    slug: entry.slug,
+    title: localized?.title ?? entry.title,
+    subtitle: localized?.subtitle ?? entry.subtitle,
+    format: localized?.format ?? entry.format,
+    version: entry.version,
+    readingTime: localized?.readingTime ?? entry.readingTime,
+    heroImage: entry.heroImage,
+    heroAlt: entry.heroAlt,
+    abstract: localized?.abstract ?? entry.abstract,
+    abstractCallouts: localized?.abstractCallouts ?? entry.abstractCallouts,
+    sourceFile: entry.sourceFile,
+    localizedSourceFile: entry.localizedSourceFile,
+    href: entry.href,
+  };
 }

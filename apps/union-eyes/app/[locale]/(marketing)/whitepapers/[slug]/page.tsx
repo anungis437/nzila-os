@@ -1,6 +1,6 @@
-import type { Metadata } from 'next';
 import fs from 'node:fs/promises';
 
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -10,8 +10,13 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import {
   WHITEPAPER_LIBRARY,
   getWhitepaperBySlug,
+<<<<<<< HEAD
+  localizeWhitepaperEntry,
+  resolveWhitepaperSourcePathForLocale,
+=======
   getWhitepaperLocaleContent,
   getWhitepaperSourceFile,
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
 } from '@/lib/whitepaper/library';
 import {
   renderWhitepaperMarkdown,
@@ -44,7 +49,37 @@ const ARTICLE_COPY = {
 
 type Params = { params: Promise<{ locale: string; slug: string }> };
 
+const PAGE_COPY = {
+  'en-CA': {
+    allWhitepapers: 'All whitepapers',
+    readInsights: 'Read Insights Library',
+    abstract: 'Abstract',
+    onThisPage: 'On this page',
+    quickActions: 'Quick actions',
+    startReading: 'Start reading',
+    browseLibrary: 'Browse the library',
+  },
+  'fr-CA': {
+    allWhitepapers: 'Tous les livres blancs',
+    readInsights: 'Consulter la bibliotheque Perspectives',
+    abstract: 'Resume',
+    onThisPage: 'Sommaire',
+    quickActions: 'Actions rapides',
+    startReading: 'Commencer la lecture',
+    browseLibrary: 'Parcourir la bibliotheque',
+  },
+} as const;
+
 export function generateStaticParams() {
+<<<<<<< HEAD
+  const locales = ['en-CA', 'fr-CA'] as const;
+  return locales.flatMap((locale) =>
+    WHITEPAPER_LIBRARY.filter((entry) => entry.sourceFile).map((entry) => ({
+      locale,
+      slug: entry.slug,
+    })),
+  );
+=======
   const entries = WHITEPAPER_LIBRARY.filter((entry) => entry.localized['en-CA'].sourceFile);
   return locales.flatMap((locale) =>
     entries.map((entry) => ({
@@ -52,6 +87,7 @@ export function generateStaticParams() {
       slug: entry.slug,
     }))
   );
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -60,18 +96,29 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!entry) {
     return {};
   }
+<<<<<<< HEAD
+  const localized = localizeWhitepaperEntry(entry, locale);
+=======
   const entryCopy = getWhitepaperLocaleContent(entry, locale);
 
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
   return {
+<<<<<<< HEAD
+    title: `${localized.title} | UnionEyes`,
+    description: localized.subtitle,
+=======
     title: `${entryCopy.title} | UnionEyes`,
     description: entryCopy.subtitle,
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
     alternates: buildLocaleAlternates(locale, entry.href),
   };
 }
 
 export default async function MarkdownWhitepaperPage({ params }: Params) {
   const { locale, slug } = await params;
-  const entry = getWhitepaperBySlug(slug);
+  const baseEntry = getWhitepaperBySlug(slug);
+  const copy = PAGE_COPY[locale as keyof typeof PAGE_COPY] ?? PAGE_COPY['en-CA'];
+  const entry = baseEntry ? localizeWhitepaperEntry(baseEntry, locale) : undefined;
   if (!entry) {
     notFound();
   }
@@ -84,6 +131,10 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
     redirect(`/${locale}${entry.href}`);
   }
 
+<<<<<<< HEAD
+  const markdown = await fs.readFile(resolveWhitepaperSourcePathForLocale(entry, locale), 'utf8');
+  const rendered = renderWhitepaperMarkdown(markdown);
+=======
   let rendered: RenderedWhitepaper;
   try {
     const markdown = await fs.readFile(resolveRuntimeWhitepaperSourcePath(sourceFile), 'utf8');
@@ -102,6 +153,7 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
       ],
     };
   }
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
 
   return (
     <div className="min-h-screen bg-white">
@@ -135,13 +187,21 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
                 href={`/${locale}/whitepapers`}
                 className="inline-flex items-center justify-center rounded-lg border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/20"
               >
+<<<<<<< HEAD
+                ← {copy.allWhitepapers}
+=======
                 ← {articleCopy.backToHub}
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
               </Link>
               <Link
                 href={`/${locale}/insights`}
                 className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100"
               >
+<<<<<<< HEAD
+                {copy.readInsights}
+=======
                 {articleCopy.insights}
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
               </Link>
             </div>
           </div>
@@ -156,7 +216,11 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
                 id="whitepaper-abstract"
                 className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1f5b84]"
               >
+<<<<<<< HEAD
+                {copy.abstract}
+=======
                 {articleCopy.abstract}
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
               </h2>
               <span className="text-xs font-medium text-slate-500">{entryCopy.readingTime}</span>
             </div>
@@ -182,7 +246,11 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
           <aside className="space-y-4 xl:col-span-3 xl:sticky xl:top-24 xl:self-start">
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+<<<<<<< HEAD
+                {copy.onThisPage}
+=======
                 {articleCopy.onThisPage}
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
               </h3>
               <ol className="mt-3 max-h-[58vh] space-y-2 overflow-y-auto pr-1 text-sm text-slate-700">
                 {rendered.tocItems.map((item, index) => (
@@ -202,7 +270,11 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+<<<<<<< HEAD
+                {copy.quickActions}
+=======
                 {articleCopy.quickActions}
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
               </h3>
               <div className="mt-3 space-y-2">
                 {rendered.tocItems[0] ? (
@@ -210,14 +282,22 @@ export default async function MarkdownWhitepaperPage({ params }: Params) {
                     href={`#${rendered.tocItems[0].slug}`}
                     className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100"
                   >
+<<<<<<< HEAD
+                    {copy.startReading}
+=======
                     {articleCopy.readNow}
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
                   </a>
                 ) : null}
                 <Link
                   href={`/${locale}/whitepapers`}
                   className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
                 >
+<<<<<<< HEAD
+                  {copy.browseLibrary}
+=======
                   {articleCopy.browseWhitepapers}
+>>>>>>> 882361cc6388040b7ed229c4839502b8b3f2d233
                 </Link>
               </div>
             </div>

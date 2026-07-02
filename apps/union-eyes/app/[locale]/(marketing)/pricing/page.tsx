@@ -10,9 +10,9 @@
  * bundling. Every layer is readable, procurement-friendly, and assumes human
  * oversight. Pricing ranges are starting points for joint scoping with leaders.
  */
-import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Users } from 'lucide-react';
@@ -162,15 +162,16 @@ const assessmentLadder = [
     key: 'institutional_continuity_diagnostic',
     name: 'Full Diagnostic & Action Plan',
     price: '$6,500 CAD',
-    pricePosture: 'Facilitated engagement · executive workshop included',
+    pricePosture: 'Facilitated engagement · executive workshop included · 100% credited toward any subsequent engagement if signed within 90 days',
     summary:
-      'A full diagnostic engagement: facilitated review, organizational continuity workshop, memory lineage mapping, and an executive briefing note your board can act on.',
+      'A full diagnostic engagement: facilitated review, organizational continuity workshop, memory lineage mapping, and an executive briefing note your board can act on. The full fee credits forward toward a subsequent Assessment, Topology, or Platform Engagement if you proceed within 90 days.',
     includes: [
       'Everything in the Leadership Briefing Report',
       'Facilitated diagnostic review',
       'Organizational continuity workshop',
       'Memory lineage mapping',
       'Executive briefing note',
+      '100% credited toward subsequent engagement (within 90 days)',
     ],
     cta: 'Request this diagnostic',
     ctaHref: '/contact?topic=organizational-continuity-diagnostic',
@@ -219,15 +220,16 @@ const frAssessmentLadder = [
     key: 'institutional_continuity_diagnostic',
     name: 'Diagnostic organisationnel de continuité',
     price: '6 500 $ CAD',
-    pricePosture: 'Engagement facilité · atelier exécutif inclus',
+    pricePosture: 'Engagement facilité · atelier exécutif inclus · crédité à 100 % sur tout engagement subséquent signé dans les 90 jours',
     summary:
-      "Un engagement diagnostic complet : revue facilitée, atelier organisationnel de continuité, cartographie de la lignée mémorielle, et note de synthèse exécutive sur laquelle votre conseil peut agir.",
+      "Un engagement diagnostic complet : revue facilitée, atelier organisationnel de continuité, cartographie de la lignée mémorielle, et note de synthèse exécutive sur laquelle votre conseil peut agir. Le montant complet est crédité sur un engagement Évaluation, Topologie ou Plateforme subséquent si vous y donnez suite dans les 90 jours.",
     includes: [
       'Tout ce qui est dans la Note exécutive',
       'Revue diagnostique facilitée',
       'Atelier organisationnel de continuité',
       'Cartographie de la lignée mémorielle',
       'Note de synthèse exécutive',
+      'Crédité à 100 % sur un engagement subséquent (dans les 90 jours)',
     ],
     cta: 'Demander ce diagnostic',
     ctaHref: '/contact?topic=organizational-continuity-diagnostic',
@@ -246,7 +248,7 @@ const engagementLayers: EngagementLayer[] = [
     icon: 'compass',
     name: 'OCI — Continuity Assessment',
     posture: 'Organizational diagnostics',
-    layer: 'Layer 1 · Continuity intelligence',
+    layer: 'Assessment Engagement · Continuity intelligence',
     fit: 'Federations and organizations establishing a continuity baseline before any tooling decision.',
     feels: 'Diagnostic. Discreet. Strategic.',
     deliverables: [
@@ -255,14 +257,14 @@ const engagementLayers: EngagementLayer[] = [
       'Governance Entropy Review',
       'Organizational Continuity Workshop',
     ],
-    range: 'Engagement — typically $18K–$45K',
+    range: '$18,000–$45,000 CAD · one-time engagement',
   },
   {
     key: 'ocra',
     icon: 'network',
     name: 'OCRA — Adaptive Continuity Intelligence',
     posture: 'Structural risk deepening',
-    layer: 'Layer 2 · Continuity topology',
+    layer: 'Topology Engagement · Continuity topology',
     fit: 'Organizations that have a baseline and need structural depth: dependency analysis, modernization pathways, confidence-aware interpretation.',
     feels: 'Structural. Interpretive. Forward-looking.',
     deliverables: [
@@ -271,15 +273,15 @@ const engagementLayers: EngagementLayer[] = [
       'Modernization pathway evaluation',
       'Confidence-aware operational interpretation',
     ],
-    range: 'Engagement — typically $35K–$90K',
+    range: '$35,000–$90,000 CAD · one-time engagement',
   },
   {
     key: 'platform',
     icon: 'layers',
     name: 'Platform Activation',
-    posture: 'Continuity infrastructure',
-    layer: 'Layer 3 · Operational continuity infrastructure',
-    fit: 'Organizations ready to activate continuity infrastructure on top of an assessed baseline — not generic SaaS onboarding.',
+    posture: 'Continuity infrastructure (post-diagnostic)',
+    layer: 'Platform Engagement · Operational continuity infrastructure',
+    fit: 'Organizations ready to activate continuity infrastructure on top of an assessed baseline — not generic SaaS onboarding. Requires a completed Assessment Engagement (or Full Diagnostic) first.',
     feels: 'Operational. Governance-safe. Inherited.',
     deliverables: [
       'Operational continuity tooling activation',
@@ -287,14 +289,14 @@ const engagementLayers: EngagementLayer[] = [
       'Evidence and decisions-of-record systems',
       'Continuity-safe workflows for officers, stewards, and staff',
     ],
-    range: 'Annual program — typically $40K–$140K',
+    range: '$40,000–$140,000 CAD per year · annual subscription (post-diagnostic)',
   },
   {
     key: 'longitudinal',
     icon: 'infinity',
     name: 'Longitudinal Continuity Support',
     posture: 'Continuity stewardship',
-    layer: 'Layer 4 · Governance continuity layer',
+    layer: 'Stewardship Engagement · Governance continuity',
     fit: 'National unions and federations sustaining continuity across leadership cycles, mandates, and federation-wide coordination.',
     feels: 'Durable. Inherited. Federation-grade.',
     deliverables: [
@@ -303,14 +305,14 @@ const engagementLayers: EngagementLayer[] = [
       'Federation-level continuity coordination',
       'Operational sovereignty posture maintenance',
     ],
-    range: 'Strategic engagement — scoped with executive leadership',
+    range: 'Multi-year stewardship · scoped with executive leadership',
   },
   {
     key: 'founding',
     icon: 'sparkles',
     name: 'Founding Partner Cohort',
     posture: 'Strategic organizational collaboration',
-    layer: 'Layer 5 · Cohort engagement',
+    layer: 'Cohort Engagement · Co-development partnership',
     fit: 'A small number of organizations co-developing continuity infrastructure with us — operationally embedded, doctrinally close.',
     feels: 'Co-developed. Privileged. Long-cycle.',
     deliverables: [
@@ -319,7 +321,7 @@ const engagementLayers: EngagementLayer[] = [
       'Privileged access to OCRA and continuity research',
       'Named cohort recognition in organizational materials',
     ],
-    range: 'Cohort terms — by invitation and mutual fit',
+    range: 'Cohort terms · by invitation and mutual fit',
   },
 ];
 
@@ -373,51 +375,51 @@ const frEngagementLayers: EngagementLayer[] = [
     key: 'oci', icon: 'compass',
     name: 'OCI — Évaluation de continuité',
     posture: 'Diagnostics organisationnels',
-    layer: 'Couche 1 · Intelligence de continuité',
+    layer: 'Engagement Évaluation · Intelligence de continuité',
     fit: 'Fédérations et organizations établissant une base de continuité avant toute décision d’outillage.',
     feels: 'Diagnostic. Discret. Stratégique.',
     deliverables: ['Aperçu OCI — base de continuité ciblée', 'Note exécutive de continuité', 'Revue d’entropie de gouvernance', 'Atelier organisationnel de continuité'],
-    range: 'Engagement — généralement 18 k$ à 45 k$',
+    range: '18 000 $ à 45 000 $ CAD · engagement ponctuel',
   },
   {
     key: 'ocra', icon: 'network',
     name: 'OCRA — Intelligence de continuité adaptative',
     posture: 'Approfondissement structurel des risques',
-    layer: 'Couche 2 · Topologie de continuité',
+    layer: 'Engagement Topologie · Topologie de continuité',
     fit: 'Organizations disposant d’une base et nécessitant une profondeur structurelle : analyse des dépendances, parcours de modernisation, interprétation consciente du niveau de confiance.',
     feels: 'Structurel. Interprétatif. Tourné vers l’avenir.',
     deliverables: ['Analyse structurelle de continuité', 'Cartographie de la topologie de continuité', 'Évaluation des parcours de modernisation', 'Interprétation opérationnelle consciente du niveau de confiance'],
-    range: 'Engagement — généralement 35 k$ à 90 k$',
+    range: '35 000 $ à 90 000 $ CAD · engagement ponctuel',
   },
   {
     key: 'platform', icon: 'layers',
     name: 'Activation de plateforme',
-    posture: 'Infrastructure de continuité',
-    layer: 'Couche 3 · Infrastructure opérationnelle de continuité',
-    fit: 'Organizations prêtes à activer une infrastructure de continuité sur une base évaluée — pas un déploiement SaaS générique.',
+    posture: 'Infrastructure de continuité (post-diagnostic)',
+    layer: 'Engagement Plateforme · Infrastructure opérationnelle de continuité',
+    fit: 'Organizations prêtes à activer une infrastructure de continuité sur une base évaluée — pas un déploiement SaaS générique. Requiert un Engagement Évaluation (ou un Diagnostic complet) préalable.',
     feels: 'Opérationnel. Respectueux de la gouvernance. Transmissible.',
     deliverables: ['Activation d’outils opérationnels de continuité', 'Alignement d’infrastructure de gouvernance', 'Systèmes de preuve et décisions officielles', 'Flux de travail respectueux de la continuité pour dirigeants, délégués et personnel'],
-    range: 'Programme annuel — généralement 40 k$ à 140 k$',
+    range: '40 000 $ à 140 000 $ CAD par année · abonnement annuel (post-diagnostic)',
   },
   {
     key: 'longitudinal', icon: 'infinity',
     name: 'Soutien longitudinal de continuité',
     posture: 'Intendance de continuité',
-    layer: 'Couche 4 · Couche de continuité de gouvernance',
+    layer: 'Engagement Intendance · Continuité de gouvernance',
     fit: 'Syndicats nationaux et fédérations soutenant la continuité à travers les cycles de leadership, les mandats et la coordination fédérative.',
     feels: 'Durable. Transmissible. À l’échelle fédérative.',
     deliverables: ['Surveillance continue de l’entropie de gouvernance', 'Intelligence exécutive longitudinale de continuité', 'Coordination fédérative de continuité', 'Maintien de la posture de souveraineté opérationnelle'],
-    range: 'Engagement stratégique — défini avec la direction exécutive',
+    range: 'Intendance pluriannuelle · définie avec la direction exécutive',
   },
   {
     key: 'founding', icon: 'sparkles',
     name: 'Cohorte de déploiement guidé',
     posture: 'Collaboration organisationnelle stratégique',
-    layer: 'Couche 5 · Engagement en cohorte',
+    layer: 'Engagement Cohorte · Partenariat de co-développement',
     fit: 'Un petit nombre d’organizations co-développant l’infrastructure de continuité avec nous — engagement opérationnel et doctrinal rapproché.',
     feels: 'Co-développé. Privilégié. À long cycle.',
     deliverables: ['Co-conception directe avec l’équipe fondatrice', 'Influence de gouvernance réservée sur la doctrine de plateforme', 'Accès privilégié à la recherche OCRA et continuité', 'Reconnaissance nommée de la cohorte dans le matériel organisationnel'],
-    range: 'Conditions de cohorte — sur invitation et ajustement mutuel',
+    range: 'Conditions de cohorte · sur invitation et ajustement mutuel',
   },
 ];
 
@@ -642,7 +644,7 @@ export default async function LocalePricingPage({
     <div className="organization-shell min-h-screen">
       <script
         type="application/ld+json"
-         
+        // eslint-disable-next-line react/no-danger -- structured data; values are static literals
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingServiceSchema) }}
       />
       <MarketingHeroSection
