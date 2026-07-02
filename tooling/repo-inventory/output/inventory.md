@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-06-22 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-07-02 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -11,14 +11,14 @@
 | Workspace Packages (apps|packages|services|tooling) | 248 |
 | GitHub Workflows | 50 |
 | Contract Test Files | 266 |
-| TS/JS Test Files | 2390 |
+| TS/JS Test Files | 2407 |
 | Python Test Files | 32 |
 
 ## Apps
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 251 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 287 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 106 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 448 | Internal operations console — platform governance, compliance, analytics, integr |

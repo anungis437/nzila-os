@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   hasPermission: vi.fn(),
   normalizeRole: vi.fn(),
   resolveOrgContext: vi.fn(),
+  verifyAbrOrgMembership: vi.fn(),
+  resolveAbrRoleForRequest: vi.fn(),
 }))
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({
@@ -28,11 +30,18 @@ vi.mock('@/lib/org-context', () => ({
   resolveOrgContext: mocks.resolveOrgContext,
 }))
 
+vi.mock('@/lib/trusted-auth', () => ({
+  verifyAbrOrgMembership: mocks.verifyAbrOrgMembership,
+  resolveAbrRoleForRequest: mocks.resolveAbrRoleForRequest,
+}))
+
 import {
   authenticateUser,
   authenticateWithOrg,
   requireOrgAccess,
   requirePermission,
+  requireVerifiedOrgAccess,
+  requireVerifiedPermission,
   withRequestContext,
 } from './api-guards'
 
@@ -45,6 +54,15 @@ describe('abr api-guards', () => {
     mocks.normalizeRole.mockReturnValue('viewer')
     mocks.hasPermission.mockReturnValue(false)
     mocks.resolveOrgContext.mockReturnValue({ orgId: 'org_1', source: 'header' })
+    mocks.verifyAbrOrgMembership.mockResolvedValue({
+      ok: true,
+      role: 'viewer',
+      source: 'abr_users_lookup',
+    })
+    mocks.resolveAbrRoleForRequest.mockReturnValue({
+      role: 'viewer',
+      source: 'abr_users_lookup',
+    })
   })
 
   it('authenticateUser returns ok when user exists', async () => {
@@ -144,6 +162,98 @@ describe('abr api-guards', () => {
     expect(mocks.createRequestContext).toHaveBeenCalledWith(req, { appName: 'abr' })
     expect(mocks.runWithContext).toHaveBeenCalledTimes(1)
     expect(handler).toHaveBeenCalledTimes(1)
+    expect(result).toEqual({ ok: true })
+  })
+
+  // ── Phase 2C.6 verified guards ────────────────────────────────────────────
+
+  it('requireVerifiedOrgAccess returns auth failure when authenticateWithOrg fails (no user)', async () => {
+    mocks.auth.mockResolvedValue({ userId: null })
+
+    const req = new NextRequest('http://localhost/api/test')
+    const result = await requireVerifiedOrgAccess(req)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.response.status).toBe(401)
+    }
+  })
+
+  it('requireVerifiedOrgAccess returns 403 when membership verification fails', async () => {
+    mocks.verifyAbrOrgMembership.mockResolvedValue({ ok: false, reason: 'no_membership' })
+
+    const req = new NextRequest('http://localhost/api/test')
+    const result = await requireVerifiedOrgAccess(req)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.response.status).toBe(403)
+      await expect(result.response.json()).resolves.toEqual({
+        error: 'Org access denied',
+        code: 'ORG_MEMBERSHIP_REQUIRED',
+        reason: 'no_membership',
+      })
+    }
+    expect(mocks.verifyAbrOrgMembership).toHaveBeenCalledWith('user_1', 'org_1')
+  })
+
+  it('requireVerifiedOrgAccess returns verified context on success', async () => {
+    mocks.verifyAbrOrgMembership.mockResolvedValue({
+      ok: true,
+      role: 'investigator',
+      source: 'abr_users_lookup',
+    })
+    mocks.resolveAbrRoleForRequest.mockReturnValue({
+      role: 'investigator',
+      source: 'abr_users_lookup',
+    })
+
+    const req = new NextRequest('http://localhost/api/test')
+    const result = await requireVerifiedOrgAccess(req)
+
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.context).toEqual({
+        userId: 'user_1',
+        orgId: 'org_1',
+        orgSource: 'header',
+        role: 'investigator',
+        membershipSource: 'abr_users_lookup',
+      })
+    }
+  })
+
+  it('requireVerifiedPermission returns 403 when role lacks permission', () => {
+    mocks.hasPermission.mockReturnValue(false)
+
+    const context = {
+      userId: 'user_1',
+      orgId: 'org_1',
+      orgSource: 'header' as const,
+      role: 'learner' as const,
+      membershipSource: 'abr_users_lookup' as const,
+    }
+    const result = requireVerifiedPermission(context, 'incident.transition')
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.response.status).toBe(403)
+    }
+    expect(mocks.hasPermission).toHaveBeenCalledWith('learner', 'incident.transition')
+  })
+
+  it('requireVerifiedPermission returns ok when role has permission', () => {
+    mocks.hasPermission.mockReturnValue(true)
+
+    const context = {
+      userId: 'user_1',
+      orgId: 'org_1',
+      orgSource: 'header' as const,
+      role: 'investigator' as const,
+      membershipSource: 'session_org_match' as const,
+    }
+    const result = requireVerifiedPermission(context, 'incident.read')
+
     expect(result).toEqual({ ok: true })
   })
 })

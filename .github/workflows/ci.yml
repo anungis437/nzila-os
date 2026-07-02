@@ -293,9 +293,27 @@ jobs:
       - name: Evidence lifecycle policy gate
         run: pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts
 
+      - name: Ensure main branch is fetched for DORA metrics
+        # actions/checkout@v5 with fetch-depth: 0 pulls all history for the PR
+        # ref but does NOT set up origin/main as a tracked remote ref on PR
+        # runs. Without origin/main, the DORA collector falls back to HEAD
+        # (the PR branch) and undercounts merges. Fetching main explicitly and
+        # setting origin/HEAD lets the collector see the real deployment history.
+        run: |
+          git fetch --no-tags --prune --depth=200 origin main:refs/remotes/origin/main || true
+          git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main || true
+          git rev-parse --verify --quiet "main^{commit}" >/dev/null 2>&1 || \
+            git update-ref refs/heads/main refs/remotes/origin/main || true
+
       - name: Collect DORA metrics
         run: node tooling/scripts/collect-dora-metrics.mjs -- --enforce
         env:
+          # DORA_MIN_DEPLOYS_PER_WEEK: 1.0 (approx 1 deploy / week floor).
+          # The collector counts PR landings via `git log --first-parent`, which
+          # correctly captures squash-merged PRs (see collect-dora-metrics.mjs
+          # comment for rationale). A 1.0/week floor is a reasonable "we are
+          # shipping" signal without being self-referentially unblockable —
+          # the trailing-30d average is currently ~2.5/week.
           DORA_MIN_DEPLOYS_PER_WEEK: "1"
           DORA_MAX_LEAD_TIME_HOURS: "720"
           DORA_MAX_CHANGE_FAILURE_RATE_PCT: "15"

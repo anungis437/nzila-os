@@ -66,6 +66,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/shopify\/webhook/,   // Shopify webhook (HMAC-verified)
       /\/api\/zoho\/webhook/,      // Zoho webhook (token-verified)
       /\/api\/contact/,             // Public contact/demo-request forms
+      /\/api\/courtlens\/public-intake/, // ABR CourtLens — pseudonymous public intake (validated + rate-limited)
       /\/api\/pilot\/apply/,        // Public pilot application form
       /\/api\/trial(?:\/|$)/,       // Public Flow trial signup form
       /\/api\/telemetry/,            // Public marketing telemetry (anonymous page events)
@@ -91,6 +92,8 @@ describe('API Authorization Contract (INV-04)', () => {
       /getAuth\(/,
       /currentUser\(\)/,
       /requireOrgAccess\(/,
+      /requireVerifiedOrgAccess\(/,  // ABR CourtLens — session/DB membership verification (Phase 2C.6)
+      /requireVerifiedPermission\(/, // ABR CourtLens — server-derived RBAC (Phase 2C.6)
       /verifyWebhookSignature\(/,
       /authenticateUser\(/,
       /requirePlatformRole\(/,

@@ -108,6 +108,8 @@ describe('INV-11 — Every API route has authorization', () => {
     'authorize(',
     'withAuth(',
     'requireOrgAccess(',
+    'requireVerifiedOrgAccess(',  // ABR CourtLens — verifies session/DB membership (Phase 2C.6)
+    'requireVerifiedPermission(', // ABR CourtLens — server-derived RBAC check (Phase 2C.6)
     'requirePlatformRole(',
     'authenticateUser(',
     'requireAuth(',
@@ -152,6 +154,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/health',
     '/api/webhooks',
     '/api/public',
+    '/api/courtlens/public-intake',    // ABR CourtLens — pseudonymous public intake (validated + rate-limited, no PII beyond consent)
     '/api/trial',               // Public product trial signup
     '/api/ready',               // Readiness/liveness probes
     '/api/version',             // Build version metadata
