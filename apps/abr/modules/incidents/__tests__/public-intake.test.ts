@@ -24,6 +24,7 @@ import {
   defaultCourtLensFields,
 } from '../courtlens';
 import { assertValidPracticeArea, CourtLensValidationError, listMatters, getMatterDetail } from '../matter-service';
+import { isValidTenantSlug, TenantNotFoundError } from '../../tenants/tenant-resolver';
 
 // ── Unknown practiceArea — safe default ───────────────────────────────────────
 
@@ -60,7 +61,7 @@ describe('practiceArea unknown default (Phase 2A fix)', () => {
 
 describe('validatePublicIntakeInput', () => {
   const validHousing: PublicIntakeInput = {
-    tenantId: 'org-clinic-test',
+    tenantSlug: 'org-clinic-test',
     practiceArea: 'housing',
     subIssue: 'eviction',
     summary: 'My landlord sent an eviction notice and I have nowhere to go.',
@@ -92,16 +93,16 @@ describe('validatePublicIntakeInput', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('rejects missing tenantId', () => {
-    const r = validatePublicIntakeInput({ ...validHousing, tenantId: '' });
+  it('rejects missing tenantSlug', () => {
+    const r = validatePublicIntakeInput({ ...validHousing, tenantSlug: '' });
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.errors.some((e) => e.code === 'MISSING_TENANT_ID')).toBe(true);
+    if (!r.ok) expect(r.errors.some((e) => e.code === 'MISSING_TENANT_SLUG')).toBe(true);
   });
 
-  it('rejects malformed tenantId', () => {
-    const r = validatePublicIntakeInput({ ...validHousing, tenantId: 'ab' }); // too short
+  it('rejects malformed tenantSlug', () => {
+    const r = validatePublicIntakeInput({ ...validHousing, tenantSlug: 'ab' }); // too short
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.errors.some((e) => e.code === 'INVALID_TENANT_ID')).toBe(true);
+    if (!r.ok) expect(r.errors.some((e) => e.code === 'INVALID_TENANT_SLUG')).toBe(true);
   });
 
   it('rejects unknown practiceArea', () => {
@@ -172,7 +173,7 @@ describe('validatePublicIntakeInput', () => {
 
   it('returns multiple errors simultaneously', () => {
     const r = validatePublicIntakeInput({
-      tenantId: '',
+      tenantSlug: '',
       practiceArea: 'criminal',
       subIssue: '',
       summary: 'short',
@@ -183,16 +184,47 @@ describe('validatePublicIntakeInput', () => {
   });
 });
 
-// ── createMatterFromPublicIntake — integration (no service mock) ──────────────
+// ── Tenant resolver — Phase 2B ────────────────────────────────────────────────
 
-let seq2a = 0;
-function org2a(): string { return `org-2a-intake-${++seq2a}`; }
+describe('isValidTenantSlug', () => {
+  it('accepts valid slugs', () => {
+    expect(isValidTenantSlug('metro-university')).toBe(true);
+    expect(isValidTenantSlug('org-clinic-1')).toBe(true);
+    expect(isValidTenantSlug('abc')).toBe(true);
+  });
 
-describe('createMatterFromPublicIntake — full integration', () => {
+  it('rejects too-short slugs', () => {
+    expect(isValidTenantSlug('ab')).toBe(false);
+    expect(isValidTenantSlug('')).toBe(false);
+  });
+
+  it('rejects slugs with invalid characters', () => {
+    expect(isValidTenantSlug('org/slash')).toBe(false);
+    expect(isValidTenantSlug('org space')).toBe(false);
+    expect(isValidTenantSlug('org@at')).toBe(false);
+  });
+
+  it('rejects slug starting with hyphen', () => {
+    expect(isValidTenantSlug('-org')).toBe(false);
+  });
+});
+
+describe('TenantNotFoundError', () => {
+  it('has a generic message that does not expose the slug', () => {
+    const err = new TenantNotFoundError('unknown-org');
+    expect(err.message).not.toContain('unknown-org');
+    expect(err.name).toBe('TenantNotFoundError');
+  });
+});
+
+// ── createMatterFromPublicIntake — integration with tenant resolver ───────────
+// Uses real demo org slugs so the tenant resolver can resolve them in
+// in-memory mode without a DB.
+
+describe('createMatterFromPublicIntake — full integration with resolver', () => {
   it('housing intake creates matter with correct practiceArea via event replay', async () => {
-    const orgId = org2a();
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'housing',
       subIssue: 'eviction',
       summary: 'Eviction notice received with 14-day deadline.',
@@ -204,45 +236,61 @@ describe('createMatterFromPublicIntake — full integration', () => {
     expect(conf.statusLabel).toBe('New Intake');
     expect(conf.legalBoundaryNotice).toBeTruthy();
 
-    // Verify event replay reconstructs practiceArea correctly
-    const detail = await getMatterDetail(orgId, conf.matterId);
+    const detail = await getMatterDetail('metro-university', conf.matterId);
     expect(detail!.matter.practiceArea).toBe('housing');
     expect(detail!.matter.subIssue).toBe('eviction');
   });
 
   it('employment intake creates matter with correct practiceArea', async () => {
-    const orgId = org2a();
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'employment',
       subIssue: 'unpaid_wages',
       summary: 'Employer has not paid wages for four weeks of completed work.',
       consentAcknowledged: true,
     });
 
-    const detail = await getMatterDetail(orgId, conf.matterId);
+    const detail = await getMatterDetail('metro-university', conf.matterId);
     expect(detail!.matter.practiceArea).toBe('employment');
     expect(detail!.matter.subIssue).toBe('unpaid_wages');
   });
 
   it('debt intake creates matter with correct practiceArea', async () => {
-    const orgId = org2a();
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'debt',
       subIssue: 'collector_harassment',
       summary: 'Collector is calling multiple times per day about a debt I do not recognize.',
       consentAcknowledged: true,
     });
 
-    const detail = await getMatterDetail(orgId, conf.matterId);
+    const detail = await getMatterDetail('metro-university', conf.matterId);
     expect(detail!.matter.practiceArea).toBe('debt');
   });
 
+  it('unknown tenant slug is rejected — TenantNotFoundError', async () => {
+    await expect(createMatterFromPublicIntake({
+      tenantSlug: 'not-a-real-org',
+      practiceArea: 'housing',
+      subIssue: 'eviction',
+      summary: 'Eviction notice received with imminent deadline.',
+      consentAcknowledged: true,
+    })).rejects.toThrow(TenantNotFoundError);
+  });
+
+  it('malformed tenant slug is rejected', async () => {
+    await expect(createMatterFromPublicIntake({
+      tenantSlug: 'ab',
+      practiceArea: 'housing',
+      subIssue: 'eviction',
+      summary: 'Eviction notice received with imminent deadline.',
+      consentAcknowledged: true,
+    })).rejects.toThrow(TenantNotFoundError);
+  });
+
   it('risk flags are persisted and reconstructed via event replay', async () => {
-    const orgId = org2a();
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'housing',
       subIssue: 'eviction',
       summary: 'Eviction notice received and at risk of losing housing.',
@@ -250,16 +298,15 @@ describe('createMatterFromPublicIntake — full integration', () => {
       riskFlags: { risk_eviction: true, risk_homelessness: true },
     });
 
-    const detail = await getMatterDetail(orgId, conf.matterId);
+    const detail = await getMatterDetail('metro-university', conf.matterId);
     expect(detail!.matter.riskFlags.risk_eviction).toBe(true);
     expect(detail!.matter.riskFlags.risk_homelessness).toBe(true);
     expect(detail!.matter.riskFlags.risk_lockout).toBe(false);
   });
 
   it('critical risk flags derive severity critical', async () => {
-    const orgId = org2a();
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'housing',
       subIssue: 'lockout',
       summary: 'I have been locked out of my apartment without notice.',
@@ -267,28 +314,26 @@ describe('createMatterFromPublicIntake — full integration', () => {
       riskFlags: { risk_lockout: true },
     });
 
-    const detail = await getMatterDetail(orgId, conf.matterId);
+    const detail = await getMatterDetail('metro-university', conf.matterId);
     expect(detail!.matter.severity).toBe('critical');
   });
 
   it('no deadline and no critical flags derive severity low', async () => {
-    const orgId = org2a();
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'debt',
       subIssue: 'collection_letter',
       summary: 'I received a collection letter for a small debt amount.',
       consentAcknowledged: true,
     });
 
-    const detail = await getMatterDetail(orgId, conf.matterId);
+    const detail = await getMatterDetail('metro-university', conf.matterId);
     expect(detail!.matter.severity).toBe('low');
   });
 
   it('client profile is persisted and reconstructed', async () => {
-    const orgId = org2a();
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'housing',
       subIssue: 'rent_arrears',
       summary: 'I am behind on rent due to unexpected medical costs.',
@@ -299,45 +344,41 @@ describe('createMatterFromPublicIntake — full integration', () => {
       hasChildren: true,
     });
 
-    const detail = await getMatterDetail(orgId, conf.matterId);
+    const detail = await getMatterDetail('metro-university', conf.matterId);
     expect(detail!.matter.clientProfile?.clientName).toBe('Jane Smith');
     expect(detail!.matter.clientProfile?.hasChildren).toBe(true);
     expect(detail!.matter.clientProfile?.consentStatus).toBe('granted');
   });
 
-  it('tenant orgId is preserved — not cross-contaminated', async () => {
-    const orgA = org2a();
-    const orgB = org2a();
-
+  it('tenant org scope is preserved — different demo orgs are isolated', async () => {
     const confA = await createMatterFromPublicIntake({
-      tenantId: orgA,
+      tenantSlug: 'metro-university',
       practiceArea: 'housing', subIssue: 'eviction',
-      summary: 'Org A client facing eviction in 14 days.',
+      summary: 'Metro University client facing eviction in 14 days.',
       consentAcknowledged: true,
     });
 
     const confB = await createMatterFromPublicIntake({
-      tenantId: orgB,
+      tenantSlug: 'northcare-hospital',
       practiceArea: 'employment', subIssue: 'termination',
-      summary: 'Org B client was terminated without cause or notice.',
+      summary: 'NorthCare Hospital worker terminated without cause or notice.',
       consentAcknowledged: true,
     });
 
-    const detailA = await getMatterDetail(orgA, confA.matterId);
-    const detailB = await getMatterDetail(orgB, confB.matterId);
+    const detailA = await getMatterDetail('metro-university', confA.matterId);
+    const detailB = await getMatterDetail('northcare-hospital', confB.matterId);
 
-    expect(detailA!.matter.orgId).toBe(orgA);
-    expect(detailB!.matter.orgId).toBe(orgB);
+    expect(detailA!.matter.orgId).toBe('metro-university');
+    expect(detailB!.matter.orgId).toBe('northcare-hospital');
 
-    // Cross-tenant isolation: orgA cannot see orgB's matter
-    const crossTenant = await getMatterDetail(orgA, confB.matterId);
+    // Cross-tenant isolation: metro-university cannot see northcare-hospital matter
+    const crossTenant = await getMatterDetail('metro-university', confB.matterId);
     expect(crossTenant).toBeNull();
   });
 
   it('public confirmation never exposes internal data', async () => {
-    const orgId = org2a();
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'housing', subIssue: 'eviction',
       summary: 'Eviction notice — need legal help urgently.',
       consentAcknowledged: true,
@@ -345,6 +386,7 @@ describe('createMatterFromPublicIntake — full integration', () => {
 
     const keys = Object.keys(conf);
     expect(keys).not.toContain('orgId');
+    expect(keys).not.toContain('tenantSlug');
     expect(keys).not.toContain('events');
     expect(keys).not.toContain('notes');
     expect(keys).not.toContain('riskFlags');
@@ -353,10 +395,9 @@ describe('createMatterFromPublicIntake — full integration', () => {
     expect(keys).not.toContain('referralStatus');
   });
 
-  it('legal boundary notice is always present', async () => {
-    const orgId = org2a();
+  it('legal boundary notice is always present and non-advisory', async () => {
     const conf = await createMatterFromPublicIntake({
-      tenantId: orgId,
+      tenantSlug: 'metro-university',
       practiceArea: 'housing', subIssue: 'eviction',
       summary: 'Eviction notice received with imminent deadline.',
       consentAcknowledged: true,
@@ -364,9 +405,7 @@ describe('createMatterFromPublicIntake — full integration', () => {
 
     expect(conf.legalBoundaryNotice).toBeTruthy();
     expect(conf.legalBoundaryNotice.length).toBeGreaterThan(50);
-    // Notice must contain the explicit denial, not a positive claim of legal advice
     expect(conf.legalBoundaryNotice.toLowerCase()).toContain('does not provide legal advice');
-    // Must not claim to provide legal advice or give legal conclusions
     expect(conf.legalBoundaryNotice.toLowerCase()).not.toMatch(/will (give|provide|offer) legal advice/);
     expect(conf.legalBoundaryNotice.toLowerCase()).not.toMatch(/legal outcome|legal conclusion/);
   });

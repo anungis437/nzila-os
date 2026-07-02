@@ -2,20 +2,19 @@
  * CourtLens public intake service — Phase 2A.
  *
  * Handles the first public-facing write path:
- *   validated intake payload → tenant resolution → createMatter → safe response
+ *   validated intake payload → tenant resolver → createMatter → safe response
  *
  * Hard constraints enforced here:
  * - Consent must be explicitly acknowledged.
  * - Practice area and sub-issue must be valid A2J values (not 'unknown').
  * - Risk flag keys must be known; unknown keys are rejected.
- * - tenantId must be a valid org-ID format.
+ * - tenantSlug is validated for format and resolved to orgId server-side.
  * - Public response never includes internal notes, evidence, reviewer data,
  *   org internals, raw event payloads, or legal advice.
  * - Legal boundary notice is mandatory on every confirmation response.
  *
- * Tenant resolver: Phase 2A accepts tenantId (orgId) directly in the intake
- * payload. A public tenant-slug-to-orgId resolver is documented as a Phase 2B
- * gap. See docs/courtlens/phase-2/public-intake-api.md.
+ * Tenant resolver: Phase 2B uses tenantSlug (resolved to orgId server-side).
+ * See modules/tenants/tenant-resolver.ts for the resolver strategy.
  */
 
 import {
@@ -33,15 +32,11 @@ import {
   CourtLensValidationError,
   assertValidRiskKeys,
 } from './matter-service';
-
-// ── Tenant ID validation ──────────────────────────────────────────────────────
-// Same format as resolveOrgContext in lib/org-context.ts.
-
-const TENANT_ID_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9_-]{2,63}$/;
-
-function isValidTenantId(id: string): boolean {
-  return TENANT_ID_REGEX.test(id);
-}
+import {
+  resolveTenantSlug,
+  isValidTenantSlug,
+  TenantNotFoundError,
+} from '@/modules/tenants/tenant-resolver';
 
 // ── Date validation ───────────────────────────────────────────────────────────
 
@@ -52,8 +47,11 @@ function isValidIsoDate(s: string): boolean {
 // ── Input/output types ────────────────────────────────────────────────────────
 
 export interface PublicIntakeInput {
-  /** Tenant organisation ID (orgId). Slug resolver is Phase 2B. */
-  tenantId: string;
+  /**
+   * Public tenant slug. Resolved to orgId server-side via tenant resolver.
+   * Phase 2B: tenantSlug === orgId. See modules/tenants/tenant-resolver.ts.
+   */
+  tenantSlug: string;
   practiceArea: string;
   subIssue: string;
   /** Client problem summary. Minimum 10 characters. */
@@ -104,12 +102,12 @@ export function validatePublicIntakeInput(
 
   const body = raw as Record<string, unknown>;
 
-  // tenantId
-  const tenantId = typeof body.tenantId === 'string' ? body.tenantId.trim() : '';
-  if (!tenantId) {
-    errs.push({ error: 'tenantId is required', field: 'tenantId', code: 'MISSING_TENANT_ID' });
-  } else if (!isValidTenantId(tenantId)) {
-    errs.push({ error: 'tenantId must be a valid tenant identifier (3–64 alphanumeric/hyphen/underscore characters, starting with alphanumeric)', field: 'tenantId', code: 'INVALID_TENANT_ID' });
+  // tenantSlug — format-validated here; existence verified in createMatterFromPublicIntake
+  const tenantSlug = typeof body.tenantSlug === 'string' ? body.tenantSlug.trim() : '';
+  if (!tenantSlug) {
+    errs.push({ error: 'tenantSlug is required', field: 'tenantSlug', code: 'MISSING_TENANT_SLUG' });
+  } else if (!isValidTenantSlug(tenantSlug)) {
+    errs.push({ error: 'tenantSlug must be a valid slug (3–64 alphanumeric/hyphen/underscore characters, starting with alphanumeric)', field: 'tenantSlug', code: 'INVALID_TENANT_SLUG' });
   }
 
   // practiceArea — must be a known A2J value; 'unknown' is not valid here
@@ -175,7 +173,7 @@ export function validatePublicIntakeInput(
   return {
     ok: true,
     input: {
-      tenantId,
+      tenantSlug,
       practiceArea,
       subIssue,
       summary,
@@ -237,10 +235,14 @@ function deriveMatterTitle(practiceArea: string, subIssue: string): string {
 export async function createMatterFromPublicIntake(
   input: PublicIntakeInput,
 ): Promise<PublicIntakeConfirmation> {
+  // Resolve tenant slug → orgId server-side.
+  // Throws TenantNotFoundError for unknown/inactive tenants.
+  const tenant = await resolveTenantSlug(input.tenantSlug);
+  const orgId = tenant.orgId;
   const hasDeadline = Boolean(input.hearingDate || input.deadlineDate);
   const severity = deriveInitialSeverity(input.riskFlags, hasDeadline);
 
-  const matter = await createMatter(input.tenantId, 'public-intake', {
+  const matter = await createMatter(orgId, 'public-intake', {
     title: deriveMatterTitle(input.practiceArea, input.subIssue),
     category: 'service_delivery',
     severity,

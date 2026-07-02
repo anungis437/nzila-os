@@ -55,7 +55,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     logAuditEvent({
       action: 'courtlens.public_intake.submitted',
       actorUserId: 'public',
-      orgId: input.tenantId,
+      orgId: input.tenantSlug,
       entityType: 'matter',
       details: {
         matterId: confirmation.matterId,
