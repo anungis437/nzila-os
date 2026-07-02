@@ -25,9 +25,8 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { db } from '@nzila/db';
-import { sql } from 'drizzle-orm';
 import { auth } from '@nzila/platform-auth/entra/server';
+import { lookupAbrUserMembership } from '@/modules/auth/abr-user-lookup';
 import { normalizeRole, type AbrRole } from '@/lib/rbac';
 
 // ── Environment gates ─────────────────────────────────────────────────────────
@@ -93,19 +92,14 @@ export async function verifyAbrOrgMembership(
 
   // Source 2: abr_users lookup (DB mode)
   if (hasDatabase()) {
-    const rows = (await db.execute(sql`
-      SELECT role, active
-      FROM abr_users
-      WHERE id = ${userId} AND org_id = ${orgId}
-      LIMIT 1
-    `)) as Array<Record<string, unknown>>;
+    const lookup = await lookupAbrUserMembership(userId, orgId);
 
-    if (rows.length === 0) return { ok: false, reason: 'no_membership' };
-    if (rows[0].active !== true) return { ok: false, reason: 'user_inactive' };
+    if (!lookup.found) return { ok: false, reason: 'no_membership' };
+    if (!lookup.row.active) return { ok: false, reason: 'user_inactive' };
 
     return {
       ok: true,
-      role: normalizeRole(String(rows[0].role)),
+      role: normalizeRole(lookup.row.role),
       source: 'abr_users_lookup',
     };
   }

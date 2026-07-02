@@ -18,7 +18,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
-  dbExecute: vi.fn(),
+  lookupAbrUserMembership: vi.fn(),
   listIncidentUsers: vi.fn(),
 }));
 
@@ -26,8 +26,8 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: mocks.auth,
 }));
 
-vi.mock('@nzila/db', () => ({
-  db: { execute: mocks.dbExecute },
+vi.mock('@/modules/auth/abr-user-lookup', () => ({
+  lookupAbrUserMembership: mocks.lookupAbrUserMembership,
 }));
 
 vi.mock('@/modules/incidents/service', () => ({
@@ -65,7 +65,7 @@ describe('verifyAbrOrgMembership — session_org_match', () => {
       expect(result.source).toBe('session_org_match');
     }
     // Session hit — no DB or memory lookup
-    expect(mocks.dbExecute).not.toHaveBeenCalled();
+    expect(mocks.lookupAbrUserMembership).not.toHaveBeenCalled();
     expect(mocks.listIncidentUsers).not.toHaveBeenCalled();
   });
 
@@ -90,7 +90,10 @@ describe('verifyAbrOrgMembership — abr_users DB lookup', () => {
   });
 
   it('returns role from abr_users when active', async () => {
-    mocks.dbExecute.mockResolvedValue([{ role: 'hr_lead', active: true }]);
+    mocks.lookupAbrUserMembership.mockResolvedValue({
+      found: true,
+      row: { role: 'hr_lead', active: true },
+    });
     const { verifyAbrOrgMembership } = await import('./trusted-auth');
 
     const result = await verifyAbrOrgMembership('user_1', 'metro-university');
@@ -103,7 +106,7 @@ describe('verifyAbrOrgMembership — abr_users DB lookup', () => {
   });
 
   it('rejects when abr_users has no matching row', async () => {
-    mocks.dbExecute.mockResolvedValue([]);
+    mocks.lookupAbrUserMembership.mockResolvedValue({ found: false });
     const { verifyAbrOrgMembership } = await import('./trusted-auth');
 
     const result = await verifyAbrOrgMembership('user_1', 'metro-university');
@@ -113,7 +116,10 @@ describe('verifyAbrOrgMembership — abr_users DB lookup', () => {
   });
 
   it('rejects when abr_users row is inactive', async () => {
-    mocks.dbExecute.mockResolvedValue([{ role: 'investigator', active: false }]);
+    mocks.lookupAbrUserMembership.mockResolvedValue({
+      found: true,
+      row: { role: 'investigator', active: false },
+    });
     const { verifyAbrOrgMembership } = await import('./trusted-auth');
 
     const result = await verifyAbrOrgMembership('user_1', 'metro-university');
