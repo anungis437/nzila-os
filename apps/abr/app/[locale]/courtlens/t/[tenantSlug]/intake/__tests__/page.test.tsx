@@ -8,6 +8,9 @@
 import { render, screen, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+// next-intl mock: resolves keys against the real EN-CA catalog.
+vi.mock('next-intl/server', async () => (await import('@/lib/test/next-intl-mock')).serverMock);
+
 const mocks = vi.hoisted(() => ({
   isValidTenantSlug: vi.fn(),
   resolveTenantSlug: vi.fn(),

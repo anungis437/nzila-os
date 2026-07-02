@@ -19,6 +19,10 @@
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+// next-intl mock: resolves keys against the real EN-CA catalog so copy-based
+// assertions still work and missing translations surface as test failures.
+vi.mock('next-intl', async () => (await import('@/lib/test/next-intl-mock')).clientMock);
+
 import { PublicIntakeForm } from '../PublicIntakeForm';
 
 function stubFetch(response: Partial<Response> & { json?: () => Promise<unknown> } = { ok: true }) {

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { createIdempotencyKey } from '@/lib/idempotency';
 
 /**
@@ -75,6 +76,8 @@ export function ReviewerActions({
   status,
   permissions,
 }: ReviewerActionsProps) {
+  const t = useTranslations('courtlens.reviewerActions');
+  const tErr = useTranslations('courtlens.errors');
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +101,7 @@ export function ReviewerActions({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? `Request failed (${res.status})`);
+        setError(data.error ?? `${tErr('reviewerActionsGeneric')} (${res.status})`);
         return;
       }
       router.refresh();
@@ -119,15 +122,15 @@ export function ReviewerActions({
 
   return (
     <div className="space-y-4 p-6 text-sm" data-testid="reviewer-actions">
-      <h3 className="font-poppins text-base font-semibold text-navy">Reviewer actions</h3>
+      <h3 className="font-poppins text-base font-semibold text-navy">{t('sectionTitle')}</h3>
       <p className="text-xs text-slate-500">
-        Actions record audited CourtLens events. AI review packet approval requires human sign-off.
+        {t('sectionHint')}
       </p>
 
       {canUpdate && aiNext.length > 0 && (
         <div data-testid="ai-summary-actions">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            AI review packet
+            {t('groupAi')}
           </p>
           <div className="mt-1 flex flex-wrap gap-2">
             {aiNext.map((to) => (
@@ -154,7 +157,7 @@ export function ReviewerActions({
       {canUpdate && referralNext.length > 0 && (
         <div data-testid="referral-actions">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Referral
+            {t('groupReferral')}
           </p>
           <div className="mt-1 flex flex-wrap gap-2">
             {referralNext.map((to) => (
@@ -181,7 +184,7 @@ export function ReviewerActions({
       {canTransition && fsmNext.length > 0 && (
         <div data-testid="transition-actions">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Matter status (ABR FSM)
+            {t('groupTransition')}
           </p>
           <div className="mt-1 flex flex-wrap gap-2">
             {fsmNext.map((to) => (
@@ -192,7 +195,7 @@ export function ReviewerActions({
                 onClick={() =>
                   callMutation(
                     `/api/courtlens/matters/${matterId}/transition`,
-                    { to, reason: 'Reviewer advanced matter' },
+                    { to, reason: t('transitionReason') },
                   )
                 }
                 className="rounded border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50"

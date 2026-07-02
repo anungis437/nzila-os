@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { createIdempotencyKey } from '@/lib/idempotency';
 
 /**
- * PublicIntakeForm — Phase 2F.
+ * PublicIntakeForm — Phase 2F + Phase 2H (i18n).
  *
  * Public, unauthenticated intake form.
  * Collects legal need; it does not answer the legal problem.
@@ -17,78 +18,33 @@ import { createIdempotencyKey } from '@/lib/idempotency';
  * - Idempotency-Key on every submit (proxy.ts contract).
  * - No x-abr-role or x-org-id headers.
  * - Success state shows only the safe public confirmation from the server.
+ * - Copy is fully localized via next-intl (courtlens.publicIntake + courtlens.errors).
  */
 
-const PRACTICE_AREAS = [
-  { value: 'housing', label: 'Housing (landlord–tenant, eviction, repairs)' },
-  { value: 'employment', label: 'Employment (unpaid wages, termination, safety)' },
-  { value: 'debt', label: 'Consumer debt / collections' },
-] as const;
-
 const HOUSING_SUB_ISSUES = [
-  { value: 'eviction', label: 'Eviction' },
-  { value: 'rent_arrears', label: 'Rent arrears' },
-  { value: 'illegal_rent_increase', label: 'Illegal rent increase' },
-  { value: 'repairs_maintenance', label: 'Repairs / maintenance' },
-  { value: 'harassment', label: 'Harassment' },
-  { value: 'lockout', label: 'Lockout' },
-  { value: 'discrimination', label: 'Discrimination' },
-  { value: 'safety', label: 'Safety concern' },
-  { value: 'utility_shutoff', label: 'Utility shutoff' },
-  { value: 'deposit', label: 'Deposit issue' },
-  { value: 'notice_validity', label: 'Notice validity' },
-  { value: 'other_housing', label: 'Other housing issue' },
+  'eviction', 'rent_arrears', 'illegal_rent_increase', 'repairs_maintenance',
+  'harassment', 'lockout', 'discrimination', 'safety', 'utility_shutoff',
+  'deposit', 'notice_validity', 'other_housing',
 ] as const;
 
 const EMPLOYMENT_SUB_ISSUES = [
-  { value: 'unpaid_wages', label: 'Unpaid wages' },
-  { value: 'termination', label: 'Termination / dismissal' },
-  { value: 'workplace_harassment', label: 'Workplace harassment / discrimination' },
-  { value: 'unsafe_work', label: 'Unsafe work' },
-  { value: 'missing_records', label: 'Missing employment records' },
-  { value: 'employment_status', label: 'Unclear employment status' },
-  { value: 'scheduling_dispute', label: 'Scheduling / hours dispute' },
-  { value: 'other_employment', label: 'Other employment issue' },
+  'unpaid_wages', 'termination', 'workplace_harassment', 'unsafe_work',
+  'missing_records', 'employment_status', 'scheduling_dispute', 'other_employment',
 ] as const;
 
 const DEBT_SUB_ISSUES = [
-  { value: 'collection_letter', label: 'Collection letter received' },
-  { value: 'debt_buyer_claim', label: 'Debt buyer claim' },
-  { value: 'wage_garnishment', label: 'Wage garnishment' },
-  { value: 'payday_loan', label: 'Payday loan issue' },
-  { value: 'credit_card_debt', label: 'Credit card / loan debt' },
-  { value: 'utility_telecom_debt', label: 'Utility / telecom debt' },
-  { value: 'court_debt_paperwork', label: 'Court / tribunal debt paperwork' },
-  { value: 'identity_theft_debt', label: 'Identity theft / mistaken debt' },
-  { value: 'collector_harassment', label: 'Collector harassment' },
-  { value: 'unclear_debt_records', label: 'Unclear debt records' },
-  { value: 'other_debt', label: 'Other debt concern' },
+  'collection_letter', 'debt_buyer_claim', 'wage_garnishment', 'payday_loan',
+  'credit_card_debt', 'utility_telecom_debt', 'court_debt_paperwork',
+  'identity_theft_debt', 'collector_harassment', 'unclear_debt_records', 'other_debt',
 ] as const;
 
-const RISK_FLAGS_BY_AREA: Record<string, Array<{ key: string; label: string }>> = {
-  housing: [
-    { key: 'risk_lockout', label: 'At risk of being locked out' },
-    { key: 'risk_eviction', label: 'At risk of eviction' },
-    { key: 'risk_utility_shutoff', label: 'At risk of utility shutoff' },
-    { key: 'risk_homelessness', label: 'At risk of homelessness' },
-    { key: 'risk_safety', label: 'Safety concern at home' },
-  ],
-  employment: [
-    { key: 'risk_income_loss', label: 'At risk of losing income' },
-    { key: 'risk_unsafe_work', label: 'Unsafe workplace condition' },
-    { key: 'risk_retaliation', label: 'At risk of employer retaliation' },
-    { key: 'risk_harassment', label: 'Workplace harassment' },
-  ],
-  debt: [
-    { key: 'risk_garnishment', label: 'Wage garnishment in progress or threatened' },
-    { key: 'risk_bank_freeze', label: 'Bank account freeze threatened' },
-    { key: 'risk_identity_theft', label: 'Identity theft concern' },
-    { key: 'risk_essential_services', label: 'Essential services at risk' },
-    { key: 'risk_harassment', label: 'Collector harassment' },
-  ],
+const RISK_FLAG_KEYS_BY_AREA: Record<string, readonly string[]> = {
+  housing: ['risk_lockout', 'risk_eviction', 'risk_utility_shutoff', 'risk_homelessness', 'risk_safety'],
+  employment: ['risk_income_loss', 'risk_unsafe_work', 'risk_retaliation', 'risk_harassment'],
+  debt: ['risk_garnishment', 'risk_bank_freeze', 'risk_identity_theft', 'risk_essential_services', 'risk_harassment'],
 };
 
-type PracticeArea = (typeof PRACTICE_AREAS)[number]['value'];
+type PracticeArea = 'housing' | 'employment' | 'debt';
 
 interface Confirmation {
   matterId: string;
@@ -99,6 +55,9 @@ interface Confirmation {
 }
 
 export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
+  const t = useTranslations('courtlens.publicIntake');
+  const tErr = useTranslations('courtlens.errors');
+
   const [practiceArea, setPracticeArea] = useState<PracticeArea | ''>('');
   const [subIssue, setSubIssue] = useState('');
   const [summary, setSummary] = useState('');
@@ -123,7 +82,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
     return [];
   }, [practiceArea]);
 
-  const riskFlagOptions = practiceArea ? RISK_FLAGS_BY_AREA[practiceArea] ?? [] : [];
+  const riskFlagOptions = practiceArea ? RISK_FLAG_KEYS_BY_AREA[practiceArea] ?? [] : [];
 
   const canSubmit =
     practiceArea !== '' &&
@@ -138,8 +97,8 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
     setError(null);
 
     const riskFlags: Record<string, boolean> = {};
-    for (const opt of riskFlagOptions) {
-      if (selectedRiskFlags[opt.key]) riskFlags[opt.key] = true;
+    for (const key of riskFlagOptions) {
+      if (selectedRiskFlags[key]) riskFlags[key] = true;
     }
 
     const body: Record<string, unknown> = {
@@ -176,17 +135,17 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
 
       if (!res.ok) {
         if (res.status === 429) {
-          setError('Too many submissions. Please wait a moment and try again.');
+          setError(tErr('publicIntakeRateLimit'));
         } else if (res.status === 400) {
           setError(
             typeof data.error === 'string'
               ? data.error
-              : 'Some information was missing or invalid. Please review the form and resubmit.',
+              : tErr('publicIntakeInvalid'),
           );
         } else if (res.status === 403 || res.status === 404) {
-          setError('This intake is not available for the requested organisation.');
+          setError(tErr('publicIntakeUnavailable'));
         } else {
-          setError('Your intake could not be submitted. Please try again later.');
+          setError(tErr('publicIntakeGeneric'));
         }
         return;
       }
@@ -207,15 +166,15 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
         className="mx-auto max-w-2xl space-y-4 p-6 text-sm text-slate-800"
         data-testid="public-intake-confirmation"
       >
-        <h2 className="text-2xl font-semibold text-navy">Intake received</h2>
+        <h2 className="text-2xl font-semibold text-navy">{t('confirmationTitle')}</h2>
         <p>
-          Reference: <span className="font-mono text-xs">{confirmation.matterId}</span>
+          {t('confirmationReference')}: <span className="font-mono text-xs">{confirmation.matterId}</span>
         </p>
         <p>
-          Status: <span data-testid="confirmation-status">{confirmation.statusLabel}</span>
+          {t('confirmationStatus')}: <span data-testid="confirmation-status">{confirmation.statusLabel}</span>
         </p>
         <p>
-          Submitted: {confirmation.submittedAt}
+          {t('confirmationSubmitted')}: {confirmation.submittedAt}
         </p>
         <div
           className="rounded border border-slate-200 bg-slate-50 p-4 text-xs text-slate-700"
@@ -235,18 +194,18 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
       noValidate
     >
       <div className="rounded border border-slate-200 bg-slate-50 p-4 text-xs text-slate-700">
-        <p className="font-medium text-navy">Before you start</p>
+        <p className="font-medium text-navy">{t('beforeYouStart')}</p>
         <ul className="mt-1 list-disc space-y-1 pl-5">
-          <li>This form collects information for supervised human review. It is not legal advice.</li>
-          <li>A qualified reviewer will look at your intake before any action is taken on your behalf.</li>
-          <li>Please share only what you are comfortable sharing. Do not include unnecessary sensitive information.</li>
-          <li>You will not receive an AI-generated legal opinion from this form.</li>
+          <li>{t('framingHumanReview')}</li>
+          <li>{t('framingReviewer')}</li>
+          <li>{t('framingSensitive')}</li>
+          <li>{t('framingNoAi')}</li>
         </ul>
       </div>
 
       <div>
         <label className="block text-xs font-medium uppercase tracking-wide text-slate-600" htmlFor="practiceArea">
-          What kind of problem?
+          {t('practiceAreaLabel')}
         </label>
         <select
           id="practiceArea"
@@ -260,19 +219,17 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
           required
         >
-          <option value="">Select a problem area…</option>
-          {PRACTICE_AREAS.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.label}
-            </option>
-          ))}
+          <option value="">{t('practiceAreaPlaceholder')}</option>
+          <option value="housing">{t('practiceAreaHousing')}</option>
+          <option value="employment">{t('practiceAreaEmployment')}</option>
+          <option value="debt">{t('practiceAreaDebt')}</option>
         </select>
       </div>
 
       {practiceArea && (
         <div>
           <label className="block text-xs font-medium uppercase tracking-wide text-slate-600" htmlFor="subIssue">
-            More specifically?
+            {t('subIssueLabel')}
           </label>
           <select
             id="subIssue"
@@ -282,10 +239,10 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
             className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
             required
           >
-            <option value="">Select a sub-issue…</option>
+            <option value="">{t('subIssuePlaceholder')}</option>
             {subIssues.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
+              <option key={s} value={s}>
+                {s.replaceAll('_', ' ')}
               </option>
             ))}
           </select>
@@ -294,7 +251,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
 
       <div>
         <label className="block text-xs font-medium uppercase tracking-wide text-slate-600" htmlFor="summary">
-          Describe your situation
+          {t('summaryLabel')}
         </label>
         <textarea
           id="summary"
@@ -304,7 +261,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
           rows={5}
           minLength={10}
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
-          placeholder="A few sentences about what is happening, in your own words. Do not include sensitive information you would rather keep private."
+          placeholder={t('summaryPlaceholder')}
           required
         />
       </div>
@@ -312,20 +269,20 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
       {riskFlagOptions.length > 0 && (
         <fieldset data-testid="field-risk-flags">
           <legend className="text-xs font-medium uppercase tracking-wide text-slate-600">
-            Any of these apply? (optional)
+            {t('riskFlagsLabel')}
           </legend>
           <div className="mt-1 space-y-1">
-            {riskFlagOptions.map((r) => (
-              <label key={r.key} className="flex items-start gap-2">
+            {riskFlagOptions.map((key) => (
+              <label key={key} className="flex items-start gap-2">
                 <input
                   type="checkbox"
-                  data-testid={`risk-${r.key}`}
-                  checked={selectedRiskFlags[r.key] ?? false}
+                  data-testid={`risk-${key}`}
+                  checked={selectedRiskFlags[key] ?? false}
                   onChange={(e) =>
-                    setSelectedRiskFlags((prev) => ({ ...prev, [r.key]: e.target.checked }))
+                    setSelectedRiskFlags((prev) => ({ ...prev, [key]: e.target.checked }))
                   }
                 />
-                <span>{r.label}</span>
+                <span>{key.replace(/^risk_/, '').replaceAll('_', ' ')}</span>
               </label>
             ))}
           </div>
@@ -335,7 +292,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <label className="block text-xs font-medium uppercase tracking-wide text-slate-600" htmlFor="hearingDate">
-            Hearing date (optional)
+            {t('hearingDateLabel')}
           </label>
           <input
             id="hearingDate"
@@ -348,7 +305,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
         </div>
         <div>
           <label className="block text-xs font-medium uppercase tracking-wide text-slate-600" htmlFor="deadlineDate">
-            Deadline date (optional)
+            {t('deadlineDateLabel')}
           </label>
           <input
             id="deadlineDate"
@@ -363,12 +320,12 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
 
       <details className="rounded border border-slate-200 p-3">
         <summary className="cursor-pointer text-xs font-medium uppercase tracking-wide text-slate-600">
-          Optional: your contact and household info
+          {t('contactSectionTitle')}
         </summary>
         <div className="mt-3 space-y-3">
           <div>
             <label className="block text-xs font-medium text-slate-600" htmlFor="contactName">
-              Your name (optional)
+              {t('contactNameLabel')}
             </label>
             <input
               id="contactName"
@@ -381,7 +338,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600" htmlFor="contactEmail">
-              Contact email (optional)
+              {t('contactEmailLabel')}
             </label>
             <input
               id="contactEmail"
@@ -394,7 +351,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600" htmlFor="householdSize">
-              Household size (optional)
+              {t('householdSizeLabel')}
             </label>
             <input
               id="householdSize"
@@ -413,7 +370,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
               checked={hasChildren}
               onChange={(e) => setHasChildren(e.target.checked)}
             />
-            <span>Children in the household</span>
+            <span>{t('hasChildrenLabel')}</span>
           </label>
           <label className="flex items-center gap-2 text-xs">
             <input
@@ -422,7 +379,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
               checked={hasDisability}
               onChange={(e) => setHasDisability(e.target.checked)}
             />
-            <span>Someone in the household has a disability</span>
+            <span>{t('hasDisabilityLabel')}</span>
           </label>
         </div>
       </details>
@@ -436,8 +393,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
           required
         />
         <span>
-          I understand this is not legal advice and my intake will be reviewed by a qualified person.
-          I consent to this information being sent to the organisation named on this page for supervised review.
+          {t('consentLabel')}
         </span>
       </label>
 
@@ -454,7 +410,7 @@ export function PublicIntakeForm({ tenantSlug }: { tenantSlug: string }) {
           className="rounded bg-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           data-testid="public-intake-submit"
         >
-          {pending ? 'Submitting…' : 'Submit intake'}
+          {pending ? t('submitting') : t('submit')}
         </button>
       </div>
     </form>

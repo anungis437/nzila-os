@@ -100,9 +100,15 @@ The no-external-demo-until-passed gate for CourtLens Phase 2. This document is t
 ## Bilingual-Readiness Status
 
 - Message catalogs: `apps/abr/messages/en-CA.json` and `apps/abr/messages/fr-CA.json` exist.
-- Search count of `courtlens` / `intake` keys in each catalog: **0 / 0**.
-- **All CourtLens UI copy is hard-coded English.**
-- FR-CA coverage: **NOT STARTED**.
+- CourtLens namespace (`courtlens.*`) added to both catalogs in Phase 2H.
+- All CourtLens UI (public intake page, form, tenant matter queue, matter detail, reviewer actions) migrated to `useTranslations`/`getTranslations`.
+- Bilingual parity regression test in [apps/abr/messages/__tests__/bilingual-parity.test.ts](../../../apps/abr/messages/__tests__/bilingual-parity.test.ts) enforces:
+  - Every EN `courtlens.*` key has a matching FR key (and vice versa).
+  - No empty FR strings.
+  - FR legal-boundary framing carries the explicit "n'est pas un avis juridique" denial.
+- FR-CA UI copy status: **PRESENT**. Requires counsel review before external demo — see [legal-boundary-copy-review-packet.md](legal-boundary-copy-review-packet.md).
+- Server-side legal notices (`LEGAL_BOUNDARY_NOTICE` in `public-intake.ts`, `MATTER_LEGAL_BOUNDARY_NOTICE` in `matter-service.ts`) are still EN-only. Documented as a remaining item if the demo audience requires FR public confirmation.
+- Pre-existing gap closed: `abrDashboard.*` namespace was referenced in dashboard pages but not present in either catalog. Phase 2H added it to both.
 
 ## Pass/Fail Criteria
 
@@ -150,8 +156,8 @@ Any step failing = smoke test FAIL = demo blocked.
 - CourtLens surface is safe for internal walkthroughs and QA sessions.
 
 ### Blockers before GREEN (external stakeholder demo allowed)
-1. **Counsel review of all customer-facing legal-boundary copy** — no lawyer has reviewed the current strings. Required before public exposure.
-2. **FR-CA bilingual copy** — all CourtLens UI is currently hard-coded English. Required for Canadian A2J demo credibility.
+1. **Counsel review of all customer-facing legal-boundary copy** — a formal review packet exists at [legal-boundary-copy-review-packet.md](legal-boundary-copy-review-packet.md); the sign-off table is not yet completed by counsel. Required before public exposure.
+2. ~~**FR-CA bilingual copy**~~ — closed in Phase 2H. FR-CA catalog present for all CourtLens UI. Server-side legal notices remain EN-only; only a blocker if the demo audience requires FR public confirmation text.
 3. **WCAG 2.1 AA audit** — no formal audit yet. Required for accessibility-focused stakeholders.
 4. **Live manual smoke sequence execution** — the 14-step sequence above must be performed by the demo owner against a running environment. Automated smoke covers the service layer but not real browser/network/proxy interaction.
 5. **Synthetic-data-only verification** — must be confirmed against the actual demo environment tenant.

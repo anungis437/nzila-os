@@ -1,6 +1,7 @@
 import { auth } from '@nzila/platform-auth/entra/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 import { Card } from '@nzila/ui';
 import { verifyAbrOrgMembership } from '@/lib/trusted-auth';
@@ -31,6 +32,7 @@ export default async function CourtLensMattersPage({
   if (!userId) redirect('/sign-in');
 
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'courtlens.tenantQueue' });
   const sp = await searchParams;
   const orgParam = typeof sp.org === 'string' ? sp.org : undefined;
   const orgId = orgParam ?? process.env.ABR_DEMO_ORG_ID ?? 'metro-university';
@@ -40,12 +42,12 @@ export default async function CourtLensMattersPage({
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="font-poppins text-2xl font-bold text-navy">CourtLens Matter Queue</h2>
-          <p className="mt-1 text-slate-600">Access to this organisation is not available.</p>
+          <h2 className="font-poppins text-2xl font-bold text-navy">{t('accessDeniedTitle')}</h2>
+          <p className="mt-1 text-slate-600">{t('accessDeniedSubtitle')}</p>
         </div>
         <Card>
           <div className="p-6 text-sm text-slate-700">
-            You do not have an active membership in this organisation. Please contact your CourtLens administrator.
+            {t('accessDeniedNoMembership')}
           </div>
         </Card>
       </div>
@@ -56,12 +58,12 @@ export default async function CourtLensMattersPage({
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="font-poppins text-2xl font-bold text-navy">CourtLens Matter Queue</h2>
-          <p className="mt-1 text-slate-600">Your role does not have queue access.</p>
+          <h2 className="font-poppins text-2xl font-bold text-navy">{t('accessDeniedRoleTitle')}</h2>
+          <p className="mt-1 text-slate-600">{t('accessDeniedRoleSubtitle')}</p>
         </div>
         <Card>
           <div className="p-6 text-sm text-slate-700">
-            The current role does not include permission to view matters.
+            {t('accessDeniedRoleMessage')}
           </div>
         </Card>
       </div>
@@ -73,21 +75,17 @@ export default async function CourtLensMattersPage({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-poppins text-2xl font-bold text-navy">CourtLens Matter Queue</h2>
+        <h2 className="font-poppins text-2xl font-bold text-navy">{t('title')}</h2>
         <p className="mt-1 text-slate-600">
-          Review-ready operational summary for supervised access-to-justice casework.
-          This surface displays operational status only. It is not legal advice.
+          {t('subtitle')}
         </p>
       </div>
 
       {items.length === 0 ? (
         <Card>
           <div className="space-y-2 p-6 text-sm text-slate-700">
-            <p className="font-medium text-navy">No matters yet.</p>
-            <p>
-              When public intake begins, submitted matters will appear here for reviewer triage.
-              This is operational infrastructure for supervised review, not legal advice.
-            </p>
+            <p className="font-medium text-navy">{t('emptyStateTitle')}</p>
+            <p>{t('emptyStateBody')}</p>
           </div>
         </Card>
       ) : (
@@ -107,39 +105,39 @@ export default async function CourtLensMattersPage({
                 </h3>
                 {item.subIssue && (
                   <p className="text-xs text-slate-500" data-testid="matter-sub-issue">
-                    Sub-issue: {item.subIssue.replaceAll('_', ' ')}
+                    {t('rowSubIssuePrefix')}{item.subIssue.replaceAll('_', ' ')}
                   </p>
                 )}
                 <dl className="space-y-1 text-xs text-slate-500">
                   <div>
-                    <dt className="inline font-medium">Status: </dt>
+                    <dt className="inline font-medium">{t('rowStatusLabel')}</dt>
                     <dd className="inline" data-testid="matter-status-label">{item.statusLabel}</dd>
                   </div>
                   <div>
-                    <dt className="inline font-medium">Opened: </dt>
+                    <dt className="inline font-medium">{t('rowOpenedLabel')}</dt>
                     <dd className="inline">{new Date(item.openedAt).toLocaleDateString()}</dd>
                   </div>
                   {item.deadlineDate && (
                     <div>
-                      <dt className="inline font-medium">Deadline: </dt>
+                      <dt className="inline font-medium">{t('rowDeadlineLabel')}</dt>
                       <dd className="inline">{item.deadlineDate}</dd>
                     </div>
                   )}
                   {item.assignedTo && (
                     <div>
-                      <dt className="inline font-medium">Assigned: </dt>
+                      <dt className="inline font-medium">{t('rowAssignedLabel')}</dt>
                       <dd className="inline">{item.assignedTo}</dd>
                     </div>
                   )}
                   <div>
-                    <dt className="inline font-medium">Review packet: </dt>
+                    <dt className="inline font-medium">{t('rowReviewPacketLabel')}</dt>
                     <dd className="inline" data-testid="matter-ai-status">
                       {item.aiSummaryStatus.replaceAll('_', ' ')}
-                      {item.isPacketExternalizable ? '' : ' (draft — not for external use)'}
+                      {item.isPacketExternalizable ? '' : t('rowReviewPacketDraftSuffix')}
                     </dd>
                   </div>
                   <div>
-                    <dt className="inline font-medium">Referral: </dt>
+                    <dt className="inline font-medium">{t('rowReferralLabel')}</dt>
                     <dd className="inline">{item.referralStatus}</dd>
                   </div>
                 </dl>
@@ -147,7 +145,7 @@ export default async function CourtLensMattersPage({
                   href={`/${locale}/dashboard/courtlens/matters/${item.id}`}
                   className="text-sm font-semibold text-electric"
                 >
-                  Open matter detail
+                  {t('rowOpenDetail')}
                 </Link>
               </div>
             </Card>

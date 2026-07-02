@@ -1,6 +1,7 @@
 import { auth } from '@nzila/platform-auth/entra/server';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 import { Card } from '@nzila/ui';
 import { verifyAbrOrgMembership } from '@/lib/trusted-auth';
@@ -9,17 +10,10 @@ import { getMatterDetail, buildMatterDetailView } from '@/modules/incidents/matt
 import { ReviewerActions } from './ReviewerActions';
 
 /**
- * CourtLens tenant matter detail page — Phase 2D (read-only).
+ * CourtLens tenant matter detail page — Phase 2D (read-only) + Phase 2E (reviewer actions).
  *
- * Server component. Uses trusted auth chain:
- *   1. auth() → userId from platform-auth session
- *   2. verifyAbrOrgMembership → server-derived role + membership
- *   3. hasPermission('incident.read')
- *   4. getMatterDetail + buildMatterDetailView with the trusted role
- *
- * All redaction happens server-side in buildMatterDetailView.
- * The rendered fields exactly mirror the API response — the UI does not
- * attempt to reconstruct hidden fields or bypass role gating.
+ * Server component. Uses trusted auth chain (Phase 2C.6) and server-side
+ * redaction via buildMatterDetailView. Copy is fully localized via next-intl.
  */
 export default async function CourtLensMatterDetailPage({
   params,
@@ -32,6 +26,7 @@ export default async function CourtLensMatterDetailPage({
   if (!userId) redirect('/sign-in');
 
   const { locale, matterId } = await params;
+  const t = await getTranslations({ locale, namespace: 'courtlens.matterDetail' });
   const sp = await searchParams;
   const orgParam = typeof sp.org === 'string' ? sp.org : undefined;
   const orgId = orgParam ?? process.env.ABR_DEMO_ORG_ID ?? 'metro-university';
@@ -41,9 +36,9 @@ export default async function CourtLensMatterDetailPage({
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="font-poppins text-2xl font-bold text-navy">Matter Detail</h2>
+          <h2 className="font-poppins text-2xl font-bold text-navy">{t('accessDeniedTitle')}</h2>
           <p className="mt-1 text-slate-600">
-            You do not have access to this matter.
+            {t('accessDeniedMessage')}
           </p>
         </div>
       </div>
@@ -60,8 +55,6 @@ export default async function CourtLensMatterDetailPage({
   const view = buildMatterDetailView(result.matter, result.detail!, membership.role);
 
   // Server-derived permission set for the reviewer actions component.
-  // The client component only uses these to decide which buttons to render;
-  // every mutation route re-enforces permissions server-side.
   const candidatePermissions: readonly AbrPermission[] = ['incident.update', 'incident.transition'];
   const permissions = candidatePermissions.filter((p) => hasPermission(membership.role, p));
 
@@ -72,14 +65,14 @@ export default async function CourtLensMatterDetailPage({
           href={`/${locale}/dashboard/courtlens/matters`}
           className="text-sm font-semibold text-electric"
         >
-          ← Back to queue
+          {t('backToQueue')}
         </Link>
       </div>
 
       <div>
         <h2 className="font-poppins text-2xl font-bold text-navy">{view.title}</h2>
         <p className="mt-1 text-slate-600">
-          Read-only reviewer view. This surface displays operational status only. It is not legal advice.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -87,44 +80,42 @@ export default async function CourtLensMatterDetailPage({
         <div className="space-y-3 p-6 text-sm" data-testid="matter-summary">
           <dl className="grid grid-cols-1 gap-2 md:grid-cols-2">
             <div>
-              <dt className="font-medium text-navy">Status</dt>
+              <dt className="font-medium text-navy">{t('fieldStatus')}</dt>
               <dd data-testid="detail-status-label">{view.statusLabel}</dd>
             </div>
             <div>
-              <dt className="font-medium text-navy">Practice area</dt>
+              <dt className="font-medium text-navy">{t('fieldPracticeArea')}</dt>
               <dd data-testid="detail-practice-area">{view.practiceArea}</dd>
             </div>
             {view.subIssue && (
               <div>
-                <dt className="font-medium text-navy">Sub-issue</dt>
+                <dt className="font-medium text-navy">{t('fieldSubIssue')}</dt>
                 <dd>{view.subIssue.replaceAll('_', ' ')}</dd>
               </div>
             )}
             <div>
-              <dt className="font-medium text-navy">Urgency</dt>
+              <dt className="font-medium text-navy">{t('fieldUrgency')}</dt>
               <dd>{view.urgencyLabel}</dd>
             </div>
             <div>
-              <dt className="font-medium text-navy">AI review packet</dt>
+              <dt className="font-medium text-navy">{t('fieldAiPacket')}</dt>
               <dd data-testid="detail-ai-status">
                 {view.aiSummaryStatus.replaceAll('_', ' ')}
-                {view.isPacketExternalizable
-                  ? ''
-                  : ' — draft only; requires human review before external use'}
+                {view.isPacketExternalizable ? '' : t('fieldAiPacketDraftSuffix')}
               </dd>
             </div>
             <div>
-              <dt className="font-medium text-navy">Referral</dt>
+              <dt className="font-medium text-navy">{t('fieldReferral')}</dt>
               <dd>{view.referralStatus}</dd>
             </div>
             {view.assignedTo && (
               <div>
-                <dt className="font-medium text-navy">Assigned</dt>
+                <dt className="font-medium text-navy">{t('fieldAssigned')}</dt>
                 <dd>{view.assignedTo}</dd>
               </div>
             )}
             <div>
-              <dt className="font-medium text-navy">Opened</dt>
+              <dt className="font-medium text-navy">{t('fieldOpened')}</dt>
               <dd>{new Date(view.openedAt).toLocaleDateString()}</dd>
             </div>
           </dl>
@@ -134,22 +125,22 @@ export default async function CourtLensMatterDetailPage({
       {(view.clientGoal || view.hearingDate || view.deadlineDate) && (
         <Card>
           <div className="space-y-3 p-6 text-sm" data-testid="matter-context">
-            <h3 className="font-poppins text-base font-semibold text-navy">Matter context</h3>
+            <h3 className="font-poppins text-base font-semibold text-navy">{t('sectionContext')}</h3>
             {view.clientGoal && (
               <div>
-                <span className="font-medium text-navy">Client goal: </span>
+                <span className="font-medium text-navy">{t('fieldClientGoal')}</span>
                 <span>{view.clientGoal}</span>
               </div>
             )}
             {view.hearingDate && (
               <div>
-                <span className="font-medium text-navy">Hearing date: </span>
+                <span className="font-medium text-navy">{t('fieldHearingDate')}</span>
                 <span>{view.hearingDate}</span>
               </div>
             )}
             {view.deadlineDate && (
               <div>
-                <span className="font-medium text-navy">Deadline: </span>
+                <span className="font-medium text-navy">{t('fieldDeadlineDate')}</span>
                 <span>{view.deadlineDate}</span>
               </div>
             )}
@@ -160,7 +151,7 @@ export default async function CourtLensMatterDetailPage({
       {view.riskFlags && (
         <Card>
           <div className="space-y-3 p-6 text-sm" data-testid="matter-risk-flags">
-            <h3 className="font-poppins text-base font-semibold text-navy">Risk indicators</h3>
+            <h3 className="font-poppins text-base font-semibold text-navy">{t('sectionRiskFlags')}</h3>
             <ul className="space-y-1">
               {Object.entries(view.riskFlags)
                 .filter(([, v]) => v === true)
@@ -168,7 +159,7 @@ export default async function CourtLensMatterDetailPage({
                   <li key={k}>{k.replace(/^risk_/, '').replaceAll('_', ' ')}</li>
                 ))}
               {Object.values(view.riskFlags).every((v) => !v) && (
-                <li className="text-slate-500">No risk indicators recorded.</li>
+                <li className="text-slate-500">{t('noRiskIndicators')}</li>
               )}
             </ul>
           </div>
@@ -178,21 +169,21 @@ export default async function CourtLensMatterDetailPage({
       {view.clientProfile && (
         <Card>
           <div className="space-y-3 p-6 text-sm" data-testid="matter-client-profile">
-            <h3 className="font-poppins text-base font-semibold text-navy">Client profile</h3>
+            <h3 className="font-poppins text-base font-semibold text-navy">{t('sectionClientProfile')}</h3>
             {view.clientProfile.clientName && (
               <div>
-                <span className="font-medium text-navy">Name: </span>
+                <span className="font-medium text-navy">{t('fieldClientName')}</span>
                 <span>{view.clientProfile.clientName}</span>
               </div>
             )}
             {view.clientProfile.householdSize != null && (
               <div>
-                <span className="font-medium text-navy">Household size: </span>
+                <span className="font-medium text-navy">{t('fieldHouseholdSize')}</span>
                 <span>{view.clientProfile.householdSize}</span>
               </div>
             )}
             <div>
-              <span className="font-medium text-navy">Consent: </span>
+              <span className="font-medium text-navy">{t('fieldConsent')}</span>
               <span>{view.clientProfile.consentStatus}</span>
             </div>
           </div>
@@ -202,7 +193,7 @@ export default async function CourtLensMatterDetailPage({
       {view.notes.length > 0 && (
         <Card>
           <div className="space-y-3 p-6 text-sm" data-testid="matter-notes">
-            <h3 className="font-poppins text-base font-semibold text-navy">Reviewer notes</h3>
+            <h3 className="font-poppins text-base font-semibold text-navy">{t('sectionNotes')}</h3>
             <ul className="space-y-2">
               {view.notes.map((note) => (
                 <li key={note.id} className="rounded border border-slate-200 p-2">
@@ -219,7 +210,7 @@ export default async function CourtLensMatterDetailPage({
 
       <Card>
         <div className="space-y-2 p-6 text-xs text-slate-600" data-testid="legal-boundary-notice">
-          <p className="font-medium text-navy">Legal notice</p>
+          <p className="font-medium text-navy">{t('sectionLegal')}</p>
           <p>{view.legalBoundaryNotice}</p>
         </div>
       </Card>

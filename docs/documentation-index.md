@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-07-02T12:22:17.004Z
+Generated: 2026-07-02T12:36:46.722Z
 
-Total documents indexed: 1349
+Total documents indexed: 1350
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -16,7 +16,7 @@ Stale documents (>90 days since repo validation): 0
 | backlog | 1 | 0 |
 | categories | 925 | 0 |
 | compliance | 6 | 0 |
-| courtlens | 12 | 0 |
+| courtlens | 13 | 0 |
 | doctrine | 61 | 0 |
 | documentation-index.md | 1 | 0 |
 | governance | 3 | 0 |
@@ -984,6 +984,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/courtlens/migration-gap-analysis.md](docs/courtlens/migration-gap-analysis.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/phase-1/abr-reuse-audit.md](docs/courtlens/phase-1/abr-reuse-audit.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/phase-2/demo-smoke-gate.md](docs/courtlens/phase-2/demo-smoke-gate.md) | courtlens | 2026-07-02 | current |
+| [docs/courtlens/phase-2/legal-boundary-copy-review-packet.md](docs/courtlens/phase-2/legal-boundary-copy-review-packet.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/phase-2/public-intake-ui.md](docs/courtlens/phase-2/public-intake-ui.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/phase-2/reviewer-workflow-ui.md](docs/courtlens/phase-2/reviewer-workflow-ui.md) | courtlens | 2026-07-02 | current |
 | [docs/courtlens/phase-2/tenant-matter-queue-api.md](docs/courtlens/phase-2/tenant-matter-queue-api.md) | courtlens | 2026-07-02 | current |
