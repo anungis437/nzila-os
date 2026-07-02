@@ -40,6 +40,12 @@ const mockDb = {
 
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/pilot/pilot-ownership', () => ({
+  enforcePilotOwnership: vi.fn(async () => null),
+  wrapPilotItemRoute: <T,>(handler: T) => handler,
+  authorizePilotAccess: vi.fn(async () => ({ ok: true })),
+  getPilotOwnerOrganizationId: vi.fn(() => 'test-org'),
+}));
 vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<typeof import('@/lib/api-auth-guard')>();
   return {

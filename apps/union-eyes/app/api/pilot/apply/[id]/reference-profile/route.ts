@@ -8,6 +8,7 @@ import {
   buildProposalPackage,
   normalizeCommercialState,
 } from '@/lib/pilot/commercialization-wave1';
+import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';

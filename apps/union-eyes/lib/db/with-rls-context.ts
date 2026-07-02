@@ -52,6 +52,15 @@ export type RLSTx = typeof db
  *   });
  * }
  */
+/**
+ * Sentinel value accepted by the context-map overload to request a
+ * system-scoped bootstrap lookup. The authenticated user context is still
+ * applied, but org context is intentionally cleared (e.g. resolving which
+ * organization a freshly-authenticated user belongs to before an active org
+ * is known). Only org scoping is relaxed — auth is still required.
+ */
+const SYSTEM_ORG_CONTEXT = 'system'
+
 export async function withRLSContext<T>(
   operation: (tx: RLSTx) => Promise<T>,
 ): Promise<T>
@@ -64,15 +73,6 @@ export async function withRLSContext<T>(
   context: Record<string, unknown>,
   operation: () => Promise<T>,
 ): Promise<T>
-/**
- * Sentinel value accepted by the context-map overload to request a
- * system-scoped bootstrap lookup. The authenticated user context is still
- * applied, but org context is intentionally cleared (e.g. resolving which
- * organization a freshly-authenticated user belongs to before an active org
- * is known). Only org scoping is relaxed — auth is still required.
- */
-const SYSTEM_ORG_CONTEXT = 'system'
-
 export async function withRLSContext<T>(
   contextOrOperation:
     | Record<string, unknown>
