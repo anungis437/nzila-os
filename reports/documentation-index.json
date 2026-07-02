@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-10T03:02:06.524Z",
-  "totalDocuments": 1226,
+  "generatedAt": "2026-07-02T12:36:46.722Z",
+  "totalDocuments": 1350,
   "staleDocuments": 0,
   "categories": [
     {
@@ -39,6 +39,11 @@
       "staleCount": 0
     },
     {
+      "category": "courtlens",
+      "count": 13,
+      "staleCount": 0
+    },
+    {
       "category": "doctrine",
       "count": 61,
       "staleCount": 0
@@ -50,7 +55,7 @@
     },
     {
       "category": "governance",
-      "count": 1,
+      "count": 3,
       "staleCount": 0
     },
     {
@@ -95,7 +100,7 @@
     },
     {
       "category": "oci",
-      "count": 127,
+      "count": 149,
       "staleCount": 0
     },
     {
@@ -121,6 +126,11 @@
     {
       "category": "root",
       "count": 4,
+      "staleCount": 0
+    },
+    {
+      "category": "sred",
+      "count": 87,
       "staleCount": 0
     },
     {
@@ -198,7 +208,7 @@
     {
       "path": "docs/categories/historical-archive/archive/audit-reports/DECISION_INTELLIGENCE_AUDIT_2026-07-06.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -306,7 +316,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/nzila-cognition-doctrine/global-anti-surveillance-enforcement.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -1656,7 +1666,7 @@
     {
       "path": "docs/categories/historical-archive/archive/iterations/plans/IMPLEMENTATION_PLAN_FINAL.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -1800,7 +1810,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/AUDIT_ENFORCEMENT.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -1986,7 +1996,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -2010,7 +2020,7 @@
     {
       "path": "docs/categories/platform-and-operations/architecture/orm-governance/governance-attachment-to-orm-authority.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -2400,7 +2410,7 @@
     {
       "path": "docs/categories/platform-and-operations/governance/platform-readiness.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -3288,7 +3298,7 @@
     {
       "path": "docs/categories/platform-and-operations/platform/VENDOR_DIVERSIFICATION_STRATEGY.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -4710,7 +4720,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-29",
       "stale": false
     },
     {
@@ -4866,7 +4876,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/runtime-authority-audit/wave9-constitutional-runtime-finalization-review.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5034,7 +5044,7 @@
     {
       "path": "docs/categories/stakeholders/commercial/azure-godaddy-cutover.md",
       "category": "categories",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-29",
       "stale": false
     },
     {
@@ -5112,7 +5122,7 @@
     {
       "path": "docs/categories/stakeholders/commercial/FOUNDER_REVENUE_COCKPIT.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5670,7 +5680,7 @@
     {
       "path": "docs/categories/stakeholders/personas/03-auditor.md",
       "category": "categories",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5688,7 +5698,7 @@
     {
       "path": "docs/categories/stakeholders/public/trust-center.md",
       "category": "categories",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5724,25 +5734,25 @@
     {
       "path": "docs/compliance/soc2/capacity-scaling-thresholds.md",
       "category": "compliance",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/compliance/soc2/control-mapping.md",
       "category": "compliance",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/compliance/soc2/evidence-inventory.md",
       "category": "compliance",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/compliance/soc2/gap-log.md",
       "category": "compliance",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5754,7 +5764,85 @@
     {
       "path": "docs/compliance/soc2/vendor-assurance-index.md",
       "category": "compliance",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/implementation-sequence.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/legacy-product-inventory.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/migration-gap-analysis.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/phase-1/abr-reuse-audit.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/phase-2/demo-smoke-gate.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/phase-2/legal-boundary-copy-review-packet.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/phase-2/public-intake-ui.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/phase-2/reviewer-workflow-ui.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/phase-2/tenant-matter-queue-api.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/phase-2/tenant-matter-ui.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/pilot-readiness-plan.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/README.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
+      "stale": false
+    },
+    {
+      "path": "docs/courtlens/target-architecture.md",
+      "category": "courtlens",
+      "lastValidated": "2026-07-02",
       "stale": false
     },
     {
@@ -5772,7 +5860,7 @@
     {
       "path": "docs/doctrine/DOCTRINE_GOVERNANCE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5808,31 +5896,31 @@
     {
       "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CATEGORY_VALIDATION_KIT.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_CYCLE1_PACKAGE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_EXEC_READOUT.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_INTERVIEW_TRACKER.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5844,25 +5932,25 @@
     {
       "path": "docs/doctrine/NZILA_CONSOLE_TAB_SCHEMA.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/NZILA_CONSOLE_TELEMETRY_SCHEMA.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/NZILA_CONSOLE_WORKSPACE_DOCTRINE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/NZILA_CONSOLE_WORKSPACE_MAP.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5880,97 +5968,97 @@
     {
       "path": "docs/doctrine/programs/FIRST_BENCHMARK_REPORT_SPEC.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/IIA_90_DAY_RECOMMENDATIONS_TEMPLATE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/IIA_EXECUTIVE_READOUT_TEMPLATE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/IIA_EXECUTIVE_WORKSHOP_DECK.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/IIA_HEATMAP_VISUALIZATION_SPEC.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/IIA_SCORING_WORKBOOK_TEMPLATE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/IIA_WORKSHOP_FACILITATOR_GUIDE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/01-IIA-OFFER-SHEET.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/02-IIA-OUTREACH-EMAIL.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/03-IIA-DISCOVERY-CALL-SCRIPT.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/04-IIA-30MIN-SALES-DECK.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/05-IIA-PRICING-AND-TIERS.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/06-IIA-PROPOSAL-TEMPLATE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/07-IIA-SOW-TEMPLATE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/08-IIA-POST-WORKSHOP-UPSELL-PATH.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/iia-commercial-pack/README.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -5982,25 +6070,25 @@
     {
       "path": "docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT_WORKSHOP.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_OBSERVATORY_SCHEMA.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_PRODUCT_ARCHITECTURE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/INSTITUTIONAL_INTELLIGENCE_PRODUCT_QUALIFICATION_MATRIX.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -6012,67 +6100,67 @@
     {
       "path": "docs/doctrine/programs/OBSERVATORY_DATA_COLLECTION_STANDARD.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/OBSERVATORY_OPERATING_MODEL.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/01-TARGET-OUTREACH-CUPE4373-BRANDON.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/02-TARGET-OUTREACH-UNA-HEATHER.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/03-TARGET-OUTREACH-ASSOCIATION-NONPROFIT.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/04-PILOT-INTAKE-FORM.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/05-CONSENT-LANGUAGE-C0-C3.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/06-PILOT-TRACKING-TABLE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/07-FIRST-THREE-CASE-STUDY-OBJECTIVES.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/08-ROUTE-DECISION-RECORD.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/programs/pilot-launch-pack/README.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -6096,19 +6184,19 @@
     {
       "path": "docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_ASSESSMENT.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/whitepapers/INSTITUTIONAL_INTELLIGENCE_PRIMER.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -6120,13 +6208,13 @@
     {
       "path": "docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md",
       "category": "doctrine",
-      "lastValidated": "2026-06-06",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-06-10",
+      "lastValidated": "2026-07-02",
       "stale": false
     },
     {
@@ -6136,9 +6224,21 @@
       "stale": false
     },
     {
+      "path": "docs/governance/gates/gate-taxonomy.md",
+      "category": "governance",
+      "lastValidated": "2026-06-28",
+      "stale": false
+    },
+    {
       "path": "docs/governance/platform-readiness.md",
       "category": "governance",
       "lastValidated": "2026-05-25",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/runtime/runtime-separation-plan.md",
+      "category": "governance",
+      "lastValidated": "2026-06-29",
       "stale": false
     },
     {
@@ -6502,6 +6602,12 @@
       "stale": false
     },
     {
+      "path": "docs/oci/assessment/OCRA_WORLD_CLASS_COMPLEXITY_VALIDATION_2026-06-13.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
       "path": "docs/oci/audit/ADAPTIVE_ROUTING_AUDIT.md",
       "category": "oci",
       "lastValidated": "2026-05-25",
@@ -6516,7 +6622,7 @@
     {
       "path": "docs/oci/audit/ENTROPY_SIGNAL_GAP_REPORT.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -6552,7 +6658,7 @@
     {
       "path": "docs/oci/audit/QUESTION_ARCHITECTURE_GOVERNANCE.md",
       "category": "oci",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -6640,6 +6746,132 @@
       "stale": false
     },
     {
+      "path": "docs/oci/government-readiness/GOVERNMENT_READINESS_ARCHITECTURE_DECISION.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/GOVERNMENT_VALIDATION_REPORT_V1.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/implementation/ADDITIVE_LAYER_IMPLEMENTATION_PLAN.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_CONFIDENCE_ARCHITECTURE.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_CONSEQUENCE_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_EXPLAINABILITY_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_GOVERNMENT_READINESS_MASTER_BLUEPRINT.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_OBLIGATION_TAXONOMY.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_PROCUREMENT_READINESS_ASSESSMENT.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/OCI_OCRA_VALIDATION_BINDER.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/README.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/RICHARD_SHARPE_VALIDATION_PROTOCOL.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/richard-packet/VALIDATION_WORKBOOK.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md",
+      "category": "oci",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
       "path": "docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md",
       "category": "oci",
       "lastValidated": "2026-05-25",
@@ -6672,19 +6904,19 @@
     {
       "path": "docs/oci/methodology/METHODOLOGY_CHANGELOG.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md",
       "category": "oci",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
       "path": "docs/oci/methodology/README.md",
       "category": "oci",
-      "lastValidated": "2026-05-25",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -7230,13 +7462,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-06-10",
+      "lastValidated": "2026-06-28",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-06-10",
+      "lastValidated": "2026-06-28",
       "stale": false
     },
     {
@@ -7294,9 +7526,531 @@
       "stale": false
     },
     {
+      "path": "docs/sred/2026/00-claim-constitution.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/00-claim-index.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/advancement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/evidence-links.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/experiment-log.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/hypothesis.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/problem-statement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/project-name.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/technological-uncertainty.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/_project-template/time-allocation.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/advancement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/evidence-links.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/experiment-log.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/hypothesis.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/problem-statement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/project-name.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/technological-uncertainty.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/healthcare-operational-continuity-intelligence/time-allocation.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/advancement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/evidence-links.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/experiment-log.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/hypothesis.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/problem-statement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/project-name.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/technological-uncertainty.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-knowledge-architecture/time-allocation.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/advancement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/evidence-links.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/experiment-log.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/hypothesis.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/problem-statement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/project-name.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/technological-uncertainty.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/institutional-intelligence-measurement-engine/time-allocation.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/advancement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/evidence-links.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/experiment-log.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/hypothesis.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/problem-statement.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/project-name.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/technological-uncertainty.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/01-project-charters/union-eyes-continuity-intelligence-methodology/time-allocation.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/02-hypotheses/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/03-experiment-logs/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/03-experiment-logs/weekly-sred-review-template.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/04-technical-obstacles/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/05-results-and-failures/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/06-time-and-costing/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/06-time-and-costing/time-tracking-template.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/healthcare/chronology.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/healthcare/evidence-index.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/healthcare/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/healthcare/key-breakthroughs.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/institutional-intelligence/chronology.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/institutional-intelligence/evidence-index.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/institutional-intelligence/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/institutional-intelligence/key-breakthroughs.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/institutional-intelligence/test-runs/2026-06-17-a1-adaptive-scoring-model-test-run.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/institutional-intelligence/test-runs/2026-06-17-a1-confidence-signal-density-test-run.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/knowledge-architecture/chronology.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/knowledge-architecture/evidence-index.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/knowledge-architecture/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/knowledge-architecture/key-breakthroughs.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/knowledge-architecture/test-runs/2026-06-17-a5-crosswalk-coverage-integrity-test-run.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/union-eyes/chronology.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/union-eyes/evidence-index.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/union-eyes/failed-approaches.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/07-supporting-evidence/union-eyes/key-breakthroughs.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/08-non-eligible-exclusions/exclusions-register.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/08-non-eligible-exclusions/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/09-consultant-cpa-package/cpa-package-checklist.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/09-consultant-cpa-package/README.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/10-technological-advancement-summary.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/11-advancement-registry.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/12-failure-ledger.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/13-research-timeline.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/14-evidence-priority-matrix.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/15-evidence-gap-register.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/16-cost-allocation-ledger.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
+      "path": "docs/sred/2026/17-draft-t661-support-package.md",
+      "category": "sred",
+      "lastValidated": "2026-06-26",
+      "stale": false
+    },
+    {
       "path": "docs/union-eyes/any-elimination.md",
       "category": "union-eyes",
-      "lastValidated": "2026-06-07",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {
@@ -7314,7 +8068,7 @@
     {
       "path": "docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md",
       "category": "union-eyes",
-      "lastValidated": "2026-06-05",
+      "lastValidated": "2026-06-26",
       "stale": false
     },
     {

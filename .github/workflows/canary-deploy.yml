@@ -41,6 +41,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   REGISTRY: nzilacanadaacr.azurecr.io
@@ -71,16 +72,36 @@ jobs:
     runs-on: ubuntu-latest
     needs: pre-canary-gates
     name: Deploy Canary (${{ inputs.canary_percent }}%)
+    # BR-5 / BR-4: canary is a PRODUCTION operation. It runs under the
+    # production GitHub Environment so azure/login resolves the production-scoped
+    # OIDC deploy identity (AcrPull-only, Contributor on nzila-canada-prod-rg).
+    # No shared AZURE_CREDENTIALS password is used; a non-production target that
+    # the production identity cannot reach fails closed by design.
+    environment: production
     outputs:
       canary_revision: ${{ steps.deploy.outputs.revision }}
       stable_revision: ${{ steps.baseline.outputs.revision }}
     steps:
       - uses: actions/checkout@v5
 
-      - name: Azure login
+      - name: Assert production deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No production-scoped deployment identity configured. Set AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID on the 'production' GitHub Environment (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure login (OIDC, production-scoped)
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: ACR login
         run: az acr login --name nzilacanadaacr
@@ -105,17 +126,39 @@ jobs:
       - name: Deploy canary revision
         id: deploy
         run: |
+          set -euo pipefail
           CONTAINER_NAME=$(az containerapp show \
             --name ${{ inputs.app }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --query "properties.template.containers[0].name" -o tsv)
+
+          # BR-5 image immutability: a production canary must roll out an
+          # immutable, pre-approved image. Reject the mutable 'latest' tag and
+          # resolve the requested tag to its @sha256 digest, then deploy by
+          # digest. ACR is shared (nzilacanadaacr); promotion discipline — not a
+          # physical registry split — enforces the image boundary here.
+          REQ_TAG='${{ inputs.image_tag }}'
+          if [ "$REQ_TAG" = "latest" ]; then
+            echo "::error::'latest' is a mutable tag and is not accepted as production canary promotion evidence. Provide an immutable commit-SHA tag or @sha256 digest (BR-5)."
+            exit 1
+          fi
+          DIGEST=$(az acr repository show \
+            --name nzilacanadaacr \
+            --image "${{ inputs.app }}:${REQ_TAG}" \
+            --query digest -o tsv 2>/dev/null || echo "")
+          if [ -z "$DIGEST" ] || [ "${DIGEST#sha256:}" = "$DIGEST" ]; then
+            echo "::error::Could not resolve an immutable @sha256 digest for ${{ inputs.app }}:${REQ_TAG}. Refusing canary deploy of a mutable-only tag (BR-5)."
+            exit 1
+          fi
+          DEPLOY_IMAGE="${{ env.IMAGE_BASE }}@${DIGEST}"
+          echo "Canary image (digest-pinned): $DEPLOY_IMAGE"
 
           # Create new revision with canary traffic
           az containerapp update \
             --name ${{ inputs.app }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --container-name "$CONTAINER_NAME" \
-            --image ${{ env.IMAGE_BASE }}:${{ inputs.image_tag }} \
+            --image "$DEPLOY_IMAGE" \
             --revision-suffix canary-$(date +%s)
 
           # Get the new revision name
@@ -155,15 +198,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-canary
     name: Bake (${{ inputs.bake_minutes }}m)
+    environment: production
     outputs:
       healthy: ${{ steps.health.outputs.healthy }}
     steps:
       - uses: actions/checkout@v5
 
-      - name: Azure login
+      - name: Azure login (OIDC, production-scoped)
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Wait for bake period
         run: |
@@ -220,11 +266,14 @@ jobs:
     needs: [deploy-canary, bake-and-observe]
     if: needs.bake-and-observe.outputs.healthy == 'true'
     name: Promote to 100%
+    environment: production
     steps:
-      - name: Azure login
+      - name: Azure login (OIDC, production-scoped)
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Promote canary to production
         run: |
@@ -261,11 +310,14 @@ jobs:
     needs: [deploy-canary, bake-and-observe]
     if: needs.bake-and-observe.outputs.healthy == 'false'
     name: Rollback (SLO breach)
+    environment: production
     steps:
-      - name: Azure login
+      - name: Azure login (OIDC, production-scoped)
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Rollback to stable
         run: |

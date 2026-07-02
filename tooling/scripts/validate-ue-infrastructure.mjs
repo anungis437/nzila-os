@@ -22,12 +22,13 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveUeAreaDir } from './lib/ue-doc-paths.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..');
 
-const ueRoot = path.join(repoRoot, 'docs', 'union-eyes', 'institutional-operating-infrastructure');
+const ueRoot = resolveUeAreaDir(repoRoot, 'institutional-operating-infrastructure');
 const finalRoot = path.join(repoRoot, 'docs', 'nzila-final-convergence');
 const elevationRoot = path.join(repoRoot, 'docs', 'nzila-maturity-elevation');
 const cognitionRoot = path.join(repoRoot, 'docs', 'nzila-cognition-doctrine');

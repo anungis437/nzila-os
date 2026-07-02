@@ -151,6 +151,10 @@ export const GET = withApiAuth(async (_request: NextRequest, context?: { params?
     if (!payload.application) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
+
+    const denied = await enforcePilotOwnership(payload.application);
+    if (denied) return denied;
+
     const persistedVersions = Array.isArray(payload.responses.pilotReferenceVersions)
       ? payload.responses.pilotReferenceVersions
       : [];
@@ -199,6 +203,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     if (!payload.application) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
+
+    const denied = await enforcePilotOwnership(payload.application);
+    if (denied) return denied;
 
     const snapshot = buildPilotReferenceVersionRecord({
       generatedAt: payload.referenceProfile.generatedAt as string,

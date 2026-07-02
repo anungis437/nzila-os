@@ -1,3 +1,22 @@
+# ============================================================================
+# LEGACY / LATENT PROFILE — DO NOT DEPLOY
+# ----------------------------------------------------------------------------
+# Status (live-verified 2026-06-28, Runtime Separation Wave Phase A.1):
+#   This staging-reuse CUPE pilot profile is NOT deployed live. No live UE
+#   Container App carries PILOT_ORG_ID=cupe-local-123. The live UE pilot runs
+#   SOVEREIGN in nzila-canada-pilot-env on the dedicated nzila-canada-pilot-db
+#   (see pilot.yml) — NOT on nzila-staging-db.
+#
+#   This file describes a superseded topology (staging RG/env + shared
+#   nzila-staging-db with RLS-only isolation). Deploying it WOULD RE-INTRODUCE
+#   blast-radius risks BR-2 (pilot<->staging DB reuse) and BR-3 (shared backup
+#   boundary). Do not apply this profile without an explicit, separately
+#   approved decision to reverse the live sovereign-pilot topology.
+#
+#   Retire or delete this file during the BR-2/BR-3 reconciliation step.
+#   Ref: reports/governance/runtime-separation-wave-phaseA1-live-verification-2026-06-28.md
+# ============================================================================
+#
 # UE Pilot — CUPE Local 123
 # Nzila OS — GitOps
 #
@@ -64,6 +83,8 @@ apps:
         value: "1.0"
 
 database:
+  # LEGACY / LATENT (see DO-NOT-DEPLOY banner at top of file). NOT live as of
+  # 2026-06-28: the live pilot uses the dedicated sovereign nzila-canada-pilot-db.
   # Reuses the staging PostgreSQL instance. Org data is isolated at the
   # application layer via RLS (app.org_id = 'cupe-local-123'). There is
   # no separate database or schema for this pilot.

@@ -4,11 +4,13 @@
 
 import { readFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, relative } from 'node:path';
+import { resolveUeAreaDir } from './lib/ue-doc-paths.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '..', '..');
-const auditDir = join(repoRoot, 'docs', 'union-eyes', 'runtime-authority-audit');
+const auditDir = resolveUeAreaDir(repoRoot, 'runtime-authority-audit');
+const auditDirRel = relative(repoRoot, auditDir).replaceAll('\\', '/');
 
 const required = [
   {
@@ -199,7 +201,7 @@ for (const entry of required) {
   try {
     await stat(path);
   } catch {
-    failures.push(`Missing file: docs/union-eyes/runtime-authority-audit/${entry.file}`);
+    failures.push(`Missing file: ${auditDirRel}/${entry.file}`);
     continue;
   }
   const text = await readFile(path, 'utf8');

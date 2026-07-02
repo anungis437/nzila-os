@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write    # BR-4: OIDC federation with the staging-scoped deployment identity
 
 env:
   ENVIRONMENT: STAGING
@@ -155,6 +156,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-artifact
     name: Deploy to Staging
+    environment: staging    # BR-4: binds the staging-scoped GitHub Environment identity
     steps:
       - uses: actions/checkout@v5
 
@@ -168,10 +170,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Azure login
+      # BR-4: staging-scoped deployment identity. Fail closed if not configured;
+      # never fall back to a shared credential that can reach production.
+      - name: Assert staging deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No staging-scoped deployment identity. Configure AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID on the 'staging' GitHub Environment (BR-4)."
+            exit 1
+          fi
+
+      - name: Azure login (OIDC, staging-scoped)
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Staging boundary gate (fail-closed)
+        run: |
+          set -euo pipefail
+          if ! az account show --output none 2>/dev/null; then
+            echo "::error::Azure CLI is not authenticated via the staging-scoped OIDC identity."
+            exit 1
+          fi
+          # Refuse if this staging identity can see any production resource group
+          # (a correctly RG-scoped staging identity cannot list the prod RG).
+          if az group show --name nzila-canada-prod-rg --output none 2>/dev/null; then
+            echo "::error::Staging deployment identity has visibility into nzila-canada-prod-rg. Its RBAC is not staging-scoped. Failing closed (BR-4 boundary)."
+            exit 1
+          fi
+          echo "Boundary OK: staging identity is not prod-scoped."
 
       - name: ACR login
         run: az acr login --name nzilacanadaacr

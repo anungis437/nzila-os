@@ -7,6 +7,8 @@
 
 ---
 
+> **⚠️ SUPERSEDED SNAPSHOT (2026-05-09).** This audit captured a pre-separation state. As of **2026-06-28** (Runtime Separation Wave Phase A.1, live-verified) the topology is materially separated: dedicated Container Apps environments and databases now exist for production (`nzila-canada-prod-env` / `nzila-os-union-eyes-prod-db`), pilot (`nzila-canada-pilot-env` / `nzila-canada-pilot-db`), and demo (`nzila-canada-demo-*`). The "DOES NOT EXIST" rows below are **no longer accurate**. See [reports/governance/runtime-separation-wave-phaseA1-live-verification-2026-06-28.md](../../../../../reports/governance/runtime-separation-wave-phaseA1-live-verification-2026-06-28.md).
+
 ## 1. Headline finding
 
 > Union Eyes today operates as **one production environment serving five hostnames**. There is exactly one Container App, one Postgres flexible server, one Key Vault, and one container image revision behind every public URL. Every claim of "staging" or "demo" or "pilot" today is a label, not isolation.

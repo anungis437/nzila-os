@@ -148,6 +148,11 @@ jobs:
     needs: [plan, validate]
     runs-on: ubuntu-latest
     name: Build Images
+    # BR-5: image BUILD/PUSH authority. Runs under the dedicated `build` GitHub
+    # Environment so azure/login resolves the `nzila-os-build` OIDC identity,
+    # which holds AcrPush on nzilacanadaacr ONLY and NO Contributor on any
+    # deploy RG. No shared AZURE_CREDENTIALS is used on the build path.
+    environment: build
     strategy:
       fail-fast: false
       matrix:
@@ -193,19 +198,39 @@ jobs:
           driver: docker-container
           driver-opts: image=moby/buildkit:buildx-stable-1
 
-      - name: Azure Login (OIDC)
-        if: steps.check.outputs.should_build == 'true' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
-        uses: azure/login@v3
-        with:
-          client-id: ${{ env.AZURE_CLIENT_ID }}
-          tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - name: Assert build identity is configured (fail-closed)
+        if: steps.check.outputs.should_build == 'true'
+        env:
+          BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          BUILD_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BUILD_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUILD_CLIENT_ID}" ] || [ -z "${BUILD_TENANT_ID}" ] || [ -z "${BUILD_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No dedicated build identity configured on the 'build' GitHub Environment (BR-5). Expected AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID for nzila-os-build. Refusing to fall back to a shared credential."
+            exit 1
+          fi
 
-      - name: Azure Login (Credentials Fallback)
-        if: steps.check.outputs.should_build == 'true' && (env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == '')
+      - name: Azure Login (OIDC, build identity)
+        if: steps.check.outputs.should_build == 'true'
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify authenticated identity is the build identity (fail-closed)
+        if: steps.check.outputs.should_build == 'true'
+        env:
+          EXPECTED_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          set -euo pipefail
+          ACTUAL=$(az account show --query user.name -o tsv)
+          if [ "$ACTUAL" != "$EXPECTED_CLIENT_ID" ]; then
+            echo "::error::Authenticated identity ($ACTUAL) is not the expected build identity. Refusing to push (BR-5)."
+            exit 1
+          fi
+          echo "Build identity verified."
 
       - name: ACR login
         if: steps.check.outputs.should_build == 'true'
@@ -272,6 +297,23 @@ jobs:
           echo "::error::buildx build/push failed for $APP after $attempts attempts."
           exit 1
 
+      - name: Resolve immutable image digest (BR-5 evidence)
+        if: steps.check.outputs.should_build == 'true'
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.plan.outputs.version }}"
+          APP="${{ matrix.app }}"
+          DIGEST=$(az acr repository show \
+            --name "${{ env.ACR_NAME }}" \
+            --image "nzila/${APP}:${VERSION}" \
+            --query digest -o tsv)
+          case "$DIGEST" in
+            sha256:*) : ;;
+            *) echo "::error::Pushed image nzila/${APP}:${VERSION} did not resolve to a sha256 digest (got '${DIGEST:-}'). (BR-5)"; exit 1 ;;
+          esac
+          echo "nzila/${APP}@${DIGEST}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Resolved digest for ${APP}: ${DIGEST}"
+
   # ── Deploy to environment ─────────────────────────────────────────────────
   deploy:
     needs: [plan, build]
@@ -296,19 +338,51 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Azure Login (OIDC)
-        if: env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
-        uses: azure/login@v3
-        with:
-          client-id: ${{ env.AZURE_CLIENT_ID }}
-          tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      # BR-4: environment-scoped deployment identity. This job sets
+      # `environment.name: ${{ needs.plan.outputs.environment }}`, so the
+      # direct `secrets.*` references below resolve to the per-environment
+      # GitHub Environment identity (overriding the repo-level values used by
+      # the build job). No shared AZURE_CREDENTIALS fallback; fail closed.
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}'. Configure AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID on the '${{ needs.plan.outputs.environment }}' GitHub Environment (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
 
-      - name: Azure Login (Credentials Fallback)
-        if: env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == ''
+      - name: Azure Login (OIDC, environment-scoped)
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # BR-4 fail-closed boundary gate: a non-production environment must never
+      # resolve to (or be able to reach) the production resource group.
+      - name: Deployment identity boundary gate (fail-closed)
+        run: |
+          set -euo pipefail
+          ENV="${{ needs.plan.outputs.environment }}"
+          CONFIG_PATH="infrastructure/gitops/environments/${ENV}.yml"
+          RG=$(python3 -c "import yaml; d=yaml.safe_load(open('$CONFIG_PATH')); print(d['resource_group'])")
+          if [ "$ENV" != "production" ] && printf '%s' "$RG" | grep -qi 'prod'; then
+            echo "::error::Non-production environment '$ENV' resolved to a production-looking resource group '$RG'. Failing closed (BR-4 boundary)."
+            exit 1
+          fi
+          if [ "$ENV" != "production" ] && az group show --name nzila-canada-prod-rg --output none 2>/dev/null; then
+            echo "::error::Environment '$ENV' deployment identity has visibility into nzila-canada-prod-rg. Its RBAC is not environment-scoped. Failing closed (BR-4 boundary)."
+            exit 1
+          fi
+          if ! az account show --output none 2>/dev/null; then
+            echo "::error::Azure CLI is not authenticated via the environment-scoped OIDC identity."
+            exit 1
+          fi
+          echo "Boundary OK: env=$ENV rg=$RG"
 
       - name: Deploy to Container Apps
         id: deploy
@@ -346,12 +420,34 @@ jobs:
 
           for APP in "${ALL_APPS[@]}"; do
             CA_NAME="nzila-os-${APP}"
-            IMAGE="${ACR}/nzila/${APP}:${VERSION}"
+            REPO="nzila/${APP}"
 
             if ! printf '%s\n' "${LIVE_APPS[@]}" | grep -Fxq "$CA_NAME"; then
               echo "::warning::Skipping $CA_NAME because it does not exist in $RG"
               SKIPPED_MISSING+=("$APP")
               continue
+            fi
+
+            # BR-5 image immutability: resolve the mutable :VERSION tag to its
+            # immutable @sha256 digest and deploy by digest. AcrPull (the only
+            # ACR role held by this env-scoped deploy identity) is sufficient to
+            # read manifest metadata; it cannot push. Production fails closed if
+            # the digest cannot be resolved — a mutable tag is not accepted as
+            # production promotion evidence.
+            DIGEST=$(az acr repository show \
+              --name "${{ env.ACR_NAME }}" \
+              --image "${REPO}:${VERSION}" \
+              --query digest -o tsv 2>/dev/null || echo "")
+            if [ -n "$DIGEST" ] && [ "${DIGEST#sha256:}" != "$DIGEST" ]; then
+              IMAGE="${ACR}/${REPO}@${DIGEST}"
+            else
+              if [ "$ENV" = "production" ]; then
+                echo "::error::Could not resolve an immutable @sha256 digest for ${REPO}:${VERSION}. Refusing to deploy a mutable-only tag to production (BR-5)."
+                FAILED+=("$APP")
+                continue
+              fi
+              echo "::warning::No digest resolved for ${REPO}:${VERSION}; falling back to mutable tag for non-production env '$ENV'."
+              IMAGE="${ACR}/${REPO}:${VERSION}"
             fi
 
             echo "Updating $CA_NAME → $IMAGE ..."
@@ -425,14 +521,34 @@ jobs:
     needs: [plan, deploy]
     runs-on: ubuntu-latest
     name: Post-Deploy Verification
+    # BR-5: verification is environment-bound (it reads the deployed env's
+    # Container Apps). Run it under the same environment-scoped OIDC deploy
+    # identity (AcrPull-only, Contributor on its own RG) so no shared
+    # AZURE_CREDENTIALS password is required. Fail closed if not configured.
+    environment:
+      name: ${{ needs.plan.outputs.environment }}
 
     steps:
       - uses: actions/checkout@v5
 
-      - name: Azure Login
+      - name: Assert environment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped identity for '${{ needs.plan.outputs.environment }}' verification. Configure AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID on the '${{ needs.plan.outputs.environment }}' GitHub Environment (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Health checks
         run: |
