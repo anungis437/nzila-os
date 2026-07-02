@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { DecisionEvidenceBuilder } from './builder.js'
-import { computePackHash, computeSealHash } from './hash.js'
-import { exportAsMarkdown, exportAsJson } from './export.js'
+import { computePackHash } from './hash.js'
 import type { DecisionEvidenceStore } from './store.js'
 import type { DecisionEvidencePack, SealedDecisionEvidencePack } from './schema.js'
 

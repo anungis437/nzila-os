@@ -143,7 +143,10 @@ export class GovernanceRationaleEngine {
     existingRationaleId: string,
     newInput: GovernanceRationaleInput,
   ): Promise<GovernanceRationale> {
-    const existing = await this.#getOrThrow(existingRationaleId)
+    // Assert the old rationale exists (throws if not); the return value is
+    // not needed here — we only need supersededBy on the new rationale to be
+    // set to `existingRationaleId`.
+    await this.#getOrThrow(existingRationaleId)
 
     const newRationale = await this.record({
       ...newInput,
