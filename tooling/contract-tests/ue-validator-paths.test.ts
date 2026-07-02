@@ -57,8 +57,12 @@ describe('INV-PATH-UE — UE validators use the canonical doc corpus', () => {
       );
       // No remaining hard-coded join into the legacy tree for a named UE area.
       for (const area of [...CANONICAL_AREAS, 'runtime-convergence']) {
+        // Escape every regex metacharacter (including `\`) to avoid incomplete
+        // sanitization warnings from static analysis. `area` values are hardcoded
+        // constants today, but the safer regex-escape keeps the invariant robust
+        // against future additions.
         const legacyJoin = new RegExp(
-          `'docs',\\s*'union-eyes',\\s*'${area.replace(/[-/]/g, '\\$&')}'`,
+          `'docs',\\s*'union-eyes',\\s*'${area.replace(/[.*+?^${}()|[\]\\/-]/g, '\\$&')}'`,
         );
         expect(
           legacyJoin.test(src),
