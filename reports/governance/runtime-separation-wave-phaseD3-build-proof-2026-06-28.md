@@ -11,7 +11,7 @@
 
 ## 1. What was created
 
-- [.github/workflows/build-identity-proof.yml](.github/workflows/build-identity-proof.yml) — temporary, dispatch-only proof workflow.
+- [.github/workflows/build-identity-proof.yml](../../.github/workflows/build-identity-proof.yml) — temporary, dispatch-only proof workflow.
 
 **Workflow properties (satisfying scope items 2–11):**
 - `on: workflow_dispatch: {}` — manual dispatch only.

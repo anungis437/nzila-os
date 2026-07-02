@@ -11,9 +11,9 @@
 
 | Workflow | Job(s) | Change | Authority class | Shared-cred status |
 |---|---|---|---|---|
-| [.github/workflows/canary-deploy.yml](.github/workflows/canary-deploy.yml) | `deploy-canary`, `bake-and-observe`, `promote`, `rollback` | Added `environment: production`; replaced `azure/login` `creds: AZURE_CREDENTIALS` with environment-scoped OIDC (`client-id` / `tenant-id` / `subscription-id`); added fail-closed identity assertion on `deploy-canary` | Deploy | **Removed** (no real `AZURE_CREDENTIALS` usage; only a comment remains) |
-| [.github/workflows/gitops-deploy.yml](.github/workflows/gitops-deploy.yml) | `verify` | Added `environment: ${{ needs.plan.outputs.environment }}`; replaced `creds: AZURE_CREDENTIALS` with environment-scoped OIDC; added fail-closed identity assertion | Verify (read-only, env-bound) | **Removed** |
-| [scripts/deploy-transactional.ts](scripts/deploy-transactional.ts) | n/a (defense-in-depth) | Added `--require-digest-pinned` flag, `DIGEST_PINNED_RE = /@sha256:[0-9a-f]{64}$/`, prod-RG auto-default, and a fail-closed `ensure(...)` rejecting non-`@sha256` targets in production | Deploy validation | n/a |
+| [.github/workflows/canary-deploy.yml](../../.github/workflows/canary-deploy.yml) | `deploy-canary`, `bake-and-observe`, `promote`, `rollback` | Added `environment: production`; replaced `azure/login` `creds: AZURE_CREDENTIALS` with environment-scoped OIDC (`client-id` / `tenant-id` / `subscription-id`); added fail-closed identity assertion on `deploy-canary` | Deploy | **Removed** (no real `AZURE_CREDENTIALS` usage; only a comment remains) |
+| [.github/workflows/gitops-deploy.yml](../../.github/workflows/gitops-deploy.yml) | `verify` | Added `environment: ${{ needs.plan.outputs.environment }}`; replaced `creds: AZURE_CREDENTIALS` with environment-scoped OIDC; added fail-closed identity assertion | Verify (read-only, env-bound) | **Removed** |
+| [scripts/deploy-transactional.ts](../../scripts/deploy-transactional.ts) | n/a (defense-in-depth) | Added `--require-digest-pinned` flag, `DIGEST_PINNED_RE = /@sha256:[0-9a-f]{64}$/`, prod-RG auto-default, and a fail-closed `ensure(...)` rejecting non-`@sha256` targets in production | Deploy validation | n/a |
 
 Workflow-level `permissions: id-token: write` was already present on `canary-deploy.yml` (added earlier in Phase D.1) and `gitops-deploy.yml`, enabling OIDC for the migrated jobs.
 
@@ -21,8 +21,8 @@ Workflow-level `permissions: id-token: write` was already present on `canary-dep
 
 | Workflow | Job | Current credential | Reason staged |
 |---|---|---|---|
-| [.github/workflows/gitops-deploy.yml](.github/workflows/gitops-deploy.yml) | `build` (line ~189) | `AZURE_CREDENTIALS` fallback | Automated push-to-main, high blast radius; no green-CI proof possible this phase |
-| [.github/workflows/deploy-union-eyes.yml](.github/workflows/deploy-union-eyes.yml) | `build-push` | `AZURE_CREDENTIALS` | Backend uses `az acr build` which AcrPush-only cannot run (see §3); requires docker-push conversion |
+| [.github/workflows/gitops-deploy.yml](../../.github/workflows/gitops-deploy.yml) | `build` (line ~189) | `AZURE_CREDENTIALS` fallback | Automated push-to-main, high blast radius; no green-CI proof possible this phase |
+| [.github/workflows/deploy-union-eyes.yml](../../.github/workflows/deploy-union-eyes.yml) | `build-push` | `AZURE_CREDENTIALS` | Backend uses `az acr build` which AcrPush-only cannot run (see §3); requires docker-push conversion |
 
 ---
 
