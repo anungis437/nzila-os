@@ -4,27 +4,27 @@
  * Thin projection layer over the existing ABR incident service.
  * Does NOT replace or duplicate incident service primitives.
  *
- * ## Persistence strategy (Phase 1C finding)
+ * ## Persistence strategy (Phase 1D — hardened)
  *
- * The `abr_incidents` table has no metadata/payload_json column.
- * CourtLens additive fields (practiceArea, subIssue, aiSummaryStatus,
- * referralStatus, riskFlags, clientGoal, hearingDate, deadlineDate,
- * clientProfile) have no direct DB persistence path in the current schema.
+ * CourtLens additive fields are persisted as typed `'courtlens_event'` entries
+ * in `abr_incident_events.payload_json`. This reuses the existing ABR event
+ * infrastructure (both in-memory and DB paths) without a schema change.
  *
- * Phase 1C decision:
- * - In demo/in-memory mode: CourtLens fields are composed from defaults and
- *   event payloads stored in `abr_incident_events.payload_json`.
- * - In DB mode: CourtLens field mutations are persisted as typed events in
- *   `abr_incident_events.payload_json`. Field values are derived by replaying
- *   events. This avoids a schema change in Phase 1C.
- * - A Phase 2 migration to add a `courtlens_metadata jsonb` column to
- *   `abr_incidents` is documented as the correct long-term path once pilot
- *   proves the field set is stable.
+ * Event payloads use the `CourtLensEventPayload` discriminated union keyed on
+ * `clEventType`. `deriveCourtLensFields` replays events to reconstruct state.
  *
- * See: docs/courtlens/phase-1/abr-reuse-audit.md (Phase 1C notes)
+ * Phase 1D hardening: `appendIncidentEvent` is now exported from service.ts
+ * and called by every CourtLens mutation. No mutation returns success without
+ * the event being written.
+ *
+ * `courtlens_metadata jsonb` column is deferred as a materialized projection
+ * cache after pilot field stability is proven. Events remain source of truth.
+ *
+ * See: docs/courtlens/phase-1/abr-reuse-audit.md (Phase 1D notes)
  */
 
 import {
+  appendIncidentEvent,
   createIncident,
   getIncidentDetail,
   listIncidents,
@@ -128,7 +128,85 @@ export function assertValidRiskKeys(flags: Partial<CourtLensRiskFlags>): void {
   }
 }
 
-// ── Matter input type ────────────────────────────────────────────────────────
+// ── CourtLens typed event helpers ────────────────────────────────────────────
+// Each helper writes a single typed `courtlens_event` into the incident event
+// stream via the exported `appendIncidentEvent` primitive. No mutation in
+// matter-service.ts succeeds without calling one of these helpers.
+
+export async function recordCourtLensFieldUpdate(
+  incidentId: string,
+  actorId: string,
+  fields: Partial<CourtLensFields>,
+): Promise<void> {
+  const payload: CourtLensEventPayload = { clEventType: 'courtlens_fields_set', fields };
+  await appendIncidentEvent(incidentId, actorId, 'courtlens_event', payload);
+}
+
+export async function recordAiSummaryStatusChanged(
+  incidentId: string,
+  actorId: string,
+  from: AiSummaryStatus,
+  to: AiSummaryStatus,
+  actorType: 'human' | 'ai',
+): Promise<void> {
+  const payload: CourtLensEventPayload = { clEventType: 'ai_summary_status_changed', from, to, actorType };
+  await appendIncidentEvent(incidentId, actorId, 'courtlens_event', payload);
+}
+
+export async function recordReferralStatusChanged(
+  incidentId: string,
+  actorId: string,
+  from: ReferralStatus,
+  to: ReferralStatus,
+): Promise<void> {
+  const payload: CourtLensEventPayload = { clEventType: 'referral_status_changed', from, to };
+  await appendIncidentEvent(incidentId, actorId, 'courtlens_event', payload);
+}
+
+export async function recordRiskFlagsUpdated(
+  incidentId: string,
+  actorId: string,
+  flags: Partial<CourtLensRiskFlags>,
+): Promise<void> {
+  const payload: CourtLensEventPayload = { clEventType: 'courtlens_fields_set', fields: { riskFlags: { ...flags } as CourtLensRiskFlags } };
+  await appendIncidentEvent(incidentId, actorId, 'courtlens_event', payload);
+}
+
+export async function recordClientProfileUpdated(
+  incidentId: string,
+  actorId: string,
+  profile: Partial<import('./courtlens').CourtLensClientProfile>,
+): Promise<void> {
+  const payload: CourtLensEventPayload = { clEventType: 'courtlens_fields_set', fields: { clientProfile: profile as import('./courtlens').CourtLensClientProfile } };
+  await appendIncidentEvent(incidentId, actorId, 'courtlens_event', payload);
+}
+
+export async function recordReviewPacketDrafted(
+  incidentId: string,
+  actorId: string,
+): Promise<void> {
+  const payload: CourtLensEventPayload = {
+    clEventType: 'ai_summary_status_changed',
+    from: 'ai_draft',
+    to: 'needs_verification',
+    actorType: 'ai',
+  };
+  await appendIncidentEvent(incidentId, actorId, 'courtlens_event', payload);
+}
+
+export async function recordReviewPacketApproved(
+  incidentId: string,
+  actorId: string,
+  from: AiSummaryStatus,
+): Promise<void> {
+  const payload: CourtLensEventPayload = {
+    clEventType: 'ai_summary_status_changed',
+    from,
+    to: 'approved',
+    actorType: 'human',
+  };
+  await appendIncidentEvent(incidentId, actorId, 'courtlens_event', payload);
+}
 
 export interface CourtLensMatterCreateInput extends IncidentCreateInput {
   practiceArea: CourtLensPracticeArea;
@@ -138,12 +216,15 @@ export interface CourtLensMatterCreateInput extends IncidentCreateInput {
   deadlineDate?: string;
 }
 
+// ── Matter input type ────────────────────────────────────────────────────────
+
 // ── Matter service functions ─────────────────────────────────────────────────
 
 /**
  * Create a new CourtLens matter as an ABR incident.
  * Persists base incident via existing incident service.
- * Stores initial CourtLens fields as a 'courtlens_fields_set' event payload.
+ * Writes initial CourtLens fields as a 'courtlens_event' / 'courtlens_fields_set'
+ * payload into the incident event stream.
  */
 export async function createMatter(
   orgId: string,
@@ -170,6 +251,10 @@ export async function createMatter(
     hearingDate: input.hearingDate ?? null,
     deadlineDate: input.deadlineDate ?? null,
   };
+
+  // Persist initial CourtLens fields as a typed event — this is the source of
+  // truth for subsequent event-replay reconstruction.
+  await recordCourtLensFieldUpdate(incident.id, actorId, initialFields);
 
   return { ...incident, ...initialFields };
 }
@@ -234,11 +319,9 @@ export async function transitionMatterStatus(
 /**
  * Update the AI summary status of a matter.
  * Enforces the human-in-the-loop approval lifecycle.
- * Persists the state change as a CourtLens-typed event payload.
- *
- * NOTE: In demo/in-memory mode, the event is appended to the in-memory store
- * via the event model in abr_incident_events. In DB mode the same path applies.
- * The current state is derived by replaying events in getMatterDetail.
+ * Persists the state change as a typed 'courtlens_event' in the incident event
+ * stream via appendIncidentEvent. No success is returned without the event
+ * being written.
  */
 export async function updateAiSummaryStatus(
   orgId: string,
@@ -260,24 +343,21 @@ export async function updateAiSummaryStatus(
   const detail = await getIncidentDetail(orgId, matterId, true);
   if (!detail) return { success: false, reason: 'Matter not found' };
 
-  // Persist as a CourtLens-typed event payload in abr_incident_events.
-  // Import appendEvent is not exported from service.ts; we store via the
-  // event model indirectly by appending a note with structured content.
-  // Phase 2 will export appendEvent or provide a typed CourtLens event API.
-  // For now, state is tracked in-memory for the adapter layer.
-  // This is the documented gap; see Phase 1C notes in abr-reuse-audit.md.
+  // Persist the state change as a typed CourtLens event.
+  await recordAiSummaryStatusChanged(matterId, actorId, from, to, actorType);
 
   return { success: true, to };
 }
 
 /**
  * Update referral status, enforcing the approved-before-sent lifecycle rule.
- * Persists the state change via CourtLens-typed event payload.
+ * Persists the state change as a typed 'courtlens_event' in the incident event
+ * stream. No success is returned without the event being written.
  */
 export async function updateReferralStatus(
   orgId: string,
   matterId: string,
-  _actorId: string,
+  actorId: string,
   from: ReferralStatus,
   to: ReferralStatus,
 ): Promise<{ success: true; to: ReferralStatus } | { success: false; reason: string }> {
@@ -287,6 +367,9 @@ export async function updateReferralStatus(
 
   const detail = await getIncidentDetail(orgId, matterId, true);
   if (!detail) return { success: false, reason: 'Matter not found' };
+
+  // Persist the state change as a typed CourtLens event.
+  await recordReferralStatusChanged(matterId, actorId, from, to);
 
   return { success: true, to };
 }

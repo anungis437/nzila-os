@@ -288,6 +288,42 @@ CourtLens implementation must not build separate versions of:
 
 ---
 
+## Phase 1D Notes (event persistence hardening)
+
+### Phase 1C gap confirmed
+
+Phase 1C claimed "CourtLens field mutations are persisted as typed events in `abr_incident_events.payload_json`" but the actual implementation of `updateAiSummaryStatus` and `updateReferralStatus` returned `{ success: true }` without writing any event. `createMatter` also did not write the initial `courtlens_fields_set` event. The comment "documented gap" in the code was accurate; the report was premature.
+
+### Phase 1D resolution
+
+Four changes:
+
+1. Added `'courtlens_event'` to `IncidentEventType` in `types.ts`. This is the dedicated typed event for CourtLens state changes in the ABR incident event stream.
+
+2. Exported `appendIncidentEvent` from `service.ts`. It delegates to the existing private `appendEvent` function, reusing both the in-memory path (no `DATABASE_URL`) and the DB path without duplication.
+
+3. Added typed CourtLens event helpers in `matter-service.ts`:
+   - `recordCourtLensFieldUpdate`
+   - `recordAiSummaryStatusChanged`
+   - `recordReferralStatusChanged`
+   - `recordRiskFlagsUpdated`
+   - `recordClientProfileUpdated`
+   - `recordReviewPacketDrafted`
+   - `recordReviewPacketApproved`
+
+4. Wired all CourtLens mutations to call the helpers before returning success:
+   - `createMatter` writes `courtlens_fields_set` with initial field values.
+   - `updateAiSummaryStatus` writes `ai_summary_status_changed` (enforcing human-only approval).
+   - `updateReferralStatus` writes `referral_status_changed`.
+
+### Confirmed persistence strategy for Phase 2
+
+Event replay via `deriveCourtLensFields` is the confirmed source of truth. `getMatterDetail` reconstructs CourtLens field state by replaying `courtlens_event` payloads from the incident event stream. This is verified by 30 integration tests in `matter-events.test.ts` with no service mocking.
+
+### `courtlens_metadata` remains deferred
+
+No schema change was required. A `courtlens_metadata jsonb` column on `abr_incidents` is deferred as a possible materialized projection cache after pilot field stability is proven — it is not the authoritative source of truth and is not required before Phase 2 public intake.
+
 ## Phase 1C Notes (added after service adapter implementation)
 
 ### Persistence gap confirmed

@@ -32,6 +32,7 @@ import { isValidTransition } from '../fsm';
 // Prevent network/DB calls; the adapter is tested in isolation.
 
 vi.mock('../service', () => ({
+  appendIncidentEvent: vi.fn(async () => undefined),
   createIncident: vi.fn(async (orgId: string, actorId: string, input: Record<string, unknown>) => ({
     id: 'inc-mock-1',
     orgId,

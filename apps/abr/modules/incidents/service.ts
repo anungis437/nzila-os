@@ -316,6 +316,20 @@ async function appendEvent(
   memory.events.push({ id, incidentId, actorId, type, payloadJson, createdAt });
 }
 
+/**
+ * Exported event append primitive for CourtLens and other thin adapters.
+ * Writes a typed event into the incident event stream.
+ * Reuses the same in-memory and DB paths as internal ABR event writes.
+ */
+export async function appendIncidentEvent(
+  incidentId: string,
+  actorId: string,
+  type: IncidentEventType,
+  payloadJson: Record<string, unknown>,
+): Promise<void> {
+  return appendEvent(incidentId, actorId, type, payloadJson);
+}
+
 function buildTimeline(
   events: IncidentEventRecord[],
   notes: IncidentNoteRecord[],

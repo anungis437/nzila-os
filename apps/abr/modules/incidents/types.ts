@@ -27,7 +27,8 @@ export type IncidentEventType =
   | 'evidence_added'
   | 'remediation_created'
   | 'due_date_changed'
-  | 'closed';
+  | 'closed'
+  | 'courtlens_event';
 
 export type RemediationType =
   | 'policy_review'
