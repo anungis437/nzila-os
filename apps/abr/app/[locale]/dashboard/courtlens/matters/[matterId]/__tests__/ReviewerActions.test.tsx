@@ -147,7 +147,7 @@ describe('ReviewerActions — mutation contract', () => {
     expect(JSON.parse(String(init.body))).toEqual({ from: 'needs_verification', to: 'approved' });
   });
 
-  it('does NOT send x-abr-role header', async () => {
+  it('does NOT send x-abr-role or x-org-id headers, and DOES send Idempotency-Key', async () => {
     const fetchMock = stubFetch();
     render(
       <ReviewerActions
@@ -168,8 +168,89 @@ describe('ReviewerActions — mutation contract', () => {
     expect(headers['X-Abr-Role']).toBeUndefined();
     expect(headers['x-org-id']).toBeUndefined();
     expect(headers['X-Org-Id']).toBeUndefined();
-    // Only Content-Type should be set
+    // Content-Type is required by JSON parsing
     expect(headers['Content-Type']).toBe('application/json');
+    // Idempotency-Key is required by apps/abr/proxy.ts middleware
+    expect(headers['Idempotency-Key']).toBeTruthy();
+    expect(headers['Idempotency-Key'].length).toBeGreaterThan(8);
+  });
+
+  it('AI summary mutation sends Idempotency-Key', async () => {
+    const fetchMock = stubFetch();
+    render(
+      <ReviewerActions
+        matterId="inc-1"
+        aiSummaryStatus="needs_verification"
+        referralStatus="none"
+        status="investigating"
+        permissions={['incident.update']}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('ai-action-approved'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect((init.headers as Record<string, string>)['Idempotency-Key']).toBeTruthy();
+  });
+
+  it('Referral mutation sends Idempotency-Key', async () => {
+    const fetchMock = stubFetch();
+    render(
+      <ReviewerActions
+        matterId="inc-1"
+        aiSummaryStatus="ai_draft"
+        referralStatus="approved"
+        status="investigating"
+        permissions={['incident.update']}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('referral-action-sent'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect((init.headers as Record<string, string>)['Idempotency-Key']).toBeTruthy();
+  });
+
+  it('Matter transition mutation sends Idempotency-Key', async () => {
+    const fetchMock = stubFetch();
+    render(
+      <ReviewerActions
+        matterId="inc-1"
+        aiSummaryStatus="approved"
+        referralStatus="completed"
+        status="new"
+        permissions={['incident.transition']}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('transition-action-triage'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect((init.headers as Record<string, string>)['Idempotency-Key']).toBeTruthy();
+  });
+
+  it('Idempotency keys are unique per action (no reuse across separate mutations)', async () => {
+    const fetchMock = stubFetch();
+    render(
+      <ReviewerActions
+        matterId="inc-1"
+        aiSummaryStatus="needs_verification"
+        referralStatus="approved"
+        status="investigating"
+        permissions={['incident.update', 'incident.transition']}
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId('ai-action-approved'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByTestId('referral-action-sent'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+    const key1 = (fetchMock.mock.calls[0][1] as RequestInit).headers as Record<string, string>;
+    const key2 = (fetchMock.mock.calls[1][1] as RequestInit).headers as Record<string, string>;
+    expect(key1['Idempotency-Key']).toBeTruthy();
+    expect(key2['Idempotency-Key']).toBeTruthy();
+    expect(key1['Idempotency-Key']).not.toBe(key2['Idempotency-Key']);
   });
 
   it('POSTs referral transition with correct body', async () => {

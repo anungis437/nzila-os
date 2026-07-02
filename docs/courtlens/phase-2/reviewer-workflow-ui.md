@@ -104,9 +104,19 @@ The audit log distinguishes AI-generated actions from human-approved ones via th
 
 ## Rate-Limit / Error Handling
 
-- All routes are covered by the existing `proxy.ts` middleware — rate limiting and (in non-dev) idempotency-key enforcement.
-- Client fetch uses `credentials: 'same-origin'` and only `Content-Type: application/json`. No auth headers.
+- All routes are covered by the existing `proxy.ts` middleware — rate limiting and (in non-dev) `Idempotency-Key` enforcement.
+- Client fetch uses `credentials: 'same-origin'`, `Content-Type: application/json`, and (as of Phase 2E.5) a fresh `Idempotency-Key: <uuid>` from `lib/idempotency.ts:createIdempotencyKey()`. No auth headers.
 - Failed mutations show the server error message inline. Successful mutations trigger `router.refresh()` so the server re-derives all state from the event stream.
+
+## Client Idempotency Contract (Phase 2E.5)
+
+Enforced across all CourtLens client-side mutation POSTs:
+
+- Every request MUST include a fresh `Idempotency-Key` header.
+- Key is generated per action via `createIdempotencyKey()`; uses `crypto.randomUUID()` when available.
+- Keys are unique per action (regression-tested against reuse).
+- No static or predictable values.
+- This is a **hard precondition** for Phase 2F public intake UI: no new public POST form ships until all CourtLens client POSTs satisfy this contract.
 
 ## Known Gaps Before Phase 2F Public Intake UI
 
@@ -114,7 +124,7 @@ The audit log distinguishes AI-generated actions from human-approved ones via th
 2. **Assignment UI**: no way to assign a matter to a reviewer. Requires exposing `assignIncident` via a new route or extending an existing one.
 3. **Bilingual copy**: reviewer action button labels are hard-coded English. Should migrate to `next-intl` message catalogs before external stakeholder demo.
 4. **Optimistic UI**: currently blocks with `useTransition` and `router.refresh()`. Not optimistic. Consider Server Actions if repeated round-trips become a UX concern.
-5. **Idempotency headers**: the client component does not currently attach `Idempotency-Key`. The proxy middleware requires it in non-dev for mutations. Add UUID generation before enabling production traffic.
+5. ~~**Idempotency headers**~~ — closed in Phase 2E.5. See "Client Idempotency Contract" above.
 6. **N+1 event replay** in queue list — unchanged from Phase 2C. Deferred.
 
 ## Related

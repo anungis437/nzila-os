@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { createIdempotencyKey } from '@/lib/idempotency';
 
 /**
  * ReviewerActions — Phase 2E client component.
@@ -87,7 +88,12 @@ export function ReviewerActions({
       const res = await fetch(url, {
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // Idempotency-Key: required by apps/abr/proxy.ts middleware for
+          // all non-dev /api mutation requests. See lib/idempotency.ts.
+          'Idempotency-Key': createIdempotencyKey(),
+        },
         body: JSON.stringify(body),
       });
       if (!res.ok) {
