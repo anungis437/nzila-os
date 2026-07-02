@@ -179,7 +179,10 @@ export class PPOAEngine {
       10,
       opportunities.filter((o) => o.status !== 'missed').reduce((sum, o) => sum + o.opportunityScore / 25, 0),
     )
-    const criticalPenalty = criticalRiskCount * 15
+    // Confidence: readiness boosted by opportunities, penalized by critical risks.
+    // Each critical risk deducts 25 points — one max-severity unmitigated critical
+    // risk is enough to push a readiness score of 50 below the 30-point abort floor.
+    const criticalPenalty = criticalRiskCount * 25
     const rolloutConfidenceScore = Math.max(
       0,
       Math.min(100, Math.round(operationalReadinessScore + opportunityBoost - criticalPenalty)),

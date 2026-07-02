@@ -138,7 +138,7 @@ export const governanceRationaleInputSchema = governanceRationaleSchema.omit({
   deviation: z.string().optional().default(''),
 })
 
-export type GovernanceRationaleInput = z.infer<typeof governanceRationaleInputSchema>
+export type GovernanceRationaleInput = z.input<typeof governanceRationaleInputSchema>
 
 // ─── Replay Result ────────────────────────────────────────────────────────────
 

@@ -166,7 +166,7 @@ export const decisionEvidencePackInputSchema = decisionEvidencePackSchema.omit({
   continuityImplications: z.array(z.string()).optional().default([]),
 })
 
-export type DecisionEvidencePackInput = z.infer<typeof decisionEvidencePackInputSchema>
+export type DecisionEvidencePackInput = z.input<typeof decisionEvidencePackInputSchema>
 
 // ─── Sealed Pack (immutable export) ──────────────────────────────────────────
 

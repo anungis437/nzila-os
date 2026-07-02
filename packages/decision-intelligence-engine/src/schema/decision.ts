@@ -23,7 +23,7 @@ export type DecisionType = z.infer<typeof decisionTypeSchema>
 // ─── Criterion (MUST — go/bust) ──────────────────────────────────────────────
 
 export const criterionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().min(1),
   label: z.string().min(1).max(200),
   description: z.string(),
   isGo: z.boolean().describe('true = must pass (go), false = must fail (bust)'),
@@ -34,7 +34,7 @@ export type Criterion = z.infer<typeof criterionSchema>
 // ─── Weighted Criterion (WANT) ────────────────────────────────────────────────
 
 export const weightedCriterionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().min(1),
   label: z.string().min(1).max(200),
   description: z.string(),
   weight: z.number().int().min(1).max(10).describe('Relative importance 1–10'),
@@ -206,7 +206,13 @@ export const decisionAnalysisInputSchema = decisionAnalysisSchema.omit({
   supersedes: z.string().uuid().nullable().optional().default(null),
 })
 
-export type DecisionAnalysisInput = z.infer<typeof decisionAnalysisInputSchema>
+/**
+ * Caller-facing input type. Uses `z.input` (not `z.infer`) so fields with
+ * `.optional().default(...)` are truly optional at the type level for
+ * consumers. The schema still applies defaults at parse time via
+ * `.parse()` inside the engine.
+ */
+export type DecisionAnalysisInput = z.input<typeof decisionAnalysisInputSchema>
 
 // ─── Score Result ─────────────────────────────────────────────────────────────
 

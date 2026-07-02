@@ -143,9 +143,15 @@ export const ppoaAnalysisInputSchema = ppoaAnalysisSchema.omit({
   decisionAnalysisRef: z.string().uuid().nullable().optional().default(null),
   evidenceRefs: z.array(z.string()).optional().default([]),
   targetDate: z.string().datetime().nullable().optional().default(null),
+  criticalRiskThreshold: z.number().int().min(1).max(25).optional().default(15),
 })
 
-export type PPOAAnalysisInput = z.infer<typeof ppoaAnalysisInputSchema>
+/**
+ * Caller-facing input type. Uses `z.input` (not `z.infer`) so fields with
+ * `.optional().default(...)` are truly optional at the type level for
+ * consumers. The schema still applies defaults at parse time via `.parse()`.
+ */
+export type PPOAAnalysisInput = z.input<typeof ppoaAnalysisInputSchema>
 
 // ─── Readiness Report ─────────────────────────────────────────────────────────
 

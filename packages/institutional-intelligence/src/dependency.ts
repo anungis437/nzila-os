@@ -79,7 +79,19 @@ export class InstitutionalDependencyEngine {
     const overallRiskScore =
       nodeRisk.length === 0
         ? 0
-        : Math.round(nodeRisk.reduce((sum, n) => sum + n.riskScore, 0) / nodeRisk.length)
+        : (() => {
+            const avg = nodeRisk.reduce((sum, n) => sum + n.riskScore, 0) / nodeRisk.length
+            // Concentration surcharge: when a single person owns multiple critical
+            // domains, the org-level dependency risk exceeds the average of the
+            // individual node risks. Each additional concentrated dependency past
+            // the first adds a 30-point surcharge (capped at 100). A single person
+            // owning 2 domains with bus-factor 1 must land in the high (≥65) band.
+            const concentrationSurcharge = [...byPerson.values()].reduce(
+              (sum, p) => sum + Math.max(0, p.dependencyCount - 1) * 30,
+              0,
+            )
+            return Math.min(100, Math.round(avg + concentrationSurcharge))
+          })()
 
     const concentrationHotspots = [...byPerson.entries()]
       .map(([personId, v]) => ({ personId, ...v }))

@@ -1,5 +1,10 @@
 import { z } from 'zod'
 import { severityScale } from './situation.js'
+import { confidenceSemanticsSchema, type ConfidenceSemantics } from './decision.js'
+
+// Re-export so existing imports from '@nzila/decision-intelligence-engine' via
+// the schema/problem barrel keep working after the consolidation into decision.ts.
+export { confidenceSemanticsSchema, type ConfidenceSemantics }
 
 // ─── KT Problem Dimensions ────────────────────────────────────────────────────
 
@@ -106,14 +111,8 @@ export const deviationTypeSchema = z.enum([
 
 export type DeviationType = z.infer<typeof deviationTypeSchema>
 
-export const confidenceSemanticsSchema = z.enum([
-  'high',
-  'moderate',
-  'low',
-  'insufficient-evidence',
-])
-
-export type ConfidenceSemantics = z.infer<typeof confidenceSemanticsSchema>
+// ConfidenceSemantics is defined canonically in ./decision.ts and imported
+// at the top of this file. It stays re-exported to preserve public API.
 
 // ─── Problem Analysis ─────────────────────────────────────────────────────────
 

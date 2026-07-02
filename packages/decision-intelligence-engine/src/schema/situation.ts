@@ -57,7 +57,9 @@ export const situationAssessmentSchema = z.object({
   unknowns: z.array(z.string()),
   recommendedActions: z.array(z.string()),
 
-  escalationThreshold: z.string().min(1),
+  // Empty string means "not yet defined" — the engine skips escalation
+  // evaluation until a caller sets a real threshold expression.
+  escalationThreshold: z.string(),
   escalated: z.boolean().default(false),
   escalatedAt: z.string().datetime().nullable(),
 
@@ -81,9 +83,18 @@ export const situationAssessmentInputSchema = situationAssessmentSchema.omit({
   escalatedAt: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Empty string means the caller has not yet defined an escalation trigger
+  // (common for freshly-created assessments). The engine tolerates this and
+  // simply skips escalation evaluation until a real threshold is set.
+  escalationThreshold: z.string().default(''),
 })
 
-export type SituationAssessmentInput = z.infer<typeof situationAssessmentInputSchema>
+/**
+ * Caller-facing input type. Uses `z.input` (not `z.infer`) so fields with
+ * `.optional().default(...)` are truly optional at the type level.
+ */
+export type SituationAssessmentInput = z.input<typeof situationAssessmentInputSchema>
 
 // ─── Priority Matrix Entry ────────────────────────────────────────────────────
 
