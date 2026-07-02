@@ -7,11 +7,11 @@
 | Metric | Count |
 |--------|-------|
 | Apps | 26 |
-| Packages (packages/*) | 216 |
-| Workspace Packages (apps|packages|services|tooling) | 248 |
+| Packages (packages/*) | 221 |
+| Workspace Packages (apps|packages|services|tooling) | 253 |
 | GitHub Workflows | 52 |
 | Contract Test Files | 268 |
-| TS/JS Test Files | 2410 |
+| TS/JS Test Files | 2419 |
 | Python Test Files | 32 |
 
 ## Apps
@@ -22,7 +22,7 @@
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 106 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 448 | Internal operations console — platform governance, compliance, analytics, integr |
-| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 325 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
+| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 332 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 43 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 436 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | maestria | Next.js | 3021 | ✅ | ✅ | ❌ | ✅ | 73 |  |

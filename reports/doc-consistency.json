@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-07-02T19:22:09.444Z",
-  "filesScanned": 2018,
-  "totalFindings": 2629,
+  "generatedAt": "2026-07-02T21:29:42.479Z",
+  "filesScanned": 2021,
+  "totalFindings": 2638,
   "findingsByRule": {
     "stale-reference": 1041,
     "stale-package-ref": 68,
-    "naming-inconsistency": 1404,
+    "naming-inconsistency": 1408,
     "stale-date": 8,
     "missing-required-doc": 3,
-    "missing-package-readme": 105
+    "missing-package-readme": 110
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1217,
-    "info": 1412
+    "warning": 1222,
+    "info": 1416
   },
   "findings": [
     {
@@ -16672,6 +16672,13 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.fr-CA.md",
+      "line": 312,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.md",
       "line": 4,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
@@ -16730,6 +16737,27 @@
       "severity": "info",
       "file": "docs/oci/whitepapers/OCI_OCRA_WHITEPAPER_ARCHITECTURE_v2.md",
       "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md",
+      "line": 4,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md",
+      "line": 16,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md",
+      "line": 353,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -17906,6 +17934,12 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
+      "file": "packages/continuity-analysis",
+      "message": "Package continuity-analysis missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
       "file": "packages/crm-hubspot",
       "message": "Package crm-hubspot missing README.md"
     },
@@ -17930,8 +17964,20 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
+      "file": "packages/decision-evidence",
+      "message": "Package decision-evidence missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
       "file": "packages/decision-intelligence",
       "message": "Package decision-intelligence missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/decision-intelligence-engine",
+      "message": "Package decision-intelligence-engine missing README.md"
     },
     {
       "rule": "missing-package-readme",
@@ -18014,6 +18060,12 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
+      "file": "packages/governance-rationale",
+      "message": "Package governance-rationale missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
       "file": "packages/governed-workflow",
       "message": "Package governed-workflow missing README.md"
     },
@@ -18052,6 +18104,12 @@
       "severity": "warning",
       "file": "packages/ingestion-core",
       "message": "Package ingestion-core missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/institutional-intelligence",
+      "message": "Package institutional-intelligence missing README.md"
     },
     {
       "rule": "missing-package-readme",

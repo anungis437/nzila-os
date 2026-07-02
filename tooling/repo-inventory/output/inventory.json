@@ -1,11 +1,11 @@
 {
   "generatedAt": "2026-07-02T00:00:00.000Z",
   "appCount": 26,
-  "packageCount": 216,
-  "workspacePackageCount": 248,
+  "packageCount": 221,
+  "workspacePackageCount": 253,
   "workflowCount": 52,
   "contractTestCount": 268,
-  "tsTestFileCount": 2410,
+  "tsTestFileCount": 2419,
   "pythonTestFileCount": 32,
   "apps": [
     {
@@ -187,14 +187,19 @@
       "nzilaDeps": [
         "attestation-visibility",
         "config",
+        "continuity-analysis",
         "continuity-review",
         "db",
         "deal-engine",
         "decision-core",
+        "decision-evidence",
         "decision-intelligence",
+        "decision-intelligence-engine",
         "governance-operations",
+        "governance-rationale",
         "governance-review",
         "governed-workflow",
+        "institutional-intelligence",
         "metrics-commercial",
         "nar",
         "observability",
@@ -233,7 +238,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 325
+      "codeFileCount": 332
     },
     {
       "name": "cora",

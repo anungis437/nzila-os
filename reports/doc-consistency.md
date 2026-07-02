@@ -1,24 +1,24 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-02T19:22:09.444Z
+> Generated: 2026-07-02T21:29:42.479Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2018 |
-| Total Findings | 2629 |
+| Files Scanned | 2021 |
+| Total Findings | 2638 |
 | Errors | 0 |
-| Warnings | 1217 |
-| Info | 1412 |
+| Warnings | 1222 |
+| Info | 1416 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1404 |
+| naming-inconsistency | 1408 |
 | stale-reference | 1041 |
-| missing-package-readme | 105 |
+| missing-package-readme | 110 |
 | stale-package-ref | 68 |
 | stale-date | 8 |
 | missing-required-doc | 3 |
@@ -1138,7 +1138,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1404)
+## naming-inconsistency (1408)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2410,6 +2410,7 @@
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:21` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.fr-CA.md:312` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.md:438` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER_fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2419,6 +2420,9 @@
 - ℹ️ `docs/oci/whitepapers/OCI_METHOD_WHITEPAPER_v1_fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/whitepapers/OCI_METHOD_WHITEPAPER_v1_fr-CA.md:169` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/whitepapers/OCI_OCRA_WHITEPAPER_ARCHITECTURE_v2.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:353` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:496` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2562,7 +2566,7 @@
 - 🟡 `docs/disaster-recovery.md` — Required document missing: Disaster recovery plan
 - 🟡 `docs/incident-response.md` — Required document missing: Incident response plan
 
-## missing-package-readme (105)
+## missing-package-readme (110)
 
 - 🟡 `packages/agri-adapters` — Package agri-adapters missing README.md
 - 🟡 `packages/agri-core` — Package agri-core missing README.md
@@ -2601,11 +2605,14 @@
 - 🟡 `packages/comms-push` — Package comms-push missing README.md
 - 🟡 `packages/comms-sms` — Package comms-sms missing README.md
 - 🟡 `packages/consent-engine` — Package consent-engine missing README.md
+- 🟡 `packages/continuity-analysis` — Package continuity-analysis missing README.md
 - 🟡 `packages/crm-hubspot` — Package crm-hubspot missing README.md
 - 🟡 `packages/data-lifecycle` — Package data-lifecycle missing README.md
 - 🟡 `packages/deal-engine` — Package deal-engine missing README.md
 - 🟡 `packages/decision-core` — Package decision-core missing README.md
+- 🟡 `packages/decision-evidence` — Package decision-evidence missing README.md
 - 🟡 `packages/decision-intelligence` — Package decision-intelligence missing README.md
+- 🟡 `packages/decision-intelligence-engine` — Package decision-intelligence-engine missing README.md
 - 🟡 `packages/enforcement` — Package enforcement missing README.md
 - 🟡 `packages/executive-os` — Package executive-os missing README.md
 - 🟡 `packages/finance-analytics` — Package finance-analytics missing README.md
@@ -2619,6 +2626,7 @@
 - 🟡 `packages/fsm-core` — Package fsm-core missing README.md
 - 🟡 `packages/fx` — Package fx missing README.md
 - 🟡 `packages/governance` — Package governance missing README.md
+- 🟡 `packages/governance-rationale` — Package governance-rationale missing README.md
 - 🟡 `packages/governed-workflow` — Package governed-workflow missing README.md
 - 🟡 `packages/health-analytics` — Package health-analytics missing README.md
 - 🟡 `packages/health-connectors` — Package health-connectors missing README.md
@@ -2626,6 +2634,7 @@
 - 🟡 `packages/health-ui` — Package health-ui missing README.md
 - 🟡 `packages/healthcare-surveys` — Package healthcare-surveys missing README.md
 - 🟡 `packages/ingestion-core` — Package ingestion-core missing README.md
+- 🟡 `packages/institutional-intelligence` — Package institutional-intelligence missing README.md
 - 🟡 `packages/intelligence` — Package intelligence missing README.md
 - 🟡 `packages/itsm-core` — Package itsm-core missing README.md
 - 🟡 `packages/nacp-core` — Package nacp-core missing README.md
