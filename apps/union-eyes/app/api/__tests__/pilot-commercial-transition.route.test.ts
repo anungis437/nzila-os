@@ -62,6 +62,13 @@ const mockDb = {
 
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/pilot/pilot-ownership', () => ({
+  // Access granted in unit tests; ownership is exercised by pilot-ownership.test.ts.
+  enforcePilotOwnership: vi.fn(async () => null),
+  wrapPilotItemRoute: <T,>(handler: T) => handler,
+  authorizePilotAccess: vi.fn(async () => ({ ok: true })),
+  getPilotOwnerOrganizationId: vi.fn(() => 'test-org'),
+}));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
 }));

@@ -9,9 +9,9 @@
 | Apps | 26 |
 | Packages (packages/*) | 216 |
 | Workspace Packages (apps|packages|services|tooling) | 248 |
-| GitHub Workflows | 50 |
-| Contract Test Files | 266 |
-| TS/JS Test Files | 2407 |
+| GitHub Workflows | 52 |
+| Contract Test Files | 268 |
+| TS/JS Test Files | 2410 |
 | Python Test Files | 32 |
 
 ## Apps
@@ -37,7 +37,7 @@
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade management — deals, listings, shipments, and commission track |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4913 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4915 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 27 |  |
@@ -52,7 +52,9 @@
 - ai-governance.yml
 - app-floor-check.yml
 - auto-promote-union-eyes.yml
+- br5-proof-deploy-staging.yml
 - branch-tag-governance.yml
+- build-identity-proof.yml
 - canary-deploy.yml
 - capital-discipline.yml
 - ci.yml

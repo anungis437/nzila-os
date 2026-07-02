@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "invariant": "INV-31b — Raw DB import is distinguished from UNSAFE raw DB import. Every sensitive-domain route that touches the database directly must carry an explicit classification. Unclassified sensitive direct DB usage and forbidden-direct-db usage fail the contract test; all other classifications are tolerated (some are migration-tracked).",
+  "scope": {
+    "appRoot": "apps/union-eyes",
+    "sensitiveDomains": [
+      "app/api/pilot",
+      "app/api/admin",
+      "app/api/governance",
+      "app/api/organizations",
+      "app/api/dues",
+      "app/api/grievances",
+      "app/api/pension",
+      "app/api/cases",
+      "app/api/claims"
+    ]
+  },
+  "categories": {
+    "allowed-system-route": {
+      "failing": false,
+      "description": "System/infrastructure route with no tenant-scoped data exposure (health, readiness, schema introspection, maintenance). Direct DB access is acceptable."
+    },
+    "allowed-admin-route": {
+      "failing": false,
+      "description": "Platform/admin-gated management or diagnostic route. Access is restricted to elevated operators; direct DB access is acceptable under that gate."
+    },
+    "requires-org-scope-wrapper": {
+      "failing": false,
+      "description": "Tenant-bound route whose safe pattern is an org-scope / ownership wrapper (e.g. enforcePilotOwnership, grievance org-access, getOrgScopedDb). Tolerated. Entries flagged migration:true are acknowledged gaps queued for a later DB-hardening wave."
+    },
+    "requires-rls-context": {
+      "failing": false,
+      "description": "Tenant-bound route whose safe pattern is withRLSContext / withSystemContext session scoping. Tolerated. Entries flagged migration:true are acknowledged gaps queued for a later DB-hardening wave."
+    },
+    "legacy-deprecated": {
+      "failing": false,
+      "description": "Known legacy route slated for removal/replacement. Tolerated but tracked for sunset; do not extend."
+    },
+    "forbidden-direct-db": {
+      "failing": true,
+      "description": "Direct DB access that is not permitted and must be removed or wrapped. FAILS the contract test."
+    }
+  },
+  "unclassifiedPolicy": {
+    "category": "unclassified-sensitive",
+    "failing": true,
+    "description": "Any sensitive-domain route with direct DB access that is not present in `classifications` is treated as unclassified-sensitive and FAILS. This is the fail-closed governance pressure: adding raw DB to a sensitive domain forces an explicit classification."
+  },
+  "classifications": {
+    "app/api/admin/ai-usage/route.ts": { "category": "allowed-admin-route", "reason": "Admin AI-usage analytics; RLS-guarded + admin auth." },
+    "app/api/admin/database/health/route.ts": { "category": "allowed-admin-route", "reason": "Admin DB health diagnostics; RLS-guarded + admin auth." },
+    "app/api/admin/database/optimize/route.ts": { "category": "allowed-admin-route", "reason": "Admin DB maintenance/optimize; RLS-guarded operator route." },
+    "app/api/admin/dues/overview/route.ts": { "category": "allowed-admin-route", "reason": "Admin dues overview; RLS-guarded + admin auth." },
+    "app/api/admin/duplicates/route.ts": { "category": "allowed-admin-route", "reason": "Admin duplicate-detection diagnostics; RLS-guarded + admin auth." },
+    "app/api/admin/members/stats/route.ts": { "category": "allowed-admin-route", "reason": "Admin member statistics; RLS-guarded + admin auth." },
+    "app/api/admin/seed-cupe-pilot/route.ts": { "category": "allowed-admin-route", "reason": "Admin pilot-seeding operator route; RLS-guarded + admin auth." },
+    "app/api/admin/stats/overview/route.ts": { "category": "allowed-admin-route", "reason": "Admin platform stats; RLS-guarded + admin auth." },
+
+    "app/api/cases/[caseId]/export/route.ts": { "category": "requires-rls-context", "reason": "Case export reads tenant case data under withRLSContext session scoping." },
+
+    "app/api/dues/arrears/[id]/payment/route.ts": { "category": "requires-rls-context", "reason": "Dues arrears payment mutation under withRLSContext + role auth." },
+    "app/api/dues/arrears/route.ts": { "category": "requires-rls-context", "reason": "Dues arrears listing under withRLSContext + role auth." },
+    "app/api/dues/reconciliation/auto-match/route.ts": { "category": "requires-rls-context", "reason": "Dues reconciliation under withRLSContext + role auth." },
+
+    "app/api/governance/board-packets/[id]/route.ts": { "category": "requires-rls-context", "reason": "Governance board packet (item) under withRLSContext + role auth." },
+    "app/api/governance/board-packets/route.ts": { "category": "requires-rls-context", "reason": "Governance board packets under withRLSContext + role auth." },
+    "app/api/governance/council-elections/route.ts": { "category": "requires-rls-context", "reason": "Council elections under withRLSContext + role auth." },
+    "app/api/governance/dashboard/route.ts": { "category": "requires-rls-context", "reason": "Governance dashboard under withRLSContext + role auth." },
+    "app/api/governance/elections/sessions/[id]/results/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Election results gated by withApi officer role + governance_suite entitlement, but reads by session id without an explicit org-scope check.", "migration": true },
+    "app/api/governance/elections/sessions/[id]/route.ts": { "category": "requires-rls-context", "reason": "Election session (item) under withRLSContext + role auth." },
+    "app/api/governance/elections/sessions/[id]/vote/route.ts": { "category": "requires-rls-context", "reason": "Cast vote under withRLSContext + role auth." },
+    "app/api/governance/elections/sessions/route.ts": { "category": "requires-rls-context", "reason": "Election sessions under withRLSContext + role auth." },
+    "app/api/governance/events/route.ts": { "category": "requires-rls-context", "reason": "Governance events under withRLSContext + role auth." },
+    "app/api/governance/golden-share/route.ts": { "category": "requires-rls-context", "reason": "Golden-share governance under withRLSContext + role auth." },
+    "app/api/governance/lifecycle/policies/route.ts": { "category": "requires-rls-context", "reason": "Lifecycle policies under withRLSContext + role auth." },
+    "app/api/governance/mission-audits/route.ts": { "category": "requires-rls-context", "reason": "Mission audits under withRLSContext + role auth." },
+    "app/api/governance/policies/rules/route.ts": { "category": "requires-rls-context", "reason": "Policy rules under withRLSContext + role auth." },
+    "app/api/governance/policy-templates/route.ts": { "category": "requires-rls-context", "reason": "Policy templates under withRLSContext + role auth." },
+    "app/api/governance/reserved-matters/[id]/class-b-vote/route.ts": { "category": "requires-rls-context", "reason": "Reserved-matter class-B vote under withRLSContext + role auth." },
+    "app/api/governance/reserved-matters/[id]/route.ts": { "category": "requires-rls-context", "reason": "Reserved-matter (item) under withRLSContext + role auth." },
+    "app/api/governance/reserved-matters/route.ts": { "category": "requires-rls-context", "reason": "Reserved matters under withRLSContext + role auth." },
+
+    "app/api/grievances/[id]/access/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Grievance access guarded by org-access wrapper; reads by id within actor org." },
+    "app/api/grievances/[id]/assign/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Grievance assignment under org-access wrapper + withRLSContext." },
+    "app/api/grievances/[id]/convert/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Grievance conversion under org-access wrapper + withRLSContext." },
+    "app/api/grievances/[id]/documents/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Grievance documents under org-access wrapper + withRLSContext." },
+    "app/api/grievances/[id]/priority-override/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Grievance priority override via audited DB helper under org-access wrapper + withRLSContext." },
+    "app/api/grievances/[id]/status/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Grievance status transition under org-access wrapper + withRLSContext." },
+    "app/api/grievances/import/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Grievance bulk import under org-access wrapper + withRLSContext." },
+    "app/api/grievances/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Grievance list/create under org-access wrapper + withRLSContext." },
+
+    "app/api/organizations/[id]/analytics/route.ts": { "category": "requires-rls-context", "reason": "Org analytics aggregation under withRLSContext." },
+    "app/api/organizations/[id]/ancestors/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Authenticated org-hierarchy ancestor lookup; reads org directory without an explicit per-org scope check.", "migration": true },
+    "app/api/organizations/[id]/children/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Authenticated org-hierarchy children lookup; reads org directory without an explicit per-org scope check.", "migration": true },
+    "app/api/organizations/[id]/descendants/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Authenticated org-hierarchy descendants lookup; reads org directory without an explicit per-org scope check.", "migration": true },
+    "app/api/organizations/[id]/members/route.ts": { "category": "requires-rls-context", "reason": "Org members listing/mutation under withRLSContext." },
+    "app/api/organizations/[id]/route.ts": { "category": "requires-rls-context", "reason": "Org (item) read/update under withRLSContext." },
+    "app/api/organizations/hierarchy/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Authenticated org directory/hierarchy listing; cross-org directory read without per-org scope.", "migration": true },
+    "app/api/organizations/route.ts": { "category": "requires-rls-context", "reason": "Organizations list/create under withRLSContext." },
+    "app/api/organizations/search/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Authenticated org directory search; cross-org directory read without per-org scope.", "migration": true },
+
+    "app/api/pilot/apply/[id]/commercial-transition/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Pilot commercial transition guarded by Phase 2 enforcePilotOwnership before withSystemContext escalation." },
+    "app/api/pilot/bootstrap/cupe/route.ts": { "category": "allowed-admin-route", "reason": "CUPE pilot bootstrap operator route; RLS-guarded + admin auth." },
+    "app/api/pilot/current/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Current pilot for the actor's org under org-scope + withRLSContext." },
+    "app/api/pilot/demo-data/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Pilot demo-data seeding scoped to the actor's org under org-scope + withRLSContext." },
+    "app/api/pilot/feedback/route.ts": { "category": "requires-rls-context", "reason": "Pilot feedback capture under withRLSContext + auth." },
+    "app/api/pilot/onboarding/route.ts": { "category": "requires-org-scope-wrapper", "reason": "Pilot onboarding scoped to the actor's org under org-scope + withRLSContext." },
+    "app/api/pilot/overview/route.ts": { "category": "requires-rls-context", "reason": "Pilot overview under withRLSContext + auth." }
+  }
+}

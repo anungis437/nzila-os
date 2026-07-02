@@ -289,6 +289,29 @@ jobs:
             )
           ' staging-artifacts/artifact-manifest.json > staging-artifacts/artifact-manifest.filtered.json
 
+          # BR-5 image immutability gate (fail-closed): every approved production
+          # deploy target MUST reference an immutable @sha256 digest. A mutable
+          # tag (:latest / :sha / :env) is not accepted as production promotion
+          # evidence. Environment deploy identities are AcrPull-only and consume
+          # only digest-pinned, pre-approved images.
+          NON_DIGEST=$(jq -r '
+            (.deployTargets // [])
+            | map((.image // .imageRef // .digest // "") )
+            | map(select((. | test("@sha256:[0-9a-f]{64}$")) | not))
+            | .[]
+          ' staging-artifacts/artifact-manifest.filtered.json)
+          if [ -n "$NON_DIGEST" ]; then
+            echo "::error::Production promotion blocked (BR-5): one or more approved deploy targets are not pinned to an immutable @sha256 digest:"
+            echo "$NON_DIGEST" | sed 's/^/::error::  - /'
+            exit 1
+          fi
+          TARGET_COUNT=$(jq -r '(.deployTargets // []) | length' staging-artifacts/artifact-manifest.filtered.json)
+          if [ "$TARGET_COUNT" -lt 1 ]; then
+            echo "::error::Production promotion blocked: no approved deploy targets resolved from the staging artifact manifest."
+            exit 1
+          fi
+          echo "✅ Image immutability gate passed: all $TARGET_COUNT approved target(s) are @sha256 digest-pinned."
+
           pnpm exec tsx scripts/deploy-transactional.ts \
             --manifest staging-artifacts/artifact-manifest.filtered.json \
             --resource-group "nzila-canada-prod-rg" \

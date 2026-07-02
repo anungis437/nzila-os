@@ -1,0 +1,388 @@
+{
+  "generatedAt": "2026-06-28T14:55:18.479Z",
+  "schema": "gate-authority-registry/v2",
+  "version": "2026-06-28",
+  "summary": {
+    "byClassification": {
+      "pr-blocking": 15,
+      "release-blocking": 4,
+      "pilot-blocking": 0,
+      "production-blocking": 0,
+      "advisory": 10,
+      "deprecated": 2,
+      "experimental": 5
+    },
+    "totalGates": 36,
+    "enforcedBlocking": 19,
+    "reportOnly": 15,
+    "excluded": 2,
+    "productionBlockingAchieved": 0,
+    "productionBlockingTargets": [
+      "validate-live-readiness",
+      "validate-infra-convergence",
+      "validate-final-go"
+    ]
+  },
+  "gates": [
+    {
+      "id": "validate-canonical-truth",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "platform-wide truth manifest",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-truth-authority",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "platform-wide truth manifest",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-product-catalog",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "portfolio catalog",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-portfolio",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "portfolio + capital",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "inventory-check",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "platform topology",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-auth-authority",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "security / auth",
+      "owner": "platform-auth",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-ga-state",
+      "classification": "release-blocking",
+      "enforcement": "blocking",
+      "scope": "release / GA declarations",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-evidence-lifecycle",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "evidence integrity",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "release-migration-safety",
+      "classification": "release-blocking",
+      "enforcement": "blocking",
+      "scope": "release / data safety",
+      "owner": "platform-data",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "db-drift-check",
+      "classification": "release-blocking",
+      "enforcement": "blocking",
+      "scope": "release / data safety",
+      "owner": "platform-data",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-governance-gate",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "platform composite",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-control-manifests",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "control-plane",
+      "owner": "control-plane",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "ga-check",
+      "classification": "release-blocking",
+      "enforcement": "blocking",
+      "scope": "release / GA readiness",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "contract-tests",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "platform invariants",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-runtime-truth",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "platform invariants",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-maturity",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "platform maturity claims",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-governance-runtime-budget",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "SRE / governance runtime budget",
+      "owner": "platform-sre",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-runtime-integrity",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "SRE / runtime evidence",
+      "owner": "platform-sre",
+      "targetClassification": "release-blocking",
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-runtime-authority",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "union-eyes / runtime authority docs",
+      "owner": "platform-sre",
+      "targetClassification": "release-blocking",
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 — GREEN (Phase 4 path repair; see reports/governance/ue-hardening-wave-phase4-validator-path-repair-2026-06-28.md)"
+    },
+    {
+      "id": "validate-runtime-convergence",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "union-eyes / runtime convergence docs",
+      "owner": "platform-sre",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 — GREEN via legacy fallback (Phase 4; see Phase 4 report)"
+    },
+    {
+      "id": "validate-final-convergence",
+      "classification": "deprecated",
+      "enforcement": "excluded",
+      "scope": "audit replay only",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; remains deprecated)"
+    },
+    {
+      "id": "validate-maturity-elevation",
+      "classification": "deprecated",
+      "enforcement": "excluded",
+      "scope": "audit replay only",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; remains deprecated)"
+    },
+    {
+      "id": "validate-cognition",
+      "classification": "experimental",
+      "enforcement": "report-only",
+      "scope": "doctrine",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
+    },
+    {
+      "id": "validate-labor-continuity",
+      "classification": "experimental",
+      "enforcement": "report-only",
+      "scope": "union-eyes / doctrine",
+      "owner": "union-eyes",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
+    },
+    {
+      "id": "validate-tier2-hardening",
+      "classification": "experimental",
+      "enforcement": "report-only",
+      "scope": "doctrine",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
+    },
+    {
+      "id": "validate-sovereignty-proving",
+      "classification": "experimental",
+      "enforcement": "report-only",
+      "scope": "doctrine",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
+    },
+    {
+      "id": "validate-residual-closure",
+      "classification": "experimental",
+      "enforcement": "report-only",
+      "scope": "doctrine",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
+    },
+    {
+      "id": "validate-operational-honesty-guardrail",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "platform / claims honesty",
+      "owner": "platform-governance",
+      "targetClassification": "pr-blocking",
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-org-resolver-guardrail",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "security / auth correctness",
+      "owner": "platform-auth",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-live-readiness",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "SRE / production readiness",
+      "owner": "platform-sre",
+      "targetClassification": "production-blocking",
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 — evidence absent (advisory; reported, not blocking)"
+    },
+    {
+      "id": "validate-infra-convergence",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "SRE / infrastructure",
+      "owner": "platform-sre",
+      "targetClassification": "production-blocking",
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-ue-infrastructure",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "union-eyes / infrastructure docs",
+      "owner": "union-eyes",
+      "targetClassification": "pr-blocking",
+      "repairRequired": true,
+      "lastVerified": "2026-06-28 — FAILING for real reasons (path drift closed in Phase 4; see Phase 4 report)"
+    },
+    {
+      "id": "validate-navigation-monetization",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "union-eyes / commercial",
+      "owner": "commercial",
+      "targetClassification": "pr-blocking",
+      "repairRequired": true,
+      "lastVerified": "2026-06-28 — FAILING for real content reason (path drift closed in Phase 4; see Phase 4 report)"
+    },
+    {
+      "id": "validate-portfolio-governance",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "portfolio composite",
+      "owner": "platform-governance",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "financial-service-health",
+      "classification": "pr-blocking",
+      "enforcement": "blocking",
+      "scope": "union-eyes / financial runtime",
+      "owner": "union-eyes",
+      "targetClassification": null,
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-final-go",
+      "classification": "advisory",
+      "enforcement": "report-only",
+      "scope": "production certification",
+      "owner": "platform-governance",
+      "targetClassification": "production-blocking",
+      "repairRequired": false,
+      "lastVerified": "2026-06-28 — advisory + visible (added to registry in Phase 5)"
+    }
+  ]
+}

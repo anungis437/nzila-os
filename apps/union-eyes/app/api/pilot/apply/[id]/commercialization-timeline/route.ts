@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { pilotApplications } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
+import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,9 @@ export const GET = withApiAuth(async (_request: NextRequest, context?: { params?
     if (!application) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
+
+    const denied = await enforcePilotOwnership(application);
+    if (denied) return denied;
 
     const responses = (application.responses ?? {}) as Record<string, unknown>;
     const events: TimelineEvent[] = [];

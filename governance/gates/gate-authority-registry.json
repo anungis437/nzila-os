@@ -1,348 +1,710 @@
 {
-  "$schema": "gate-authority-registry/v1",
-  "version": "2026-05-11",
-  "asOfDate": "2026-05-11",
-  "scope": "Authority classification for governance validators across the Nzila OS monorepo.",
-  "classifications": {
-    "blocking": "Failure must fail CI / block the release. Output is authoritative.",
-    "advisory": "Failure is reported but does not block; signal-only or budget-tracking.",
-    "deprecated": "Superseded by a newer validator. Kept for back-compat or audit replay; output not authoritative.",
-    "future_doctrine": "Doctrine validator whose evidence model is not yet wired/sealed; runs in non-enforcing mode until promoted."
+  "$schema": "gate-authority-registry/v2",
+  "version": "2026-06-28",
+  "asOfDate": "2026-06-28",
+  "supersedes": "gate-authority-registry/v1 (2026-05-11)",
+  "scope": "Authority classification for governance validators across the Nzila OS monorepo. SINGLE SOURCE OF TRUTH for which gates carry release authority and at which stage.",
+  "taxonomy": {
+    "categories": {
+      "pr-blocking": {
+        "enforcement": "blocking",
+        "stage": "pull-request",
+        "description": "Must pass on every PR / push to main. Failure fails CI immediately."
+      },
+      "release-blocking": {
+        "enforcement": "blocking",
+        "stage": "release",
+        "description": "Must pass before a release/deploy is cut. Failure blocks the release pipeline."
+      },
+      "pilot-blocking": {
+        "enforcement": "blocking",
+        "stage": "controlled-pilot",
+        "description": "Must pass for a controlled-pilot deployment to remain safe. Failure blocks pilot promotion. (No gates are registered here yet; UE pilot-safety invariants currently live as contract tests, not as standalone registry gates.)"
+      },
+      "production-blocking": {
+        "enforcement": "blocking",
+        "stage": "production-certification",
+        "description": "Must pass for FULL production certification. NO gate has achieved this classification yet; production-certification authority is aspirational and tracked via target_classification + promotion_condition only."
+      },
+      "advisory": {
+        "enforcement": "report-only",
+        "stage": "any",
+        "description": "Runs and is reported (annotated as a warning) but NEVER fails CI. Signal-only / diagnostic / not-yet-promoted."
+      },
+      "deprecated": {
+        "enforcement": "excluded",
+        "stage": "none",
+        "description": "Superseded by a newer gate. Excluded from canonical CI execution; retained for audit replay only. Output is not authoritative."
+      },
+      "experimental": {
+        "enforcement": "report-only",
+        "stage": "any",
+        "description": "Doctrine / evidence model not yet sealed. May run only in non-blocking mode. Was 'future_doctrine' in v1."
+      }
+    },
+    "enforcementSemantics": {
+      "blocking": "Failure fails the workflow at the gate's stage.",
+      "report-only": "Runs and annotates (::warning::) but never fails the workflow.",
+      "excluded": "Not executed in canonical CI; retained for audit replay only."
+    },
+    "authorityRules": [
+      "`classification` is the ENFORCED authority. `target_classification` is aspirational ONLY and never changes CI behavior.",
+      "A gate may be promoted to a *-blocking classification ONLY via a PR that records stability evidence. Running green is NECESSARY but NOT SUFFICIENT for promotion.",
+      "A gate whose target is production-blocking but has NOT met its promotion_condition MUST remain classification=advisory.",
+      "final:go remains advisory until: zero missing certification artifacts AND full-chain rehearsal pass.",
+      "Promoting experimental -> blocking requires: (1) evidence model documented, (2) green run on main for >= 7 days, (3) PR updating this registry."
+    ]
+  },
+  "v1ClassificationMap": {
+    "blocking": "pr-blocking | release-blocking (split by each gate's release stage/scope)",
+    "advisory": "advisory",
+    "deprecated": "deprecated",
+    "future_doctrine": "experimental"
   },
   "notes": [
     "This registry is the SINGLE SOURCE OF TRUTH for which validators carry release authority.",
-    "Adding a new validator requires an entry here with explicit classification + rationale.",
-    "Promoting future_doctrine -> blocking requires: (1) evidence model documented, (2) green run on main for >= 7 days, (3) PR updating this registry."
+    "Adding a new validator requires an entry here with explicit classification + scope + criteria.",
+    "Phase 5 (2026-06-28) migrated v1 -> v2 taxonomy. It did NOT promote any advisory gate to blocking; it made authority explicit and honest.",
+    "validate-runtime-convergence was reclassified deprecated -> advisory after Phase 4 path repair (now runs green via LEGACY doc fallback). It is NOT promoted to blocking and is flagged for re-deprecation once validate-runtime-integrity fully subsumes it."
   ],
   "gates": [
     {
       "id": "validate-canonical-truth",
+      "name": "Canonical Truth Coherence",
       "command": "pnpm validate:canonical-truth",
+      "script": "scripts/validate-canonical-truth.ts",
       "path": "scripts/validate-canonical-truth.ts",
       "purpose": "Enforce coherence of nzila-truth-manifest.json against product catalog and registry.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "platform-wide truth manifest",
+      "owner": "platform-governance",
       "rationale": "Truth manifest is the cross-cutting authority for app status; drift here invalidates downstream gates.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote via PR documenting a replacement truth-coherence authority."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-truth-authority",
+      "name": "Source-of-Truth Pointer Authority",
       "command": "pnpm validate:truth-authority",
+      "script": "scripts/validate-truth-authority.ts",
       "path": "scripts/validate-truth-authority.ts",
       "purpose": "Verify every product/app has an authoritative source-of-truth pointer.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "platform-wide truth manifest",
+      "owner": "platform-governance",
       "rationale": "Prevents orphan truth records and silent authority drift.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote via PR documenting a replacement authority."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-product-catalog",
+      "name": "Product Catalog Schema/Invariants",
       "command": "pnpm validate:product-catalog",
+      "script": "scripts/validate-product-catalog.ts",
       "path": "scripts/validate-product-catalog.ts",
       "purpose": "Schema + invariant checks on governance/portfolio/product-catalog.json.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "portfolio catalog",
+      "owner": "platform-governance",
       "rationale": "Catalog is the canonical product list; malformed entries break inventory sync and registry coherence.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote if the catalog ceases to be authoritative."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-portfolio",
+      "name": "Portfolio Invariants",
       "command": "pnpm validate:portfolio",
+      "script": "scripts/validate-portfolio.ts",
       "path": "scripts/validate-portfolio.ts",
       "purpose": "Portfolio-level invariants across catalog, registry, capital allocation.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "portfolio + capital",
+      "owner": "platform-governance",
       "rationale": "Portfolio drift produces misleading capital / commercial reports.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote via PR documenting a replacement authority."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "inventory-check",
+      "name": "Deployment + Repo Inventory Sync",
       "command": "pnpm inventory:check",
+      "script": "packages/repo-inventory (check)",
       "path": "packages/repo-inventory (check)",
       "purpose": "Verify deployment-inventory and repo inventory are in sync with workspace state.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "platform topology",
+      "owner": "platform-governance",
       "rationale": "Inventory is the source of truth for app topology, deploy targets, and runtime checks. Drift here was the immediate trigger for PR #497.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote if inventory ceases to be authoritative for deploy targets."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-auth-authority",
+      "name": "Single Auth Authority",
       "command": "pnpm validate:auth-authority",
+      "script": "scripts/validate-auth-authority.ts",
       "path": "scripts/validate-auth-authority.ts",
       "purpose": "Confirm @nzila/platform-auth is the single auth authority; no stray Clerk imports or competing providers.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "security / auth",
+      "owner": "platform-auth",
       "rationale": "Auth authority drift is a security regression class; must block.",
-      "owner": "platform-auth"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Never demote without a security-team-approved replacement control."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-ga-state",
+      "name": "GA-State Evidence",
       "command": "pnpm validate:ga-state",
+      "script": "scripts/validate-ga-state.ts",
       "path": "scripts/validate-ga-state.ts",
       "purpose": "Validate GA-state declarations against actual deploy/runtime evidence.",
-      "classification": "blocking",
+      "classification": "release-blocking",
+      "scope": "release / GA declarations",
+      "owner": "platform-governance",
       "rationale": "Prevents apps from claiming GA without supporting evidence.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote via PR documenting a replacement GA-evidence authority."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-evidence-lifecycle",
+      "name": "Evidence Lifecycle Policy",
       "command": "pnpm validate:evidence:lifecycle",
+      "script": "scripts/validate-evidence-lifecycle-policy.ts",
       "path": "scripts/validate-evidence-lifecycle-policy.ts",
       "purpose": "Enforce freshness/provenance/retention policy on evidence artifacts.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "evidence integrity",
+      "owner": "platform-governance",
       "rationale": "Stale evidence presented as fresh undermines every downstream report.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote via PR documenting a replacement evidence-freshness authority."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "release-migration-safety",
+      "name": "Migration Safety",
       "command": "pnpm release:migration:safety",
+      "script": "scripts/release/validate-migration-safety.ts",
       "path": "scripts/release/validate-migration-safety.ts",
       "purpose": "Block destructive/unsafe SQL migrations from reaching staging/prod.",
-      "classification": "blocking",
+      "classification": "release-blocking",
+      "scope": "release / data safety",
+      "owner": "platform-data",
       "rationale": "Data-loss prevention; non-negotiable.",
-      "owner": "platform-data"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Never demote; data-loss prevention is non-negotiable."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "db-drift-check",
+      "name": "DB Schema Drift",
       "command": "pnpm db:drift:check",
+      "script": "scripts/db/drift-check.ts",
       "path": "scripts/db/drift-check.ts",
       "purpose": "Detect schema drift between Drizzle schema and live DB.",
-      "classification": "blocking",
+      "classification": "release-blocking",
+      "scope": "release / data safety",
+      "owner": "platform-data",
       "rationale": "Drift produces 'Failed query' runtime errors (see drizzle memory note).",
-      "owner": "platform-data"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote if schema authority migrates off Drizzle."],
+      "knownLimitations": ["Requires a reachable live DB; runs in release context, not on every PR."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-governance-gate",
+      "name": "Governance Composite Gate",
       "command": "pnpm exec tsx tooling/governance/validate-governance-gate.ts",
+      "script": "tooling/governance/validate-governance-gate.ts",
       "path": "tooling/governance/validate-governance-gate.ts",
       "purpose": "Composite gate: orchestrates the blocking validators below into a single CI signal.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "platform composite",
+      "owner": "platform-governance",
       "rationale": "Single composite entrypoint for the Governance Gates workflow.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote if composite is decomposed into individually-wired gates."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-control-manifests",
+      "name": "Control-Plane Manifest Validation",
       "command": "pnpm validate:control:manifests",
+      "script": "tooling/governance/validate-control-manifests.ts",
       "path": "tooling/governance/validate-control-manifests.ts",
       "purpose": "Validate control-plane manifests (jobs, schedules, budgets) for required fields.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "control-plane",
+      "owner": "control-plane",
       "rationale": "Bad control manifests silently disable critical jobs.",
-      "owner": "control-plane"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote if control manifests cease to drive job scheduling."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "ga-check",
+      "name": "GA Readiness Checklist",
       "command": "pnpm ga-check",
+      "script": "tooling/ga-check/ga-check.ts",
       "path": "tooling/ga-check/ga-check.ts",
       "purpose": "GA readiness checklist runner.",
-      "classification": "blocking",
+      "classification": "release-blocking",
+      "scope": "release / GA readiness",
+      "owner": "platform-governance",
       "rationale": "Top-level entry for governance composite (see validate:governance script).",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote via PR documenting a replacement GA-readiness authority."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "contract-tests",
+      "name": "Cross-Package Contract Tests",
       "command": "pnpm contract-tests",
+      "script": "vitest --project contract-tests",
       "path": "vitest --project contract-tests",
       "purpose": "Cross-package contract assertions (truth manifest coherence, no fake production behavior, evidence chain integrity, etc).",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "platform invariants",
+      "owner": "platform-governance",
       "rationale": "Contract suite encodes invariants assumed by every other gate.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Never demote; contract suite is foundational."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-runtime-truth",
+      "name": "Runtime Truth (No Placeholder Evidence)",
       "command": "pnpm validate:runtime-truth",
+      "script": "tooling/contract-tests/* (curated subset)",
       "path": "tooling/contract-tests/* (curated subset)",
       "purpose": "Subset of contract tests that guard against fake/placeholder runtime behavior.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "platform invariants",
+      "owner": "platform-governance",
       "rationale": "Directly enforces the no-placeholder-evidence invariant.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Never demote; no-placeholder-evidence is foundational."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-maturity",
+      "name": "App Maturity Enforcement",
       "command": "pnpm validate:maturity",
+      "script": "tooling/contract-tests/app-maturity-enforcement.test.ts",
       "path": "tooling/contract-tests/app-maturity-enforcement.test.ts",
       "purpose": "Enforce per-app maturity.json invariants and truth-manifest coherence.",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "platform maturity claims",
+      "owner": "platform-governance",
       "rationale": "Maturity drift is how UE/flagship overstatement enters the system.",
-      "owner": "platform-governance"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Never demote; maturity overstatement is a doctrine-level risk."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-governance-runtime-budget",
+      "name": "Governance Runtime Budget",
       "command": "pnpm validate:governance:runtime-budget",
+      "script": "tooling/scripts/check-governance-runtime-budget.mjs",
       "path": "tooling/scripts/check-governance-runtime-budget.mjs",
       "purpose": "Track total wall-clock and resource budget for governance jobs.",
       "classification": "advisory",
-      "rationale": "Budget signal for SRE; should not block release. Note: script invokes with --enforce by default; the --enforce mode is itself currently treated as a soft signal pending budget calibration.",
-      "owner": "platform-sre"
+      "scope": "SRE / governance runtime budget",
+      "owner": "platform-sre",
+      "targetClassification": null,
+      "rationale": "Budget signal for SRE; should not block release.",
+      "promotionCriteria": ["Budget thresholds calibrated against >= 30 days of CI duration data."],
+      "demotionCriteria": [],
+      "knownLimitations": ["Script invokes with --enforce by default, but --enforce is treated as a SOFT signal pending budget calibration (known false-positive risk)."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-runtime-integrity",
+      "name": "Runtime Integrity",
       "command": "pnpm validate:runtime-integrity",
+      "script": "tooling/scripts/validate-runtime-integrity.mjs",
       "path": "tooling/scripts/validate-runtime-integrity.mjs",
       "purpose": "Cross-checks runtime evidence (health-latest, failure matrix) against declared topology.",
       "classification": "advisory",
-      "rationale": "Runtime evidence is staging-only and currently bootstrapEvidence:true; treating as blocking would create false negatives. Promote to blocking once evidence-authority sidecar (reports/runtime/evidence-authority.json) is consumed by this validator.",
+      "scope": "SRE / runtime evidence",
       "owner": "platform-sre",
+      "targetClassification": "release-blocking",
+      "rationale": "Runtime evidence is staging-only and currently bootstrapEvidence:true; treating as blocking would create false negatives.",
       "promotionCriteria": [
         "Validator reads reports/runtime/evidence-authority.json",
         "asOfDate freshness window enforced (<= 24h)",
         "scope=staging is acknowledged in output"
-      ]
+      ],
+      "demotionCriteria": [],
+      "knownLimitations": ["bootstrapEvidence:true today; staging-only evidence would yield false negatives if treated as blocking."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-runtime-authority",
+      "name": "Runtime Authority Audit",
       "command": "pnpm validate:runtime-authority",
+      "script": "tooling/scripts/validate-runtime-authority-audit.mjs",
       "path": "tooling/scripts/validate-runtime-authority-audit.mjs",
-      "purpose": "Audits runtime authority pointers across apps.",
+      "purpose": "Audits runtime authority pointers across apps (UE runtime-authority-audit corpus).",
       "classification": "advisory",
-      "rationale": "Useful for drift detection; not yet calibrated for blocking.",
-      "owner": "platform-sre"
+      "scope": "union-eyes / runtime authority docs",
+      "owner": "platform-sre",
+      "targetClassification": "release-blocking",
+      "rationale": "GREEN after Phase 4 path repair (reads canonical docs/categories/products-and-market/union-eyes/runtime-authority-audit). Candidate for future promotion but NOT promoted: a single green run is necessary, not sufficient.",
+      "promotionCriteria": [
+        ">= 7 consecutive days green on main",
+        "Recorded stability evidence (no path drift, no flaky doc-corpus reads) attached to the promotion PR"
+      ],
+      "demotionCriteria": [],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 — GREEN (Phase 4 path repair; see reports/governance/ue-hardening-wave-phase4-validator-path-repair-2026-06-28.md)"
     },
     {
       "id": "validate-runtime-convergence",
+      "name": "Runtime Convergence",
       "command": "pnpm validate:runtime-convergence",
+      "script": "tooling/scripts/validate-runtime-convergence.mjs",
       "path": "tooling/scripts/validate-runtime-convergence.mjs",
-      "purpose": "Convergence checks across runtime declarations.",
-      "classification": "deprecated",
-      "rationale": "Superseded by validate-runtime-integrity + truth-manifest coherence; retained for audit replay only. Schedule for removal once historical reports no longer reference it.",
-      "supersededBy": "validate-runtime-integrity",
-      "owner": "platform-sre"
+      "purpose": "Convergence checks across runtime declarations (UE runtime-convergence corpus).",
+      "classification": "advisory",
+      "scope": "union-eyes / runtime convergence docs",
+      "owner": "platform-sre",
+      "targetClassification": null,
+      "supersedeCandidate": "validate-runtime-integrity",
+      "rationale": "Was deprecated in v1 (superseded by validate-runtime-integrity). Phase 4 repaired its path drift and it now runs GREEN, but ONLY via a LEGACY doc fallback (docs/union-eyes/runtime-convergence is not yet migrated to canonical). Reclassified deprecated -> advisory to keep the green signal visible. NOT promoted to blocking.",
+      "promotionCriteria": [
+        "runtime-convergence docs migrated to canonical tree",
+        "validate-runtime-integrity confirmed to NOT yet fully subsume this gate"
+      ],
+      "demotionCriteria": [
+        "Re-deprecate (advisory -> deprecated) once validate-runtime-integrity fully subsumes runtime-convergence checks."
+      ],
+      "knownLimitations": [
+        "Resolves its doc corpus via LEGACY fallback (docs/union-eyes/runtime-convergence); green depends on the legacy tree still existing."
+      ],
+      "lastVerified": "2026-06-28 — GREEN via legacy fallback (Phase 4; see Phase 4 report)"
     },
     {
       "id": "validate-final-convergence",
+      "name": "Final Convergence (historical)",
       "command": "pnpm validate:final-convergence",
+      "script": "tooling/scripts/validate-final-convergence.mjs",
       "path": "tooling/scripts/validate-final-convergence.mjs",
       "purpose": "Historical 'final convergence' ladder.",
       "classification": "deprecated",
-      "rationale": "Authority subsumed by validate-canonical-truth + validate-truth-authority + validate-maturity. Remove after Q2 2026 audit cycle.",
+      "scope": "audit replay only",
+      "owner": "platform-governance",
       "supersededBy": "validate-canonical-truth+validate-truth-authority+validate-maturity",
-      "owner": "platform-governance"
+      "rationale": "Authority subsumed by validate-canonical-truth + validate-truth-authority + validate-maturity. Remove after Q2 2026 audit cycle.",
+      "promotionCriteria": [],
+      "demotionCriteria": [],
+      "knownLimitations": ["Excluded from canonical execution; retained for audit replay only."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; remains deprecated)"
     },
     {
       "id": "validate-maturity-elevation",
+      "name": "Maturity Elevation (historical)",
       "command": "pnpm validate:maturity-elevation",
+      "script": "tooling/scripts/validate-maturity-convergence.mjs",
       "path": "tooling/scripts/validate-maturity-convergence.mjs",
       "purpose": "Earlier maturity convergence ladder.",
       "classification": "deprecated",
-      "rationale": "Replaced by validate:maturity (contract tests).",
+      "scope": "audit replay only",
+      "owner": "platform-governance",
       "supersededBy": "validate-maturity",
-      "owner": "platform-governance"
+      "rationale": "Replaced by validate:maturity (contract tests).",
+      "promotionCriteria": [],
+      "demotionCriteria": [],
+      "knownLimitations": ["Excluded from canonical execution; retained for audit replay only."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; remains deprecated)"
     },
     {
       "id": "validate-cognition",
+      "name": "Institutional Cognition Convergence",
       "command": "pnpm validate:cognition",
+      "script": "tooling/scripts/validate-institutional-cognition-convergence.mjs",
       "path": "tooling/scripts/validate-institutional-cognition-convergence.mjs",
       "purpose": "Doctrine convergence for institutional cognition layer.",
-      "classification": "future_doctrine",
+      "classification": "experimental",
+      "scope": "doctrine",
+      "owner": "platform-governance",
       "rationale": "Doctrine concept; evidence model not yet sealed. Runs but is not authoritative until promoted.",
-      "owner": "platform-governance"
+      "promotionCriteria": ["Evidence model documented", "Green on main >= 7 days", "PR updating this registry"],
+      "demotionCriteria": [],
+      "knownLimitations": ["Evidence model not yet sealed; runs non-blocking only."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
     },
     {
       "id": "validate-labor-continuity",
+      "name": "Labor-Continuity Governance",
       "command": "pnpm validate:labor-continuity",
+      "script": "tooling/scripts/validate-labor-continuity-governance.mjs",
       "path": "tooling/scripts/validate-labor-continuity-governance.mjs",
       "purpose": "Labor-continuity governance ladder (UE-adjacent).",
-      "classification": "future_doctrine",
+      "classification": "experimental",
+      "scope": "union-eyes / doctrine",
+      "owner": "union-eyes",
       "rationale": "Domain doctrine; not yet wired to release authority.",
-      "owner": "union-eyes"
+      "promotionCriteria": ["Evidence model documented", "Green on main >= 7 days", "PR updating this registry"],
+      "demotionCriteria": [],
+      "knownLimitations": ["Not yet wired to release authority; runs non-blocking only."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
     },
     {
       "id": "validate-tier2-hardening",
+      "name": "Tier-2 Hardening Convergence",
       "command": "pnpm validate:tier2-hardening",
+      "script": "tooling/scripts/validate-tier2-hardening.mjs",
       "path": "tooling/scripts/validate-tier2-hardening.mjs",
       "purpose": "Tier-2 hardening convergence checks.",
-      "classification": "future_doctrine",
+      "classification": "experimental",
+      "scope": "doctrine",
+      "owner": "platform-governance",
       "rationale": "No tier-2 apps in inventory at GA boundary; promote once any app is classified tier-2.",
-      "owner": "platform-governance"
+      "promotionCriteria": ["At least one app classified tier-2", "Evidence model documented", "PR updating this registry"],
+      "demotionCriteria": [],
+      "knownLimitations": ["No tier-2 apps in inventory; runs non-blocking only."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
     },
     {
       "id": "validate-sovereignty-proving",
+      "name": "Sovereignty Proving Doctrine",
       "command": "pnpm validate:sovereignty-proving",
+      "script": "tooling/scripts/validate-sovereignty-proving.mjs",
       "path": "tooling/scripts/validate-sovereignty-proving.mjs",
       "purpose": "Sovereignty proving doctrine.",
-      "classification": "future_doctrine",
+      "classification": "experimental",
+      "scope": "doctrine",
+      "owner": "platform-governance",
       "rationale": "Doctrine; evidence model pending. Not authoritative.",
-      "owner": "platform-governance"
+      "promotionCriteria": ["Evidence model documented", "Green on main >= 7 days", "PR updating this registry"],
+      "demotionCriteria": [],
+      "knownLimitations": ["Evidence model pending; runs non-blocking only."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
     },
     {
       "id": "validate-residual-closure",
+      "name": "Residual Closure Ladder",
       "command": "pnpm validate:residual-closure",
+      "script": "tooling/scripts/validate-residual-closure.mjs",
       "path": "tooling/scripts/validate-residual-closure.mjs",
       "purpose": "Residual-closure ladder.",
-      "classification": "future_doctrine",
+      "classification": "experimental",
+      "scope": "doctrine",
+      "owner": "platform-governance",
       "rationale": "Doctrine; pending closure model.",
-      "owner": "platform-governance"
+      "promotionCriteria": ["Closure model documented", "Green on main >= 7 days", "PR updating this registry"],
+      "demotionCriteria": [],
+      "knownLimitations": ["Closure model pending; runs non-blocking only."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; v1 future_doctrine -> experimental)"
     },
     {
       "id": "validate-operational-honesty-guardrail",
+      "name": "Operational Honesty Guardrail",
       "command": "pnpm validate:operational-honesty-guardrail",
+      "script": "tooling/scripts/validate-operational-honesty-guardrail.mjs",
       "path": "tooling/scripts/validate-operational-honesty-guardrail.mjs",
       "purpose": "Guardrail against overstated operational claims.",
       "classification": "advisory",
-      "rationale": "Aligned with truth-manifest coherence; promote to blocking once it consumes truth manifest directly rather than ad-hoc claim scraping.",
-      "owner": "platform-governance"
+      "scope": "platform / claims honesty",
+      "owner": "platform-governance",
+      "targetClassification": "pr-blocking",
+      "rationale": "Aligned with truth-manifest coherence; promote to blocking once it consumes the truth manifest directly rather than ad-hoc claim scraping.",
+      "promotionCriteria": ["Consumes truth manifest directly", "Green on main >= 7 days", "PR updating this registry"],
+      "demotionCriteria": [],
+      "knownLimitations": ["Currently scrapes claims ad-hoc; potential false positives until truth-manifest-backed."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-org-resolver-guardrail",
+      "name": "Org Resolver Guardrail",
       "command": "pnpm validate:org-resolver-guardrail",
+      "script": "tooling/scripts/validate-org-resolver-guardrail.mjs",
       "path": "tooling/scripts/validate-org-resolver-guardrail.mjs",
       "purpose": "Prevents misuse of auth().orgId for app-level org lookups (see Entra Auth Gotchas).",
-      "classification": "blocking",
+      "classification": "pr-blocking",
+      "scope": "security / auth correctness",
+      "owner": "platform-auth",
       "rationale": "Encodes a known security/correctness footgun documented in user memory.",
-      "owner": "platform-auth"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Never demote without a security-team-approved replacement control."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-live-readiness",
+      "name": "Live Operational Readiness",
       "command": "pnpm validate:live-readiness",
+      "script": "tooling/scripts/validate-live-operational-readiness.mjs",
       "path": "tooling/scripts/validate-live-operational-readiness.mjs",
       "purpose": "Live operational readiness signal aggregation.",
       "classification": "advisory",
-      "rationale": "Useful operational dashboard; not authoritative for release blocking.",
-      "owner": "platform-sre"
+      "scope": "SRE / production readiness",
+      "owner": "platform-sre",
+      "targetClassification": "production-blocking",
+      "promotionCondition": "Live-operational-readiness evidence present and full-chain rehearsal pass. Evidence is currently ABSENT (do NOT fabricate live-audit docs).",
+      "rationale": "Useful operational dashboard; NOT authoritative for release blocking. Production-readiness evidence is absent — remains advisory and visible only.",
+      "promotionCriteria": ["Live-readiness evidence model populated (not bootstrap)", "Full-chain rehearsal pass recorded"],
+      "demotionCriteria": [],
+      "knownLimitations": ["Evidence absent; signal-only. Must NOT be treated as production-certified."],
+      "lastVerified": "2026-06-28 — evidence absent (advisory; reported, not blocking)"
     },
     {
       "id": "validate-infra-convergence",
+      "name": "Live Infrastructure Convergence",
       "command": "pnpm validate:infra-convergence",
+      "script": "tooling/scripts/validate-live-infrastructure-convergence.mjs",
       "path": "tooling/scripts/validate-live-infrastructure-convergence.mjs",
       "purpose": "Live infrastructure convergence signal.",
       "classification": "advisory",
-      "rationale": "Diagnostic; promote when paired with live-readiness contract.",
-      "owner": "platform-sre"
+      "scope": "SRE / infrastructure",
+      "owner": "platform-sre",
+      "targetClassification": "production-blocking",
+      "rationale": "Diagnostic; promote when paired with the live-readiness contract.",
+      "promotionCriteria": ["Paired with live-readiness evidence contract", "Green on main >= 7 days"],
+      "demotionCriteria": [],
+      "knownLimitations": ["Diagnostic-only today."],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "validate-ue-infrastructure",
+      "name": "UE Institutional Infrastructure",
       "command": "pnpm validate:ue-infrastructure",
+      "script": "tooling/scripts/validate-ue-infrastructure.mjs",
       "path": "tooling/scripts/validate-ue-infrastructure.mjs",
-      "purpose": "UE-specific infrastructure ladder.",
+      "purpose": "UE-specific institutional infrastructure ladder.",
       "classification": "advisory",
-      "rationale": "UE-scoped; complements but does not gate the platform composite.",
-      "owner": "union-eyes"
+      "scope": "union-eyes / infrastructure docs",
+      "owner": "union-eyes",
+      "targetClassification": "pr-blocking",
+      "repairRequired": true,
+      "rationale": "UE-scoped. Phase 4 closed its doc PATH drift (now reads canonical UE corpus), but it still FAILS for REAL reasons unrelated to paths. Remains advisory / repair-required. Do NOT point it at archived doctrine snapshots to force green.",
+      "promotionCriteria": [
+        "Upstream doctrine anchors (nzila-cognition-doctrine, nzila-maturity-elevation, nzila-final-convergence) reinstated or requirement intentionally re-scoped (NOT pointed at archived snapshots)",
+        "Final UE review doc enumerates required validate:* references",
+        ">= 7 days green on main after the above"
+      ],
+      "demotionCriteria": [],
+      "knownLimitations": [
+        "Real failing signal (not path drift): required upstream doctrine anchors were ARCHIVED to docs/categories/historical-archive/archive/iterations/nzila-*; final UE review doc is missing required validator references. See Phase 4 report."
+      ],
+      "lastVerified": "2026-06-28 — FAILING for real reasons (path drift closed in Phase 4; see Phase 4 report)"
     },
     {
       "id": "validate-navigation-monetization",
+      "name": "Navigation/Monetization Matrix",
       "command": "pnpm validate:navigation-monetization",
+      "script": "tooling/scripts/validate-navigation-monetization.mjs",
       "path": "tooling/scripts/validate-navigation-monetization.mjs",
-      "purpose": "Navigation/monetization coherence checks.",
+      "purpose": "Navigation/monetization coherence checks (UE navigation-monetization-matrix corpus).",
       "classification": "advisory",
-      "rationale": "Commercial signal; promote when revenue contracts are sealed.",
-      "owner": "commercial"
+      "scope": "union-eyes / commercial",
+      "owner": "commercial",
+      "targetClassification": "pr-blocking",
+      "repairRequired": true,
+      "rationale": "Phase 4 closed its doc PATH drift (now reads the canonical UE nav/monetization corpus), but it still FAILS for a REAL content reason. Remains advisory / repair-required. Not green.",
+      "promotionCriteria": [
+        "Final navigation/monetization review doc enumerates required validate:* references",
+        ">= 7 days green on main after the content fix"
+      ],
+      "demotionCriteria": [],
+      "knownLimitations": [
+        "Real failing signal (not path drift): final navigation/monetization review doc is missing required validator references. See Phase 4 report."
+      ],
+      "lastVerified": "2026-06-28 — FAILING for real content reason (path drift closed in Phase 4; see Phase 4 report)"
     },
     {
       "id": "validate-portfolio-governance",
+      "name": "Portfolio Governance Composite",
       "command": "pnpm validate:portfolio-governance",
+      "script": "composite (brand-leakage + product-catalog + portfolio + canonical-truth + truth-authority)",
       "path": "composite (brand-leakage + product-catalog + portfolio + canonical-truth + truth-authority)",
       "purpose": "Composite portfolio governance gate.",
-      "classification": "blocking",
-      "rationale": "Composite of blocking validators; stays blocking.",
-      "owner": "platform-governance"
+      "classification": "pr-blocking",
+      "scope": "portfolio composite",
+      "owner": "platform-governance",
+      "rationale": "Composite of pr-blocking validators; stays blocking.",
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote if decomposed into individually-wired gates."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
     },
     {
       "id": "financial-service-health",
+      "name": "UE Financial-Service Health",
       "command": "pnpm financial-service:health",
+      "script": "scripts/financial-service-health.ts",
       "path": "scripts/financial-service-health.ts",
-      "purpose": "Blocking health gate for Union Eyes financial-service compile, lint, and test signals.",
-      "classification": "blocking",
+      "purpose": "Health gate for Union Eyes financial-service compile, lint, and test signals.",
+      "classification": "pr-blocking",
+      "scope": "union-eyes / financial runtime",
+      "owner": "union-eyes",
       "rationale": "Financial runtime is strategic infrastructure and must be explicitly visible to governance and release gates.",
-      "owner": "union-eyes"
+      "promotionCriteria": [],
+      "demotionCriteria": ["Only demote if financial-service ceases to be a release-gating component."],
+      "knownLimitations": [],
+      "lastVerified": "2026-06-28 (Phase 5 reconciliation; behavior unchanged)"
+    },
+    {
+      "id": "validate-final-go",
+      "name": "Final Go-Status (final:go)",
+      "command": "pnpm final:go",
+      "script": "tooling/scripts/validate-final-go-status.mjs",
+      "path": "tooling/scripts/validate-final-go-status.mjs",
+      "purpose": "Aggregate final go/no-go certification status across the platform.",
+      "classification": "advisory",
+      "scope": "production certification",
+      "owner": "platform-governance",
+      "targetClassification": "production-blocking",
+      "promotionCondition": "zero missing certification artifacts + full-chain rehearsal pass",
+      "rationale": "final:go stays advisory but VISIBLE. It must appear in governance reports but MUST NOT fail CI until its promotion_condition is met. Do NOT fabricate missing certification evidence to force green.",
+      "promotionCriteria": [
+        "Zero missing certification artifacts",
+        "Full-chain rehearsal pass recorded"
+      ],
+      "demotionCriteria": [],
+      "knownLimitations": ["Certification artifacts not yet complete; advisory and visible only. NOT a production-readiness claim."],
+      "lastVerified": "2026-06-28 — advisory + visible (added to registry in Phase 5)"
     }
   ],
   "summary": {
-    "blocking": 17,
-    "advisory": 9,
-    "deprecated": 3,
-    "future_doctrine": 5
+    "byClassification": {
+      "pr-blocking": 15,
+      "release-blocking": 4,
+      "pilot-blocking": 0,
+      "production-blocking": 0,
+      "advisory": 10,
+      "deprecated": 2,
+      "experimental": 5
+    },
+    "totalGates": 36,
+    "enforcedBlocking": 19,
+    "reportOnly": 15,
+    "excluded": 2,
+    "productionBlockingAchieved": 0,
+    "productionBlockingTargets": ["validate-live-readiness", "validate-infra-convergence", "validate-final-go"]
   }
 }

@@ -1,6 +1,6 @@
 # Repo Excellence Audit
 
-Generated: 2026-06-10T03:02:13.969Z
+Generated: 2026-06-28T14:55:55.814Z
 
 Overall score: 8 / 10
 
@@ -10,7 +10,7 @@ Overall score: 8 / 10
 | --- | ---: |
 | runtime_proof | 9 |
 | duplication | 8 |
-| script_sprawl | 2.4 |
+| script_sprawl | 2.3 |
 | hidden_fragility | 8 |
 | docs_truth | 9 |
 | naming_consistency | 10 |
@@ -28,7 +28,7 @@ Overall score: 8 / 10
 - [runtime_proof] Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available.
 - [duplication] Duplicate script bodies remain: contract-tests, contract:test
 - [duplication] Duplicate script bodies remain: inventory:check, docs:sync
-- [script_sprawl] Root script count is 292.
+- [script_sprawl] Root script count is 295.
 - [script_sprawl] Root command surface is still dense and benefits from continued pruning.
 - [ci_efficiency] Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml
 - [ci_efficiency] App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml

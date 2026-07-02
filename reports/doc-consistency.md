@@ -1,29 +1,29 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-06-17T18:00:08.326Z
+> Generated: 2026-07-02T19:22:09.444Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2003 |
-| Total Findings | 2583 |
+| Files Scanned | 2018 |
+| Total Findings | 2629 |
 | Errors | 0 |
-| Warnings | 1214 |
-| Info | 1369 |
+| Warnings | 1217 |
+| Info | 1412 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1362 |
-| stale-reference | 1043 |
+| naming-inconsistency | 1404 |
+| stale-reference | 1041 |
 | missing-package-readme | 105 |
-| stale-package-ref | 63 |
-| stale-date | 7 |
+| stale-package-ref | 68 |
+| stale-date | 8 |
 | missing-required-doc | 3 |
 
-## stale-reference (1043)
+## stale-reference (1041)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -695,13 +695,13 @@
 - 🟡 `docs/categories/products-and-market/union-eyes/partner-overview.md:49` — Possible broken link: [Security Policy](../../SECURITY.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/partner-overview.md:86` — Possible broken link: [Security Policy](../../SECURITY.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/pilot-overview.md:77` — Possible broken link: [Pilot Scope (technical)](../../apps/union-eyes/docs/PILOT_SCOPE.md)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:31` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:133` — Possible broken link: [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:143` — Possible broken link: [apps/union-eyes/lib/runtime/production-guard.ts](../../../apps/union-eyes/lib/runtime/production-guard.ts)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:144` — Possible broken link: [apps/union-eyes/lib/runtime/production-guard.mjs](../../../apps/union-eyes/lib/runtime/production-guard.mjs)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:145` — Possible broken link: [apps/union-eyes/lib/runtime/environment.ts](../../../apps/union-eyes/lib/runtime/environment.ts)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:152` — Possible broken link: [apps/union-eyes/infra/environments/union-eyes-env.bicep](../../../apps/union-eyes/infra/environments/union-eyes-env.bicep)
-- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:153` — Possible broken link: [apps/union-eyes/infra/environments/provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:33` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:135` — Possible broken link: [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:145` — Possible broken link: [apps/union-eyes/lib/runtime/production-guard.ts](../../../apps/union-eyes/lib/runtime/production-guard.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:146` — Possible broken link: [apps/union-eyes/lib/runtime/production-guard.mjs](../../../apps/union-eyes/lib/runtime/production-guard.mjs)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:147` — Possible broken link: [apps/union-eyes/lib/runtime/environment.ts](../../../apps/union-eyes/lib/runtime/environment.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:154` — Possible broken link: [apps/union-eyes/infra/environments/union-eyes-env.bicep](../../../apps/union-eyes/infra/environments/union-eyes-env.bicep)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:155` — Possible broken link: [apps/union-eyes/infra/environments/provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:41` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:93` — Possible broken link: [feature-flags/route.ts](../../../apps/union-eyes/app/api/feature-flags/route.ts#L27)
 - 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:114` — Possible broken link: [seed-clc-demo-environment.ts](../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts)
@@ -835,8 +835,6 @@
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:137` — Possible broken link: [Reference: AI Gateway](../reference/ai-gateway.md)
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:138` — Possible broken link: [Explanation: AI Risk Management](../explanation/ai-risk-management.md)
 - 🟡 `docs/categories/stakeholders/tutorials/first-app.md:135` — Possible broken link: [Reference: Package Catalogue](../reference/packages.md)
-- 🟡 `docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md:8` — Possible broken link: [RICHARD_SHARPE_VALIDATION_PROTOCOL.md](./RICHARD_SHARPE_VALIDATION_PROTOCOL.md)
-- 🟡 `docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md:278` — Possible broken link: [GOVERNMENT_VALIDATION_REPORT_V1.md](./GOVERNMENT_VALIDATION_REPORT_V1.md)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 - 🟡 `governance/business/README.md:158` — Possible broken link: [Portfolio Deep Dive Analysis](../PORTFOLIO_DEEP_DIVE.md)
 - 🟡 `governance/business/README.md:159` — Possible broken link: [Migration Plan](../MIGRATION_PLAN.md)
@@ -1069,7 +1067,7 @@
 - 🟡 `governance/foundations/content/README.md:71` — Possible broken link: [`tooling/staging-seed/SYNTHETIC.md`](../../tooling/staging-seed/SYNTHETIC.md)
 - 🟡 `governance/foundations/content/README.md:73` — Possible broken link: [`governance/privacy/ai-pia/surfaces/`](../privacy/ai-pia/surfaces/)
 
-## stale-package-ref (63)
+## stale-package-ref (68)
 
 - 🟡 `CHANGELOG.md:10` — References @nzila/institutional-cognition-core but package does not exist
 - 🟡 `docs/categories/historical-archive/archive/iterations/institutional-operating-intelligence/README.md:4` — References @nzila/institutional-cognition-core but package does not exist
@@ -1130,12 +1128,17 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — References @nzila/shop-quoter but package does not exist
 - 🟡 `docs/categories/stakeholders/builders/COMMANDS.md:14` — References @nzila/web but package does not exist
 - 🟡 `docs/categories/stakeholders/builders/COMMANDS.md:14` — References @nzila/console but package does not exist
+- 🟡 `docs/courtlens/README.md:22` — References @nzila/abr but package does not exist
+- 🟡 `docs/courtlens/migration-gap-analysis.md:5` — References @nzila/abr but package does not exist
+- 🟡 `docs/courtlens/phase-1/abr-reuse-audit.md:7` — References @nzila/abr but package does not exist
+- 🟡 `docs/courtlens/phase-2/demo-smoke-gate.md:116` — References @nzila/abr but package does not exist
+- 🟡 `docs/courtlens/target-architecture.md:1` — References @nzila/abr but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:24` — References @nzila/platform-audit but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:25` — References @nzila/platform-consent but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1362)
+## naming-inconsistency (1404)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2004,23 +2007,24 @@
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:32` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:33` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/demo-environment-validation-report.md:197` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:30` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:31` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:10` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:32` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:33` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:34` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:45` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:46` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:35` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:36` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:47` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:69` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:70` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:48` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:49` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:71` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:72` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:73` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:85` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:88` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:89` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:74` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:75` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:87` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:90` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:91` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:92` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:39` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:41` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:47` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2171,6 +2175,44 @@
 - ℹ️ `docs/compliance/soc2/control-mapping.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/compliance/soc2/evidence-inventory.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/compliance/soc2/gap-log.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:26` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:42` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:70` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:138` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:140` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:141` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:148` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:166` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:240` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:247` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:253` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-1/abr-reuse-audit.md:267` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/demo-smoke-gate.md:18` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/demo-smoke-gate.md:56` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/demo-smoke-gate.md:57` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/demo-smoke-gate.md:60` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/demo-smoke-gate.md:135` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/public-intake-ui.md:5` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/public-intake-ui.md:22` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/public-intake-ui.md:63` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/public-intake-ui.md:69` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/public-intake-ui.md:93` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/reviewer-workflow-ui.md:49` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/reviewer-workflow-ui.md:73` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:22` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:29` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:48` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:76` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:80` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:81` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:112` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:113` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-queue-api.md:166` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-ui.md:34` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/phase-2/tenant-matter-ui.md:35` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/target-architecture.md:28` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/target-architecture.md:92` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/courtlens/target-architecture.md:148` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md:12` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/DOCTRINE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/DOCTRINE.md:36` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2246,7 +2288,10 @@
 - ℹ️ `docs/doctrine/whitepapers/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:961` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:963` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/governance/runtime/runtime-separation-plan.md:164` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/governance/runtime/runtime-separation-plan.md:123` — "evidence bundle" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/governance/runtime/runtime-separation-plan.md:153` — "Evidence bundle" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/healthcare/discovery-surveys.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2500,15 +2545,16 @@
 - ℹ️ `governance/security/THREAT_MODEL.md:15` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/security/THREAT_MODEL.md:144` — "orgId" should be "org_id" (tenant identifier)
 
-## stale-date (7)
+## stale-date (8)
 
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 120 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 120 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 120 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 120 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 120 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 120 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 120 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md:4` — Document date "2026-03-25" is 99 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 135 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 135 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 135 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 135 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 135 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 135 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 135 days old — may be stale
 
 ## missing-required-doc (3)
 

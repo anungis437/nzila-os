@@ -3,9 +3,9 @@
   "appCount": 26,
   "packageCount": 216,
   "workspacePackageCount": 248,
-  "workflowCount": 50,
-  "contractTestCount": 266,
-  "tsTestFileCount": 2407,
+  "workflowCount": 52,
+  "contractTestCount": 268,
+  "tsTestFileCount": 2410,
   "pythonTestFileCount": 32,
   "apps": [
     {
@@ -667,7 +667,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 4913
+      "codeFileCount": 4915
     },
     {
       "name": "veridian-admin",
@@ -816,7 +816,9 @@
     "ai-governance.yml",
     "app-floor-check.yml",
     "auto-promote-union-eyes.yml",
+    "br5-proof-deploy-staging.yml",
     "branch-tag-governance.yml",
+    "build-identity-proof.yml",
     "canary-deploy.yml",
     "capital-discipline.yml",
     "ci.yml",

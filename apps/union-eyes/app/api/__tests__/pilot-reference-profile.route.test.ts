@@ -48,6 +48,13 @@ vi.mock('@/lib/pilot/commercialization-wave1', () => ({
   buildProposalPackage: m.buildProposalPackage,
   normalizeCommercialState: m.normalizeCommercialState,
 }));
+vi.mock('@/lib/pilot/pilot-ownership', () => ({
+  // Access granted in unit tests; ownership is exercised by pilot-ownership.test.ts.
+  enforcePilotOwnership: vi.fn(async () => null),
+  wrapPilotItemRoute: <T,>(handler: T) => handler,
+  authorizePilotAccess: vi.fn(async () => ({ ok: true })),
+  getPilotOwnerOrganizationId: vi.fn(() => 'test-org'),
+}));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
 async function loadRoute() {

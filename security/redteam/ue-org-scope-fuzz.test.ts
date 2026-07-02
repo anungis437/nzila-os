@@ -306,4 +306,49 @@ describe('RED-TEAM-ORG — UE Org-Scope Route Fuzz (static analysis)', () => {
       `These routes have dangerous auth bypass flags:\n${violations.join('\n')}`,
     ).toEqual([])
   })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Phase 2 (UE Hardening Wave) — id-scoped pilot application ownership.
+  //
+  // pilot_applications has no organization_id column, so the shared role gate
+  // (hasMinRole('steward')) alone let any steward+ act on ANY pilot by ID
+  // (cross-org read/mutate/export/billing). Every route.ts under
+  // app/api/pilot/apply/[id]/** must now reference the ownership guard that
+  // verifies responses.organizationId before mutation/export/transition.
+  // This is a HARD fail — unlike the trend-based ORG-003 threshold — because
+  // the ownership invariant is fully implemented and must not regress.
+  // ──────────────────────────────────────────────────────────────────────────
+  it('RED-TEAM-ORG-011: every id-scoped pilot route enforces ownership-before-action', () => {
+    const PILOT_ITEM_DIR = join(UE_API_DIR, 'pilot', 'apply', '[id]')
+    expect(
+      existsSync(PILOT_ITEM_DIR),
+      `id-scoped pilot route dir must exist: ${PILOT_ITEM_DIR}`,
+    ).toBe(true)
+
+    const pilotItemRoutes = walkSync(PILOT_ITEM_DIR).filter((f) => f.endsWith('route.ts'))
+    expect(
+      pilotItemRoutes.length,
+      'Expected at least one route.ts under pilot/apply/[id]',
+    ).toBeGreaterThan(0)
+
+    // The route must reference the Phase 2 ownership helper (either the direct
+    // guard, the decision core, the factory wrapper, or the owner extractor).
+    const OWNERSHIP_MARKER =
+      /enforcePilotOwnership|authorizePilotAccess|withPilotOwnership|getPilotOwnerOrganizationId/
+
+    const unguarded: string[] = []
+    for (const route of pilotItemRoutes) {
+      const content = readFileSync(route, 'utf-8')
+      if (!OWNERSHIP_MARKER.test(content)) {
+        unguarded.push(route.replace(ROOT, '').replace(/^[/\\]/, ''))
+      }
+    }
+
+    expect(
+      unguarded,
+      `These id-scoped pilot routes do NOT enforce org ownership before acting ` +
+        `on a pilot application (cross-org mutation/export/billing risk):\n` +
+        unguarded.map((f) => `  - ${f}`).join('\n'),
+    ).toEqual([])
+  })
 })
