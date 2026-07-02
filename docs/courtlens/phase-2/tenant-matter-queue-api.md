@@ -2,8 +2,9 @@
 
 ## Status
 - Phase 2C: implemented (`GET /api/courtlens/matters`, `GET /api/courtlens/matters/:matterId`).
-- Phase 2C.5: auth contract hardened (this document).
-- Phase 2D (tenant UI): **blocked** on the auth blockers listed below.
+- Phase 2C.5: auth contract documented (this document).
+- Phase 2C.6: **auth blockers closed** — trusted role + membership verification in place.
+- Phase 2D (tenant UI): unblocked from an auth perspective, subject to the residual limitations listed below.
 
 ## Routes
 
@@ -66,41 +67,45 @@ Errors:
 
 ## Auth / Org-Scope / Role Contract
 
+CourtLens matter routes use the trusted verified guards added in Phase 2C.6:
+`requireVerifiedOrgAccess` and `requireVerifiedPermission` (see [apps/abr/lib/api-guards.ts](../../../apps/abr/lib/api-guards.ts)).
+
 ### Trusted server-side sources
 - **`userId`**: derived from the authenticated platform-auth session (`@nzila/platform-auth/entra/server`). **Trusted.**
 - **`withRequestContext`**: propagates `x-request-id` and W3C traceparent. **Trusted.**
+- **Org membership**: verified via `verifyAbrOrgMembership(userId, orgId)` (see [apps/abr/lib/trusted-auth.ts](../../../apps/abr/lib/trusted-auth.ts)).
+- **Role**: derived from the verified membership record via `resolveAbrRoleForRequest`.
 
-### Not-yet-trusted client-controlled inputs
+### Membership verification sources (priority order)
+1. **`session_org_match`** — platform-auth session `orgId` matches requested `orgId`. No DB hit.
+2. **`abr_users_lookup`** — DB row where `id = userId AND org_id = orgId AND active = true`.
+3. **`in_memory_demo`** — in-memory demo store (when `DATABASE_URL` is unset).
+4. **`dev_unverified_fallback`** — only when `NODE_ENV !== 'production'` AND `ABR_ALLOW_UNVERIFIED_ORG === 'true'`. Fails closed in production.
 
-The following headers are currently client-controllable and MUST be treated as untrusted for production authorization decisions.
+### Role source (priority order)
+1. **Membership record role** — from whichever source verified the membership.
+2. **`x-abr-role` header** — only when `NODE_ENV !== 'production'` AND `ABR_ALLOW_HEADER_ROLE === 'true'`. **Never trusted in production.**
 
-#### `x-org-id`
-- Consumed by `resolveOrgContext` in [apps/abr/lib/org-context.ts](../../../apps/abr/lib/org-context.ts).
-- Any authenticated user can currently target any org by setting this header.
-- **No server-side membership check exists between `userId` and the resolved `orgId`.**
-- `TENANT_MEMBERSHIP_TODO` in [apps/abr/lib/api-guards.ts](../../../apps/abr/lib/api-guards.ts).
+### Client-controlled inputs — actual trust status
 
-#### `x-abr-role`
-- Consumed by `requirePermission` in [apps/abr/lib/api-guards.ts](../../../apps/abr/lib/api-guards.ts).
-- Any authenticated user can currently escalate role by setting `x-abr-role: super_admin`.
-- **No server-side role source exists.**
-- `ROLE_SOURCE_TODO` in [apps/abr/lib/api-guards.ts](../../../apps/abr/lib/api-guards.ts).
+| Header | Role in Phase 2C.6 |
+|---|---|
+| `x-org-id` | **Selector only.** Never proof of access. Verified against membership before use. Non-member → `403 ORG_MEMBERSHIP_REQUIRED`. |
+| `x-abr-role` | **Dev/test override only.** Requires two environment flags: `NODE_ENV !== 'production'` AND `ABR_ALLOW_HEADER_ROLE === 'true'`. Attempting to forge `super_admin` in production is silently ignored. |
 
-### Trusted role-source rule (must be enforced before Phase 2D production traffic)
+Regression tests in [apps/abr/lib/trusted-auth.test.ts](../../../apps/abr/lib/trusted-auth.test.ts) prove:
+- Forged `x-abr-role: super_admin` in production is not honoured.
+- `ABR_ALLOW_HEADER_ROLE=true` in production is not honoured.
+- Non-member of the requested org is rejected fail-closed.
+- Inactive membership is rejected.
 
-1. Role must be derived from the server-side platform-auth session or a validated `OrganizationMembership` record.
-2. `x-abr-role` header must be ignored in production paths.
-3. Membership check: authenticated `userId` must have an active membership in the resolved `orgId`. Missing membership must fail closed with `403`.
-4. Any residual dev/test role override must be gated by `NODE_ENV !== 'production'` or an explicit trusted service identity.
+### Production readiness of the trusted guards
 
-### Current safe-use envelope
-
-The current guards are safe when:
-- Deployed behind trusted-network conditions (internal pilot, controlled QA).
-- No public tenant UI is exposed.
-- Requests are made by a controlled service (CLI, integration test, trusted admin script).
-
-They are **NOT safe** for public browser traffic until the two TODOs above are resolved.
+**Safe for production traffic** under these conditions:
+- `NODE_ENV=production` (default).
+- `DATABASE_URL` set OR the in-memory demo store is intentionally used.
+- `ABR_ALLOW_HEADER_ROLE` and `ABR_ALLOW_UNVERIFIED_ORG` are **not set** (they are ignored in production either way).
+- Platform-auth session is available.
 
 ## Cross-Tenant Isolation
 
@@ -151,11 +156,18 @@ Legal boundary notice is mandatory on every detail response.
 
 ## Blockers Before Phase 2D Tenant UI
 
-1. **`x-abr-role` role source**: replace with server-derived role. See `ROLE_SOURCE_TODO`.
-2. **`x-org-id` membership verification**: add `verifyOrgMembership(userId, orgId)` and fail closed. See `TENANT_MEMBERSHIP_TODO`.
-3. **Regression tests for forged headers**: prove `x-abr-role: super_admin` from a low-privilege session is rejected after fix.
+Both Phase 2C.5 blockers have been closed in Phase 2C.6:
 
-Until these are resolved, the tenant UI must be deployed behind trusted-network conditions only. UI code must not send `x-abr-role` from the browser; it must rely on server-side role derivation.
+- ✅ **`x-abr-role` role source**: replaced with server-derived role via `resolveAbrRoleForRequest`. Header is production-ignored. Regression tests prove forged headers are rejected.
+- ✅ **`x-org-id` membership verification**: `verifyAbrOrgMembership` fails closed if the authenticated user is not an active member of the requested org.
+
+### Residual limitations to know before shipping UI
+
+1. **`abr_users` seed data**: production deployment must populate `abr_users` with real `(userId, orgId, role)` triples that match the platform-auth session `userId` values. Without this seed, non-session users will fail membership verification.
+2. **Session `orgRole` mapping**: platform-auth `orgRole` values must map to valid `AbrRole` values (`normalizeRole` returns `'learner'` for unknown roles). If Entra/Clerk uses different role names, add a translation table.
+3. **Legacy incident routes** (`/api/abr/incidents/*`) still use the older `requireOrgAccess` / `requirePermission`. They remain safe for dev/test/pilot but should migrate to the verified guards before those routes ship to public production traffic.
+4. **`x-org-id` may still expose org-existence** through error messages when a valid user targets an unknown org. Consider unifying to `404` if enumeration is a concern.
+5. **N+1 event replay** in queue list — unchanged from Phase 2C. Deferred.
 
 ## Related
 

@@ -16,9 +16,8 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { withRequestContext, requireOrgAccess, requirePermission } from '@/lib/api-guards';
+import { withRequestContext, requireVerifiedOrgAccess, requireVerifiedPermission } from '@/lib/api-guards';
 import { logAuditEvent } from '@/lib/audit-log';
-import { normalizeRole } from '@/lib/rbac';
 import { getMatterDetail, buildMatterDetailView } from '@/modules/incidents/matter-service';
 
 export async function GET(
@@ -26,10 +25,10 @@ export async function GET(
   { params }: { params: Promise<{ matterId: string }> },
 ): Promise<NextResponse> {
   return withRequestContext(request, async () => {
-    const authz = await requireOrgAccess(request);
+    const authz = await requireVerifiedOrgAccess(request);
     if (!authz.ok) return authz.response;
 
-    const permission = requirePermission(request, 'incident.read');
+    const permission = requireVerifiedPermission(authz.context, 'incident.read');
     if (!permission.ok) return permission.response;
 
     const { matterId } = await params;
@@ -41,8 +40,8 @@ export async function GET(
     }
 
     // Org-scoped lookup — returns null if matterId does not belong to this org.
-    const result = await getMatterDetail(authz.orgId, matterId, {
-      role: permission.role,
+    const result = await getMatterDetail(authz.context.orgId, matterId, {
+      role: authz.context.role,
       includeSensitiveNotes: true,
     });
 
@@ -53,19 +52,22 @@ export async function GET(
       );
     }
 
-    const role = normalizeRole(permission.role);
-    const view = buildMatterDetailView(result.matter, result.detail!, role);
+    const view = buildMatterDetailView(result.matter, result.detail!, authz.context.role);
 
     logAuditEvent({
       action: 'courtlens.matter.viewed',
-      actorUserId: authz.userId,
-      orgId: authz.orgId,
+      actorUserId: authz.context.userId,
+      orgId: authz.context.orgId,
       entityType: 'matter',
-      details: { matterId, role: permission.role },
+      details: {
+        matterId,
+        role: authz.context.role,
+        membershipSource: authz.context.membershipSource,
+      },
     });
 
     return NextResponse.json({
-      orgId: authz.orgId,
+      orgId: authz.context.orgId,
       matter: view,
     });
   });

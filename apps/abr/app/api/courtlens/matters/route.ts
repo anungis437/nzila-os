@@ -17,30 +17,34 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { withRequestContext, requireOrgAccess, requirePermission } from '@/lib/api-guards';
+import { withRequestContext, requireVerifiedOrgAccess, requireVerifiedPermission } from '@/lib/api-guards';
 import { logAuditEvent } from '@/lib/audit-log';
 import { listMatterQueueForOrg } from '@/modules/incidents/matter-service';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   return withRequestContext(request, async () => {
-    const authz = await requireOrgAccess(request);
+    const authz = await requireVerifiedOrgAccess(request);
     if (!authz.ok) return authz.response;
 
-    const permission = requirePermission(request, 'incident.read');
+    const permission = requireVerifiedPermission(authz.context, 'incident.read');
     if (!permission.ok) return permission.response;
 
-    const items = await listMatterQueueForOrg(authz.orgId);
+    const items = await listMatterQueueForOrg(authz.context.orgId);
 
     logAuditEvent({
       action: 'courtlens.matter_queue.listed',
-      actorUserId: authz.userId,
-      orgId: authz.orgId,
+      actorUserId: authz.context.userId,
+      orgId: authz.context.orgId,
       entityType: 'matter',
-      details: { count: items.length, role: permission.role },
+      details: {
+        count: items.length,
+        role: authz.context.role,
+        membershipSource: authz.context.membershipSource,
+      },
     });
 
     return NextResponse.json({
-      orgId: authz.orgId,
+      orgId: authz.context.orgId,
       dataSource: process.env.DATABASE_URL ? 'database' : 'seeded-memory',
       items,
     });
