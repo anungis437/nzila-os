@@ -1,4 +1,4 @@
-import type { DecisionEvidencePack, SealedDecisionEvidencePack } from './schema.js'
+import type { DecisionEvidencePack, SealedDecisionEvidencePack } from './schema'
 
 // ─── JSON Export ──────────────────────────────────────────────────────────────
 

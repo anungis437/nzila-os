@@ -6,8 +6,8 @@ import {
   type ContinuityRiskSignal,
   type ContinuityDriftEvent,
   type ContinuityAssessmentInput,
-} from './schema.js'
-import type { ContinuityAnalysisStore } from './store.js'
+} from './schema'
+import type { ContinuityAnalysisStore } from './store'
 import {
   computeSignalRiskIndex,
   computeGovernanceDriftScore,
@@ -16,7 +16,7 @@ import {
   computeEscalationInstabilityScore,
   computeOverallRiskScore,
   computeTrend,
-} from './scoring.js'
+} from './scoring'
 
 // ─── Continuity Analysis Engine ───────────────────────────────────────────────
 

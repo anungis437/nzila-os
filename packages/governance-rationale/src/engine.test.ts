@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { GovernanceRationaleEngine } from './engine.js'
-import { computeRationaleHash, replayRationale } from './replay.js'
-import type { GovernanceRationaleStore } from './store.js'
-import type { GovernanceRationale, RationaleReplayResult } from './schema.js'
+import { GovernanceRationaleEngine } from './engine'
+import { computeRationaleHash, replayRationale } from './replay'
+import type { GovernanceRationaleStore } from './store'
+import type { GovernanceRationale, RationaleReplayResult } from './schema'
 
 // ─── In-memory store ──────────────────────────────────────────────────────────
 

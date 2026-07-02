@@ -1,7 +1,7 @@
-import type { SituationAssessment } from './schema/situation.js'
-import type { ProblemAnalysis } from './schema/problem.js'
-import type { DecisionAnalysis } from './schema/decision.js'
-import type { PPOAAnalysis } from './schema/ppoa.js'
+import type { SituationAssessment } from './schema/situation'
+import type { ProblemAnalysis } from './schema/problem'
+import type { DecisionAnalysis } from './schema/decision'
+import type { PPOAAnalysis } from './schema/ppoa'
 
 // ─── Situation Appraisal Store ────────────────────────────────────────────────
 

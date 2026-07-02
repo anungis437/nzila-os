@@ -9,8 +9,8 @@ import {
   type PotentialRisk,
   type PotentialOpportunity,
   type ReadinessReport,
-} from '../schema/ppoa.js'
-import type { PPOAStore } from '../store.js'
+} from '../schema/ppoa'
+import type { PPOAStore } from '../store'
 
 // ─── PPOA Engine ──────────────────────────────────────────────────────────────
 

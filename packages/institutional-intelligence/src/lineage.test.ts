@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { DecisionLineageGraphEngine } from './lineage.js'
-import type { InstitutionalIntelligenceStore } from './store.js'
-import type { DependencyNode, DependencyRiskReport, LineageEdge, LineageNode, LineageSnapshot } from './schema.js'
+import { DecisionLineageGraphEngine } from './lineage'
+import type { InstitutionalIntelligenceStore } from './store'
+import type { DependencyNode, DependencyRiskReport, LineageEdge, LineageNode, LineageSnapshot } from './schema'
 
 function makeStore(): InstitutionalIntelligenceStore {
   const nodes: LineageNode[] = []

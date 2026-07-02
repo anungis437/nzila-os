@@ -8,8 +8,8 @@ import {
   type ProblemAnalysisInput,
   type RootCauseHypothesis,
   type MitigationRecommendation,
-} from '../schema/problem.js'
-import type { ProblemAnalysisStore } from '../store.js'
+} from '../schema/problem'
+import type { ProblemAnalysisStore } from '../store'
 
 // ─── Problem Analysis Engine ──────────────────────────────────────────────────
 

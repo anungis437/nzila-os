@@ -4,7 +4,7 @@ import type {
   LineageSnapshot,
   DependencyNode,
   DependencyRiskReport,
-} from './schema.js'
+} from './schema'
 
 export interface InstitutionalIntelligenceStore {
   appendNode(node: LineageNode): Promise<void>

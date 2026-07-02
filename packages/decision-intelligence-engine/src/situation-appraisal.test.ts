@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { SituationAppraisalEngine } from './engines/situation-appraisal.js'
-import type { SituationAppraisalStore } from './store.js'
-import type { SituationAssessment } from './schema/situation.js'
+import { SituationAppraisalEngine } from './engines/situation-appraisal'
+import type { SituationAppraisalStore } from './store'
+import type { SituationAssessment } from './schema/situation'
 
 // ─── In-memory store for testing ─────────────────────────────────────────────
 

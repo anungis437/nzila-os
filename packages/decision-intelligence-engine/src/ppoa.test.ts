@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { PPOAEngine } from './engines/ppoa.js'
-import type { PPOAStore } from './store.js'
-import type { PPOAAnalysis } from './schema/ppoa.js'
+import { PPOAEngine } from './engines/ppoa'
+import type { PPOAStore } from './store'
+import type { PPOAAnalysis } from './schema/ppoa'
 
 // ─── In-memory store ──────────────────────────────────────────────────────────
 

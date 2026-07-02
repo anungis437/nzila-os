@@ -1,14 +1,14 @@
 // ─── Schema re-exports ────────────────────────────────────────────────────────
-export * from './schema/situation.js'
-export * from './schema/problem.js'
-export * from './schema/decision.js'
-export * from './schema/ppoa.js'
+export * from './schema/situation'
+export * from './schema/problem'
+export * from './schema/decision'
+export * from './schema/ppoa'
 
 // ─── Engine re-exports ────────────────────────────────────────────────────────
-export { SituationAppraisalEngine } from './engines/situation-appraisal.js'
-export { ProblemAnalysisEngine } from './engines/problem-analysis.js'
-export { DecisionAnalysisEngine } from './engines/decision-analysis.js'
-export { PPOAEngine } from './engines/ppoa.js'
+export { SituationAppraisalEngine } from './engines/situation-appraisal'
+export { ProblemAnalysisEngine } from './engines/problem-analysis'
+export { DecisionAnalysisEngine } from './engines/decision-analysis'
+export { PPOAEngine } from './engines/ppoa'
 
 // ─── Store interfaces ─────────────────────────────────────────────────────────
 export type {
@@ -17,4 +17,4 @@ export type {
   DecisionAnalysisStore,
   PPOAStore,
   ListOptions,
-} from './store.js'
+} from './store'

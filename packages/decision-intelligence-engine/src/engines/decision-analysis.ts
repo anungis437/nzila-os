@@ -11,8 +11,8 @@ import {
   type RiskAcceptance,
   type MitigationCommitment,
   type DecisionScoringResult,
-} from '../schema/decision.js'
-import type { DecisionAnalysisStore } from '../store.js'
+} from '../schema/decision'
+import type { DecisionAnalysisStore } from '../store'
 
 // ─── Decision Analysis Engine ─────────────────────────────────────────────────
 

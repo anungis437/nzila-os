@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { ProblemAnalysisEngine } from './engines/problem-analysis.js'
-import type { ProblemAnalysisStore } from './store.js'
-import type { ProblemAnalysis } from './schema/problem.js'
+import { ProblemAnalysisEngine } from './engines/problem-analysis'
+import type { ProblemAnalysisStore } from './store'
+import type { ProblemAnalysis } from './schema/problem'
 
 // ─── In-memory store ──────────────────────────────────────────────────────────
 

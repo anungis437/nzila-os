@@ -6,8 +6,8 @@ import {
   type LineageNode,
   type LineageEdge,
   type LineageSnapshot,
-} from './schema.js'
-import type { InstitutionalIntelligenceStore } from './store.js'
+} from './schema'
+import type { InstitutionalIntelligenceStore } from './store'
 
 export class DecisionLineageGraphEngine {
   readonly #store: InstitutionalIntelligenceStore

@@ -5,8 +5,8 @@ import {
   type SituationAssessment,
   type SituationAssessmentInput,
   type SituationPriorityEntry,
-} from '../schema/situation.js'
-import type { SituationAppraisalStore } from '../store.js'
+} from '../schema/situation'
+import type { SituationAppraisalStore } from '../store'
 
 // ─── Situation Appraisal Engine ───────────────────────────────────────────────
 

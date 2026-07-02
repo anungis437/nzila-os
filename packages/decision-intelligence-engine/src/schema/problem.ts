@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { severityScale } from './situation.js'
-import { confidenceSemanticsSchema, type ConfidenceSemantics } from './decision.js'
+import { severityScale } from './situation'
+import { confidenceSemanticsSchema, type ConfidenceSemantics } from './decision'
 
 // Re-export so existing imports from '@nzila/decision-intelligence-engine' via
 // the schema/problem barrel keep working after the consolidation into decision.ts.

@@ -1,5 +1,5 @@
-export * from './schema.js'
-export { ContinuityAnalysisEngine } from './engine.js'
+export * from './schema'
+export { ContinuityAnalysisEngine } from './engine'
 export {
   computeSignalRiskIndex,
   computeGovernanceDriftScore,
@@ -9,6 +9,6 @@ export {
   computeOverallRiskScore,
   computeTrend,
   computeDriftDiagnostics,
-} from './scoring.js'
-export type { ContinuityAnalysisStore } from './store.js'
-export type { ContinuityTrendPoint, DriftDiagnostics } from './scoring.js'
+} from './scoring'
+export type { ContinuityAnalysisStore } from './store'
+export type { ContinuityTrendPoint, DriftDiagnostics } from './scoring'

@@ -1,4 +1,4 @@
-import type { GovernanceRationale, RationaleReplayResult } from './schema.js'
+import type { GovernanceRationale, RationaleReplayResult } from './schema'
 
 // ─── Governance Rationale Store ───────────────────────────────────────────────
 

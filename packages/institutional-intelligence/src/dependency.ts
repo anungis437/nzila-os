@@ -5,8 +5,8 @@ import {
   type DependencyNode,
   type DependencyRiskLevel,
   type DependencyRiskReport,
-} from './schema.js'
-import type { InstitutionalIntelligenceStore } from './store.js'
+} from './schema'
+import type { InstitutionalIntelligenceStore } from './store'
 
 export class InstitutionalDependencyEngine {
   readonly #store: InstitutionalIntelligenceStore

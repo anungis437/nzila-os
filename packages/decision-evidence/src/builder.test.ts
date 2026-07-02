@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { DecisionEvidenceBuilder } from './builder.js'
-import { computePackHash } from './hash.js'
-import type { DecisionEvidenceStore } from './store.js'
-import type { DecisionEvidencePack, SealedDecisionEvidencePack } from './schema.js'
+import { DecisionEvidenceBuilder } from './builder'
+import { computePackHash } from './hash'
+import type { DecisionEvidenceStore } from './store'
+import type { DecisionEvidencePack, SealedDecisionEvidencePack } from './schema'
 
 // ─── In-memory store ──────────────────────────────────────────────────────────
 

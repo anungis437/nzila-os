@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import type { DecisionEvidencePack } from './schema.js'
+import type { DecisionEvidencePack } from './schema'
 
 // ─── Pack Hash Computation ────────────────────────────────────────────────────
 

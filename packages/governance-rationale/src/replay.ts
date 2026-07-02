@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import type {
   GovernanceRationale,
   RationaleReplayResult,
-} from './schema.js'
+} from './schema'
 
 // ─── Canonical Payload ────────────────────────────────────────────────────────
 

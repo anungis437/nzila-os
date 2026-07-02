@@ -11,9 +11,9 @@ import {
   type RationaleRejection,
   type RationaleAcceptedRisk,
   type RationaleReplayResult,
-} from './schema.js'
-import type { GovernanceRationaleStore } from './store.js'
-import { computeRationaleHash, replayRationale } from './replay.js'
+} from './schema'
+import type { GovernanceRationaleStore } from './store'
+import { computeRationaleHash, replayRationale } from './replay'
 
 // ─── Governance Rationale Engine ─────────────────────────────────────────────
 

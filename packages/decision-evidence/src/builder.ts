@@ -6,10 +6,10 @@ import {
   type DecisionEvidencePack,
   type DecisionEvidencePackInput,
   type SealedDecisionEvidencePack,
-} from './schema.js'
-import type { DecisionEvidenceStore } from './store.js'
-import { computePackHash, computeSealHash } from './hash.js'
-import { exportAsJson, exportAsMarkdown } from './export.js'
+} from './schema'
+import type { DecisionEvidenceStore } from './store'
+import { computePackHash, computeSealHash } from './hash'
+import { exportAsJson, exportAsMarkdown } from './export'
 
 // ─── Decision Evidence Builder ────────────────────────────────────────────────
 

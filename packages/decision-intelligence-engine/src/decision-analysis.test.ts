@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { DecisionAnalysisEngine } from './engines/decision-analysis.js'
-import type { DecisionAnalysisStore } from './store.js'
-import type { DecisionAnalysis } from './schema/decision.js'
+import { DecisionAnalysisEngine } from './engines/decision-analysis'
+import type { DecisionAnalysisStore } from './store'
+import type { DecisionAnalysis } from './schema/decision'
 
 // ─── In-memory store ──────────────────────────────────────────────────────────
 

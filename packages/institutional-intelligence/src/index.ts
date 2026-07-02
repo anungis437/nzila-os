@@ -1,4 +1,4 @@
-export * from './schema.js'
-export { DecisionLineageGraphEngine } from './lineage.js'
-export { InstitutionalDependencyEngine } from './dependency.js'
-export type { InstitutionalIntelligenceStore } from './store.js'
+export * from './schema'
+export { DecisionLineageGraphEngine } from './lineage'
+export { InstitutionalDependencyEngine } from './dependency'
+export type { InstitutionalIntelligenceStore } from './store'

@@ -2,7 +2,7 @@ import type {
   ContinuityRiskScore,
   ContinuityRiskSignal,
   ContinuityDriftEvent,
-} from './schema.js'
+} from './schema'
 
 // ─── Continuity Analysis Store ────────────────────────────────────────────────
 

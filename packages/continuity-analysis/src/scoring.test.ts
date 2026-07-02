@@ -7,8 +7,8 @@ import {
   computeOverallRiskScore,
   computeTrend,
   computeDriftDiagnostics,
-} from './scoring.js'
-import type { ContinuityRiskSignal } from './schema.js'
+} from './scoring'
+import type { ContinuityRiskSignal } from './schema'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

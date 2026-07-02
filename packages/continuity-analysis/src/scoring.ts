@@ -3,7 +3,7 @@ import type {
   ContinuityRiskScore,
   GovernanceMaturityIndicator,
   InstitutionalMemoryCoverage,
-} from './schema.js'
+} from './schema'
 
 // ─── Signal Risk Index ────────────────────────────────────────────────────────
 

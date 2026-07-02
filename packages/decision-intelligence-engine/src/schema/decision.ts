@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { severityScale } from './situation.js'
+import { severityScale } from './situation'
 
 // ─── Decision Type ────────────────────────────────────────────────────────────
 
