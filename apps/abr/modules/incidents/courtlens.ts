@@ -20,6 +20,14 @@ import type { IncidentRecord, IncidentStatus } from './types';
 export const COURTLENS_PRACTICE_AREAS = ['housing', 'employment', 'debt'] as const;
 export type CourtLensPracticeArea = (typeof COURTLENS_PRACTICE_AREAS)[number];
 
+/**
+ * Matter read-model practice area — includes 'unknown' for matters where the
+ * practice area has not yet been set by a CourtLens event.
+ * Use CourtLensPracticeArea for intake validation (rejects 'unknown').
+ * Use CourtLensMatterPracticeArea for read model / projection types.
+ */
+export type CourtLensMatterPracticeArea = CourtLensPracticeArea | 'unknown';
+
 export const COURTLENS_INTAKE_CHANNELS = [
   'public_web',
   'tenant_staff',
@@ -224,7 +232,7 @@ export function defaultClientProfile(): CourtLensClientProfile {
 // Phase 1A audit confirmed all are additive — none replace ABR incident fields.
 
 export interface CourtLensFields {
-  practiceArea: CourtLensPracticeArea;
+  practiceArea: CourtLensMatterPracticeArea;
   subIssue: CourtLensSubIssue | null;
   aiSummaryStatus: AiSummaryStatus;
   referralStatus: ReferralStatus;
@@ -278,7 +286,7 @@ export function isMatterPacketExternalizable(matter: CourtLensMatter): boolean {
 // Used alongside IncidentCreateInput to initialise CourtLens-specific fields.
 
 export function defaultCourtLensFields(
-  practiceArea: CourtLensPracticeArea,
+  practiceArea: CourtLensMatterPracticeArea = 'unknown',
 ): CourtLensFields {
   return {
     practiceArea,

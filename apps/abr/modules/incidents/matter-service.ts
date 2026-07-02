@@ -42,6 +42,7 @@ import {
   type AiSummaryStatus,
   type CourtLensFields,
   type CourtLensMatter,
+  type CourtLensMatterPracticeArea,
   type CourtLensPracticeArea,
   type CourtLensRiskFlags,
   type CourtLensSubIssue,
@@ -67,7 +68,7 @@ function isCourtLensPayload(p: Record<string, unknown>): p is CourtLensEventPayl
 
 export function deriveCourtLensFields(
   eventPayloads: Record<string, unknown>[],
-  practiceArea: CourtLensPracticeArea,
+  practiceArea: CourtLensMatterPracticeArea = 'unknown',
 ): CourtLensFields {
   const fields: CourtLensFields = defaultCourtLensFields(practiceArea);
 
@@ -267,9 +268,12 @@ export async function createMatter(
  */
 export async function listMatters(orgId: string): Promise<CourtLensMatter[]> {
   const incidents = await listIncidents(orgId);
+  // practiceArea is 'unknown' for list-mode projections because full event
+  // replay is not available at list time (no DB column yet).
+  // Use getMatterDetail for the event-replayed read with correct practiceArea.
   return incidents.map((incident) => ({
     ...incident,
-    ...defaultCourtLensFields('housing'), // practiceArea unknown at list time without DB column; Phase 2 migration resolves this
+    ...defaultCourtLensFields('unknown'),
   }));
 }
 
@@ -287,10 +291,10 @@ export async function getMatterDetail(
   if (!detail) return null;
 
   // Derive CourtLens fields from event history.
+  // practiceArea defaults to 'unknown' if no courtlens_fields_set event has
+  // been written — never silently 'housing'.
   const eventPayloads = detail.events.map((e) => e.payloadJson);
-  // practiceArea is stored as 'courtlens_fields_set' event payload if set,
-  // otherwise defaults to 'housing' pending Phase 2 migration.
-  const baseFields = deriveCourtLensFields(eventPayloads, 'housing');
+  const baseFields = deriveCourtLensFields(eventPayloads, 'unknown');
   const matter: CourtLensMatter = { ...detail.incident, ...baseFields };
 
   return { matter, detail };
@@ -384,7 +388,7 @@ export interface MatterQueueItem {
   id: string;
   orgId: string;
   title: string;
-  practiceArea: CourtLensPracticeArea;
+  practiceArea: CourtLensMatterPracticeArea;
   statusLabel: string;
   urgencyLabel: string;
   aiSummaryStatus: AiSummaryStatus;
