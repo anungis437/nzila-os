@@ -389,6 +389,7 @@ export interface MatterQueueItem {
   orgId: string;
   title: string;
   practiceArea: CourtLensMatterPracticeArea;
+  subIssue: CourtLensSubIssue | null;
   statusLabel: string;
   urgencyLabel: string;
   aiSummaryStatus: AiSummaryStatus;
@@ -397,6 +398,7 @@ export interface MatterQueueItem {
   assignedTo: string | null;
   openedAt: string;
   dueAt: string | null;
+  deadlineDate: string | null;
 }
 
 export function toMatterQueueItem(matter: CourtLensMatter): MatterQueueItem {
@@ -405,6 +407,7 @@ export function toMatterQueueItem(matter: CourtLensMatter): MatterQueueItem {
     orgId: matter.orgId,
     title: matter.title,
     practiceArea: matter.practiceArea,
+    subIssue: matter.subIssue,
     statusLabel: getMatterStatusLabel(matter.status),
     urgencyLabel: matter.severity,
     aiSummaryStatus: matter.aiSummaryStatus,
@@ -413,5 +416,105 @@ export function toMatterQueueItem(matter: CourtLensMatter): MatterQueueItem {
     assignedTo: matter.assignedTo,
     openedAt: matter.openedAt,
     dueAt: matter.dueAt,
+    deadlineDate: matter.deadlineDate,
+  };
+}
+
+// ── Queue list with event replay ─────────────────────────────────────────────
+//
+// Phase 2C: per-item event replay (N+1). Acceptable for pilot-scale queues
+// (< 200 matters). If list performance becomes a measured blocker, add a
+// `courtlens_metadata jsonb` column to `abr_incidents` as a materialised
+// projection cache and eliminate per-item replay at list time.
+
+export async function listMatterQueueForOrg(orgId: string): Promise<MatterQueueItem[]> {
+  const incidents = await listIncidents(orgId);
+  const items: MatterQueueItem[] = [];
+  for (const incident of incidents) {
+    const result = await getMatterDetail(orgId, incident.id);
+    if (result) items.push(toMatterQueueItem(result.matter));
+  }
+  return items;
+}
+
+// ── Detail view with role-aware CourtLens field gating ───────────────────────
+
+import type { AbrRole } from '@/lib/rbac';
+import { getIncidentVisibilityPolicy, applyIncidentRedaction } from '@/lib/visibility';
+import type { IncidentDetail } from './types';
+
+export interface CourtLensMatterDetailView {
+  id: string;
+  orgId: string;
+  title: string;
+  statusLabel: string;
+  practiceArea: CourtLensMatterPracticeArea;
+  subIssue: CourtLensSubIssue | null;
+  urgencyLabel: string;
+  aiSummaryStatus: AiSummaryStatus;
+  referralStatus: ReferralStatus;
+  isPacketExternalizable: boolean;
+  assignedTo: string | null;
+  clientGoal: string | null;
+  hearingDate: string | null;
+  deadlineDate: string | null;
+  /** Null for roles without evidence access (e.g. executive_viewer). */
+  riskFlags: import('./courtlens').CourtLensRiskFlags | null;
+  /** Null for roles without evidence access. */
+  clientProfile: import('./courtlens').CourtLensClientProfile | null;
+  /** Role-filtered notes from incident detail. */
+  notes: IncidentDetail['notes'];
+  /** Role-filtered timeline from incident detail. */
+  timeline: IncidentDetail['timeline'];
+  openedAt: string;
+  dueAt: string | null;
+  /** Mandatory on any response that may contain AI-generated content. */
+  legalBoundaryNotice: string;
+}
+
+const MATTER_LEGAL_BOUNDARY_NOTICE =
+  'AI-generated content in this record is draft-only and requires human ' +
+  'reviewer approval before external use. This platform does not provide ' +
+  'legal advice.';
+
+export function buildMatterDetailView(
+  matter: CourtLensMatter,
+  detail: IncidentDetail,
+  role: AbrRole,
+): CourtLensMatterDetailView {
+  const policy = getIncidentVisibilityPolicy(role);
+  const redacted = applyIncidentRedaction(
+    { ...detail, incident: detail.incident },
+    role,
+  );
+
+  // CourtLens-specific sensitive fields are gated by canSeeEvidence.
+  // executive_viewer and auditor roles have canSeeEvidence: false.
+  const canSeeCourtLensSensitive = policy.canSeeEvidence && !policy.canSeeAggregateOnly;
+
+  return {
+    id: matter.id,
+    orgId: matter.orgId,
+    title: redacted.incident.summary === matter.summary
+      ? matter.title
+      : redacted.incident.title ?? matter.title,
+    statusLabel: getMatterStatusLabel(matter.status),
+    practiceArea: matter.practiceArea,
+    subIssue: matter.subIssue,
+    urgencyLabel: matter.severity,
+    aiSummaryStatus: matter.aiSummaryStatus,
+    referralStatus: matter.referralStatus,
+    isPacketExternalizable: isMatterPacketExternalizable(matter),
+    assignedTo: matter.assignedTo,
+    clientGoal: canSeeCourtLensSensitive ? matter.clientGoal : null,
+    hearingDate: canSeeCourtLensSensitive ? matter.hearingDate : null,
+    deadlineDate: canSeeCourtLensSensitive ? matter.deadlineDate : null,
+    riskFlags: canSeeCourtLensSensitive ? matter.riskFlags : null,
+    clientProfile: canSeeCourtLensSensitive ? matter.clientProfile : null,
+    notes: redacted.notes,
+    timeline: redacted.timeline,
+    openedAt: matter.openedAt,
+    dueAt: matter.dueAt,
+    legalBoundaryNotice: MATTER_LEGAL_BOUNDARY_NOTICE,
   };
 }
