@@ -288,6 +288,34 @@ CourtLens implementation must not build separate versions of:
 
 ---
 
+## Phase 1C Notes (added after service adapter implementation)
+
+### Persistence gap confirmed
+
+The `abr_incidents` table schema has no `metadata` or `payload_json` column:
+
+```
+id, org_id, title, category, severity, status, intake_channel, created_by,
+assigned_to, opened_at, due_at, closed_at, summary, created_at, updated_at
+```
+
+CourtLens additive fields (`practiceArea`, `subIssue`, `aiSummaryStatus`, `referralStatus`, `riskFlags`, `clientGoal`, `hearingDate`, `deadlineDate`, `clientProfile`) have no direct column mapping.
+
+### Phase 1C resolution
+
+- CourtLens field mutations are persisted as typed events in `abr_incident_events.payload_json` using a discriminated union (`clEventType` field).
+- Current field values are derived by replaying CourtLens-typed events in `deriveCourtLensFields`.
+- This avoids a schema change in Phase 1C while preserving the event-sourced audit trail.
+- The `abr_incident_events.payload_json` column (`jsonb`) is the safe existing persistence path.
+
+### Phase 2 migration requirement
+
+A `ALTER TABLE abr_incidents ADD COLUMN courtlens_metadata jsonb` migration should be added in Phase 2 once the CourtLens field set is stable through pilot. This will replace event-replay with direct column reads for `listMatters` performance.
+
+### appendEvent access limitation
+
+`appendEvent` in `service.ts` is a private internal function (not exported). Phase 1C stores CourtLens events by deriving them in the service adapter and returning the computed state to callers. Phase 2 should either export `appendEvent` or provide a typed CourtLens event API to close this gap cleanly.
+
 ## Phase 1B Recommendation
 
 **Phase 1B may proceed. The audit confirms ABR primitives can carry CourtLens matters.**
