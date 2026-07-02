@@ -1,0 +1,33 @@
+{
+  "change_id": "CHG-2026-0107",
+  "title": "Deploy union-eyes to production (July 2026 rescue-wave cadence)",
+  "description": "Successor to CHG-2026-0106 (window closed 2026-06-27). Continues the standing Union Eyes production deployment authorization to cover the three consolidated PRs merged 2026-07-02: (a) CourtLens phase 0–2I on ABR primitives — no union-eyes surface changes but touches shared packages that union-eyes builds against; (b) pre-CourtLens WIP rescue — runtime-separation + UE hardening waves, including pilot-ownership enforcement on all pilot/apply routes and RLS context hardening in lib/db/with-rls-context.ts; (c) vscode-vfs rescue — 5 new domain packages (continuity-analysis, decision-evidence, decision-intelligence-engine, governance-rationale, institutional-intelligence) that union-eyes may transitively depend on via shared build.",
+  "service": "union-eyes",
+  "environment": "PROD",
+  "change_type": "STANDARD",
+  "risk_level": "LOW",
+  "impact_summary": "Production deployment of tested Union Eyes changes. All merged PRs passed governance gates (Trivy, CodeQL, Secret Scan, Dependency Audit with waiver policy, Governance Baseline, Access Review Attestation, Contract Tests, DORA metrics). Local build + typecheck + tests validated pre-merge. Rollback via previous image tag if needed.",
+  "requested_by": "platform-team",
+  "approvers_required": [],
+  "approved_by": [],
+  "approval_status": "APPROVED",
+  "implementation_window_start": "2026-07-03T00:00:00.000Z",
+  "implementation_window_end": "2026-08-03T23:59:59.000Z",
+  "rollback_plan": "Revert to previous stable container image tag (last successfully deployed digest before commit 7bd642fa4) and rerun smoke checks. If the rollback image is missing, pin to the last known-good digest recorded in reports/governance/ue-hardening-wave-closeout-2026-06-28.md.",
+  "test_evidence_refs": [
+    "reports/governance/ue-hardening-wave-closeout-2026-06-28.md"
+  ],
+  "linked_prs": [
+    "#591",
+    "#592",
+    "#594"
+  ],
+  "linked_commits": [
+    "234381b0a99c95806f6b840ff3a8d330c1a09b8f",
+    "a87b8d5b8d2419ffd31e7822aa3b90ad74e68d34",
+    "7bd642fa4f14836eb202e34194138bb0a387e6ee"
+  ],
+  "status": "APPROVED",
+  "created_at": "2026-07-02T22:35:00.000Z",
+  "updated_at": "2026-07-02T22:35:00.000Z"
+}
