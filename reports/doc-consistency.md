@@ -1,29 +1,29 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-02T21:29:42.479Z
+> Generated: 2026-07-03T15:28:05.789Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2021 |
-| Total Findings | 2638 |
+| Files Scanned | 2075 |
+| Total Findings | 2705 |
 | Errors | 0 |
-| Warnings | 1222 |
-| Info | 1416 |
+| Warnings | 1220 |
+| Info | 1485 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1408 |
-| stale-reference | 1041 |
+| naming-inconsistency | 1477 |
+| stale-reference | 1039 |
 | missing-package-readme | 110 |
 | stale-package-ref | 68 |
 | stale-date | 8 |
 | missing-required-doc | 3 |
 
-## stale-reference (1041)
+## stale-reference (1039)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -388,7 +388,6 @@
 - 🟡 `docs/categories/platform-and-operations/README.md:11` — Possible broken link: [Intelligence](../../intelligence/)
 - 🟡 `docs/categories/platform-and-operations/README.md:15` — Possible broken link: [Deployment](../../deploy/)
 - 🟡 `docs/categories/platform-and-operations/README.md:17` — Possible broken link: [Release Docs](../../releases/)
-- 🟡 `docs/categories/platform-and-operations/README.md:19` — Possible broken link: [Runtime Runbooks](../../runbooks/)
 - 🟡 `docs/categories/platform-and-operations/README.md:24` — Possible broken link: [Security](../../security/)
 - 🟡 `docs/categories/platform-and-operations/README.md:25` — Possible broken link: [Risk](../../risk/)
 - 🟡 `docs/categories/platform-and-operations/README.md:27` — Possible broken link: [Stress Test](../../stress-test/)
@@ -734,7 +733,6 @@
 - 🟡 `docs/categories/products-and-market/zonga/pilot-readiness-audit.md:8` — Possible broken link: [apps/zonga/features/media/playback-service.ts](../../apps/zonga/features/media/playback-service.ts)
 - 🟡 `docs/categories/stakeholders/README.md:7` — Possible broken link: [Builder Guides](../../builders/)
 - 🟡 `docs/categories/stakeholders/README.md:12` — Possible broken link: [Operator Guides](../../operators/)
-- 🟡 `docs/categories/stakeholders/README.md:14` — Possible broken link: [Runtime Runbooks](../../runbooks/)
 - 🟡 `docs/categories/stakeholders/README.md:18` — Possible broken link: [Buyer Packs](../../buyers/)
 - 🟡 `docs/categories/stakeholders/README.md:19` — Possible broken link: [Commercial Documentation](../../commercial/)
 - 🟡 `docs/categories/stakeholders/README.md:20` — Possible broken link: [Go-to-Market Documentation](../../gtm/)
@@ -1138,7 +1136,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1408)
+## naming-inconsistency (1477)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2296,6 +2294,20 @@
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:73` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:9` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:10` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:11` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/cross-app-e2e-validation-matrix.md:11` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/cross-app-e2e-validation-matrix.md:12` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/cross-app-e2e-validation-matrix.md:13` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/final-operational-legitimacy-audit.md:16` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/live-full-chain-operational-rehearsal.md:15` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-finalization/live-full-chain-operational-rehearsal.md:16` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-infrastructure-convergence/final-live-infrastructure-certification.md:16` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-infrastructure-convergence/final-live-infrastructure-certification.md:20` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-infrastructure-convergence/full-database-migration-legitimacy.md:6` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-infrastructure-convergence/live-infrastructure-discovery.md:6` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-live-audit/full-environment-inventory-audit.md:6` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/full-residual-elimination-review.md:36` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-closure.md:39` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2435,6 +2447,61 @@
 - ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/portfolio-matrix.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/proof-center/portfolio-proof-index.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:36` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:37` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:41` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:50` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:53` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:58` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:59` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:60` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/azure-production-baseline.md:62` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/backup-restore-certification.md:13` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/backup-restore-certification.md:26` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/backup-restore-certification.md:28` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/br6-org-context-closure.md:48` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/readiness/br6-org-context-closure.md:49` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/readiness/br6-org-context-inventory.md:18` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/readiness/br6-org-context-inventory.md:19` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/readiness/br6-org-context-inventory.md:20` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/readiness/deployment-authority-inventory.md:57` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/dns-tls-ingress-certification.md:13` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/dns-tls-ingress-certification.md:23` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/dns-tls-ingress-certification.md:24` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/oidc-migration-certification.md:18` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/oidc-migration-certification.md:21` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/oidc-migration-certification.md:22` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/oidc-migration-certification.md:23` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/oidc-migration-certification.md:47` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/oidc-migration-certification.md:55` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/platform-production-runtime-inventory.md:12` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/platform-production-runtime-inventory.md:13` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/platform-production-runtime-inventory.md:14` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/platform-production-runtime-inventory.md:27` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/platform-production-runtime-inventory.md:29` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/platform-production-runtime-inventory.md:30` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/platform-production-runtime-inventory.md:41` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-app-graduation-certification.md:12` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-app-graduation-certification.md:13` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-app-graduation-certification.md:19` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-app-graduation-certification.md:27` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-certification.md:3` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-config-certification.md:20` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-ready-release-summary.md:3` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-ready-release-summary.md:28` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-ready-release-summary.md:29` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-ready-release-summary.md:30` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-staging-isolation-certification.md:22` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/production-staging-isolation-certification.md:23` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/runtime-artifact-identity-evidence.md:17` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/runtime-artifact-identity-evidence.md:20` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/runtime-artifact-identity-evidence.md:22` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/runtime-artifact-identity-evidence.md:26` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/readiness/runtime-artifact-identity-evidence.md:27` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/runbooks/production-incident-response.md:21` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/runbooks/production-rollback.md:28` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/runbooks/production-rollback.md:32` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/runbooks/production-rollback.md:37` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/any-elimination.md:158` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md:43` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:63` — "organizationId" should be "org_id" (tenant identifier)
@@ -2551,14 +2618,14 @@
 
 ## stale-date (8)
 
-- ℹ️ `docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md:4` — Document date "2026-03-25" is 99 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 135 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 135 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 135 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 135 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 135 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 135 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 135 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md:4` — Document date "2026-03-25" is 100 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 136 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 136 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 136 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 136 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 136 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 136 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 136 days old — may be stale
 
 ## missing-required-doc (3)
 

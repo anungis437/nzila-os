@@ -688,6 +688,73 @@
       "demotionCriteria": [],
       "knownLimitations": ["Certification artifacts not yet complete; advisory and visible only. NOT a production-readiness claim."],
       "lastVerified": "2026-06-28 — advisory + visible (added to registry in Phase 5)"
+    },
+    {
+      "id": "validate-production-surface",
+      "name": "Production Surface Freeze",
+      "command": "pnpm validate:production-surface",
+      "script": "tooling/scripts/validate-production-surface.mjs",
+      "path": "tooling/scripts/validate-production-surface.mjs",
+      "purpose": "Freeze and classify every app, workflow and environment as PRODUCTION/PILOT/DEMO/INTERNAL_ONLY/RETIRED/TEST_ONLY/UNKNOWN. Fail on UNKNOWN, retired/test deploy paths, or internal public exposure.",
+      "classification": "advisory",
+      "scope": "production surface freeze (Phase -1)",
+      "owner": "platform-governance",
+      "targetClassification": "production-blocking",
+      "promotionCondition": "open surface blockers OSB-1..OSB-7 resolved + per-route gateCoverage for any PRODUCTION app + demo/pilot data isolation proven",
+      "rationale": "Surface is frozen and enforced (fails on UNKNOWN) but not yet wired into final:go. Promotion must be earned, not assumed.",
+      "promotionCriteria": [
+        "Open surface blockers OSB-1..OSB-7 resolved",
+        "Any PRODUCTION-classified app carries routeClassification + gateCoverage evidence",
+        "Demo/pilot production-data isolation proven by executable check"
+      ],
+      "demotionCriteria": [],
+      "knownLimitations": ["Route-level classification is app-level until a PRODUCTION app is declared. Authority: governance/readiness/production-surface.json."],
+      "lastVerified": "2026-07-03 — Phase -1 production surface freeze (advisory + visible)"
+    },
+    {
+      "id": "validate-production-deploy-authority",
+      "name": "Production Deploy Authority",
+      "command": "pnpm validate:production-deploy-authority",
+      "script": "tooling/scripts/validate-production-deploy-authority.mjs",
+      "path": "tooling/scripts/validate-production-deploy-authority.mjs",
+      "purpose": "Cross-check deploy workflows against the frozen production surface: no long-lived AZURE_CREDENTIALS, no forbidden-class production deploy, no expired exception, no unfiltered wildcard.",
+      "classification": "advisory",
+      "scope": "deployment authority (Phase 4A)",
+      "owner": "platform-ops",
+      "targetClassification": "production-blocking",
+      "promotionCondition": "V2 internal-only prod eligibility removed (done) + rollback exceptions structured/non-expired (done) + canary forbidden-class choice removed (done) — promotion-eligible",
+      "rationale": "Long-lived AZURE_CREDENTIALS removed (Phase 4A). Phase 4B closed the policy blockers: console/control-plane no longer production-promotable, canary no longer offers console, and pilot production runs under structured non-expired exceptions (governance/release/production-exceptions.json). Validator now PASSES. Kept advisory pending CI wiring; promotion-eligible.",
+      "promotionCriteria": [
+        "No production-eligible app is surface-classified INTERNAL_ONLY/RETIRED/TEST_ONLY/UNKNOWN",
+        "No production-eligible app carries an expired rollback/production exception",
+        "No deploy workflow references secrets.AZURE_CREDENTIALS",
+        "No production workflow offers a forbidden-class app as a deploy choice"
+      ],
+      "demotionCriteria": [],
+      "knownLimitations": ["Static analysis of workflows + inventory; does not verify Azure-side federated credential existence (external verification required)."],
+      "lastVerified": "2026-07-03 — Phase 4B (advisory; validator PASSES, deploy-authority policy CLOSED)"
+    },
+    {
+      "id": "validate-br6-org-context",
+      "name": "BR-6 Organization Context Closure",
+      "command": "pnpm validate:br6-org-context",
+      "script": "tooling/scripts/validate-br6-org-context.mjs",
+      "path": "tooling/scripts/validate-br6-org-context.mjs",
+      "purpose": "Prove a single fail-closed canonical org resolver with no silent default-org fallback in runtime paths (beyond the forbidden-pattern guardrail).",
+      "classification": "advisory",
+      "scope": "BR-6 org-context substrate (Phase 2)",
+      "owner": "union-eyes, platform-governance",
+      "targetClassification": "production-blocking",
+      "promotionCondition": "canonical resolver fail-closed (done) + zero silent default-org fallbacks in union-eyes runtime service/job paths (done) — promotion-eligible",
+      "rationale": "Canonical resolver fails closed in production and all legacy service/job default-org fallbacks are removed (twilio/payment/remittance). Validator now PASSES. Kept advisory pending CI wiring; promotion-eligible to production-blocking.",
+      "promotionCriteria": [
+        "No `|| process.env.DEFAULT_ORGANIZATION_ID` or `|| 'default-org'` in union-eyes runtime paths",
+        "Background/service jobs declare explicit org or allowlisted system scope",
+        "Canonical resolver retains its fail-closed guard"
+      ],
+      "demotionCriteria": [],
+      "knownLimitations": ["Static scan of union-eyes app/lib/services; does not execute RLS. Complements validate-org-resolver-guardrail."],
+      "lastVerified": "2026-07-03 — Phase 2B (advisory; validator PASSES, BR-6 CLOSED)"
     }
   ],
   "summary": {
@@ -696,15 +763,15 @@
       "release-blocking": 4,
       "pilot-blocking": 0,
       "production-blocking": 0,
-      "advisory": 10,
+      "advisory": 13,
       "deprecated": 2,
       "experimental": 5
     },
-    "totalGates": 36,
+    "totalGates": 39,
     "enforcedBlocking": 19,
-    "reportOnly": 15,
+    "reportOnly": 18,
     "excluded": 2,
     "productionBlockingAchieved": 0,
-    "productionBlockingTargets": ["validate-live-readiness", "validate-infra-convergence", "validate-final-go"]
+    "productionBlockingTargets": ["validate-live-readiness", "validate-infra-convergence", "validate-final-go", "validate-production-surface", "validate-production-deploy-authority", "validate-br6-org-context"]
   }
 }

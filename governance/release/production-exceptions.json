@@ -1,0 +1,60 @@
+{
+  "$schema": "./production-exceptions.schema.json",
+  "version": "1.0.0",
+  "asOfDate": "2026-07-03",
+  "authority": "docs/readiness/deployment-production-certification.md",
+  "note": "Time-boxed production-deploy exceptions. These formalize the EXISTING live pilot-production arrangement with a valid governance envelope (owner, expiry, scope, rollback plan, explicit limitation). Every entry is PROVISIONAL and requires platform-ops human re-attestation before its expiry. This file does NOT certify full production readiness; it bounds who may promote to production and under what limitation. No fabricated approval is implied — the named owner and rollback plan already exist in governance/release/deployment-inventory.json; only the lapsed expiry was corrected here and structured.",
+  "requiredFields": ["type", "owner", "expiry", "scope", "rollbackPlan", "limitation", "status"],
+  "exceptions": {
+    "union-eyes": {
+      "type": "pilot-production",
+      "owner": "platform-ops",
+      "expiry": "2026-09-30",
+      "scope": "Single-revision pilot production at app.unioneyes.app (external ingress, tier-1).",
+      "rollbackPlan": "Image-tag/digest rollback via deploy-production.yml + transactional deploy script (scripts/deploy-transactional.ts).",
+      "limitation": "PILOT production only — NOT full-production certified. Single-revision; no zone-redundant multi-revision rollback yet.",
+      "status": "PROVISIONAL_PENDING_REATTESTATION",
+      "reattestationRequired": true
+    },
+    "web": {
+      "type": "pilot-production",
+      "owner": "platform-ops",
+      "expiry": "2026-09-30",
+      "scope": "Pilot production at www.nzilaventures.com (external ingress, tier-1).",
+      "rollbackPlan": "Redeploy prior approved image digest from release manifest.",
+      "limitation": "PILOT production only — NOT full-production certified. No inactive healthy revision retained yet.",
+      "status": "PROVISIONAL_PENDING_REATTESTATION",
+      "reattestationRequired": true
+    },
+    "partners": {
+      "type": "pilot-production",
+      "owner": "platform-ops",
+      "expiry": "2026-09-30",
+      "scope": "Pilot production at partners.nzilaventures.com (external ingress, tier-1).",
+      "rollbackPlan": "Approved rollback target in release manifest.",
+      "limitation": "PILOT production only — NOT full-production certified. No inactive healthy revision retained yet.",
+      "status": "PROVISIONAL_PENDING_REATTESTATION",
+      "reattestationRequired": true
+    },
+    "console": {
+      "type": "internal-restricted-production",
+      "owner": "platform-ops",
+      "expiry": "2026-09-30",
+      "scope": "Restricted-ingress internal console at console.nzilaventures.com. Deployed via deploy-console.yml, NOT the tier-1 production promotion pipeline.",
+      "rollbackPlan": "Transactional redeploy to prior signed release.",
+      "limitation": "INTERNAL_ONLY — not production-promotable via resolve-deploy-apps.ts; not a public production surface.",
+      "status": "PROVISIONAL_PENDING_REATTESTATION",
+      "reattestationRequired": true
+    },
+    "control-plane": {
+      "type": "internal-restricted-production",
+      "owner": "platform-ops",
+      "expiry": "2026-09-30",
+      "scope": "Restricted-ingress control plane at control.nzilaventures.com. Deployed via its own workflow, NOT the tier-1 production promotion pipeline.",
+      "rollbackPlan": "Pinned previous image + control-plane smoke validation.",
+      "limitation": "INTERNAL_ONLY — not production-promotable via resolve-deploy-apps.ts; not a public production surface.",
+      "status": "PROVISIONAL_PENDING_REATTESTATION",
+      "reattestationRequired": true
+    }
+  }
+}

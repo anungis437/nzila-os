@@ -5,15 +5,19 @@
     "runtimeManifest": "nzila-truth-manifest.json"
   },
   "topology": {
-    "strategy": "shared-resource-group-environment",
+    "strategy": "dedicated-production-environment",
     "staging": {
       "resourceGroup": "nzila-canada-staging-rg",
       "containerAppEnvironment": "nzila-canada-staging-env"
     },
     "production": {
-      "resourceGroup": "nzila-canada-staging-rg",
-      "containerAppEnvironment": "nzila-canada-staging-env",
-      "sharedWithStaging": true
+      "resourceGroup": "nzila-canada-prod-rg",
+      "containerAppEnvironment": "nzila-canada-prod-env",
+      "sharedWithStaging": false,
+      "database": "nzila-os-union-eyes-prod-db",
+      "logAnalytics": "nzila-canada-prod-law",
+      "verifiedBy": "az CLI 2026-07-03 (Phase 5)",
+      "note": "CORRECTED from stale sharedWithStaging=true. Live Azure shows union-eyes production isolated in nzila-canada-prod-rg / nzila-canada-prod-env with a dedicated prod DB and Log Analytics. web/partners currently run ONLY in nzila-canada-staging-env (no isolated prod runtime yet)."
     }
   },
   "verificationPolicy": {
@@ -32,8 +36,10 @@
       "rollbackException": true,
       "rollbackPolicy": {
         "owner": "platform-ops",
-        "expiry": "2026-06-30",
-        "mitigation": "Single-revision production profile currently active; fallback is image-tag rollback via deploy-production workflow and transactional deploy script."
+        "expiry": "2026-09-30",
+        "mitigation": "Single-revision production profile currently active; fallback is image-tag rollback via deploy-production workflow and transactional deploy script.",
+        "status": "PROVISIONAL_PENDING_REATTESTATION",
+        "reference": "governance/release/production-exceptions.json"
       },
       "routing": {
         "staging": "https://staging.unioneyes.app",
@@ -127,8 +133,10 @@
       "rollbackException": true,
       "rollbackPolicy": {
         "owner": "platform-ops",
-        "expiry": "2026-06-30",
-        "mitigation": "No inactive healthy revision retained yet; rollback executed by redeploying prior approved image digest from release manifest."
+        "expiry": "2026-09-30",
+        "mitigation": "No inactive healthy revision retained yet; rollback executed by redeploying prior approved image digest from release manifest.",
+        "status": "PROVISIONAL_PENDING_REATTESTATION",
+        "reference": "governance/release/production-exceptions.json"
       },
       "routing": {
         "staging": "blocked",
@@ -151,8 +159,10 @@
       "rollbackException": true,
       "rollbackPolicy": {
         "owner": "platform-ops",
-        "expiry": "2026-06-30",
-        "mitigation": "No inactive healthy revision retained yet; rollback executed through approved rollback target in release manifest."
+        "expiry": "2026-09-30",
+        "mitigation": "No inactive healthy revision retained yet; rollback executed through approved rollback target in release manifest.",
+        "status": "PROVISIONAL_PENDING_REATTESTATION",
+        "reference": "governance/release/production-exceptions.json"
       },
       "routing": {
         "staging": "https://staging-partners.nzilaventures.com",
@@ -367,7 +377,7 @@
       "tier": "internal",
       "releaseStatus": "internal-only",
       "track": "internal",
-      "prodPromotionEligible": true,
+      "prodPromotionEligible": false,
       "owners": [
         "platform-admin",
         "platform-ops"
@@ -375,8 +385,10 @@
       "rollbackException": true,
       "rollbackPolicy": {
         "owner": "platform-ops",
-        "expiry": "2026-06-30",
-        "mitigation": "No inactive healthy revision retained yet; rollback performed via transactional redeploy to prior signed release."
+        "expiry": "2026-09-30",
+        "mitigation": "No inactive healthy revision retained yet; rollback performed via transactional redeploy to prior signed release.",
+        "status": "PROVISIONAL_PENDING_REATTESTATION",
+        "reference": "governance/release/production-exceptions.json"
       },
       "routing": {
         "staging": "https://staging-console.nzilaventures.com",
@@ -384,13 +396,14 @@
         "healthPath": "/",
         "ingress": "restricted",
         "tls": "managed"
-      }
+      },
+      "productionPromotion": "blocked-internal-only (Phase 4B)"
     },
     "control-plane": {
       "tier": "internal",
       "releaseStatus": "internal-only",
       "track": "internal",
-      "prodPromotionEligible": true,
+      "prodPromotionEligible": false,
       "containerAppName": "nzila-os-control-plane",
       "stagingDeployed": true,
       "stagingDnsStatus": "active",
@@ -403,8 +416,10 @@
       "rollbackException": true,
       "rollbackPolicy": {
         "owner": "platform-ops",
-        "expiry": "2026-06-30",
-        "mitigation": "No inactive healthy revision retained yet; rollback performed by pinned previous image + control-plane smoke validation."
+        "expiry": "2026-09-30",
+        "mitigation": "No inactive healthy revision retained yet; rollback performed by pinned previous image + control-plane smoke validation.",
+        "status": "PROVISIONAL_PENDING_REATTESTATION",
+        "reference": "governance/release/production-exceptions.json"
       },
       "routing": {
         "staging": "https://staging-control.nzilaventures.com",
@@ -414,7 +429,8 @@
         "healthPath": "/",
         "ingress": "restricted",
         "tls": "managed"
-      }
+      },
+      "productionPromotion": "blocked-internal-only (Phase 4B)"
     },
     "orchestrator-api": {
       "tier": "internal",
@@ -581,7 +597,7 @@
         "state": "synthetic-demo",
         "owner": "veridian",
         "reviewBy": "2026-09-30",
-        "mitigation": "Clinical workflow pilot surface. Synthetic-demo only \u2014 no live PHI is ingested or stored. Staging container app is not currently deployed in ACA; keep DNS unresolved advisory until deployment and domain binding are complete."
+        "mitigation": "Clinical workflow pilot surface. Synthetic-demo only — no live PHI is ingested or stored. Staging container app is not currently deployed in ACA; keep DNS unresolved advisory until deployment and domain binding are complete."
       },
       "routing": {
         "staging": "https://staging-veridian-care.nzilaventures.com",
@@ -627,7 +643,9 @@
       "track": "internal",
       "prodPromotionEligible": false,
       "outOfScopeForRuntimeChecks": true,
-      "owners": ["platform-core"],
+      "owners": [
+        "platform-core"
+      ],
       "rationale": "Catalog tier-3 / gtm hold / lifecycle incubating. No staging or production container app provisioned. Excluded from runtime gate until promoted."
     },
     "trustcore-trustops": {
@@ -636,7 +654,9 @@
       "track": "internal",
       "prodPromotionEligible": false,
       "outOfScopeForRuntimeChecks": true,
-      "owners": ["platform-core"],
+      "owners": [
+        "platform-core"
+      ],
       "rationale": "Catalog tier-3 / gtm hold / lifecycle incubating. Companion ops surface for trustcore; not provisioned."
     },
     "maestria": {
@@ -645,7 +665,9 @@
       "track": "internal",
       "prodPromotionEligible": false,
       "outOfScopeForRuntimeChecks": true,
-      "owners": ["platform-core"],
+      "owners": [
+        "platform-core"
+      ],
       "rationale": "Catalog tier-4 / gtm internal-only / lifecycle incubating. Local development only."
     },
     "nzila-hq": {
@@ -654,7 +676,9 @@
       "track": "internal",
       "prodPromotionEligible": false,
       "outOfScopeForRuntimeChecks": true,
-      "owners": ["platform-core"],
+      "owners": [
+        "platform-core"
+      ],
       "rationale": "Catalog tier-3 / gtm internal-only / lifecycle incubating. Internal HQ surface; not provisioned in ACA."
     },
     "weekone": {
@@ -663,7 +687,9 @@
       "track": "internal",
       "prodPromotionEligible": false,
       "outOfScopeForRuntimeChecks": true,
-      "owners": ["platform-core"],
+      "owners": [
+        "platform-core"
+      ],
       "rationale": "Catalog tier-4 / gtm internal-only / lifecycle frozen. Frozen onboarding artifact; no deployment expected."
     },
     "test-scaffold-gp": {
@@ -672,7 +698,9 @@
       "track": "internal",
       "prodPromotionEligible": false,
       "outOfScopeForRuntimeChecks": true,
-      "owners": ["platform-core"],
+      "owners": [
+        "platform-core"
+      ],
       "rationale": "Catalog tier-5 / gtm sunset / lifecycle frozen. Scaffold template only; never deployed."
     }
   },
@@ -690,4 +718,3 @@
     ]
   }
 }
-

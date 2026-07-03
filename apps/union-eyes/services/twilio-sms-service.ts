@@ -153,10 +153,12 @@ async function resolveOrganizationIdFromPhoneNumber(phoneNumber: string): Promis
       .where(sql`(${organizations.settings} ->> 'twilioPhoneNumber') = ${phoneNumber}`)
       .limit(1);
 
-    return org?.id || process.env.DEFAULT_ORGANIZATION_ID || null;
+    // BR-6: no default-org fallback. An unmatched inbound phone number must
+    // fail closed (null) rather than be attributed to the Default Organization.
+    return org?.id ?? null;
   } catch (error) {
     logger.error('Failed to resolve organization from phone number', { error, phoneNumber });
-    return process.env.DEFAULT_ORGANIZATION_ID || null;
+    return null;
   }
 }
 
