@@ -1,7 +1,7 @@
 # Monetization Architecture — Nzila OS
 
 > Canonical reference for the Monetization Infrastructure Layer (MIL).
-> Last updated: 2026-03-25
+> Last updated: 2026-07-03 (review only — no substantive change since 2026-03-25)
 
 ---
 

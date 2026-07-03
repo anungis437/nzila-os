@@ -622,4 +622,4 @@ INSERT INTO companion_prompts VALUES (
 ---
 
 **© 2026 Nzila Ventures. Confidential & Proprietary.**  
-*Last Updated: February 17, 2026*
+*Last Updated: 2026-07-03 (review only — no substantive change since February 17, 2026)*
