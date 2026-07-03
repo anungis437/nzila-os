@@ -793,7 +793,7 @@ async function sendNotifications(
   template: NotificationTemplate,
   config: NotificationConfig,
   _type: NotificationType,
-  _data: RemittanceNotificationData
+  data: RemittanceNotificationData
 ): Promise<NotificationResult[]> {
   const results: NotificationResult[] = [];
 
@@ -816,7 +816,7 @@ async function sendNotifications(
 
     // Send SMS
     if ((config.channel === 'sms' || config.channel === 'both') && recipient.phone && template.smsBody) {
-      const smsResult = await sendSMS(recipient.phone, template.smsBody);
+      const smsResult = await sendSMS(recipient.phone, template.smsBody, data.organizationId);
       results.push({
         success: smsResult.success,
         channel: 'sms',
@@ -866,7 +866,8 @@ return {
 
 async function sendSMS(
   to: string,
-  message: string
+  message: string,
+  organizationId: string,
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Import and use the Twilio SMS service
@@ -875,7 +876,7 @@ async function sendSMS(
     const result = await sendSms({
       phoneNumber: to,
       message,
-      organizationId: process.env.DEFAULT_ORGANIZATION_ID,
+      organizationId,
     });
 
     if (result.success) {

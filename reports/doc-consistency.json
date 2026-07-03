@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-07-02T21:29:42.479Z",
-  "filesScanned": 2021,
-  "totalFindings": 2638,
+  "generatedAt": "2026-07-03T15:28:05.789Z",
+  "filesScanned": 2075,
+  "totalFindings": 2705,
   "findingsByRule": {
-    "stale-reference": 1041,
+    "stale-reference": 1039,
     "stale-package-ref": 68,
-    "naming-inconsistency": 1408,
+    "naming-inconsistency": 1477,
     "stale-date": 8,
     "missing-required-doc": 3,
     "missing-package-readme": 110
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1222,
-    "info": 1416
+    "warning": 1220,
+    "info": 1485
   },
   "findings": [
     {
@@ -2598,13 +2598,6 @@
       "file": "docs/categories/platform-and-operations/README.md",
       "line": 17,
       "message": "Possible broken link: [Release Docs](../../releases/)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/platform-and-operations/README.md",
-      "line": 19,
-      "message": "Possible broken link: [Runtime Runbooks](../../runbooks/)"
     },
     {
       "rule": "stale-reference",
@@ -5377,13 +5370,6 @@
       "file": "docs/categories/stakeholders/README.md",
       "line": 12,
       "message": "Possible broken link: [Operator Guides](../../operators/)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/categories/stakeholders/README.md",
-      "line": 14,
-      "message": "Possible broken link: [Runtime Runbooks](../../runbooks/)"
     },
     {
       "rule": "stale-reference",
@@ -15874,6 +15860,104 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/nzila-finalization/canonical-operating-system-navigation.md",
+      "line": 9,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-finalization/canonical-operating-system-navigation.md",
+      "line": 10,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-finalization/canonical-operating-system-navigation.md",
+      "line": 11,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-finalization/cross-app-e2e-validation-matrix.md",
+      "line": 11,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-finalization/cross-app-e2e-validation-matrix.md",
+      "line": 12,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-finalization/cross-app-e2e-validation-matrix.md",
+      "line": 13,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-finalization/final-operational-legitimacy-audit.md",
+      "line": 16,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-finalization/live-full-chain-operational-rehearsal.md",
+      "line": 15,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-finalization/live-full-chain-operational-rehearsal.md",
+      "line": 16,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-infrastructure-convergence/final-live-infrastructure-certification.md",
+      "line": 16,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-infrastructure-convergence/final-live-infrastructure-certification.md",
+      "line": 20,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-infrastructure-convergence/full-database-migration-legitimacy.md",
+      "line": 6,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-infrastructure-convergence/live-infrastructure-discovery.md",
+      "line": 6,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/nzila-live-audit/full-environment-inventory-audit.md",
+      "line": 6,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/nzila-residual-closure/README.md",
       "line": 1,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
@@ -16847,6 +16931,391 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 36,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 37,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 41,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 50,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 53,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 58,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 59,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 60,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/azure-production-baseline.md",
+      "line": 62,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/backup-restore-certification.md",
+      "line": 13,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/backup-restore-certification.md",
+      "line": 26,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/backup-restore-certification.md",
+      "line": 28,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/br6-org-context-closure.md",
+      "line": 48,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/br6-org-context-closure.md",
+      "line": 49,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/br6-org-context-inventory.md",
+      "line": 18,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/br6-org-context-inventory.md",
+      "line": 19,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/br6-org-context-inventory.md",
+      "line": 20,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/deployment-authority-inventory.md",
+      "line": 57,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/dns-tls-ingress-certification.md",
+      "line": 13,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/dns-tls-ingress-certification.md",
+      "line": 23,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/dns-tls-ingress-certification.md",
+      "line": 24,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/oidc-migration-certification.md",
+      "line": 18,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/oidc-migration-certification.md",
+      "line": 21,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/oidc-migration-certification.md",
+      "line": 22,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/oidc-migration-certification.md",
+      "line": 23,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/oidc-migration-certification.md",
+      "line": 47,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/oidc-migration-certification.md",
+      "line": 55,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/platform-production-runtime-inventory.md",
+      "line": 12,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/platform-production-runtime-inventory.md",
+      "line": 13,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/platform-production-runtime-inventory.md",
+      "line": 14,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/platform-production-runtime-inventory.md",
+      "line": 27,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/platform-production-runtime-inventory.md",
+      "line": 29,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/platform-production-runtime-inventory.md",
+      "line": 30,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/platform-production-runtime-inventory.md",
+      "line": 41,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-app-graduation-certification.md",
+      "line": 12,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-app-graduation-certification.md",
+      "line": 13,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-app-graduation-certification.md",
+      "line": 19,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-app-graduation-certification.md",
+      "line": 27,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-certification.md",
+      "line": 3,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-config-certification.md",
+      "line": 20,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-ready-release-summary.md",
+      "line": 3,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-ready-release-summary.md",
+      "line": 28,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-ready-release-summary.md",
+      "line": 29,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-ready-release-summary.md",
+      "line": 30,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-staging-isolation-certification.md",
+      "line": 22,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/production-staging-isolation-certification.md",
+      "line": 23,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/runtime-artifact-identity-evidence.md",
+      "line": 17,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/runtime-artifact-identity-evidence.md",
+      "line": 20,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/runtime-artifact-identity-evidence.md",
+      "line": 22,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/runtime-artifact-identity-evidence.md",
+      "line": 26,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/readiness/runtime-artifact-identity-evidence.md",
+      "line": 27,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/runbooks/production-incident-response.md",
+      "line": 21,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/runbooks/production-rollback.md",
+      "line": 28,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/runbooks/production-rollback.md",
+      "line": 32,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/runbooks/production-rollback.md",
+      "line": 37,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/union-eyes/any-elimination.md",
       "line": 158,
       "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
@@ -17640,56 +18109,56 @@
       "severity": "info",
       "file": "docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md",
       "line": 4,
-      "message": "Document date \"2026-03-25\" is 99 days old — may be stale"
+      "message": "Document date \"2026-03-25\" is 100 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"February 17, 2026\" is 135 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 136 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"February 17, 2026\" is 135 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 136 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"February 17, 2026\" is 135 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 136 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"February 17, 2026\" is 135 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 136 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 135 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 136 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"February 17, 2026\" is 135 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 136 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"February 17, 2026\" is 135 days old — may be stale"
+      "message": "Document date \"February 17, 2026\" is 136 days old — may be stale"
     },
     {
       "rule": "missing-required-doc",

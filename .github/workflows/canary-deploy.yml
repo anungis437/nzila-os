@@ -19,7 +19,6 @@ on:
         type: choice
         options:
           - nzila-os-web
-          - nzila-os-console
           - nzila-os-partners
           - nzila-os-union-eyes
       image_tag:

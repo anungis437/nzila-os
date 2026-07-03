@@ -230,8 +230,18 @@ export async function processPaymentCollection(params: {
           const paidAt = payment.paidDate ?? payment.createdAt;
           const paymentDate = new Date(String(paidAt));
 
+          // BR-6: never issue a payment receipt under a default-org fallback.
+          // A member with no verified organization context fails closed (the
+          // surrounding catch logs and the loop continues without a receipt).
+          const receiptOrgId = member?.organizationId;
+          if (!receiptOrgId) {
+            throw new Error(
+              `Member ${memberId} has no verified organization context; refusing default-org payment receipt (BR-6).`,
+            );
+          }
+
           await sendPaymentReceipt({
-            organizationId: member?.organizationId || process.env.DEFAULT_ORGANIZATION_ID || 'default-org',
+            organizationId: receiptOrgId,
             memberId,
             memberName: `${payment.memberFirstName || ''} ${payment.memberLastName || ''}`.trim() || 'Member',
             memberEmail: payment.memberEmail || '',
