@@ -1,27 +1,25 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-03T15:28:05.789Z
+> Generated: 2026-07-03T16:01:41.104Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2075 |
-| Total Findings | 2705 |
+| Files Scanned | 2078 |
+| Total Findings | 2698 |
 | Errors | 0 |
-| Warnings | 1220 |
-| Info | 1485 |
+| Warnings | 1217 |
+| Info | 1481 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1477 |
+| naming-inconsistency | 1481 |
 | stale-reference | 1039 |
 | missing-package-readme | 110 |
 | stale-package-ref | 68 |
-| stale-date | 8 |
-| missing-required-doc | 3 |
 
 ## stale-reference (1039)
 
@@ -1136,7 +1134,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1477)
+## naming-inconsistency (1481)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2211,6 +2209,8 @@
 - ℹ️ `docs/courtlens/target-architecture.md:28` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/courtlens/target-architecture.md:92` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/courtlens/target-architecture.md:148` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/disaster-recovery.md:3` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/disaster-recovery.md:21` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/ANTI_SURVEILLANCE_DOCTRINE.md:12` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/DOCTRINE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/DOCTRINE.md:36` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2294,6 +2294,7 @@
 - ℹ️ `docs/healthcare/discovery-surveys.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:18` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/healthcare/discovery-surveys.md:73` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/incident-response.md:4` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:9` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:10` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:11` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2446,6 +2447,7 @@
 - ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/portfolio-matrix.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/procurement-pack.md:4` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/proof-center/portfolio-proof-index.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:36` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:37` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2615,23 +2617,6 @@
 - ℹ️ `governance/security/THREAT_MODEL.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/security/THREAT_MODEL.md:15` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/security/THREAT_MODEL.md:144` — "orgId" should be "org_id" (tenant identifier)
-
-## stale-date (8)
-
-- ℹ️ `docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md:4` — Document date "2026-03-25" is 100 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "February 17, 2026" is 136 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "February 17, 2026" is 136 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "February 17, 2026" is 136 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "February 17, 2026" is 136 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "February 17, 2026" is 136 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "February 17, 2026" is 136 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "February 17, 2026" is 136 days old — may be stale
-
-## missing-required-doc (3)
-
-- 🟡 `docs/procurement-pack.md` — Required document missing: Procurement pack documentation
-- 🟡 `docs/disaster-recovery.md` — Required document missing: Disaster recovery plan
-- 🟡 `docs/incident-response.md` — Required document missing: Incident response plan
 
 ## missing-package-readme (110)
 

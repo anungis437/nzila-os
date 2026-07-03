@@ -1,7 +1,7 @@
 # 📊 NZILA VENTURES — Business Intelligence Hub
 
 **Strategic Command Center for 15-Platform Multi-Vertical Portfolio**  
-Last Updated: February 17, 2026
+Last Updated: 2026-07-03 (review only — no substantive change since February 17, 2026)
 
 ---
 
