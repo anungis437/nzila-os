@@ -13,6 +13,7 @@ const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3
 
 const navigation = [
   { key: 'continuity', href: '/organizational-continuity' },
+  { key: 'publicService', href: '/public-service' },
   { key: 'unionEyes', href: '/union-eyes' },
   { key: 'platform', href: '/platform' },
   { key: 'trust', href: '/trust' },

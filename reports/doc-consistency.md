@@ -1,16 +1,16 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-03T16:01:41.104Z
+> Generated: 2026-07-10T12:19:36.485Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2078 |
-| Total Findings | 2698 |
+| Files Scanned | 2087 |
+| Total Findings | 2699 |
 | Errors | 0 |
 | Warnings | 1217 |
-| Info | 1481 |
+| Info | 1482 |
 
 ## Findings by Rule
 
@@ -20,6 +20,7 @@
 | stale-reference | 1039 |
 | missing-package-readme | 110 |
 | stale-package-ref | 68 |
+| stale-date | 1 |
 
 ## stale-reference (1039)
 
@@ -2617,6 +2618,10 @@
 - ℹ️ `governance/security/THREAT_MODEL.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/security/THREAT_MODEL.md:15` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/security/THREAT_MODEL.md:144` — "orgId" should be "org_id" (tenant identifier)
+
+## stale-date (1)
+
+- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 93 days old — may be stale
 
 ## missing-package-readme (110)
 
