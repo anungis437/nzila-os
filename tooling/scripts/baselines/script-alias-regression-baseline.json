@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-27T17:02:05.144Z",
+  "generatedAt": "2026-07-10T13:13:34.286Z",
   "violations": [
     {
       "name": "ai:analyze",
@@ -260,6 +260,18 @@
     },
     {
       "name": "ga-check",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "gate-authority:report",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "gate-authority:selftest",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "gate-authority:validate",
       "pattern": "tsx-root"
     },
     {
@@ -655,6 +667,10 @@
       "pattern": "tsx-root"
     },
     {
+      "name": "validate:br6-org-context",
+      "pattern": "node-root"
+    },
+    {
       "name": "validate:canonical-truth",
       "pattern": "tsx-root"
     },
@@ -749,6 +765,14 @@
     {
       "name": "validate:product-catalog",
       "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:production-deploy-authority",
+      "pattern": "node-root"
+    },
+    {
+      "name": "validate:production-surface",
+      "pattern": "node-root"
     },
     {
       "name": "validate:readmes",
