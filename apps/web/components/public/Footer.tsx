@@ -36,6 +36,7 @@ const footerCopy: Record<Locale, {
         category: 'Platform',
         links: [
           { name: 'Organizational Continuity', href: '/organizational-continuity' },
+          { name: 'Public Service (CIVIC)', href: '/public-service' },
           { name: 'Union Eyes', href: '/union-eyes' },
           { name: 'Platform', href: '/platform' },
           { name: 'Trust Center', href: '/trust' },
@@ -85,6 +86,7 @@ const footerCopy: Record<Locale, {
         category: 'Plateforme',
         links: [
           { name: 'Continuité organisationnelle', href: '/organizational-continuity' },
+          { name: 'Service public (CIVIC)', href: '/public-service' },
           { name: 'Union Eyes', href: '/union-eyes' },
           { name: 'Plateforme', href: '/platform' },
           { name: 'Centre de confiance', href: '/trust' },

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-02T00:00:00.000Z",
+  "generatedAt": "2026-07-10T00:00:00.000Z",
   "appCount": 26,
   "packageCount": 221,
   "workspacePackageCount": 253,
@@ -747,7 +747,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 91
+      "codeFileCount": 92
     },
     {
       "name": "weekone",

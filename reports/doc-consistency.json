@@ -1,17 +1,18 @@
 {
-  "generatedAt": "2026-07-03T16:01:41.104Z",
-  "filesScanned": 2078,
-  "totalFindings": 2698,
+  "generatedAt": "2026-07-10T12:19:36.485Z",
+  "filesScanned": 2087,
+  "totalFindings": 2699,
   "findingsByRule": {
     "stale-reference": 1039,
     "stale-package-ref": 68,
     "naming-inconsistency": 1481,
+    "stale-date": 1,
     "missing-package-readme": 110
   },
   "findingsBySeverity": {
     "error": 0,
     "warning": 1217,
-    "info": 1481
+    "info": 1482
   },
   "findings": [
     {
@@ -18129,6 +18130,13 @@
       "file": "governance/security/THREAT_MODEL.md",
       "line": 144,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md",
+      "line": 343,
+      "message": "Document date \"2026-04-08\" is 93 days old — may be stale"
     },
     {
       "rule": "missing-package-readme",
