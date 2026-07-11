@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
+import ScrollReveal from '@/components/public/ScrollReveal';
 
 export const metadata: Metadata = {
   title: 'CIVIC by Nzila',
@@ -60,46 +62,72 @@ const principles = [
 export default function PublicServicePage() {
   return (
     <main className="bg-white min-h-screen">
-      <section className="bg-navy text-white py-24">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-electric text-sm font-semibold tracking-widest uppercase mb-4">
-            CIVIC by Nzila
-          </p>
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">CIVIC by Nzila</h1>
-          <p className="text-xl md:text-2xl text-gray-200 mb-8">
-            Public-service continuity and modernization intelligence
-          </p>
-          <div className="max-w-4xl space-y-4 text-gray-200 leading-relaxed">
-            <p>
-              Public institutions are being asked to modernize services, adopt AI responsibly, preserve trust, and
-              manage workforce transition while institutional memory, accountability structures, and operating capacity
-              are changing.
+      {/* ═══════════════════════ HERO ═══════════════════════ */}
+      <section className="relative min-h-[60vh] flex items-center overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920"
+          alt="Public-service team collaborating around a table — CIVIC by Nzila"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/85 via-navy/75 to-navy/90" />
+        <div className="absolute inset-0 bg-mesh opacity-40" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
+          <ScrollReveal>
+            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/20 text-blue-300 mb-6">
+              CIVIC by Nzila
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+              <span className="gradient-text">CIVIC</span> by Nzila
+            </h1>
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-6">
+              Public-service continuity and modernization intelligence
             </p>
-            <p>
-              CIVIC by Nzila helps public-service leaders see where service continuity, implementation commitments,
-              evidence, institutional knowledge, and modernization readiness may become fragile before change becomes
-              irreversible.
+          </ScrollReveal>
+          <ScrollReveal delay={0.3}>
+            <div className="max-w-3xl mx-auto space-y-4 text-gray-300 leading-relaxed mb-8">
+              <p>
+                Public institutions are being asked to modernize services, adopt AI responsibly, preserve trust, and
+                manage workforce transition while institutional memory, accountability structures, and operating capacity
+                are changing.
+              </p>
+              <p>
+                CIVIC by Nzila helps public-service leaders see where service continuity, implementation commitments,
+                evidence, institutional knowledge, and modernization readiness may become fragile before change becomes
+                irreversible.
+              </p>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.4}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition text-lg"
+              >
+                Request a briefing
+              </Link>
+              <a
+                href="#public-service-brief"
+                className="inline-flex items-center justify-center px-8 py-4 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition text-lg"
+              >
+                Read the public-service brief
+              </a>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.5}>
+            <p className="mt-8 text-sm text-gray-300 max-w-3xl mx-auto">
+              CIVIC is currently being introduced as a public-service continuity initiative and briefing series. Nzila is
+              seeking conversations with public-sector leaders to validate where this framing is useful before packaging
+              formal offerings.
             </p>
-          </div>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center px-6 py-3 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition"
-            >
-              Request a briefing
-            </Link>
-            <a
-              href="#public-service-brief"
-              className="inline-flex items-center justify-center px-6 py-3 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition"
-            >
-              Read the public-service brief
-            </a>
-          </div>
-          <p className="mt-8 text-sm text-gray-300 max-w-4xl">
-            CIVIC is currently being introduced as a public-service continuity initiative and briefing series. Nzila is
-            seeking conversations with public-sector leaders to validate where this framing is useful before packaging
-            formal offerings.
-          </p>
+          </ScrollReveal>
         </div>
       </section>
 

@@ -9,10 +9,8 @@ import TrackedLink from './TrackedLink';
 import { locales, type Locale } from '@/lib/locales';
 
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
-const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3004';
 
 const navigation = [
-  { key: 'continuity', href: '/organizational-continuity' },
   { key: 'publicService', href: '/public-service' },
   { key: 'unionEyes', href: '/union-eyes' },
   { key: 'platform', href: '/platform' },
@@ -23,7 +21,6 @@ const navigation = [
 
 const appLinks = [
   { key: 'console', href: CONSOLE_URL },
-  { key: 'partnerPortal', href: PARTNERS_URL },
 ] as const;
 
 const localeLabels: Record<Locale, string> = {
