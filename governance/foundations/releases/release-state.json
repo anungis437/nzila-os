@@ -1,7 +1,7 @@
 {
-  "version": "0.1.0",
-  "commit": "seed",
-  "lastDeploymentAt": "2026-01-01T00:00:00.000Z",
+  "version": "1.0.3",
+  "commit": "ef95ef21dcb7c02095de453bd4eb9715b480e4d3",
+  "lastDeploymentAt": "2026-07-11T10:22:32.327Z",
   "rollbackAvailable": true,
   "semverCompliant": true,
   "stagingGate": "pending",
