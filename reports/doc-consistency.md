@@ -1,6 +1,6 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-10T12:19:36.485Z
+> Generated: 2026-07-11T09:59:12.177Z
 
 ## Summary
 
@@ -2621,7 +2621,7 @@
 
 ## stale-date (1)
 
-- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 93 days old — may be stale
+- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 94 days old — may be stale
 
 ## missing-package-readme (110)
 

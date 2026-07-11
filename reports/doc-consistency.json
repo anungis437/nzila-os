@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-10T12:19:36.485Z",
+  "generatedAt": "2026-07-11T09:59:12.177Z",
   "filesScanned": 2087,
   "totalFindings": 2699,
   "findingsByRule": {
@@ -18136,7 +18136,7 @@
       "severity": "info",
       "file": "docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md",
       "line": 343,
-      "message": "Document date \"2026-04-08\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-08\" is 94 days old — may be stale"
     },
     {
       "rule": "missing-package-readme",
