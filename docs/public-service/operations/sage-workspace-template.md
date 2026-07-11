@@ -17,6 +17,9 @@
 > **Warning:** This is a manual internal workspace template. It does not mean SAGE is launched,
 > available, or productized. It is a document-based way to assemble a SAGE-style workspace by hand.
 
+> Use the standard internal-use disclaimer from [kit-conventions.md](kit-conventions.md), Section 2, when
+> this template is filled for a sample, proof run, dry run, or completed internal workspace.
+
 ## 1. Workspace metadata
 
 *Institution (or fictional label), question reference, operator, dates.*
@@ -39,11 +42,14 @@
 
 ## 6. Evidence source register
 
-*Reference to the completed evidence source register.*
+*Reference to the completed evidence source register. **Mirror, do not restate:** point to the register
+as the source of truth rather than re-typing sources here. See [kit-conventions.md](kit-conventions.md),
+Section 7.*
 
 ## 7. CLEAR brief link
 
-*Reference to the completed CLEAR brief.*
+*Reference to the completed CLEAR brief. Keep confidence, risk tier, and open questions in sync with the
+brief; do not diverge.*
 
 ## 8. Decision-context log
 
@@ -76,3 +82,13 @@
 ## 15. Closure / archive notes
 
 *Retention/archive per the institution's own records rules; SAGE does not determine record status.*
+
+## Manual-sync checklist
+
+Because this workspace is assembled by hand, confirm alignment before closing:
+
+- [ ] Sources here mirror the evidence source register (no new or diverging sources).
+- [ ] Confidence levels match the CLEAR brief.
+- [ ] Risk tier matches the CLEAR brief.
+- [ ] Open questions match the CLEAR brief and evidence register.
+- [ ] Disclaimer block present (see [kit-conventions.md](kit-conventions.md), Section 2).

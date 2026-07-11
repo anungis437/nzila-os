@@ -15,6 +15,9 @@
 > institution type first, using the adaptation framework
 > ([public-institution-adaptation-framework.md](../public-institution-adaptation-framework.md)).
 
+> Use the standard internal-use disclaimer from [kit-conventions.md](kit-conventions.md), Section 2, when
+> this template is filled for a sample, proof run, dry run, or completed internal workspace.
+
 ## Intake fields
 
 | Field | Value |
@@ -67,4 +70,5 @@ Select one from the adaptation framework's matrix:
 
 Record the institution-specific red lines from the adaptation framework's boundary table **before** any
 evidence review. First contact is feedback-oriented only — no product, procurement, pricing, pilot,
-demo, or SOW language, and SAGE is not mentioned first.
+demo, or SOW language, and SAGE is not mentioned first. Apply the shared standards in
+[kit-conventions.md](kit-conventions.md) when completing downstream templates.
