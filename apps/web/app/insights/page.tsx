@@ -116,12 +116,20 @@ export default function InsightsPage() {
             that institutional memory, ownership, evidence quality, and implementation traceability
             weaken while services are being redesigned.
           </p>
-          <Link
-            href="/public-service"
-            className="inline-flex items-center justify-center px-6 py-3 bg-electric text-white font-semibold rounded-xl hover:bg-blue-700 transition"
-          >
-            Request a briefing
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              href="/insights/public-service-continuity-problem"
+              className="inline-flex items-center justify-center px-6 py-3 bg-electric text-white font-semibold rounded-xl hover:bg-blue-700 transition"
+            >
+              Read the article
+            </Link>
+            <Link
+              href="/public-service"
+              className="inline-flex items-center justify-center px-6 py-3 border border-navy text-navy font-semibold rounded-xl hover:bg-navy hover:text-white transition"
+            >
+              Request a briefing
+            </Link>
+          </div>
         </div>
       </section>
 
