@@ -14,8 +14,26 @@
 | Human reviewer | |
 | Review date | |
 
+> Internal operating draft. Not an assurance opinion, compliance certification, or public copy.
+
+> Use the standard internal-use disclaimer from [kit-conventions.md](kit-conventions.md), Section 2, when
+> this template is filled for a sample, proof run, dry run, or completed internal workspace.
+
 > Complete this checklist before producing any internal or external assurance-ready package. Every item
 > must be confirmed before a package is shared.
+
+## Status definitions
+
+Mark every item with one of these standard statuses (see
+[kit-conventions.md](kit-conventions.md), Section 3):
+
+| Status | Definition |
+| --- | --- |
+| **PASS** | Confirmed by a human reviewer with evidence on hand. No open concern. |
+| **NEEDS REVIEW** | Incomplete, uncertain, or awaiting accountable human confirmation. Not cleared until resolved. |
+| **N/A** | Does not apply to this workspace; the reason is recorded. |
+
+The package is **not cleared** while any required item is **NEEDS REVIEW**.
 
 ## Checklist
 

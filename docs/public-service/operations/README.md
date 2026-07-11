@@ -35,8 +35,12 @@ method and assembling SAGE-style workspaces manually, so we can learn before any
 8. Record whether anything should be integrated into public copy, FAQ, CLEAR, SAGE, or the adaptation
    framework (via the validation feedback layer).
 
+When completing any template, apply the shared standards in `kit-conventions.md` (disclaimer block,
+status definitions, confidence levels, authorized-only marker, risk-tier phrasing).
+
 ## 5. Template map
 
+- `kit-conventions.md` — shared status, confidence, authorized-only, risk-tier, disclaimer, and manual-sync conventions
 - `institution-intake-worksheet.md` — pre-conversation / pre-analysis intake
 - `evidence-source-register-template.md` — evidence provenance and source control
 - `clear-brief-template.md` — CLEAR method output
@@ -58,6 +62,7 @@ A CLEAR/SAGE internal workspace is not complete unless:
 - human-review path is recorded
 - prohibited conclusions are avoided
 - SAGE is not described as launched, available, or productized
+- required internal-use disclaimer is present where applicable
 
 ## 7. Versioning and ownership
 
