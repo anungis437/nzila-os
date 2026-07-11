@@ -29,6 +29,7 @@ theory. Proof runs are internal operations material only.
 | --- | --- | --- | --- | --- |
 | 001 | Example Crown Corporation | Crown corporation | mandate traceability / institutional memory / modernization reviewability | Complete — retrospective complete |
 | 002 | Example Federal Regulator | Regulator | regulatory independence / enforcement-boundary / compliance-determination risk | Complete — retrospective complete |
+| 003 | Example Public Accountability Office | Tribunal / ombuds office | adjudication-adjacent independence / complaint-handling / protected-disclosure / findings-and-recommendations boundary risk | Complete — retrospective pending |
 
 ## 4. Index maintenance
 
