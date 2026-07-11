@@ -105,3 +105,63 @@ Level 4 (high). The tier is never set automatically and never implies a finding 
 
 These conventions are calibration output from the Proof Run 0.1 retrospective. They do not change any
 boundary, do not create software, and do not change SAGE's future-facing status.
+
+## 8. Regulator-boundary convention
+
+Use this block when a proof run, sample, or internal workspace involves a regulator or regulatory-adjacent
+institution. It is calibration output from the Proof Run 0.2 retrospective (Section 12).
+
+### Regulator boundary block
+
+CLEAR/SAGE may organize evidence about regulatory-policy continuity, public-guidance traceability,
+accessibility implementation evidence, modernization reviewability, and institutional memory.
+
+CLEAR/SAGE must not influence, assess, score, rank, automate, or support:
+
+- investigations
+- enforcement priorities
+- inspections
+- licensing decisions
+- compliance determinations
+- penalties or sanctions
+- adjudicative or quasi-adjudicative processes
+- complaint handling where tied to enforcement
+- regulated-entity outcomes
+- regulated-entity records
+- investigation files
+- enforcement files
+- inspection files
+- licensing case files
+- adjudicative records
+- privileged legal advice
+- personal information unless explicitly authorized, minimized, and necessary
+
+### Required regulator phrasing
+
+Use this phrasing or a materially equivalent version:
+
+> CLEAR/SAGE can organize evidence about policy continuity and implementation traceability, but cannot
+> influence or assess investigations, inspections, enforcement, licensing, compliance, penalties,
+> adjudication, complaint handling tied to enforcement, or regulated-entity outcomes.
+
+### Standard Level 3 regulator risk-tier phrasing
+
+Use this phrasing when the dry run involves regulator-boundary risk:
+
+> Level 3 — Elevated regulatory-boundary question, applied for this fictional dry run. In a real
+> engagement, risk tiering would require accountable human confirmation.
+
+### Expected-match rule for regulator-boundary scans
+
+Regulator-sensitive terms may appear in proof-run materials only when they are part of:
+
+- exclusions
+- red lines
+- prohibited-material lists
+- prohibited-conclusion lists
+- not-proven language
+- boundary checks
+- scan expected-match explanations
+
+They must not appear as evidence targets, evidence sources, decision objects, operating recommendations,
+product claims, or SAGE capabilities.
