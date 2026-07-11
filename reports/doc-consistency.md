@@ -1,22 +1,22 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-11T16:12:39.644Z
+> Generated: 2026-07-11T16:36:07.286Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2097 |
-| Total Findings | 2702 |
+| Files Scanned | 2098 |
+| Total Findings | 2704 |
 | Errors | 0 |
 | Warnings | 1217 |
-| Info | 1485 |
+| Info | 1487 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1484 |
+| naming-inconsistency | 1486 |
 | stale-reference | 1039 |
 | missing-package-readme | 110 |
 | stale-package-ref | 68 |
@@ -1135,7 +1135,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1484)
+## naming-inconsistency (1486)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2453,6 +2453,8 @@
 - ℹ️ `docs/public-service/clear-method-canonical.md:112` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/clear-method-canonical.md:379` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/clear-method-one-page-summary.md:41` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/public-service/sage-workspace-canonical.md:178` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/public-service/sage-workspace-canonical.md:213` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/readiness/azure-production-baseline.md:36` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:37` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:41` — "nzila-os" should be "NzilaOS" (platform name)

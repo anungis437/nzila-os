@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-11T16:12:39.644Z",
-  "filesScanned": 2097,
-  "totalFindings": 2702,
+  "generatedAt": "2026-07-11T16:36:07.286Z",
+  "filesScanned": 2098,
+  "totalFindings": 2704,
   "findingsByRule": {
     "stale-reference": 1039,
     "stale-package-ref": 68,
-    "naming-inconsistency": 1484,
+    "naming-inconsistency": 1486,
     "stale-date": 1,
     "missing-package-readme": 110
   },
   "findingsBySeverity": {
     "error": 0,
     "warning": 1217,
-    "info": 1485
+    "info": 1487
   },
   "findings": [
     {
@@ -16974,6 +16974,20 @@
       "severity": "info",
       "file": "docs/public-service/clear-method-one-page-summary.md",
       "line": 41,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/public-service/sage-workspace-canonical.md",
+      "line": 178,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/public-service/sage-workspace-canonical.md",
+      "line": 213,
       "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
     },
     {
