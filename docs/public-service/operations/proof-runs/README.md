@@ -25,7 +25,7 @@ theory. Proof runs are internal operations material only.
 | Run | Fictional institution | Institution type | Risk surface tested | Status |
 | --- | --- | --- | --- | --- |
 | 001 | Example Crown Corporation | Crown corporation | mandate traceability / institutional memory / modernization reviewability | Complete — retrospective complete |
-| 002 | Example Federal Regulator | Regulator | regulatory independence / enforcement-boundary / compliance-determination risk | Complete — retrospective pending |
+| 002 | Example Federal Regulator | Regulator | regulatory independence / enforcement-boundary / compliance-determination risk | Complete — retrospective complete |
 
 ## 4. What proof runs can demonstrate
 
