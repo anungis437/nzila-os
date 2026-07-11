@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-11T11:14:52.542Z",
-  "filesScanned": 2095,
-  "totalFindings": 2699,
+  "generatedAt": "2026-07-11T16:12:39.644Z",
+  "filesScanned": 2097,
+  "totalFindings": 2702,
   "findingsByRule": {
     "stale-reference": 1039,
     "stale-package-ref": 68,
-    "naming-inconsistency": 1481,
+    "naming-inconsistency": 1484,
     "stale-date": 1,
     "missing-package-readme": 110
   },
   "findingsBySeverity": {
     "error": 0,
     "warning": 1217,
-    "info": 1482
+    "info": 1485
   },
   "findings": [
     {
@@ -16954,6 +16954,27 @@
       "file": "docs/proof-center/portfolio-proof-index.md",
       "line": 3,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/public-service/clear-method-canonical.md",
+      "line": 112,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/public-service/clear-method-canonical.md",
+      "line": 379,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/public-service/clear-method-one-page-summary.md",
+      "line": 41,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
     },
     {
       "rule": "naming-inconsistency",
