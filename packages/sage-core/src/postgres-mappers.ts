@@ -50,6 +50,23 @@ function textOrNull(value: unknown): string | null {
   return String(value)
 }
 
+/**
+ * Parse a jsonb array-of-ids column. node-postgres returns jsonb already parsed
+ * (array); guard against a raw JSON string in case a driver returns text.
+ */
+function toIdArray(value: unknown): string[] {
+  let parsed: unknown = value
+  if (typeof value === 'string') {
+    try {
+      parsed = JSON.parse(value)
+    } catch {
+      return []
+    }
+  }
+  if (!Array.isArray(parsed)) return []
+  return parsed.filter((v): v is string => typeof v === 'string')
+}
+
 // boundary_profile is a jsonb column; node-postgres returns it already parsed.
 // Guard against a string in case a driver returns raw text.
 function toBoundaryProfile(value: unknown): SageBoundaryProfile {
@@ -140,20 +157,32 @@ export type SageBoundaryFlagRow = {
   id: string
   workspace_id: string
   org_id: string
+  target_type: string | null
   target_id: string | null
   flag_type: SageBoundaryFlagType
   note: string | null
+  status: string
+  authorization_level: string | null
+  authorization_basis: string | null
+  resolved_at: unknown
+  resolved_by: string | null
+  resolution_note: string | null
   created_by: string
   created_at: unknown
+  updated_at: unknown
 }
 
 export type SageReviewNoteRow = {
   id: string
   workspace_id: string
   org_id: string
+  target_type: string | null
   target_id: string | null
   reviewer_id: string
+  note_type: string | null
   note: string
+  authorization_level: string | null
+  authorization_basis: string | null
   created_at: unknown
 }
 
@@ -163,7 +192,13 @@ export type SageDecisionRecordRow = {
   org_id: string
   decision: string
   rationale: string | null
+  uncertainty: string | null
   human_reviewer_id: string
+  referenced_evidence_item_ids: unknown
+  referenced_boundary_flag_ids: unknown
+  authorization_level: string | null
+  authorization_basis: string | null
+  excluded_from_external_review: unknown
   created_by: string
   created_at: unknown
 }
@@ -288,11 +323,19 @@ export function mapBoundaryFlag(row: SageBoundaryFlagRow): SageBoundaryFlag {
     id: row.id,
     workspaceId: row.workspace_id,
     orgId: row.org_id,
+    targetType: (textOrNull(row.target_type) as SageBoundaryFlag['targetType']) ?? null,
     targetId: textOrNull(row.target_id),
     flagType: row.flag_type,
     note: textOrNull(row.note),
+    status: (row.status as SageBoundaryFlag['status']) ?? 'open',
+    authorizationLevel: (textOrNull(row.authorization_level) as SageBoundaryFlag['authorizationLevel']) ?? 'internal',
+    authorizationBasis: (textOrNull(row.authorization_basis) as SageBoundaryFlag['authorizationBasis']) ?? null,
+    resolvedAt: row.resolved_at ? toIso(row.resolved_at) : null,
+    resolvedBy: textOrNull(row.resolved_by),
+    resolutionNote: textOrNull(row.resolution_note),
     createdBy: row.created_by,
     createdAt: toIso(row.created_at),
+    updatedAt: toIso(row.updated_at ?? row.created_at),
   }
 }
 
@@ -301,9 +344,13 @@ export function mapReviewNote(row: SageReviewNoteRow): SageReviewNote {
     id: row.id,
     workspaceId: row.workspace_id,
     orgId: row.org_id,
+    targetType: (textOrNull(row.target_type) as SageReviewNote['targetType']) ?? null,
     targetId: textOrNull(row.target_id),
     reviewerId: row.reviewer_id,
+    noteType: (textOrNull(row.note_type) as SageReviewNote['noteType']) ?? 'observation',
     note: row.note,
+    authorizationLevel: (textOrNull(row.authorization_level) as SageReviewNote['authorizationLevel']) ?? 'internal',
+    authorizationBasis: (textOrNull(row.authorization_basis) as SageReviewNote['authorizationBasis']) ?? null,
     createdAt: toIso(row.created_at),
   }
 }
@@ -315,7 +362,13 @@ export function mapDecisionRecord(row: SageDecisionRecordRow): SageDecisionRecor
     orgId: row.org_id,
     decision: row.decision,
     rationale: textOrNull(row.rationale),
+    uncertainty: textOrNull(row.uncertainty),
     humanReviewerId: row.human_reviewer_id,
+    referencedEvidenceItemIds: toIdArray(row.referenced_evidence_item_ids),
+    referencedBoundaryFlagIds: toIdArray(row.referenced_boundary_flag_ids),
+    authorizationLevel: (textOrNull(row.authorization_level) as SageDecisionRecord['authorizationLevel']) ?? 'internal',
+    authorizationBasis: (textOrNull(row.authorization_basis) as SageDecisionRecord['authorizationBasis']) ?? null,
+    excludedFromExternalReview: Boolean(row.excluded_from_external_review),
     createdBy: row.created_by,
     createdAt: toIso(row.created_at),
   }

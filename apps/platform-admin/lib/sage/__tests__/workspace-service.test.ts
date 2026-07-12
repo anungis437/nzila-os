@@ -32,9 +32,12 @@ const {
 // org_admin     → WORKSPACE_CREATE + WORKSPACE_ADMIN (read-only oversight)
 // org_secretary → WORKSPACE_CREATE only (no oversight)
 // org_viewer    → no SAGE permissions (access only via SAGE membership + role)
-const admin = (orgId = 'org-1') => ({ actorId: 'admin-1', orgId, orgRole: 'org_admin' })
-const writer = (orgId = 'org-1') => ({ actorId: 'sec-1', orgId, orgRole: 'org_secretary' })
-const viewer = (orgId = 'org-1') => ({ actorId: 'viewer-1', orgId, orgRole: 'org_viewer' })
+const admin = (orgId = 'org-1') =>
+  ({ actorId: 'admin-1', orgId, orgRole: 'org_admin', authenticationType: 'interactive_user' }) as const
+const writer = (orgId = 'org-1') =>
+  ({ actorId: 'sec-1', orgId, orgRole: 'org_secretary', authenticationType: 'interactive_user' }) as const
+const viewer = (orgId = 'org-1') =>
+  ({ actorId: 'viewer-1', orgId, orgRole: 'org_viewer', authenticationType: 'interactive_user' }) as const
 
 const input = {
   name: 'Workspace A',
@@ -126,7 +129,12 @@ describe('workspace-service — idempotency', () => {
 
   it('scopes the idempotency key per actor', async () => {
     const a = await createSageWorkspaceForScope(writer(), input, idem('per-actor'))
-    const other = { actorId: 'sec-2', orgId: 'org-1', orgRole: 'org_secretary' }
+    const other = {
+      actorId: 'sec-2',
+      orgId: 'org-1',
+      orgRole: 'org_secretary',
+      authenticationType: 'interactive_user',
+    } as const
     const b = await createSageWorkspaceForScope(other, input, idem('per-actor'))
     expect(b.replayed).toBe(false)
     expect(b.response.id).not.toBe(a.response.id)

@@ -32,6 +32,13 @@ export interface OrgScopeContext {
   actorId: string
   orgId: string
   orgRole: string
+  /**
+   * Trusted authentication classification. `requireOrgScope` authenticates an
+   * interactive signed-in operator via `auth()`, so every context it yields is
+   * an interactive user. Derived server-side; never browser-supplied. Consumed
+   * by downstream trust boundaries (e.g. SAGE actor-kind resolution).
+   */
+  authenticationType: 'interactive_user'
 }
 
 export class OrgScopeError extends Error {
@@ -144,6 +151,7 @@ export async function requireOrgScope(
     actorId,
     orgId,
     orgRole,
+    authenticationType: 'interactive_user',
   }
 }
 

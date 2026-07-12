@@ -592,6 +592,246 @@ describe('PostgresSageRepository — lifecycle compare-and-set', () => {
   })
 })
 
+describe('PostgresSageRepository — governance reads + boundary CAS (tenant-scoped)', () => {
+  function boundaryRow(status = 'open') {
+    return {
+      id: 'flag-1',
+      workspace_id: 'ws-1',
+      org_id: 'org-1',
+      target_type: 'workspace',
+      target_id: null,
+      flag_type: 'review_required',
+      note: null,
+      status,
+      authorization_level: 'internal',
+      authorization_basis: 'workspace_default',
+      resolved_at: null,
+      resolved_by: null,
+      resolution_note: null,
+      created_by: 'actor-1',
+      created_at: new Date('2026-07-12T00:00:00.000Z'),
+      updated_at: new Date('2026-07-12T00:00:00.000Z'),
+    }
+  }
+  function decisionRow() {
+    return {
+      id: 'dec-1',
+      workspace_id: 'ws-1',
+      org_id: 'org-1',
+      decision: 'proceed',
+      rationale: null,
+      uncertainty: 'n/a',
+      human_reviewer_id: 'actor-1',
+      referenced_evidence_item_ids: [],
+      referenced_boundary_flag_ids: [],
+      authorization_level: 'internal',
+      authorization_basis: 'workspace_default',
+      excluded_from_external_review: false,
+      created_by: 'actor-1',
+      created_at: new Date('2026-07-12T00:00:00.000Z'),
+    }
+  }
+
+  it('listBoundaryFlags filters by workspace_id + org_id with deterministic ordering', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([boundaryRow()])
+    const repo = new PostgresSageRepository(sql)
+    await repo.listBoundaryFlags('ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where workspace_id = $1 and org_id = $2')
+    expect(sql.lastCall.text).toContain('order by created_at desc, id desc')
+    expect(sql.lastCall.params).toEqual(['ws-1', 'org-1'])
+  })
+
+  it('listBoundaryFlags parameterizes optional status/target filters', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([boundaryRow('resolved')])
+    const repo = new PostgresSageRepository(sql)
+    await repo.listBoundaryFlags('ws-1', 'org-1', {
+      status: 'resolved',
+      targetType: 'evidence_source',
+      targetId: 'src-1',
+    })
+    expect(sql.lastCall.text).toContain('target_type = $3')
+    expect(sql.lastCall.text).toContain('target_id = $4')
+    expect(sql.lastCall.text).toContain('status = $5')
+    expect(sql.lastCall.params).toEqual(['ws-1', 'org-1', 'evidence_source', 'src-1', 'resolved'])
+  })
+
+  it('reviewBoundaryFlag compare-and-sets from status = open', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([boundaryRow('under_review')])
+    const repo = new PostgresSageRepository(sql)
+    await repo.reviewBoundaryFlag('flag-1', 'ws-1', 'org-1', '2026-07-12T00:00:00.000Z')
+    expect(sql.lastCall.text).toContain("status = 'open'")
+    expect(sql.lastCall.text).toContain('where id = $1 and workspace_id = $2 and org_id = $3')
+  })
+
+  it('resolveBoundaryFlag compare-and-sets from open/under_review and fences tenant', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([boundaryRow('resolved')])
+    const repo = new PostgresSageRepository(sql)
+    await repo.resolveBoundaryFlag('flag-1', 'ws-1', 'org-1', {
+      status: 'resolved',
+      resolvedBy: 'actor-1',
+      resolutionNote: 'done',
+      resolvedAt: '2026-07-12T00:00:00.000Z',
+      updatedAt: '2026-07-12T00:00:00.000Z',
+    })
+    expect(sql.lastCall.text).toContain('where id = $1 and workspace_id = $2 and org_id = $3')
+    expect(sql.lastCall.text).toContain("status in ('open', 'under_review')")
+    expect(sql.lastCall.params[0]).toBe('flag-1')
+    expect(sql.lastCall.params[3]).toBe('resolved')
+  })
+
+  it('resolveBoundaryFlag preserves authorization_level unless the resolver raises it', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([boundaryRow('resolved')])
+    const repo = new PostgresSageRepository(sql)
+    // No override → coalesce keeps the persisted level (last param is null).
+    await repo.resolveBoundaryFlag('flag-1', 'ws-1', 'org-1', {
+      status: 'resolved',
+      resolvedBy: 'actor-1',
+      resolutionNote: 'done',
+      resolvedAt: '2026-07-12T00:00:00.000Z',
+      updatedAt: '2026-07-12T00:00:00.000Z',
+    })
+    expect(sql.lastCall.text).toContain('authorization_level = coalesce($9, authorization_level)')
+    expect(sql.lastCall.params[8]).toBeNull()
+
+    // Explicit raise → the new (stricter) level is passed through.
+    sql.enqueue([boundaryRow('resolved')])
+    await repo.resolveBoundaryFlag('flag-1', 'ws-1', 'org-1', {
+      status: 'resolved',
+      resolvedBy: 'actor-1',
+      resolutionNote: 'references sensitive evidence',
+      resolvedAt: '2026-07-12T00:00:00.000Z',
+      updatedAt: '2026-07-12T00:00:00.000Z',
+      authorizationLevel: 'sensitive',
+    })
+    expect(sql.lastCall.params[8]).toBe('sensitive')
+  })
+
+  it('addBoundaryFlag / addReviewNote persist the authorization envelope columns', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([boundaryRow()])
+    const repo = new PostgresSageRepository(sql)
+    await repo.addBoundaryFlag({
+      workspaceId: 'ws-1',
+      orgId: 'org-1',
+      targetType: 'evidence_source',
+      targetId: 'src-1',
+      flagType: 'review_required',
+      note: null,
+      status: 'open',
+      authorizationLevel: 'sensitive',
+      authorizationBasis: 'target_inherited',
+      resolvedAt: null,
+      resolvedBy: null,
+      resolutionNote: null,
+      createdBy: 'actor-1',
+      createdAt: '2026-07-12T00:00:00.000Z',
+      updatedAt: '2026-07-12T00:00:00.000Z',
+    })
+    expect(sql.lastCall.text).toContain('authorization_level')
+    expect(sql.lastCall.text).toContain('authorization_basis')
+    expect(sql.lastCall.params).toContain('sensitive')
+    expect(sql.lastCall.params).toContain('target_inherited')
+
+    sql.enqueue([
+      {
+        id: 'note-1',
+        workspace_id: 'ws-1',
+        org_id: 'org-1',
+        target_type: 'evidence_source',
+        target_id: 'src-1',
+        reviewer_id: 'actor-1',
+        note_type: 'observation',
+        note: 'seen',
+        authorization_level: 'authorized_only',
+        authorization_basis: 'target_inherited',
+        created_at: new Date('2026-07-12T00:00:00.000Z'),
+      },
+    ])
+    await repo.addReviewNote({
+      workspaceId: 'ws-1',
+      orgId: 'org-1',
+      targetType: 'evidence_source',
+      targetId: 'src-1',
+      reviewerId: 'actor-1',
+      noteType: 'observation',
+      note: 'seen',
+      authorizationLevel: 'authorized_only',
+      authorizationBasis: 'target_inherited',
+      createdAt: '2026-07-12T00:00:00.000Z',
+    })
+    expect(sql.lastCall.text).toContain('authorization_level')
+    expect(sql.lastCall.params).toContain('authorized_only')
+  })
+
+  it('resolveBoundaryFlag raises CONFLICT when the guarded update matches no row', async () => {
+    const sql = new FakeSqlClient() // zero-row update
+    const repo = new PostgresSageRepository(sql)
+    await expect(
+      repo.resolveBoundaryFlag('flag-1', 'ws-1', 'org-1', {
+        status: 'resolved',
+        resolvedBy: 'actor-1',
+        resolutionNote: 'done',
+        resolvedAt: '2026-07-12T00:00:00.000Z',
+        updatedAt: '2026-07-12T00:00:00.000Z',
+      }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('listReviewNotes / listDecisionRecords / getDecisionRecord are tenant-scoped', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([])
+    const repo = new PostgresSageRepository(sql)
+    await repo.listReviewNotes('ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where workspace_id = $1 and org_id = $2')
+    expect(sql.lastCall.params).toEqual(['ws-1', 'org-1'])
+
+    sql.enqueue([])
+    await repo.listDecisionRecords('ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where workspace_id = $1 and org_id = $2')
+    expect(sql.lastCall.text).toContain('order by created_at desc, id desc')
+
+    sql.enqueue([decisionRow()])
+    await repo.getDecisionRecord('dec-1', 'ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where id = $1 and workspace_id = $2 and org_id = $3')
+    expect(sql.lastCall.params).toEqual(['dec-1', 'ws-1', 'org-1'])
+  })
+
+  it('createDecisionRecord persists uncertainty + reference arrays as jsonb', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([decisionRow()])
+    const repo = new PostgresSageRepository(sql)
+    await repo.createDecisionRecord({
+      workspaceId: 'ws-1',
+      orgId: 'org-1',
+      decision: 'proceed',
+      rationale: null,
+      uncertainty: 'limited',
+      humanReviewerId: 'actor-1',
+      referencedEvidenceItemIds: ['item-1'],
+      referencedBoundaryFlagIds: ['flag-1'],
+      authorizationLevel: 'internal',
+      authorizationBasis: 'evidence_inherited',
+      excludedFromExternalReview: false,
+      createdBy: 'actor-1',
+      createdAt: '2026-07-12T00:00:00.000Z',
+    })
+    expect(sql.lastCall.text).toContain('$7::jsonb')
+    expect(sql.lastCall.text).toContain('$8::jsonb')
+    expect(sql.lastCall.params[6]).toBe(JSON.stringify(['item-1']))
+    expect(sql.lastCall.params[7]).toBe(JSON.stringify(['flag-1']))
+    expect(sql.lastCall.text).toContain('authorization_level')
+    expect(sql.lastCall.text).toContain('excluded_from_external_review')
+    expect(sql.lastCall.params[8]).toBe('internal')
+    expect(sql.lastCall.params[9]).toBe('evidence_inherited')
+    expect(sql.lastCall.params[10]).toBe(false)
+  })
+})
+
 function exportRequestRow(
   overrides: Partial<SageExportRequestRow> = {},
 ): SageExportRequestRow {
@@ -669,7 +909,13 @@ describe('postgres-mappers — snake_case → camelCase', () => {
       org_id: 'org-1',
       decision: 'proceed',
       rationale: 'documented',
+      uncertainty: 'limited sample',
       human_reviewer_id: 'reviewer-9',
+      referenced_evidence_item_ids: ['item-1', 'item-2'],
+      referenced_boundary_flag_ids: [],
+      authorization_level: 'internal',
+      authorization_basis: 'evidence_inherited',
+      excluded_from_external_review: false,
       created_by: 'actor-1',
       created_at: new Date('2026-07-12T00:00:00.000Z'),
     }
@@ -677,7 +923,10 @@ describe('postgres-mappers — snake_case → camelCase', () => {
     expect(record).toMatchObject({
       workspaceId: 'ws-1',
       decision: 'proceed',
+      uncertainty: 'limited sample',
       humanReviewerId: 'reviewer-9',
+      referencedEvidenceItemIds: ['item-1', 'item-2'],
+      referencedBoundaryFlagIds: [],
       createdBy: 'actor-1',
     })
   })

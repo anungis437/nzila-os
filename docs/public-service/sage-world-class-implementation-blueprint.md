@@ -106,6 +106,10 @@ This is the final planning-only SAGE PR. The next PR must begin engineering impl
 > crash-recovery single execution, old-owner fencing) and Postgres SQL assertions (reclaim/finalize/release
 > predicates + parameterization). Boundaries unchanged; still not launched, available, or procurement-ready.
 
+> **Implementation status (Phase 6 started).** Authenticated boundary flags, human review notes, and
+> named-human decision records implemented over the durable evidence lifecycle. Boundaries unchanged; still
+> not launched, available, or procurement-ready.
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:

@@ -78,6 +78,9 @@
     },
     "evidence": {
       "tab": "Preuves"
+    },
+    "governance": {
+      "tab": "Examen et décisions"
     }
   },
   "sageEvidence": {
@@ -125,6 +128,81 @@
       "needs_review": "À examiner",
       "excluded": "Exclu",
       "archived": "Archivé"
-    }
+    },
+    "governanceTab": "Examen et décisions"
+  },
+  "sageGovernance": {
+    "pageTitle": "Examen et décisions",
+    "pageDescription": "Examen humain et gouvernance du cycle de vie des preuves : ouvrir et résoudre des signalements de limites, consigner des notes d’examen attribuées, et créer des dossiers de décision par une personne nommée. À usage interne uniquement — il ne s’agit pas d’une décision automatisée, d’un pointage ni d’une certification.",
+    "boundaryFlags": "Signalements de limites",
+    "reviewNotes": "Notes d’examen",
+    "decisionRecords": "Dossiers de décision",
+    "openFlag": "Ouvrir un signalement",
+    "flagType": "Type de signalement",
+    "target": "Cible",
+    "note": "Note",
+    "submitting": "Enregistrement…",
+    "noFlags": "Aucun signalement de limite consultable pour l’instant.",
+    "flagsListLabel": "Signalements de limites",
+    "flagStatus": {
+      "open": "Ouvert",
+      "under_review": "En examen",
+      "resolved": "Résolu",
+      "retained": "Maintenu"
+    },
+    "resolvedBy": "résolu par",
+    "resolutionNote": "Note de résolution",
+    "resolveFlag": "Résoudre le signalement",
+    "resolutionOutcome": "Issue",
+    "validation": {
+      "resolutionNoteRequired": "Une note de résolution est requise.",
+      "noteRequired": "Une note est requise.",
+      "decisionRequired": "Un énoncé de décision est requis.",
+      "uncertaintyRequired": "Un énoncé d’incertitude ou de limites est requis."
+    },
+    "error": {
+      "flagFailed": "Impossible d’ouvrir le signalement. Veuillez réessayer.",
+      "resolveFailed": "Impossible de résoudre le signalement. Veuillez réessayer.",
+      "noteFailed": "Impossible d’ajouter la note d’examen. Veuillez réessayer.",
+      "decisionFailed": "Impossible de créer le dossier de décision. Veuillez réessayer."
+    },
+    "addReviewNote": "Ajouter une note d’examen",
+    "humanAuthoredHint": "Une note d’examen est une observation humaine. Elle n’approuve pas de preuve et ne consigne pas de décision.",
+    "reviewer": "Examinateur",
+    "noteType": "Type de note",
+    "noteDoesNotDecide": "Consigner une note n’approuve pas de preuve et ne constitue pas une décision.",
+    "humanAuthored": "Observation rédigée par une personne",
+    "recordedBy": "Consigné par",
+    "notesListLabel": "Notes d’examen",
+    "noNotes": "Aucune note d’examen consultable pour l’instant.",
+    "createDecision": "Créer un dossier de décision",
+    "humanDecisionHint": "Un dossier de décision est un jugement humain nommé. Les références aux preuves ne constituent pas une conclusion automatisée.",
+    "decisionStatement": "Énoncé de décision",
+    "rationale": "Justification",
+    "uncertainty": "Incertitude et limites",
+    "uncertaintyHelp": "Précisez ce qui demeure incertain ou hors de portée. Ce champ est requis.",
+    "reviewedEvidence": "Preuves examinées",
+    "relatedFlags": "Signalements de limites liés",
+    "humanDecisionRecord": "Dossier de décision humaine",
+    "decisionRecord": "Dossier de décision",
+    "evidenceNotAutomated": "Les références aux preuves ne constituent pas une conclusion automatisée.",
+    "noDecisions": "Aucun dossier de décision consultable pour l’instant.",
+    "decisionsListLabel": "Dossiers de décision",
+    "distinctions": {
+      "heading": "Preuve, examen, signalement et décision sont distincts",
+      "evidenceTerm": "Preuve",
+      "evidence": "Matériel factuel sourcé.",
+      "reviewTerm": "Note d’examen",
+      "review": "Une observation humaine nommée.",
+      "flagTerm": "Signalement de limite",
+      "flag": "Une préoccupation, une limite ou une condition d’examen.",
+      "decisionTerm": "Dossier de décision",
+      "decision": "Un jugement humain nommé et sa justification."
+    },
+    "targetWorkspace": "Espace de travail",
+    "targetSourcePrefix": "Source :",
+    "targetItemPrefix": "Élément :",
+    "permissionDenied": "Vous n’avez pas la permission pour cette action.",
+    "unableToLoad": "Impossible de charger l’examen et les décisions."
   }
 }

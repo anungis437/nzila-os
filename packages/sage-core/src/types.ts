@@ -223,6 +223,53 @@ export const SAGE_BOUNDARY_FLAG_TYPES = [
 ] as const
 export type SageBoundaryFlagType = (typeof SAGE_BOUNDARY_FLAG_TYPES)[number]
 
+// ─── Human-governance enums (Phase 6) ────────────────────────────────────────
+
+/** What a boundary flag / review note is attached to (used for redaction). */
+export const SAGE_GOVERNANCE_TARGET_TYPES = [
+  'workspace',
+  'evidence_source',
+  'evidence_item',
+] as const
+export type SageGovernanceTargetType = (typeof SAGE_GOVERNANCE_TARGET_TYPES)[number]
+
+/** Boundary-flag lifecycle. Only these named transitions are permitted. */
+export const SAGE_BOUNDARY_FLAG_STATUSES = [
+  'open',
+  'under_review',
+  'resolved',
+  'retained',
+] as const
+export type SageBoundaryFlagStatus = (typeof SAGE_BOUNDARY_FLAG_STATUSES)[number]
+
+/** Terminal outcomes a reviewer may record when closing a boundary flag. */
+export const SAGE_BOUNDARY_RESOLUTIONS = ['resolved', 'retained'] as const
+export type SageBoundaryResolution = (typeof SAGE_BOUNDARY_RESOLUTIONS)[number]
+
+/** Structured kind of a human review note (never a decision by itself). */
+export const SAGE_REVIEW_NOTE_TYPES = [
+  'observation',
+  'concern',
+  'clarification',
+  'follow_up',
+] as const
+export type SageReviewNoteType = (typeof SAGE_REVIEW_NOTE_TYPES)[number]
+
+/**
+ * How a governance record's effective authorization level was derived. A
+ * governance record is DERIVED information; its authorization envelope is at
+ * least as restrictive as the evidence it summarizes.
+ */
+export const SAGE_GOVERNANCE_AUTHORIZATION_BASES = [
+  'workspace_default', // workspace/general record; floor = internal
+  'target_inherited', // inherited from a flagged/annotated evidence target
+  'evidence_inherited', // inherited from the most restrictive referenced evidence
+  'reviewer_restricted', // reviewer explicitly requested a stricter level
+  'legacy_conservative', // migration fallback: unresolved legacy provenance → sensitive
+] as const
+export type SageGovernanceAuthorizationBasis =
+  (typeof SAGE_GOVERNANCE_AUTHORIZATION_BASES)[number]
+
 // ─── Evidence and decision entities (mirror the migration tables) ────────────
 
 export type SageEvidenceSource = {
@@ -258,20 +305,32 @@ export type SageBoundaryFlag = {
   id: string
   workspaceId: string
   orgId: string
+  targetType?: SageGovernanceTargetType | null
   targetId?: string | null
   flagType: SageBoundaryFlagType
   note?: string | null
+  status: SageBoundaryFlagStatus
+  authorizationLevel: SageAuthorizationLevel
+  authorizationBasis?: SageGovernanceAuthorizationBasis | null
+  resolvedAt?: string | null
+  resolvedBy?: string | null
+  resolutionNote?: string | null
   createdBy: string
   createdAt: string
+  updatedAt: string
 }
 
 export type SageReviewNote = {
   id: string
   workspaceId: string
   orgId: string
+  targetType?: SageGovernanceTargetType | null
   targetId?: string | null
   reviewerId: string
+  noteType: SageReviewNoteType
   note: string
+  authorizationLevel: SageAuthorizationLevel
+  authorizationBasis?: SageGovernanceAuthorizationBasis | null
   createdAt: string
 }
 
@@ -281,7 +340,13 @@ export type SageDecisionRecord = {
   orgId: string
   decision: string
   rationale?: string | null
+  uncertainty?: string | null
   humanReviewerId: string
+  referencedEvidenceItemIds: string[]
+  referencedBoundaryFlagIds: string[]
+  authorizationLevel: SageAuthorizationLevel
+  authorizationBasis?: SageGovernanceAuthorizationBasis | null
+  excludedFromExternalReview: boolean
   createdBy: string
   createdAt: string
 }

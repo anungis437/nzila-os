@@ -20,13 +20,19 @@ import {
   denySageExport,
   getSageWorkspaceSummary,
   getSageWorkspace,
+  getSageDecisionRecord,
   getSageEvidenceSource,
   grantSageEvidenceAuthorization,
   linkSageEvidenceItem,
+  listSageBoundaryFlags,
+  listSageDecisionRecords,
   listSageEvidenceItems,
   listSageEvidenceSources,
+  listSageReviewNotes,
   listSageWorkspaces,
   requestSageExport,
+  resolveSageBoundaryFlag,
+  reviewSageBoundaryFlag,
   revokeSageRole,
   type SageServiceDeps,
 } from './services'
@@ -34,7 +40,13 @@ import {
 const ALL_PERMS = Object.values(SAGE_PERMISSIONS)
 
 function actor(overrides: Partial<SageServiceActor> = {}): SageServiceActor {
-  return { actorId: 'actor_1', orgId: 'org_1', permissions: [...ALL_PERMS], ...overrides }
+  return {
+    actorId: 'actor_1',
+    orgId: 'org_1',
+    actorKind: 'human',
+    permissions: [...ALL_PERMS],
+    ...overrides,
+  }
 }
 
 function ctxFor(a: SageServiceActor): SageServiceContext {
@@ -56,18 +68,22 @@ async function makeWorkspace(a = actor()) {
     riskSurface: 'general_governance',
   })
   // The creator is bootstrapped as workspace_owner; also grant evidence_steward
-  // so evidence-flow tests can exercise create/classify/link end-to-end.
-  await deps.repo.assignRole({
-    workspaceId: ws.id,
-    orgId: ws.orgId,
-    actorId: a.actorId,
-    sageApplicationRole: 'evidence_steward',
-    workspaceScope: ws.id,
-    accessReason: 'test',
-    approvedBy: a.actorId,
-    createdAt: '2026-07-12T00:00:00.000Z',
-    revokedAt: null,
-  })
+  // so evidence-flow tests can exercise create/classify/link end-to-end, plus the
+  // governance roles (security_reviewer → BOUNDARY_FLAG; decision_record_approver
+  // → REVIEW_NOTE + DECISION_RECORD) so Phase 6 flows run end-to-end.
+  for (const role of ['evidence_steward', 'security_reviewer', 'decision_record_approver'] as const) {
+    await deps.repo.assignRole({
+      workspaceId: ws.id,
+      orgId: ws.orgId,
+      actorId: a.actorId,
+      sageApplicationRole: role,
+      workspaceScope: ws.id,
+      accessReason: 'test',
+      approvedBy: a.actorId,
+      createdAt: '2026-07-12T00:00:00.000Z',
+      revokedAt: null,
+    })
+  }
   return ws
 }
 
@@ -531,51 +547,331 @@ describe('boundary flags, review notes, decision records', () => {
     const flag = await addSageBoundaryFlag(deps, ctxFor(actor()), {
       workspaceId: ws.id,
       flagType: 'prohibited_use',
+      targetType: 'workspace',
       note: 'test',
     })
     expect(flag.flagType).toBe('prohibited_use')
+    expect(flag.status).toBe('open')
     expect(sink.has(SAGE_AUDIT_ACTIONS.BOUNDARY_FLAGGED)).toBe(true)
   })
 
-  it('requires a named reviewer for a review note', async () => {
-    const ws = await makeWorkspace()
-    await expect(
-      addSageReviewNote(deps, ctxFor(actor()), { workspaceId: ws.id, reviewerId: '', note: 'x' }),
-    ).rejects.toThrow(/reviewer/)
-  })
-
-  it('records a review note with a named reviewer', async () => {
+  it('records a review note attributed to the authenticated actor', async () => {
     const ws = await makeWorkspace()
     const note = await addSageReviewNote(deps, ctxFor(actor()), {
       workspaceId: ws.id,
-      reviewerId: 'reviewer_1',
       note: 'looks fine',
+      noteType: 'observation',
+      targetType: 'workspace',
     })
-    expect(note.reviewerId).toBe('reviewer_1')
+    // reviewerId is server-derived (the authenticated actor), never from input.
+    expect(note.reviewerId).toBe('actor_1')
+    expect(note.noteType).toBe('observation')
     expect(sink.has(SAGE_AUDIT_ACTIONS.REVIEW_NOTED)).toBe(true)
   })
 
-  it('rejects a decision record without a named human reviewer', async () => {
+  it('rejects a decision record without an uncertainty statement', async () => {
     const ws = await makeWorkspace()
     await expect(
       createSageDecisionRecord(deps, ctxFor(actor()), {
         workspaceId: ws.id,
         decision: 'proceed',
-        humanReviewerId: '',
+        uncertainty: '',
       }),
-    ).rejects.toThrow(/human reviewer/)
+    ).rejects.toThrow(/uncertainty|limitation/)
   })
 
-  it('records a decision with a named human reviewer', async () => {
+  it('records a decision with the authenticated actor as the named human reviewer', async () => {
     const ws = await makeWorkspace()
     const rec = await createSageDecisionRecord(deps, ctxFor(actor()), {
       workspaceId: ws.id,
       decision: 'proceed',
-      humanReviewerId: 'reviewer_1',
       rationale: 'human-authored',
+      uncertainty: 'limited sample',
     })
-    expect(rec.humanReviewerId).toBe('reviewer_1')
+    expect(rec.humanReviewerId).toBe('actor_1') // derived from the session
     expect(sink.has(SAGE_AUDIT_ACTIONS.DECISION_RECORDED)).toBe(true)
+  })
+})
+
+describe('governance authorization envelope (derivative-data protection)', () => {
+  // Build a workspace with a SENSITIVE evidence source the owner can access.
+  async function setupSensitive() {
+    const a = actor()
+    const ws = await makeWorkspace(a)
+    await grantSageEvidenceAuthorization(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      actorId: a.actorId,
+      level: 'sensitive',
+      accessReason: 'owner review',
+      approvedBy: 'admin',
+    })
+    const src = await createSageEvidenceSource(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceType: 'public',
+    })
+    await classifySageEvidenceSource(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      sourceQuality: 'moderate',
+      authorizationLevel: 'sensitive',
+    })
+    const item = await createSageEvidenceItem(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      confidenceLevel: 'low',
+    })
+    return { a, ws, src, item }
+  }
+
+  // A member who has a governance role but NO sensitive evidence grant.
+  async function addUngrantedReader(ws: { id: string; orgId: string }, a = actor()) {
+    await addSageWorkspaceMember(deps, ctxFor(a), { workspaceId: ws.id, actorId: 'reader' })
+    await assignSageRole(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      actorId: 'reader',
+      role: 'decision_record_approver',
+      accessReason: 'r',
+      approvedBy: a.actorId,
+    })
+    return ctxFor(actor({ actorId: 'reader', actorKind: 'human', permissions: [] }))
+  }
+
+  it('a boundary flag on sensitive evidence inherits the sensitive level', async () => {
+    const { a, ws, src } = await setupSensitive()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      flagType: 'sensitivity',
+      targetType: 'evidence_source',
+      targetId: src.id,
+    })
+    expect(flag.authorizationLevel).toBe('sensitive')
+    expect(flag.authorizationBasis).toBe('target_inherited')
+  })
+
+  it('a workspace-level flag defaults to the internal floor', async () => {
+    const ws = await makeWorkspace()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+    })
+    expect(flag.authorizationLevel).toBe('internal')
+    expect(flag.authorizationBasis).toBe('workspace_default')
+  })
+
+  it('a reviewer may raise the level (never lower it)', async () => {
+    const ws = await makeWorkspace()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+      requestedAuthorizationLevel: 'sensitive',
+    })
+    expect(flag.authorizationLevel).toBe('sensitive')
+    expect(flag.authorizationBasis).toBe('reviewer_restricted')
+  })
+
+  it('rejects a request that would downgrade the inherited level', async () => {
+    const { a, ws, src } = await setupSensitive()
+    await expect(
+      addSageBoundaryFlag(deps, ctxFor(a), {
+        workspaceId: ws.id,
+        flagType: 'sensitivity',
+        targetType: 'evidence_source',
+        targetId: src.id,
+        requestedAuthorizationLevel: 'public',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('hides a sensitive boundary flag from a member without a matching grant', async () => {
+    const { a, ws, src } = await setupSensitive()
+    await addSageBoundaryFlag(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      flagType: 'sensitivity',
+      targetType: 'evidence_source',
+      targetId: src.id,
+    })
+    // Owner (granted) sees it; ungranted reader does not.
+    expect(await listSageBoundaryFlags(deps, ctxFor(a), { workspaceId: ws.id })).toHaveLength(1)
+    const readerCtx = await addUngrantedReader(ws, a)
+    expect(await listSageBoundaryFlags(deps, readerCtx, { workspaceId: ws.id })).toHaveLength(0)
+  })
+
+  it('a review note inherits the sensitive level and is hidden from ungranted readers', async () => {
+    const { a, ws, src } = await setupSensitive()
+    const note = await addSageReviewNote(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      note: 'confidential observation',
+      noteType: 'observation',
+      targetType: 'evidence_source',
+      targetId: src.id,
+    })
+    expect(note.authorizationLevel).toBe('sensitive')
+    const readerCtx = await addUngrantedReader(ws, a)
+    expect(await listSageReviewNotes(deps, readerCtx, { workspaceId: ws.id })).toHaveLength(0)
+  })
+
+  it('a decision referencing sensitive evidence inherits that level and is non-disclosed', async () => {
+    const { a, ws, item } = await setupSensitive()
+    const rec = await createSageDecisionRecord(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      decision: 'proceed',
+      uncertainty: 'limited',
+      referencedEvidenceItemIds: [item.id],
+    })
+    expect(rec.authorizationLevel).toBe('sensitive')
+    expect(rec.authorizationBasis).toBe('evidence_inherited')
+
+    const readerCtx = await addUngrantedReader(ws, a)
+    // Whole record omitted from the list — not merely reference-redacted.
+    expect(await listSageDecisionRecords(deps, readerCtx, { workspaceId: ws.id })).toHaveLength(0)
+    // Direct fetch is non-disclosed as NOT_FOUND.
+    await expect(
+      getSageDecisionRecord(deps, readerCtx, { workspaceId: ws.id, decisionId: rec.id }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('a decision referencing excluded evidence is marked out of external review', async () => {
+    const a = actor()
+    const ws = await makeWorkspace(a)
+    const src = await createSageEvidenceSource(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceType: 'excluded',
+    })
+    await classifySageEvidenceSource(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      sourceQuality: 'insufficient',
+      authorizationLevel: 'excluded',
+    })
+    await grantSageEvidenceAuthorization(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      actorId: a.actorId,
+      level: 'excluded',
+      accessReason: 'owner review',
+      approvedBy: 'admin',
+    })
+    const item = await createSageEvidenceItem(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      confidenceLevel: 'low',
+    })
+    const rec = await createSageDecisionRecord(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      decision: 'proceed',
+      uncertainty: 'limited',
+      referencedEvidenceItemIds: [item.id],
+    })
+    expect(rec.excludedFromExternalReview).toBe(true)
+    expect(rec.authorizationLevel).toBe('excluded')
+  })
+
+  it('resolving a flag cannot downgrade its authorization and preserves it by default', async () => {
+    const { a, ws, src } = await setupSensitive()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      flagType: 'sensitivity',
+      targetType: 'evidence_source',
+      targetId: src.id,
+    })
+    await expect(
+      resolveSageBoundaryFlag(deps, ctxFor(a), {
+        workspaceId: ws.id,
+        flagId: flag.id,
+        resolution: 'resolved',
+        resolutionNote: 'handled',
+        requestedAuthorizationLevel: 'public',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+
+    const resolved = await resolveSageBoundaryFlag(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      flagId: flag.id,
+      resolution: 'resolved',
+      resolutionNote: 'handled',
+    })
+    expect(resolved.authorizationLevel).toBe('sensitive')
+  })
+})
+
+describe('authenticated-human actor assurance', () => {
+  it('rejects a service principal from adding a review note', async () => {
+    const ws = await makeWorkspace()
+    const service = actor({ actorKind: 'service' })
+    await expect(
+      addSageReviewNote(deps, ctxFor(service), {
+        workspaceId: ws.id,
+        note: 'x',
+        noteType: 'observation',
+        targetType: 'workspace',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('rejects a service principal from resolving a boundary flag', async () => {
+    const ws = await makeWorkspace()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+    })
+    const service = actor({ actorKind: 'service' })
+    await expect(
+      resolveSageBoundaryFlag(deps, ctxFor(service), {
+        workspaceId: ws.id,
+        flagId: flag.id,
+        resolution: 'resolved',
+        resolutionNote: 'x',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('rejects a service principal from recording a decision', async () => {
+    const ws = await makeWorkspace()
+    const service = actor({ actorKind: 'service' })
+    await expect(
+      createSageDecisionRecord(deps, ctxFor(service), {
+        workspaceId: ws.id,
+        decision: 'proceed',
+        uncertainty: 'limited',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('rejects a system actor from recording a decision', async () => {
+    const ws = await makeWorkspace()
+    const system = actor({ actorKind: 'system' })
+    await expect(
+      createSageDecisionRecord(deps, ctxFor(system), {
+        workspaceId: ws.id,
+        decision: 'proceed',
+        uncertainty: 'limited',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('fails closed when the actor kind is absent', async () => {
+    const ws = await makeWorkspace()
+    const unknown = actor({ actorKind: undefined })
+    await expect(
+      createSageDecisionRecord(deps, ctxFor(unknown), {
+        workspaceId: ws.id,
+        decision: 'proceed',
+        uncertainty: 'limited',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('still allows a non-human actor to RAISE a boundary flag (not a named-human act)', async () => {
+    const ws = await makeWorkspace()
+    const service = actor({ actorKind: 'service' })
+    const flag = await addSageBoundaryFlag(deps, ctxFor(service), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+    })
+    expect(flag.status).toBe('open')
   })
 })
 
@@ -730,6 +1026,7 @@ describe('workspace summary', () => {
     await addSageBoundaryFlag(deps, ctxFor(actor()), {
       workspaceId: ws.id,
       flagType: 'review_required',
+      targetType: 'workspace',
     })
     await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
     const summary = await getSageWorkspaceSummary(deps, ctxFor(actor()), { workspaceId: ws.id })
@@ -776,16 +1073,17 @@ describe('audit emission coverage', () => {
       confidenceLevel: 'moderate',
     })
     await linkSageEvidenceItem(deps, ctxFor(a), { workspaceId: ws.id, itemId: item.id })
-    await addSageBoundaryFlag(deps, ctxFor(a), { workspaceId: ws.id, flagType: 'sensitivity' })
+    await addSageBoundaryFlag(deps, ctxFor(a), { workspaceId: ws.id, flagType: 'sensitivity', targetType: 'workspace' })
     await addSageReviewNote(deps, ctxFor(a), {
       workspaceId: ws.id,
-      reviewerId: 'reviewer_1',
       note: 'ok',
+      noteType: 'observation',
+      targetType: 'workspace',
     })
     await createSageDecisionRecord(deps, ctxFor(a), {
       workspaceId: ws.id,
       decision: 'proceed',
-      humanReviewerId: 'reviewer_1',
+      uncertainty: 'limited sample',
     })
     const req = await requestSageExport(deps, ctxFor(a), { workspaceId: ws.id })
     await approveSageExport(deps, ctxFor(actor({ actorId: 'approver_1' })), {
@@ -1057,5 +1355,410 @@ describe('SAGE evidence lifecycle concurrency + mutation authorization', () => {
     await expect(
       linkSageEvidenceItem(deps, ctxFor(oversight), { workspaceId: ws.id, itemId: item.id }),
     ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+})
+
+describe('SAGE Phase 6 — human governance (authorization, invariants, CAS)', () => {
+  async function memberWith(ws: { id: string }, actorId: string, role: string) {
+    await addSageWorkspaceMember(deps, ctxFor(actor()), { workspaceId: ws.id, actorId })
+    await assignSageRole(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId,
+      role: role as never,
+      accessReason: 'test',
+      approvedBy: 'actor_1',
+    })
+  }
+
+  it('denies review notes / decisions to a member without a governance role', async () => {
+    const ws = await makeWorkspace()
+    await memberWith(ws, 'reader', 'read_only_observer')
+    const reader = ctxFor(actor({ actorId: 'reader', permissions: [] }))
+    await expect(
+      addSageReviewNote(deps, reader, {
+        workspaceId: ws.id,
+        note: 'x',
+        noteType: 'observation',
+        targetType: 'workspace',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+    await expect(
+      createSageDecisionRecord(deps, reader, {
+        workspaceId: ws.id,
+        decision: 'proceed',
+        uncertainty: 'n/a',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('requires membership + an active, non-revoked, non-expired role', async () => {
+    const ws = await makeWorkspace()
+    // Stranger (no membership) is forbidden.
+    await expect(
+      addSageBoundaryFlag(deps, ctxFor(actor({ actorId: 'stranger', permissions: [] })), {
+        workspaceId: ws.id,
+        flagType: 'sensitivity',
+        targetType: 'workspace',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+
+    // Revoked governance role is denied.
+    await addSageWorkspaceMember(deps, ctxFor(actor()), { workspaceId: ws.id, actorId: 'rev' })
+    const role = await assignSageRole(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: 'rev',
+      role: 'security_reviewer',
+      accessReason: 'x',
+      approvedBy: 'actor_1',
+    })
+    await revokeSageRole(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      roleAssignmentId: role.id,
+      reason: 'x',
+    })
+    await expect(
+      addSageBoundaryFlag(deps, ctxFor(actor({ actorId: 'rev', permissions: [] })), {
+        workspaceId: ws.id,
+        flagType: 'sensitivity',
+        targetType: 'workspace',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+
+    // Expired (time-bound) governance role is denied.
+    await addSageWorkspaceMember(deps, ctxFor(actor()), { workspaceId: ws.id, actorId: 'exp' })
+    await deps.repo.assignRole({
+      workspaceId: ws.id,
+      orgId: ws.orgId,
+      actorId: 'exp',
+      sageApplicationRole: 'security_reviewer',
+      workspaceScope: ws.id,
+      timeBoundAccessExpiresAt: '2020-01-01T00:00:00.000Z',
+      accessReason: 'x',
+      approvedBy: 'actor_1',
+      createdAt: '2019-01-01T00:00:00.000Z',
+      revokedAt: null,
+    })
+    await expect(
+      addSageBoundaryFlag(deps, ctxFor(actor({ actorId: 'exp', permissions: [] })), {
+        workspaceId: ws.id,
+        flagType: 'sensitivity',
+        targetType: 'workspace',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('rejects a synthetic / non-human decision reviewer identity', async () => {
+    const ws = await makeWorkspace(actor({ actorId: 'system' }))
+    await expect(
+      createSageDecisionRecord(deps, ctxFor(actor({ actorId: 'system' })), {
+        workspaceId: ws.id,
+        decision: 'proceed',
+        uncertainty: 'n/a',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('rejects a boundary flag whose evidence target is in another workspace', async () => {
+    const wsA = await makeWorkspace()
+    const wsB = await makeWorkspace()
+    const src = await createSageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: wsB.id,
+      sourceType: 'public',
+    })
+    await expect(
+      addSageBoundaryFlag(deps, ctxFor(actor()), {
+        workspaceId: wsA.id,
+        flagType: 'sensitivity',
+        targetType: 'evidence_source',
+        targetId: src.id,
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('enforces evidence-reference authorization for decisions (grant + revoke)', async () => {
+    const ws = await makeWorkspace()
+    const src = await createSageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceType: 'authorized_only',
+    })
+    await classifySageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      sourceQuality: 'moderate',
+      authorizationLevel: 'authorized_only',
+    })
+    const item = await createSageEvidenceItem(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      confidenceLevel: 'moderate',
+    })
+    // Without a grant, the creator cannot reference authorized_only evidence.
+    await expect(
+      createSageDecisionRecord(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        decision: 'proceed',
+        uncertainty: 'n/a',
+        referencedEvidenceItemIds: [item.id],
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+
+    const grant = await grantSageEvidenceAuthorization(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: 'actor_1',
+      level: 'authorized_only',
+      accessReason: 'x',
+      approvedBy: 'actor_1',
+    })
+    const ok = await createSageDecisionRecord(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      decision: 'proceed',
+      uncertainty: 'n/a',
+      referencedEvidenceItemIds: [item.id],
+    })
+    expect(ok.referencedEvidenceItemIds).toEqual([item.id])
+
+    // Revoking the grant blocks new references again.
+    await revokeSageEvidenceAuthorizationSafe(grant.id, ws.id, actor())
+    await expect(
+      createSageDecisionRecord(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        decision: 'proceed again',
+        uncertainty: 'n/a',
+        referencedEvidenceItemIds: [item.id],
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('resolves a boundary flag once; a concurrent resolver conflicts (one audit event)', async () => {
+    const ws = await makeWorkspace()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+    })
+    const before = sink.records.filter((r) => r.action === SAGE_AUDIT_ACTIONS.BOUNDARY_RESOLVED).length
+    const results = await Promise.allSettled([
+      resolveSageBoundaryFlag(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        flagId: flag.id,
+        resolution: 'resolved',
+        resolutionNote: 'addressed',
+      }),
+      resolveSageBoundaryFlag(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        flagId: flag.id,
+        resolution: 'retained',
+        resolutionNote: 'kept',
+      }),
+    ])
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1)
+    const rejected = results.filter((r) => r.status === 'rejected')
+    expect(rejected).toHaveLength(1)
+    expect((rejected[0] as PromiseRejectedResult).reason).toMatchObject({ code: 'CONFLICT' })
+    const after = sink.records.filter((r) => r.action === SAGE_AUDIT_ACTIONS.BOUNDARY_RESOLVED).length
+    expect(after - before).toBe(1)
+    // The original flag is preserved (still present, now terminal).
+    const [preserved] = await listSageBoundaryFlags(deps, ctxFor(actor()), { workspaceId: ws.id })
+    expect(['resolved', 'retained']).toContain(preserved.status)
+  })
+
+  it('requires a resolution note and rejects re-resolution of a terminal flag', async () => {
+    const ws = await makeWorkspace()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+    })
+    await expect(
+      resolveSageBoundaryFlag(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        flagId: flag.id,
+        resolution: 'resolved',
+        resolutionNote: '   ',
+      }),
+    ).rejects.toMatchObject({ code: 'INVALID_INPUT' })
+    await resolveSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagId: flag.id,
+      resolution: 'resolved',
+      resolutionNote: 'done',
+    })
+    await expect(
+      resolveSageBoundaryFlag(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        flagId: flag.id,
+        resolution: 'resolved',
+        resolutionNote: 'again',
+      }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('reviews a flag (open → under_review) via compare-and-set', async () => {
+    const ws = await makeWorkspace()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+    })
+    const reviewed = await reviewSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagId: flag.id,
+    })
+    expect(reviewed.status).toBe('under_review')
+    // A second review (no longer 'open') conflicts.
+    await expect(
+      reviewSageBoundaryFlag(deps, ctxFor(actor()), { workspaceId: ws.id, flagId: flag.id }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('non-discloses whole governance records derived from inaccessible evidence', async () => {
+    const ws = await makeWorkspace()
+    const src = await createSageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceType: 'authorized_only',
+    })
+    await classifySageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      sourceQuality: 'moderate',
+      authorizationLevel: 'sensitive',
+    })
+    // Creator has a sensitive grant (self) to file the flag + decision.
+    await grantSageEvidenceAuthorization(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: 'actor_1',
+      level: 'sensitive',
+      accessReason: 'x',
+      approvedBy: 'actor_1',
+    })
+    await addSageBoundaryFlag(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      flagType: 'sensitivity',
+      targetType: 'evidence_source',
+      targetId: src.id,
+    })
+    const item = await createSageEvidenceItem(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      confidenceLevel: 'moderate',
+    })
+    const decision = await createSageDecisionRecord(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      decision: 'proceed',
+      uncertainty: 'n/a',
+      referencedEvidenceItemIds: [item.id],
+    })
+
+    // A reader WITHOUT the sensitive grant: the sensitive flag AND the derived
+    // sensitive decision are hidden whole — the reader never sees the narrative,
+    // and a direct fetch is non-disclosed as NOT_FOUND.
+    await addSageWorkspaceMember(deps, ctxFor(actor()), { workspaceId: ws.id, actorId: 'reader' })
+    await assignSageRole(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: 'reader',
+      role: 'read_only_observer',
+      accessReason: 'x',
+      approvedBy: 'actor_1',
+    })
+    const reader = ctxFor(actor({ actorId: 'reader', permissions: [] }))
+    expect(await listSageBoundaryFlags(deps, reader, { workspaceId: ws.id })).toHaveLength(0)
+    expect(await listSageDecisionRecords(deps, reader, { workspaceId: ws.id })).toHaveLength(0)
+    await expect(
+      getSageDecisionRecord(deps, reader, { workspaceId: ws.id, decisionId: decision.id }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('redacts references the reader cannot access on an otherwise-visible decision', async () => {
+    const ws = await makeWorkspace()
+    // Owner grants self both levels so the decision can reference mixed evidence.
+    for (const level of ['authorized_only', 'sensitive'] as const) {
+      await grantSageEvidenceAuthorization(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        actorId: 'actor_1',
+        level,
+        accessReason: 'x',
+        approvedBy: 'actor_1',
+      })
+    }
+    async function makeItem(level: SageAuthorizationLevel) {
+      const src = await createSageEvidenceSource(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        sourceType: 'public',
+      })
+      await classifySageEvidenceSource(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        sourceId: src.id,
+        sourceQuality: 'moderate',
+        authorizationLevel: level,
+      })
+      return createSageEvidenceItem(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        sourceId: src.id,
+        confidenceLevel: 'moderate',
+      })
+    }
+    const authorizedItem = await makeItem('authorized_only')
+    const sensitiveItem = await makeItem('sensitive')
+    const decision = await createSageDecisionRecord(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      decision: 'proceed',
+      uncertainty: 'n/a',
+      referencedEvidenceItemIds: [authorizedItem.id, sensitiveItem.id],
+    })
+    // Decision inherits the most restrictive level (sensitive).
+    expect(decision.authorizationLevel).toBe('sensitive')
+
+    // A reader with ONLY a sensitive grant can see the record (sensitive) but
+    // NOT the authorized_only reference (grants are exact-level, not tiered).
+    await addSageWorkspaceMember(deps, ctxFor(actor()), { workspaceId: ws.id, actorId: 'reader' })
+    await assignSageRole(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: 'reader',
+      role: 'read_only_observer',
+      accessReason: 'x',
+      approvedBy: 'actor_1',
+    })
+    await grantSageEvidenceAuthorization(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: 'reader',
+      level: 'sensitive',
+      accessReason: 'x',
+      approvedBy: 'actor_1',
+    })
+    const reader = ctxFor(actor({ actorId: 'reader', permissions: [] }))
+    const detail = await getSageDecisionRecord(deps, reader, {
+      workspaceId: ws.id,
+      decisionId: decision.id,
+    })
+    expect(detail.referencedEvidenceItemIds).toEqual([sensitiveItem.id])
+  })
+
+  it('does not disclose another org’s decision record (NOT_FOUND)', async () => {
+    const ws = await makeWorkspace()
+    const decision = await createSageDecisionRecord(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      decision: 'proceed',
+      uncertainty: 'n/a',
+    })
+    await expect(
+      getSageDecisionRecord(deps, ctxFor(actor({ orgId: 'org_2' })), {
+        workspaceId: ws.id,
+        decisionId: decision.id,
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('lists review notes attributed to the authenticated reviewer', async () => {
+    const ws = await makeWorkspace()
+    await addSageReviewNote(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      note: 'human observation',
+      noteType: 'concern',
+      targetType: 'workspace',
+    })
+    const notes = await listSageReviewNotes(deps, ctxFor(actor()), { workspaceId: ws.id })
+    expect(notes).toHaveLength(1)
+    expect(notes[0].reviewerId).toBe('actor_1')
+    expect(notes[0].noteType).toBe('concern')
   })
 })

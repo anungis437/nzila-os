@@ -11,10 +11,13 @@
 import {
   SAGE_APPLICATION_ROLES,
   SAGE_AUTHORIZATION_LEVELS,
+  SAGE_BOUNDARY_RESOLUTIONS,
+  SAGE_REVIEW_NOTE_TYPES,
   type SageApplicationRole,
   type SageAuthorizationLevel,
   type SageBoundaryFlag,
   type SageBoundaryFlagType,
+  type SageBoundaryResolution,
   type SageConfidenceLevel,
   type SageDecisionRecord,
   type SageEvidenceAuthorization,
@@ -22,8 +25,11 @@ import {
   type SageEvidenceSource,
   type SageExportApproval,
   type SageExportRequest,
+  type SageGovernanceAuthorizationBasis,
+  type SageGovernanceTargetType,
   type SageInstitutionType,
   type SageReviewNote,
+  type SageReviewNoteType,
   type SageRiskSurface,
   type SageRoleAssignment,
   type SageSourceQuality,
@@ -33,7 +39,15 @@ import {
 } from './types'
 import { SAGE_PERMISSIONS } from './permissions'
 import type { SagePermission } from './permissions'
-import { resolveSagePermission, canAccessEvidenceLevel, type SageAccessContext } from './access-model'
+import {
+  resolveSagePermission,
+  canAccessEvidenceLevel,
+  authorizationLevelRank,
+  mostRestrictiveAuthorization,
+  isAuthorizationDowngrade,
+  SAGE_GOVERNANCE_AUTHORIZATION_FLOOR,
+  type SageAccessContext,
+} from './access-model'
 import {
   SAGE_AUDIT_ACTIONS,
   SAGE_AUDIT_RESOURCES,
@@ -688,48 +702,348 @@ export async function getSageEvidenceItem(
   return item
 }
 
-// ─── Boundary flags, review notes, decision records ──────────────────────────
+// ─── Boundary flags, review notes, decision records (Phase 6 human governance) ─
+
+/** Synthetic / non-human reviewer identities that may never author a decision. */
+const NON_HUMAN_REVIEWER_IDS = new Set([
+  'system',
+  'ai',
+  'automation',
+  'automated',
+  'bot',
+  'service',
+  'anonymous',
+  'unknown',
+])
+
+function assertNamedHumanReviewer(reviewerId: string): void {
+  const normalized = reviewerId.trim().toLowerCase()
+  if (!normalized) invalidInput('a named human reviewer is required')
+  if (NON_HUMAN_REVIEWER_IDS.has(normalized)) {
+    forbidden('a decision record requires a named human reviewer (no system/automated identity)')
+  }
+}
+
+/**
+ * Assert the actor is an authenticated human. The actor kind is derived
+ * server-side from the trusted session (never supplied by the browser); a
+ * service principal carrying an ordinary UUID is still rejected here because it
+ * is not marked 'human'. Absent/unknown kinds fail closed.
+ */
+function assertActorIsHuman(ctx: SageServiceContext): void {
+  if (ctx.actor.actorKind !== 'human') {
+    forbidden('this action requires an authenticated human actor')
+  }
+}
+
+/**
+ * Whether the actor may see a governance record given the record's OWN
+ * authorization envelope. This is the primary non-disclosure gate for derived
+ * governance narratives: a record is filtered on its stored authorization
+ * level, not merely on redaction of its referenced identifiers.
+ */
+function canAccessGovernanceRecord(
+  access: SageAccessContext,
+  record: { authorizationLevel: SageAuthorizationLevel },
+): boolean {
+  return canAccessEvidenceLevel(access, record.authorizationLevel)
+}
+
+/**
+ * Derive the authorization envelope for a boundary flag / review note. The
+ * effective level is the MOST RESTRICTIVE of the governance floor ('internal')
+ * and the target evidence's authorization level. A reviewer may request a
+ * STRICTER level (raising it), but never a weaker one (a downgrade is rejected).
+ * The browser cannot set the final level directly — the server floors it here.
+ */
+async function deriveTargetAuthorization(
+  deps: SageServiceDeps,
+  ws: SageWorkspace,
+  targetType: SageGovernanceTargetType,
+  targetId: string | null | undefined,
+  requested: SageAuthorizationLevel | undefined,
+): Promise<{
+  authorizationLevel: SageAuthorizationLevel
+  authorizationBasis: SageGovernanceAuthorizationBasis
+}> {
+  let floor: SageAuthorizationLevel = SAGE_GOVERNANCE_AUTHORIZATION_FLOOR
+  let basis: SageGovernanceAuthorizationBasis = 'workspace_default'
+
+  if (targetType === 'evidence_source' && targetId) {
+    const src = await deps.repo.getEvidenceSource(targetId, ws.id, ws.orgId)
+    if (src) {
+      floor = mostRestrictiveAuthorization(floor, src.authorizationLevel)
+      basis = 'target_inherited'
+    }
+  } else if (targetType === 'evidence_item' && targetId) {
+    const item = await deps.repo.getEvidenceItem(targetId, ws.id, ws.orgId)
+    const src = item
+      ? await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
+      : undefined
+    if (src) {
+      floor = mostRestrictiveAuthorization(floor, src.authorizationLevel)
+      basis = 'target_inherited'
+    }
+  }
+
+  return applyRequestedAuthorization(floor, basis, requested)
+}
+
+/**
+ * Apply a caller-requested authorization level to a derived floor. Requests may
+ * only RAISE restriction; a downgrade below the floor is forbidden.
+ */
+function applyRequestedAuthorization(
+  floor: SageAuthorizationLevel,
+  floorBasis: SageGovernanceAuthorizationBasis,
+  requested: SageAuthorizationLevel | undefined,
+): {
+  authorizationLevel: SageAuthorizationLevel
+  authorizationBasis: SageGovernanceAuthorizationBasis
+} {
+  if (!requested) return { authorizationLevel: floor, authorizationBasis: floorBasis }
+  if (!SAGE_AUTHORIZATION_LEVELS.includes(requested)) {
+    invalidInput('invalid authorization level')
+  }
+  if (isAuthorizationDowngrade(requested, floor)) {
+    forbidden('cannot lower the derived authorization level of a governance record')
+  }
+  if (authorizationLevelRank(requested) > authorizationLevelRank(floor)) {
+    return { authorizationLevel: requested, authorizationBasis: 'reviewer_restricted' }
+  }
+  return { authorizationLevel: floor, authorizationBasis: floorBasis }
+}
+
+/**
+ * Whether the actor may see a governance record attached to the given target.
+ * Workspace-level targets are visible to any workspace reader; evidence targets
+ * inherit the evidence authorization rules, so a flag/note about a source or
+ * item the actor cannot access is hidden (non-disclosure).
+ */
+async function isGovernanceTargetAccessible(
+  deps: SageServiceDeps,
+  ws: SageWorkspace,
+  access: SageAccessContext,
+  targetType: SageGovernanceTargetType | null | undefined,
+  targetId: string | null | undefined,
+): Promise<boolean> {
+  if (targetType === 'evidence_source') {
+    if (!targetId) return false
+    const src = await deps.repo.getEvidenceSource(targetId, ws.id, ws.orgId)
+    return Boolean(src) && canAccessEvidenceLevel(access, src!.authorizationLevel)
+  }
+  if (targetType === 'evidence_item') {
+    if (!targetId) return false
+    const item = await deps.repo.getEvidenceItem(targetId, ws.id, ws.orgId)
+    if (!item) return false
+    const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
+    return Boolean(src) && canAccessEvidenceLevel(access, src!.authorizationLevel)
+  }
+  // 'workspace' (or unspecified) → workspace-level, visible to any reader.
+  return true
+}
+
+/**
+ * Validate that a mutation's target belongs to the workspace AND is accessible
+ * to the actor. Evidence targets that are missing or inaccessible resolve to
+ * NOT_FOUND (never leak existence); a workspace target must carry no targetId.
+ */
+async function assertGovernanceTargetUsable(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  ws: SageWorkspace,
+  targetType: SageGovernanceTargetType,
+  targetId: string | null | undefined,
+): Promise<void> {
+  if (targetType === 'workspace') {
+    if (targetId) invalidInput('a workspace-level target must not reference a specific id')
+    return
+  }
+  if (!targetId) invalidInput('targetId is required for an evidence target')
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const accessible = await isGovernanceTargetAccessible(deps, ws, access, targetType, targetId)
+  if (!accessible) notFound(targetType === 'evidence_source' ? 'evidence source' : 'evidence item')
+}
 
 export async function addSageBoundaryFlag(
   deps: SageServiceDeps,
   ctx: SageServiceContext,
-  input: { workspaceId: string; flagType: SageBoundaryFlagType; targetId?: string; note?: string },
+  input: {
+    workspaceId: string
+    flagType: SageBoundaryFlagType
+    targetType: SageGovernanceTargetType
+    targetId?: string
+    note?: string
+    requestedAuthorizationLevel?: SageAuthorizationLevel
+  },
 ): Promise<SageBoundaryFlag> {
-  requirePermission(ctx, SAGE_PERMISSIONS.BOUNDARY_FLAG)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.BOUNDARY_FLAG,
+  })
+  await assertGovernanceTargetUsable(deps, ctx, ws, input.targetType, input.targetId)
+  // Derive the authorization envelope server-side so the flag narrative can
+  // never be less protected than the evidence it concerns.
+  const { authorizationLevel, authorizationBasis } = await deriveTargetAuthorization(
+    deps,
+    ws,
+    input.targetType,
+    input.targetId,
+    input.requestedAuthorizationLevel,
+  )
+  const ts = contextNow(ctx)
   const flag = await deps.repo.addBoundaryFlag({
     workspaceId: ws.id,
     orgId: ws.orgId,
+    targetType: input.targetType,
     targetId: input.targetId ?? null,
     flagType: input.flagType,
     note: input.note ?? null,
+    status: 'open',
+    authorizationLevel,
+    authorizationBasis,
+    resolvedAt: null,
+    resolvedBy: null,
+    resolutionNote: null,
     createdBy: ctx.actor.actorId,
-    createdAt: contextNow(ctx),
+    createdAt: ts,
+    updatedAt: ts,
   })
   await emit(deps, ctx, SAGE_AUDIT_ACTIONS.BOUNDARY_FLAGGED, SAGE_AUDIT_RESOURCES.BOUNDARY_FLAG, flag.id, {
     flagType: input.flagType,
+    targetType: input.targetType,
+    status: flag.status,
+    authorizationLevel: flag.authorizationLevel,
   })
   return flag
+}
+
+/** Acknowledge a flag for review: compare-and-set 'open' → 'under_review'. */
+export async function reviewSageBoundaryFlag(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; flagId: string },
+): Promise<SageBoundaryFlag> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.BOUNDARY_FLAG,
+  })
+  const existing = await deps.repo.getBoundaryFlag(input.flagId, ws.id, ws.orgId)
+  if (!existing) notFound('boundary flag')
+  const reviewed = await deps.repo.reviewBoundaryFlag(input.flagId, ws.id, ws.orgId, contextNow(ctx))
+  await emit(
+    deps,
+    ctx,
+    SAGE_AUDIT_ACTIONS.BOUNDARY_REVIEWED,
+    SAGE_AUDIT_RESOURCES.BOUNDARY_FLAG,
+    reviewed.id,
+    { status: reviewed.status },
+  )
+  return reviewed
+}
+
+/** Resolve or retain a boundary flag: compare-and-set, requires a human note. */
+export async function resolveSageBoundaryFlag(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: {
+    workspaceId: string
+    flagId: string
+    resolution: SageBoundaryResolution
+    resolutionNote: string
+    requestedAuthorizationLevel?: SageAuthorizationLevel
+  },
+): Promise<SageBoundaryFlag> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.BOUNDARY_FLAG,
+  })
+  // Resolving a boundary is a named-human governance act.
+  assertActorIsHuman(ctx)
+  if (!SAGE_BOUNDARY_RESOLUTIONS.includes(input.resolution)) {
+    invalidInput('invalid boundary resolution')
+  }
+  if (!input.resolutionNote || !input.resolutionNote.trim()) {
+    invalidInput('a human resolution note is required')
+  }
+  const existing = await deps.repo.getBoundaryFlag(input.flagId, ws.id, ws.orgId)
+  if (!existing) notFound('boundary flag')
+  // The resolution narrative must remain at least as restricted as the flag it
+  // resolves. The resolver may raise the level (e.g. if the note references
+  // stricter evidence) but can never downgrade it.
+  const { authorizationLevel } = applyRequestedAuthorization(
+    existing.authorizationLevel,
+    existing.authorizationBasis ?? 'workspace_default',
+    input.requestedAuthorizationLevel,
+  )
+  const ts = contextNow(ctx)
+  const resolved = await deps.repo.resolveBoundaryFlag(input.flagId, ws.id, ws.orgId, {
+    status: input.resolution,
+    resolvedBy: ctx.actor.actorId,
+    resolutionNote: input.resolutionNote,
+    resolvedAt: ts,
+    updatedAt: ts,
+    authorizationLevel,
+  })
+  await emit(
+    deps,
+    ctx,
+    SAGE_AUDIT_ACTIONS.BOUNDARY_RESOLVED,
+    SAGE_AUDIT_RESOURCES.BOUNDARY_FLAG,
+    resolved.id,
+    { resolution: input.resolution, status: resolved.status, authorizationLevel: resolved.authorizationLevel },
+  )
+  return resolved
 }
 
 export async function addSageReviewNote(
   deps: SageServiceDeps,
   ctx: SageServiceContext,
-  input: { workspaceId: string; reviewerId: string; note: string; targetId?: string },
+  input: {
+    workspaceId: string
+    note: string
+    noteType: SageReviewNoteType
+    targetType: SageGovernanceTargetType
+    targetId?: string
+    requestedAuthorizationLevel?: SageAuthorizationLevel
+  },
 ): Promise<SageReviewNote> {
-  requirePermission(ctx, SAGE_PERMISSIONS.REVIEW_NOTE)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
-  if (!input.reviewerId) invalidInput('reviewerId (named reviewer) is required')
-  if (!input.note) invalidInput('note is required')
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.REVIEW_NOTE,
+  })
+  // A review note is a named-human governance act.
+  assertActorIsHuman(ctx)
+  if (!input.note || !input.note.trim()) invalidInput('note is required')
+  if (!SAGE_REVIEW_NOTE_TYPES.includes(input.noteType)) invalidInput('invalid review note type')
+  await assertGovernanceTargetUsable(deps, ctx, ws, input.targetType, input.targetId)
+  // Derive the authorization envelope so the note narrative cannot be less
+  // protected than the evidence it annotates.
+  const { authorizationLevel, authorizationBasis } = await deriveTargetAuthorization(
+    deps,
+    ws,
+    input.targetType,
+    input.targetId,
+    input.requestedAuthorizationLevel,
+  )
+  // reviewerId is the AUTHENTICATED actor — never a browser-supplied identity.
   const note = await deps.repo.addReviewNote({
     workspaceId: ws.id,
     orgId: ws.orgId,
+    targetType: input.targetType,
     targetId: input.targetId ?? null,
-    reviewerId: input.reviewerId,
+    reviewerId: ctx.actor.actorId,
+    noteType: input.noteType,
     note: input.note,
+    authorizationLevel,
+    authorizationBasis,
     createdAt: contextNow(ctx),
   })
-  await emit(deps, ctx, SAGE_AUDIT_ACTIONS.REVIEW_NOTED, SAGE_AUDIT_RESOURCES.WORKSPACE, note.id)
+  await emit(deps, ctx, SAGE_AUDIT_ACTIONS.REVIEW_NOTED, SAGE_AUDIT_RESOURCES.REVIEW_NOTE, note.id, {
+    noteType: input.noteType,
+    targetType: input.targetType,
+    authorizationLevel: note.authorizationLevel,
+  })
   return note
 }
 
@@ -739,31 +1053,84 @@ export async function createSageDecisionRecord(
   input: {
     workspaceId: string
     decision: string
-    humanReviewerId: string
     rationale?: string
+    uncertainty: string
     referencedEvidenceItemIds?: string[]
+    referencedBoundaryFlagIds?: string[]
+    requestedAuthorizationLevel?: SageAuthorizationLevel
   },
 ): Promise<SageDecisionRecord> {
-  requirePermission(ctx, SAGE_PERMISSIONS.DECISION_RECORD)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
-  if (!input.decision) invalidInput('decision is required')
-  assertDecisionRecordHasNamedHumanReviewer({ humanReviewerId: input.humanReviewerId })
-
-  // If evidence is referenced, it must have been reviewed (human_review_required cleared
-  // is not modeled yet in Phase 2; we require the referenced items to exist and to be
-  // non-excluded). No auto-generated findings path exists: a decision is only created
-  // from an explicit human-authored `decision` string with a named human reviewer.
-  for (const itemId of input.referencedEvidenceItemIds ?? []) {
-    const item = await deps.repo.getEvidenceItem(itemId, ws.id, ws.orgId)
-    if (!item || item.workspaceId !== ws.id) notFound('referenced evidence item')
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.DECISION_RECORD,
+  })
+  if (!input.decision || !input.decision.trim()) invalidInput('a decision statement is required')
+  if (!input.uncertainty || !input.uncertainty.trim()) {
+    invalidInput('an uncertainty / limitations statement is required')
   }
+
+  // A decision record is a named-human governance act. The actor kind is
+  // derived server-side; a service principal with an ordinary UUID is rejected.
+  assertActorIsHuman(ctx)
+
+  // The named human reviewer IS the authenticated actor — derived server-side,
+  // never accepted from the browser. Admin/oversight status cannot substitute:
+  // DECISION_RECORD authority was already checked via membership + active role.
+  const humanReviewerId = ctx.actor.actorId
+  assertDecisionRecordHasNamedHumanReviewer({ humanReviewerId })
+  assertNamedHumanReviewer(humanReviewerId)
+
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+
+  // Referenced evidence must belong to the workspace AND be accessible to the
+  // reviewer. As we validate, we also derive the decision's authorization
+  // envelope: it inherits the MOST RESTRICTIVE level among referenced evidence,
+  // and any excluded evidence forces the decision out of external review.
+  const evidenceRefs = input.referencedEvidenceItemIds ?? []
+  let floor: SageAuthorizationLevel = SAGE_GOVERNANCE_AUTHORIZATION_FLOOR
+  let excludedFromExternalReview = false
+  for (const itemId of evidenceRefs) {
+    const item = await deps.repo.getEvidenceItem(itemId, ws.id, ws.orgId)
+    if (!item) notFound('referenced evidence item')
+    const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
+    if (!src || !canAccessEvidenceLevel(access, src.authorizationLevel)) {
+      forbidden('referenced evidence is not accessible to the reviewer')
+    }
+    floor = mostRestrictiveAuthorization(floor, src.authorizationLevel)
+    if (item.excludedFromExternalReview || src.authorizationLevel === 'excluded') {
+      excludedFromExternalReview = true
+    }
+  }
+
+  // Referenced boundary flags must belong to the workspace, and their own
+  // authorization envelope also raises the decision floor.
+  const flagRefs = input.referencedBoundaryFlagIds ?? []
+  for (const flagId of flagRefs) {
+    const flag = await deps.repo.getBoundaryFlag(flagId, ws.id, ws.orgId)
+    if (!flag) notFound('referenced boundary flag')
+    floor = mostRestrictiveAuthorization(floor, flag.authorizationLevel)
+  }
+
+  const floorBasis: SageGovernanceAuthorizationBasis =
+    evidenceRefs.length > 0 || flagRefs.length > 0 ? 'evidence_inherited' : 'workspace_default'
+  const { authorizationLevel, authorizationBasis } = applyRequestedAuthorization(
+    floor,
+    floorBasis,
+    input.requestedAuthorizationLevel,
+  )
 
   const record = await deps.repo.createDecisionRecord({
     workspaceId: ws.id,
     orgId: ws.orgId,
     decision: input.decision,
     rationale: input.rationale ?? null,
-    humanReviewerId: input.humanReviewerId,
+    uncertainty: input.uncertainty,
+    humanReviewerId,
+    referencedEvidenceItemIds: [...evidenceRefs],
+    referencedBoundaryFlagIds: [...flagRefs],
+    authorizationLevel,
+    authorizationBasis,
+    excludedFromExternalReview,
     createdBy: ctx.actor.actorId,
     createdAt: contextNow(ctx),
   })
@@ -773,9 +1140,124 @@ export async function createSageDecisionRecord(
     SAGE_AUDIT_ACTIONS.DECISION_RECORDED,
     SAGE_AUDIT_RESOURCES.DECISION_RECORD,
     record.id,
-    { humanReviewerId: input.humanReviewerId },
+    {
+      humanReviewerId,
+      actorKind: ctx.actor.actorKind,
+      authorizationLevel: record.authorizationLevel,
+      excludedFromExternalReview: record.excludedFromExternalReview,
+      evidenceReferenceCount: evidenceRefs.length,
+      boundaryFlagReferenceCount: flagRefs.length,
+    },
   )
   return record
+}
+
+// ─── Governance read models (authorization-filtered) ─────────────────────────
+
+/** List boundary flags the actor may see (evidence-target flags are redacted). */
+export async function listSageBoundaryFlags(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; filters?: { status?: string } },
+): Promise<SageBoundaryFlag[]> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const flags = await deps.repo.listBoundaryFlags(ws.id, ws.orgId, input.filters)
+  const visible: SageBoundaryFlag[] = []
+  for (const f of flags) {
+    // Filter on the record's OWN authorization envelope AND the target's
+    // accessibility (defense in depth for legacy rows predating the envelope).
+    if (
+      canAccessGovernanceRecord(access, f) &&
+      (await isGovernanceTargetAccessible(deps, ws, access, f.targetType, f.targetId))
+    ) {
+      visible.push(f)
+    }
+  }
+  return visible
+}
+
+/** List review notes the actor may see (evidence-target notes are redacted). */
+export async function listSageReviewNotes(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; filters?: { targetType?: string; targetId?: string } },
+): Promise<SageReviewNote[]> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const notes = await deps.repo.listReviewNotes(ws.id, ws.orgId, input.filters)
+  const visible: SageReviewNote[] = []
+  for (const n of notes) {
+    if (
+      canAccessGovernanceRecord(access, n) &&
+      (await isGovernanceTargetAccessible(deps, ws, access, n.targetType, n.targetId))
+    ) {
+      visible.push(n)
+    }
+  }
+  return visible
+}
+
+/** Redact a decision's evidence references down to those the actor can access. */
+async function redactDecisionReferences(
+  deps: SageServiceDeps,
+  ws: SageWorkspace,
+  access: SageAccessContext,
+  record: SageDecisionRecord,
+): Promise<SageDecisionRecord> {
+  const accessibleEvidence: string[] = []
+  for (const itemId of record.referencedEvidenceItemIds) {
+    const item = await deps.repo.getEvidenceItem(itemId, ws.id, ws.orgId)
+    if (!item) continue
+    const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
+    if (src && canAccessEvidenceLevel(access, src.authorizationLevel)) accessibleEvidence.push(itemId)
+  }
+  return { ...record, referencedEvidenceItemIds: accessibleEvidence }
+}
+
+export async function listSageDecisionRecords(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string },
+): Promise<SageDecisionRecord[]> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const records = await deps.repo.listDecisionRecords(ws.id, ws.orgId)
+  const out: SageDecisionRecord[] = []
+  for (const record of records) {
+    // A decision narrative is disclosed only when the actor can access the
+    // record's own authorization level; otherwise the record is omitted whole.
+    if (!canAccessGovernanceRecord(access, record)) continue
+    out.push(await redactDecisionReferences(deps, ws, access, record))
+  }
+  return out
+}
+
+export async function getSageDecisionRecord(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; decisionId: string },
+): Promise<SageDecisionRecord> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const record = await deps.repo.getDecisionRecord(input.decisionId, ws.id, ws.orgId)
+  if (!record) notFound('decision record')
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  // Non-disclosure: an inaccessible decision resolves to NOT_FOUND rather than
+  // leaking its existence or narrative.
+  if (!canAccessGovernanceRecord(access, record)) notFound('decision record')
+  return redactDecisionReferences(deps, ws, access, record)
 }
 
 // ─── Export workflow ─────────────────────────────────────────────────────────
