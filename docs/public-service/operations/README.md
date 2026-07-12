@@ -52,6 +52,7 @@ status definitions, confidence levels, authorized-only marker, risk-tier phrasin
 - `internal-doctrine-map.md` — internal lineage map connecting OCI/OCRA, CIVIC, CLEAR, SAGE, and the Manual Operating Pack
 - `external-review-readiness-decision.md` — internal decision memo and gate criteria for controlled external review
 - `feedback-only-material-set-checklist.md` — internal checklist for approving controlled feedback-only reviewer materials
+- `external-review-materials/cbc-ishmael-feedback-only/README.md` — controlled feedback-only reviewer material set for a named trusted reviewer; not yet authorized for sharing
 
 ## 6. Minimum quality gate
 
