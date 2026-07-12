@@ -46,6 +46,12 @@ This is the final planning-only SAGE PR. The next PR must begin engineering impl
 > implementation-blocking invariants, access model, and negative-path tests). Boundaries remain unchanged;
 > nothing here is launched, available, or procurement-ready.
 
+> **Implementation status (Phase 2 started).** The `@nzila/sage-core` service layer is now executable:
+> `service-context.ts`, `service-errors.ts`, `repository.ts` (port + in-memory impl), `audit-sink.ts`, and
+> `services.ts` orchestrate workspace/membership/role/evidence/decision/export flows with permission checks,
+> org-boundary enforcement, invariant enforcement, and SAGE audit emission (integrating with `@nzila/audit`).
+> Covered by `services.test.ts`. Boundaries unchanged; still not launched, available, or procurement-ready.
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:

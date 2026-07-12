@@ -12,7 +12,12 @@
     "./boundary-profile": "./src/boundary-profile.ts",
     "./audit-events": "./src/audit-events.ts",
     "./invariants": "./src/invariants.ts",
-    "./access-model": "./src/access-model.ts"
+    "./access-model": "./src/access-model.ts",
+    "./service-context": "./src/service-context.ts",
+    "./service-errors": "./src/service-errors.ts",
+    "./repository": "./src/repository.ts",
+    "./audit-sink": "./src/audit-sink.ts",
+    "./services": "./src/services.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
