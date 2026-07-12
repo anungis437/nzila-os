@@ -69,8 +69,52 @@ export interface SageRepository {
   linkEvidenceItem(itemId: string, linkedAt: string): Promise<SageEvidenceItem>
 
   addBoundaryFlag(input: Omit<SageBoundaryFlag, 'id'>): Promise<SageBoundaryFlag>
+  getBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageBoundaryFlag | undefined>
+  listBoundaryFlags(
+    workspaceId: string,
+    orgId: string,
+    filters?: { targetType?: string; targetId?: string; status?: string },
+  ): Promise<SageBoundaryFlag[]>
+  /** Compare-and-set: 'open' → 'under_review'. Conflict if not currently 'open'. */
+  reviewBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+    updatedAt: string,
+  ): Promise<SageBoundaryFlag>
+  /** Compare-and-set: 'open'|'under_review' → resolution. Conflict otherwise. */
+  resolveBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+    update: {
+      status: 'resolved' | 'retained'
+      resolvedBy: string
+      resolutionNote: string
+      resolvedAt: string
+      updatedAt: string
+      authorizationLevel?: SageAuthorizationLevel
+    },
+  ): Promise<SageBoundaryFlag>
+
   addReviewNote(input: Omit<SageReviewNote, 'id'>): Promise<SageReviewNote>
+  listReviewNotes(
+    workspaceId: string,
+    orgId: string,
+    filters?: { targetType?: string; targetId?: string },
+  ): Promise<SageReviewNote[]>
+
   createDecisionRecord(input: Omit<SageDecisionRecord, 'id'>): Promise<SageDecisionRecord>
+  listDecisionRecords(workspaceId: string, orgId: string): Promise<SageDecisionRecord[]>
+  getDecisionRecord(
+    decisionId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDecisionRecord | undefined>
 
   createExportRequest(input: Omit<SageExportRequest, 'id'>): Promise<SageExportRequest>
   getExportRequest(exportRequestId: string): Promise<SageExportRequest | undefined>
@@ -283,10 +327,105 @@ export class InMemorySageRepository implements SageRepository {
     return flag
   }
 
+  async getBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageBoundaryFlag | undefined> {
+    return this.boundaryFlags.find(
+      (f) => f.id === flagId && f.workspaceId === workspaceId && f.orgId === orgId,
+    )
+  }
+
+  async listBoundaryFlags(
+    workspaceId: string,
+    orgId: string,
+    filters?: { targetType?: string; targetId?: string; status?: string },
+  ): Promise<SageBoundaryFlag[]> {
+    return this.boundaryFlags
+      .filter(
+        (f) =>
+          f.workspaceId === workspaceId &&
+          f.orgId === orgId &&
+          (filters?.targetType === undefined || f.targetType === filters.targetType) &&
+          (filters?.targetId === undefined || f.targetId === filters.targetId) &&
+          (filters?.status === undefined || f.status === filters.status),
+      )
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id))
+  }
+
+  async reviewBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+    updatedAt: string,
+  ): Promise<SageBoundaryFlag> {
+    // Compare-and-set: only an 'open' flag may transition to 'under_review'.
+    const flag = this.boundaryFlags.find(
+      (f) =>
+        f.id === flagId &&
+        f.workspaceId === workspaceId &&
+        f.orgId === orgId &&
+        f.status === 'open',
+    )
+    if (!flag) conflict('boundary flag is not open or was concurrently modified')
+    flag.status = 'under_review'
+    flag.updatedAt = updatedAt
+    return flag
+  }
+
+  async resolveBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+    update: {
+      status: 'resolved' | 'retained'
+      resolvedBy: string
+      resolutionNote: string
+      resolvedAt: string
+      updatedAt: string
+      authorizationLevel?: SageAuthorizationLevel
+    },
+  ): Promise<SageBoundaryFlag> {
+    // Compare-and-set: only an open/under_review flag may be resolved/retained.
+    const flag = this.boundaryFlags.find(
+      (f) =>
+        f.id === flagId &&
+        f.workspaceId === workspaceId &&
+        f.orgId === orgId &&
+        (f.status === 'open' || f.status === 'under_review'),
+    )
+    if (!flag) conflict('boundary flag is already resolved or was concurrently modified')
+    flag.status = update.status
+    flag.resolvedBy = update.resolvedBy
+    flag.resolutionNote = update.resolutionNote
+    flag.resolvedAt = update.resolvedAt
+    flag.updatedAt = update.updatedAt
+    // Authorization may only be raised by the resolver; the service floors it.
+    if (update.authorizationLevel) flag.authorizationLevel = update.authorizationLevel
+    return flag
+  }
+
   async addReviewNote(input: Omit<SageReviewNote, 'id'>): Promise<SageReviewNote> {
     const note: SageReviewNote = { ...input, id: nextId('note') }
     this.reviewNotes.push(note)
     return note
+  }
+
+  async listReviewNotes(
+    workspaceId: string,
+    orgId: string,
+    filters?: { targetType?: string; targetId?: string },
+  ): Promise<SageReviewNote[]> {
+    return this.reviewNotes
+      .filter(
+        (n) =>
+          n.workspaceId === workspaceId &&
+          n.orgId === orgId &&
+          (filters?.targetType === undefined || n.targetType === filters.targetType) &&
+          (filters?.targetId === undefined || n.targetId === filters.targetId),
+      )
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id))
   }
 
   async createDecisionRecord(
@@ -295,6 +434,25 @@ export class InMemorySageRepository implements SageRepository {
     const record: SageDecisionRecord = { ...input, id: nextId('dec') }
     this.decisionRecords.push(record)
     return record
+  }
+
+  async listDecisionRecords(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDecisionRecord[]> {
+    return this.decisionRecords
+      .filter((d) => d.workspaceId === workspaceId && d.orgId === orgId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id))
+  }
+
+  async getDecisionRecord(
+    decisionId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDecisionRecord | undefined> {
+    return this.decisionRecords.find(
+      (d) => d.id === decisionId && d.workspaceId === workspaceId && d.orgId === orgId,
+    )
   }
 
   async createExportRequest(

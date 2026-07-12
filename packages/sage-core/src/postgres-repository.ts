@@ -398,15 +398,21 @@ export class PostgresSageRepository implements SageRepository {
   async addBoundaryFlag(input: Omit<SageBoundaryFlag, 'id'>): Promise<SageBoundaryFlag> {
     const { rows } = await this.sql.query<SageBoundaryFlagRow>(
       `insert into sage_boundary_flag
-         (workspace_id, org_id, target_id, flag_type, note, created_by, created_at)
-       values ($1, $2, $3, $4, $5, $6, $7)
+         (workspace_id, org_id, target_type, target_id, flag_type, note, status,
+          authorization_level, authorization_basis,
+          created_by, created_at, updated_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)
        returning *`,
       [
         input.workspaceId,
         input.orgId,
+        input.targetType ?? null,
         input.targetId ?? null,
         input.flagType,
         input.note ?? null,
+        input.status,
+        input.authorizationLevel,
+        input.authorizationBasis ?? null,
         input.createdBy,
         input.createdAt,
       ],
@@ -414,22 +420,149 @@ export class PostgresSageRepository implements SageRepository {
     return mapBoundaryFlag(rows[0])
   }
 
+  async getBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageBoundaryFlag | undefined> {
+    const { rows } = await this.sql.query<SageBoundaryFlagRow>(
+      `select * from sage_boundary_flag where id = $1 and workspace_id = $2 and org_id = $3`,
+      [flagId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapBoundaryFlag(row) : undefined
+  }
+
+  async listBoundaryFlags(
+    workspaceId: string,
+    orgId: string,
+    filters?: { targetType?: string; targetId?: string; status?: string },
+  ): Promise<SageBoundaryFlag[]> {
+    const params: unknown[] = [workspaceId, orgId]
+    let where = 'where workspace_id = $1 and org_id = $2'
+    if (filters?.targetType !== undefined) {
+      params.push(filters.targetType)
+      where += ` and target_type = $${params.length}`
+    }
+    if (filters?.targetId !== undefined) {
+      params.push(filters.targetId)
+      where += ` and target_id = $${params.length}`
+    }
+    if (filters?.status !== undefined) {
+      params.push(filters.status)
+      where += ` and status = $${params.length}`
+    }
+    const { rows } = await this.sql.query<SageBoundaryFlagRow>(
+      `select * from sage_boundary_flag ${where} order by created_at desc, id desc`,
+      params,
+    )
+    return rows.map(mapBoundaryFlag)
+  }
+
+  async reviewBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+    updatedAt: string,
+  ): Promise<SageBoundaryFlag> {
+    // Compare-and-set: only an 'open' flag may move to 'under_review'.
+    const { rows } = await this.sql.query<SageBoundaryFlagRow>(
+      `update sage_boundary_flag
+         set status = 'under_review', updated_at = $4
+       where id = $1 and workspace_id = $2 and org_id = $3 and status = 'open'
+       returning *`,
+      [flagId, workspaceId, orgId, updatedAt],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) conflict('boundary flag is not open or was concurrently modified')
+    return mapBoundaryFlag(row)
+  }
+
+  async resolveBoundaryFlag(
+    flagId: string,
+    workspaceId: string,
+    orgId: string,
+    update: {
+      status: 'resolved' | 'retained'
+      resolvedBy: string
+      resolutionNote: string
+      resolvedAt: string
+      updatedAt: string
+      authorizationLevel?: SageAuthorizationLevel
+    },
+  ): Promise<SageBoundaryFlag> {
+    // Compare-and-set: only an open/under_review flag may be resolved/retained.
+    // The status predicate makes two concurrent resolvers race for one row.
+    // Authorization may only be raised (never lowered) by the resolver; when the
+    // caller supplies no override the persisted level is preserved unchanged.
+    const { rows } = await this.sql.query<SageBoundaryFlagRow>(
+      `update sage_boundary_flag
+         set status = $4, resolved_by = $5, resolution_note = $6,
+             resolved_at = $7, updated_at = $8,
+             authorization_level = coalesce($9, authorization_level)
+       where id = $1 and workspace_id = $2 and org_id = $3
+         and status in ('open', 'under_review')
+       returning *`,
+      [
+        flagId,
+        workspaceId,
+        orgId,
+        update.status,
+        update.resolvedBy,
+        update.resolutionNote,
+        update.resolvedAt,
+        update.updatedAt,
+        update.authorizationLevel ?? null,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) conflict('boundary flag is already resolved or was concurrently modified')
+    return mapBoundaryFlag(row)
+  }
+
   async addReviewNote(input: Omit<SageReviewNote, 'id'>): Promise<SageReviewNote> {
     const { rows } = await this.sql.query<SageReviewNoteRow>(
       `insert into sage_review_note
-         (workspace_id, org_id, target_id, reviewer_id, note, created_at)
-       values ($1, $2, $3, $4, $5, $6)
+         (workspace_id, org_id, target_type, target_id, reviewer_id, note_type, note,
+          authorization_level, authorization_basis, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        returning *`,
       [
         input.workspaceId,
         input.orgId,
+        input.targetType ?? null,
         input.targetId ?? null,
         input.reviewerId,
+        input.noteType,
         input.note,
+        input.authorizationLevel,
+        input.authorizationBasis ?? null,
         input.createdAt,
       ],
     )
     return mapReviewNote(rows[0])
+  }
+
+  async listReviewNotes(
+    workspaceId: string,
+    orgId: string,
+    filters?: { targetType?: string; targetId?: string },
+  ): Promise<SageReviewNote[]> {
+    const params: unknown[] = [workspaceId, orgId]
+    let where = 'where workspace_id = $1 and org_id = $2'
+    if (filters?.targetType !== undefined) {
+      params.push(filters.targetType)
+      where += ` and target_type = $${params.length}`
+    }
+    if (filters?.targetId !== undefined) {
+      params.push(filters.targetId)
+      where += ` and target_id = $${params.length}`
+    }
+    const { rows } = await this.sql.query<SageReviewNoteRow>(
+      `select * from sage_review_note ${where} order by created_at desc, id desc`,
+      params,
+    )
+    return rows.map(mapReviewNote)
   }
 
   async createDecisionRecord(
@@ -437,20 +570,55 @@ export class PostgresSageRepository implements SageRepository {
   ): Promise<SageDecisionRecord> {
     const { rows } = await this.sql.query<SageDecisionRecordRow>(
       `insert into sage_decision_record
-         (workspace_id, org_id, decision, rationale, human_reviewer_id, created_by, created_at)
-       values ($1, $2, $3, $4, $5, $6, $7)
+         (workspace_id, org_id, decision, rationale, uncertainty, human_reviewer_id,
+          referenced_evidence_item_ids, referenced_boundary_flag_ids,
+          authorization_level, authorization_basis, excluded_from_external_review,
+          created_by, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9, $10, $11, $12, $13)
        returning *`,
       [
         input.workspaceId,
         input.orgId,
         input.decision,
         input.rationale ?? null,
+        input.uncertainty ?? null,
         input.humanReviewerId,
+        JSON.stringify(input.referencedEvidenceItemIds ?? []),
+        JSON.stringify(input.referencedBoundaryFlagIds ?? []),
+        input.authorizationLevel,
+        input.authorizationBasis ?? null,
+        input.excludedFromExternalReview,
         input.createdBy,
         input.createdAt,
       ],
     )
     return mapDecisionRecord(rows[0])
+  }
+
+  async listDecisionRecords(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDecisionRecord[]> {
+    const { rows } = await this.sql.query<SageDecisionRecordRow>(
+      `select * from sage_decision_record
+       where workspace_id = $1 and org_id = $2
+       order by created_at desc, id desc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapDecisionRecord)
+  }
+
+  async getDecisionRecord(
+    decisionId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDecisionRecord | undefined> {
+    const { rows } = await this.sql.query<SageDecisionRecordRow>(
+      `select * from sage_decision_record where id = $1 and workspace_id = $2 and org_id = $3`,
+      [decisionId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDecisionRecord(row) : undefined
   }
 
   // ─── Export workflow ─────────────────────────────────────────────────────────

@@ -78,6 +78,9 @@
     },
     "evidence": {
       "tab": "Evidence"
+    },
+    "governance": {
+      "tab": "Review & decisions"
     }
   },
   "sageEvidence": {
@@ -125,6 +128,81 @@
       "needs_review": "Needs review",
       "excluded": "Excluded",
       "archived": "Archived"
-    }
+    },
+    "governanceTab": "Review & decisions"
+  },
+  "sageGovernance": {
+    "pageTitle": "Review & decisions",
+    "pageDescription": "Human review and governance over the evidence lifecycle: open and resolve boundary flags, record attributed review notes, and create named-human decision records. For internal review use only — not an automated decision, score, or certification.",
+    "boundaryFlags": "Boundary flags",
+    "reviewNotes": "Review notes",
+    "decisionRecords": "Decision records",
+    "openFlag": "Open flag",
+    "flagType": "Flag type",
+    "target": "Target",
+    "note": "Note",
+    "submitting": "Saving…",
+    "noFlags": "No boundary flags you can view yet.",
+    "flagsListLabel": "Boundary flags",
+    "flagStatus": {
+      "open": "Open",
+      "under_review": "Under review",
+      "resolved": "Resolved",
+      "retained": "Retained"
+    },
+    "resolvedBy": "resolved by",
+    "resolutionNote": "Resolution note",
+    "resolveFlag": "Resolve flag",
+    "resolutionOutcome": "Outcome",
+    "validation": {
+      "resolutionNoteRequired": "A resolution note is required.",
+      "noteRequired": "A note is required.",
+      "decisionRequired": "A decision statement is required.",
+      "uncertaintyRequired": "An uncertainty / limitations statement is required."
+    },
+    "error": {
+      "flagFailed": "Could not open the boundary flag. Please try again.",
+      "resolveFailed": "Could not resolve the boundary flag. Please try again.",
+      "noteFailed": "Could not add the review note. Please try again.",
+      "decisionFailed": "Could not create the decision record. Please try again."
+    },
+    "addReviewNote": "Add review note",
+    "humanAuthoredHint": "A review note is a human observation. It does not approve evidence or record a decision.",
+    "reviewer": "Reviewer",
+    "noteType": "Note type",
+    "noteDoesNotDecide": "Recording a note does not approve evidence or constitute a decision.",
+    "humanAuthored": "Human-authored observation",
+    "recordedBy": "Recorded by",
+    "notesListLabel": "Review notes",
+    "noNotes": "No review notes you can view yet.",
+    "createDecision": "Create decision record",
+    "humanDecisionHint": "A decision record is a named human judgment. Evidence references do not constitute an automated conclusion.",
+    "decisionStatement": "Decision statement",
+    "rationale": "Rationale",
+    "uncertainty": "Uncertainty and limitations",
+    "uncertaintyHelp": "State what remains uncertain or out of scope. This is required.",
+    "reviewedEvidence": "Reviewed evidence",
+    "relatedFlags": "Related boundary flags",
+    "humanDecisionRecord": "Human decision record",
+    "decisionRecord": "Decision record",
+    "evidenceNotAutomated": "Evidence references do not constitute an automated conclusion.",
+    "noDecisions": "No decision records you can view yet.",
+    "decisionsListLabel": "Decision records",
+    "distinctions": {
+      "heading": "Evidence, review, flag, and decision are distinct",
+      "evidenceTerm": "Evidence",
+      "evidence": "Sourced factual material.",
+      "reviewTerm": "Review note",
+      "review": "A named human observation.",
+      "flagTerm": "Boundary flag",
+      "flag": "A concern, limitation, or review condition.",
+      "decisionTerm": "Decision record",
+      "decision": "A named human judgment and rationale."
+    },
+    "targetWorkspace": "Workspace",
+    "targetSourcePrefix": "Source:",
+    "targetItemPrefix": "Item:",
+    "permissionDenied": "You do not have permission for this action.",
+    "unableToLoad": "Unable to load review & decisions."
   }
 }

@@ -12,6 +12,7 @@ import 'server-only'
 import {
   PostgresSageRepository,
   SAGE_PERMISSIONS,
+  type SageActorKind,
   type SageServiceContext,
   type SageServiceDeps,
 } from '@nzila/sage-core'
@@ -27,6 +28,72 @@ export interface SageActorScope {
   actorId: string
   orgId: string
   orgRole: string
+  /**
+   * How the caller authenticated, derived SERVER-SIDE from the trusted session
+   * — never supplied by the browser. This is the fail-closed input from which
+   * the actor kind is resolved; an unknown/missing value is rejected (it is
+   * never silently classified as human).
+   */
+  authenticationType?: SageAuthenticationType
+  /**
+   * Optional explicit actor kind. When present it is trusted as-is (server
+   * origin only); when absent it is derived from `authenticationType`. It is
+   * NEVER defaulted to a value — a scope carrying neither is rejected.
+   */
+  actorKind?: SageActorKind
+}
+
+/**
+ * Trusted authentication classifications. Only the runtime (never the browser)
+ * assigns these, and each maps to exactly one actor kind.
+ */
+export type SageAuthenticationType =
+  | 'interactive_user' // a signed-in human operator session
+  | 'service_principal' // a machine/service identity
+  | 'internal_system' // internal platform execution (jobs, workers)
+
+/** Explicit, total mapping from authentication type → actor kind. */
+const AUTHENTICATION_ACTOR_KIND: Record<SageAuthenticationType, SageActorKind> = {
+  interactive_user: 'human',
+  service_principal: 'service',
+  internal_system: 'system',
+}
+
+/**
+ * Fail-closed resolution of the trusted actor kind. Both `actorKind` and
+ * `authenticationType` are server-origin only (never browser-supplied), and:
+ *   - authenticationType alone  → derived from the total trusted mapping
+ *   - actorKind alone           → accepted (explicit trusted internal caller)
+ *   - both present + agree       → accepted
+ *   - both present + conflict    → REJECTED (no silent preference either way)
+ *   - neither present            → REJECTED
+ *   - unknown authenticationType → REJECTED
+ * An unknown or missing classification is never converted into the most
+ * privileged ('human') category.
+ */
+export function resolveSageActorKind(scope: SageActorScope): SageActorKind {
+  const authType = scope.authenticationType
+  if (authType && !(authType in AUTHENTICATION_ACTOR_KIND)) {
+    throw new Error(
+      'SAGE authenticated actor kind is required: authentication classification is missing or unknown',
+    )
+  }
+  const derived = authType ? AUTHENTICATION_ACTOR_KIND[authType] : undefined
+
+  // Conflicting trusted claims must never be silently reconciled.
+  if (scope.actorKind && derived && scope.actorKind !== derived) {
+    throw new Error(
+      'SAGE actor kind conflicts with the authenticated identity type',
+    )
+  }
+
+  const actorKind = derived ?? scope.actorKind
+  if (!actorKind) {
+    throw new Error(
+      'SAGE authenticated actor kind is required: authentication classification is missing or unknown',
+    )
+  }
+  return actorKind
 }
 
 // Org roles that receive explicit, read-only SAGE workspace oversight. This is a
@@ -70,10 +137,14 @@ export function createSageRuntime(scope: SageActorScope): SageServiceDeps {
  * orgId/actorId derive from the session; permissions from the org role.
  */
 export function createSageServiceContext(scope: SageActorScope): SageServiceContext {
+  // Fail closed: the actor kind must resolve from a trusted classification.
+  // A missing/unknown classification throws rather than defaulting to 'human'.
+  const actorKind = resolveSageActorKind(scope)
   return {
     actor: {
       actorId: scope.actorId,
       orgId: scope.orgId,
+      actorKind,
       permissions: mapSagePermissions(scope.orgRole),
     },
   }

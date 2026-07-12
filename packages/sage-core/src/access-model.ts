@@ -9,6 +9,7 @@ import type {
   SageAuthorizationLevel,
   SageExportAuthorityLevel,
 } from './types'
+import { SAGE_AUTHORIZATION_LEVELS } from './types'
 import { SAGE_PERMISSIONS, type SagePermission } from './permissions'
 
 // Role → permission grants (the enforceable application layer).
@@ -108,4 +109,35 @@ export function canApproveExport(
 /** External reviewer default posture: enabled only when explicitly granted a scoped role. */
 export function isExternalReviewerEnabled(ctx: SageAccessContext): boolean {
   return ctx.hasMembership && ctx.activeRoles.includes('external_reviewer')
+}
+
+// ─── Authorization ladder (restrictiveness ordering) ─────────────────────────
+// SAGE_AUTHORIZATION_LEVELS is authored least→most restrictive, so the array
+// index is the restrictiveness rank:
+//   public(0) < administrative(1) < internal(2) < authorized_only(3)
+//   < sensitive(4) < excluded(5)
+
+/** The lowest non-public floor governance records default to. */
+export const SAGE_GOVERNANCE_AUTHORIZATION_FLOOR: SageAuthorizationLevel = 'internal'
+
+/** Restrictiveness rank of an authorization level (higher = more restrictive). */
+export function authorizationLevelRank(level: SageAuthorizationLevel): number {
+  const rank = SAGE_AUTHORIZATION_LEVELS.indexOf(level)
+  return rank < 0 ? SAGE_AUTHORIZATION_LEVELS.indexOf('internal') : rank
+}
+
+/** Return the MORE restrictive of two authorization levels. */
+export function mostRestrictiveAuthorization(
+  a: SageAuthorizationLevel,
+  b: SageAuthorizationLevel,
+): SageAuthorizationLevel {
+  return authorizationLevelRank(a) >= authorizationLevelRank(b) ? a : b
+}
+
+/** True when `candidate` is strictly less restrictive than `floor` (a downgrade). */
+export function isAuthorizationDowngrade(
+  candidate: SageAuthorizationLevel,
+  floor: SageAuthorizationLevel,
+): boolean {
+  return authorizationLevelRank(candidate) < authorizationLevelRank(floor)
 }
