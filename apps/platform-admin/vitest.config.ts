@@ -5,6 +5,7 @@ export default defineProject({
   resolve: {
     alias: {
       '@': resolve(__dirname, '.'),
+      'server-only': resolve(__dirname, 'test/server-only-stub.ts'),
     },
   },
   test: {

@@ -8,8 +8,8 @@ import type {
   SageApplicationRole,
   SageAuthorizationLevel,
   SageExportAuthorityLevel,
-} from './types.js'
-import { SAGE_PERMISSIONS, type SagePermission } from './permissions.js'
+} from './types'
+import { SAGE_PERMISSIONS, type SagePermission } from './permissions'
 
 // Role → permission grants (the enforceable application layer).
 const ROLE_PERMISSIONS: Record<SageApplicationRole, readonly SagePermission[]> = {

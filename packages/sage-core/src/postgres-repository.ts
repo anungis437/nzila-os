@@ -14,8 +14,8 @@
 //   * Export request defaults to a non-approved status; approve/deny update status
 //     and insert an approval row.
 
-import type { SageRepository } from './repository.js'
-import type { SageSqlClient } from './sql-client.js'
+import type { SageRepository } from './repository'
+import type { SageSqlClient } from './sql-client'
 import type {
   SageAuthorizationLevel,
   SageBoundaryFlag,
@@ -30,7 +30,7 @@ import type {
   SageSourceQuality,
   SageWorkspace,
   SageWorkspaceMember,
-} from './types.js'
+} from './types'
 import {
   mapBoundaryFlag,
   mapDecisionRecord,
@@ -54,7 +54,7 @@ import {
   type SageRoleAssignmentRow,
   type SageWorkspaceMemberRow,
   type SageWorkspaceRow,
-} from './postgres-mappers.js'
+} from './postgres-mappers'
 
 type CountRow = { count: number | string }
 
@@ -108,6 +108,15 @@ export class PostgresSageRepository implements SageRepository {
     )
     const row = firstOrUndefined(rows)
     return row ? mapWorkspace(row) : undefined
+  }
+
+  async listWorkspaces(orgId: string): Promise<SageWorkspace[]> {
+    // Organization-scoped list; never returns another org's workspaces.
+    const { rows } = await this.sql.query<SageWorkspaceRow>(
+      `select * from sage_workspace where org_id = $1 order by updated_at desc, created_at desc`,
+      [orgId],
+    )
+    return rows.map(mapWorkspace)
   }
 
   // ─── Membership (separate from role assignment) ─────────────────────────────

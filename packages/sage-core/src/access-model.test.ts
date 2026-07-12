@@ -6,8 +6,8 @@ import {
   isExternalReviewerEnabled,
   rolePermissions,
   type SageAccessContext,
-} from './access-model.js'
-import { SAGE_PERMISSIONS } from './permissions.js'
+} from './access-model'
+import { SAGE_PERMISSIONS } from './permissions'
 
 function ctx(partial: Partial<SageAccessContext>): SageAccessContext {
   return {

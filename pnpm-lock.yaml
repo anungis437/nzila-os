@@ -1903,6 +1903,9 @@ importers:
       '@nzila/platform-shell':
         specifier: workspace:*
         version: link:../../packages/platform-shell
+      '@nzila/sage-core':
+        specifier: workspace:*
+        version: link:../../packages/sage-core
       '@nzila/schema-core':
         specifier: workspace:*
         version: link:../../packages/schema-core

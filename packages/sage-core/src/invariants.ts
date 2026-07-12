@@ -8,7 +8,7 @@ import type {
   SageAuthorizationLevel,
   SageBoundaryProfile,
   SageWorkspace,
-} from './types.js'
+} from './types'
 
 export class SageInvariantError extends Error {
   constructor(message: string) {

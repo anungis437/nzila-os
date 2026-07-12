@@ -59,6 +59,15 @@ This is the final planning-only SAGE PR. The next PR must begin engineering impl
 > separation, revocation, export status, and mapping. Migration `0033_sage_phase_3_review_note.sql` adds the
 > `sage_review_note` table. Boundaries unchanged; still not launched, available, or procurement-ready.
 
+> **Implementation status (Phase 4 started).** Authenticated platform-admin workspace create/list/view
+> vertical slice implemented using the SAGE service layer and SQL-backed repository. In `apps/platform-admin`:
+> `lib/sage/` runtime composition (`runtime.ts`, `sql-adapter.ts`, `audit-adapter.ts`, `workspace-service.ts`,
+> `schemas.ts`, `view.ts`), API routes under `app/api/sage/workspaces`, and pages under `app/sage`. orgId and
+> actorId derive from the authenticated session (never the browser); cross-org access returns 404
+> (non-disclosure); summaries are counts/status only. Bilingual (en/fr) strings added. `@nzila/sage-core`
+> gains `listWorkspaces`/`getSageWorkspace`/`listSageWorkspaces`. Boundaries unchanged; still not launched,
+> available, or procurement-ready.
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:

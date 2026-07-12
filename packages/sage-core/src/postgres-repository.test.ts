@@ -5,8 +5,8 @@
 // and snake_case → TypeScript mapping. No live database is required.
 
 import { describe, expect, it } from 'vitest'
-import { PostgresSageRepository } from './postgres-repository.js'
-import type { SageSqlClient } from './sql-client.js'
+import { PostgresSageRepository } from './postgres-repository'
+import type { SageSqlClient } from './sql-client'
 import {
   mapDecisionRecord,
   mapEvidenceAuthorization,
@@ -18,13 +18,13 @@ import {
   type SageExportRequestRow,
   type SageRoleAssignmentRow,
   type SageWorkspaceRow,
-} from './postgres-mappers.js'
-import type { SageBoundaryProfile } from './types.js'
-import { createSageWorkspace, activeSageRoles } from './services.js'
-import { InMemorySageAuditSink } from './audit-sink.js'
-import { SAGE_PERMISSIONS } from './permissions.js'
-import { SAGE_AUDIT_ACTIONS } from './audit-events.js'
-import type { SageServiceContext } from './service-context.js'
+} from './postgres-mappers'
+import type { SageBoundaryProfile } from './types'
+import { createSageWorkspace, activeSageRoles } from './services'
+import { InMemorySageAuditSink } from './audit-sink'
+import { SAGE_PERMISSIONS } from './permissions'
+import { SAGE_AUDIT_ACTIONS } from './audit-events'
+import type { SageServiceContext } from './service-context'
 
 type Call = { text: string; params: readonly unknown[] }
 
@@ -168,6 +168,20 @@ describe('PostgresSageRepository — workspace', () => {
     expect(await repo.getWorkspace('ws-1', 'other-org')).toBeUndefined()
     expect(sql.lastCall.text).toContain('and org_id = $2')
     expect(sql.lastCall.params).toEqual(['ws-1', 'other-org'])
+  })
+
+  it('listWorkspaces filters by org_id and orders by updated_at/created_at desc', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([workspaceRow({ id: 'ws-a' }), workspaceRow({ id: 'ws-b' })])
+    const repo = new PostgresSageRepository(sql)
+
+    const list = await repo.listWorkspaces('org-1')
+
+    expect(sql.lastCall.text).toContain('from sage_workspace where org_id = $1')
+    expect(sql.lastCall.text).toContain('order by updated_at desc, created_at desc')
+    expect(sql.lastCall.params).toEqual(['org-1'])
+    expect(list.map((w) => w.id)).toEqual(['ws-a', 'ws-b'])
+    expect(list.every((w) => w.orgId === 'org-1')).toBe(true)
   })
 })
 
@@ -533,7 +547,20 @@ describe('service integration with PostgresSageRepository', () => {
 
   it('createSageWorkspace persists via the SQL repository and emits an audit event', async () => {
     const sql = new FakeSqlClient()
-    sql.enqueue([workspaceRow()])
+    // 1) workspace insert, 2) bootstrap member insert, 3) bootstrap role insert.
+    sql
+      .enqueue([workspaceRow()])
+      .enqueue([
+        {
+          id: 'mem-1',
+          workspace_id: 'ws-1',
+          org_id: 'org-1',
+          actor_id: 'actor-1',
+          created_by: 'actor-1',
+          created_at: new Date('2026-07-12T00:00:00.000Z'),
+        },
+      ])
+      .enqueue([roleRow({ actor_id: 'actor-1', sage_application_role: 'workspace_owner' })])
     const repo = new PostgresSageRepository(sql)
     const audit = new InMemorySageAuditSink()
 
@@ -545,6 +572,9 @@ describe('service integration with PostgresSageRepository', () => {
 
     expect(ws.id).toBe('ws-1')
     expect(sql.calls[0].text).toContain('insert into sage_workspace')
+    // Creator is bootstrapped as a member + workspace_owner.
+    expect(sql.calls[1].text).toContain('insert into sage_workspace_member')
+    expect(sql.calls[2].text).toContain('insert into sage_role_assignment')
     expect(audit.has(SAGE_AUDIT_ACTIONS.WORKSPACE_CREATED)).toBe(true)
   })
 })

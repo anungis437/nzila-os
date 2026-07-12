@@ -30,16 +30,18 @@ import {
   type SageSourceType,
   type SageWorkspace,
   type SageWorkspaceMember,
-} from './types.js'
-import { SAGE_PERMISSIONS } from './permissions.js'
+} from './types'
+import { SAGE_PERMISSIONS } from './permissions'
+import type { SagePermission } from './permissions'
+import { resolveSagePermission, type SageAccessContext } from './access-model'
 import {
   SAGE_AUDIT_ACTIONS,
   SAGE_AUDIT_RESOURCES,
   buildSageAuditPayload,
   type SageAuditAction,
   type SageAuditResource,
-} from './audit-events.js'
-import { deriveSageBoundaryProfile } from './boundary-profile.js'
+} from './audit-events'
+import { deriveSageBoundaryProfile } from './boundary-profile'
 import {
   assertDecisionRecordHasNamedHumanReviewer,
   assertEvidenceLinkRequiresClassifiedSource,
@@ -48,11 +50,11 @@ import {
   assertRequesterCannotApproveOwnExport,
   assertRoleAssignmentRequiresMembership,
   assertWorkspaceUsable,
-} from './invariants.js'
-import type { SageRepository } from './repository.js'
-import type { SageAuditSink } from './audit-sink.js'
-import { contextNow, type SageServiceContext } from './service-context.js'
-import { forbidden, invalidInput, notFound, orgBoundary, permissionDenied } from './service-errors.js'
+} from './invariants'
+import type { SageRepository } from './repository'
+import type { SageAuditSink } from './audit-sink'
+import { contextNow, type SageServiceContext } from './service-context'
+import { forbidden, invalidInput, notFound, orgBoundary, permissionDenied } from './service-errors'
 
 export type SageServiceDeps = {
   repo: SageRepository
@@ -66,6 +68,21 @@ function requirePermission(ctx: SageServiceContext, permission: string): void {
 function requireSameOrg(ctx: SageServiceContext, orgId: string): void {
   if (ctx.actor.orgId !== orgId) orgBoundary()
 }
+
+/**
+ * A role assignment is active when it is not revoked and (if time-bound) not
+ * yet expired. ISO-8601 timestamps compare lexicographically in chronological
+ * order, so a string comparison is correct here.
+ */
+function isAssignmentActive(r: SageRoleAssignment, nowIso: string): boolean {
+  if (r.revokedAt) return false
+  if (r.timeBoundAccessExpiresAt && r.timeBoundAccessExpiresAt <= nowIso) return false
+  return true
+}
+
+// Permissions an explicit oversight admin (WORKSPACE_ADMIN) may exercise without
+// a per-workspace role. Deliberately read-only: never evidence or export.
+const OVERSIGHT_PERMISSIONS: readonly SagePermission[] = [SAGE_PERMISSIONS.WORKSPACE_READ]
 
 async function loadUsableWorkspace(
   deps: SageServiceDeps,
@@ -134,11 +151,127 @@ export async function createSageWorkspace(
     updatedAt: ts,
   })
   assertWorkspaceUsable(ws)
+
+  // Bootstrap (the single documented exception where creation grants SAGE
+  // workspace access): the creator becomes a member and workspace_owner so they
+  // can immediately view/administer the workspace. All other workspace access
+  // requires an explicit membership + active role assignment.
+  await deps.repo.addWorkspaceMember({
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    actorId: ctx.actor.actorId,
+    createdBy: ctx.actor.actorId,
+    createdAt: ts,
+  })
+  await deps.repo.assignRole({
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    actorId: ctx.actor.actorId,
+    sageApplicationRole: 'workspace_owner',
+    workspaceScope: ws.id,
+    accessReason: 'workspace creation bootstrap',
+    approvedBy: ctx.actor.actorId,
+    createdAt: ts,
+    revokedAt: null,
+  })
+
   await emit(deps, ctx, SAGE_AUDIT_ACTIONS.WORKSPACE_CREATED, SAGE_AUDIT_RESOURCES.WORKSPACE, ws.id, {
     institutionType: ws.institutionType,
     riskSurface: ws.riskSurface,
+    bootstrappedOwner: ctx.actor.actorId,
   })
   return ws
+}
+
+/**
+ * Authorize workspace-scoped access. Access requires EITHER an explicit, named
+ * oversight permission (WORKSPACE_ADMIN) in the service context, OR an active
+ * workspace membership plus an active SAGE role assignment that grants the
+ * required permission. Membership alone is never sufficient; revoked and
+ * time-expired assignments are ignored. Cross-org/missing throws NOT_FOUND
+ * (non-disclosure); same-org but unauthorized throws FORBIDDEN.
+ */
+export async function authorizeSageWorkspaceAccess(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; requiredPermission: SagePermission },
+): Promise<SageWorkspace> {
+  const ws = await deps.repo.getWorkspace(input.workspaceId, ctx.actor.orgId)
+  if (!ws) notFound('workspace')
+  assertWorkspaceUsable(ws)
+
+  // Explicit oversight is READ-ONLY: an administrator (WORKSPACE_ADMIN) may view
+  // any workspace in their org, but oversight never confers evidence access or
+  // export authority — those still require explicit grants/roles.
+  if (
+    OVERSIGHT_PERMISSIONS.includes(input.requiredPermission) &&
+    ctx.actor.permissions.includes(SAGE_PERMISSIONS.WORKSPACE_ADMIN)
+  ) {
+    return ws
+  }
+
+  const nowIso = contextNow(ctx)
+  const membership = await deps.repo.getWorkspaceMember(ws.id, ctx.actor.actorId)
+  const assignments = await deps.repo.listRoleAssignments(ws.id, ctx.actor.actorId)
+  const access: SageAccessContext = {
+    hasMembership: Boolean(membership),
+    activeRoles: assignments
+      .filter((r) => isAssignmentActive(r, nowIso))
+      .map((r) => r.sageApplicationRole),
+    evidenceAuthorizations: [],
+  }
+  if (!resolveSagePermission(access, input.requiredPermission)) {
+    forbidden('SAGE workspace access requires an active membership and role assignment')
+  }
+  return ws
+}
+
+/**
+ * List the SAGE workspaces the actor is authorized to see. Oversight admins
+ * (explicit WORKSPACE_ADMIN permission) see all org workspaces; everyone else
+ * sees only workspaces where they hold an active membership + read-granting
+ * role. Never exposes another organization's workspaces.
+ */
+export async function listSageWorkspaces(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+): Promise<SageWorkspace[]> {
+  const all = await deps.repo.listWorkspaces(ctx.actor.orgId)
+  if (ctx.actor.permissions.includes(SAGE_PERMISSIONS.WORKSPACE_ADMIN)) return all
+
+  // Per-workspace membership + role check. A future indexed query can replace
+  // this loop for large organizations.
+  const nowIso = contextNow(ctx)
+  const accessible: SageWorkspace[] = []
+  for (const ws of all) {
+    const membership = await deps.repo.getWorkspaceMember(ws.id, ctx.actor.actorId)
+    if (!membership) continue
+    const assignments = await deps.repo.listRoleAssignments(ws.id, ctx.actor.actorId)
+    const access: SageAccessContext = {
+      hasMembership: true,
+      activeRoles: assignments
+        .filter((r) => isAssignmentActive(r, nowIso))
+        .map((r) => r.sageApplicationRole),
+      evidenceAuthorizations: [],
+    }
+    if (resolveSagePermission(access, SAGE_PERMISSIONS.WORKSPACE_READ)) accessible.push(ws)
+  }
+  return accessible
+}
+
+/**
+ * Load a single workspace the actor is authorized to read. Requires membership +
+ * active role (or explicit oversight). Cross-org/missing throws NOT_FOUND.
+ */
+export async function getSageWorkspace(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string },
+): Promise<SageWorkspace> {
+  return authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
 }
 
 // ─── Membership + role assignment ────────────────────────────────────────────
@@ -229,14 +362,15 @@ export async function revokeSageRole(
   )
 }
 
-/** Active (non-revoked) roles for an actor in a workspace. */
+/** Active (non-revoked, non-expired) roles for an actor in a workspace. */
 export async function activeSageRoles(
   deps: SageServiceDeps,
   workspaceId: string,
   actorId: string,
 ): Promise<SageApplicationRole[]> {
+  const nowIso = new Date().toISOString()
   const roles = await deps.repo.listRoleAssignments(workspaceId, actorId)
-  return roles.filter((r) => !r.revokedAt).map((r) => r.sageApplicationRole)
+  return roles.filter((r) => isAssignmentActive(r, nowIso)).map((r) => r.sageApplicationRole)
 }
 
 // ─── Evidence authorization ──────────────────────────────────────────────────
@@ -666,8 +800,10 @@ export async function getSageWorkspaceSummary(
   ctx: SageServiceContext,
   input: { workspaceId: string },
 ): Promise<SageWorkspaceSummary> {
-  requirePermission(ctx, SAGE_PERMISSIONS.WORKSPACE_READ)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
   return {
     workspaceId: ws.id,
     orgId: ws.orgId,

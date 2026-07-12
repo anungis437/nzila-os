@@ -17,8 +17,8 @@ import {
   assertExternalReviewerHasNoExportAuthority,
   assertPlatformAdminDoesNotAutomaticallyReceiveSensitiveEvidenceAccess,
   assertOrgAdminDoesNotAutomaticallyApproveExport,
-} from './invariants.js'
-import { deriveSageBoundaryProfile } from './boundary-profile.js'
+} from './invariants'
+import { deriveSageBoundaryProfile } from './boundary-profile'
 
 const boundaryProfile = deriveSageBoundaryProfile('crown_corporation', 'general_governance')
 const usableWorkspace = {
