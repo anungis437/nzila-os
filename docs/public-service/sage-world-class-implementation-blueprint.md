@@ -460,11 +460,21 @@ enums). Indexes and validation are candidates for Phase 1 confirmation.
 | sage_evidence_item | id, source_id, workspace_id, org_id, lifecycle_state, confidence_level, excluded_from_external_review, human_review_required, created_by, updated_by | (workspace_id, lifecycle_state), (source_id) | lifecycle_state in enum; source classified | lifecycle §13 |
 | sage_boundary_flag | id, workspace_id, org_id, target_id, flag_type, note, created_by | (workspace_id), (target_id) | flag_type in enum | visible to reviewers |
 | sage_decision_record | id, workspace_id, org_id, decision, rationale, human_reviewer_id, created_by, created_at | (workspace_id) | human_reviewer_id required | no record without reviewer |
+| sage_workspace_member | id, workspace_id, org_id, actor_id, created_by, created_at | (workspace_id), (actor_id) | membership required before role assignment | membership is not permission |
+| sage_stakeholder_profile | id, org_id, actor_id, stakeholder_function, institution_type_context, created_by, updated_by | (org_id, actor_id) | stakeholder_function required | maps real-world function |
+| sage_role_assignment | id, workspace_id, org_id, actor_id, sage_application_role, workspace_scope, time_bound_access_expires_at, access_reason, approved_by | (workspace_id, actor_id), (sage_application_role) | membership required; role valid | enforceable application role |
+| sage_evidence_authorization | id, workspace_id, org_id, actor_id, evidence_authorization_level, access_reason, approved_by | (workspace_id, actor_id), (evidence_authorization_level) | level valid; approver required | user-to-evidence authorization |
+| sage_export_request | id, workspace_id, org_id, requested_by, scope, status, created_at | (workspace_id), (status) | default denied | export request, not approval |
+| sage_export_approval | id, export_request_id, org_id, export_authority_level, approver_id, decision, decision_at, reason | (export_request_id), (approver_id) | approver cannot be requester | user-to-export authorization |
 | sage_audit_event | correlation to `packages/audit` entry (resource=`sage_*`, resourceId=entity id) | via audit store | actorId + orgId + action required | reuse audit package |
 
 Enums (candidate, idempotent `DO $$` blocks): `sage_evidence_lifecycle`, `sage_source_type`,
 `sage_source_quality`, `sage_authorization_level`, `sage_confidence_level`, `sage_boundary_flag_type`,
 `sage_workspace_status`, `sage_export_status`, `sage_institution_type`, `sage_risk_surface`.
+
+Workspace boundary-profile usability rule: a SAGE workspace is not usable until `institution_type`,
+`risk_surface`, and `boundary_profile` are present. Evidence source creation, evidence item creation,
+linking, decision records, and exports must be blocked until the workspace has a valid boundary profile.
 
 ## 21. API / service layer candidates
 
@@ -473,9 +483,14 @@ onto existing packages; each enforces `platform-auth` permission and emits a `pa
 
 | Service | Inputs | Auth required | Audit event | Boundary validation |
 | --- | --- | --- | --- | --- |
-| createSageWorkspace | org_id, name, actor | sage.workspace.create | sage.workspace.created | org scope |
+| createSageWorkspace | org_id, name, institution_type, risk_surface, actor | sage.workspace.create | sage.workspace.created | org scope; institution_type + risk_surface required; boundary_profile derived before workspace is usable |
 | addSageWorkspaceMember | workspace_id, actor_id, role | sage.member.manage | sage.member.added | role valid |
-| createSageEvidenceSource | workspace_id, source_type | sage.evidence.create | sage.evidence_source.created | classification pending |
+| assignSageRole | workspace_id, actor_id, sage_application_role, scope, access_reason, approved_by | sage.role.assign | sage.role.assigned | membership required; role valid; approver required |
+| revokeSageRole | workspace_id, actor_id, sage_application_role, revoked_by, reason | sage.role.revoke | sage.role.revoked | membership remains but role permission removed |
+| grantSageEvidenceAuthorization | workspace_id, actor_id, evidence_authorization_level, access_reason, approved_by | sage.evidence_authorization.grant | sage.evidence_authorization.granted | membership required; level valid; approver required |
+| revokeSageEvidenceAuthorization | workspace_id, actor_id, evidence_authorization_level, revoked_by, reason | sage.evidence_authorization.revoke | sage.evidence_authorization.revoked | access removed; audit required |
+| setSageExportAuthority | workspace_id, actor_id, export_authority_level, access_reason, approved_by | sage.export_authority.set | sage.export_authority.set | no unrestricted default; approver required |
+| createSageEvidenceSource | workspace_id, source_type | sage.evidence.create | sage.evidence_source.created | classification pending; workspace boundary profile required |
 | classifySageEvidenceSource | source_id, source_quality, authorization_level | sage.evidence.classify | sage.source.classified | required before use |
 | createSageEvidenceItem | source_id, fields | sage.evidence.create | sage.evidence_item.created | source classified |
 | linkSageEvidenceItem | from_id, to_id, link_type | sage.evidence.link | sage.evidence.linked | authorized-only marked |
@@ -486,6 +501,10 @@ onto existing packages; each enforces `platform-auth` permission and emits a `pa
 | approveSageExport | export_id, approver_id | sage.export.approve | sage.export.approved | approver ≠ requester |
 | denySageExport | export_id, approver_id, reason | sage.export.approve | sage.export.denied | reason required |
 | getSageWorkspaceSummary | workspace_id | sage.workspace.read | (read; no audit) | no scores/rankings |
+
+Workspace creation requires `institution_type` and `risk_surface`; `boundary_profile` is derived from them
+before the workspace is usable. Evidence source creation, evidence item creation, linking, decision records,
+and exports must be blocked until the workspace has a valid boundary profile.
 
 ## 22. UI implementation candidates
 
@@ -523,6 +542,13 @@ SAGE belongs in a different app, the route base is revised then.
 - Export authority separation tests
 - Sensitive evidence exclusion tests
 - Institution-type boundary tests
+- Negative authorization tests
+- Negative export-control tests
+- Negative boundary-invariant tests
+- Requester-cannot-approve-own-export test
+- Platform-admin-no-automatic-sensitive-evidence-access test
+- Org-admin-no-automatic-export-approval test
+- External-reviewer-no-export test
 - Boundary-copy scan
 - SAGE productization scan
 - Accessibility smoke test
@@ -533,11 +559,32 @@ SAGE belongs in a different app, the route base is revised then.
 SAGE cannot be considered world-class unless stakeholder access, evidence authorization, and export authority
 are tested separately.
 
+### Implementation-blocking invariants
+
+SAGE implementation must fail validation if any of these invariants are violated:
+
+- workspace exists without `org_id`
+- workspace exists without `institution_type`
+- workspace exists without `risk_surface`
+- workspace exists without `boundary_profile`
+- workspace member has permissions without role assignment
+- role assignment exists without workspace membership
+- evidence item is linked before source classification
+- authorized-only evidence is linked without explicit authorization
+- sensitive evidence is used without additional review
+- excluded evidence appears in an external-review output
+- decision record exists without named human reviewer
+- export approval is granted by the requester
+- external reviewer has export authority
+- platform admin automatically receives sensitive evidence access
+- organization admin automatically receives export approval
+- audit event is missing for a material action
+
 ## 24. Implementation phases
 
 | Phase | Objective | Deliverables | Exit criteria |
 | --- | --- | --- | --- |
-| Phase 1 — Architecture lock, stakeholder access model, and domain model | Confirm repo-native persistence, auth, and audit integration; lock the stakeholder access model; define `sage_*` schema | Stakeholder/access model aligned to the Public-Institution Adaptation Framework; SAGE application role model; evidence authorization levels; export authority model; domain entities for stakeholder role assignments and evidence authorization; migration(s) for core `sage_*` tables/enums; TypeScript entity types; permission-string list; audit-event contract for access and authorization changes; architecture note; schema/validation tests | Access model reviewed; migrations apply idempotently; types compile; permission + audit contracts reviewed; tests pass |
+| Phase 1 — Architecture lock, stakeholder access model, and domain model | Confirm repo-native persistence, auth, and audit integration; lock the stakeholder access model; define `sage_*` schema | Stakeholder/access model aligned to the Public-Institution Adaptation Framework; SAGE application role model; evidence authorization levels; export authority model; domain entities for stakeholder role assignments and evidence authorization; migration(s) for core `sage_*` tables/enums; TypeScript entity types; permission-string list; audit-event contract for access and authorization changes; architecture note; schema/validation tests | See Phase 1 hard exit gate below |
 | Phase 2 — Core services and audit events | Build service functions with auth + audit | `createSageWorkspace`, evidence source/item services; audit emission; permission enforcement | Services enforce `org_id` + permissions; every material action emits an audit entry; unit tests pass |
 | Phase 3 — Workspace UI shell | platform-admin `sage` route shell | Workspace list + overview routes; navigation; localized strings | Routes render; strings keyed in `messages/*.json`; auth-gated |
 | Phase 4 — Evidence source and item lifecycle | Full source + item lifecycle | Create/classify/link/exclude flows; lifecycle state machine | Lifecycle rules enforced; exclusion respected; tests pass |
@@ -547,6 +594,17 @@ are tested separately.
 | Phase 8 — End-to-end proof of implementation | Prove the workspace lifecycle | E2E flow: create workspace → register/classify evidence → flag → review → decision (human) → gated export | E2E passes; scorecard categories ≥ 9/10; `final:go` certified |
 
 Phase 1 is engineering-oriented: it produces real migrations, types, and contracts — not documentation.
+
+**Phase 1 hard exit gate.** Phase 1 cannot exit until:
+
+- `sage_workspace` includes `org_id`, `institution_type`, `risk_surface`, and `boundary_profile`
+- stakeholder/access model tables are defined
+- membership and role assignment are separate
+- evidence authorization levels are represented
+- export authority levels are represented
+- audit-event contract covers access, authorization, evidence, decision, and export actions
+- negative authorization/export tests exist or are explicitly queued with a blocking TODO
+- typecheck and tests pass
 
 ## 25. Definition of done
 
@@ -595,3 +653,16 @@ Required deliverables for the next PR:
 
 The next PR after this blueprint must implement at least one repo-native engineering foundation for SAGE. It
 must not be another planning-only artifact.
+
+The next PR is not allowed to be docs-only.
+
+The next PR must include at least one of:
+
+- a repo-native migration
+- TypeScript domain types
+- permission constants/tests
+- audit-event contract tests
+- schema validation
+- service-layer skeleton with tests
+
+A documentation-only PR does not satisfy the next-step requirement.

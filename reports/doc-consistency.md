@@ -1,6 +1,6 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-12T11:43:31.819Z
+> Generated: 2026-07-12T11:48:42.667Z
 
 ## Summary
 
@@ -2457,7 +2457,7 @@
 - ℹ️ `docs/public-service/sage-workspace-canonical.md:213` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:117` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:126` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:463` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:469` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/readiness/azure-production-baseline.md:36` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:37` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:41` — "nzila-os" should be "NzilaOS" (platform name)
