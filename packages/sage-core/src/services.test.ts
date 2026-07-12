@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { InMemorySageRepository } from './repository.js'
-import { InMemorySageAuditSink } from './audit-sink.js'
-import { SAGE_PERMISSIONS } from './permissions.js'
-import { SAGE_AUDIT_ACTIONS } from './audit-events.js'
-import { SageServiceError } from './service-errors.js'
-import type { SageServiceContext, SageServiceActor } from './service-context.js'
+import { InMemorySageRepository } from './repository'
+import { InMemorySageAuditSink } from './audit-sink'
+import { SAGE_PERMISSIONS } from './permissions'
+import { SAGE_AUDIT_ACTIONS } from './audit-events'
+import { SageServiceError } from './service-errors'
+import type { SageServiceContext, SageServiceActor } from './service-context'
+import type { SageApplicationRole } from './types'
 import {
   addSageBoundaryFlag,
   addSageReviewNote,
@@ -18,12 +19,14 @@ import {
   createSageWorkspace,
   denySageExport,
   getSageWorkspaceSummary,
+  getSageWorkspace,
   grantSageEvidenceAuthorization,
   linkSageEvidenceItem,
+  listSageWorkspaces,
   requestSageExport,
   revokeSageRole,
   type SageServiceDeps,
-} from './services.js'
+} from './services'
 
 const ALL_PERMS = Object.values(SAGE_PERMISSIONS)
 
@@ -193,6 +196,170 @@ describe('org boundary', () => {
     const ws = await makeWorkspace()
     expect(await deps.repo.getWorkspace(ws.id, 'org_1')).toBeDefined()
     expect(await deps.repo.getWorkspace(ws.id, 'org_2')).toBeUndefined()
+  })
+})
+
+describe('listSageWorkspaces', () => {
+  it('returns only same-org workspaces', async () => {
+    await makeWorkspace()
+    await makeWorkspace()
+    const list = await listSageWorkspaces(deps, ctxFor(actor()))
+    expect(list).toHaveLength(2)
+    expect(list.every((w) => w.orgId === 'org_1')).toBe(true)
+  })
+
+  it('excludes another organization\u2019s workspaces', async () => {
+    await makeWorkspace()
+    // Create a workspace in a different org via a writer in org_2.
+    await createSageWorkspace(deps, ctxFor(actor({ orgId: 'org_2' })), {
+      name: 'Other Org WS',
+      institutionType: 'regulator',
+      riskSurface: 'regulatory_boundary',
+    })
+    const org1List = await listSageWorkspaces(deps, ctxFor(actor()))
+    expect(org1List).toHaveLength(1)
+    expect(org1List[0].orgId).toBe('org_1')
+
+    const org2List = await listSageWorkspaces(deps, ctxFor(actor({ orgId: 'org_2' })))
+    expect(org2List).toHaveLength(1)
+    expect(org2List[0].orgId).toBe('org_2')
+  })
+
+  it('returns an empty list for an actor without membership or oversight', async () => {
+    await makeWorkspace()
+    const stranger = actor({ actorId: 'stranger', permissions: [] })
+    expect(await listSageWorkspaces(deps, ctxFor(stranger))).toEqual([])
+  })
+})
+
+describe('getSageWorkspace', () => {
+  it('returns a same-org workspace', async () => {
+    const ws = await makeWorkspace()
+    const loaded = await getSageWorkspace(deps, ctxFor(actor()), { workspaceId: ws.id })
+    expect(loaded.id).toBe(ws.id)
+  })
+
+  it('returns NOT_FOUND for a cross-org workspace (non-disclosure)', async () => {
+    const ws = await makeWorkspace()
+    await expect(
+      getSageWorkspace(deps, ctxFor(actor({ orgId: 'org_2' })), { workspaceId: ws.id }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('denies a same-org non-member without oversight (FORBIDDEN)', async () => {
+    const ws = await makeWorkspace()
+    const stranger = actor({ actorId: 'stranger', permissions: [] })
+    await expect(
+      getSageWorkspace(deps, ctxFor(stranger), { workspaceId: ws.id }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+})
+
+describe('SAGE workspace RBAC (membership + role assignment)', () => {
+  const NOW = '2026-07-12T00:00:00.000Z'
+
+  async function addMember(workspaceId: string, actorId: string) {
+    await deps.repo.addWorkspaceMember({
+      workspaceId,
+      orgId: 'org_1',
+      actorId,
+      createdBy: 'actor_1',
+      createdAt: NOW,
+    })
+  }
+
+  async function assign(
+    workspaceId: string,
+    actorId: string,
+    role: SageApplicationRole,
+    extra: { revokedAt?: string | null; timeBoundAccessExpiresAt?: string | null } = {},
+  ) {
+    await deps.repo.assignRole({
+      workspaceId,
+      orgId: 'org_1',
+      actorId,
+      sageApplicationRole: role,
+      workspaceScope: workspaceId,
+      accessReason: 'test',
+      approvedBy: 'actor_1',
+      createdAt: NOW,
+      revokedAt: extra.revokedAt ?? null,
+      timeBoundAccessExpiresAt: extra.timeBoundAccessExpiresAt ?? null,
+    })
+  }
+
+  it('membership alone (no active role) does not grant read', async () => {
+    const ws = await makeWorkspace()
+    await addMember(ws.id, 'm1')
+    await expect(
+      getSageWorkspace(deps, ctxFor(actor({ actorId: 'm1', permissions: [] })), {
+        workspaceId: ws.id,
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('an active read-granting role permits read', async () => {
+    const ws = await makeWorkspace()
+    await addMember(ws.id, 'm1')
+    await assign(ws.id, 'm1', 'internal_reviewer')
+    const loaded = await getSageWorkspace(
+      deps,
+      ctxFor(actor({ actorId: 'm1', permissions: [] })),
+      { workspaceId: ws.id },
+    )
+    expect(loaded.id).toBe(ws.id)
+    // The member also appears in their scoped workspace list.
+    const list = await listSageWorkspaces(deps, ctxFor(actor({ actorId: 'm1', permissions: [] })))
+    expect(list.map((w) => w.id)).toContain(ws.id)
+  })
+
+  it('a revoked role denies read', async () => {
+    const ws = await makeWorkspace()
+    await addMember(ws.id, 'm1')
+    await assign(ws.id, 'm1', 'internal_reviewer', { revokedAt: NOW })
+    await expect(
+      getSageWorkspace(deps, ctxFor(actor({ actorId: 'm1', permissions: [] })), {
+        workspaceId: ws.id,
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('an expired time-bound role denies read', async () => {
+    const ws = await makeWorkspace()
+    await addMember(ws.id, 'm1')
+    await assign(ws.id, 'm1', 'internal_reviewer', {
+      timeBoundAccessExpiresAt: '2020-01-01T00:00:00.000Z',
+    })
+    await expect(
+      getSageWorkspace(deps, ctxFor(actor({ actorId: 'm1', permissions: [] })), {
+        workspaceId: ws.id,
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('oversight (WORKSPACE_ADMIN) grants read but not evidence creation', async () => {
+    const ws = await makeWorkspace()
+    const oversight = actor({ actorId: 'ov', permissions: [SAGE_PERMISSIONS.WORKSPACE_ADMIN] })
+    const loaded = await getSageWorkspace(deps, ctxFor(oversight), { workspaceId: ws.id })
+    expect(loaded.id).toBe(ws.id)
+    // Oversight is read-only: no automatic sensitive-evidence access.
+    await expect(
+      createSageEvidenceSource(deps, ctxFor(oversight), {
+        workspaceId: ws.id,
+        sourceType: 'public',
+      }),
+    ).rejects.toMatchObject({ code: 'PERMISSION_DENIED' })
+  })
+
+  it('oversight (WORKSPACE_ADMIN) confers no export approval authority', async () => {
+    const ws = await makeWorkspace()
+    const oversight = actor({ actorId: 'ov', permissions: [SAGE_PERMISSIONS.WORKSPACE_ADMIN] })
+    await expect(
+      approveSageExport(deps, ctxFor(oversight), {
+        workspaceId: ws.id,
+        exportRequestId: 'nope',
+      }),
+    ).rejects.toMatchObject({ code: 'PERMISSION_DENIED' })
   })
 })
 
@@ -648,7 +815,7 @@ async function revokeSageEvidenceAuthorizationSafe(
   workspaceId: string,
   a: SageServiceActor,
 ) {
-  const { revokeSageEvidenceAuthorization } = await import('./services.js')
+  const { revokeSageEvidenceAuthorization } = await import('./services')
   await revokeSageEvidenceAuthorization(deps, ctxFor(a), {
     workspaceId,
     authorizationId,

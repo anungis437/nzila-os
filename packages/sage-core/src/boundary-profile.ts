@@ -4,7 +4,7 @@
 // institution-type + risk-surface pairs layer on additional exclusions.
 // Source doctrine: docs/public-service/public-institution-adaptation-framework.md.
 
-import type { SageBoundaryProfile, SageInstitutionType, SageRiskSurface } from './types.js'
+import type { SageBoundaryProfile, SageInstitutionType, SageRiskSurface } from './types'
 
 // Baseline prohibitions that apply to every SAGE workspace regardless of type.
 const BASE_PROHIBITED_USES: readonly string[] = [

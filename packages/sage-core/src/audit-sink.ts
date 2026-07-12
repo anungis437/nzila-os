@@ -3,7 +3,7 @@
 // record them here. A real sink appends to the @nzila/audit hash chain; this is
 // NOT a parallel audit log — it is the SAGE-side port into the audit system.
 
-import type { SageAuditPayload } from './audit-events.js'
+import type { SageAuditPayload } from './audit-events'
 
 export interface SageAuditSink {
   record(input: SageAuditPayload): Promise<void>

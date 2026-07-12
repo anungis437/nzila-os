@@ -5,7 +5,7 @@ import {
   SAGE_AUDIT_RESOURCES,
   SAGE_AUDIT_RESOURCE_VALUES,
   buildSageAuditPayload,
-} from './audit-events.js'
+} from './audit-events'
 
 describe('SAGE audit-event contract', () => {
   it('defines an action constant for every material SAGE action', () => {

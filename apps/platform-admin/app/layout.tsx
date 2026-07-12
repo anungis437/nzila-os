@@ -25,6 +25,7 @@ const NAV_ITEMS = [
   { href: '/platform-health', label: 'Platform Health' },
   { href: '/integration-ops', label: 'Integration Ops' },
   { href: '/itsm-config', label: 'Service Ops Config' },
+  { href: '/sage', label: 'SAGE' },
 ] as const
 
 export default async function RootLayout({

@@ -16,11 +16,12 @@ import type {
   SageSourceQuality,
   SageWorkspace,
   SageWorkspaceMember,
-} from './types.js'
+} from './types'
 
 export interface SageRepository {
   createWorkspace(input: Omit<SageWorkspace, 'id'>): Promise<SageWorkspace>
   getWorkspace(workspaceId: string, orgId: string): Promise<SageWorkspace | undefined>
+  listWorkspaces(orgId: string): Promise<SageWorkspace[]>
 
   addWorkspaceMember(input: Omit<SageWorkspaceMember, 'id'>): Promise<SageWorkspaceMember>
   getWorkspaceMember(
@@ -102,6 +103,16 @@ export class InMemorySageRepository implements SageRepository {
     // Tenant-scoped: a workspace is only visible within its own org.
     const ws = this.workspaces.get(workspaceId)
     return ws && ws.orgId === orgId ? ws : undefined
+  }
+
+  async listWorkspaces(orgId: string): Promise<SageWorkspace[]> {
+    // Organization-scoped; most-recently-updated first (tie-break on created).
+    return [...this.workspaces.values()]
+      .filter((ws) => ws.orgId === orgId)
+      .sort(
+        (a, b) =>
+          b.updatedAt.localeCompare(a.updatedAt) || b.createdAt.localeCompare(a.createdAt),
+      )
   }
 
   async addWorkspaceMember(

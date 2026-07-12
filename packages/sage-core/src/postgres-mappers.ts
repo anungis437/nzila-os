@@ -28,7 +28,7 @@ import type {
   SageWorkspace,
   SageWorkspaceMember,
   SageWorkspaceStatus,
-} from './types.js'
+} from './types'
 
 // ─── Timestamp normalization ─────────────────────────────────────────────────
 // timestamptz columns arrive as Date (node-postgres default) or ISO string.

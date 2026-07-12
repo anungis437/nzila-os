@@ -7,5 +7,51 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "create": "Créer"
+  },
+  "sage": {
+    "navLabel": "SAGE",
+    "breadcrumb": "SAGE",
+    "pageTitle": "Preuves d’assurance des services et de gouvernance",
+    "pageDescription": "Espace de travail interne pour organiser les preuves d’assurance des services et de gouvernance. À usage de révision interne seulement — il ne s’agit pas d’un service public, d’un produit ni d’une certification.",
+    "tableCaption": "Espaces de travail SAGE de l’organisation",
+    "createWorkspace": "Créer un espace de travail",
+    "workspaceName": "Nom de l’espace de travail",
+    "workspaceNameHelp": "Une courte étiquette interne pour cet espace de travail.",
+    "institutionType": "Type d’institution",
+    "riskSurface": "Surface de risque",
+    "status": "Statut",
+    "emptyState": "Aucun espace de travail SAGE pour cette organisation pour l’instant.",
+    "submit": "Créer",
+    "submitting": "Création…",
+    "cancel": "Annuler",
+    "columns": {
+      "workspace": "Espace de travail",
+      "institutionType": "Type d’institution",
+      "riskSurface": "Surface de risque",
+      "status": "Statut",
+      "updated": "Mis à jour",
+      "action": "Action",
+      "open": "Ouvrir"
+    },
+    "validation": { "nameRequired": "Un nom d’espace de travail est requis." },
+    "error": { "createFailed": "Impossible de créer l’espace de travail. Veuillez réessayer." },
+    "sections": {
+      "identity": "Identité de l’espace de travail",
+      "boundaryProfile": "Profil de délimitation",
+      "counts": "Sommaire"
+    },
+    "boundary": {
+      "prohibitedUses": "Utilisations interdites",
+      "excludedSourceClasses": "Catégories de sources exclues",
+      "requiredReviewers": "Réviseurs requis",
+      "exportRestrictions": "Restrictions d’exportation"
+    },
+    "counts": {
+      "evidenceSources": "Sources de preuves",
+      "evidenceItems": "Éléments de preuve",
+      "boundaryFlags": "Indicateurs de délimitation",
+      "decisionRecords": "Registres de décision",
+      "openExportRequests": "Demandes d’exportation ouvertes"
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deriveSageBoundaryProfile } from './boundary-profile.js'
+import { deriveSageBoundaryProfile } from './boundary-profile'
 
 describe('deriveSageBoundaryProfile', () => {
   it('always includes the baseline prohibitions, human review, and export gating', () => {

@@ -7,5 +7,51 @@
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create"
+  },
+  "sage": {
+    "navLabel": "SAGE",
+    "breadcrumb": "SAGE",
+    "pageTitle": "Service Assurance & Governance Evidence",
+    "pageDescription": "Internal workspace for organizing service assurance and governance evidence. For internal review use only — not a public service, product, or certification.",
+    "tableCaption": "Organization SAGE workspaces",
+    "createWorkspace": "Create workspace",
+    "workspaceName": "Workspace name",
+    "workspaceNameHelp": "A short internal label for this workspace.",
+    "institutionType": "Institution type",
+    "riskSurface": "Risk surface",
+    "status": "Status",
+    "emptyState": "No SAGE workspaces for this organization yet.",
+    "submit": "Create",
+    "submitting": "Creating…",
+    "cancel": "Cancel",
+    "columns": {
+      "workspace": "Workspace",
+      "institutionType": "Institution type",
+      "riskSurface": "Risk surface",
+      "status": "Status",
+      "updated": "Updated",
+      "action": "Action",
+      "open": "Open"
+    },
+    "validation": { "nameRequired": "A workspace name is required." },
+    "error": { "createFailed": "Could not create the workspace. Please try again." },
+    "sections": {
+      "identity": "Workspace identity",
+      "boundaryProfile": "Boundary profile",
+      "counts": "Summary"
+    },
+    "boundary": {
+      "prohibitedUses": "Prohibited uses",
+      "excludedSourceClasses": "Excluded source classes",
+      "requiredReviewers": "Required reviewers",
+      "exportRestrictions": "Export restrictions"
+    },
+    "counts": {
+      "evidenceSources": "Evidence sources",
+      "evidenceItems": "Evidence items",
+      "boundaryFlags": "Boundary flags",
+      "decisionRecords": "Decision records",
+      "openExportRequests": "Open export requests"
+    }
   }
 }
