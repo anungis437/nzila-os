@@ -22,6 +22,9 @@ theory. Proof runs are internal operations material only.
 - For regulator or regulator-adjacent proof runs, use the regulator-boundary convention in
   [../kit-conventions.md](../kit-conventions.md) before drafting the intake, evidence register, CLEAR
   brief, SAGE workspace, assurance checklist, or decision record.
+- For tribunal, ombuds, public accountability, oversight, or adjudication-adjacent proof runs, use the
+  tribunal / ombuds boundary convention in [../kit-conventions.md](../kit-conventions.md) before drafting
+  the intake, evidence register, CLEAR brief, SAGE workspace, assurance checklist, or decision record.
 
 ## 3. Proof-run index
 
@@ -77,6 +80,18 @@ For regulator proof runs, regulator-specific exclusions must remain consistent a
 - assurance checklist
 - feedback-integration decision record
 - retrospective, if added
+
+For tribunal / ombuds proof runs, tribunal/ombuds-specific exclusions must remain consistent across:
+
+- institution intake
+- evidence source register
+- CLEAR brief
+- SAGE workspace
+- assurance checklist
+- feedback-integration decision record
+- retrospective, if added
+
+The public-guidance-versus-case-material distinction must be preserved throughout the proof run.
 
 Synchronization drift is treated as a calibration issue, not a reason to create public copy or software.
 
