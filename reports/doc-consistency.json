@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-11T23:55:57.198Z",
+  "generatedAt": "2026-07-12T00:18:04.652Z",
   "filesScanned": 2139,
-  "totalFindings": 2704,
+  "totalFindings": 2705,
   "findingsByRule": {
     "stale-reference": 1039,
     "stale-package-ref": 68,
     "naming-inconsistency": 1486,
-    "stale-date": 1,
+    "stale-date": 2,
     "missing-package-readme": 110
   },
   "findingsBySeverity": {
     "error": 0,
     "warning": 1217,
-    "info": 1487
+    "info": 1488
   },
   "findings": [
     {
@@ -18171,7 +18171,14 @@
       "severity": "info",
       "file": "docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md",
       "line": 343,
-      "message": "Document date \"2026-04-08\" is 94 days old — may be stale"
+      "message": "Document date \"2026-04-08\" is 95 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md",
+      "line": 3,
+      "message": "Document date \"2026-04-13\" is 90 days old — may be stale"
     },
     {
       "rule": "missing-package-readme",

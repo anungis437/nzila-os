@@ -165,3 +165,113 @@ Regulator-sensitive terms may appear in proof-run materials only when they are p
 
 They must not appear as evidence targets, evidence sources, decision objects, operating recommendations,
 product claims, or SAGE capabilities.
+
+## 9. Tribunal / ombuds boundary convention
+
+Use this block when a proof run, sample, or internal workspace involves a tribunal, ombuds office, public
+accountability office, oversight body, complaint-handling body, or adjudication-adjacent institution. It is
+calibration output from the Proof Run 0.3 retrospective (Section 12).
+
+### Tribunal / ombuds boundary block
+
+CLEAR/SAGE may organize evidence about complaint-pathway continuity, public-guidance traceability,
+accessibility implementation evidence, modernization reviewability, institutional memory, and
+public-service pathway clarity.
+
+CLEAR/SAGE must not influence, assess, score, rank, automate, or support:
+
+- complaint intake decisions
+- complaint screening decisions
+- investigation decisions
+- evidence assessment
+- witness, complainant, respondent, whistleblower, or protected-disclosure treatment
+- protected-disclosure handling
+- adjudicative or quasi-adjudicative processes
+- findings
+- reasons
+- recommendations
+- remedies
+- individual case outcomes
+- complaint files
+- investigation files
+- protected-disclosure files
+- adjudicative records
+- evidence records
+- witness records
+- complainant or respondent records
+- draft findings
+- draft reasons
+- draft recommendations
+- remedy deliberations
+- privileged legal advice
+- personal information unless explicitly authorized, minimized, and necessary
+
+### Required tribunal / ombuds phrasing
+
+Use this phrasing or a materially equivalent version:
+
+> CLEAR/SAGE can organize evidence about complaint-pathway continuity, public guidance, accessibility
+> implementation, and modernization reviewability, but cannot influence or assess complaint intake,
+> investigations, protected disclosures, adjudication, findings, reasons, recommendations, remedies, or
+> individual case outcomes.
+
+### Standard Level 3 adjudication-adjacent risk-tier phrasing
+
+Use this phrasing when the dry run involves tribunal, ombuds, public accountability, or adjudication-adjacent
+boundary risk:
+
+> Level 3 — Elevated adjudication-adjacent boundary question, applied for this fictional dry run. In a real
+> engagement, risk tiering would require accountable human confirmation.
+
+### Public-guidance versus case-material distinction
+
+For tribunal / ombuds proof runs, distinguish public guidance and process material from case, investigation,
+protected-disclosure, adjudicative, evidence, witness, complainant/respondent, findings, reasons,
+recommendations, remedy, or case-outcome material.
+
+Allowed proof-run evidence source categories may include:
+
+- public mandate statement
+- public complaint process guide
+- public annual report
+- public accessibility plan
+- public service standards
+- public modernization strategy
+- public guidance page inventory
+- public outreach or education materials
+- `[AUTHORIZED-ONLY]` internal owner interview notes
+- `[AUTHORIZED-ONLY]` internal public-guidance update tracker
+
+Excluded material includes:
+
+- complaint files
+- investigation files
+- protected-disclosure files
+- adjudicative records
+- evidence records
+- witness records
+- complainant/respondent records
+- draft findings
+- draft reasons
+- draft recommendations
+- remedy deliberations
+- privileged legal advice
+- personal information unless explicitly authorized, minimized, and necessary
+
+### Expected-match rule for tribunal / ombuds boundary scans
+
+Tribunal/ombuds-sensitive terms may appear in proof-run materials only when they are part of:
+
+- exclusions
+- red lines
+- prohibited-material lists
+- prohibited-conclusion lists
+- not-proven language
+- boundary checks
+- scan expected-match explanations
+- public-guidance-versus-case-material distinctions
+
+They must not appear as evidence targets, evidence sources, decision objects, operating recommendations,
+product claims, SAGE capabilities, legal validation material, procedural-fairness validation material,
+adjudicative support material, complaint-resolution material, protected-disclosure handling material, or
+case-outcome support.
