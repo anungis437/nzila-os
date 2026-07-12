@@ -97,6 +97,12 @@ export default async function SageWorkspaceOverviewPage({
           ← {t('pageTitle')}
         </Link>
         <h1 className="mt-2 text-2xl font-bold text-gray-900">{detail.name}</h1>
+        <Link
+          href={`/sage/${workspaceId}/evidence`}
+          className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+        >
+          {t('evidence.tab')} →
+        </Link>
       </div>
 
       <section aria-labelledby="sage-identity-heading" className="space-y-3">

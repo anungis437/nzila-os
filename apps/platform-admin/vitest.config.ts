@@ -1,7 +1,9 @@
 import { defineProject } from 'vitest/config'
+import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 
 export default defineProject({
+  plugins: [react()],
   resolve: {
     alias: {
       '@': resolve(__dirname, '.'),
@@ -11,7 +13,10 @@ export default defineProject({
   test: {
     name: 'platform-admin',
     environment: 'node',
-    include: ['lib/**/*.test.ts'],
+    // Rendered component tests (.test.tsx) run under jsdom; everything else runs
+    // under node.
+    environmentMatchGlobs: [['**/*.test.tsx', 'jsdom']],
+    include: ['lib/**/*.test.ts', 'lib/**/*.test.tsx'],
     coverage: {
       provider: 'v8',
       include: [

@@ -55,6 +55,7 @@ import {
   type SageWorkspaceMemberRow,
   type SageWorkspaceRow,
 } from './postgres-mappers'
+import { conflict } from './service-errors'
 
 type CountRow = { count: number | string }
 
@@ -261,29 +262,53 @@ export class PostgresSageRepository implements SageRepository {
     return mapEvidenceSource(rows[0])
   }
 
-  async getEvidenceSource(sourceId: string): Promise<SageEvidenceSource | undefined> {
+  async getEvidenceSource(
+    sourceId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageEvidenceSource | undefined> {
     const { rows } = await this.sql.query<SageEvidenceSourceRow>(
-      `select * from sage_evidence_source where id = $1`,
-      [sourceId],
+      `select * from sage_evidence_source where id = $1 and workspace_id = $2 and org_id = $3`,
+      [sourceId, workspaceId, orgId],
     )
     const row = firstOrUndefined(rows)
     return row ? mapEvidenceSource(row) : undefined
+  }
+
+  async listEvidenceSources(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageEvidenceSource[]> {
+    const { rows } = await this.sql.query<SageEvidenceSourceRow>(
+      `select * from sage_evidence_source
+       where workspace_id = $1 and org_id = $2
+       order by created_at desc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapEvidenceSource)
   }
 
   async classifyEvidenceSource(
     sourceId: string,
     update: { sourceQuality: SageSourceQuality; authorizationLevel: SageAuthorizationLevel },
   ): Promise<SageEvidenceSource> {
-    // "classified" is derived (source_quality is not null) — no separate column.
+    // Compare-and-set: "classified" is derived (source_quality is not null), so
+    // the guard `source_quality is null` admits ONLY a not-yet-classified source.
+    // Two concurrent classifications race on this predicate; exactly one matches
+    // a row and the loser gets zero rows → a typed CONFLICT (never a silent
+    // second overwrite).
     const { rows } = await this.sql.query<SageEvidenceSourceRow>(
       `update sage_evidence_source
          set source_quality = $2, authorization_level = $3
        where id = $1
+         and source_quality is null
        returning *`,
       [sourceId, update.sourceQuality, update.authorizationLevel],
     )
     const row = firstOrUndefined(rows)
-    if (!row) throw new Error('sage-core: source not found')
+    if (!row) {
+      conflict('evidence source is already classified or was concurrently modified')
+    }
     return mapEvidenceSource(row)
   }
 
@@ -312,25 +337,59 @@ export class PostgresSageRepository implements SageRepository {
     return mapEvidenceItem(rows[0])
   }
 
-  async getEvidenceItem(itemId: string): Promise<SageEvidenceItem | undefined> {
+  async getEvidenceItem(
+    itemId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageEvidenceItem | undefined> {
     const { rows } = await this.sql.query<SageEvidenceItemRow>(
-      `select * from sage_evidence_item where id = $1`,
-      [itemId],
+      `select * from sage_evidence_item where id = $1 and workspace_id = $2 and org_id = $3`,
+      [itemId, workspaceId, orgId],
     )
     const row = firstOrUndefined(rows)
     return row ? mapEvidenceItem(row) : undefined
   }
 
+  async listEvidenceItems(
+    workspaceId: string,
+    orgId: string,
+    sourceId?: string,
+  ): Promise<SageEvidenceItem[]> {
+    if (sourceId !== undefined) {
+      const { rows } = await this.sql.query<SageEvidenceItemRow>(
+        `select * from sage_evidence_item
+         where workspace_id = $1 and org_id = $2 and source_id = $3
+         order by updated_at desc, created_at desc`,
+        [workspaceId, orgId, sourceId],
+      )
+      return rows.map(mapEvidenceItem)
+    }
+    const { rows } = await this.sql.query<SageEvidenceItemRow>(
+      `select * from sage_evidence_item
+       where workspace_id = $1 and org_id = $2
+       order by updated_at desc, created_at desc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapEvidenceItem)
+  }
+
   async linkEvidenceItem(itemId: string, linkedAt: string): Promise<SageEvidenceItem> {
+    // Compare-and-set: only a 'registered' item may transition to 'linked'. Two
+    // concurrent links race on `lifecycle_state = 'registered'`; exactly one
+    // matches and the loser gets zero rows → a typed CONFLICT (never two
+    // independent successful transitions from the same initial state).
     const { rows } = await this.sql.query<SageEvidenceItemRow>(
       `update sage_evidence_item
          set lifecycle_state = 'linked', updated_at = $2
        where id = $1
+         and lifecycle_state = 'registered'
        returning *`,
       [itemId, linkedAt],
     )
     const row = firstOrUndefined(rows)
-    if (!row) throw new Error('sage-core: item not found')
+    if (!row) {
+      conflict('evidence item is not in a linkable state or was concurrently modified')
+    }
     return mapEvidenceItem(row)
   }
 

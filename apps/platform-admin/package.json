@@ -48,9 +48,11 @@
   "devDependencies": {
     "@nzila/config": "workspace:*",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/react": "^16.0.0",
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10",
     "eslint-config-next": "16.2.2",
     "tailwindcss": "^4",

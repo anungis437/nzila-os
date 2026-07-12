@@ -16,10 +16,11 @@ import 'server-only'
 import {
   InMemoryIdempotencyCache,
   PostgresIdempotencyCache,
-  type IdempotencyCache,
+  isStrictEnvironment,
+  type AtomicIdempotencyCache,
 } from '@nzila/os-core/idempotency'
 
-let cache: IdempotencyCache | null = null
+let cache: AtomicIdempotencyCache | null = null
 
 /** True when a durable (PostgreSQL-backed) idempotency store should be used. */
 export function shouldUseDurableIdempotency(): boolean {
@@ -27,14 +28,29 @@ export function shouldUseDurableIdempotency(): boolean {
 }
 
 /**
- * Return the process-wide SAGE idempotency cache. Durable (Postgres) whenever a
- * database is configured; in-memory only as a no-DB dev/test fallback.
+ * Return the process-wide SAGE idempotency cache.
+ *
+ *  - DATABASE_URL present → durable PostgreSQL store.
+ *  - No DATABASE_URL in a strict (pilot/prod) environment → FAIL CLOSED (throw).
+ *    Production must never silently use process-local memory for idempotency.
+ *  - No DATABASE_URL in dev/test → in-memory fallback (explicitly permitted).
+ *
+ * Both implementations satisfy `AtomicIdempotencyCache`, so callers get atomic
+ * first-writer acquisition (see `runIdempotentMutation`) rather than the
+ * non-atomic check→mutate→set flow.
  */
-export function getSageIdempotencyCache(): IdempotencyCache {
+export function getSageIdempotencyCache(): AtomicIdempotencyCache {
   if (cache) return cache
-  const created = shouldUseDurableIdempotency()
-    ? new PostgresIdempotencyCache()
-    : new InMemoryIdempotencyCache()
-  cache = created
-  return created
+  if (shouldUseDurableIdempotency()) {
+    cache = new PostgresIdempotencyCache()
+    return cache
+  }
+  if (isStrictEnvironment()) {
+    throw new Error(
+      'SAGE idempotency requires DATABASE_URL in production (pilot/prod): refusing to fall back to ' +
+        'in-memory idempotency. Set DATABASE_URL so replay protection is durable across instances.',
+    )
+  }
+  cache = new InMemoryIdempotencyCache()
+  return cache
 }

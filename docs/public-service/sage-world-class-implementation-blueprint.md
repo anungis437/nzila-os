@@ -68,6 +68,44 @@ This is the final planning-only SAGE PR. The next PR must begin engineering impl
 > gains `listWorkspaces`/`getSageWorkspace`/`listSageWorkspaces`. Boundaries unchanged; still not launched,
 > available, or procurement-ready.
 
+> **Implementation status (Phase 5 started).** Authenticated evidence source registration, classification,
+> evidence-item creation, and linking are now implemented through the durable SAGE service and repository
+> layers. In `apps/platform-admin`: `lib/sage/evidence-schemas.ts`, `lib/sage/evidence-view.ts`,
+> `lib/sage/evidence-service.ts` (durable, replay-safe idempotency per org+actor+route+key), API routes under
+> `app/api/sage/workspaces/[workspaceId]/evidence-sources` (+ `/classify`) and `/evidence-items` (+ `/link`),
+> and an evidence page + accessible client components under `app/sage`. `@nzila/sage-core` gains
+> authorization-filtered read services (`listSageEvidenceSources`/`listSageEvidenceItems`/
+> `getSageEvidenceSource`/`getSageEvidenceItem`) and tenant-scoped repository reads; evidence mutations now
+> authorize through workspace membership + active SAGE role (never org-entry permissions). orgId/actorId
+> derive from the session; missing/cross-org/denied resolves to a non-disclosing 404; authorized-only and
+> sensitive evidence require an explicit active grant. Bilingual (en/fr) strings added. Boundaries unchanged;
+> still not launched, available, or procurement-ready.
+
+> **Implementation status (Phase 5 hardening).** Concurrency safety added on top of the evidence slice.
+> `@nzila/os-core` idempotency gained ATOMIC first-writer acquisition (`AtomicIdempotencyCache.acquire`/
+> `finalize`/`release` on both the in-memory and Postgres caches, plus `runIdempotentMutation`): under
+> concurrent identical requests exactly one mutation runs and the rest replay its result — closing the
+> `check → mutate → set` race. The SAGE workspace/evidence mutation wrappers now use it. Evidence lifecycle
+> transitions are compare-and-set at the SQL layer (`classifyEvidenceSource` guarded by `source_quality is
+> null`; `linkEvidenceItem` guarded by `lifecycle_state = 'registered'`), surfacing a typed CONFLICT on a
+> zero-row update so two concurrent transitions cannot both succeed. Linking sensitive (and authorized-only)
+> evidence requires an explicit, active, non-revoked evidence-authorization grant; oversight/admin status
+> never substitutes. Covered by atomic-idempotency, concurrent-route, compare-and-set, mutation-authorization,
+> and rendered permission-gating tests. Boundaries unchanged; still not launched, available, or
+> procurement-ready.
+
+> **Implementation status (Phase 5 crash-recovery hardening).** The atomic idempotency reservation is now a
+> LEASE with a fencing token. `@nzila/os-core` reservations carry an unguessable `reservation_owner` and a
+> finite lease deadline (`IDEMPOTENCY_LEASE_MS`, reusing `expires_at` while in flight; migration
+> `packages/db/drizzle/0031` adds `reservation_owner`). If a worker crashes after `acquire` but before
+> `finalize`/`release`, the stale lease is atomically RECLAIMED by a later retry (single compare-and-set
+> `UPDATE … WHERE status=0 AND payload_hash=$ AND expires_at < now()`), so a key is never orphaned in
+> `in_progress`. `finalize`/`release` are fenced on the owner token (`… AND reservation_owner=$`), so a
+> reclaimed/slow worker cannot clobber the new owner's result — a lost fence returns a typed
+> `ownership_lost`. Covered by in-memory lease tests (injected clock: reclaim, active-lease, payload-conflict,
+> crash-recovery single execution, old-owner fencing) and Postgres SQL assertions (reclaim/finalize/release
+> predicates + parameterization). Boundaries unchanged; still not launched, available, or procurement-ready.
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:

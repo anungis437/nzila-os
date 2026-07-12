@@ -33,8 +33,12 @@
       "action": "Action",
       "open": "Open"
     },
-    "validation": { "nameRequired": "A workspace name is required." },
-    "error": { "createFailed": "Could not create the workspace. Please try again." },
+    "validation": {
+      "nameRequired": "A workspace name is required."
+    },
+    "error": {
+      "createFailed": "Could not create the workspace. Please try again."
+    },
     "sections": {
       "identity": "Workspace identity",
       "boundaryProfile": "Boundary profile",
@@ -52,6 +56,56 @@
       "boundaryFlags": "Boundary flags",
       "decisionRecords": "Decision records",
       "openExportRequests": "Open export requests"
+    },
+    "evidence": {
+      "tab": "Evidence"
+    }
+  },
+  "sageEvidence": {
+    "pageTitle": "Evidence",
+    "pageDescription": "Register evidence sources, classify them, create evidence items, and link them for internal review. For internal review use only — not a public service, product, certification, or availability claim.",
+    "sourcesHeading": "Evidence sources",
+    "itemsHeading": "Evidence items",
+    "registerSource": "Register source",
+    "sourceType": "Source type",
+    "containsPersonalInformation": "Contains personal information",
+    "containsSensitiveInformation": "Contains sensitive information",
+    "sourceQuality": "Source quality",
+    "authorizationLevel": "Authorization level",
+    "classify": "Classify",
+    "confidenceLevel": "Confidence level",
+    "evidenceSource": "Evidence source",
+    "createItem": "Create item",
+    "link": "Link",
+    "submitting": "Saving…",
+    "noSources": "No evidence sources you can view yet.",
+    "noItems": "No evidence items you can view yet.",
+    "notClassifiedYet": "Not classified yet",
+    "needClassifiedSource": "Classify a source before creating evidence items.",
+    "humanReviewRequired": "Human review required",
+    "excludedFromExternalReview": "Excluded from external review",
+    "sourcesTableCaption": "Evidence sources",
+    "itemsTableCaption": "Evidence items",
+    "validation": {
+      "sourceTypeRequired": "Select a source type.",
+      "sourceRequired": "Select an evidence source."
+    },
+    "error": {
+      "registerFailed": "Could not register the source. Please try again.",
+      "classifyFailed": "Could not classify the source. Please try again.",
+      "createItemFailed": "Could not create the evidence item. Please try again.",
+      "linkFailed": "Could not link the evidence item. Please try again."
+    },
+    "lifecycle": {
+      "proposed": "Proposed",
+      "registered": "Registered",
+      "classified": "Classified",
+      "linked": "Linked",
+      "reviewed": "Reviewed",
+      "accepted": "Accepted",
+      "needs_review": "Needs review",
+      "excluded": "Excluded",
+      "archived": "Archived"
     }
   }
 }

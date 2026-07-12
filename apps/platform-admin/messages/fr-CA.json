@@ -52,8 +52,12 @@
       "action": "Action",
       "open": "Ouvrir"
     },
-    "validation": { "nameRequired": "Un nom d’espace de travail est requis." },
-    "error": { "createFailed": "Impossible de créer l’espace de travail. Veuillez réessayer." },
+    "validation": {
+      "nameRequired": "Un nom d’espace de travail est requis."
+    },
+    "error": {
+      "createFailed": "Impossible de créer l’espace de travail. Veuillez réessayer."
+    },
     "sections": {
       "identity": "Identité de l’espace de travail",
       "boundaryProfile": "Profil de délimitation",
@@ -71,6 +75,56 @@
       "boundaryFlags": "Indicateurs de délimitation",
       "decisionRecords": "Registres de décision",
       "openExportRequests": "Demandes d’exportation ouvertes"
+    },
+    "evidence": {
+      "tab": "Preuves"
+    }
+  },
+  "sageEvidence": {
+    "pageTitle": "Preuves",
+    "pageDescription": "Enregistrez des sources de preuve, classez-les, créez des éléments de preuve et liez-les pour examen interne. À usage interne uniquement — il ne s’agit pas d’un service public, d’un produit, d’une certification ni d’une allégation de disponibilité.",
+    "sourcesHeading": "Sources de preuve",
+    "itemsHeading": "Éléments de preuve",
+    "registerSource": "Enregistrer la source",
+    "sourceType": "Type de source",
+    "containsPersonalInformation": "Contient des renseignements personnels",
+    "containsSensitiveInformation": "Contient des renseignements sensibles",
+    "sourceQuality": "Qualité de la source",
+    "authorizationLevel": "Niveau d’autorisation",
+    "classify": "Classer",
+    "confidenceLevel": "Niveau de confiance",
+    "evidenceSource": "Source de preuve",
+    "createItem": "Créer un élément",
+    "link": "Lier",
+    "submitting": "Enregistrement…",
+    "noSources": "Aucune source de preuve consultable pour l’instant.",
+    "noItems": "Aucun élément de preuve consultable pour l’instant.",
+    "notClassifiedYet": "Pas encore classé",
+    "needClassifiedSource": "Classez une source avant de créer des éléments de preuve.",
+    "humanReviewRequired": "Examen humain requis",
+    "excludedFromExternalReview": "Exclu de l’examen externe",
+    "sourcesTableCaption": "Sources de preuve",
+    "itemsTableCaption": "Éléments de preuve",
+    "validation": {
+      "sourceTypeRequired": "Sélectionnez un type de source.",
+      "sourceRequired": "Sélectionnez une source de preuve."
+    },
+    "error": {
+      "registerFailed": "Impossible d’enregistrer la source. Veuillez réessayer.",
+      "classifyFailed": "Impossible de classer la source. Veuillez réessayer.",
+      "createItemFailed": "Impossible de créer l’élément de preuve. Veuillez réessayer.",
+      "linkFailed": "Impossible de lier l’élément de preuve. Veuillez réessayer."
+    },
+    "lifecycle": {
+      "proposed": "Proposé",
+      "registered": "Enregistré",
+      "classified": "Classé",
+      "linked": "Lié",
+      "reviewed": "Examiné",
+      "accepted": "Accepté",
+      "needs_review": "À examiner",
+      "excluded": "Exclu",
+      "archived": "Archivé"
     }
   }
 }

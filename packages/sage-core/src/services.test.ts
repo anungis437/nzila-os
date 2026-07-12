@@ -5,7 +5,7 @@ import { SAGE_PERMISSIONS } from './permissions'
 import { SAGE_AUDIT_ACTIONS } from './audit-events'
 import { SageServiceError } from './service-errors'
 import type { SageServiceContext, SageServiceActor } from './service-context'
-import type { SageApplicationRole } from './types'
+import type { SageApplicationRole, SageAuthorizationLevel } from './types'
 import {
   addSageBoundaryFlag,
   addSageReviewNote,
@@ -20,8 +20,11 @@ import {
   denySageExport,
   getSageWorkspaceSummary,
   getSageWorkspace,
+  getSageEvidenceSource,
   grantSageEvidenceAuthorization,
   linkSageEvidenceItem,
+  listSageEvidenceItems,
+  listSageEvidenceSources,
   listSageWorkspaces,
   requestSageExport,
   revokeSageRole,
@@ -47,11 +50,25 @@ beforeEach(() => {
 })
 
 async function makeWorkspace(a = actor()) {
-  return createSageWorkspace(deps, ctxFor(a), {
+  const ws = await createSageWorkspace(deps, ctxFor(a), {
     name: 'Example Service Review Office',
     institutionType: 'crown_corporation',
     riskSurface: 'general_governance',
   })
+  // The creator is bootstrapped as workspace_owner; also grant evidence_steward
+  // so evidence-flow tests can exercise create/classify/link end-to-end.
+  await deps.repo.assignRole({
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    actorId: a.actorId,
+    sageApplicationRole: 'evidence_steward',
+    workspaceScope: ws.id,
+    accessReason: 'test',
+    approvedBy: a.actorId,
+    createdAt: '2026-07-12T00:00:00.000Z',
+    revokedAt: null,
+  })
+  return ws
 }
 
 describe('createSageWorkspace', () => {
@@ -342,13 +359,13 @@ describe('SAGE workspace RBAC (membership + role assignment)', () => {
     const oversight = actor({ actorId: 'ov', permissions: [SAGE_PERMISSIONS.WORKSPACE_ADMIN] })
     const loaded = await getSageWorkspace(deps, ctxFor(oversight), { workspaceId: ws.id })
     expect(loaded.id).toBe(ws.id)
-    // Oversight is read-only: no automatic sensitive-evidence access.
+    // Oversight is read-only: no automatic evidence access (needs membership + role).
     await expect(
       createSageEvidenceSource(deps, ctxFor(oversight), {
         workspaceId: ws.id,
         sourceType: 'public',
       }),
-    ).rejects.toMatchObject({ code: 'PERMISSION_DENIED' })
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
   })
 
   it('oversight (WORKSPACE_ADMIN) confers no export approval authority', async () => {
@@ -822,3 +839,223 @@ async function revokeSageEvidenceAuthorizationSafe(
     reason: 'no longer needed',
   })
 }
+
+describe('SAGE evidence read services (authorization filtering)', () => {
+  async function setupSource(authorizationLevel?: SageAuthorizationLevel) {
+    const ws = await makeWorkspace() // actor_1: workspace_owner + evidence_steward
+    const src = await createSageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceType: 'public',
+    })
+    if (authorizationLevel) {
+      await classifySageEvidenceSource(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        sourceId: src.id,
+        sourceQuality: 'moderate',
+        authorizationLevel,
+      })
+    }
+    return { ws, src }
+  }
+
+  it('lists sources for an authorized member', async () => {
+    const { ws } = await setupSource()
+    const list = await listSageEvidenceSources(deps, ctxFor(actor()), { workspaceId: ws.id })
+    expect(list).toHaveLength(1)
+  })
+
+  it('does not disclose another organization\u2019s evidence', async () => {
+    const { ws, src } = await setupSource()
+    await expect(
+      getSageEvidenceSource(deps, ctxFor(actor({ orgId: 'org_2' })), {
+        workspaceId: ws.id,
+        sourceId: src.id,
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+    await expect(
+      listSageEvidenceSources(deps, ctxFor(actor({ orgId: 'org_2' })), { workspaceId: ws.id }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('rejects a cross-workspace source lookup with NOT_FOUND', async () => {
+    const { src } = await setupSource()
+    const otherWs = await makeWorkspace()
+    await expect(
+      getSageEvidenceSource(deps, ctxFor(actor()), { workspaceId: otherWs.id, sourceId: src.id }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('requires membership + active role to list', async () => {
+    const { ws } = await setupSource()
+    await expect(
+      listSageEvidenceSources(deps, ctxFor(actor({ actorId: 'stranger', permissions: [] })), {
+        workspaceId: ws.id,
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('hides authorized_only evidence until an explicit active grant exists', async () => {
+    const { ws } = await setupSource('authorized_only')
+    await addSageWorkspaceMember(deps, ctxFor(actor()), { workspaceId: ws.id, actorId: 'reader' })
+    await assignSageRole(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: 'reader',
+      role: 'read_only_observer',
+      accessReason: 'r',
+      approvedBy: 'actor_1',
+    })
+    const readerCtx = ctxFor(actor({ actorId: 'reader', permissions: [] }))
+    expect(await listSageEvidenceSources(deps, readerCtx, { workspaceId: ws.id })).toHaveLength(0)
+
+    const grant = await grantSageEvidenceAuthorization(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: 'reader',
+      level: 'authorized_only',
+      accessReason: 'r',
+      approvedBy: 'actor_1',
+    })
+    expect(await listSageEvidenceSources(deps, readerCtx, { workspaceId: ws.id })).toHaveLength(1)
+
+    // A revoked grant hides it again.
+    await revokeSageEvidenceAuthorizationSafe(grant.id, ws.id, actor())
+    expect(await listSageEvidenceSources(deps, readerCtx, { workspaceId: ws.id })).toHaveLength(0)
+  })
+
+  it('does not expose sensitive evidence through WORKSPACE_ADMIN oversight', async () => {
+    const { ws } = await setupSource('sensitive')
+    const oversight = actor({ actorId: 'ov', permissions: [SAGE_PERMISSIONS.WORKSPACE_ADMIN] })
+    // Oversight can read the workspace but is not a member with an evidence grant.
+    expect(await listSageEvidenceSources(deps, ctxFor(oversight), { workspaceId: ws.id })).toHaveLength(0)
+  })
+
+  it('lists items only for accessible sources', async () => {
+    const { ws, src } = await setupSource('internal')
+    const item = await createSageEvidenceItem(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      confidenceLevel: 'moderate',
+    })
+    const items = await listSageEvidenceItems(deps, ctxFor(actor()), { workspaceId: ws.id })
+    expect(items.map((i) => i.id)).toContain(item.id)
+  })
+})
+
+describe('SAGE evidence lifecycle concurrency + mutation authorization', () => {
+  async function classifiedSourceWithItem(level: SageAuthorizationLevel) {
+    const ws = await makeWorkspace() // creator: workspace_owner + evidence_steward + member
+    const src = await createSageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceType: level === 'public' ? 'public' : 'authorized_only',
+    })
+    await classifySageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      sourceQuality: 'moderate',
+      authorizationLevel: level,
+    })
+    const item = await createSageEvidenceItem(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      confidenceLevel: 'moderate',
+    })
+    return { ws, src, item }
+  }
+
+  it('classifies a source at most once under concurrent requests (compare-and-set)', async () => {
+    const ws = await makeWorkspace()
+    const src = await createSageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceType: 'public',
+    })
+    // Two different classifications race on the same unclassified source.
+    const results = await Promise.allSettled([
+      classifySageEvidenceSource(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        sourceId: src.id,
+        sourceQuality: 'moderate',
+        authorizationLevel: 'internal',
+      }),
+      classifySageEvidenceSource(deps, ctxFor(actor()), {
+        workspaceId: ws.id,
+        sourceId: src.id,
+        sourceQuality: 'high',
+        authorizationLevel: 'public',
+      }),
+    ])
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1)
+    const rejected = results.filter((r) => r.status === 'rejected')
+    expect(rejected).toHaveLength(1)
+    expect((rejected[0] as PromiseRejectedResult).reason).toMatchObject({ code: 'CONFLICT' })
+    // Exactly one classification took effect.
+    const after = await getSageEvidenceSource(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+    })
+    expect(after.classified).toBe(true)
+  })
+
+  it('links an item at most once under concurrent requests and emits a single audit event', async () => {
+    const { ws, item } = await classifiedSourceWithItem('public')
+    const before = sink.records.filter(
+      (r) => r.action === SAGE_AUDIT_ACTIONS.EVIDENCE_LINKED,
+    ).length
+    const results = await Promise.allSettled([
+      linkSageEvidenceItem(deps, ctxFor(actor()), { workspaceId: ws.id, itemId: item.id }),
+      linkSageEvidenceItem(deps, ctxFor(actor()), { workspaceId: ws.id, itemId: item.id }),
+    ])
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1)
+    const rejected = results.filter((r) => r.status === 'rejected')
+    expect(rejected).toHaveLength(1)
+    expect((rejected[0] as PromiseRejectedResult).reason).toMatchObject({ code: 'CONFLICT' })
+    const after = sink.records.filter(
+      (r) => r.action === SAGE_AUDIT_ACTIONS.EVIDENCE_LINKED,
+    ).length
+    expect(after - before).toBe(1) // one transition → one audit event
+  })
+
+  it('blocks linking sensitive evidence without an explicit grant', async () => {
+    const { ws, item } = await classifiedSourceWithItem('sensitive')
+    await expect(
+      linkSageEvidenceItem(deps, ctxFor(actor()), { workspaceId: ws.id, itemId: item.id }),
+    ).rejects.toThrow(/sensitive.*authorization/)
+  })
+
+  it('links sensitive evidence only with an explicit active grant', async () => {
+    const { ws, item } = await classifiedSourceWithItem('sensitive')
+    await grantSageEvidenceAuthorization(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: actor().actorId,
+      level: 'sensitive',
+      accessReason: 'x',
+      approvedBy: 'admin',
+    })
+    const linked = await linkSageEvidenceItem(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      itemId: item.id,
+    })
+    expect(linked.lifecycleState).toBe('linked')
+  })
+
+  it('ignores a revoked grant when authorizing a sensitive link', async () => {
+    const { ws, item } = await classifiedSourceWithItem('sensitive')
+    const grant = await grantSageEvidenceAuthorization(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      actorId: actor().actorId,
+      level: 'sensitive',
+      accessReason: 'x',
+      approvedBy: 'admin',
+    })
+    await revokeSageEvidenceAuthorizationSafe(grant.id, ws.id, actor())
+    await expect(
+      linkSageEvidenceItem(deps, ctxFor(actor()), { workspaceId: ws.id, itemId: item.id }),
+    ).rejects.toThrow(/sensitive.*authorization/)
+  })
+
+  it('never lets WORKSPACE_ADMIN oversight link evidence (oversight is read-only)', async () => {
+    const { ws, item } = await classifiedSourceWithItem('public')
+    const oversight = actor({ actorId: 'ov', permissions: [SAGE_PERMISSIONS.WORKSPACE_ADMIN] })
+    await expect(
+      linkSageEvidenceItem(deps, ctxFor(oversight), { workspaceId: ws.id, itemId: item.id }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+})
