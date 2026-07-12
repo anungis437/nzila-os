@@ -47,6 +47,7 @@ status definitions, confidence levels, authorized-only marker, risk-tier phrasin
 - `sage-workspace-template.md` — manual internal SAGE workspace
 - `assurance-package-checklist.md` — pre-export / pre-share quality gate
 - `sample-public-broadcaster-workspace.md` — fictional example only
+- `manual-operating-readiness-summary.md` — internal readiness summary consolidating the completed proof runs
 
 ## 6. Minimum quality gate
 
