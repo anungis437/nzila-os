@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-12T11:24:57.497Z",
-  "filesScanned": 2161,
-  "totalFindings": 2705,
+  "generatedAt": "2026-07-12T11:43:31.819Z",
+  "filesScanned": 2162,
+  "totalFindings": 2708,
   "findingsByRule": {
     "stale-reference": 1039,
     "stale-package-ref": 68,
-    "naming-inconsistency": 1486,
+    "naming-inconsistency": 1489,
     "stale-date": 2,
     "missing-package-readme": 110
   },
   "findingsBySeverity": {
     "error": 0,
     "warning": 1217,
-    "info": 1488
+    "info": 1491
   },
   "findings": [
     {
@@ -16989,6 +16989,27 @@
       "file": "docs/public-service/sage-workspace-canonical.md",
       "line": 213,
       "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/public-service/sage-world-class-implementation-blueprint.md",
+      "line": 117,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/public-service/sage-world-class-implementation-blueprint.md",
+      "line": 126,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/public-service/sage-world-class-implementation-blueprint.md",
+      "line": 463,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",

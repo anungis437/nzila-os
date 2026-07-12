@@ -1,22 +1,22 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-12T11:24:57.497Z
+> Generated: 2026-07-12T11:43:31.819Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2161 |
-| Total Findings | 2705 |
+| Files Scanned | 2162 |
+| Total Findings | 2708 |
 | Errors | 0 |
 | Warnings | 1217 |
-| Info | 1488 |
+| Info | 1491 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1486 |
+| naming-inconsistency | 1489 |
 | stale-reference | 1039 |
 | missing-package-readme | 110 |
 | stale-package-ref | 68 |
@@ -1135,7 +1135,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1486)
+## naming-inconsistency (1489)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2455,6 +2455,9 @@
 - ℹ️ `docs/public-service/clear-method-one-page-summary.md:41` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/sage-workspace-canonical.md:178` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/sage-workspace-canonical.md:213` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:117` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:126` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:463` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/readiness/azure-production-baseline.md:36` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:37` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:41` — "nzila-os" should be "NzilaOS" (platform name)
