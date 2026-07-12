@@ -21,6 +21,10 @@ compliance certification, or external assurance package.
 External sharing remains **NEEDS REVIEW**. Do not clear a proof run for external sharing from this pack;
 external clearance requires separate review and approval.
 
+A polished *internal* export package (a consolidated or reformatted bundle intended to look presentation-
+ready) also remains **NEEDS REVIEW**. Producing a tidy internal package does not clear it for any external
+use.
+
 ## 4. Public-copy gate
 
 - [ ] No proof-run text is reused as public copy.

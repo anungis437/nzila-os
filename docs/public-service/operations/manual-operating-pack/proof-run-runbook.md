@@ -7,6 +7,12 @@
 A step-by-step runbook for completing a future internal, fictional CLEAR/SAGE proof run using the Alpha
 Operating Kit and the calibrated conventions. Follow it in order; do not improvise boundary language.
 
+> **Usability dry-run mode:** To rehearse the setup logic without creating a proof run, walk Steps 1–12 on
+> paper only — do **not** create a proof-run folder, a `NNN-*` directory, a proof-runs index row, or any
+> completed proof-run file. Record the rehearsal under
+> [usability-dry-runs/](usability-dry-runs/) instead. A proof run is only *created* when Step 1 actually
+> adds a folder and index row.
+
 ## 2. Inputs required
 
 - A fictional institution label (never a real institution).
