@@ -49,6 +49,7 @@ status definitions, confidence levels, authorized-only marker, risk-tier phrasin
 - `sample-public-broadcaster-workspace.md` — fictional example only
 - `manual-operating-readiness-summary.md` — internal readiness summary consolidating the completed proof runs
 - `manual-operating-pack/README.md` — internal operating pack for completing and controlling future manual proof runs
+- `internal-doctrine-map.md` — internal lineage map connecting OCI/OCRA, CIVIC, CLEAR, SAGE, and the Manual Operating Pack
 
 ## 6. Minimum quality gate
 
