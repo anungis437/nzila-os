@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-07-12T11:48:42.667Z",
+  "generatedAt": "2026-07-12T12:05:11.689Z",
   "filesScanned": 2162,
-  "totalFindings": 2708,
+  "totalFindings": 2709,
   "findingsByRule": {
     "stale-reference": 1039,
     "stale-package-ref": 68,
     "naming-inconsistency": 1489,
     "stale-date": 2,
-    "missing-package-readme": 110
+    "missing-package-readme": 111
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1217,
+    "warning": 1218,
     "info": 1491
   },
   "findings": [
@@ -16994,21 +16994,21 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/public-service/sage-world-class-implementation-blueprint.md",
-      "line": 117,
+      "line": 123,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/public-service/sage-world-class-implementation-blueprint.md",
-      "line": 126,
+      "line": 132,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/public-service/sage-world-class-implementation-blueprint.md",
-      "line": 469,
+      "line": 475,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -18680,6 +18680,12 @@
       "severity": "warning",
       "file": "packages/quebec-vocabulary",
       "message": "Package quebec-vocabulary missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/sage-core",
+      "message": "Package sage-core missing README.md"
     },
     {
       "rule": "missing-package-readme",

@@ -168,6 +168,7 @@ export default defineConfig({
       // Governance packages
       'packages/observability',
       'packages/audit',
+      'packages/sage-core',
       'packages/ai-control',
       'packages/contracts',
       'packages/events',

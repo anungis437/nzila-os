@@ -1,15 +1,15 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-12T11:48:42.667Z
+> Generated: 2026-07-12T12:05:11.689Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Files Scanned | 2162 |
-| Total Findings | 2708 |
+| Total Findings | 2709 |
 | Errors | 0 |
-| Warnings | 1217 |
+| Warnings | 1218 |
 | Info | 1491 |
 
 ## Findings by Rule
@@ -18,7 +18,7 @@
 |------|-------|
 | naming-inconsistency | 1489 |
 | stale-reference | 1039 |
-| missing-package-readme | 110 |
+| missing-package-readme | 111 |
 | stale-package-ref | 68 |
 | stale-date | 2 |
 
@@ -2455,9 +2455,9 @@
 - ℹ️ `docs/public-service/clear-method-one-page-summary.md:41` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/sage-workspace-canonical.md:178` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/sage-workspace-canonical.md:213` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:117` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:126` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:469` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:123` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:132` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/public-service/sage-world-class-implementation-blueprint.md:475` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/readiness/azure-production-baseline.md:36` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:37` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/readiness/azure-production-baseline.md:41` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2632,7 +2632,7 @@
 - ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 95 days old — may be stale
 - ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 90 days old — may be stale
 
-## missing-package-readme (110)
+## missing-package-readme (111)
 
 - 🟡 `packages/agri-adapters` — Package agri-adapters missing README.md
 - 🟡 `packages/agri-core` — Package agri-core missing README.md
@@ -2714,6 +2714,7 @@
 - 🟡 `packages/policy-intelligence` — Package policy-intelligence missing README.md
 - 🟡 `packages/pricing-engine` — Package pricing-engine missing README.md
 - 🟡 `packages/quebec-vocabulary` — Package quebec-vocabulary missing README.md
+- 🟡 `packages/sage-core` — Package sage-core missing README.md
 - 🟡 `packages/schema-core` — Package schema-core missing README.md
 - 🟡 `packages/secrets` — Package secrets missing README.md
 - 🟡 `packages/security` — Package security missing README.md
