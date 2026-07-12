@@ -193,7 +193,8 @@ Internal packaging must not proceed if:
 ## 14. Recommended next step
 
 Pause additional proof runs and create an internal CLEAR/SAGE Manual Operating Pack. Proof Run 0.4 should
-remain deferred unless a specific health-system risk rehearsal is needed.
+remain deferred unless a specific health-system risk rehearsal is needed. See
+[manual-operating-pack/README.md](manual-operating-pack/README.md).
 
 The Manual Operating Pack should include:
 
