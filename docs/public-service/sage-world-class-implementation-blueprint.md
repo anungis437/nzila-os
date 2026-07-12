@@ -40,6 +40,12 @@ internally; restrict external claims until implementation is complete and separa
 
 This is the final planning-only SAGE PR. The next PR must begin engineering implementation.
 
+> **Implementation status (Phase 1 started).** Phase 1 engineering has begun. Repo-native artifacts:
+> `migrations/0032_sage_phase_1_access_domain_lock.sql` (SAGE enums + access/domain tables) and the
+> `packages/sage-core` package (types, permission/audit constants, `deriveSageBoundaryProfile`,
+> implementation-blocking invariants, access model, and negative-path tests). Boundaries remain unchanged;
+> nothing here is launched, available, or procurement-ready.
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:
