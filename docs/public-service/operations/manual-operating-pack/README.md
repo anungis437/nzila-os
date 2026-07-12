@@ -43,6 +43,8 @@ calibration or a new proof run is warranted.
 - [decision-record-checklist.md](decision-record-checklist.md) — controlled feedback decisions
 - [retrospective-checklist.md](retrospective-checklist.md) — standardized retrospectives
 - [packaging-export-prohibition-checklist.md](packaging-export-prohibition-checklist.md) — prevent premature external packaging
+- [usability-dry-runs/001-pack-operator-usability-dry-run.md](usability-dry-runs/001-pack-operator-usability-dry-run.md) — operator usability dry run of the pack
+- [v0.1-closure-note.md](v0.1-closure-note.md) — v0.1 closure record and next decision point
 
 ## 6. Required operating sequence
 
