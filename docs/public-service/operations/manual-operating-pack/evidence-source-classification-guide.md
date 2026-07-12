@@ -16,6 +16,16 @@ kept distinct from authorized-only and excluded material.
 - **Excluded** — material that must not be registered or accessed in a proof run.
 - **Unknown / needs review** — unclassified; treated as excluded until reviewed.
 
+### Quick reference
+
+| Class | Use allowed? | Access rule |
+| --- | --- | --- |
+| Public | Yes | Reference/link first |
+| Administrative | Yes, with normal internal handling | Reference/link first |
+| Authorized-only | Placeholder only until authorized | `[AUTHORIZED-ONLY]`; not accessed until recorded authorization |
+| Excluded | No | Not registered, not accessed |
+| Unknown / needs review | No until reclassified | Treat as excluded; escalate to a reviewer |
+
 ## 3. Allowed source categories
 
 - public mandate statement

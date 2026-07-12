@@ -7,6 +7,11 @@
 Provide repeatable scan discipline so every proof run is checked for public/product drift, real-institution
 leakage, and domain-boundary violations before completion.
 
+> **Expected-match rubric (read first):** A scan hit is acceptable only in no-go/boundary/exclusion/
+> prohibited-material/not-proven/scan-instruction context. A hit is a **blocker** if it appears as a
+> capability, recommendation, product claim, evidence target, decision object, public copy, outreach, or
+> validation claim.
+
 ## 2. Required scan categories
 
 - Governance scan
