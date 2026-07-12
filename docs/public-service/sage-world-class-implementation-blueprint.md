@@ -52,6 +52,13 @@ This is the final planning-only SAGE PR. The next PR must begin engineering impl
 > org-boundary enforcement, invariant enforcement, and SAGE audit emission (integrating with `@nzila/audit`).
 > Covered by `services.test.ts`. Boundaries unchanged; still not launched, available, or procurement-ready.
 
+> **Implementation status (Phase 3 started).** SQL-backed `SageRepository` added behind the existing
+> service layer: `sql-client.ts` (framework-free `SageSqlClient`), `postgres-repository.ts`
+> (`PostgresSageRepository`), and `postgres-mappers.ts` (snake_case ↔ TypeScript row mapping), with
+> `postgres-repository.test.ts` covering parameterized SQL, org/workspace boundaries, membership-vs-role
+> separation, revocation, export status, and mapping. Migration `0033_sage_phase_3_review_note.sql` adds the
+> `sage_review_note` table. Boundaries unchanged; still not launched, available, or procurement-ready.
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:

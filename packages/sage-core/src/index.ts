@@ -3,6 +3,7 @@
 // Phase 1: stakeholder access model, domain types, permission/audit constants,
 //   boundary-profile derivation, and implementation-blocking invariants.
 // Phase 2: executable service layer (repository port, audit sink, services).
+// Phase 3: SQL-backed repository persistence (SQL client, Postgres repository, mappers).
 //
 // Boundaries (from the SAGE World-Class Implementation Blueprint):
 // no automated decisions, no scoring/ranking, no certification,
@@ -19,3 +20,6 @@ export * from './service-errors.js'
 export * from './repository.js'
 export * from './audit-sink.js'
 export * from './services.js'
+export * from './sql-client.js'
+export * from './postgres-mappers.js'
+export * from './postgres-repository.js'

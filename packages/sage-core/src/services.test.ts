@@ -181,12 +181,18 @@ describe('membership and role assignment', () => {
 })
 
 describe('org boundary', () => {
-  it('blocks cross-org access to a workspace', async () => {
+  it('blocks cross-org access to a workspace (non-disclosure: NOT_FOUND)', async () => {
     const ws = await makeWorkspace()
     const otherOrg = actor({ actorId: 'x', orgId: 'org_2' })
     await expect(
       addSageWorkspaceMember(deps, ctxFor(otherOrg), { workspaceId: ws.id, actorId: 'user_2' }),
-    ).rejects.toThrow(/org/i)
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('getWorkspace is tenant-scoped: returns undefined for a mismatched org', async () => {
+    const ws = await makeWorkspace()
+    expect(await deps.repo.getWorkspace(ws.id, 'org_1')).toBeDefined()
+    expect(await deps.repo.getWorkspace(ws.id, 'org_2')).toBeUndefined()
   })
 })
 
@@ -512,12 +518,12 @@ describe('workspace summary', () => {
     expect(summary.boundaryProfilePresent).toBe(true)
   })
 
-  it('respects the org boundary', async () => {
+  it('respects the org boundary (non-disclosure: NOT_FOUND)', async () => {
     const ws = await makeWorkspace()
     const otherOrg = actor({ orgId: 'org_2' })
     await expect(
       getSageWorkspaceSummary(deps, ctxFor(otherOrg), { workspaceId: ws.id }),
-    ).rejects.toThrow(/org/i)
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
   })
 
   it('reflects counts after activity', async () => {

@@ -17,7 +17,10 @@
     "./service-errors": "./src/service-errors.ts",
     "./repository": "./src/repository.ts",
     "./audit-sink": "./src/audit-sink.ts",
-    "./services": "./src/services.ts"
+    "./services": "./src/services.ts",
+    "./sql-client": "./src/sql-client.ts",
+    "./postgres-mappers": "./src/postgres-mappers.ts",
+    "./postgres-repository": "./src/postgres-repository.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
