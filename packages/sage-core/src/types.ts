@@ -184,3 +184,104 @@ export type SageExportApproval = {
   decisionAt: string
   reason?: string | null
 }
+
+// ─── Evidence enums (mirror the migration) ───────────────────────────────────
+
+export const SAGE_SOURCE_TYPES = [
+  'public',
+  'administrative',
+  'authorized_only',
+  'excluded',
+  'unknown',
+] as const
+export type SageSourceType = (typeof SAGE_SOURCE_TYPES)[number]
+
+export const SAGE_SOURCE_QUALITIES = [
+  'low',
+  'low_moderate',
+  'moderate',
+  'high',
+  'insufficient',
+] as const
+export type SageSourceQuality = (typeof SAGE_SOURCE_QUALITIES)[number]
+
+export const SAGE_CONFIDENCE_LEVELS = [
+  'low',
+  'low_moderate',
+  'moderate',
+  'high',
+  'insufficient',
+] as const
+export type SageConfidenceLevel = (typeof SAGE_CONFIDENCE_LEVELS)[number]
+
+export const SAGE_BOUNDARY_FLAG_TYPES = [
+  'prohibited_use',
+  'sensitivity',
+  'exclusion',
+  'review_required',
+  'real_institution_risk',
+] as const
+export type SageBoundaryFlagType = (typeof SAGE_BOUNDARY_FLAG_TYPES)[number]
+
+// ─── Evidence and decision entities (mirror the migration tables) ────────────
+
+export type SageEvidenceSource = {
+  id: string
+  workspaceId: string
+  orgId: string
+  sourceType: SageSourceType
+  sourceQuality?: SageSourceQuality | null
+  authorizationLevel: SageAuthorizationLevel
+  containsPersonalInformation: boolean
+  containsSensitiveInformation: boolean
+  classified: boolean
+  createdBy: string
+  createdAt: string
+}
+
+export type SageEvidenceItem = {
+  id: string
+  sourceId: string
+  workspaceId: string
+  orgId: string
+  lifecycleState: SageEvidenceLifecycleState
+  confidenceLevel?: SageConfidenceLevel | null
+  excludedFromExternalReview: boolean
+  humanReviewRequired: boolean
+  createdBy: string
+  updatedBy?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type SageBoundaryFlag = {
+  id: string
+  workspaceId: string
+  orgId: string
+  targetId?: string | null
+  flagType: SageBoundaryFlagType
+  note?: string | null
+  createdBy: string
+  createdAt: string
+}
+
+export type SageReviewNote = {
+  id: string
+  workspaceId: string
+  orgId: string
+  targetId?: string | null
+  reviewerId: string
+  note: string
+  createdAt: string
+}
+
+export type SageDecisionRecord = {
+  id: string
+  workspaceId: string
+  orgId: string
+  decision: string
+  rationale?: string | null
+  humanReviewerId: string
+  createdBy: string
+  createdAt: string
+}
