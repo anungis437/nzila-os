@@ -20,7 +20,7 @@ import type {
 
 export interface SageRepository {
   createWorkspace(input: Omit<SageWorkspace, 'id'>): Promise<SageWorkspace>
-  getWorkspace(workspaceId: string): Promise<SageWorkspace | undefined>
+  getWorkspace(workspaceId: string, orgId: string): Promise<SageWorkspace | undefined>
 
   addWorkspaceMember(input: Omit<SageWorkspaceMember, 'id'>): Promise<SageWorkspaceMember>
   getWorkspaceMember(
@@ -98,8 +98,10 @@ export class InMemorySageRepository implements SageRepository {
     return ws
   }
 
-  async getWorkspace(workspaceId: string): Promise<SageWorkspace | undefined> {
-    return this.workspaces.get(workspaceId)
+  async getWorkspace(workspaceId: string, orgId: string): Promise<SageWorkspace | undefined> {
+    // Tenant-scoped: a workspace is only visible within its own org.
+    const ws = this.workspaces.get(workspaceId)
+    return ws && ws.orgId === orgId ? ws : undefined
   }
 
   async addWorkspaceMember(

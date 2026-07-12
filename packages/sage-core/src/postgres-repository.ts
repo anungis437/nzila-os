@@ -1,0 +1,492 @@
+// ─── @nzila/sage-core — SQL-backed repository (PostgreSQL) ────────────────────
+// Durable implementation of the SageRepository port (Phase 2) against the
+// sage_* schema from migration 0032 (Phase 1).
+//
+// Invariants preserved from Phase 2:
+//   * Parameterized SQL only — no interpolation of user-controlled values.
+//   * Org/workspace boundary: every write persists org_id; every workspace-scoped
+//     read filters by workspace_id (the tenant scope, FK to sage_workspace.org_id).
+//     getWorkspace is tenant-scoped at query time (id AND org_id); the service layer
+//     also performs an org-boundary check on the returned row (defense-in-depth).
+//   * Membership is separate from role assignment (distinct tables/inserts).
+//   * Revocation sets revoked_at; rows are never deleted. Active filtering is done
+//     in the service layer (activeSageRoles / activeEvidenceAuthorizations).
+//   * Export request defaults to a non-approved status; approve/deny update status
+//     and insert an approval row.
+
+import type { SageRepository } from './repository.js'
+import type { SageSqlClient } from './sql-client.js'
+import type {
+  SageAuthorizationLevel,
+  SageBoundaryFlag,
+  SageDecisionRecord,
+  SageEvidenceAuthorization,
+  SageEvidenceItem,
+  SageEvidenceSource,
+  SageExportApproval,
+  SageExportRequest,
+  SageReviewNote,
+  SageRoleAssignment,
+  SageSourceQuality,
+  SageWorkspace,
+  SageWorkspaceMember,
+} from './types.js'
+import {
+  mapBoundaryFlag,
+  mapDecisionRecord,
+  mapEvidenceAuthorization,
+  mapEvidenceItem,
+  mapEvidenceSource,
+  mapExportApproval,
+  mapExportRequest,
+  mapReviewNote,
+  mapRoleAssignment,
+  mapWorkspace,
+  mapWorkspaceMember,
+  type SageBoundaryFlagRow,
+  type SageDecisionRecordRow,
+  type SageEvidenceAuthorizationRow,
+  type SageEvidenceItemRow,
+  type SageEvidenceSourceRow,
+  type SageExportApprovalRow,
+  type SageExportRequestRow,
+  type SageReviewNoteRow,
+  type SageRoleAssignmentRow,
+  type SageWorkspaceMemberRow,
+  type SageWorkspaceRow,
+} from './postgres-mappers.js'
+
+type CountRow = { count: number | string }
+
+function toCount(rows: readonly CountRow[]): number {
+  if (rows.length === 0) return 0
+  return Number(rows[0].count)
+}
+
+function firstOrUndefined<T>(rows: readonly T[]): T | undefined {
+  return rows.length > 0 ? rows[0] : undefined
+}
+
+/**
+ * SQL-backed SageRepository. Construct with any client that satisfies
+ * SageSqlClient (e.g. a node-postgres Pool/Client or a transaction handle).
+ */
+export class PostgresSageRepository implements SageRepository {
+  constructor(private readonly sql: SageSqlClient) {}
+
+  // ─── Workspace ─────────────────────────────────────────────────────────────
+
+  async createWorkspace(input: Omit<SageWorkspace, 'id'>): Promise<SageWorkspace> {
+    const { rows } = await this.sql.query<SageWorkspaceRow>(
+      `insert into sage_workspace
+         (org_id, name, status, institution_type, risk_surface, boundary_profile,
+          created_by, updated_by, created_at, updated_at)
+       values ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10)
+       returning *`,
+      [
+        input.orgId,
+        input.name,
+        input.status,
+        input.institutionType,
+        input.riskSurface,
+        JSON.stringify(input.boundaryProfile),
+        input.createdBy,
+        input.updatedBy ?? null,
+        input.createdAt,
+        input.updatedAt,
+      ],
+    )
+    return mapWorkspace(rows[0])
+  }
+
+  async getWorkspace(workspaceId: string, orgId: string): Promise<SageWorkspace | undefined> {
+    // Tenant-scoped at the SQL boundary: a cross-org id never returns a row,
+    // preventing existence leakage across organizations.
+    const { rows } = await this.sql.query<SageWorkspaceRow>(
+      `select * from sage_workspace where id = $1 and org_id = $2`,
+      [workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapWorkspace(row) : undefined
+  }
+
+  // ─── Membership (separate from role assignment) ─────────────────────────────
+
+  async addWorkspaceMember(
+    input: Omit<SageWorkspaceMember, 'id'>,
+  ): Promise<SageWorkspaceMember> {
+    // Membership is idempotent (unique (workspace_id, actor_id)); on conflict
+    // return the existing row so membership never duplicates.
+    const { rows } = await this.sql.query<SageWorkspaceMemberRow>(
+      `insert into sage_workspace_member (workspace_id, org_id, actor_id, created_by, created_at)
+       values ($1, $2, $3, $4, $5)
+       on conflict (workspace_id, actor_id) do update set actor_id = excluded.actor_id
+       returning *`,
+      [input.workspaceId, input.orgId, input.actorId, input.createdBy, input.createdAt],
+    )
+    return mapWorkspaceMember(rows[0])
+  }
+
+  async getWorkspaceMember(
+    workspaceId: string,
+    actorId: string,
+  ): Promise<SageWorkspaceMember | undefined> {
+    const { rows } = await this.sql.query<SageWorkspaceMemberRow>(
+      `select * from sage_workspace_member where workspace_id = $1 and actor_id = $2`,
+      [workspaceId, actorId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapWorkspaceMember(row) : undefined
+  }
+
+  // ─── Role assignment ─────────────────────────────────────────────────────────
+
+  async listRoleAssignments(
+    workspaceId: string,
+    actorId: string,
+  ): Promise<SageRoleAssignment[]> {
+    const { rows } = await this.sql.query<SageRoleAssignmentRow>(
+      `select * from sage_role_assignment where workspace_id = $1 and actor_id = $2`,
+      [workspaceId, actorId],
+    )
+    return rows.map(mapRoleAssignment)
+  }
+
+  async assignRole(input: Omit<SageRoleAssignment, 'id'>): Promise<SageRoleAssignment> {
+    const { rows } = await this.sql.query<SageRoleAssignmentRow>(
+      `insert into sage_role_assignment
+         (workspace_id, org_id, actor_id, sage_application_role, workspace_scope,
+          time_bound_access_expires_at, access_reason, approved_by, created_at, revoked_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       returning *`,
+      [
+        input.workspaceId,
+        input.orgId,
+        input.actorId,
+        input.sageApplicationRole,
+        input.workspaceScope ?? null,
+        input.timeBoundAccessExpiresAt ?? null,
+        input.accessReason ?? null,
+        input.approvedBy ?? null,
+        input.createdAt,
+        input.revokedAt ?? null,
+      ],
+    )
+    return mapRoleAssignment(rows[0])
+  }
+
+  async revokeRole(roleAssignmentId: string, revokedAt: string): Promise<void> {
+    // Sets revoked_at; never deletes. Active filtering happens in the service layer.
+    await this.sql.query(
+      `update sage_role_assignment set revoked_at = $2 where id = $1`,
+      [roleAssignmentId, revokedAt],
+    )
+  }
+
+  // ─── Evidence authorization ──────────────────────────────────────────────────
+
+  async listEvidenceAuthorizations(
+    workspaceId: string,
+    actorId: string,
+  ): Promise<SageEvidenceAuthorization[]> {
+    const { rows } = await this.sql.query<SageEvidenceAuthorizationRow>(
+      `select * from sage_evidence_authorization where workspace_id = $1 and actor_id = $2`,
+      [workspaceId, actorId],
+    )
+    return rows.map(mapEvidenceAuthorization)
+  }
+
+  async grantEvidenceAuthorization(
+    input: Omit<SageEvidenceAuthorization, 'id'>,
+  ): Promise<SageEvidenceAuthorization> {
+    const { rows } = await this.sql.query<SageEvidenceAuthorizationRow>(
+      `insert into sage_evidence_authorization
+         (workspace_id, org_id, actor_id, evidence_authorization_level,
+          access_reason, approved_by, created_at, revoked_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8)
+       returning *`,
+      [
+        input.workspaceId,
+        input.orgId,
+        input.actorId,
+        input.evidenceAuthorizationLevel,
+        input.accessReason ?? null,
+        input.approvedBy ?? null,
+        input.createdAt,
+        input.revokedAt ?? null,
+      ],
+    )
+    return mapEvidenceAuthorization(rows[0])
+  }
+
+  async revokeEvidenceAuthorization(authorizationId: string, revokedAt: string): Promise<void> {
+    await this.sql.query(
+      `update sage_evidence_authorization set revoked_at = $2 where id = $1`,
+      [authorizationId, revokedAt],
+    )
+  }
+
+  // ─── Evidence source + item lifecycle ────────────────────────────────────────
+
+  async createEvidenceSource(
+    input: Omit<SageEvidenceSource, 'id'>,
+  ): Promise<SageEvidenceSource> {
+    const { rows } = await this.sql.query<SageEvidenceSourceRow>(
+      `insert into sage_evidence_source
+         (workspace_id, org_id, source_type, source_quality, authorization_level,
+          contains_personal_information, contains_sensitive_information, created_by, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       returning *`,
+      [
+        input.workspaceId,
+        input.orgId,
+        input.sourceType,
+        input.sourceQuality ?? null,
+        input.authorizationLevel,
+        input.containsPersonalInformation,
+        input.containsSensitiveInformation,
+        input.createdBy,
+        input.createdAt,
+      ],
+    )
+    return mapEvidenceSource(rows[0])
+  }
+
+  async getEvidenceSource(sourceId: string): Promise<SageEvidenceSource | undefined> {
+    const { rows } = await this.sql.query<SageEvidenceSourceRow>(
+      `select * from sage_evidence_source where id = $1`,
+      [sourceId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapEvidenceSource(row) : undefined
+  }
+
+  async classifyEvidenceSource(
+    sourceId: string,
+    update: { sourceQuality: SageSourceQuality; authorizationLevel: SageAuthorizationLevel },
+  ): Promise<SageEvidenceSource> {
+    // "classified" is derived (source_quality is not null) — no separate column.
+    const { rows } = await this.sql.query<SageEvidenceSourceRow>(
+      `update sage_evidence_source
+         set source_quality = $2, authorization_level = $3
+       where id = $1
+       returning *`,
+      [sourceId, update.sourceQuality, update.authorizationLevel],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) throw new Error('sage-core: source not found')
+    return mapEvidenceSource(row)
+  }
+
+  async createEvidenceItem(input: Omit<SageEvidenceItem, 'id'>): Promise<SageEvidenceItem> {
+    const { rows } = await this.sql.query<SageEvidenceItemRow>(
+      `insert into sage_evidence_item
+         (source_id, workspace_id, org_id, lifecycle_state, confidence_level,
+          excluded_from_external_review, human_review_required, created_by, updated_by,
+          created_at, updated_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       returning *`,
+      [
+        input.sourceId,
+        input.workspaceId,
+        input.orgId,
+        input.lifecycleState,
+        input.confidenceLevel ?? null,
+        input.excludedFromExternalReview,
+        input.humanReviewRequired,
+        input.createdBy,
+        input.updatedBy ?? null,
+        input.createdAt,
+        input.updatedAt,
+      ],
+    )
+    return mapEvidenceItem(rows[0])
+  }
+
+  async getEvidenceItem(itemId: string): Promise<SageEvidenceItem | undefined> {
+    const { rows } = await this.sql.query<SageEvidenceItemRow>(
+      `select * from sage_evidence_item where id = $1`,
+      [itemId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapEvidenceItem(row) : undefined
+  }
+
+  async linkEvidenceItem(itemId: string, linkedAt: string): Promise<SageEvidenceItem> {
+    const { rows } = await this.sql.query<SageEvidenceItemRow>(
+      `update sage_evidence_item
+         set lifecycle_state = 'linked', updated_at = $2
+       where id = $1
+       returning *`,
+      [itemId, linkedAt],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) throw new Error('sage-core: item not found')
+    return mapEvidenceItem(row)
+  }
+
+  // ─── Boundary flags / review notes / decision records ────────────────────────
+
+  async addBoundaryFlag(input: Omit<SageBoundaryFlag, 'id'>): Promise<SageBoundaryFlag> {
+    const { rows } = await this.sql.query<SageBoundaryFlagRow>(
+      `insert into sage_boundary_flag
+         (workspace_id, org_id, target_id, flag_type, note, created_by, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7)
+       returning *`,
+      [
+        input.workspaceId,
+        input.orgId,
+        input.targetId ?? null,
+        input.flagType,
+        input.note ?? null,
+        input.createdBy,
+        input.createdAt,
+      ],
+    )
+    return mapBoundaryFlag(rows[0])
+  }
+
+  async addReviewNote(input: Omit<SageReviewNote, 'id'>): Promise<SageReviewNote> {
+    const { rows } = await this.sql.query<SageReviewNoteRow>(
+      `insert into sage_review_note
+         (workspace_id, org_id, target_id, reviewer_id, note, created_at)
+       values ($1, $2, $3, $4, $5, $6)
+       returning *`,
+      [
+        input.workspaceId,
+        input.orgId,
+        input.targetId ?? null,
+        input.reviewerId,
+        input.note,
+        input.createdAt,
+      ],
+    )
+    return mapReviewNote(rows[0])
+  }
+
+  async createDecisionRecord(
+    input: Omit<SageDecisionRecord, 'id'>,
+  ): Promise<SageDecisionRecord> {
+    const { rows } = await this.sql.query<SageDecisionRecordRow>(
+      `insert into sage_decision_record
+         (workspace_id, org_id, decision, rationale, human_reviewer_id, created_by, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7)
+       returning *`,
+      [
+        input.workspaceId,
+        input.orgId,
+        input.decision,
+        input.rationale ?? null,
+        input.humanReviewerId,
+        input.createdBy,
+        input.createdAt,
+      ],
+    )
+    return mapDecisionRecord(rows[0])
+  }
+
+  // ─── Export workflow ─────────────────────────────────────────────────────────
+
+  async createExportRequest(
+    input: Omit<SageExportRequest, 'id'>,
+  ): Promise<SageExportRequest> {
+    const { rows } = await this.sql.query<SageExportRequestRow>(
+      `insert into sage_export_request
+         (workspace_id, org_id, requested_by, scope, status, created_at)
+       values ($1, $2, $3, $4, $5, $6)
+       returning *`,
+      [
+        input.workspaceId,
+        input.orgId,
+        input.requestedBy,
+        input.scope ?? null,
+        input.status,
+        input.createdAt,
+      ],
+    )
+    return mapExportRequest(rows[0])
+  }
+
+  async getExportRequest(exportRequestId: string): Promise<SageExportRequest | undefined> {
+    const { rows } = await this.sql.query<SageExportRequestRow>(
+      `select * from sage_export_request where id = $1`,
+      [exportRequestId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapExportRequest(row) : undefined
+  }
+
+  async setExportRequestStatus(
+    exportRequestId: string,
+    status: SageExportRequest['status'],
+  ): Promise<void> {
+    await this.sql.query(
+      `update sage_export_request set status = $2 where id = $1`,
+      [exportRequestId, status],
+    )
+  }
+
+  async createExportApproval(
+    input: Omit<SageExportApproval, 'id'>,
+  ): Promise<SageExportApproval> {
+    const { rows } = await this.sql.query<SageExportApprovalRow>(
+      `insert into sage_export_approval
+         (export_request_id, org_id, export_authority_level, approver_id, decision, decision_at, reason)
+       values ($1, $2, $3, $4, $5, $6, $7)
+       returning *`,
+      [
+        input.exportRequestId,
+        input.orgId,
+        input.exportAuthorityLevel,
+        input.approverId,
+        input.decision,
+        input.decisionAt,
+        input.reason ?? null,
+      ],
+    )
+    return mapExportApproval(rows[0])
+  }
+
+  // ─── Read models for the workspace summary (counts only) ─────────────────────
+
+  async countWorkspaceEvidenceSources(workspaceId: string): Promise<number> {
+    const { rows } = await this.sql.query<CountRow>(
+      `select count(*)::int as count from sage_evidence_source where workspace_id = $1`,
+      [workspaceId],
+    )
+    return toCount(rows)
+  }
+
+  async countWorkspaceEvidenceItems(workspaceId: string): Promise<number> {
+    const { rows } = await this.sql.query<CountRow>(
+      `select count(*)::int as count from sage_evidence_item where workspace_id = $1`,
+      [workspaceId],
+    )
+    return toCount(rows)
+  }
+
+  async countWorkspaceBoundaryFlags(workspaceId: string): Promise<number> {
+    const { rows } = await this.sql.query<CountRow>(
+      `select count(*)::int as count from sage_boundary_flag where workspace_id = $1`,
+      [workspaceId],
+    )
+    return toCount(rows)
+  }
+
+  async countWorkspaceDecisionRecords(workspaceId: string): Promise<number> {
+    const { rows } = await this.sql.query<CountRow>(
+      `select count(*)::int as count from sage_decision_record where workspace_id = $1`,
+      [workspaceId],
+    )
+    return toCount(rows)
+  }
+
+  async countWorkspaceOpenExportRequests(workspaceId: string): Promise<number> {
+    const { rows } = await this.sql.query<CountRow>(
+      `select count(*)::int as count from sage_export_request
+       where workspace_id = $1 and status = 'requested'`,
+      [workspaceId],
+    )
+    return toCount(rows)
+  }
+}

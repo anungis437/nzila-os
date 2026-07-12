@@ -72,8 +72,11 @@ async function loadUsableWorkspace(
   ctx: SageServiceContext,
   workspaceId: string,
 ): Promise<SageWorkspace> {
-  const ws = await deps.repo.getWorkspace(workspaceId)
+  // Primary tenant boundary: the repository query is scoped to the actor's org,
+  // so a cross-org workspace is never returned (non-disclosure — NOT_FOUND).
+  const ws = await deps.repo.getWorkspace(workspaceId, ctx.actor.orgId)
   if (!ws) notFound('workspace')
+  // Defense-in-depth: re-assert org boundary on the returned row.
   requireSameOrg(ctx, ws.orgId)
   assertWorkspaceUsable(ws)
   return ws
