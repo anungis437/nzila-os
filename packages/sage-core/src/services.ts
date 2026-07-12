@@ -33,7 +33,7 @@ import {
 } from './types'
 import { SAGE_PERMISSIONS } from './permissions'
 import type { SagePermission } from './permissions'
-import { resolveSagePermission, type SageAccessContext } from './access-model'
+import { resolveSagePermission, canAccessEvidenceLevel, type SageAccessContext } from './access-model'
 import {
   SAGE_AUDIT_ACTIONS,
   SAGE_AUDIT_RESOURCES,
@@ -456,8 +456,10 @@ export async function createSageEvidenceSource(
     containsSensitiveInformation?: boolean
   },
 ): Promise<SageEvidenceSource> {
-  requirePermission(ctx, SAGE_PERMISSIONS.EVIDENCE_CREATE)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.EVIDENCE_CREATE,
+  })
   const src = await deps.repo.createEvidenceSource({
     workspaceId: ws.id,
     orgId: ws.orgId,
@@ -491,9 +493,11 @@ export async function classifySageEvidenceSource(
     authorizationLevel: SageAuthorizationLevel
   },
 ): Promise<SageEvidenceSource> {
-  requirePermission(ctx, SAGE_PERMISSIONS.EVIDENCE_CLASSIFY)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
-  const src = await deps.repo.getEvidenceSource(input.sourceId)
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.EVIDENCE_CLASSIFY,
+  })
+  const src = await deps.repo.getEvidenceSource(input.sourceId, ws.id, ws.orgId)
   if (!src || src.workspaceId !== ws.id) notFound('evidence source')
   const classified = await deps.repo.classifyEvidenceSource(input.sourceId, {
     sourceQuality: input.sourceQuality,
@@ -515,9 +519,11 @@ export async function createSageEvidenceItem(
   ctx: SageServiceContext,
   input: { workspaceId: string; sourceId: string; confidenceLevel: SageConfidenceLevel },
 ): Promise<SageEvidenceItem> {
-  requirePermission(ctx, SAGE_PERMISSIONS.EVIDENCE_CREATE)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
-  const src = await deps.repo.getEvidenceSource(input.sourceId)
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.EVIDENCE_CREATE,
+  })
+  const src = await deps.repo.getEvidenceSource(input.sourceId, ws.id, ws.orgId)
   if (!src || src.workspaceId !== ws.id) notFound('evidence source')
   assertEvidenceLinkRequiresClassifiedSource({ sourceClassified: src.classified })
   if (!input.confidenceLevel) invalidInput('confidenceLevel is required')
@@ -552,24 +558,134 @@ export async function linkSageEvidenceItem(
   ctx: SageServiceContext,
   input: { workspaceId: string; itemId: string },
 ): Promise<SageEvidenceItem> {
-  requirePermission(ctx, SAGE_PERMISSIONS.EVIDENCE_LINK)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
-  const item = await deps.repo.getEvidenceItem(input.itemId)
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.EVIDENCE_LINK,
+  })
+  const item = await deps.repo.getEvidenceItem(input.itemId, ws.id, ws.orgId)
   if (!item || item.workspaceId !== ws.id) notFound('evidence item')
-  const src = await deps.repo.getEvidenceSource(item.sourceId)
+  const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
   if (!src) notFound('evidence source')
 
   assertEvidenceLinkRequiresClassifiedSource({ sourceClassified: src.classified })
-  if (src.authorizationLevel === 'authorized_only') {
+  // Restricted authorization levels require an EXPLICIT, active evidence-
+  // authorization grant at that exact level. The EVIDENCE_LINK role permission
+  // authorizes the *operation*; it does not grant access to restricted evidence.
+  // Workspace/org/oversight admin status never substitutes for the grant, and
+  // revoked grants are ignored (see `activeEvidenceAuthorizations`).
+  if (src.authorizationLevel === 'authorized_only' || src.authorizationLevel === 'sensitive') {
     const grants = await activeEvidenceAuthorizations(deps, ws.id, ctx.actor.actorId)
-    if (!grants.includes('authorized_only')) {
-      forbidden('authorized-only evidence is linked without explicit authorization')
+    if (!grants.includes(src.authorizationLevel)) {
+      forbidden(`${src.authorizationLevel} evidence is linked without explicit authorization`)
     }
   }
 
   const linked = await deps.repo.linkEvidenceItem(item.id, contextNow(ctx))
   await emit(deps, ctx, SAGE_AUDIT_ACTIONS.EVIDENCE_LINKED, SAGE_AUDIT_RESOURCES.EVIDENCE_ITEM, linked.id)
   return linked
+}
+
+// ─── Evidence read models (authorization-filtered) ───────────────────────────
+
+/**
+ * Build the actor's evidence access context for a workspace: membership,
+ * active (non-revoked, non-expired) role assignments, and active evidence
+ * authorization grants. Used to filter which evidence the actor may see.
+ */
+async function loadSageAccessContext(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  workspaceId: string,
+): Promise<SageAccessContext> {
+  const nowIso = contextNow(ctx)
+  const membership = await deps.repo.getWorkspaceMember(workspaceId, ctx.actor.actorId)
+  const assignments = await deps.repo.listRoleAssignments(workspaceId, ctx.actor.actorId)
+  const grants = await deps.repo.listEvidenceAuthorizations(workspaceId, ctx.actor.actorId)
+  return {
+    hasMembership: Boolean(membership),
+    activeRoles: assignments
+      .filter((r) => isAssignmentActive(r, nowIso))
+      .map((r) => r.sageApplicationRole),
+    evidenceAuthorizations: grants.filter((g) => !g.revokedAt).map((g) => g.evidenceAuthorizationLevel),
+  }
+}
+
+/**
+ * List evidence sources the actor is authorized to see. Requires workspace
+ * read access; each source is additionally filtered by its authorization level
+ * (authorized_only / sensitive / excluded require an explicit active grant).
+ */
+export async function listSageEvidenceSources(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string },
+): Promise<SageEvidenceSource[]> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const sources = await deps.repo.listEvidenceSources(ws.id, ws.orgId)
+  return sources.filter((s) => canAccessEvidenceLevel(access, s.authorizationLevel))
+}
+
+/**
+ * List evidence items whose source the actor is authorized to see. Items inherit
+ * their authorization from their source, so an item is visible only when its
+ * source is accessible.
+ */
+export async function listSageEvidenceItems(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; sourceId?: string },
+): Promise<SageEvidenceItem[]> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const sources = await deps.repo.listEvidenceSources(ws.id, ws.orgId)
+  const accessibleSourceIds = new Set(
+    sources.filter((s) => canAccessEvidenceLevel(access, s.authorizationLevel)).map((s) => s.id),
+  )
+  const items = await deps.repo.listEvidenceItems(ws.id, ws.orgId, input.sourceId)
+  return items.filter((i) => accessibleSourceIds.has(i.sourceId))
+}
+
+/** Load a single evidence source if accessible; NOT_FOUND otherwise (non-disclosure). */
+export async function getSageEvidenceSource(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; sourceId: string },
+): Promise<SageEvidenceSource> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const src = await deps.repo.getEvidenceSource(input.sourceId, ws.id, ws.orgId)
+  if (!src) notFound('evidence source')
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  if (!canAccessEvidenceLevel(access, src.authorizationLevel)) notFound('evidence source')
+  return src
+}
+
+/** Load a single evidence item if its source is accessible; NOT_FOUND otherwise. */
+export async function getSageEvidenceItem(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; itemId: string },
+): Promise<SageEvidenceItem> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const item = await deps.repo.getEvidenceItem(input.itemId, ws.id, ws.orgId)
+  if (!item) notFound('evidence item')
+  const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
+  if (!src) notFound('evidence item')
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  if (!canAccessEvidenceLevel(access, src.authorizationLevel)) notFound('evidence item')
+  return item
 }
 
 // ─── Boundary flags, review notes, decision records ──────────────────────────
@@ -638,7 +754,7 @@ export async function createSageDecisionRecord(
   // non-excluded). No auto-generated findings path exists: a decision is only created
   // from an explicit human-authored `decision` string with a named human reviewer.
   for (const itemId of input.referencedEvidenceItemIds ?? []) {
-    const item = await deps.repo.getEvidenceItem(itemId)
+    const item = await deps.repo.getEvidenceItem(itemId, ws.id, ws.orgId)
     if (!item || item.workspaceId !== ws.id) notFound('referenced evidence item')
   }
 
@@ -713,7 +829,7 @@ export async function approveSageExport(
   // Excluded evidence cannot be exported.
   const scope = JSON.parse(req.scope ?? '{"evidenceItemIds":[]}') as ExportScope
   for (const itemId of scope.evidenceItemIds ?? []) {
-    const item = await deps.repo.getEvidenceItem(itemId)
+    const item = await deps.repo.getEvidenceItem(itemId, ws.id, ws.orgId)
     if (item) {
       assertExcludedEvidenceCannotBeExternallyExported({
         level: item.excludedFromExternalReview ? 'excluded' : 'internal',

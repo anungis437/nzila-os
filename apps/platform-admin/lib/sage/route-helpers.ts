@@ -5,7 +5,7 @@
  * using the same `{ ok, error }` envelope as the rest of platform-admin.
  */
 import { NextResponse } from 'next/server'
-import { SageServiceError } from '@nzila/sage-core'
+import { SageInvariantError, SageServiceError } from '@nzila/sage-core'
 
 const CODE_TO_STATUS: Record<string, number> = {
   PERMISSION_DENIED: 403,
@@ -22,6 +22,14 @@ export function sageErrorResponse(error: unknown): NextResponse {
     return NextResponse.json(
       { ok: false, error: { code: error.code, message: error.message } },
       { status: CODE_TO_STATUS[error.code] ?? 500 },
+    )
+  }
+  // A domain invariant violation (e.g. linking evidence before its source is
+  // classified) is a 422 — a well-formed request the domain rules reject.
+  if (error instanceof SageInvariantError) {
+    return NextResponse.json(
+      { ok: false, error: { code: 'INVARIANT_VIOLATION', message: error.message } },
+      { status: 422 },
     )
   }
   return NextResponse.json(

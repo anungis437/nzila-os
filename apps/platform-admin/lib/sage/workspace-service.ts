@@ -23,8 +23,12 @@ import {
   type SageRiskSurface,
 } from '@nzila/sage-core'
 import {
-  checkIdempotency,
-  type IdempotencyCache,
+  buildCacheKey,
+  hashPayload,
+  runIdempotentMutation,
+  IdempotencyConflictError,
+  IdempotencyInProgressError,
+  type AtomicIdempotencyCache,
 } from '@nzila/os-core/idempotency'
 import { createSageRuntime, createSageServiceContext, type SageActorScope } from './runtime'
 import { getSageIdempotencyCache } from './idempotency'
@@ -85,57 +89,56 @@ export async function listSageWorkspacesForScope(
 export async function createSageWorkspaceForScope(
   scope: SageActorScope,
   input: CreateSageWorkspaceInput,
-  options: { idempotencyKey: string; cache?: IdempotencyCache },
+  options: { idempotencyKey: string; cache?: AtomicIdempotencyCache },
 ): Promise<CreateSageWorkspaceResult> {
-  const cache = options.cache ?? getSageIdempotencyCache()
-  const body = JSON.stringify({
-    name: input.name,
-    institutionType: input.institutionType,
-    riskSurface: input.riskSurface,
-  })
-
-  const check = await checkIdempotency({
-    method: 'POST',
-    // actorId is folded into the route segment so the key scope is
-    // org + route + actor + idempotencyKey (payload hash handled internally).
-    pathname: `/api/sage/workspaces#${scope.actorId}`,
-    idempotencyKey: options.idempotencyKey,
-    orgId: scope.orgId,
-    body,
-    cache,
-    strict: true,
-  })
-
-  if (!check.proceed) {
-    if (check.error) {
-      if (check.error.status === 409) {
-        throw new SageServiceError('CONFLICT', 'Idempotency-Key was used with a different payload')
-      }
-      throw new SageServiceError('INVALID_INPUT', 'Idempotency-Key header is required')
-    }
-    // Replay: return the recorded result without creating a second workspace.
-    const cached = JSON.parse(check.cachedResponse!.body) as SageWorkspaceResponse
-    return { response: cached, replayed: true }
+  if (!options.idempotencyKey || options.idempotencyKey.trim().length === 0) {
+    throw new SageServiceError('INVALID_INPUT', 'Idempotency-Key header is required')
   }
+  const cache = options.cache ?? getSageIdempotencyCache()
+  // actorId is folded into the route segment so the key scope is
+  // org + route + actor + idempotencyKey (payload hash handled internally).
+  const cacheKey = buildCacheKey(
+    scope.orgId,
+    `/api/sage/workspaces#${scope.actorId}`,
+    options.idempotencyKey,
+  )
+  const payloadHash = hashPayload(
+    JSON.stringify({
+      name: input.name,
+      institutionType: input.institutionType,
+      riskSurface: input.riskSurface,
+    }),
+  )
 
-  const deps = createSageRuntime(scope)
-  const ctx = createSageServiceContext(scope)
-  const ws = await createSageWorkspace(deps, ctx, {
-    name: input.name,
-    institutionType: input.institutionType,
-    riskSurface: input.riskSurface,
-  })
-  const response = toWorkspaceResponse(ws)
-
-  await cache.set(check.cacheKey!, {
-    payloadHash: check.payloadHash!,
-    status: 201,
-    body: JSON.stringify(response),
-    headers: {},
-    createdAt: Date.now(),
-  })
-
-  return { response, replayed: false }
+  try {
+    // Atomic first-writer acquisition: under concurrent identical requests, only
+    // one creates the workspace; the rest replay its result (no second create,
+    // no second audit event).
+    return await runIdempotentMutation<SageWorkspaceResponse>({
+      cache,
+      cacheKey,
+      payloadHash,
+      status: 201,
+      run: async () => {
+        const deps = createSageRuntime(scope)
+        const ctx = createSageServiceContext(scope)
+        const ws = await createSageWorkspace(deps, ctx, {
+          name: input.name,
+          institutionType: input.institutionType,
+          riskSurface: input.riskSurface,
+        })
+        return toWorkspaceResponse(ws)
+      },
+    })
+  } catch (error) {
+    if (error instanceof IdempotencyConflictError) {
+      throw new SageServiceError('CONFLICT', error.message)
+    }
+    if (error instanceof IdempotencyInProgressError) {
+      throw new SageServiceError('CONFLICT', error.message)
+    }
+    throw error
+  }
 }
 
 /** Load a single workspace (with boundary posture); null if missing/cross-org. */

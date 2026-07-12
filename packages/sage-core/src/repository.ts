@@ -17,6 +17,7 @@ import type {
   SageWorkspace,
   SageWorkspaceMember,
 } from './types'
+import { conflict } from './service-errors'
 
 export interface SageRepository {
   createWorkspace(input: Omit<SageWorkspace, 'id'>): Promise<SageWorkspace>
@@ -43,14 +44,28 @@ export interface SageRepository {
   revokeEvidenceAuthorization(authorizationId: string, revokedAt: string): Promise<void>
 
   createEvidenceSource(input: Omit<SageEvidenceSource, 'id'>): Promise<SageEvidenceSource>
-  getEvidenceSource(sourceId: string): Promise<SageEvidenceSource | undefined>
+  getEvidenceSource(
+    sourceId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageEvidenceSource | undefined>
+  listEvidenceSources(workspaceId: string, orgId: string): Promise<SageEvidenceSource[]>
   classifyEvidenceSource(
     sourceId: string,
     update: { sourceQuality: SageSourceQuality; authorizationLevel: SageAuthorizationLevel },
   ): Promise<SageEvidenceSource>
 
   createEvidenceItem(input: Omit<SageEvidenceItem, 'id'>): Promise<SageEvidenceItem>
-  getEvidenceItem(itemId: string): Promise<SageEvidenceItem | undefined>
+  getEvidenceItem(
+    itemId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageEvidenceItem | undefined>
+  listEvidenceItems(
+    workspaceId: string,
+    orgId: string,
+    sourceId?: string,
+  ): Promise<SageEvidenceItem[]>
   linkEvidenceItem(itemId: string, linkedAt: string): Promise<SageEvidenceItem>
 
   addBoundaryFlag(input: Omit<SageBoundaryFlag, 'id'>): Promise<SageBoundaryFlag>
@@ -180,8 +195,22 @@ export class InMemorySageRepository implements SageRepository {
     return src
   }
 
-  async getEvidenceSource(sourceId: string): Promise<SageEvidenceSource | undefined> {
-    return this.sources.get(sourceId)
+  async getEvidenceSource(
+    sourceId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageEvidenceSource | undefined> {
+    const src = this.sources.get(sourceId)
+    return src && src.workspaceId === workspaceId && src.orgId === orgId ? src : undefined
+  }
+
+  async listEvidenceSources(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageEvidenceSource[]> {
+    return [...this.sources.values()]
+      .filter((s) => s.workspaceId === workspaceId && s.orgId === orgId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   }
 
   async classifyEvidenceSource(
@@ -190,6 +219,12 @@ export class InMemorySageRepository implements SageRepository {
   ): Promise<SageEvidenceSource> {
     const src = this.sources.get(sourceId)
     if (!src) throw new Error('source not found')
+    // Compare-and-set: only a not-yet-classified source may be classified. This
+    // mirrors the SQL guard (`source_quality is null`) so concurrent
+    // classifications cannot both succeed.
+    if (src.classified) {
+      conflict('evidence source is already classified or was concurrently modified')
+    }
     src.sourceQuality = update.sourceQuality
     src.authorizationLevel = update.authorizationLevel
     src.classified = true
@@ -202,13 +237,41 @@ export class InMemorySageRepository implements SageRepository {
     return item
   }
 
-  async getEvidenceItem(itemId: string): Promise<SageEvidenceItem | undefined> {
-    return this.items.get(itemId)
+  async getEvidenceItem(
+    itemId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageEvidenceItem | undefined> {
+    const item = this.items.get(itemId)
+    return item && item.workspaceId === workspaceId && item.orgId === orgId ? item : undefined
+  }
+
+  async listEvidenceItems(
+    workspaceId: string,
+    orgId: string,
+    sourceId?: string,
+  ): Promise<SageEvidenceItem[]> {
+    return [...this.items.values()]
+      .filter(
+        (i) =>
+          i.workspaceId === workspaceId &&
+          i.orgId === orgId &&
+          (sourceId === undefined || i.sourceId === sourceId),
+      )
+      .sort(
+        (a, b) =>
+          b.updatedAt.localeCompare(a.updatedAt) || b.createdAt.localeCompare(a.createdAt),
+      )
   }
 
   async linkEvidenceItem(itemId: string, linkedAt: string): Promise<SageEvidenceItem> {
     const item = this.items.get(itemId)
     if (!item) throw new Error('item not found')
+    // Compare-and-set: only a 'registered' item may transition to 'linked',
+    // mirroring the SQL guard so concurrent links cannot both succeed.
+    if (item.lifecycleState !== 'registered') {
+      conflict('evidence item is not in a linkable state or was concurrently modified')
+    }
     item.lifecycleState = 'linked'
     item.updatedAt = linkedAt
     return item

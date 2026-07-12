@@ -80,9 +80,20 @@ export const idempotencyCache = pgTable(
     body: text('body').notNull(),
     /** Cached response headers */
     headers: jsonb('headers').notNull().default({}),
+    /**
+     * Fencing token of the worker currently holding an in-flight reservation
+     * (status = 0). NULL for completed entries. `finalize`/`release` are
+     * conditional on this token so a worker whose lease was reclaimed after a
+     * crash cannot overwrite the new owner's state.
+     */
+    reservationOwner: varchar('reservation_owner', { length: 64 }),
     /** When this entry was created */
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    /** Auto-expiry timestamp (used by cleanup jobs / queries) */
+    /**
+     * For a completed entry: auto-expiry timestamp (cleanup jobs / queries).
+     * For an in-flight reservation (status = 0): the LEASE deadline — after it
+     * passes the reservation is stale and may be atomically reclaimed.
+     */
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   },
   (table) => [

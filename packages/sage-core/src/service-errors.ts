@@ -38,3 +38,7 @@ export function invalidInput(message: string): never {
 export function forbidden(message: string): never {
   throw new SageServiceError('FORBIDDEN', message)
 }
+
+export function conflict(message: string): never {
+  throw new SageServiceError('CONFLICT', message)
+}

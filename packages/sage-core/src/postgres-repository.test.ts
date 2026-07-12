@@ -440,6 +440,158 @@ describe('PostgresSageRepository — export status semantics', () => {
   })
 })
 
+describe('PostgresSageRepository — evidence read models (tenant-scoped)', () => {
+  function sourceRow() {
+    return {
+      id: 'src-1',
+      workspace_id: 'ws-1',
+      org_id: 'org-1',
+      source_type: 'public',
+      source_quality: 'moderate',
+      authorization_level: 'internal',
+      contains_personal_information: false,
+      contains_sensitive_information: false,
+      created_by: 'actor-1',
+      created_at: new Date('2026-07-12T00:00:00.000Z'),
+    }
+  }
+  function itemRow() {
+    return {
+      id: 'item-1',
+      source_id: 'src-1',
+      workspace_id: 'ws-1',
+      org_id: 'org-1',
+      lifecycle_state: 'registered',
+      confidence_level: 'moderate',
+      excluded_from_external_review: false,
+      human_review_required: true,
+      created_by: 'actor-1',
+      updated_by: 'actor-1',
+      created_at: new Date('2026-07-12T00:00:00.000Z'),
+      updated_at: new Date('2026-07-12T00:00:00.000Z'),
+    }
+  }
+
+  it('listEvidenceSources filters by workspace_id + org_id', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([sourceRow()])
+    const repo = new PostgresSageRepository(sql)
+    const list = await repo.listEvidenceSources('ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where workspace_id = $1 and org_id = $2')
+    expect(sql.lastCall.params).toEqual(['ws-1', 'org-1'])
+    expect(list[0].id).toBe('src-1')
+  })
+
+  it('getEvidenceSource filters by id + workspace_id + org_id', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([sourceRow()])
+    const repo = new PostgresSageRepository(sql)
+    await repo.getEvidenceSource('src-1', 'ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where id = $1 and workspace_id = $2 and org_id = $3')
+    expect(sql.lastCall.params).toEqual(['src-1', 'ws-1', 'org-1'])
+  })
+
+  it('getEvidenceSource returns undefined for a cross-workspace/org id', async () => {
+    const sql = new FakeSqlClient()
+    const repo = new PostgresSageRepository(sql)
+    expect(await repo.getEvidenceSource('src-1', 'other-ws', 'other-org')).toBeUndefined()
+    expect(sql.lastCall.params).toEqual(['src-1', 'other-ws', 'other-org'])
+  })
+
+  it('listEvidenceItems filters by workspace_id + org_id (+ source_id when given)', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([itemRow()])
+    const repo = new PostgresSageRepository(sql)
+    await repo.listEvidenceItems('ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where workspace_id = $1 and org_id = $2')
+    expect(sql.lastCall.params).toEqual(['ws-1', 'org-1'])
+
+    sql.enqueue([itemRow()])
+    await repo.listEvidenceItems('ws-1', 'org-1', 'src-1')
+    expect(sql.lastCall.text).toContain('and source_id = $3')
+    expect(sql.lastCall.params).toEqual(['ws-1', 'org-1', 'src-1'])
+  })
+
+  it('getEvidenceItem filters by id + workspace_id + org_id', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([itemRow()])
+    const repo = new PostgresSageRepository(sql)
+    await repo.getEvidenceItem('item-1', 'ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where id = $1 and workspace_id = $2 and org_id = $3')
+    expect(sql.lastCall.params).toEqual(['item-1', 'ws-1', 'org-1'])
+  })
+})
+
+describe('PostgresSageRepository — lifecycle compare-and-set', () => {
+  function sourceRow(sourceQuality: string | null = 'moderate') {
+    return {
+      id: 'src-1',
+      workspace_id: 'ws-1',
+      org_id: 'org-1',
+      source_type: 'public',
+      source_quality: sourceQuality,
+      authorization_level: 'internal',
+      contains_personal_information: false,
+      contains_sensitive_information: false,
+      created_by: 'actor-1',
+      created_at: new Date('2026-07-12T00:00:00.000Z'),
+    }
+  }
+  function itemRow(state = 'linked') {
+    return {
+      id: 'item-1',
+      source_id: 'src-1',
+      workspace_id: 'ws-1',
+      org_id: 'org-1',
+      lifecycle_state: state,
+      confidence_level: 'moderate',
+      excluded_from_external_review: false,
+      human_review_required: true,
+      created_by: 'actor-1',
+      updated_by: 'actor-1',
+      created_at: new Date('2026-07-12T00:00:00.000Z'),
+      updated_at: new Date('2026-07-12T00:00:00.000Z'),
+    }
+  }
+
+  it('classifyEvidenceSource guards on source_quality is null (compare-and-set)', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([sourceRow()])
+    const repo = new PostgresSageRepository(sql)
+    await repo.classifyEvidenceSource('src-1', {
+      sourceQuality: 'moderate',
+      authorizationLevel: 'internal',
+    })
+    expect(sql.lastCall.text).toContain('source_quality is null')
+    expect(sql.lastCall.params).toEqual(['src-1', 'moderate', 'internal'])
+  })
+
+  it('classifyEvidenceSource raises CONFLICT when the guarded update matches no row', async () => {
+    const sql = new FakeSqlClient() // no rows enqueued → zero-row update
+    const repo = new PostgresSageRepository(sql)
+    await expect(
+      repo.classifyEvidenceSource('src-1', { sourceQuality: 'moderate', authorizationLevel: 'internal' }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it("linkEvidenceItem guards on lifecycle_state = 'registered' (compare-and-set)", async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([itemRow('linked')])
+    const repo = new PostgresSageRepository(sql)
+    await repo.linkEvidenceItem('item-1', '2026-07-12T00:00:00.000Z')
+    expect(sql.lastCall.text).toContain("lifecycle_state = 'registered'")
+    expect(sql.lastCall.params).toEqual(['item-1', '2026-07-12T00:00:00.000Z'])
+  })
+
+  it('linkEvidenceItem raises CONFLICT when the guarded update matches no row', async () => {
+    const sql = new FakeSqlClient() // zero-row update
+    const repo = new PostgresSageRepository(sql)
+    await expect(
+      repo.linkEvidenceItem('item-1', '2026-07-12T00:00:00.000Z'),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+})
+
 function exportRequestRow(
   overrides: Partial<SageExportRequestRow> = {},
 ): SageExportRequestRow {
