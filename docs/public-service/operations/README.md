@@ -51,6 +51,7 @@ status definitions, confidence levels, authorized-only marker, risk-tier phrasin
 - `manual-operating-pack/README.md` — internal operating pack for completing and controlling future manual proof runs
 - `internal-doctrine-map.md` — internal lineage map connecting OCI/OCRA, CIVIC, CLEAR, SAGE, and the Manual Operating Pack
 - `external-review-readiness-decision.md` — internal decision memo and gate criteria for controlled external review
+- `feedback-only-material-set-checklist.md` — internal checklist for approving controlled feedback-only reviewer materials
 
 ## 6. Minimum quality gate
 
