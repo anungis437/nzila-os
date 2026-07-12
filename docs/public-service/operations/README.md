@@ -48,6 +48,7 @@ status definitions, confidence levels, authorized-only marker, risk-tier phrasin
 - `assurance-package-checklist.md` — pre-export / pre-share quality gate
 - `sample-public-broadcaster-workspace.md` — fictional example only
 - `manual-operating-readiness-summary.md` — internal readiness summary consolidating the completed proof runs
+- `manual-operating-pack/README.md` — internal operating pack for completing and controlling future manual proof runs
 
 ## 6. Minimum quality gate
 
