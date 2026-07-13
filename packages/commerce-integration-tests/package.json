@@ -16,9 +16,9 @@
     "@nzila/commerce-events": "workspace:*",
     "@nzila/commerce-audit": "workspace:*",
     "@nzila/commerce-evidence": "workspace:*",
-    "vitest": "^4.1.2",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "vitest": "^4.1.10",
+    "@typescript-eslint/eslint-plugin": "^8.63.0",
+    "@typescript-eslint/parser": "^8.63.0",
     "eslint": "^10"
   }
 }

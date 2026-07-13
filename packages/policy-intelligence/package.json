@@ -21,7 +21,7 @@
     "@nzila/decision-intelligence": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^6",
-    "vitest": "^4.1.2"
+    "typescript": "^7",
+    "vitest": "^4.1.10"
   }
 }

@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@types/node": "^25",
-    "typescript": "^6",
+    "typescript": "^7",
     "vitest": "^4"
   }
 }

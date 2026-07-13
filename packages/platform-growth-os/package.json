@@ -32,8 +32,8 @@
     "@nzila/platform-intelligence": "workspace:*"
   },
   "devDependencies": {
-    "vitest": "^4.1.2",
-    "typescript": "^6",
+    "vitest": "^4.1.10",
+    "typescript": "^7",
     "tsx": "^4.20.0"
   }
 }
