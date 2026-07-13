@@ -5,6 +5,7 @@
 
 import type {
   SageAuthorizationLevel,
+  SageAuditOutboxEvent,
   SageBoundaryFlag,
   SageBoundaryFlagType,
   SageBoundaryProfile,
@@ -16,6 +17,7 @@ import type {
   SageEvidenceSource,
   SageExportApproval,
   SageExportAuthorityLevel,
+  SageExportPackage,
   SageExportRequest,
   SageExportStatus,
   SageInstitutionType,
@@ -48,6 +50,12 @@ function toIsoOrNull(value: unknown): string | null {
 function textOrNull(value: unknown): string | null {
   if (value === null || value === undefined) return null
   return String(value)
+}
+
+/** Serialize a jsonb column back to a canonical JSON string (driver-parsed or raw). */
+function toJsonString(value: unknown): string {
+  if (typeof value === 'string') return value
+  return JSON.stringify(value)
 }
 
 /**
@@ -209,8 +217,14 @@ export type SageExportRequestRow = {
   org_id: string
   requested_by: string
   scope: string | null
+  purpose: string | null
+  package_type: string
+  requested_scope_json: unknown
+  requested_scope_hash: string | null
+  policy_version: string | null
   status: SageExportStatus
   created_at: unknown
+  updated_at: unknown
 }
 
 export type SageExportApprovalRow = {
@@ -222,6 +236,47 @@ export type SageExportApprovalRow = {
   decision: string
   decision_at: unknown
   reason: string | null
+  approved_scope_hash: string | null
+}
+
+export type SageExportPackageRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  export_request_id: string
+  status: string
+  package_type: string
+  manifest_json: unknown
+  manifest_hash: string
+  content_hash: string
+  storage_reference: string
+  media_type: string
+  size_bytes: unknown
+  policy_version: string
+  item_count: unknown
+  excluded_count: unknown
+  generated_by: string
+  generated_at: unknown
+  created_at: unknown
+}
+
+export type SageAuditOutboxRow = {
+  id: string
+  event_id: string
+  org_id: string
+  workspace_id: string
+  actor_id: string
+  action: string
+  resource_type: string
+  resource_id: string
+  safe_payload_json: unknown
+  status: string
+  attempt_count: unknown
+  created_at: unknown
+  dispatched_at: unknown
+  last_error_code: string | null
+  dispatch_owner: string | null
+  lease_expires_at: unknown
 }
 
 // ─── Row → domain mappers ────────────────────────────────────────────────────
@@ -381,8 +436,14 @@ export function mapExportRequest(row: SageExportRequestRow): SageExportRequest {
     orgId: row.org_id,
     requestedBy: row.requested_by,
     scope: textOrNull(row.scope),
+    purpose: textOrNull(row.purpose),
+    packageType: (row.package_type as SageExportRequest['packageType']) ?? 'internal_review_bundle',
+    requestedScopeJson: row.requested_scope_json == null ? null : toJsonString(row.requested_scope_json),
+    requestedScopeHash: textOrNull(row.requested_scope_hash),
+    policyVersion: textOrNull(row.policy_version),
     status: row.status,
     createdAt: toIso(row.created_at),
+    updatedAt: row.updated_at ? toIso(row.updated_at) : null,
   }
 }
 
@@ -396,5 +457,50 @@ export function mapExportApproval(row: SageExportApprovalRow): SageExportApprova
     decision: row.decision,
     decisionAt: toIso(row.decision_at),
     reason: textOrNull(row.reason),
+    approvedScopeHash: textOrNull(row.approved_scope_hash),
+  }
+}
+
+export function mapExportPackage(row: SageExportPackageRow): SageExportPackage {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    exportRequestId: row.export_request_id,
+    status: (row.status as SageExportPackage['status']) ?? 'generated',
+    packageType: (row.package_type as SageExportPackage['packageType']) ?? 'internal_review_bundle',
+    manifestJson: toJsonString(row.manifest_json),
+    manifestHash: row.manifest_hash,
+    contentHash: row.content_hash,
+    storageReference: row.storage_reference,
+    mediaType: row.media_type,
+    sizeBytes: Number(row.size_bytes ?? 0),
+    policyVersion: row.policy_version,
+    itemCount: Number(row.item_count ?? 0),
+    excludedCount: Number(row.excluded_count ?? 0),
+    generatedBy: row.generated_by,
+    generatedAt: toIso(row.generated_at),
+    createdAt: toIso(row.created_at),
+  }
+}
+
+export function mapAuditOutbox(row: SageAuditOutboxRow): SageAuditOutboxEvent {
+  return {
+    id: row.id,
+    eventId: row.event_id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    actorId: row.actor_id,
+    action: row.action,
+    resourceType: row.resource_type,
+    resourceId: row.resource_id,
+    safePayloadJson: toJsonString(row.safe_payload_json),
+    status: (row.status as SageAuditOutboxEvent['status']) ?? 'pending',
+    attemptCount: Number(row.attempt_count ?? 0),
+    createdAt: toIso(row.created_at),
+    dispatchedAt: row.dispatched_at ? toIso(row.dispatched_at) : null,
+    lastErrorCode: textOrNull(row.last_error_code),
+    dispatchOwner: textOrNull(row.dispatch_owner),
+    leaseExpiresAt: toIsoOrNull(row.lease_expires_at),
   }
 }

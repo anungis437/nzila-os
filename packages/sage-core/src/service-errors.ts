@@ -8,6 +8,7 @@ export type SageServiceErrorCode =
   | 'INVALID_INPUT'
   | 'INVARIANT_VIOLATION'
   | 'CONFLICT'
+  | 'INTEGRITY_ERROR'
 
 export class SageServiceError extends Error {
   readonly code: SageServiceErrorCode
@@ -41,4 +42,12 @@ export function forbidden(message: string): never {
 
 export function conflict(message: string): never {
   throw new SageServiceError('CONFLICT', message)
+}
+
+/**
+ * A stored artifact failed cryptographic integrity verification (its bytes no
+ * longer match the immutable committed hashes). Never returns the artifact.
+ */
+export function integrityError(message = 'stored package failed integrity verification'): never {
+  throw new SageServiceError('INTEGRITY_ERROR', message)
 }

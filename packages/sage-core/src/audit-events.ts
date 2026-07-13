@@ -24,6 +24,10 @@ export const SAGE_AUDIT_ACTIONS = {
   EXPORT_REQUESTED: 'sage.export.requested',
   EXPORT_APPROVED: 'sage.export.approved',
   EXPORT_DENIED: 'sage.export.denied',
+  EXPORT_PACKAGE_GENERATED: 'sage.export.package_generated',
+  EXPORT_PACKAGE_ACCESS_AUTHORIZED: 'sage.export.package_access_authorized',
+  EXPORT_PACKAGE_ACCESSED: 'sage.export.package_accessed',
+  EXPORT_PACKAGE_ACCESS_DENIED: 'sage.export.package_access_denied',
 } as const
 
 export type SageAuditAction = (typeof SAGE_AUDIT_ACTIONS)[keyof typeof SAGE_AUDIT_ACTIONS]
@@ -43,6 +47,7 @@ export const SAGE_AUDIT_RESOURCES = {
   DECISION_RECORD: 'sage_decision_record',
   EXPORT_REQUEST: 'sage_export_request',
   EXPORT_APPROVAL: 'sage_export_approval',
+  EXPORT_PACKAGE: 'sage_export_package',
 } as const
 
 export type SageAuditResource = (typeof SAGE_AUDIT_RESOURCES)[keyof typeof SAGE_AUDIT_RESOURCES]

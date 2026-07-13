@@ -16,6 +16,7 @@ import {
   type SageDecisionRecordRow,
   type SageEvidenceAuthorizationRow,
   type SageExportRequestRow,
+  type SageExportPackageRow,
   type SageRoleAssignmentRow,
   type SageWorkspaceRow,
 } from './postgres-mappers'
@@ -367,10 +368,10 @@ function evAuthRow(
   }
 }
 
-// ─── Deliverable 7: export request/approval status semantics ─────────────────
+// ─── Deliverable 7: export request/approval + package SQL semantics ──────────
 
 describe('PostgresSageRepository — export status semantics', () => {
-  it('createExportRequest starts non-approved (requested)', async () => {
+  it('createExportRequest starts non-approved (requested) and persists scope hash', async () => {
     const sql = new FakeSqlClient()
     sql.enqueue([exportRequestRow()])
     const repo = new PostgresSageRepository(sql)
@@ -378,56 +379,234 @@ describe('PostgresSageRepository — export status semantics', () => {
       workspaceId: 'ws-1',
       orgId: 'org-1',
       requestedBy: 'actor-2',
-      scope: '{"evidenceItemIds":[]}',
+      scope: null,
+      purpose: 'internal review',
+      packageType: 'internal_review_bundle',
+      requestedScopeJson: '{"items":[]}',
+      requestedScopeHash: 'hash-1',
+      policyVersion: 'sage-export-v1',
       status: 'requested',
       createdAt: '2026-07-12T00:00:00.000Z',
+      updatedAt: '2026-07-12T00:00:00.000Z',
     })
     expect(sql.lastCall.text).toContain('insert into sage_export_request')
+    expect(sql.lastCall.text).toContain('requested_scope_hash')
     expect(sql.lastCall.params).toContain('requested')
+    expect(sql.lastCall.params).toContain('hash-1')
     expect(sql.lastCall.params).not.toContain('approved')
     expect(req.status).toBe('requested')
   })
 
-  it('approve flow updates request status to approved and inserts an approval row', async () => {
+  it('decideExportRequest is a single-statement CAS from requested → approved + approval insert', async () => {
     const sql = new FakeSqlClient()
-    // 1) status update returns nothing; 2) approval insert returns a row.
-    sql.enqueue([]).enqueue([
-      {
-        id: 'appr-1',
-        export_request_id: 'exp-1',
-        org_id: 'org-1',
-        export_authority_level: 'approve',
-        approver_id: 'actor-3',
-        decision: 'approved',
-        decision_at: new Date('2026-07-12T05:00:00.000Z'),
-        reason: null,
-      },
-    ])
+    sql
+      .enqueue([
+        {
+          id: 'appr-1',
+          export_request_id: 'exp-1',
+          org_id: 'org-1',
+          export_authority_level: 'approve',
+          approver_id: 'actor-3',
+          decision: 'approved',
+          decision_at: new Date('2026-07-12T05:00:00.000Z'),
+          reason: 'ok',
+          approved_scope_hash: 'hash-1',
+        },
+      ])
+      .enqueue([exportRequestRow({ status: 'approved' })])
     const repo = new PostgresSageRepository(sql)
-
-    await repo.setExportRequestStatus('exp-1', 'approved')
-    expect(sql.calls[0].text).toContain('update sage_export_request set status = $2')
-    expect(sql.calls[0].params).toEqual(['exp-1', 'approved'])
-
-    const approval = await repo.createExportApproval({
+    const decided = await repo.decideExportRequest({
       exportRequestId: 'exp-1',
+      workspaceId: 'ws-1',
       orgId: 'org-1',
-      exportAuthorityLevel: 'approve',
-      approverId: 'actor-3',
       decision: 'approved',
-      decisionAt: '2026-07-12T05:00:00.000Z',
-      reason: null,
+      updatedAt: '2026-07-12T05:00:00.000Z',
+      approval: {
+        exportRequestId: 'exp-1',
+        orgId: 'org-1',
+        exportAuthorityLevel: 'approve',
+        approverId: 'actor-3',
+        decision: 'approved',
+        decisionAt: '2026-07-12T05:00:00.000Z',
+        reason: 'ok',
+        approvedScopeHash: 'hash-1',
+      },
+      auditEvent: {
+        eventId: 'ev-approve-1',
+        actorId: 'actor-3',
+        action: 'sage.export.approved',
+        resourceType: 'sage_export_approval',
+        safePayload: { exportRequestId: 'exp-1' },
+      },
     })
-    expect(sql.lastCall.text).toContain('insert into sage_export_approval')
-    expect(approval.decision).toBe('approved')
+    // The CAS + approval insert + durable audit outbox are ONE statement (a CTE).
+    expect(sql.calls[0].text).toContain('with decided as')
+    expect(sql.calls[0].text).toContain("status = 'requested'")
+    expect(sql.calls[0].text).toContain('insert into sage_export_approval')
+    expect(sql.calls[0].text).toContain('insert into sage_audit_outbox')
+    expect(decided?.approval.decision).toBe('approved')
   })
 
-  it('deny flow updates request status to denied', async () => {
+  it('decideExportRequest returns undefined (conflict) when no requested row matches', async () => {
+    const sql = new FakeSqlClient() // zero rows → the guarded CTE inserts nothing
+    const repo = new PostgresSageRepository(sql)
+    const result = await repo.decideExportRequest({
+      exportRequestId: 'exp-1',
+      workspaceId: 'ws-1',
+      orgId: 'org-1',
+      decision: 'denied',
+      updatedAt: '2026-07-12T05:00:00.000Z',
+      approval: {
+        exportRequestId: 'exp-1',
+        orgId: 'org-1',
+        exportAuthorityLevel: 'deny',
+        approverId: 'actor-3',
+        decision: 'denied',
+        decisionAt: '2026-07-12T05:00:00.000Z',
+        reason: 'x',
+        approvedScopeHash: null,
+      },
+      auditEvent: {
+        eventId: 'ev-deny-1',
+        actorId: 'actor-3',
+        action: 'sage.export.denied',
+        resourceType: 'sage_export_approval',
+        safePayload: { exportRequestId: 'exp-1' },
+      },
+    })
+    expect(result).toBeUndefined()
+  })
+
+  it('commitExportPackage commits object + package + audit outbox in ONE atomic statement', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([exportPackageRow()])
+    const repo = new PostgresSageRepository(sql)
+    const result = await repo.commitExportPackage({
+      package: {
+        orgId: 'org-1',
+        workspaceId: 'ws-1',
+        exportRequestId: 'exp-1',
+        status: 'generated',
+        packageType: 'internal_review_bundle',
+        manifestJson: '{"items":[]}',
+        manifestHash: 'mh',
+        contentHash: 'ch',
+        storageReference: 'sage-internal://k',
+        mediaType: 'application/json',
+        sizeBytes: 10,
+        policyVersion: 'sage-export-v1',
+        itemCount: 1,
+        excludedCount: 0,
+        generatedBy: 'actor-3',
+        generatedAt: '2026-07-12T06:00:00.000Z',
+        createdAt: '2026-07-12T06:00:00.000Z',
+      },
+      object: {
+        storageReference: 'sage-internal://k',
+        mediaType: 'application/json',
+        bytes: new TextEncoder().encode('{"manifest":{}}'),
+        contentHash: 'ch',
+        sizeBytes: 10,
+      },
+      auditEvent: {
+        eventId: 'ev-pkg-1',
+        actorId: 'actor-3',
+        action: 'sage.export.package_generated',
+        resourceType: 'sage_export_package',
+        safePayload: { exportRequestId: 'exp-1' },
+      },
+    })
+    // One statement, claim-gated inserts, guarded idempotency on both keys.
+    expect(sql.calls[0].text).toContain('with existing_pkg as')
+    expect(sql.calls[0].text).toContain('insert into sage_export_package_object')
+    expect(sql.calls[0].text).toContain('insert into sage_export_package')
+    expect(sql.calls[0].text).toContain('insert into sage_audit_outbox')
+    // The object insert is gated on NOT already having a package for the request
+    // (winning the generation claim) — never merely sharing the statement.
+    expect(sql.calls[0].text).toContain('where not exists (select 1 from existing_pkg)')
+    // The package insert is gated on a matching object row being present.
+    expect(sql.calls[0].text).toContain('from object_row')
+    // The outbox insert is gated on the package row being inserted.
+    expect(sql.calls[0].text).toMatch(/select .* from pkg/s)
+    expect(sql.calls[0].text).toContain('on conflict (storage_reference) do nothing')
+    expect(sql.calls[0].text).toContain('on conflict (export_request_id) do nothing')
+    expect(sql.calls[0].text).toContain('on conflict (event_id) do nothing')
+    expect(result.created).toBe(true)
+
+    sql.enqueue([exportPackageRow()])
+    await repo.getExportPackage('pkg-1', 'ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where id = $1 and workspace_id = $2 and org_id = $3')
+    expect(sql.lastCall.params).toEqual(['pkg-1', 'ws-1', 'org-1'])
+
+    sql.enqueue([exportRequestRow()])
+    await repo.getExportRequest('exp-1', 'ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where id = $1 and workspace_id = $2 and org_id = $3')
+    expect(sql.lastCall.params).toEqual(['exp-1', 'ws-1', 'org-1'])
+  })
+
+  it('listExportRequests / listExportPackages filter by workspace_id + org_id', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([exportRequestRow()])
+    const repo = new PostgresSageRepository(sql)
+    await repo.listExportRequests('ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where workspace_id = $1 and org_id = $2')
+    expect(sql.lastCall.params).toEqual(['ws-1', 'org-1'])
+
+    sql.enqueue([exportPackageRow()])
+    await repo.listExportPackages('ws-1', 'org-1')
+    expect(sql.lastCall.text).toContain('where workspace_id = $1 and org_id = $2')
+    expect(sql.lastCall.params).toEqual(['ws-1', 'org-1'])
+  })
+
+  it('claimPendingAuditOutbox uses a leased FOR UPDATE SKIP LOCKED claim', async () => {
     const sql = new FakeSqlClient()
     const repo = new PostgresSageRepository(sql)
-    await repo.setExportRequestStatus('exp-1', 'denied')
-    expect(sql.lastCall.text).toContain('update sage_export_request set status = $2')
-    expect(sql.lastCall.params).toEqual(['exp-1', 'denied'])
+    await repo.claimPendingAuditOutbox({
+      owner: 'own-1',
+      leaseExpiresAt: 'lease-ts',
+      limit: 25,
+      now: 'now-ts',
+    })
+    const text = sql.lastCall.text
+    expect(text).toContain('update sage_audit_outbox')
+    expect(text).toContain("set status = 'dispatching'")
+    expect(text).toContain('dispatch_owner = $1')
+    expect(text).toContain('attempt_count = o.attempt_count + 1')
+    expect(text).toContain('for update skip locked')
+    // Reclaims pending OR events whose lease has expired.
+    expect(text).toContain("status = 'pending'")
+    expect(text).toContain("status = 'dispatching' and lease_expires_at < $3")
+    expect(sql.lastCall.params).toEqual(['own-1', 'lease-ts', 'now-ts', 25])
+  })
+
+  it('markAuditOutboxDispatched is owner-fenced and returns whether it won', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([{ event_id: 'ev-1' }])
+    const repo = new PostgresSageRepository(sql)
+    const won = await repo.markAuditOutboxDispatched('ev-1', 'own-1', 'ts')
+    expect(won).toBe(true)
+    const text = sql.lastCall.text
+    expect(text).toContain("set status = 'dispatched'")
+    expect(text).toContain('where event_id = $1 and dispatch_owner = $2')
+    expect(text).toContain("status = 'dispatching'")
+    expect(sql.lastCall.params).toEqual(['ev-1', 'own-1', 'ts'])
+
+    // No row updated (lost lease) → returns false.
+    const lost = await repo.markAuditOutboxDispatched('ev-1', 'own-2', 'ts')
+    expect(lost).toBe(false)
+  })
+
+  it('releaseAuditOutbox is owner-fenced and returns the claim to pending', async () => {
+    const sql = new FakeSqlClient()
+    sql.enqueue([{ event_id: 'ev-1' }])
+    const repo = new PostgresSageRepository(sql)
+    const released = await repo.releaseAuditOutbox('ev-1', 'own-1', 'ERR')
+    expect(released).toBe(true)
+    const text = sql.lastCall.text
+    expect(text).toContain("set status = 'pending'")
+    expect(text).toContain('where event_id = $1 and dispatch_owner = $2')
+    expect(text).toContain("status = 'dispatching'")
+    expect(sql.lastCall.params).toEqual(['ev-1', 'own-1', 'ERR'])
   })
 
   it('countWorkspaceOpenExportRequests counts only requested status', async () => {
@@ -840,9 +1019,39 @@ function exportRequestRow(
     workspace_id: 'ws-1',
     org_id: 'org-1',
     requested_by: 'actor-2',
-    scope: '{"evidenceItemIds":[]}',
+    scope: null,
+    purpose: 'internal review',
+    package_type: 'internal_review_bundle',
+    requested_scope_json: { policyVersion: 'sage-export-v1', packageType: 'internal_review_bundle', items: [] },
+    requested_scope_hash: 'hash-1',
+    policy_version: 'sage-export-v1',
     status: 'requested',
     created_at: new Date('2026-07-12T00:00:00.000Z'),
+    updated_at: new Date('2026-07-12T00:00:00.000Z'),
+    ...overrides,
+  }
+}
+
+function exportPackageRow(overrides: Partial<SageExportPackageRow> = {}): SageExportPackageRow {
+  return {
+    id: 'pkg-1',
+    org_id: 'org-1',
+    workspace_id: 'ws-1',
+    export_request_id: 'exp-1',
+    status: 'generated',
+    package_type: 'internal_review_bundle',
+    manifest_json: { items: [] },
+    manifest_hash: 'mh',
+    content_hash: 'ch',
+    storage_reference: 'sage-internal://k',
+    media_type: 'application/json',
+    size_bytes: 10,
+    policy_version: 'sage-export-v1',
+    item_count: 1,
+    excluded_count: 0,
+    generated_by: 'actor-3',
+    generated_at: new Date('2026-07-12T06:00:00.000Z'),
+    created_at: new Date('2026-07-12T06:00:00.000Z'),
     ...overrides,
   }
 }

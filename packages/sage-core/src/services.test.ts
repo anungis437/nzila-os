@@ -18,6 +18,8 @@ import {
   createSageEvidenceSource,
   createSageWorkspace,
   denySageExport,
+  generateSageExportPackage,
+  getSageExportPackageContent,
   getSageWorkspaceSummary,
   getSageWorkspace,
   getSageDecisionRecord,
@@ -28,6 +30,8 @@ import {
   listSageDecisionRecords,
   listSageEvidenceItems,
   listSageEvidenceSources,
+  listSageExportPackages,
+  listSageExportRequests,
   listSageReviewNotes,
   listSageWorkspaces,
   requestSageExport,
@@ -36,6 +40,13 @@ import {
   revokeSageRole,
   type SageServiceDeps,
 } from './services'
+import {
+  canonicalizeSageExportScope,
+  hashSageExportScope,
+  buildSageExportPackage,
+  SAGE_EXPORT_POLICY_VERSION,
+  type SageExportScope,
+} from './index'
 
 const ALL_PERMS = Object.values(SAGE_PERMISSIONS)
 
@@ -391,8 +402,9 @@ describe('SAGE workspace RBAC (membership + role assignment)', () => {
       approveSageExport(deps, ctxFor(oversight), {
         workspaceId: ws.id,
         exportRequestId: 'nope',
+        rationale: 'x',
       }),
-    ).rejects.toMatchObject({ code: 'PERMISSION_DENIED' })
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
   })
 })
 
@@ -875,116 +887,394 @@ describe('authenticated-human actor assurance', () => {
   })
 })
 
-describe('export workflow', () => {
-  it('creates an export request that is not approved by default', async () => {
-    const ws = await makeWorkspace()
-    const req = await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
+describe('export workflow (Phase 7 — controlled export packages)', () => {
+  // Build a workspace with: actor_1 (workspace_owner → EXPORT_REQUEST) and an
+  // independent human approver with the export_approver role. Returns an
+  // accessible (internal) evidence item to request.
+  async function makeExportSetup() {
+    const a = actor()
+    const ws = await makeWorkspace(a)
+    // Independent approver: a member with the dedicated export_approver role.
+    await addSageWorkspaceMember(deps, ctxFor(a), { workspaceId: ws.id, actorId: 'approver_1' })
+    await assignSageRole(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      actorId: 'approver_1',
+      role: 'export_approver',
+      accessReason: 'export review',
+      approvedBy: a.actorId,
+    })
+    const src = await createSageEvidenceSource(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceType: 'public',
+    })
+    await classifySageEvidenceSource(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      sourceQuality: 'high',
+      authorizationLevel: 'internal',
+    })
+    const item = await createSageEvidenceItem(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      confidenceLevel: 'moderate',
+    })
+    return { a, ws, src, item }
+  }
+
+  const approver = () => actor({ actorId: 'approver_1' })
+
+  it('requests an export with a canonical scope + hash (not approved by default)', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'internal review',
+      evidenceItemIds: [item.id],
+    })
     expect(req.status).toBe('requested')
-    expect(req.status).not.toBe('approved')
+    expect(req.requestedScopeHash).toBeTruthy()
+    expect(req.requestedScopeJson).toContain(item.id)
     expect(sink.has(SAGE_AUDIT_ACTIONS.EXPORT_REQUESTED)).toBe(true)
   })
 
-  it('blocks a requester from approving their own export', async () => {
-    const ws = await makeWorkspace()
-    const req = await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
+  it('rejects a request with no purpose', async () => {
+    const { a, ws, item } = await makeExportSetup()
     await expect(
-      approveSageExport(deps, ctxFor(actor()), {
-        workspaceId: ws.id,
-        exportRequestId: req.id,
-      }),
-    ).rejects.toThrow(/requester/)
+      requestSageExport(deps, ctxFor(a), { workspaceId: ws.id, purpose: '', evidenceItemIds: [item.id] }),
+    ).rejects.toThrow(/purpose/)
   })
 
-  it('allows a different approver to approve', async () => {
-    const ws = await makeWorkspace()
-    const req = await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
-    const approver = actor({ actorId: 'approver_1' })
-    const approval = await approveSageExport(deps, ctxFor(approver), {
-      workspaceId: ws.id,
-      exportRequestId: req.id,
-    })
-    expect(approval.decision).toBe('approved')
-    expect(sink.has(SAGE_AUDIT_ACTIONS.EXPORT_APPROVED)).toBe(true)
-  })
-
-  it('blocks an external reviewer from approving an export', async () => {
-    const ws = await makeWorkspace()
-    const req = await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
-    const reviewer = actor({ actorId: 'ext_1' })
-    await addSageWorkspaceMember(deps, ctxFor(actor()), { workspaceId: ws.id, actorId: 'ext_1' })
-    await assignSageRole(deps, ctxFor(actor()), {
-      workspaceId: ws.id,
-      actorId: 'ext_1',
-      role: 'external_reviewer',
-      accessReason: 'review',
-      approvedBy: 'admin',
-    })
-    await expect(
-      approveSageExport(deps, ctxFor(reviewer), { workspaceId: ws.id, exportRequestId: req.id }),
-    ).rejects.toThrow(/external reviewer/)
-  })
-
-  it('blocks approval without explicit export-approve permission (admins do not auto-approve)', async () => {
-    const ws = await makeWorkspace()
-    const req = await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
-    const orgAdmin = actor({
-      actorId: 'org_admin',
-      permissions: [SAGE_PERMISSIONS.WORKSPACE_READ, SAGE_PERMISSIONS.MEMBER_MANAGE],
-    })
-    await expect(
-      approveSageExport(deps, ctxFor(orgAdmin), { workspaceId: ws.id, exportRequestId: req.id }),
-    ).rejects.toThrow(/permission/i)
-  })
-
-  it('blocks exporting excluded evidence', async () => {
-    const ws = await makeWorkspace()
-    const src = await createSageEvidenceSource(deps, ctxFor(actor()), {
-      workspaceId: ws.id,
-      sourceType: 'excluded',
-    })
-    await classifySageEvidenceSource(deps, ctxFor(actor()), {
+  it('rejects a request selecting excluded evidence', async () => {
+    const { a, ws } = await makeExportSetup()
+    const src = await createSageEvidenceSource(deps, ctxFor(a), { workspaceId: ws.id, sourceType: 'excluded' })
+    await classifySageEvidenceSource(deps, ctxFor(a), {
       workspaceId: ws.id,
       sourceId: src.id,
       sourceQuality: 'insufficient',
       authorizationLevel: 'excluded',
     })
-    const item = await createSageEvidenceItem(deps, ctxFor(actor()), {
+    await grantSageEvidenceAuthorization(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      actorId: a.actorId,
+      level: 'excluded',
+      accessReason: 'x',
+      approvedBy: 'admin',
+    })
+    const item = await createSageEvidenceItem(deps, ctxFor(a), {
       workspaceId: ws.id,
       sourceId: src.id,
       confidenceLevel: 'low',
     })
-    const req = await requestSageExport(deps, ctxFor(actor()), {
+    await expect(
+      requestSageExport(deps, ctxFor(a), {
+        workspaceId: ws.id,
+        purpose: 'x',
+        evidenceItemIds: [item.id],
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('rejects a request selecting inaccessible evidence (non-disclosure NOT_FOUND)', async () => {
+    const { a, ws } = await makeExportSetup()
+    const src = await createSageEvidenceSource(deps, ctxFor(a), { workspaceId: ws.id, sourceType: 'authorized_only' })
+    await classifySageEvidenceSource(deps, ctxFor(a), {
       workspaceId: ws.id,
+      sourceId: src.id,
+      sourceQuality: 'moderate',
+      authorizationLevel: 'sensitive',
+    })
+    const item = await createSageEvidenceItem(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      sourceId: src.id,
+      confidenceLevel: 'low',
+    })
+    // A non-owner member without a sensitive grant requests it → NOT_FOUND.
+    await addSageWorkspaceMember(deps, ctxFor(a), { workspaceId: ws.id, actorId: 'reader' })
+    await assignSageRole(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      actorId: 'reader',
+      role: 'workspace_owner',
+      accessReason: 'x',
+      approvedBy: a.actorId,
+    })
+    await expect(
+      requestSageExport(deps, ctxFor(actor({ actorId: 'reader' })), {
+        workspaceId: ws.id,
+        purpose: 'x',
+        evidenceItemIds: [item.id],
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('rejects a request from a non-human actor', async () => {
+    const { ws, item } = await makeExportSetup()
+    await expect(
+      requestSageExport(deps, ctxFor(actor({ actorKind: 'service' })), {
+        workspaceId: ws.id,
+        purpose: 'x',
+        evidenceItemIds: [item.id],
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('blocks a requester from approving their own export', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    // Give the requester export_approver too, to prove the SELF guard (not authz) blocks it.
+    await assignSageRole(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      actorId: a.actorId,
+      role: 'export_approver',
+      accessReason: 'x',
+      approvedBy: a.actorId,
+    })
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
       evidenceItemIds: [item.id],
     })
-    const approver = actor({ actorId: 'approver_1' })
     await expect(
-      approveSageExport(deps, ctxFor(approver), { workspaceId: ws.id, exportRequestId: req.id }),
-    ).rejects.toThrow(/external-review output/)
+      approveSageExport(deps, ctxFor(a), { workspaceId: ws.id, exportRequestId: req.id, rationale: 'ok' }),
+    ).rejects.toThrow(/requester/)
   })
 
-  it('requires a reason to deny an export', async () => {
-    const ws = await makeWorkspace()
-    const req = await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
-    await expect(
-      denySageExport(deps, ctxFor(actor()), {
-        workspaceId: ws.id,
-        exportRequestId: req.id,
-        reason: '',
-      }),
-    ).rejects.toThrow(/reason/)
-  })
-
-  it('denies an export with a reason', async () => {
-    const ws = await makeWorkspace()
-    const req = await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
-    const approval = await denySageExport(deps, ctxFor(actor()), {
+  it('lets a different human approver approve (freezing the scope hash)', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      evidenceItemIds: [item.id],
+    })
+    const approval = await approveSageExport(deps, ctxFor(approver()), {
       workspaceId: ws.id,
       exportRequestId: req.id,
-      reason: 'out of scope',
+      rationale: 'looks correct',
     })
-    expect(approval.decision).toBe('denied')
+    expect(approval.decision).toBe('approved')
+    expect(approval.approvedScopeHash).toBe(req.requestedScopeHash)
+    expect(sink.has(SAGE_AUDIT_ACTIONS.EXPORT_APPROVED)).toBe(true)
+  })
+
+  it('blocks approval by a service principal', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      evidenceItemIds: [item.id],
+    })
+    await expect(
+      approveSageExport(deps, ctxFor(actor({ actorId: 'approver_1', actorKind: 'service' })), {
+        workspaceId: ws.id,
+        exportRequestId: req.id,
+        rationale: 'x',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('blocks approval without the export_approver role (generic admin does not substitute)', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      evidenceItemIds: [item.id],
+    })
+    const orgAdmin = actor({
+      actorId: 'org_admin',
+      permissions: [SAGE_PERMISSIONS.WORKSPACE_READ, SAGE_PERMISSIONS.MEMBER_MANAGE],
+    })
+    await expect(
+      approveSageExport(deps, ctxFor(orgAdmin), { workspaceId: ws.id, exportRequestId: req.id, rationale: 'x' }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
+
+  it('rejects approval when the scope drifted (content changed)', async () => {
+    const { a, ws } = await makeExportSetup()
+    // Request a boundary flag, then mutate it (resolve) so its content hash changes.
+    const flag = await addSageBoundaryFlag(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+    })
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      boundaryFlagIds: [flag.id],
+    })
+    await resolveSageBoundaryFlag(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      flagId: flag.id,
+      resolution: 'resolved',
+      resolutionNote: 'done',
+    })
+    await expect(
+      approveSageExport(deps, ctxFor(approver()), { workspaceId: ws.id, exportRequestId: req.id, rationale: 'x' }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('requires a rationale to deny and denial is terminal (CAS)', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      evidenceItemIds: [item.id],
+    })
+    await expect(
+      denySageExport(deps, ctxFor(approver()), { workspaceId: ws.id, exportRequestId: req.id, rationale: '' }),
+    ).rejects.toThrow(/rationale/)
+    const denial = await denySageExport(deps, ctxFor(approver()), {
+      workspaceId: ws.id,
+      exportRequestId: req.id,
+      rationale: 'out of scope',
+    })
+    expect(denial.decision).toBe('denied')
+    // A second decision conflicts (terminal).
+    await expect(
+      approveSageExport(deps, ctxFor(approver()), { workspaceId: ws.id, exportRequestId: req.id, rationale: 'x' }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
     expect(sink.has(SAGE_AUDIT_ACTIONS.EXPORT_DENIED)).toBe(true)
+  })
+
+  it('generates one immutable package from an approved request', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      evidenceItemIds: [item.id],
+    })
+    await approveSageExport(deps, ctxFor(approver()), { workspaceId: ws.id, exportRequestId: req.id, rationale: 'ok' })
+    const pkg = await generateSageExportPackage(deps, ctxFor(approver()), {
+      workspaceId: ws.id,
+      exportRequestId: req.id,
+    })
+    expect(pkg.status).toBe('generated')
+    expect(pkg.contentHash).toBeTruthy()
+    expect(pkg.manifestHash).toBeTruthy()
+    expect(pkg.itemCount).toBe(1)
+    expect(sink.has(SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_GENERATED)).toBe(true)
+
+    // Idempotent: a second generation returns the SAME package (one storage object).
+    const again = await generateSageExportPackage(deps, ctxFor(approver()), {
+      workspaceId: ws.id,
+      exportRequestId: req.id,
+    })
+    expect(again.id).toBe(pkg.id)
+    expect(sink.records.filter((r) => r.action === SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_GENERATED)).toHaveLength(1)
+  })
+
+  it('blocks generation from a non-approved request', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      evidenceItemIds: [item.id],
+    })
+    await expect(
+      generateSageExportPackage(deps, ctxFor(approver()), { workspaceId: ws.id, exportRequestId: req.id }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('blocks generation when the approved scope changed', async () => {
+    const { a, ws } = await makeExportSetup()
+    const flag = await addSageBoundaryFlag(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      flagType: 'review_required',
+      targetType: 'workspace',
+    })
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      boundaryFlagIds: [flag.id],
+    })
+    await approveSageExport(deps, ctxFor(approver()), { workspaceId: ws.id, exportRequestId: req.id, rationale: 'ok' })
+    // Mutate after approval → generation must CONFLICT.
+    await resolveSageBoundaryFlag(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      flagId: flag.id,
+      resolution: 'resolved',
+      resolutionNote: 'done',
+    })
+    await expect(
+      generateSageExportPackage(deps, ctxFor(approver()), { workspaceId: ws.id, exportRequestId: req.id }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('serves package content to the requester and audits access (no external delivery)', async () => {
+    const { a, ws, item } = await makeExportSetup()
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'x',
+      evidenceItemIds: [item.id],
+    })
+    await approveSageExport(deps, ctxFor(approver()), { workspaceId: ws.id, exportRequestId: req.id, rationale: 'ok' })
+    const pkg = await generateSageExportPackage(deps, ctxFor(approver()), {
+      workspaceId: ws.id,
+      exportRequestId: req.id,
+    })
+    const content = await getSageExportPackageContent(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      packageId: pkg.id,
+    })
+    expect(content.mediaType).toBe('application/json')
+    expect(content.bytes.byteLength).toBeGreaterThan(0)
+    expect(sink.has(SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_ACCESS_AUTHORIZED)).toBe(true)
+  })
+
+  it('does not disclose export requests/packages across orgs', async () => {
+    const { ws } = await makeExportSetup()
+    await expect(
+      listSageExportRequests(deps, ctxFor(actor({ orgId: 'org_2' })), { workspaceId: ws.id }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+    await expect(
+      listSageExportPackages(deps, ctxFor(actor({ orgId: 'org_2' })), { workspaceId: ws.id }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+})
+
+describe('export scope hashing + determinism', () => {
+  function scope(items: SageExportScope['items']): SageExportScope {
+    return { policyVersion: SAGE_EXPORT_POLICY_VERSION, packageType: 'internal_review_bundle', items }
+  }
+  const itemA = {
+    resourceType: 'evidence_item' as const,
+    resourceId: 'id-a',
+    contentHash: 'hash-a',
+    authorizationLevel: 'internal' as const,
+    excludedFromExternalReview: false,
+    included: true,
+    exclusionReason: null,
+    order: 0,
+  }
+  const itemB = { ...itemA, resourceId: 'id-b', contentHash: 'hash-b', order: 1 }
+
+  it('is stable under input reordering', () => {
+    expect(hashSageExportScope(scope([itemA, itemB]))).toBe(hashSageExportScope(scope([itemB, itemA])))
+  })
+
+  it('changes when a resource content hash changes', () => {
+    expect(hashSageExportScope(scope([itemA]))).not.toBe(
+      hashSageExportScope(scope([{ ...itemA, contentHash: 'changed' }])),
+    )
+  })
+
+  it('changes when an authorization level changes', () => {
+    expect(hashSageExportScope(scope([itemA]))).not.toBe(
+      hashSageExportScope(scope([{ ...itemA, authorizationLevel: 'sensitive' }])),
+    )
+  })
+
+  it('changes when the policy version changes', () => {
+    const s = scope([itemA])
+    expect(hashSageExportScope(s)).not.toBe(hashSageExportScope({ ...s, policyVersion: 'other' }))
+  })
+
+  it('produces an identical manifest/content hash for identical approved scope', () => {
+    const canonical = canonicalizeSageExportScope(scope([itemA, itemB]))
+    const resources = [
+      { resourceType: 'evidence_item' as const, resourceId: 'id-a', authorizationLevel: 'internal' as const, contentHash: 'hash-a', content: { id: 'id-a' } },
+      { resourceType: 'evidence_item' as const, resourceId: 'id-b', authorizationLevel: 'internal' as const, contentHash: 'hash-b', content: { id: 'id-b' } },
+    ]
+    const p1 = buildSageExportPackage({ scope: canonical, workspaceId: 'ws', exportRequestId: 'req', approvedScopeHash: 'h', resources })
+    const p2 = buildSageExportPackage({ scope: canonical, workspaceId: 'ws', exportRequestId: 'req', approvedScopeHash: 'h', resources: [...resources].reverse() })
+    expect(p1.manifestHash).toBe(p2.manifestHash)
+    expect(p1.contentHash).toBe(p2.contentHash)
   })
 })
 
@@ -1018,7 +1308,7 @@ describe('workspace summary', () => {
       sourceQuality: 'high',
       authorizationLevel: 'public',
     })
-    await createSageEvidenceItem(deps, ctxFor(actor()), {
+    const evItem = await createSageEvidenceItem(deps, ctxFor(actor()), {
       workspaceId: ws.id,
       sourceId: src.id,
       confidenceLevel: 'moderate',
@@ -1028,7 +1318,11 @@ describe('workspace summary', () => {
       flagType: 'review_required',
       targetType: 'workspace',
     })
-    await requestSageExport(deps, ctxFor(actor()), { workspaceId: ws.id })
+    await requestSageExport(deps, ctxFor(actor()), {
+      workspaceId: ws.id,
+      purpose: 'internal review',
+      evidenceItemIds: [evItem.id],
+    })
     const summary = await getSageWorkspaceSummary(deps, ctxFor(actor()), { workspaceId: ws.id })
     expect(summary.counts.evidenceSources).toBe(1)
     expect(summary.counts.evidenceItems).toBe(1)
@@ -1085,11 +1379,30 @@ describe('audit emission coverage', () => {
       decision: 'proceed',
       uncertainty: 'limited sample',
     })
-    const req = await requestSageExport(deps, ctxFor(a), { workspaceId: ws.id })
+    // Independent export approver + the full request → approve → generate flow.
+    await addSageWorkspaceMember(deps, ctxFor(a), { workspaceId: ws.id, actorId: 'approver_1' })
+    await assignSageRole(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      actorId: 'approver_1',
+      role: 'export_approver',
+      accessReason: 'x',
+      approvedBy: 'admin',
+    })
+    const req = await requestSageExport(deps, ctxFor(a), {
+      workspaceId: ws.id,
+      purpose: 'internal review',
+      evidenceItemIds: [item.id],
+    })
     await approveSageExport(deps, ctxFor(actor({ actorId: 'approver_1' })), {
       workspaceId: ws.id,
       exportRequestId: req.id,
+      rationale: 'ok',
     })
+    await generateSageExportPackage(
+      deps,
+      ctxFor(actor({ actorId: 'approver_1' })),
+      { workspaceId: ws.id, exportRequestId: req.id },
+    )
 
     const expected = [
       SAGE_AUDIT_ACTIONS.WORKSPACE_CREATED,
@@ -1106,6 +1419,7 @@ describe('audit emission coverage', () => {
       SAGE_AUDIT_ACTIONS.DECISION_RECORDED,
       SAGE_AUDIT_ACTIONS.EXPORT_REQUESTED,
       SAGE_AUDIT_ACTIONS.EXPORT_APPROVED,
+      SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_GENERATED,
     ]
     for (const action of expected) {
       expect(sink.has(action)).toBe(true)

@@ -101,6 +101,12 @@ export default async function SageEvidencePage({
         >
           {t('governanceTab')} →
         </Link>
+        <Link
+          href={`/sage/${workspaceId}/exports`}
+          className="mt-2 ml-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+        >
+          {t('exportsTab')} →
+        </Link>
       </div>
 
       <section aria-labelledby="sage-sources-heading" className="space-y-4">

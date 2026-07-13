@@ -143,6 +143,12 @@ export default async function SageGovernancePage({
         </Link>
         <h1 className="mt-2 text-2xl font-bold text-gray-900">{t('pageTitle')}</h1>
         <p className="mt-1 max-w-2xl text-sm text-gray-500">{t('pageDescription')}</p>
+        <Link
+          href={`/sage/${workspaceId}/exports`}
+          className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+        >
+          {t('exportsTab')} →
+        </Link>
       </div>
 
       <section aria-labelledby="sage-distinctions-heading" className="rounded-lg border border-gray-200 bg-gray-50 p-4">

@@ -24,7 +24,12 @@ import {
   type SageEvidenceItem,
   type SageEvidenceSource,
   type SageExportApproval,
+  type SageExportPackage,
+  type SageExportPackageType,
   type SageExportRequest,
+  type SageExportScope,
+  type SageExportScopeItem,
+  type SageExportResourceType,
   type SageGovernanceAuthorizationBasis,
   type SageGovernanceTargetType,
   type SageInstitutionType,
@@ -57,9 +62,21 @@ import {
 } from './audit-events'
 import { deriveSageBoundaryProfile } from './boundary-profile'
 import {
+  SAGE_EXPORT_POLICY_VERSION,
+  canonicalizeSageExportScope,
+  canonicalJsonStringify,
+  hashSageExportScope,
+  sha256Hex,
+} from './export-scope'
+import {
+  buildSageExportPackage,
+  verifySageExportPackageBytes,
+  type SageExportPackageResource,
+} from './export-package'
+import { sageExportPackageStorageReference } from './export-store'
+import {
   assertDecisionRecordHasNamedHumanReviewer,
   assertEvidenceLinkRequiresClassifiedSource,
-  assertExcludedEvidenceCannotBeExternallyExported,
   assertExternalReviewerHasNoExportAuthority,
   assertRequesterCannotApproveOwnExport,
   assertRoleAssignmentRequiresMembership,
@@ -68,7 +85,8 @@ import {
 import type { SageRepository } from './repository'
 import type { SageAuditSink } from './audit-sink'
 import { contextNow, type SageServiceContext } from './service-context'
-import { forbidden, invalidInput, notFound, orgBoundary, permissionDenied } from './service-errors'
+import { conflict, forbidden, integrityError, invalidInput, notFound, orgBoundary, permissionDenied } from './service-errors'
+import { randomUUID } from 'node:crypto'
 
 export type SageServiceDeps = {
   repo: SageRepository
@@ -131,6 +149,169 @@ async function emit(
       payload,
     }),
   )
+}
+
+/** Deterministic, stable audit-outbox event id (same inputs → same id → dedupe). */
+function exportAuditEventId(kind: string, ...parts: string[]): string {
+  return sha256Hex([kind, ...parts].join(':'))
+}
+
+/**
+ * Durably record a package access-control decision: persist a pending outbox row
+ * (stable event_id) BEFORE streaming, then dispatch it. If the process crashes
+ * after the row commits but before dispatch, the drainer re-delivers it — the
+ * access decision is never lost. Delivery is at-least-once with a stable
+ * event_id (the sink does not dedupe by event_id).
+ */
+async function emitDurableAccessEvent(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  action: SageAuditAction,
+  resourceId: string,
+  workspaceId: string,
+  payload: Record<string, unknown> = {},
+): Promise<void> {
+  const at = contextNow(ctx)
+  const eventId = exportAuditEventId(action, resourceId, ctx.actor.actorId, at)
+  await deps.repo.enqueueAuditOutbox({
+    intent: {
+      eventId,
+      actorId: ctx.actor.actorId,
+      action,
+      resourceType: SAGE_AUDIT_RESOURCES.EXPORT_PACKAGE,
+      safePayload: payload,
+    },
+    orgId: ctx.actor.orgId,
+    workspaceId,
+    resourceId,
+    createdAt: at,
+  })
+  await dispatchOutboxEvent(deps, {
+    eventId,
+    actorId: ctx.actor.actorId,
+    orgId: ctx.actor.orgId,
+    action,
+    resource: SAGE_AUDIT_RESOURCES.EXPORT_PACKAGE,
+    resourceId,
+    payload,
+    at,
+  })
+}
+
+/** Unguessable, unique lease owner for a single dispatcher pass. */
+function mintDispatchOwner(): string {
+  return `sage-dispatch:${randomUUID()}`
+}
+
+const DEFAULT_OUTBOX_LEASE_MS = 30_000
+
+/**
+ * Dispatch a single durable audit-outbox event to the sink after commit.
+ *
+ * Delivery guarantee: AT-LEAST-ONCE with a stable event_id. The downstream
+ * audit sink mints its own hash-chained record id and does NOT deduplicate by
+ * event_id, so a crash between "sink accepted" and "mark dispatched" will
+ * re-deliver the same event_id on retry. We fence with a lease so at most one
+ * dispatcher is live for an event at a time, but we do not claim exactly-once.
+ *
+ * The event row was enqueued transactionally alongside the material change, so
+ * on sink failure the row simply returns to 'pending' and is retried by
+ * dispatchPendingSageAuditOutbox — the committed change is never rolled back
+ * because the external audit sink is temporarily unavailable.
+ */
+async function dispatchOutboxEvent(
+  deps: SageServiceDeps,
+  event: {
+    eventId: string
+    actorId: string
+    orgId: string
+    action: SageAuditAction
+    resource: SageAuditResource
+    resourceId: string
+    payload: Record<string, unknown>
+    at: string
+  },
+  opts: { leaseMs?: number } = {},
+): Promise<void> {
+  const owner = mintDispatchOwner()
+  const now = event.at
+  const leaseExpiresAt = new Date(
+    Date.parse(now) + (opts.leaseMs ?? DEFAULT_OUTBOX_LEASE_MS),
+  ).toISOString()
+  // Fenced claim: only proceed if we own the live lease. If another dispatcher
+  // (e.g. the background drainer) already holds it, let them deliver it.
+  const claimed = await deps.repo
+    .claimAuditOutboxEvent({ eventId: event.eventId, owner, leaseExpiresAt, now })
+    .catch(() => undefined)
+  if (!claimed) return
+  try {
+    await deps.audit.record(
+      buildSageAuditPayload({
+        actorId: event.actorId,
+        orgId: event.orgId,
+        action: event.action,
+        resource: event.resource,
+        resourceId: event.resourceId,
+        payload: event.payload,
+      }),
+    )
+    await deps.repo.markAuditOutboxDispatched(event.eventId, owner, event.at)
+  } catch {
+    // Return the claim to 'pending' (fenced) so the drainer retries it.
+    await deps.repo.releaseAuditOutbox(event.eventId, owner, 'AUDIT_DISPATCH_FAILED').catch(() => {})
+  }
+}
+
+/**
+ * Drain durable audit-outbox events to the sink (oldest first). Used by a
+ * background dispatcher and for crash recovery.
+ *
+ * Concurrency-safe: each pass mints a unique owner and atomically claims a lease
+ * on each event (FOR UPDATE SKIP LOCKED), so two dispatchers never grab the same
+ * event, and an event whose owner crashed is reclaimed once its lease expires.
+ * Delivery is AT-LEAST-ONCE with a stable event_id (the sink does not dedupe by
+ * event_id), so a crash after the sink accepts but before we mark dispatched
+ * results in a redelivery of the same event_id — not a lost audit record.
+ */
+export async function dispatchPendingSageAuditOutbox(
+  deps: SageServiceDeps,
+  opts: { limit?: number; leaseMs?: number; now?: () => string } = {},
+): Promise<{ dispatched: number; failed: number }> {
+  const limit = opts.limit ?? 50
+  const now = opts.now ?? (() => new Date().toISOString())
+  const owner = mintDispatchOwner()
+  const claimAt = now()
+  const leaseExpiresAt = new Date(
+    Date.parse(claimAt) + (opts.leaseMs ?? DEFAULT_OUTBOX_LEASE_MS),
+  ).toISOString()
+  const claimed = await deps.repo.claimPendingAuditOutbox({
+    owner,
+    leaseExpiresAt,
+    limit,
+    now: claimAt,
+  })
+  let dispatched = 0
+  let failed = 0
+  for (const ev of claimed) {
+    try {
+      await deps.audit.record(
+        buildSageAuditPayload({
+          actorId: ev.actorId,
+          orgId: ev.orgId,
+          action: ev.action as SageAuditAction,
+          resource: ev.resourceType as SageAuditResource,
+          resourceId: ev.resourceId,
+          payload: JSON.parse(ev.safePayloadJson) as Record<string, unknown>,
+        }),
+      )
+      await deps.repo.markAuditOutboxDispatched(ev.eventId, owner, now())
+      dispatched += 1
+    } catch {
+      await deps.repo.releaseAuditOutbox(ev.eventId, owner, 'AUDIT_DISPATCH_FAILED')
+      failed += 1
+    }
+  }
+  return { dispatched, failed }
 }
 
 // ─── Workspace ───────────────────────────────────────────────────────────────
@@ -1260,119 +1441,720 @@ export async function getSageDecisionRecord(
   return redactDecisionReferences(deps, ws, access, record)
 }
 
-// ─── Export workflow ─────────────────────────────────────────────────────────
+// ─── Export workflow (Phase 7 — controlled export packages) ──────────────────
+//
+// An export request captures an explicit, reviewable scope and a canonical scope
+// hash. A DIFFERENT authenticated human independently approves (freezing the
+// scope hash) or denies. An approved request generates exactly one immutable
+// internal package. External delivery is DISABLED — there is no recipient,
+// public URL, email, webhook, or transmission path anywhere in this workflow.
 
-type ExportScope = { description?: string; evidenceItemIds: string[] }
+export type SageExportSelection = {
+  evidenceItemIds?: string[]
+  boundaryFlagIds?: string[]
+  reviewNoteIds?: string[]
+  decisionRecordIds?: string[]
+}
+
+type ResolvedExportItem =
+  | { status: 'ok'; scopeItem: SageExportScopeItem; resource: SageExportPackageResource }
+  | { status: 'missing' }
+  | { status: 'excluded' }
+  | { status: 'inaccessible' }
+
+function hashResourceContent(projection: Record<string, unknown>): string {
+  return sha256Hex(canonicalJsonStringify(projection))
+}
+
+/** Resolve one requested resource into a scope item + content projection. */
+async function resolveExportItem(
+  deps: SageServiceDeps,
+  ws: SageWorkspace,
+  access: SageAccessContext,
+  resourceType: SageExportResourceType,
+  resourceId: string,
+): Promise<ResolvedExportItem> {
+  if (resourceType === 'evidence_item') {
+    const item = await deps.repo.getEvidenceItem(resourceId, ws.id, ws.orgId)
+    if (!item) return { status: 'missing' }
+    const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
+    if (!src) return { status: 'missing' }
+    const level = src.authorizationLevel
+    if (level === 'excluded' || item.excludedFromExternalReview) return { status: 'excluded' }
+    if (!canAccessEvidenceLevel(access, level)) return { status: 'inaccessible' }
+    const content = {
+      t: 'evidence_item',
+      id: item.id,
+      sourceId: item.sourceId,
+      lifecycleState: item.lifecycleState,
+      confidenceLevel: item.confidenceLevel ?? null,
+      humanReviewRequired: item.humanReviewRequired,
+      authorizationLevel: level,
+      updatedAt: item.updatedAt,
+    }
+    const contentHash = hashResourceContent(content)
+    return {
+      status: 'ok',
+      scopeItem: {
+        resourceType,
+        resourceId: item.id,
+        contentHash,
+        authorizationLevel: level,
+        excludedFromExternalReview: item.excludedFromExternalReview,
+        included: true,
+        exclusionReason: null,
+        order: 0,
+      },
+      resource: { resourceType, resourceId: item.id, authorizationLevel: level, contentHash, content },
+    }
+  }
+  if (resourceType === 'boundary_flag') {
+    const flag = await deps.repo.getBoundaryFlag(resourceId, ws.id, ws.orgId)
+    if (!flag) return { status: 'missing' }
+    if (flag.authorizationLevel === 'excluded') return { status: 'excluded' }
+    if (!canAccessGovernanceRecord(access, flag)) return { status: 'inaccessible' }
+    const content = {
+      t: 'boundary_flag',
+      id: flag.id,
+      flagType: flag.flagType,
+      targetType: flag.targetType ?? null,
+      targetId: flag.targetId ?? null,
+      note: flag.note ?? null,
+      status: flag.status,
+      resolutionNote: flag.resolutionNote ?? null,
+      authorizationLevel: flag.authorizationLevel,
+      updatedAt: flag.updatedAt,
+    }
+    const contentHash = hashResourceContent(content)
+    return {
+      status: 'ok',
+      scopeItem: {
+        resourceType,
+        resourceId: flag.id,
+        contentHash,
+        authorizationLevel: flag.authorizationLevel,
+        excludedFromExternalReview: false,
+        included: true,
+        exclusionReason: null,
+        order: 0,
+      },
+      resource: {
+        resourceType,
+        resourceId: flag.id,
+        authorizationLevel: flag.authorizationLevel,
+        contentHash,
+        content,
+      },
+    }
+  }
+  if (resourceType === 'review_note') {
+    const note = await deps.repo.getReviewNote(resourceId, ws.id, ws.orgId)
+    if (!note) return { status: 'missing' }
+    if (note.authorizationLevel === 'excluded') return { status: 'excluded' }
+    if (!canAccessGovernanceRecord(access, note)) return { status: 'inaccessible' }
+    const content = {
+      t: 'review_note',
+      id: note.id,
+      noteType: note.noteType,
+      targetType: note.targetType ?? null,
+      targetId: note.targetId ?? null,
+      note: note.note,
+      reviewerId: note.reviewerId,
+      authorizationLevel: note.authorizationLevel,
+      createdAt: note.createdAt,
+    }
+    const contentHash = hashResourceContent(content)
+    return {
+      status: 'ok',
+      scopeItem: {
+        resourceType,
+        resourceId: note.id,
+        contentHash,
+        authorizationLevel: note.authorizationLevel,
+        excludedFromExternalReview: false,
+        included: true,
+        exclusionReason: null,
+        order: 0,
+      },
+      resource: {
+        resourceType,
+        resourceId: note.id,
+        authorizationLevel: note.authorizationLevel,
+        contentHash,
+        content,
+      },
+    }
+  }
+  // decision_record
+  const record = await deps.repo.getDecisionRecord(resourceId, ws.id, ws.orgId)
+  if (!record) return { status: 'missing' }
+  if (record.authorizationLevel === 'excluded' || record.excludedFromExternalReview) {
+    return { status: 'excluded' }
+  }
+  if (!canAccessGovernanceRecord(access, record)) return { status: 'inaccessible' }
+  const content = {
+    t: 'decision_record',
+    id: record.id,
+    decision: record.decision,
+    rationale: record.rationale ?? null,
+    uncertainty: record.uncertainty ?? null,
+    humanReviewerId: record.humanReviewerId,
+    referencedEvidenceItemIds: record.referencedEvidenceItemIds,
+    referencedBoundaryFlagIds: record.referencedBoundaryFlagIds,
+    authorizationLevel: record.authorizationLevel,
+    createdAt: record.createdAt,
+  }
+  const contentHash = hashResourceContent(content)
+  return {
+    status: 'ok',
+    scopeItem: {
+      resourceType: 'decision_record',
+      resourceId: record.id,
+      contentHash,
+      authorizationLevel: record.authorizationLevel,
+      excludedFromExternalReview: record.excludedFromExternalReview,
+      included: true,
+      exclusionReason: null,
+      order: 0,
+    },
+    resource: {
+      resourceType: 'decision_record',
+      resourceId: record.id,
+      authorizationLevel: record.authorizationLevel,
+      contentHash,
+      content,
+    },
+  }
+}
+
+function selectionPairs(
+  selection: SageExportSelection,
+): { resourceType: SageExportResourceType; resourceId: string }[] {
+  const pairs: { resourceType: SageExportResourceType; resourceId: string }[] = []
+  for (const id of selection.evidenceItemIds ?? []) pairs.push({ resourceType: 'evidence_item', resourceId: id })
+  for (const id of selection.boundaryFlagIds ?? []) pairs.push({ resourceType: 'boundary_flag', resourceId: id })
+  for (const id of selection.reviewNoteIds ?? []) pairs.push({ resourceType: 'review_note', resourceId: id })
+  for (const id of selection.decisionRecordIds ?? []) pairs.push({ resourceType: 'decision_record', resourceId: id })
+  return pairs
+}
+
+/** Build a fresh canonical scope for a NEW request (explicit failures on bad selection). */
+async function buildExportScopeForRequest(
+  deps: SageServiceDeps,
+  ws: SageWorkspace,
+  access: SageAccessContext,
+  packageType: SageExportPackageType,
+  selection: SageExportSelection,
+): Promise<{ scope: SageExportScope; resources: SageExportPackageResource[] }> {
+  const pairs = selectionPairs(selection)
+  if (pairs.length === 0) invalidInput('an export request must select at least one resource')
+  const items: SageExportScopeItem[] = []
+  const resources: SageExportPackageResource[] = []
+  for (const { resourceType, resourceId } of pairs) {
+    const resolved = await resolveExportItem(deps, ws, access, resourceType, resourceId)
+    if (resolved.status === 'missing') notFound('requested export resource')
+    if (resolved.status === 'inaccessible') notFound('requested export resource') // non-disclosure
+    if (resolved.status === 'excluded') {
+      forbidden('an excluded resource cannot be included in an export package')
+    }
+    if (resolved.status === 'ok') {
+      items.push(resolved.scopeItem)
+      resources.push(resolved.resource)
+    }
+  }
+  const scope = canonicalizeSageExportScope({
+    policyVersion: SAGE_EXPORT_POLICY_VERSION,
+    packageType,
+    items,
+  })
+  return { scope, resources }
+}
+
+type RecomputeResult =
+  | { status: 'ok'; scope: SageExportScope; hash: string; resources: SageExportPackageResource[] }
+  | { status: 'inaccessible' }
+  | { status: 'drift' }
+
+/** Recompute the current canonical scope from a stored request's selection. */
+async function recomputeExportScope(
+  deps: SageServiceDeps,
+  ws: SageWorkspace,
+  access: SageAccessContext,
+  storedScope: SageExportScope,
+): Promise<RecomputeResult> {
+  const items: SageExportScopeItem[] = []
+  const resources: SageExportPackageResource[] = []
+  for (const stored of storedScope.items) {
+    const resolved = await resolveExportItem(deps, ws, access, stored.resourceType, stored.resourceId)
+    if (resolved.status === 'inaccessible') return { status: 'inaccessible' }
+    if (resolved.status === 'missing' || resolved.status === 'excluded') return { status: 'drift' }
+    items.push(resolved.scopeItem)
+    resources.push(resolved.resource)
+  }
+  const scope = canonicalizeSageExportScope({
+    policyVersion: storedScope.policyVersion,
+    packageType: storedScope.packageType,
+    items,
+  })
+  return { status: 'ok', scope, hash: hashSageExportScope(scope), resources }
+}
+
+function parseStoredScope(req: SageExportRequest): SageExportScope {
+  if (!req.requestedScopeJson) invalidInput('export request has no canonical scope')
+  return JSON.parse(req.requestedScopeJson) as SageExportScope
+}
 
 export async function requestSageExport(
   deps: SageServiceDeps,
   ctx: SageServiceContext,
-  input: { workspaceId: string; description?: string; evidenceItemIds?: string[] },
+  input: {
+    workspaceId: string
+    purpose: string
+    packageType?: SageExportPackageType
+    evidenceItemIds?: string[]
+    boundaryFlagIds?: string[]
+    reviewNoteIds?: string[]
+    decisionRecordIds?: string[]
+  },
 ): Promise<SageExportRequest> {
-  requirePermission(ctx, SAGE_PERMISSIONS.EXPORT_REQUEST)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
-  const scope: ExportScope = {
-    description: input.description,
-    evidenceItemIds: input.evidenceItemIds ?? [],
-  }
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.EXPORT_REQUEST,
+  })
+  assertActorIsHuman(ctx)
+  if (!input.purpose || !input.purpose.trim()) invalidInput('an export purpose is required')
+  const packageType: SageExportPackageType = input.packageType ?? 'internal_review_bundle'
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const { scope } = await buildExportScopeForRequest(deps, ws, access, packageType, {
+    evidenceItemIds: input.evidenceItemIds,
+    boundaryFlagIds: input.boundaryFlagIds,
+    reviewNoteIds: input.reviewNoteIds,
+    decisionRecordIds: input.decisionRecordIds,
+  })
+  const scopeHash = hashSageExportScope(scope)
+  const ts = contextNow(ctx)
   const req = await deps.repo.createExportRequest({
     workspaceId: ws.id,
     orgId: ws.orgId,
     requestedBy: ctx.actor.actorId,
-    scope: JSON.stringify(scope),
+    purpose: input.purpose,
+    packageType,
+    scope: null,
+    requestedScopeJson: canonicalJsonStringify(scope),
+    requestedScopeHash: scopeHash,
+    policyVersion: scope.policyVersion,
     status: 'requested', // default is NOT approved
-    createdAt: contextNow(ctx),
+    createdAt: ts,
+    updatedAt: ts,
   })
-  await emit(deps, ctx, SAGE_AUDIT_ACTIONS.EXPORT_REQUESTED, SAGE_AUDIT_RESOURCES.EXPORT_REQUEST, req.id)
+  await emit(deps, ctx, SAGE_AUDIT_ACTIONS.EXPORT_REQUESTED, SAGE_AUDIT_RESOURCES.EXPORT_REQUEST, req.id, {
+    packageType,
+    scopeHash,
+    itemCount: scope.items.length,
+    policyVersion: scope.policyVersion,
+  })
   return req
 }
 
 export async function approveSageExport(
   deps: SageServiceDeps,
   ctx: SageServiceContext,
-  input: { workspaceId: string; exportRequestId: string },
+  input: { workspaceId: string; exportRequestId: string; rationale: string },
 ): Promise<SageExportApproval> {
-  // No automatic approve authority: the actor must hold the explicit permission.
-  requirePermission(ctx, SAGE_PERMISSIONS.EXPORT_APPROVE)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
-  const req = await deps.repo.getExportRequest(input.exportRequestId)
-  if (!req || req.workspaceId !== ws.id) notFound('export request')
-
-  assertRequesterCannotApproveOwnExport({
-    requestedBy: req.requestedBy,
-    approverId: ctx.actor.actorId,
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.EXPORT_APPROVE,
   })
+  // Approval is a named-human judgment.
+  assertActorIsHuman(ctx)
+  if (!input.rationale || !input.rationale.trim()) invalidInput('an approval rationale is required')
+  const req = await deps.repo.getExportRequest(input.exportRequestId, ws.id, ws.orgId)
+  if (!req) notFound('export request')
+  if (req.status !== 'requested') conflict('export request is no longer pending a decision')
 
-  // External reviewer can never approve an export.
+  assertRequesterCannotApproveOwnExport({ requestedBy: req.requestedBy, approverId: ctx.actor.actorId })
   for (const role of await activeSageRoles(deps, ws.id, ctx.actor.actorId)) {
     assertExternalReviewerHasNoExportAuthority({ approverRole: role })
   }
 
-  // Excluded evidence cannot be exported.
-  const scope = JSON.parse(req.scope ?? '{"evidenceItemIds":[]}') as ExportScope
-  for (const itemId of scope.evidenceItemIds ?? []) {
-    const item = await deps.repo.getEvidenceItem(itemId, ws.id, ws.orgId)
-    if (item) {
-      assertExcludedEvidenceCannotBeExternallyExported({
-        level: item.excludedFromExternalReview ? 'excluded' : 'internal',
-        excludedFromExternalReview: item.excludedFromExternalReview,
-        inExternalReviewOutput: true,
-      })
-    }
+  // The approver must be able to access the ENTIRE scope, and the scope must not
+  // have drifted since it was requested. Access is checked under the APPROVER's
+  // grants, so a revoked/expired grant denies approval.
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const stored = parseStoredScope(req)
+  const recomputed = await recomputeExportScope(deps, ws, access, stored)
+  if (recomputed.status === 'inaccessible') {
+    forbidden('the approver cannot access every resource in the requested scope')
+  }
+  if (recomputed.status === 'drift' || recomputed.hash !== req.requestedScopeHash) {
+    conflict('the requested scope changed; a new approval is required')
   }
 
-  await deps.repo.setExportRequestStatus(req.id, 'approved')
-  const approval = await deps.repo.createExportApproval({
+  const ts = contextNow(ctx)
+  const eventId = exportAuditEventId('export_approved', req.id, ctx.actor.actorId, ts)
+  const decided = await deps.repo.decideExportRequest({
     exportRequestId: req.id,
+    workspaceId: ws.id,
     orgId: ws.orgId,
-    exportAuthorityLevel: 'approve',
-    approverId: ctx.actor.actorId,
     decision: 'approved',
-    decisionAt: contextNow(ctx),
-    reason: null,
+    updatedAt: ts,
+    approval: {
+      exportRequestId: req.id,
+      orgId: ws.orgId,
+      exportAuthorityLevel: 'approve',
+      approverId: ctx.actor.actorId,
+      decision: 'approved',
+      decisionAt: ts,
+      reason: input.rationale,
+      approvedScopeHash: req.requestedScopeHash, // freeze the reviewed scope
+    },
+    auditEvent: {
+      eventId,
+      actorId: ctx.actor.actorId,
+      action: SAGE_AUDIT_ACTIONS.EXPORT_APPROVED,
+      resourceType: SAGE_AUDIT_RESOURCES.EXPORT_APPROVAL,
+      safePayload: { exportRequestId: req.id, approvedScopeHash: req.requestedScopeHash },
+    },
   })
-  await emit(
-    deps,
-    ctx,
-    SAGE_AUDIT_ACTIONS.EXPORT_APPROVED,
-    SAGE_AUDIT_RESOURCES.EXPORT_APPROVAL,
-    approval.id,
-    { exportRequestId: req.id },
-  )
-  return approval
+  if (!decided) conflict('export request is no longer pending a decision')
+  await dispatchOutboxEvent(deps, {
+    eventId,
+    actorId: ctx.actor.actorId,
+    orgId: ws.orgId,
+    action: SAGE_AUDIT_ACTIONS.EXPORT_APPROVED,
+    resource: SAGE_AUDIT_RESOURCES.EXPORT_APPROVAL,
+    resourceId: decided.approval.id,
+    payload: { exportRequestId: req.id, approvedScopeHash: req.requestedScopeHash },
+    at: ts,
+  })
+  return decided.approval
 }
 
 export async function denySageExport(
   deps: SageServiceDeps,
   ctx: SageServiceContext,
-  input: { workspaceId: string; exportRequestId: string; reason: string },
+  input: { workspaceId: string; exportRequestId: string; rationale: string },
 ): Promise<SageExportApproval> {
-  requirePermission(ctx, SAGE_PERMISSIONS.EXPORT_APPROVE)
-  const ws = await loadUsableWorkspace(deps, ctx, input.workspaceId)
-  const req = await deps.repo.getExportRequest(input.exportRequestId)
-  if (!req || req.workspaceId !== ws.id) notFound('export request')
-  if (!input.reason) invalidInput('reason is required to deny an export')
-
-  await deps.repo.setExportRequestStatus(req.id, 'denied')
-  const approval = await deps.repo.createExportApproval({
-    exportRequestId: req.id,
-    orgId: ws.orgId,
-    exportAuthorityLevel: 'deny',
-    approverId: ctx.actor.actorId,
-    decision: 'denied',
-    decisionAt: contextNow(ctx),
-    reason: input.reason,
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.EXPORT_APPROVE,
   })
-  await emit(
-    deps,
-    ctx,
-    SAGE_AUDIT_ACTIONS.EXPORT_DENIED,
-    SAGE_AUDIT_RESOURCES.EXPORT_APPROVAL,
-    approval.id,
-    { exportRequestId: req.id, reason: input.reason },
-  )
-  return approval
+  assertActorIsHuman(ctx)
+  if (!input.rationale || !input.rationale.trim()) invalidInput('a denial rationale is required')
+  const req = await deps.repo.getExportRequest(input.exportRequestId, ws.id, ws.orgId)
+  if (!req) notFound('export request')
+  if (req.status !== 'requested') conflict('export request is no longer pending a decision')
+  assertRequesterCannotApproveOwnExport({ requestedBy: req.requestedBy, approverId: ctx.actor.actorId })
+
+  const ts = contextNow(ctx)
+  const eventId = exportAuditEventId('export_denied', req.id, ctx.actor.actorId, ts)
+  const decided = await deps.repo.decideExportRequest({
+    exportRequestId: req.id,
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    decision: 'denied',
+    updatedAt: ts,
+    approval: {
+      exportRequestId: req.id,
+      orgId: ws.orgId,
+      exportAuthorityLevel: 'deny',
+      approverId: ctx.actor.actorId,
+      decision: 'denied',
+      decisionAt: ts,
+      reason: input.rationale,
+      approvedScopeHash: null,
+    },
+    auditEvent: {
+      eventId,
+      actorId: ctx.actor.actorId,
+      action: SAGE_AUDIT_ACTIONS.EXPORT_DENIED,
+      resourceType: SAGE_AUDIT_RESOURCES.EXPORT_APPROVAL,
+      safePayload: { exportRequestId: req.id },
+    },
+  })
+  if (!decided) conflict('export request is no longer pending a decision')
+  await dispatchOutboxEvent(deps, {
+    eventId,
+    actorId: ctx.actor.actorId,
+    orgId: ws.orgId,
+    action: SAGE_AUDIT_ACTIONS.EXPORT_DENIED,
+    resource: SAGE_AUDIT_RESOURCES.EXPORT_APPROVAL,
+    resourceId: decided.approval.id,
+    payload: { exportRequestId: req.id },
+    at: ts,
+  })
+  return decided.approval
 }
+
+/**
+ * Generate the single immutable package for an approved request. The current
+ * scope is recomputed and compared with the approved scope hash: any drift
+ * (changed/deleted/newly-excluded resource, raised authorization) blocks
+ * generation with a CONFLICT and emits no package-generated event.
+ */
+export async function generateSageExportPackage(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; exportRequestId: string },
+): Promise<SageExportPackage> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.EXPORT_PACKAGE_GENERATE,
+  })
+  const req = await deps.repo.getExportRequest(input.exportRequestId, ws.id, ws.orgId)
+  if (!req) notFound('export request')
+  if (req.status !== 'approved') conflict('only an approved export request can generate a package')
+
+  const approvals = await deps.repo.listExportApprovals(req.id, ws.id, ws.orgId)
+  const approval = approvals.find((a) => a.decision === 'approved')
+  if (!approval || !approval.approvedScopeHash) conflict('the approved scope hash is missing')
+
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const stored = parseStoredScope(req)
+  const recomputed = await recomputeExportScope(deps, ws, access, stored)
+  if (recomputed.status === 'inaccessible') {
+    forbidden('the generator cannot access every resource in the approved scope')
+  }
+  if (recomputed.status === 'drift' || recomputed.hash !== approval.approvedScopeHash) {
+    conflict('the approved scope changed; the package cannot be generated')
+  }
+
+  // Build the bytes + hashes ONCE, then commit those exact bytes and hashes.
+  const artifact = buildSageExportPackage({
+    scope: recomputed.scope,
+    workspaceId: ws.id,
+    exportRequestId: req.id,
+    approvedScopeHash: approval.approvedScopeHash,
+    resources: recomputed.resources,
+  })
+  const storageReference = sageExportPackageStorageReference({
+    orgId: ws.orgId,
+    workspaceId: ws.id,
+    exportRequestId: req.id,
+    contentHash: artifact.contentHash,
+  })
+  const ts = contextNow(ctx)
+  const eventId = exportAuditEventId('export_package_generated', req.id, artifact.contentHash)
+  const safePayload = {
+    exportRequestId: req.id,
+    packageType: req.packageType,
+    manifestHash: artifact.manifestHash,
+    contentHash: artifact.contentHash,
+    itemCount: artifact.itemCount,
+    excludedCount: artifact.excludedCount,
+    scopeHash: approval.approvedScopeHash,
+    policyVersion: recomputed.scope.policyVersion,
+  }
+
+  // ONE atomic operation: object bytes + package metadata + durable audit intent.
+  const committed = await deps.repo.commitExportPackage({
+    package: {
+      orgId: ws.orgId,
+      workspaceId: ws.id,
+      exportRequestId: req.id,
+      status: 'generated',
+      packageType: req.packageType,
+      manifestJson: artifact.manifestJson,
+      manifestHash: artifact.manifestHash,
+      contentHash: artifact.contentHash,
+      storageReference,
+      mediaType: artifact.mediaType,
+      sizeBytes: artifact.contentBytes.byteLength,
+      policyVersion: recomputed.scope.policyVersion,
+      itemCount: artifact.itemCount,
+      excludedCount: artifact.excludedCount,
+      generatedBy: ctx.actor.actorId,
+      generatedAt: ts,
+      createdAt: ts,
+    },
+    object: {
+      storageReference,
+      mediaType: artifact.mediaType,
+      bytes: artifact.contentBytes,
+      contentHash: artifact.contentHash,
+      sizeBytes: artifact.contentBytes.byteLength,
+    },
+    auditEvent: {
+      eventId,
+      actorId: ctx.actor.actorId,
+      action: SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_GENERATED,
+      resourceType: SAGE_AUDIT_RESOURCES.EXPORT_PACKAGE,
+      safePayload,
+    },
+  })
+
+  // Dispatch the durable audit intent only for a freshly-committed package.
+  if (committed.created) {
+    await dispatchOutboxEvent(deps, {
+      eventId,
+      actorId: ctx.actor.actorId,
+      orgId: ws.orgId,
+      action: SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_GENERATED,
+      resource: SAGE_AUDIT_RESOURCES.EXPORT_PACKAGE,
+      resourceId: committed.package.id,
+      payload: safePayload,
+      at: ts,
+    })
+    return committed.package
+  }
+
+  // Idempotent replay: a package already exists for this request. It is only a
+  // safe replay if the just-recomputed, byte-identical artifact matches the
+  // stored package (same content hash AND policy version). A divergence means
+  // the world changed under an already-finalized package — fail CLOSED rather
+  // than silently returning a package that no longer reflects the current scope.
+  if (
+    committed.package.contentHash !== artifact.contentHash ||
+    committed.package.policyVersion !== recomputed.scope.policyVersion
+  ) {
+    conflict('an incompatible package already exists for this export request')
+  }
+  return committed.package
+}
+
+// ─── Export read services (tenant-scoped; membership + active role) ──────────
+
+export async function listSageExportRequests(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string },
+): Promise<SageExportRequest[]> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  return deps.repo.listExportRequests(ws.id, ws.orgId)
+}
+
+export async function getSageExportRequest(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; exportRequestId: string },
+): Promise<SageExportRequest> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const req = await deps.repo.getExportRequest(input.exportRequestId, ws.id, ws.orgId)
+  if (!req) notFound('export request')
+  return req
+}
+
+export async function listSageExportApprovals(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; exportRequestId: string },
+): Promise<SageExportApproval[]> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  return deps.repo.listExportApprovals(input.exportRequestId, ws.id, ws.orgId)
+}
+
+export async function listSageExportPackages(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string },
+): Promise<SageExportPackage[]> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  return deps.repo.listExportPackages(ws.id, ws.orgId)
+}
+
+export async function getSageExportPackage(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; packageId: string },
+): Promise<SageExportPackage> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const pkg = await deps.repo.getExportPackage(input.packageId, ws.id, ws.orgId)
+  if (!pkg) notFound('export package')
+  return pkg
+}
+
+/**
+ * Retrieve the private package bytes for authenticated INTERNAL access. Requires
+ * either package-generation authority or being the request's original requester
+ * (rechecked against current membership + roles). No public URL is ever emitted.
+ *
+ * INTEGRITY: the stored bytes are re-hashed (SHA-256) and the embedded manifest
+ * hash is recomputed, then compared to the immutable committed package hashes.
+ * A mismatch returns a typed INTEGRITY_ERROR, streams NO bytes, records NO
+ * access-authorized event, and durably records an access-denied event.
+ *
+ * AUDIT DURABILITY: both the access-authorized and access-denied decisions are
+ * persisted to the durable outbox BEFORE any bytes are returned (persist-before-
+ * stream), then dispatched at-least-once with a stable event_id.
+ */
+export async function getSageExportPackageContent(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: { workspaceId: string; packageId: string },
+): Promise<{ package: SageExportPackage; mediaType: string; bytes: Uint8Array }> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const pkg = await deps.repo.getExportPackage(input.packageId, ws.id, ws.orgId)
+  if (!pkg) notFound('export package')
+
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const isGenerator = resolveSagePermission(access, SAGE_PERMISSIONS.EXPORT_PACKAGE_GENERATE)
+  let isRequester = false
+  if (!isGenerator) {
+    const req = await deps.repo.getExportRequest(pkg.exportRequestId, ws.id, ws.orgId)
+    isRequester = Boolean(req && req.requestedBy === ctx.actor.actorId)
+  }
+  if (!isGenerator && !isRequester) {
+    forbidden('internal package access requires export authority or original ownership')
+  }
+
+  const object = await deps.repo.getExportPackageObject(pkg.storageReference)
+  if (!object) {
+    // The package row points at absent bytes — a broken/tampered state.
+    await emitDurableAccessEvent(deps, ctx, SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_ACCESS_DENIED, pkg.id, ws.id, {
+      exportRequestId: pkg.exportRequestId,
+      reason: 'object_missing',
+    })
+    integrityError('the package object is missing')
+  }
+
+  // The stored object's own recorded hash must match the package metadata, and
+  // the ACTUAL bytes must recompute to the same content + manifest hashes.
+  if (object.contentHash !== pkg.contentHash) {
+    await emitDurableAccessEvent(deps, ctx, SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_ACCESS_DENIED, pkg.id, ws.id, {
+      exportRequestId: pkg.exportRequestId,
+      reason: 'object_hash_mismatch',
+    })
+    integrityError('the stored object hash does not match the package')
+  }
+  const verified = verifySageExportPackageBytes(object.bytes, {
+    contentHash: pkg.contentHash,
+    manifestHash: pkg.manifestHash,
+  })
+  if (!verified.ok) {
+    await emitDurableAccessEvent(deps, ctx, SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_ACCESS_DENIED, pkg.id, ws.id, {
+      exportRequestId: pkg.exportRequestId,
+      reason: `integrity_${verified.reason}`,
+    })
+    integrityError('the stored package failed integrity verification')
+  }
+
+  // Persist-before-stream: durably record the authorized access BEFORE returning
+  // any bytes, so a crash mid-stream never yields un-audited access.
+  await emitDurableAccessEvent(deps, ctx, SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_ACCESS_AUTHORIZED, pkg.id, ws.id, {
+    exportRequestId: pkg.exportRequestId,
+    contentHash: pkg.contentHash,
+  })
+  return { package: pkg, mediaType: object.mediaType, bytes: object.bytes }
+}
+
 
 // ─── Workspace summary (counts/status only; no scores/ranks/certification) ───
 

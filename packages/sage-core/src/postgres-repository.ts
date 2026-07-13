@@ -18,12 +18,16 @@ import type { SageRepository } from './repository'
 import type { SageSqlClient } from './sql-client'
 import type {
   SageAuthorizationLevel,
+  SageAuditOutboxEvent,
+  SageAuditOutboxIntent,
   SageBoundaryFlag,
   SageDecisionRecord,
   SageEvidenceAuthorization,
   SageEvidenceItem,
   SageEvidenceSource,
   SageExportApproval,
+  SageExportPackage,
+  SageExportPackageObject,
   SageExportRequest,
   SageReviewNote,
   SageRoleAssignment,
@@ -38,7 +42,9 @@ import {
   mapEvidenceItem,
   mapEvidenceSource,
   mapExportApproval,
+  mapExportPackage,
   mapExportRequest,
+  mapAuditOutbox,
   mapReviewNote,
   mapRoleAssignment,
   mapWorkspace,
@@ -49,7 +55,9 @@ import {
   type SageEvidenceItemRow,
   type SageEvidenceSourceRow,
   type SageExportApprovalRow,
+  type SageExportPackageRow,
   type SageExportRequestRow,
+  type SageAuditOutboxRow,
   type SageReviewNoteRow,
   type SageRoleAssignmentRow,
   type SageWorkspaceMemberRow,
@@ -543,6 +551,19 @@ export class PostgresSageRepository implements SageRepository {
     return mapReviewNote(rows[0])
   }
 
+  async getReviewNote(
+    reviewNoteId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageReviewNote | undefined> {
+    const { rows } = await this.sql.query<SageReviewNoteRow>(
+      `select * from sage_review_note where id = $1 and workspace_id = $2 and org_id = $3`,
+      [reviewNoteId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapReviewNote(row) : undefined
+  }
+
   async listReviewNotes(
     workspaceId: string,
     orgId: string,
@@ -628,14 +649,21 @@ export class PostgresSageRepository implements SageRepository {
   ): Promise<SageExportRequest> {
     const { rows } = await this.sql.query<SageExportRequestRow>(
       `insert into sage_export_request
-         (workspace_id, org_id, requested_by, scope, status, created_at)
-       values ($1, $2, $3, $4, $5, $6)
+         (workspace_id, org_id, requested_by, scope, purpose, package_type,
+          requested_scope_json, requested_scope_hash, policy_version,
+          status, created_at, updated_at)
+       values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $11)
        returning *`,
       [
         input.workspaceId,
         input.orgId,
         input.requestedBy,
         input.scope ?? null,
+        input.purpose ?? null,
+        input.packageType,
+        input.requestedScopeJson ?? null,
+        input.requestedScopeHash ?? null,
+        input.policyVersion ?? null,
         input.status,
         input.createdAt,
       ],
@@ -643,44 +671,385 @@ export class PostgresSageRepository implements SageRepository {
     return mapExportRequest(rows[0])
   }
 
-  async getExportRequest(exportRequestId: string): Promise<SageExportRequest | undefined> {
+  async getExportRequest(
+    exportRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportRequest | undefined> {
     const { rows } = await this.sql.query<SageExportRequestRow>(
-      `select * from sage_export_request where id = $1`,
-      [exportRequestId],
+      `select * from sage_export_request where id = $1 and workspace_id = $2 and org_id = $3`,
+      [exportRequestId, workspaceId, orgId],
     )
     const row = firstOrUndefined(rows)
     return row ? mapExportRequest(row) : undefined
   }
 
-  async setExportRequestStatus(
+  async listExportRequests(workspaceId: string, orgId: string): Promise<SageExportRequest[]> {
+    const { rows } = await this.sql.query<SageExportRequestRow>(
+      `select * from sage_export_request
+       where workspace_id = $1 and org_id = $2
+       order by created_at desc, id desc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapExportRequest)
+  }
+
+  async listExportApprovals(
     exportRequestId: string,
-    status: SageExportRequest['status'],
-  ): Promise<void> {
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportApproval[]> {
+    // Tenant-fenced through a join on the parent request's workspace/org.
+    const { rows } = await this.sql.query<SageExportApprovalRow>(
+      `select a.* from sage_export_approval a
+         join sage_export_request r on r.id = a.export_request_id
+       where a.export_request_id = $1 and r.workspace_id = $2 and a.org_id = $3
+       order by a.decision_at desc, a.id desc`,
+      [exportRequestId, workspaceId, orgId],
+    )
+    return rows.map(mapExportApproval)
+  }
+
+  async decideExportRequest(input: {
+    exportRequestId: string
+    workspaceId: string
+    orgId: string
+    decision: 'approved' | 'denied'
+    updatedAt: string
+    approval: Omit<SageExportApproval, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<{ request: SageExportRequest; approval: SageExportApproval } | undefined> {
+    // Atomic compare-and-set in ONE statement: the approval INSERT and the
+    // durable audit-outbox INSERT only run when the guarded UPDATE flips a
+    // 'requested' row. Approval + status + audit intent commit together — an
+    // approved status cannot exist without an approval and durable audit intent.
+    const { rows } = await this.sql.query<SageExportApprovalRow>(
+      `with decided as (
+         update sage_export_request
+           set status = $4, updated_at = $5
+         where id = $1 and workspace_id = $2 and org_id = $3 and status = 'requested'
+         returning id
+       ),
+       appr as (
+         insert into sage_export_approval
+           (export_request_id, org_id, export_authority_level, approver_id,
+            decision, decision_at, reason, approved_scope_hash)
+         select $1, $3, $6, $7, $8, $9, $10, $11 from decided
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $12, $3, $2, $13, $14, $15, appr.id, $16::jsonb, 'pending', 0, $5 from appr
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from appr`,
+      [
+        input.exportRequestId,
+        input.workspaceId,
+        input.orgId,
+        input.decision,
+        input.updatedAt,
+        input.approval.exportAuthorityLevel,
+        input.approval.approverId,
+        input.approval.decision,
+        input.approval.decisionAt,
+        input.approval.reason ?? null,
+        input.approval.approvedScopeHash ?? null,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+      ],
+    )
+    const approvalRow = firstOrUndefined(rows)
+    if (!approvalRow) return undefined
+    const request = await this.getExportRequest(
+      input.exportRequestId,
+      input.workspaceId,
+      input.orgId,
+    )
+    if (!request) return undefined
+    return { request, approval: mapExportApproval(approvalRow) }
+  }
+
+  async commitExportPackage(input: {
+    package: Omit<SageExportPackage, 'id'>
+    object: SageExportPackageObject
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<{ package: SageExportPackage; created: boolean }> {
+    // ONE atomic statement, claim-gated so a loser produces NO side effects:
+    //   • the object bytes are inserted ONLY when no package yet exists for this
+    //     request (winning the generation claim), never merely because they share
+    //     the statement;
+    //   • the package row is inserted ONLY when a matching object is present
+    //     (never points at absent bytes);
+    //   • the audit-outbox intent is enqueued ONLY when the package row is
+    //     inserted (never drops or duplicates evidence).
+    // A request that loses the `export_request_id` claim inserts nothing.
+    const contentText = new TextDecoder().decode(input.object.bytes)
+    const { rows } = await this.sql.query<SageExportPackageRow>(
+      `with existing_pkg as (
+         select 1 from sage_export_package where export_request_id = $8
+       ),
+       obj as (
+         insert into sage_export_package_object
+           (storage_reference, media_type, content_hash, content_text, size_bytes)
+         select $1, $2, $3, $4, $5
+         where not exists (select 1 from existing_pkg)
+         on conflict (storage_reference) do nothing
+         returning storage_reference
+       ),
+       object_row as (
+         select o.storage_reference
+         from sage_export_package_object o
+         where o.storage_reference = $1
+           and o.content_hash = $3
+           and o.size_bytes = $5
+       ),
+       pkg as (
+         insert into sage_export_package
+           (org_id, workspace_id, export_request_id, status, package_type,
+            manifest_json, manifest_hash, content_hash, storage_reference,
+            media_type, size_bytes, policy_version, item_count, excluded_count,
+            generated_by, generated_at, created_at)
+         select $6, $7, $8, 'generated', $9, $10::jsonb, $11, $3, $1, $2, $5,
+                $12, $13, $14, $15, $16, $16
+         from object_row
+         on conflict (export_request_id) do nothing
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $17, $6, $7, $18, $19, $20, pkg.id, $21::jsonb, 'pending', 0, $16 from pkg
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from pkg`,
+      [
+        input.object.storageReference,
+        input.object.mediaType,
+        input.object.contentHash,
+        contentText,
+        input.object.sizeBytes,
+        input.package.orgId,
+        input.package.workspaceId,
+        input.package.exportRequestId,
+        input.package.packageType,
+        input.package.manifestJson,
+        input.package.manifestHash,
+        input.package.policyVersion,
+        input.package.itemCount,
+        input.package.excludedCount,
+        input.package.generatedBy,
+        input.package.generatedAt,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (row) return { package: mapExportPackage(row), created: true }
+    // Conflict: a package already exists for this request — return it.
+    const existing = await this.getExportPackageByRequest(
+      input.package.exportRequestId,
+      input.package.workspaceId,
+      input.package.orgId,
+    )
+    if (!existing) conflict('export package generation conflict')
+    return { package: existing, created: false }
+  }
+
+  async getExportPackageObject(
+    storageReference: string,
+  ): Promise<SageExportPackageObject | undefined> {
+    const { rows } = await this.sql.query<{
+      storage_reference: string
+      media_type: string
+      content_hash: string
+      content_text: string
+      size_bytes: unknown
+    }>(
+      `select storage_reference, media_type, content_hash, content_text, size_bytes
+       from sage_export_package_object where storage_reference = $1`,
+      [storageReference],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) return undefined
+    return {
+      storageReference: row.storage_reference,
+      mediaType: row.media_type,
+      contentHash: row.content_hash,
+      bytes: new TextEncoder().encode(row.content_text),
+      sizeBytes: Number(row.size_bytes ?? 0),
+    }
+  }
+
+  async enqueueAuditOutbox(input: {
+    intent: SageAuditOutboxIntent
+    orgId: string
+    workspaceId: string
+    resourceId: string
+    createdAt: string
+  }): Promise<void> {
     await this.sql.query(
-      `update sage_export_request set status = $2 where id = $1`,
-      [exportRequestId, status],
+      `insert into sage_audit_outbox
+         (event_id, org_id, workspace_id, actor_id, action, resource_type,
+          resource_id, safe_payload_json, status, attempt_count, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, 'pending', 0, $9)
+       on conflict (event_id) do nothing`,
+      [
+        input.intent.eventId,
+        input.orgId,
+        input.workspaceId,
+        input.intent.actorId,
+        input.intent.action,
+        input.intent.resourceType,
+        input.resourceId,
+        JSON.stringify(input.intent.safePayload),
+        input.createdAt,
+      ],
     )
   }
 
-  async createExportApproval(
-    input: Omit<SageExportApproval, 'id'>,
-  ): Promise<SageExportApproval> {
-    const { rows } = await this.sql.query<SageExportApprovalRow>(
-      `insert into sage_export_approval
-         (export_request_id, org_id, export_authority_level, approver_id, decision, decision_at, reason)
-       values ($1, $2, $3, $4, $5, $6, $7)
-       returning *`,
-      [
-        input.exportRequestId,
-        input.orgId,
-        input.exportAuthorityLevel,
-        input.approverId,
-        input.decision,
-        input.decisionAt,
-        input.reason ?? null,
-      ],
+  async listPendingAuditOutbox(limit: number): Promise<SageAuditOutboxEvent[]> {
+    const { rows } = await this.sql.query<SageAuditOutboxRow>(
+      `select * from sage_audit_outbox
+       where status = 'pending'
+       order by created_at asc, id asc
+       limit $1`,
+      [limit],
     )
-    return mapExportApproval(rows[0])
+    return rows.map(mapAuditOutbox)
+  }
+
+  async claimPendingAuditOutbox(input: {
+    owner: string
+    leaseExpiresAt: string
+    limit: number
+    now: string
+  }): Promise<SageAuditOutboxEvent[]> {
+    // Atomic leased claim: take pending events (or events whose lease has
+    // expired) with FOR UPDATE SKIP LOCKED so concurrent dispatchers never grab
+    // the same row. Delivery is at-least-once with a stable event_id.
+    const { rows } = await this.sql.query<SageAuditOutboxRow>(
+      `update sage_audit_outbox o
+         set status = 'dispatching',
+             dispatch_owner = $1,
+             lease_expires_at = $2,
+             attempt_count = o.attempt_count + 1
+       where o.id in (
+         select id from sage_audit_outbox
+          where status = 'pending'
+             or (status = 'dispatching' and lease_expires_at < $3)
+          order by created_at asc, id asc
+          for update skip locked
+          limit $4
+       )
+       returning *`,
+      [input.owner, input.leaseExpiresAt, input.now, input.limit],
+    )
+    return rows.map(mapAuditOutbox)
+  }
+
+  async claimAuditOutboxEvent(input: {
+    eventId: string
+    owner: string
+    leaseExpiresAt: string
+    now: string
+  }): Promise<SageAuditOutboxEvent | undefined> {
+    const { rows } = await this.sql.query<SageAuditOutboxRow>(
+      `update sage_audit_outbox o
+         set status = 'dispatching',
+             dispatch_owner = $2,
+             lease_expires_at = $3,
+             attempt_count = o.attempt_count + 1
+       where o.id in (
+         select id from sage_audit_outbox
+          where event_id = $1
+            and (status = 'pending'
+                 or (status = 'dispatching' and lease_expires_at < $4))
+          for update skip locked
+          limit 1
+       )
+       returning *`,
+      [input.eventId, input.owner, input.leaseExpiresAt, input.now],
+    )
+    return firstOrUndefined(rows.map(mapAuditOutbox))
+  }
+
+  async markAuditOutboxDispatched(
+    eventId: string,
+    owner: string,
+    dispatchedAt: string,
+  ): Promise<boolean> {
+    // Fenced: only the current lease owner may finalize the claim.
+    const { rows } = await this.sql.query<{ event_id: string }>(
+      `update sage_audit_outbox
+         set status = 'dispatched', dispatched_at = $3,
+             dispatch_owner = null, lease_expires_at = null, last_error_code = null
+       where event_id = $1 and dispatch_owner = $2 and status = 'dispatching'
+       returning event_id`,
+      [eventId, owner, dispatchedAt],
+    )
+    return rows.length > 0
+  }
+
+  async releaseAuditOutbox(eventId: string, owner: string, errorCode: string): Promise<boolean> {
+    // Fenced: only the current lease owner may release the claim back to pending.
+    const { rows } = await this.sql.query<{ event_id: string }>(
+      `update sage_audit_outbox
+         set status = 'pending', dispatch_owner = null,
+             lease_expires_at = null, last_error_code = $3
+       where event_id = $1 and dispatch_owner = $2 and status = 'dispatching'
+       returning event_id`,
+      [eventId, owner, errorCode],
+    )
+    return rows.length > 0
+  }
+
+  async getExportPackageByRequest(
+    exportRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportPackage | undefined> {
+    const { rows } = await this.sql.query<SageExportPackageRow>(
+      `select * from sage_export_package
+       where export_request_id = $1 and workspace_id = $2 and org_id = $3`,
+      [exportRequestId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapExportPackage(row) : undefined
+  }
+
+  async listExportPackages(workspaceId: string, orgId: string): Promise<SageExportPackage[]> {
+    const { rows } = await this.sql.query<SageExportPackageRow>(
+      `select * from sage_export_package
+       where workspace_id = $1 and org_id = $2
+       order by generated_at desc, id desc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapExportPackage)
+  }
+
+  async getExportPackage(
+    packageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportPackage | undefined> {
+    const { rows } = await this.sql.query<SageExportPackageRow>(
+      `select * from sage_export_package where id = $1 and workspace_id = $2 and org_id = $3`,
+      [packageId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapExportPackage(row) : undefined
   }
 
   // ─── Read models for the workspace summary (counts only) ─────────────────────
