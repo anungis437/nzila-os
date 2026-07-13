@@ -6,7 +6,7 @@
     {
       "path": "apps/platform-admin/app/api/admin/set-active-org/route.ts",
       "owner": "platform-team",
-      "justification": "Session-bootstrap endpoint: sets the active-org cookie based on (userId, orgId). The effect is deterministic and naturally idempotent — replays produce identical cookie state with no DB writes. Idempotency-Key would add friction to a UI selection flow without changing dedup semantics.",
+      "justification": "Session-bootstrap endpoint: sets the active-org cookie based on (userId, orgId). The effect is deterministic and naturally idempotent \u2014 replays produce identical cookie state with no DB writes. Idempotency-Key would add friction to a UI selection flow without changing dedup semantics.",
       "expiresOn": "2026-09-01"
     },
     {
@@ -30,13 +30,13 @@
     {
       "path": "apps/weekone/app/api/analytics/route.ts",
       "owner": "platform-core",
-      "justification": "Public marketing analytics event sink (anonymous page events). Server logs the event and returns 200 — no DB writes, no side effects requiring per-request dedup. Re-evaluate when persistence is added.",
+      "justification": "Public marketing analytics event sink (anonymous page events). Server logs the event and returns 200 \u2014 no DB writes, no side effects requiring per-request dedup. Re-evaluate when persistence is added.",
       "expiresOn": "2026-07-22"
     },
     {
       "path": "apps/weekone/app/api/billing/checkout/route.ts",
       "owner": "platform-core",
-      "justification": "Public Stripe checkout initiation — Stripe-hosted session is itself idempotent via session_id. Caller-side retries are safe (Stripe deduplicates by session). Add Idempotency-Key once we move to direct PaymentIntents.",
+      "justification": "Public Stripe checkout initiation \u2014 Stripe-hosted session is itself idempotent via session_id. Caller-side retries are safe (Stripe deduplicates by session). Add Idempotency-Key once we move to direct PaymentIntents.",
       "expiresOn": "2026-07-22"
     },
     {
@@ -54,7 +54,7 @@
     {
       "path": "apps/weekone/app/api/newsletter/route.ts",
       "owner": "platform-core",
-      "justification": "Public marketing newsletter signup (lead capture). Server logs the event and returns 200 — no DB writes yet. Add Idempotency-Key when ESP integration persists subscribers.",
+      "justification": "Public marketing newsletter signup (lead capture). Server logs the event and returns 200 \u2014 no DB writes yet. Add Idempotency-Key when ESP integration persists subscribers.",
       "expiresOn": "2026-07-22"
     },
     {
@@ -66,25 +66,25 @@
     {
       "path": "apps/weekone/app/api/referrals/route.ts",
       "owner": "platform-core",
-      "justification": "Public referral lead capture (no persistence yet — returns generated UUID). Add Idempotency-Key when referrals are persisted with attribution.",
+      "justification": "Public referral lead capture (no persistence yet \u2014 returns generated UUID). Add Idempotency-Key when referrals are persisted with attribution.",
       "expiresOn": "2026-07-22"
     },
     {
       "path": "apps/weekone/app/api/templates/download/route.ts",
       "owner": "platform-core",
-      "justification": "Public template download lead capture. Server logs the event and returns a static download URL — no DB writes. Add Idempotency-Key when downloads are persisted with attribution.",
+      "justification": "Public template download lead capture. Server logs the event and returns a static download URL \u2014 no DB writes. Add Idempotency-Key when downloads are persisted with attribution.",
       "expiresOn": "2026-07-22"
     },
     {
       "path": "apps/weekone/app/api/waitlist/route.ts",
       "owner": "platform-core",
-      "justification": "Public marketing waitlist signup (lead capture). Server logs the event and returns 200 — no DB writes yet. Add Idempotency-Key when waitlist persistence + ESP integration is enabled.",
+      "justification": "Public marketing waitlist signup (lead capture). Server logs the event and returns 200 \u2014 no DB writes yet. Add Idempotency-Key when waitlist persistence + ESP integration is enabled.",
       "expiresOn": "2026-07-22"
     },
     {
       "path": "apps/nzila-hq/app/api/internal/billing/sync/route.ts",
       "owner": "platform-core",
-      "justification": "Internal system-to-system billing sync (Stripe + QBO). Full sync overwrites — idempotent by design. Bearer-token guarded via NZILA_HQ_SNAPSHOT_TOKEN. Idempotency key to be added before PILOT promotion.",
+      "justification": "Internal system-to-system billing sync (Stripe + QBO). Full sync overwrites \u2014 idempotent by design. Bearer-token guarded via NZILA_HQ_SNAPSHOT_TOKEN. Idempotency key to be added before PILOT promotion.",
       "expiresOn": "2026-10-01"
     },
     {
@@ -132,19 +132,19 @@
     {
       "path": "apps/trustcore/app/api/internal/notify/route.ts",
       "owner": "trustcore-team",
-      "justification": "TrustCore is INCUBATING (founder-internal). Internal notification dispatch — notify-on-retry is low risk. Idempotency-Key to be added before PILOT promotion.",
+      "justification": "TrustCore is INCUBATING (founder-internal). Internal notification dispatch \u2014 notify-on-retry is low risk. Idempotency-Key to be added before PILOT promotion.",
       "expiresOn": "2026-12-31"
     },
     {
       "path": "apps/trustcore/app/api/leads/convert/route.ts",
       "owner": "trustcore-team",
-      "justification": "TrustCore is INCUBATING (founder-internal). Lead conversion is guarded by org_admin role — retries are safe (upsert semantics). Idempotency-Key to be added before PILOT promotion.",
+      "justification": "TrustCore is INCUBATING (founder-internal). Lead conversion is guarded by org_admin role \u2014 retries are safe (upsert semantics). Idempotency-Key to be added before PILOT promotion.",
       "expiresOn": "2026-12-31"
     },
     {
       "path": "apps/trustcore/app/api/leads/route.ts",
       "owner": "trustcore-team",
-      "justification": "Public lead capture (pre-onboarding). Upsert by email is naturally idempotent — re-submitting same email is a no-op. Full Idempotency-Key enforcement to be added before PILOT promotion.",
+      "justification": "Public lead capture (pre-onboarding). Upsert by email is naturally idempotent \u2014 re-submitting same email is a no-op. Full Idempotency-Key enforcement to be added before PILOT promotion.",
       "expiresOn": "2026-12-31"
     },
     {
@@ -194,6 +194,24 @@
       "owner": "trustcore-team",
       "justification": "TrustCore TrustOps is INCUBATING (founder-internal). Stage transitions are guarded by org_admin role. Idempotency-Key to be added before PILOT promotion.",
       "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/platform-admin/app/api/delivery/claim/route.ts",
+      "owner": "platform-team",
+      "justification": "SAGE Phase 8A recipient claim: CAS state transition (issued->active), not a repeated mutation. Idempotency is enforced by the unique invitation_token_hash constraint in the DB, not by an Idempotency-Key header. One-time token semantics make header-based dedup inapplicable.",
+      "expiresOn": "2027-07-01"
+    },
+    {
+      "path": "apps/platform-admin/app/api/delivery/[grantId]/download/route.ts",
+      "owner": "platform-team",
+      "justification": "SAGE Phase 8A recipient download: access_count is atomically incremented per-grant; the budget ceiling is the idempotency control. No DB-level dedup key would change the download semantics; the grant's max_accesses field is the governing constraint.",
+      "expiresOn": "2027-07-01"
+    },
+    {
+      "path": "apps/platform-admin/app/api/delivery/[grantId]/acknowledge/route.ts",
+      "owner": "platform-team",
+      "justification": "SAGE Phase 8A recipient acknowledgment: idempotent by unique event_id in sage_delivery_receipt (on conflict do nothing). Idempotency-Key header pattern does not apply to recipient-session operations.",
+      "expiresOn": "2027-07-01"
     }
   ]
 }

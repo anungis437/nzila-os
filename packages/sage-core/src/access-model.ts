@@ -61,6 +61,19 @@ const ROLE_PERMISSIONS: Record<SageApplicationRole, readonly SagePermission[]> =
     SAGE_PERMISSIONS.WORKSPACE_READ,
     SAGE_PERMISSIONS.EXPORT_APPROVE,
     SAGE_PERMISSIONS.EXPORT_PACKAGE_GENERATE,
+    // May request secure external delivery of a generated package (never approve
+    // its own request — enforced per-instance, not by role).
+    SAGE_PERMISSIONS.EXPORT_DELIVERY_REQUEST,
+    SAGE_PERMISSIONS.EXPORT_DELIVERY_READ,
+  ],
+  // Independent delivery authority: approves/denies the exact package↔recipient
+  // pairing and may revoke an issued grant. Separate from package generation and
+  // from generic administration; never confers evidence or export authority.
+  export_delivery_approver: [
+    SAGE_PERMISSIONS.WORKSPACE_READ,
+    SAGE_PERMISSIONS.EXPORT_DELIVERY_APPROVE,
+    SAGE_PERMISSIONS.EXPORT_DELIVERY_REVOKE,
+    SAGE_PERMISSIONS.EXPORT_DELIVERY_READ,
   ],
 }
 

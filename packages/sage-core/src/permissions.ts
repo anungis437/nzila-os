@@ -20,6 +20,10 @@ export const SAGE_PERMISSIONS = {
   EXPORT_REQUEST: 'sage.export.request',
   EXPORT_APPROVE: 'sage.export.approve',
   EXPORT_PACKAGE_GENERATE: 'sage.export.package.generate',
+  EXPORT_DELIVERY_REQUEST: 'sage.export.delivery.request',
+  EXPORT_DELIVERY_APPROVE: 'sage.export.delivery.approve',
+  EXPORT_DELIVERY_REVOKE: 'sage.export.delivery.revoke',
+  EXPORT_DELIVERY_READ: 'sage.export.delivery.read',
 } as const
 
 export type SagePermission = (typeof SAGE_PERMISSIONS)[keyof typeof SAGE_PERMISSIONS]

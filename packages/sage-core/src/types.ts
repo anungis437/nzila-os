@@ -50,6 +50,7 @@ export const SAGE_APPLICATION_ROLES = [
   'read_only_observer',
   'external_reviewer',
   'export_approver',
+  'export_delivery_approver',
 ] as const
 export type SageApplicationRole = (typeof SAGE_APPLICATION_ROLES)[number]
 

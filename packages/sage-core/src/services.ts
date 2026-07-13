@@ -84,6 +84,7 @@ import {
 } from './invariants'
 import type { SageRepository } from './repository'
 import type { SageAuditSink } from './audit-sink'
+import type { SageDeliveryNotifier, SageDeliveryRateLimiter } from './delivery-notifier'
 import { contextNow, type SageServiceContext } from './service-context'
 import { conflict, forbidden, integrityError, invalidInput, notFound, orgBoundary, permissionDenied } from './service-errors'
 import { randomUUID } from 'node:crypto'
@@ -91,6 +92,10 @@ import { randomUUID } from 'node:crypto'
 export type SageServiceDeps = {
   repo: SageRepository
   audit: SageAuditSink
+  /** Phase 8A: recipient invitation notifier. Issuance fails closed without it. */
+  deliveryNotifier?: SageDeliveryNotifier
+  /** Phase 8A: optional recipient claim/access rate limiter (edge also enforces). */
+  deliveryRateLimiter?: SageDeliveryRateLimiter
 }
 
 function requirePermission(ctx: SageServiceContext, permission: string): void {
@@ -219,7 +224,7 @@ const DEFAULT_OUTBOX_LEASE_MS = 30_000
  * dispatchPendingSageAuditOutbox — the committed change is never rolled back
  * because the external audit sink is temporarily unavailable.
  */
-async function dispatchOutboxEvent(
+export async function dispatchOutboxEvent(
   deps: SageServiceDeps,
   event: {
     eventId: string

@@ -82,6 +82,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/icra(?:\/|$)/,          // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated) [legacy alias]
       /\/api\/ocra(?:\/|$)/,          // OCRA — canonical alias of /api/icra (OCI↔OCRA convergence Phase 2)
       /\/api\/workbook(?:\/|$)/,      // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential, claim route enforces auth() at runtime, Stripe webhook signature-verified)
+      /\/api\/delivery(?:\/|$)/,      // SAGE Phase 8A recipient delivery — grant-scoped session-token flow; X-Delivery-Session verified server-side, never org-scope guard
       /\/_perf\//,                   // Web vitals beacon endpoint (anonymous sendBeacon, size-capped)
     ]
 

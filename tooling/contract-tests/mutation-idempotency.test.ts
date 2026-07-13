@@ -136,6 +136,11 @@ const EXEMPT_PATTERNS = [
   '**/api/health/**',
   // Cron endpoints are idempotent by definition (system-triggered)
   '**/api/cron/**',
+  // SAGE Phase 8A recipient delivery — grant-scoped session-token operations.
+  // Claim is a CAS state transition (one-time); download/acknowledge are bounded
+  // by the grant itself (not by an Idempotency-Key header pattern). Documented
+  // in governance/exceptions/mutation-idempotency.json.
+  '**/api/delivery/**',
 ]
 
 function isExempt(routeRelPath: string): boolean {

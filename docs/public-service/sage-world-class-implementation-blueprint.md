@@ -113,6 +113,9 @@ This is the final planning-only SAGE PR. The next PR must begin engineering impl
 > **Phase 7 started: controlled export requests, independent human approval, and immutable internal package
 > generation implemented; external delivery remains disabled.**
 
+> **Phase 8A started: verified external recipients, independently approved delivery grants, revocable grant-scoped
+> access, and durable delivery receipts implemented over immutable export packages.**
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:

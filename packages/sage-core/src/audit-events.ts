@@ -28,6 +28,18 @@ export const SAGE_AUDIT_ACTIONS = {
   EXPORT_PACKAGE_ACCESS_AUTHORIZED: 'sage.export.package_access_authorized',
   EXPORT_PACKAGE_ACCESSED: 'sage.export.package_accessed',
   EXPORT_PACKAGE_ACCESS_DENIED: 'sage.export.package_access_denied',
+  DELIVERY_RECIPIENT_CREATED: 'sage.delivery.recipient_created',
+  DELIVERY_REQUESTED: 'sage.delivery.requested',
+  DELIVERY_APPROVED: 'sage.delivery.approved',
+  DELIVERY_DENIED: 'sage.delivery.denied',
+  DELIVERY_INVITATION_ISSUED: 'sage.delivery.invitation_issued',
+  DELIVERY_INVITATION_CLAIMED: 'sage.delivery.invitation_claimed',
+  DELIVERY_ACCESS_AUTHORIZED: 'sage.delivery.access_authorized',
+  DELIVERY_ACCESS_DENIED: 'sage.delivery.access_denied',
+  DELIVERY_DOWNLOAD_AUTHORIZED: 'sage.delivery.download_authorized',
+  DELIVERY_RECIPIENT_ACKNOWLEDGED: 'sage.delivery.recipient_acknowledged',
+  DELIVERY_GRANT_REVOKED: 'sage.delivery.grant_revoked',
+  DELIVERY_GRANT_EXPIRED: 'sage.delivery.grant_expired',
 } as const
 
 export type SageAuditAction = (typeof SAGE_AUDIT_ACTIONS)[keyof typeof SAGE_AUDIT_ACTIONS]
@@ -48,6 +60,10 @@ export const SAGE_AUDIT_RESOURCES = {
   EXPORT_REQUEST: 'sage_export_request',
   EXPORT_APPROVAL: 'sage_export_approval',
   EXPORT_PACKAGE: 'sage_export_package',
+  DELIVERY_RECIPIENT: 'sage_delivery_recipient',
+  DELIVERY_REQUEST: 'sage_delivery_request',
+  DELIVERY_APPROVAL: 'sage_delivery_approval',
+  DELIVERY_GRANT: 'sage_delivery_grant',
 } as const
 
 export type SageAuditResource = (typeof SAGE_AUDIT_RESOURCES)[keyof typeof SAGE_AUDIT_RESOURCES]
