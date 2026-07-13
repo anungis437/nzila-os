@@ -54,6 +54,14 @@ const ROLE_PERMISSIONS: Record<SageApplicationRole, readonly SagePermission[]> =
   accessibility_language_reviewer: [SAGE_PERMISSIONS.WORKSPACE_READ, SAGE_PERMISSIONS.REVIEW_NOTE],
   read_only_observer: [SAGE_PERMISSIONS.WORKSPACE_READ],
   external_reviewer: [], // disabled by default; no permissions without explicit, scoped grant
+  // Independent export authority: an export_approver may review/approve or deny
+  // another user's export request and generate the immutable package. It is a
+  // dedicated SAGE role — generic platform/org administration never confers it.
+  export_approver: [
+    SAGE_PERMISSIONS.WORKSPACE_READ,
+    SAGE_PERMISSIONS.EXPORT_APPROVE,
+    SAGE_PERMISSIONS.EXPORT_PACKAGE_GENERATE,
+  ],
 }
 
 export type SageAccessContext = {

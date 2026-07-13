@@ -15,6 +15,9 @@ const CODE_TO_STATUS: Record<string, number> = {
   INVALID_INPUT: 400,
   INVARIANT_VIOLATION: 422,
   CONFLICT: 409,
+  // A stored artifact failed cryptographic integrity verification. Server-side
+  // data problem; return 500 without disclosing storage details.
+  INTEGRITY_ERROR: 500,
 }
 
 export function sageErrorResponse(error: unknown): NextResponse {

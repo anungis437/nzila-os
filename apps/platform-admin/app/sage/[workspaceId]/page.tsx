@@ -110,6 +110,12 @@ export default async function SageWorkspaceOverviewPage({
           >
             {t('governance.tab')} →
           </Link>
+          <Link
+            href={`/sage/${workspaceId}/exports`}
+            className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+          >
+            {t('exports.tab')} →
+          </Link>
         </div>
       </div>
 

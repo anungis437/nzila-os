@@ -110,6 +110,9 @@ This is the final planning-only SAGE PR. The next PR must begin engineering impl
 > named-human decision records implemented over the durable evidence lifecycle. Boundaries unchanged; still
 > not launched, available, or procurement-ready.
 
+> **Phase 7 started: controlled export requests, independent human approval, and immutable internal package
+> generation implemented; external delivery remains disabled.**
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:

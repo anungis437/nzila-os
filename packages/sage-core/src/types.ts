@@ -49,6 +49,7 @@ export const SAGE_APPLICATION_ROLES = [
   'accessibility_language_reviewer',
   'read_only_observer',
   'external_reviewer',
+  'export_approver',
 ] as const
 export type SageApplicationRole = (typeof SAGE_APPLICATION_ROLES)[number]
 
@@ -74,6 +75,55 @@ export type SageExportAuthorityLevel = (typeof SAGE_EXPORT_AUTHORITY_LEVELS)[num
 
 export const SAGE_EXPORT_STATUSES = ['requested', 'approved', 'denied', 'cancelled'] as const
 export type SageExportStatus = (typeof SAGE_EXPORT_STATUSES)[number]
+
+// ─── Phase 7 — controlled export packages ────────────────────────────────────
+
+/** The kinds of internal package a controlled export may produce. */
+export const SAGE_EXPORT_PACKAGE_TYPES = ['internal_review_bundle'] as const
+export type SageExportPackageType = (typeof SAGE_EXPORT_PACKAGE_TYPES)[number]
+
+/** A generated package is immutable and terminal in a single state. */
+export const SAGE_EXPORT_PACKAGE_STATUSES = ['generated'] as const
+export type SageExportPackageStatus = (typeof SAGE_EXPORT_PACKAGE_STATUSES)[number]
+
+/** Resource kinds that may be requested into an export scope. */
+export const SAGE_EXPORT_RESOURCE_TYPES = [
+  'evidence_item',
+  'boundary_flag',
+  'review_note',
+  'decision_record',
+] as const
+export type SageExportResourceType = (typeof SAGE_EXPORT_RESOURCE_TYPES)[number]
+
+/** Safe, narrative-free exclusion reason codes for manifest provenance. */
+export const SAGE_EXPORT_EXCLUSION_REASONS = [
+  'excluded_from_external_review',
+  'not_accessible',
+  'unresolved',
+] as const
+export type SageExportExclusionReason = (typeof SAGE_EXPORT_EXCLUSION_REASONS)[number]
+
+/** A single canonical, deterministically ordered entry in an export scope. */
+export type SageExportScopeItem = {
+  resourceType: SageExportResourceType
+  resourceId: string
+  contentHash: string
+  authorizationLevel: SageAuthorizationLevel
+  excludedFromExternalReview: boolean
+  included: boolean
+  exclusionReason?: SageExportExclusionReason | null
+  order: number
+}
+
+/** The canonical, hashable representation of an export request's scope. */
+export type SageExportScope = {
+  policyVersion: string
+  packageType: SageExportPackageType
+  items: SageExportScopeItem[]
+}
+
+export const SAGE_EXPORT_STATUSES_TERMINAL = ['approved', 'denied', 'cancelled'] as const
+
 
 export const SAGE_EVIDENCE_LIFECYCLE_STATES = [
   'proposed',
@@ -170,8 +220,14 @@ export type SageExportRequest = {
   orgId: string
   requestedBy: string
   scope?: string | null
+  purpose?: string | null
+  packageType: SageExportPackageType
+  requestedScopeJson?: string | null
+  requestedScopeHash?: string | null
+  policyVersion?: string | null
   status: SageExportStatus
   createdAt: string
+  updatedAt?: string | null
 }
 
 export type SageExportApproval = {
@@ -183,6 +239,81 @@ export type SageExportApproval = {
   decision: string
   decisionAt: string
   reason?: string | null
+  approvedScopeHash?: string | null
+}
+
+/** An immutable, generated internal export package. External delivery is disabled. */
+export type SageExportPackage = {
+  id: string
+  orgId: string
+  workspaceId: string
+  exportRequestId: string
+  status: SageExportPackageStatus
+  packageType: SageExportPackageType
+  manifestJson: string
+  manifestHash: string
+  contentHash: string
+  storageReference: string
+  mediaType: string
+  sizeBytes: number
+  policyVersion: string
+  itemCount: number
+  excludedCount: number
+  generatedBy: string
+  generatedAt: string
+  createdAt: string
+}
+
+/** Immutable private package bytes (content-addressed, insert-only). */
+export type SageExportPackageObject = {
+  storageReference: string
+  mediaType: string
+  contentHash: string
+  bytes: Uint8Array
+  sizeBytes: number
+}
+
+// ─── Durable audit outbox (Phase 7) ──────────────────────────────────────────
+
+export const SAGE_AUDIT_OUTBOX_STATUSES = ['pending', 'dispatching', 'dispatched', 'failed'] as const
+export type SageAuditOutboxStatus = (typeof SAGE_AUDIT_OUTBOX_STATUSES)[number]
+
+/**
+ * A durable audit event written IN THE SAME transaction as the material change
+ * it records, then dispatched to the audit sink after commit (retriable). Only
+ * safe identifiers/hashes are stored — never narrative, rationale, or bytes.
+ */
+export type SageAuditOutboxEvent = {
+  id: string
+  eventId: string
+  orgId: string
+  workspaceId: string
+  actorId: string
+  action: string
+  resourceType: string
+  resourceId: string
+  safePayloadJson: string
+  status: SageAuditOutboxStatus
+  attemptCount: number
+  createdAt: string
+  dispatchedAt?: string | null
+  lastErrorCode?: string | null
+  dispatchOwner?: string | null
+  leaseExpiresAt?: string | null
+}
+
+/**
+ * The intent to enqueue an audit event inside a domain transaction. The
+ * repository sets `resourceId` from the newly-committed row and persists the
+ * event as 'pending' for after-commit dispatch. `safePayload` must never carry
+ * narrative, rationale, evidence content, or credentials.
+ */
+export type SageAuditOutboxIntent = {
+  eventId: string
+  actorId: string
+  action: string
+  resourceType: string
+  safePayload: Record<string, unknown>
 }
 
 // ─── Evidence enums (mirror the migration) ───────────────────────────────────

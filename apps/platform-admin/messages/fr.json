@@ -62,6 +62,9 @@
     },
     "governance": {
       "tab": "Examen et décisions"
+    },
+    "exports": {
+      "tab": "Exportations contrôlées"
     }
   },
   "sageEvidence": {
@@ -110,7 +113,8 @@
       "excluded": "Exclu",
       "archived": "Archivé"
     },
-    "governanceTab": "Examen et décisions"
+    "governanceTab": "Examen et décisions",
+    "exportsTab": "Exportations contrôlées"
   },
   "sageGovernance": {
     "pageTitle": "Examen et décisions",
@@ -184,6 +188,72 @@
     "targetSourcePrefix": "Source :",
     "targetItemPrefix": "Élément :",
     "permissionDenied": "Vous n’avez pas la permission pour cette action.",
-    "unableToLoad": "Impossible de charger l’examen et les décisions."
+    "unableToLoad": "Impossible de charger l’examen et les décisions.",
+    "exportsTab": "Exportations contrôlées"
+  },
+  "sageExports": {
+    "title": "Exportations contrôlées",
+    "nav": {
+      "overview": "Aperçu",
+      "evidence": "Preuves",
+      "governance": "Examen et décisions"
+    },
+    "internalOnlyBanner": "Génération de trousses internes seulement. La livraison externe est désactivée.",
+    "sections": {
+      "requests": "Demandes d’exportation",
+      "packages": "Trousses générées"
+    },
+    "approvalQueue": "File d’approbation",
+    "requestExport": "Demander une exportation",
+    "requestedBy": "Demandé par",
+    "approvedBy": "Approuvé par",
+    "purpose": "Objet",
+    "packageType": "Type de trousse",
+    "selectedEvidence": "Preuves sélectionnées",
+    "selectedGovernance": "Dossiers de gouvernance sélectionnés",
+    "submitting": "Envoi en cours…",
+    "itemCount": "Éléments",
+    "excludedCount": "Exclus",
+    "noPurpose": "(aucun objet fourni)",
+    "cannotDecideOwn": "Vous ne pouvez pas approuver ni refuser votre propre demande.",
+    "scopeChanged": "La portée a changé; une nouvelle approbation est requise.",
+    "decisionRationale": "Justification de la décision",
+    "approvalRationale": "Justification de l’approbation",
+    "denialRationale": "Justification du refus",
+    "approveRequest": "Approuver la demande",
+    "denyRequest": "Refuser la demande",
+    "manifestHash": "Empreinte du manifeste",
+    "contentHash": "Empreinte du contenu",
+    "generatedBy": "Générée par",
+    "policyVersion": "Version de la politique",
+    "generatable": "Demandes approuvées prêtes à générer",
+    "generatePackage": "Générer la trousse",
+    "downloadInternal": "Télécharger la trousse interne",
+    "status": {
+      "requested": "Exportation demandée."
+    },
+    "statusLabel": {
+      "requested": "Demandée",
+      "approved": "Approuvée",
+      "denied": "Refusée",
+      "cancelled": "Annulée",
+      "generated": "Générée"
+    },
+    "empty": {
+      "requests": "Aucune demande d’exportation.",
+      "approvals": "Aucune approbation en attente.",
+      "packages": "Aucune trousse générée."
+    },
+    "validation": {
+      "purposeRequired": "Un objet est requis.",
+      "selectionRequired": "Sélectionnez au moins une ressource.",
+      "approvalRationaleRequired": "Une justification d’approbation est requise.",
+      "denialRationaleRequired": "Une justification de refus est requise."
+    },
+    "error": {
+      "requestFailed": "La demande d’exportation n’a pas pu être soumise.",
+      "decisionFailed": "La décision n’a pas pu être enregistrée.",
+      "generateFailed": "La trousse n’a pas pu être générée."
+    }
   }
 }
