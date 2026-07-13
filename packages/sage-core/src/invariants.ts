@@ -149,6 +149,17 @@ export function assertExternalReviewerHasNoExportAuthority(input: {
   }
 }
 
+// ── Phase 8A: secure delivery separation of duties ───────────────────────────
+
+export function assertDeliveryRequesterCannotApproveOwn(input: {
+  requestedBy: string
+  approverId: string
+}): void {
+  if (input.requestedBy === input.approverId) {
+    fail('delivery approval is granted by the requester')
+  }
+}
+
 // ── Admin roles do not auto-escalate ─────────────────────────────────────────
 
 export function assertPlatformAdminDoesNotAutomaticallyReceiveSensitiveEvidenceAccess(input: {

@@ -18,6 +18,8 @@ const CODE_TO_STATUS: Record<string, number> = {
   // A stored artifact failed cryptographic integrity verification. Server-side
   // data problem; return 500 without disclosing storage details.
   INTEGRITY_ERROR: 500,
+  // Recipient claim/access rate limit exceeded.
+  RATE_LIMITED: 429,
 }
 
 export function sageErrorResponse(error: unknown): NextResponse {

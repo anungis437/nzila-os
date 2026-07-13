@@ -9,6 +9,7 @@ export type SageServiceErrorCode =
   | 'INVARIANT_VIOLATION'
   | 'CONFLICT'
   | 'INTEGRITY_ERROR'
+  | 'RATE_LIMITED'
 
 export class SageServiceError extends Error {
   readonly code: SageServiceErrorCode
@@ -50,4 +51,9 @@ export function conflict(message: string): never {
  */
 export function integrityError(message = 'stored package failed integrity verification'): never {
   throw new SageServiceError('INTEGRITY_ERROR', message)
+}
+
+/** The caller exceeded a recipient claim/access rate limit. */
+export function rateLimited(message = 'too many attempts; retry later'): never {
+  throw new SageServiceError('RATE_LIMITED', message)
 }

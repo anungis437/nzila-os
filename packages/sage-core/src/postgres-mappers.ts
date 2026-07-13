@@ -31,6 +31,19 @@ import type {
   SageWorkspaceMember,
   SageWorkspaceStatus,
 } from './types'
+import type {
+  SageDeliveryApproval,
+  SageDeliveryDecision,
+  SageDeliveryGrant,
+  SageDeliveryGrantStatus,
+  SageDeliveryReceipt,
+  SageDeliveryReceiptEventType,
+  SageDeliveryRecipient,
+  SageDeliveryRecipientVerificationStatus,
+  SageDeliveryRequest,
+  SageDeliveryRequestStatus,
+  SageDeliveryRevocationReasonCode,
+} from './delivery-types'
 
 // ─── Timestamp normalization ─────────────────────────────────────────────────
 // timestamptz columns arrive as Date (node-postgres default) or ISO string.
@@ -502,5 +515,199 @@ export function mapAuditOutbox(row: SageAuditOutboxRow): SageAuditOutboxEvent {
     lastErrorCode: textOrNull(row.last_error_code),
     dispatchOwner: textOrNull(row.dispatch_owner),
     leaseExpiresAt: toIsoOrNull(row.lease_expires_at),
+  }
+}
+
+// ─── Phase 8A: secure delivery row types + mappers ───────────────────────────
+
+export type SageDeliveryRecipientRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  display_name: string
+  identity_provider: string
+  identity_subject: string
+  normalized_email_hash: string
+  verification_status: string
+  verified_at: unknown
+  created_by: string
+  created_at: unknown
+  updated_at: unknown
+}
+
+export function mapDeliveryRecipient(row: SageDeliveryRecipientRow): SageDeliveryRecipient {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    displayName: row.display_name,
+    identityProvider: row.identity_provider,
+    identitySubject: row.identity_subject,
+    normalizedEmailHash: row.normalized_email_hash,
+    verificationStatus: (row.verification_status as SageDeliveryRecipientVerificationStatus) ?? 'unverified',
+    verifiedAt: toIsoOrNull(row.verified_at),
+    createdBy: row.created_by,
+    createdAt: toIso(row.created_at),
+    updatedAt: toIso(row.updated_at),
+  }
+}
+
+export type SageDeliveryRequestRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  export_package_id: string
+  recipient_id: string
+  requested_by: string
+  purpose: string | null
+  status: string
+  package_content_hash: string
+  package_manifest_hash: string
+  recipient_identity_hash: string
+  policy_version: string
+  requested_access_expires_at: unknown
+  requested_max_accesses: unknown
+  requested_at: unknown
+  updated_at: unknown
+}
+
+export function mapDeliveryRequest(row: SageDeliveryRequestRow): SageDeliveryRequest {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    exportPackageId: row.export_package_id,
+    recipientId: row.recipient_id,
+    requestedBy: row.requested_by,
+    purpose: textOrNull(row.purpose),
+    status: (row.status as SageDeliveryRequestStatus) ?? 'requested',
+    packageContentHash: row.package_content_hash,
+    packageManifestHash: row.package_manifest_hash,
+    recipientIdentityHash: row.recipient_identity_hash,
+    policyVersion: row.policy_version,
+    requestedAccessExpiresAt: toIso(row.requested_access_expires_at),
+    requestedMaxAccesses: Number(row.requested_max_accesses ?? 0),
+    requestedAt: toIso(row.requested_at),
+    updatedAt: toIso(row.updated_at),
+  }
+}
+
+export type SageDeliveryApprovalRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  delivery_request_id: string
+  decision: string
+  approver_id: string
+  rationale: string | null
+  approved_package_content_hash: string
+  approved_manifest_hash: string
+  approved_recipient_identity_hash: string
+  approved_policy_version: string
+  approved_access_expires_at: unknown
+  approved_max_accesses: unknown
+  decided_at: unknown
+}
+
+export function mapDeliveryApproval(row: SageDeliveryApprovalRow): SageDeliveryApproval {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    deliveryRequestId: row.delivery_request_id,
+    decision: (row.decision as SageDeliveryDecision) ?? 'denied',
+    approverId: row.approver_id,
+    rationale: textOrNull(row.rationale),
+    approvedPackageContentHash: row.approved_package_content_hash,
+    approvedManifestHash: row.approved_manifest_hash,
+    approvedRecipientIdentityHash: row.approved_recipient_identity_hash,
+    approvedPolicyVersion: row.approved_policy_version,
+    approvedAccessExpiresAt: toIso(row.approved_access_expires_at),
+    approvedMaxAccesses: Number(row.approved_max_accesses ?? 0),
+    decidedAt: toIso(row.decided_at),
+  }
+}
+
+export type SageDeliveryGrantRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  delivery_request_id: string
+  export_package_id: string
+  recipient_id: string
+  status: string
+  invitation_token_hash: string
+  invitation_expires_at: unknown
+  session_token_hash: string | null
+  claimed_identity_provider: string | null
+  claimed_identity_subject: string | null
+  claimed_at: unknown
+  access_expires_at: unknown
+  max_accesses: unknown
+  access_count: unknown
+  issued_by: string
+  issued_at: unknown
+  revoked_by: string | null
+  revoked_at: unknown
+  revocation_reason_code: string | null
+  updated_at: unknown
+}
+
+export function mapDeliveryGrant(row: SageDeliveryGrantRow): SageDeliveryGrant {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    deliveryRequestId: row.delivery_request_id,
+    exportPackageId: row.export_package_id,
+    recipientId: row.recipient_id,
+    status: (row.status as SageDeliveryGrantStatus) ?? 'issued',
+    invitationTokenHash: row.invitation_token_hash,
+    invitationExpiresAt: toIso(row.invitation_expires_at),
+    sessionTokenHash: textOrNull(row.session_token_hash),
+    claimedIdentityProvider: textOrNull(row.claimed_identity_provider),
+    claimedIdentitySubject: textOrNull(row.claimed_identity_subject),
+    claimedAt: toIsoOrNull(row.claimed_at),
+    accessExpiresAt: toIso(row.access_expires_at),
+    maxAccesses: Number(row.max_accesses ?? 0),
+    accessCount: Number(row.access_count ?? 0),
+    issuedBy: row.issued_by,
+    issuedAt: toIso(row.issued_at),
+    revokedBy: textOrNull(row.revoked_by),
+    revokedAt: toIsoOrNull(row.revoked_at),
+    revocationReasonCode: (textOrNull(row.revocation_reason_code) as SageDeliveryRevocationReasonCode | null) ?? null,
+    updatedAt: toIso(row.updated_at),
+  }
+}
+
+export type SageDeliveryReceiptRow = {
+  id: string
+  event_id: string
+  org_id: string
+  workspace_id: string
+  delivery_request_id: string | null
+  grant_id: string | null
+  package_id: string | null
+  recipient_id: string | null
+  event_type: string
+  safe_reason_code: string | null
+  occurred_at: unknown
+  created_at: unknown
+}
+
+export function mapDeliveryReceipt(row: SageDeliveryReceiptRow): SageDeliveryReceipt {
+  return {
+    id: row.id,
+    eventId: row.event_id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    deliveryRequestId: textOrNull(row.delivery_request_id),
+    grantId: textOrNull(row.grant_id),
+    packageId: textOrNull(row.package_id),
+    recipientId: textOrNull(row.recipient_id),
+    eventType: row.event_type as SageDeliveryReceiptEventType,
+    safeReasonCode: textOrNull(row.safe_reason_code),
+    occurredAt: toIso(row.occurred_at),
+    createdAt: toIso(row.created_at),
   }
 }

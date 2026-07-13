@@ -183,6 +183,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/ocra',                           // OCRA canonical alias for ICRA public diagnostic routes
     '/api/exit-interviews/institutional-', // Legacy public redirect aliases to organizational-* exit-interview endpoints
     '/api/workbook/',                      // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential; claim route enforces auth() at runtime, Stripe webhook signature-verified)
+    '/api/delivery/',                      // SAGE Phase 8A recipient delivery — grant-scoped session-token flow; X-Delivery-Session credential verified by delivery-service, never org-scope; recipient routes intentionally have no withOrgScope guard
     '/_perf/',                             // Web vitals beacon — intentionally anonymous (sendBeacon)
   ]
 

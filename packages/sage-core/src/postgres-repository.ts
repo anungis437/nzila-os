@@ -35,6 +35,16 @@ import type {
   SageWorkspace,
   SageWorkspaceMember,
 } from './types'
+import type {
+  SageDeliveryApproval,
+  SageDeliveryDecision,
+  SageDeliveryGrant,
+  SageDeliveryReceipt,
+  SageDeliveryReceiptIntent,
+  SageDeliveryRecipient,
+  SageDeliveryRequest,
+  SageDeliveryRevocationReasonCode,
+} from './delivery-types'
 import {
   mapBoundaryFlag,
   mapDecisionRecord,
@@ -49,6 +59,11 @@ import {
   mapRoleAssignment,
   mapWorkspace,
   mapWorkspaceMember,
+  mapDeliveryRecipient,
+  mapDeliveryRequest,
+  mapDeliveryApproval,
+  mapDeliveryGrant,
+  mapDeliveryReceipt,
   type SageBoundaryFlagRow,
   type SageDecisionRecordRow,
   type SageEvidenceAuthorizationRow,
@@ -62,6 +77,11 @@ import {
   type SageRoleAssignmentRow,
   type SageWorkspaceMemberRow,
   type SageWorkspaceRow,
+  type SageDeliveryRecipientRow,
+  type SageDeliveryRequestRow,
+  type SageDeliveryApprovalRow,
+  type SageDeliveryGrantRow,
+  type SageDeliveryReceiptRow,
 } from './postgres-mappers'
 import { conflict } from './service-errors'
 
@@ -1093,5 +1113,640 @@ export class PostgresSageRepository implements SageRepository {
       [workspaceId],
     )
     return toCount(rows)
+  }
+
+  // ── Phase 8A: secure recipient delivery ────────────────────────────────────
+
+  async createDeliveryRecipient(
+    input: Omit<SageDeliveryRecipient, 'id'>,
+  ): Promise<SageDeliveryRecipient> {
+    const { rows } = await this.sql.query<SageDeliveryRecipientRow>(
+      `insert into sage_delivery_recipient
+         (org_id, workspace_id, display_name, identity_provider, identity_subject,
+          normalized_email_hash, verification_status, verified_at, created_by,
+          created_at, updated_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)
+       on conflict (workspace_id, identity_provider, identity_subject) do nothing
+       returning *`,
+      [
+        input.orgId,
+        input.workspaceId,
+        input.displayName,
+        input.identityProvider,
+        input.identitySubject,
+        input.normalizedEmailHash,
+        input.verificationStatus,
+        input.verifiedAt ?? null,
+        input.createdBy,
+        input.createdAt,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) conflict('a recipient with this verified identity already exists')
+    return mapDeliveryRecipient(row)
+  }
+
+  async getDeliveryRecipient(
+    recipientId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRecipient | undefined> {
+    const { rows } = await this.sql.query<SageDeliveryRecipientRow>(
+      `select * from sage_delivery_recipient
+       where id = $1 and workspace_id = $2 and org_id = $3`,
+      [recipientId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryRecipient(row) : undefined
+  }
+
+  async listDeliveryRecipients(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRecipient[]> {
+    const { rows } = await this.sql.query<SageDeliveryRecipientRow>(
+      `select * from sage_delivery_recipient
+       where workspace_id = $1 and org_id = $2
+       order by created_at asc, id asc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapDeliveryRecipient)
+  }
+
+  async createDeliveryRequest(input: {
+    request: Omit<SageDeliveryRequest, 'id'>
+    auditEvent: SageAuditOutboxIntent
+    receipt?: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryRequest> {
+    const r = input.request
+    const { rows } = await this.sql.query<SageDeliveryRequestRow>(
+      `with req as (
+         insert into sage_delivery_request
+           (org_id, workspace_id, export_package_id, recipient_id, requested_by,
+            purpose, status, package_content_hash, package_manifest_hash,
+            recipient_identity_hash, policy_version, requested_access_expires_at,
+            requested_max_accesses, requested_at, updated_at)
+         values ($1, $2, $3, $4, $5, $6, 'requested', $7, $8, $9, $10, $11, $12, $13, $13)
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $14, $1, $2, $15, $16, $17, req.id, $18::jsonb, 'pending', 0, $13 from req
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from req`,
+      [
+        r.orgId,
+        r.workspaceId,
+        r.exportPackageId,
+        r.recipientId,
+        r.requestedBy,
+        r.purpose ?? null,
+        r.packageContentHash,
+        r.packageManifestHash,
+        r.recipientIdentityHash,
+        r.policyVersion,
+        r.requestedAccessExpiresAt,
+        r.requestedMaxAccesses,
+        r.requestedAt,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+      ],
+    )
+    return mapDeliveryRequest(rows[0])
+  }
+
+  async getDeliveryRequest(
+    requestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRequest | undefined> {
+    const { rows } = await this.sql.query<SageDeliveryRequestRow>(
+      `select * from sage_delivery_request
+       where id = $1 and workspace_id = $2 and org_id = $3`,
+      [requestId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryRequest(row) : undefined
+  }
+
+  async listDeliveryRequests(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRequest[]> {
+    const { rows } = await this.sql.query<SageDeliveryRequestRow>(
+      `select * from sage_delivery_request
+       where workspace_id = $1 and org_id = $2
+       order by requested_at desc, id desc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapDeliveryRequest)
+  }
+
+  async decideDeliveryRequest(input: {
+    deliveryRequestId: string
+    workspaceId: string
+    orgId: string
+    decision: SageDeliveryDecision
+    updatedAt: string
+    approval: Omit<SageDeliveryApproval, 'id'>
+    auditEvent: SageAuditOutboxIntent
+    receipt?: SageDeliveryReceiptIntent
+  }): Promise<{ request: SageDeliveryRequest; approval: SageDeliveryApproval } | undefined> {
+    const a = input.approval
+    // Atomic CAS: approval INSERT + audit INSERT only run when the guarded
+    // UPDATE flips a still-'requested' row in this tenant.
+    const { rows } = await this.sql.query<SageDeliveryApprovalRow>(
+      `with decided as (
+         update sage_delivery_request
+           set status = $4, updated_at = $5
+         where id = $1 and workspace_id = $2 and org_id = $3 and status = 'requested'
+         returning id
+       ),
+       appr as (
+         insert into sage_delivery_approval
+           (org_id, workspace_id, delivery_request_id, decision, approver_id,
+            rationale, approved_package_content_hash, approved_manifest_hash,
+            approved_recipient_identity_hash, approved_policy_version,
+            approved_access_expires_at, approved_max_accesses, decided_at)
+         select $3, $2, $1, $6, $7, $8, $9, $10, $11, $12, $13, $14, $5 from decided
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $15, $3, $2, $16, $17, $18, appr.id, $19::jsonb, 'pending', 0, $5 from appr
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from appr`,
+      [
+        input.deliveryRequestId,
+        input.workspaceId,
+        input.orgId,
+        input.decision,
+        input.updatedAt,
+        a.decision,
+        a.approverId,
+        a.rationale ?? null,
+        a.approvedPackageContentHash,
+        a.approvedManifestHash,
+        a.approvedRecipientIdentityHash,
+        a.approvedPolicyVersion,
+        a.approvedAccessExpiresAt,
+        a.approvedMaxAccesses,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+      ],
+    )
+    const approvalRow = firstOrUndefined(rows)
+    if (!approvalRow) return undefined
+    const request = await this.getDeliveryRequest(
+      input.deliveryRequestId,
+      input.workspaceId,
+      input.orgId,
+    )
+    if (!request) return undefined
+    return { request, approval: mapDeliveryApproval(approvalRow) }
+  }
+
+  async getDeliveryApproval(
+    deliveryRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryApproval | undefined> {
+    const { rows } = await this.sql.query<SageDeliveryApprovalRow>(
+      `select * from sage_delivery_approval
+       where delivery_request_id = $1 and workspace_id = $2 and org_id = $3`,
+      [deliveryRequestId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryApproval(row) : undefined
+  }
+
+  async issueDeliveryGrant(input: {
+    grant: Omit<SageDeliveryGrant, 'id'>
+    updatedAt: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<{ grant: SageDeliveryGrant; created: boolean } | undefined> {
+    const g = input.grant
+    const rc = input.receipt
+    // Atomic: flip approved request → issued, insert exactly one grant, enqueue
+    // the invitation_issued receipt + audit. Loser (request not approved, or a
+    // grant already exists) inserts nothing here.
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `with issued_req as (
+         update sage_delivery_request
+           set status = 'issued', updated_at = $19
+         where id = $3 and workspace_id = $2 and org_id = $1 and status = 'approved'
+             and not exists (select 1 from sage_delivery_grant where delivery_request_id = $3)
+         returning id
+       ),
+       grant_row as (
+         insert into sage_delivery_grant
+           (org_id, workspace_id, delivery_request_id, export_package_id,
+            recipient_id, status, invitation_token_hash, invitation_expires_at,
+            access_expires_at, max_accesses, access_count, issued_by, issued_at, updated_at)
+         select $1, $2, $3, $4, $5, 'issued', $6, $7, $8, $9, 0, $10, $11, $11 from issued_req
+         on conflict (delivery_request_id) do nothing
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $12, $1, $2, $13, $14, $15, grant_row.id, $16::jsonb, 'pending', 0, $11 from grant_row
+         on conflict (event_id) do nothing
+         returning event_id
+       ),
+       receipt as (
+         insert into sage_delivery_receipt
+           (event_id, org_id, workspace_id, delivery_request_id, grant_id,
+            package_id, recipient_id, event_type, safe_reason_code, occurred_at, created_at)
+         select $17, $1, $2, $3, grant_row.id, $4, $5, $18, $20, $11, $11 from grant_row
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from grant_row`,
+      [
+        g.orgId,
+        g.workspaceId,
+        g.deliveryRequestId,
+        g.exportPackageId,
+        g.recipientId,
+        g.invitationTokenHash,
+        g.invitationExpiresAt,
+        g.accessExpiresAt,
+        g.maxAccesses,
+        g.issuedBy,
+        g.issuedAt,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+        rc.eventId,
+        rc.eventType,
+        input.updatedAt,
+        rc.safeReasonCode ?? null,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (row) return { grant: mapDeliveryGrant(row), created: true }
+    // Either a grant already exists (idempotent) or the request was not approvable.
+    const existing = await this.sql.query<SageDeliveryGrantRow>(
+      `select * from sage_delivery_grant where delivery_request_id = $1`,
+      [g.deliveryRequestId],
+    )
+    const existingRow = firstOrUndefined(existing.rows)
+    if (existingRow) return { grant: mapDeliveryGrant(existingRow), created: false }
+    return undefined
+  }
+
+  async getDeliveryGrant(
+    grantId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryGrant | undefined> {
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `select * from sage_delivery_grant
+       where id = $1 and workspace_id = $2 and org_id = $3`,
+      [grantId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryGrant(row) : undefined
+  }
+
+  async getDeliveryGrantByInvitationHash(
+    invitationTokenHash: string,
+  ): Promise<SageDeliveryGrant | undefined> {
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `select * from sage_delivery_grant where invitation_token_hash = $1`,
+      [invitationTokenHash],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryGrant(row) : undefined
+  }
+
+  async getDeliveryGrantById(grantId: string): Promise<SageDeliveryGrant | undefined> {
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `select * from sage_delivery_grant where id = $1`,
+      [grantId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryGrant(row) : undefined
+  }
+
+  async listDeliveryGrants(workspaceId: string, orgId: string): Promise<SageDeliveryGrant[]> {
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `select * from sage_delivery_grant
+       where workspace_id = $1 and org_id = $2
+       order by issued_at desc, id desc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapDeliveryGrant)
+  }
+
+  async claimDeliveryGrant(input: {
+    grantId: string
+    invitationTokenHash: string
+    claimedIdentityProvider: string
+    claimedIdentitySubject: string
+    sessionTokenHash: string
+    claimedAt: string
+    now: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined> {
+    const rc = input.receipt
+    // CAS: issued → active, binding identity + session, only if the invitation
+    // hash matches and the invitation has not expired.
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `with claimed as (
+         update sage_delivery_grant
+           set status = 'active', claimed_identity_provider = $3,
+               claimed_identity_subject = $4, session_token_hash = $5,
+               claimed_at = $6, updated_at = $6
+         where id = $1 and status = 'issued' and invitation_token_hash = $2
+             and invitation_expires_at > $7
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $8, claimed.org_id, claimed.workspace_id, $9, $10, $11, claimed.id, $12::jsonb, 'pending', 0, $6
+           from claimed
+         on conflict (event_id) do nothing
+         returning event_id
+       ),
+       receipt as (
+         insert into sage_delivery_receipt
+           (event_id, org_id, workspace_id, delivery_request_id, grant_id,
+            package_id, recipient_id, event_type, safe_reason_code, occurred_at, created_at)
+         select $13, claimed.org_id, claimed.workspace_id, claimed.delivery_request_id,
+                claimed.id, claimed.export_package_id, claimed.recipient_id, $14, $15, $6, $6
+           from claimed
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from claimed`,
+      [
+        input.grantId,
+        input.invitationTokenHash,
+        input.claimedIdentityProvider,
+        input.claimedIdentitySubject,
+        input.sessionTokenHash,
+        input.claimedAt,
+        input.now,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+        rc.eventId,
+        rc.eventType,
+        rc.safeReasonCode ?? null,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryGrant(row) : undefined
+  }
+
+  async authorizeDeliveryAccess(input: {
+    grantId: string
+    identitySubject: string
+    now: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined> {
+    const rc = input.receipt
+    // Atomic authorization: increment access_count ONLY on an active, in-window,
+    // in-budget, identity-bound grant. The receipt + audit commit together.
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `with authed as (
+         update sage_delivery_grant
+           set access_count = access_count + 1, updated_at = $3
+         where id = $1 and status = 'active' and access_expires_at > $3
+             and access_count < max_accesses and claimed_identity_subject = $2
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $4, authed.org_id, authed.workspace_id, $5, $6, $7, authed.id, $8::jsonb, 'pending', 0, $3
+           from authed
+         on conflict (event_id) do nothing
+         returning event_id
+       ),
+       receipt as (
+         insert into sage_delivery_receipt
+           (event_id, org_id, workspace_id, delivery_request_id, grant_id,
+            package_id, recipient_id, event_type, safe_reason_code, occurred_at, created_at)
+         select $9, authed.org_id, authed.workspace_id, authed.delivery_request_id,
+                authed.id, authed.export_package_id, authed.recipient_id, $10, $11, $3, $3
+           from authed
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from authed`,
+      [
+        input.grantId,
+        input.identitySubject,
+        input.now,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+        rc.eventId,
+        rc.eventType,
+        rc.safeReasonCode ?? null,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryGrant(row) : undefined
+  }
+
+  async revokeDeliveryGrant(input: {
+    grantId: string
+    workspaceId: string
+    orgId: string
+    revokedBy: string
+    revocationReasonCode: SageDeliveryRevocationReasonCode
+    revokedAt: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined> {
+    const rc = input.receipt
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `with revoked as (
+         update sage_delivery_grant
+           set status = 'revoked', revoked_by = $4, revocation_reason_code = $5,
+               revoked_at = $6, updated_at = $6
+         where id = $1 and workspace_id = $2 and org_id = $3
+             and status in ('issued', 'active')
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $7, revoked.org_id, revoked.workspace_id, $8, $9, $10, revoked.id, $11::jsonb, 'pending', 0, $6
+           from revoked
+         on conflict (event_id) do nothing
+         returning event_id
+       ),
+       receipt as (
+         insert into sage_delivery_receipt
+           (event_id, org_id, workspace_id, delivery_request_id, grant_id,
+            package_id, recipient_id, event_type, safe_reason_code, occurred_at, created_at)
+         select $12, revoked.org_id, revoked.workspace_id, revoked.delivery_request_id,
+                revoked.id, revoked.export_package_id, revoked.recipient_id, $13, $5, $6, $6
+           from revoked
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from revoked`,
+      [
+        input.grantId,
+        input.workspaceId,
+        input.orgId,
+        input.revokedBy,
+        input.revocationReasonCode,
+        input.revokedAt,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+        rc.eventId,
+        rc.eventType,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryGrant(row) : undefined
+  }
+
+  async expireDeliveryGrants(input: {
+    now: string
+    limit: number
+    auditAction: string
+    workspaceId?: string
+    orgId?: string
+  }): Promise<SageDeliveryGrant[]> {
+    // Atomically flip claimable rows to 'expired' (one sweeper wins each row),
+    // then append one grant_expired receipt + audit per row (unique event_id
+    // makes concurrent sweepers idempotent).
+    const { rows } = await this.sql.query<SageDeliveryGrantRow>(
+      `update sage_delivery_grant g
+         set status = 'expired', updated_at = $1
+       where g.id in (
+         select id from sage_delivery_grant
+          where ((status = 'issued' and invitation_expires_at <= $1)
+              or (status = 'active' and access_expires_at <= $1))
+            and ($3::text is null or workspace_id = $3)
+            and ($4::text is null or org_id = $4)
+          order by issued_at asc, id asc
+          for update skip locked
+          limit $2
+       )
+       returning *`,
+      [input.now, input.limit, input.workspaceId ?? null, input.orgId ?? null],
+    )
+    const grants = rows.map(mapDeliveryGrant)
+    for (const grant of grants) {
+      const eventId = `${grant.id}:grant_expired`
+      await this.sql.query(
+        `insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         values ($1, $2, $3, 'system', $4, 'sage_delivery_grant', $5, $6::jsonb, 'pending', 0, $7)
+         on conflict (event_id) do nothing`,
+        [
+          eventId,
+          grant.orgId,
+          grant.workspaceId,
+          input.auditAction,
+          grant.id,
+          JSON.stringify({ grantId: grant.id, deliveryRequestId: grant.deliveryRequestId }),
+          input.now,
+        ],
+      )
+      await this.sql.query(
+        `insert into sage_delivery_receipt
+           (event_id, org_id, workspace_id, delivery_request_id, grant_id,
+            package_id, recipient_id, event_type, safe_reason_code, occurred_at, created_at)
+         values ($1, $2, $3, $4, $5, $6, $7, 'grant_expired', 'expired', $8, $8)
+         on conflict (event_id) do nothing`,
+        [
+          eventId,
+          grant.orgId,
+          grant.workspaceId,
+          grant.deliveryRequestId,
+          grant.id,
+          grant.exportPackageId,
+          grant.recipientId,
+          input.now,
+        ],
+      )
+    }
+    return grants
+  }
+
+  async createDeliveryReceipt(input: {
+    orgId: string
+    workspaceId: string
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryReceipt | undefined> {
+    const rc = input.receipt
+    const { rows } = await this.sql.query<SageDeliveryReceiptRow>(
+      `insert into sage_delivery_receipt
+         (event_id, org_id, workspace_id, delivery_request_id, grant_id,
+          package_id, recipient_id, event_type, safe_reason_code, occurred_at, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)
+       on conflict (event_id) do nothing
+       returning *`,
+      [
+        rc.eventId,
+        input.orgId,
+        input.workspaceId,
+        rc.deliveryRequestId ?? null,
+        rc.grantId ?? null,
+        rc.packageId ?? null,
+        rc.recipientId ?? null,
+        rc.eventType,
+        rc.safeReasonCode ?? null,
+        rc.occurredAt,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDeliveryReceipt(row) : undefined
+  }
+
+  async listDeliveryReceipts(
+    grantId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryReceipt[]> {
+    const { rows } = await this.sql.query<SageDeliveryReceiptRow>(
+      `select * from sage_delivery_receipt
+       where grant_id = $1 and workspace_id = $2 and org_id = $3
+       order by occurred_at asc, id asc`,
+      [grantId, workspaceId, orgId],
+    )
+    return rows.map(mapDeliveryReceipt)
   }
 }

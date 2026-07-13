@@ -21,6 +21,16 @@ import type {
   SageWorkspace,
   SageWorkspaceMember,
 } from './types'
+import type {
+  SageDeliveryApproval,
+  SageDeliveryDecision,
+  SageDeliveryGrant,
+  SageDeliveryReceipt,
+  SageDeliveryReceiptIntent,
+  SageDeliveryRecipient,
+  SageDeliveryRequest,
+  SageDeliveryRevocationReasonCode,
+} from './delivery-types'
 import { conflict } from './service-errors'
 
 export interface SageRepository {
@@ -220,6 +230,119 @@ export interface SageRepository {
   countWorkspaceBoundaryFlags(workspaceId: string): Promise<number>
   countWorkspaceDecisionRecords(workspaceId: string): Promise<number>
   countWorkspaceOpenExportRequests(workspaceId: string): Promise<number>
+
+  // ── Phase 8A: secure recipient delivery ────────────────────────────────────
+  createDeliveryRecipient(input: Omit<SageDeliveryRecipient, 'id'>): Promise<SageDeliveryRecipient>
+  getDeliveryRecipient(
+    recipientId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRecipient | undefined>
+  listDeliveryRecipients(workspaceId: string, orgId: string): Promise<SageDeliveryRecipient[]>
+
+  createDeliveryRequest(input: {
+    request: Omit<SageDeliveryRequest, 'id'>
+    auditEvent: SageAuditOutboxIntent
+    receipt?: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryRequest>
+  getDeliveryRequest(
+    requestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRequest | undefined>
+  listDeliveryRequests(workspaceId: string, orgId: string): Promise<SageDeliveryRequest[]>
+
+  /** CAS approve/deny of a 'requested' delivery request + frozen approval + durable receipt/audit. */
+  decideDeliveryRequest(input: {
+    deliveryRequestId: string
+    workspaceId: string
+    orgId: string
+    decision: SageDeliveryDecision
+    updatedAt: string
+    approval: Omit<SageDeliveryApproval, 'id'>
+    auditEvent: SageAuditOutboxIntent
+    receipt?: SageDeliveryReceiptIntent
+  }): Promise<{ request: SageDeliveryRequest; approval: SageDeliveryApproval } | undefined>
+
+  getDeliveryApproval(
+    deliveryRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryApproval | undefined>
+
+  /** Issue exactly one grant for an approved request (flips request → 'issued'). */
+  issueDeliveryGrant(input: {
+    grant: Omit<SageDeliveryGrant, 'id'>
+    updatedAt: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<{ grant: SageDeliveryGrant; created: boolean } | undefined>
+
+  getDeliveryGrant(
+    grantId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryGrant | undefined>
+  getDeliveryGrantByInvitationHash(
+    invitationTokenHash: string,
+  ): Promise<SageDeliveryGrant | undefined>
+  /** Load a grant by id only (recipient access has no org/workspace scope). */
+  getDeliveryGrantById(grantId: string): Promise<SageDeliveryGrant | undefined>
+  listDeliveryGrants(workspaceId: string, orgId: string): Promise<SageDeliveryGrant[]>
+
+  /** CAS claim of an 'issued' grant → 'active', binding the recipient identity + session. */
+  claimDeliveryGrant(input: {
+    grantId: string
+    invitationTokenHash: string
+    claimedIdentityProvider: string
+    claimedIdentitySubject: string
+    sessionTokenHash: string
+    claimedAt: string
+    now: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined>
+
+  /** Atomic access authorization: CAS access_count++ on an active, in-window, in-budget grant. */
+  authorizeDeliveryAccess(input: {
+    grantId: string
+    identitySubject: string
+    now: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined>
+
+  /** CAS revoke of an issued/active grant. */
+  revokeDeliveryGrant(input: {
+    grantId: string
+    workspaceId: string
+    orgId: string
+    revokedBy: string
+    revocationReasonCode: SageDeliveryRevocationReasonCode
+    revokedAt: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined>
+
+  /** CAS-expire issued invitations / active grants past their clocks; one receipt each. */
+  expireDeliveryGrants(input: {
+    now: string
+    limit: number
+    auditAction: string
+    workspaceId?: string
+    orgId?: string
+  }): Promise<SageDeliveryGrant[]>
+
+  createDeliveryReceipt(input: {
+    orgId: string
+    workspaceId: string
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryReceipt | undefined>
+  listDeliveryReceipts(
+    grantId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryReceipt[]>
 }
 
 let counter = 0
@@ -244,6 +367,12 @@ export class InMemorySageRepository implements SageRepository {
   private exportPackages = new Map<string, SageExportPackage>()
   private exportPackageObjects = new Map<string, SageExportPackageObject>()
   private auditOutbox: SageAuditOutboxEvent[] = []
+  // Phase 8A — secure delivery
+  private deliveryRecipients = new Map<string, SageDeliveryRecipient>()
+  private deliveryRequests = new Map<string, SageDeliveryRequest>()
+  private deliveryApprovals: SageDeliveryApproval[] = []
+  private deliveryGrants = new Map<string, SageDeliveryGrant>()
+  private deliveryReceipts: SageDeliveryReceipt[] = []
 
   async createWorkspace(input: Omit<SageWorkspace, 'id'>): Promise<SageWorkspace> {
     const ws: SageWorkspace = { ...input, id: nextId('ws') }
@@ -830,5 +959,380 @@ export class InMemorySageRepository implements SageRepository {
     return [...this.exportRequests.values()].filter(
       (r) => r.workspaceId === workspaceId && r.status === 'requested',
     ).length
+  }
+
+  // ── Phase 8A: secure recipient delivery ────────────────────────────────────
+
+  private appendDeliveryReceipt(
+    orgId: string,
+    workspaceId: string,
+    intent: SageDeliveryReceiptIntent,
+  ): void {
+    if (this.deliveryReceipts.some((r) => r.eventId === intent.eventId)) return // unique(event_id)
+    this.deliveryReceipts.push({
+      id: nextId('drcpt'),
+      eventId: intent.eventId,
+      orgId,
+      workspaceId,
+      deliveryRequestId: intent.deliveryRequestId ?? null,
+      grantId: intent.grantId ?? null,
+      packageId: intent.packageId ?? null,
+      recipientId: intent.recipientId ?? null,
+      eventType: intent.eventType,
+      safeReasonCode: intent.safeReasonCode ?? null,
+      occurredAt: intent.occurredAt,
+      createdAt: intent.occurredAt,
+    })
+  }
+
+  async createDeliveryRecipient(
+    input: Omit<SageDeliveryRecipient, 'id'>,
+  ): Promise<SageDeliveryRecipient> {
+    // One verified identity per (workspace, provider, subject).
+    const existing = [...this.deliveryRecipients.values()].find(
+      (r) =>
+        r.workspaceId === input.workspaceId &&
+        r.identityProvider === input.identityProvider &&
+        r.identitySubject === input.identitySubject,
+    )
+    if (existing) conflict('a recipient with this verified identity already exists')
+    const recipient: SageDeliveryRecipient = { ...input, id: nextId('drecip') }
+    this.deliveryRecipients.set(recipient.id, recipient)
+    return recipient
+  }
+
+  async getDeliveryRecipient(
+    recipientId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRecipient | undefined> {
+    const r = this.deliveryRecipients.get(recipientId)
+    if (!r || r.workspaceId !== workspaceId || r.orgId !== orgId) return undefined
+    return r
+  }
+
+  async listDeliveryRecipients(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRecipient[]> {
+    return [...this.deliveryRecipients.values()]
+      .filter((r) => r.workspaceId === workspaceId && r.orgId === orgId)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id))
+  }
+
+  async createDeliveryRequest(input: {
+    request: Omit<SageDeliveryRequest, 'id'>
+    auditEvent: SageAuditOutboxIntent
+    receipt?: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryRequest> {
+    const req: SageDeliveryRequest = { ...input.request, id: nextId('dreq') }
+    this.deliveryRequests.set(req.id, req)
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: req.orgId,
+      workspaceId: req.workspaceId,
+      resourceId: req.id,
+      createdAt: req.requestedAt,
+    })
+    if (input.receipt) this.appendDeliveryReceipt(req.orgId, req.workspaceId, input.receipt)
+    return req
+  }
+
+  async getDeliveryRequest(
+    requestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRequest | undefined> {
+    const r = this.deliveryRequests.get(requestId)
+    if (!r || r.workspaceId !== workspaceId || r.orgId !== orgId) return undefined
+    return r
+  }
+
+  async listDeliveryRequests(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryRequest[]> {
+    return [...this.deliveryRequests.values()]
+      .filter((r) => r.workspaceId === workspaceId && r.orgId === orgId)
+      .sort((a, b) => b.requestedAt.localeCompare(a.requestedAt) || b.id.localeCompare(a.id))
+  }
+
+  async decideDeliveryRequest(input: {
+    deliveryRequestId: string
+    workspaceId: string
+    orgId: string
+    decision: SageDeliveryDecision
+    updatedAt: string
+    approval: Omit<SageDeliveryApproval, 'id'>
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<{ request: SageDeliveryRequest; approval: SageDeliveryApproval } | undefined> {
+    const req = this.deliveryRequests.get(input.deliveryRequestId)
+    // CAS: only a still-'requested' row in the same tenant may be decided.
+    if (
+      !req ||
+      req.workspaceId !== input.workspaceId ||
+      req.orgId !== input.orgId ||
+      req.status !== 'requested'
+    ) {
+      return undefined
+    }
+    req.status = input.decision
+    req.updatedAt = input.updatedAt
+    const approval: SageDeliveryApproval = { ...input.approval, id: nextId('dappr') }
+    this.deliveryApprovals.push(approval)
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: input.orgId,
+      workspaceId: input.workspaceId,
+      resourceId: approval.id,
+      createdAt: input.updatedAt,
+    })
+    if (input.receipt) this.appendDeliveryReceipt(input.orgId, input.workspaceId, input.receipt)
+    return { request: req, approval }
+  }
+
+  async getDeliveryApproval(
+    deliveryRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryApproval | undefined> {
+    return this.deliveryApprovals.find(
+      (a) =>
+        a.deliveryRequestId === deliveryRequestId &&
+        a.workspaceId === workspaceId &&
+        a.orgId === orgId,
+    )
+  }
+
+  async issueDeliveryGrant(input: {
+    grant: Omit<SageDeliveryGrant, 'id'>
+    updatedAt: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<{ grant: SageDeliveryGrant; created: boolean } | undefined> {
+    // Idempotent: exactly one grant per request.
+    const existing = [...this.deliveryGrants.values()].find(
+      (g) => g.deliveryRequestId === input.grant.deliveryRequestId,
+    )
+    if (existing) return { grant: existing, created: false }
+    const req = this.deliveryRequests.get(input.grant.deliveryRequestId)
+    // CAS: issue only from an approved request in the same tenant.
+    if (
+      !req ||
+      req.workspaceId !== input.grant.workspaceId ||
+      req.orgId !== input.grant.orgId ||
+      req.status !== 'approved'
+    ) {
+      return undefined
+    }
+    req.status = 'issued'
+    req.updatedAt = input.updatedAt
+    const grant: SageDeliveryGrant = { ...input.grant, id: nextId('dgrant') }
+    this.deliveryGrants.set(grant.id, grant)
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: grant.orgId,
+      workspaceId: grant.workspaceId,
+      resourceId: grant.id,
+      createdAt: grant.issuedAt,
+    })
+    this.appendDeliveryReceipt(grant.orgId, grant.workspaceId, input.receipt)
+    return { grant, created: true }
+  }
+
+  async getDeliveryGrant(
+    grantId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryGrant | undefined> {
+    const g = this.deliveryGrants.get(grantId)
+    if (!g || g.workspaceId !== workspaceId || g.orgId !== orgId) return undefined
+    return g
+  }
+
+  async getDeliveryGrantByInvitationHash(
+    invitationTokenHash: string,
+  ): Promise<SageDeliveryGrant | undefined> {
+    return [...this.deliveryGrants.values()].find(
+      (g) => g.invitationTokenHash === invitationTokenHash,
+    )
+  }
+
+  async getDeliveryGrantById(grantId: string): Promise<SageDeliveryGrant | undefined> {
+    return this.deliveryGrants.get(grantId)
+  }
+
+  async listDeliveryGrants(workspaceId: string, orgId: string): Promise<SageDeliveryGrant[]> {
+    return [...this.deliveryGrants.values()]
+      .filter((g) => g.workspaceId === workspaceId && g.orgId === orgId)
+      .sort((a, b) => b.issuedAt.localeCompare(a.issuedAt) || b.id.localeCompare(a.id))
+  }
+
+  async claimDeliveryGrant(input: {
+    grantId: string
+    invitationTokenHash: string
+    claimedIdentityProvider: string
+    claimedIdentitySubject: string
+    sessionTokenHash: string
+    claimedAt: string
+    now: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined> {
+    const g = this.deliveryGrants.get(input.grantId)
+    // CAS: issued, unexpired invitation, matching invitation hash.
+    if (
+      !g ||
+      g.status !== 'issued' ||
+      g.invitationTokenHash !== input.invitationTokenHash ||
+      g.invitationExpiresAt <= input.now
+    ) {
+      return undefined
+    }
+    g.status = 'active'
+    g.claimedIdentityProvider = input.claimedIdentityProvider
+    g.claimedIdentitySubject = input.claimedIdentitySubject
+    g.sessionTokenHash = input.sessionTokenHash
+    g.claimedAt = input.claimedAt
+    g.updatedAt = input.claimedAt
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: g.orgId,
+      workspaceId: g.workspaceId,
+      resourceId: g.id,
+      createdAt: input.claimedAt,
+    })
+    this.appendDeliveryReceipt(g.orgId, g.workspaceId, input.receipt)
+    return { ...g }
+  }
+
+  async authorizeDeliveryAccess(input: {
+    grantId: string
+    identitySubject: string
+    now: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined> {
+    const g = this.deliveryGrants.get(input.grantId)
+    // CAS: active, in-window, in-budget, identity-bound. Atomic count increment.
+    if (
+      !g ||
+      g.status !== 'active' ||
+      g.accessExpiresAt <= input.now ||
+      g.accessCount >= g.maxAccesses ||
+      g.claimedIdentitySubject !== input.identitySubject
+    ) {
+      return undefined
+    }
+    g.accessCount += 1
+    g.updatedAt = input.now
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: g.orgId,
+      workspaceId: g.workspaceId,
+      resourceId: g.id,
+      createdAt: input.now,
+    })
+    this.appendDeliveryReceipt(g.orgId, g.workspaceId, input.receipt)
+    return { ...g }
+  }
+
+  async revokeDeliveryGrant(input: {
+    grantId: string
+    workspaceId: string
+    orgId: string
+    revokedBy: string
+    revocationReasonCode: SageDeliveryRevocationReasonCode
+    revokedAt: string
+    auditEvent: SageAuditOutboxIntent
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryGrant | undefined> {
+    const g = this.deliveryGrants.get(input.grantId)
+    // CAS: only an issued/active grant in the same tenant may be revoked.
+    if (
+      !g ||
+      g.workspaceId !== input.workspaceId ||
+      g.orgId !== input.orgId ||
+      (g.status !== 'issued' && g.status !== 'active')
+    ) {
+      return undefined
+    }
+    g.status = 'revoked'
+    g.revokedBy = input.revokedBy
+    g.revokedAt = input.revokedAt
+    g.revocationReasonCode = input.revocationReasonCode
+    g.updatedAt = input.revokedAt
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: g.orgId,
+      workspaceId: g.workspaceId,
+      resourceId: g.id,
+      createdAt: input.revokedAt,
+    })
+    this.appendDeliveryReceipt(g.orgId, g.workspaceId, input.receipt)
+    return { ...g }
+  }
+
+  async expireDeliveryGrants(input: {
+    now: string
+    limit: number
+    auditAction: string
+    workspaceId?: string
+    orgId?: string
+  }): Promise<SageDeliveryGrant[]> {
+    const expired: SageDeliveryGrant[] = []
+    const candidates = [...this.deliveryGrants.values()]
+      .filter((g) => !input.workspaceId || g.workspaceId === input.workspaceId)
+      .filter((g) => !input.orgId || g.orgId === input.orgId)
+      .filter(
+        (g) =>
+          (g.status === 'issued' && g.invitationExpiresAt <= input.now) ||
+          (g.status === 'active' && g.accessExpiresAt <= input.now),
+      )
+      .sort((a, b) => a.issuedAt.localeCompare(b.issuedAt) || a.id.localeCompare(b.id))
+      .slice(0, input.limit)
+    for (const g of candidates) {
+      g.status = 'expired'
+      g.updatedAt = input.now
+      const eventId = `${g.id}:grant_expired`
+      this.enqueueAuditOutboxInternal(
+        {
+          eventId,
+          actorId: 'system',
+          action: input.auditAction,
+          resourceType: 'sage_delivery_grant',
+          safePayload: { grantId: g.id, deliveryRequestId: g.deliveryRequestId },
+        },
+        { orgId: g.orgId, workspaceId: g.workspaceId, resourceId: g.id, createdAt: input.now },
+      )
+      this.appendDeliveryReceipt(g.orgId, g.workspaceId, {
+        eventId,
+        deliveryRequestId: g.deliveryRequestId,
+        grantId: g.id,
+        packageId: g.exportPackageId,
+        recipientId: g.recipientId,
+        eventType: 'grant_expired',
+        safeReasonCode: 'expired',
+        occurredAt: input.now,
+      })
+      expired.push({ ...g })
+    }
+    return expired
+  }
+
+  async createDeliveryReceipt(input: {
+    orgId: string
+    workspaceId: string
+    receipt: SageDeliveryReceiptIntent
+  }): Promise<SageDeliveryReceipt | undefined> {
+    const before = this.deliveryReceipts.length
+    this.appendDeliveryReceipt(input.orgId, input.workspaceId, input.receipt)
+    if (this.deliveryReceipts.length === before) return undefined // duplicate event_id
+    return this.deliveryReceipts[this.deliveryReceipts.length - 1]
+  }
+
+  async listDeliveryReceipts(
+    grantId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageDeliveryReceipt[]> {
+    return this.deliveryReceipts
+      .filter((r) => r.grantId === grantId && r.workspaceId === workspaceId && r.orgId === orgId)
+      .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt) || a.id.localeCompare(b.id))
   }
 }
