@@ -24,6 +24,14 @@ export const SAGE_PERMISSIONS = {
   EXPORT_DELIVERY_APPROVE: 'sage.export.delivery.approve',
   EXPORT_DELIVERY_REVOKE: 'sage.export.delivery.revoke',
   EXPORT_DELIVERY_READ: 'sage.export.delivery.read',
+  // Phase 8B — records lifecycle (retention, legal holds, destruction). Each is
+  // a narrow, distinct authority; generic platform/org admin never inherits any.
+  EXPORT_RETENTION_ASSIGN: 'sage.export.retention.assign',
+  EXPORT_LEGAL_HOLD_MANAGE: 'sage.export.legal_hold.manage',
+  EXPORT_DESTRUCTION_REQUEST: 'sage.export.destruction.request',
+  EXPORT_DESTRUCTION_APPROVE: 'sage.export.destruction.approve',
+  EXPORT_DESTRUCTION_EXECUTE: 'sage.export.destruction.execute',
+  EXPORT_DESTRUCTION_READ: 'sage.export.destruction.read',
 } as const
 
 export type SagePermission = (typeof SAGE_PERMISSIONS)[keyof typeof SAGE_PERMISSIONS]

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-10T13:13:34.286Z",
+  "generatedAt": "2026-07-15T01:29:51.766Z",
   "violations": [
     {
       "name": "ai:analyze",
@@ -852,6 +852,10 @@
     },
     {
       "name": "verify:env",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "verify:migrations",
       "pattern": "tsx-root"
     },
     {

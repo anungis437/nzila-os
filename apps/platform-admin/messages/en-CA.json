@@ -1,4 +1,28 @@
 {
+  "sageRecords": {
+    "title": "Records lifecycle",
+    "retentionPolicy": "Retention policy",
+    "retentionPeriod": "Retention period",
+    "retainUntil": "Retain until",
+    "legalHold": "Legal hold",
+    "placeLegalHold": "Place legal hold",
+    "releaseLegalHold": "Release legal hold",
+    "destructionEligibility": "Destruction eligibility",
+    "destructionBlocked": "Destruction blocked",
+    "requestDestruction": "Request destruction",
+    "approveDestruction": "Approve destruction",
+    "denyDestruction": "Deny destruction",
+    "verifiedDestroyed": "Verified destroyed",
+    "destructionFailed": "Destruction failed",
+    "packageUnavailable": "Package unavailable",
+    "activeLegalHoldPreventsDestruction": "An active legal hold prevents destruction",
+    "retentionPeriodNotElapsed": "The retention period has not elapsed",
+    "differentApproverRequired": "A different authorized person must approve this destruction",
+    "retentionNotAssigned": "No retention policy is assigned",
+    "packageAlreadyDestroyed": "This package has already been destroyed",
+    "confirmDestruction": "Confirm destruction",
+    "tombstone": "This package has been permanently destroyed and can no longer be downloaded or delivered."
+  },
   "sageDelivery": {
     "title": "Secure delivery",
     "intro": "External access is verified, independently approved, revocable, and expiring.",

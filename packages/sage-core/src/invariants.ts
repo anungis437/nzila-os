@@ -160,7 +160,16 @@ export function assertDeliveryRequesterCannotApproveOwn(input: {
   }
 }
 
-// ── Admin roles do not auto-escalate ─────────────────────────────────────────
+// ── Phase 8B: destruction separation of duties ───────────────────────────────
+
+export function assertDestructionRequesterCannotApproveOwn(input: {
+  requestedBy: string
+  approverId: string
+}): void {
+  if (input.requestedBy === input.approverId) {
+    fail('destruction approval is granted by the requester')
+  }
+}
 
 export function assertPlatformAdminDoesNotAutomaticallyReceiveSensitiveEvidenceAccess(input: {
   role: SageApplicationRole

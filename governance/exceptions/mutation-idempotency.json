@@ -218,6 +218,12 @@
       "owner": "platform-team",
       "justification": "Protected SAGE scheduler endpoint. Each attempt is claimed from the durable outbox with a fenced lease and uses a stable provider idempotency key, so replaying the scheduler request cannot create a second issuance or a second live claim.",
       "expiresOn": "2027-07-01"
+    },
+    {
+      "path": "apps/platform-admin/app/api/internal/sage/destruction/*/execute/route.ts",
+      "owner": "platform-team",
+      "justification": "Protected SAGE destruction-execution endpoint. Execution is fenced by a leased execution owner on the destruction request and is idempotent by the request identity: a verified-destroyed request replays its authoritative evidence, an executing request is claimed by exactly one worker, and a stale lease is reclaimed with fencing. Replaying the internal request cannot delete twice or tombstone twice.",
+      "expiresOn": "2027-07-01"
     }
   ]
 }

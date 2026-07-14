@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-07-14 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-07-15 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -10,8 +10,8 @@
 | Packages (packages/*) | 222 |
 | Workspace Packages (apps|packages|services|tooling) | 254 |
 | GitHub Workflows | 52 |
-| Contract Test Files | 269 |
-| TS/JS Test Files | 2454 |
+| Contract Test Files | 271 |
+| TS/JS Test Files | 2460 |
 | Python Test Files | 32 |
 
 ## Apps
@@ -32,7 +32,7 @@
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 105 |  |
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 35 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 110 | Partner portal for managing deals, commissions, certifications, and go-to-market |
-| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 168 | Internal admin console for managing platform services — events, knowledge, ontol |
+| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 182 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade management — deals, listings, shipments, and commission track |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |

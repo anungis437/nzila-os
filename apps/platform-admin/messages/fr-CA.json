@@ -1,4 +1,28 @@
 {
+  "sageRecords": {
+    "title": "Cycle de vie des documents",
+    "retentionPolicy": "Calendrier de conservation",
+    "retentionPeriod": "Période de conservation",
+    "retainUntil": "Conserver jusqu'au",
+    "legalHold": "Gel juridique",
+    "placeLegalHold": "Appliquer un gel juridique",
+    "releaseLegalHold": "Lever le gel juridique",
+    "destructionEligibility": "Admissibilité à la destruction",
+    "destructionBlocked": "Destruction bloquée",
+    "requestDestruction": "Demander la destruction",
+    "approveDestruction": "Approuver la destruction",
+    "denyDestruction": "Refuser la destruction",
+    "verifiedDestroyed": "Destruction vérifiée",
+    "destructionFailed": "Échec de la destruction",
+    "packageUnavailable": "Lot indisponible",
+    "activeLegalHoldPreventsDestruction": "Un gel juridique actif empêche la destruction",
+    "retentionPeriodNotElapsed": "La période de conservation n'est pas écoulée",
+    "differentApproverRequired": "Une autre personne autorisée doit approuver cette destruction",
+    "retentionNotAssigned": "Aucun calendrier de conservation n'est attribué",
+    "packageAlreadyDestroyed": "Ce lot a déjà été détruit",
+    "confirmDestruction": "Confirmer la destruction",
+    "tombstone": "Ce lot a été détruit de façon permanente et ne peut plus être téléchargé ni transmis."
+  },
   "sageDelivery": {
     "title": "Livraison sécurisée",
     "intro": "L’accès externe est vérifié, approuvé indépendamment, révocable et à durée limitée.",

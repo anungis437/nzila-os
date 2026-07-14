@@ -4,6 +4,8 @@
 // Boundaries: no automated decisions, no scoring/ranking, no certification,
 // no public availability/procurement claim. Human review required; export gated.
 
+import type { SagePackageAvailabilityStatus } from './records-types'
+
 export const SAGE_INSTITUTION_TYPES = [
   'department_ministry',
   'crown_corporation',
@@ -51,6 +53,12 @@ export const SAGE_APPLICATION_ROLES = [
   'external_reviewer',
   'export_approver',
   'export_delivery_approver',
+  // Phase 8B — records lifecycle roles. Distinct, non-overlapping authorities so
+  // no single actor can drive an unchecked destruction.
+  'records_manager',
+  'legal_hold_manager',
+  'destruction_approver',
+  'destruction_executor',
 ] as const
 export type SageApplicationRole = (typeof SAGE_APPLICATION_ROLES)[number]
 
@@ -263,6 +271,12 @@ export type SageExportPackage = {
   generatedBy: string
   generatedAt: string
   createdAt: string
+  /** Phase 8B tombstone — 'available' until a verified destruction, then 'destroyed'. */
+  availabilityStatus?: SagePackageAvailabilityStatus
+  destroyedAt?: string | null
+  destroyedBy?: string | null
+  destructionRequestId?: string | null
+  destructionEvidenceId?: string | null
 }
 
 /** Immutable private package bytes (content-addressed, insert-only). */
