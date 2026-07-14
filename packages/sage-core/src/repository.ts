@@ -30,6 +30,8 @@ import type {
   SageDeliveryRecipient,
   SageDeliveryRequest,
   SageDeliveryRevocationReasonCode,
+  SageNotificationOutbox,
+  SageNotificationOutboxIntent,
 } from './delivery-types'
 import { conflict } from './service-errors'
 
@@ -276,6 +278,7 @@ export interface SageRepository {
     updatedAt: string
     auditEvent: SageAuditOutboxIntent
     receipt: SageDeliveryReceiptIntent
+    notification: SageNotificationOutboxIntent
   }): Promise<{ grant: SageDeliveryGrant; created: boolean } | undefined>
 
   getDeliveryGrant(
@@ -343,6 +346,42 @@ export interface SageRepository {
     workspaceId: string,
     orgId: string,
   ): Promise<SageDeliveryReceipt[]>
+
+  // ── Notification Outbox (Phase 8A.1) ──────────────────────────────────────
+  enqueueNotificationOutbox(input: {
+    intent: SageNotificationOutboxIntent
+    orgId: string
+    workspaceId: string
+    recipientId: string
+  }): Promise<SageNotificationOutbox | undefined>
+  getNotificationOutboxByMessageId(messageId: string): Promise<SageNotificationOutbox | undefined>
+  getNotificationOutboxById(id: string): Promise<SageNotificationOutbox | undefined>
+  claimPendingNotificationForDispatch(input: {
+    maxAttempts?: number
+    dispatchOwner: string
+    leaseMs?: number
+  }): Promise<SageNotificationOutbox | undefined>
+  markNotificationDispatched(input: {
+    id: string
+    dispatchOwner: string
+    providerMessageId?: string
+    providerRequestId?: string
+  }): Promise<{ success: boolean }>
+  markNotificationFailed(input: {
+    id: string
+    dispatchOwner: string
+    errorCode?: string
+    errorMessage?: string
+  }): Promise<{ success: boolean }>
+  releaseNotificationOutboxToPending(id: string): Promise<{ success: boolean }>
+  listPendingNotificationOutbox(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageNotificationOutbox[]>
+  listNotificationOutboxByGrant(
+    grantId: string,
+    orgId: string,
+  ): Promise<SageNotificationOutbox[]>
 }
 
 let counter = 0
@@ -373,6 +412,8 @@ export class InMemorySageRepository implements SageRepository {
   private deliveryApprovals: SageDeliveryApproval[] = []
   private deliveryGrants = new Map<string, SageDeliveryGrant>()
   private deliveryReceipts: SageDeliveryReceipt[] = []
+  // Phase 8A.1 — notification outbox
+  private notificationOutbox: SageNotificationOutbox[] = []
 
   async createWorkspace(input: Omit<SageWorkspace, 'id'>): Promise<SageWorkspace> {
     const ws: SageWorkspace = { ...input, id: nextId('ws') }
@@ -1108,6 +1149,7 @@ export class InMemorySageRepository implements SageRepository {
     updatedAt: string
     auditEvent: SageAuditOutboxIntent
     receipt: SageDeliveryReceiptIntent
+    notification: SageNotificationOutboxIntent
   }): Promise<{ grant: SageDeliveryGrant; created: boolean } | undefined> {
     // Idempotent: exactly one grant per request.
     const existing = [...this.deliveryGrants.values()].find(
@@ -1135,6 +1177,14 @@ export class InMemorySageRepository implements SageRepository {
       createdAt: grant.issuedAt,
     })
     this.appendDeliveryReceipt(grant.orgId, grant.workspaceId, input.receipt)
+    // Enqueue notification message in the same logical transaction
+    // The grant is now created, so fill in the grantId
+    await this.enqueueNotificationOutbox({
+      intent: { ...input.notification, grantId: grant.id },
+      orgId: grant.orgId,
+      workspaceId: grant.workspaceId,
+      recipientId: grant.recipientId,
+    })
     return { grant, created: true }
   }
 
@@ -1334,5 +1384,112 @@ export class InMemorySageRepository implements SageRepository {
     return this.deliveryReceipts
       .filter((r) => r.grantId === grantId && r.workspaceId === workspaceId && r.orgId === orgId)
       .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt) || a.id.localeCompare(b.id))
+  }
+
+  // ── Notification Outbox (Phase 8A.1, in-memory) ──────────────────────────
+  async enqueueNotificationOutbox(input: {
+    intent: SageNotificationOutboxIntent
+    orgId: string
+    workspaceId: string
+    recipientId: string
+  }): Promise<SageNotificationOutbox | undefined> {
+    const existing = this.notificationOutbox.find((n) => n.messageId === input.intent.messageId)
+    if (existing) return existing
+    const msg: SageNotificationOutbox = {
+      id: nextId('notif'),
+      messageId: input.intent.messageId,
+      orgId: input.orgId,
+      workspaceId: input.workspaceId,
+      deliveryRequestId: input.intent.deliveryRequestId,
+      grantId: input.intent.grantId,
+      recipientId: input.recipientId,
+      provider: input.intent.provider,
+      template: input.intent.template,
+      recipientAddressHash: input.intent.recipientAddressHash,
+      encryptedPayload: input.intent.encryptedPayload,
+      encryptionKeyReference: input.intent.encryptionKeyReference || 'sage-notification:v1',
+      status: 'pending',
+      attemptCount: 0,
+      maxRetries: 5,
+      createdAt: input.intent.createdAt,
+    }
+    this.notificationOutbox.push(msg)
+    return msg
+  }
+
+  async getNotificationOutboxByMessageId(messageId: string): Promise<SageNotificationOutbox | undefined> {
+    return this.notificationOutbox.find((n) => n.messageId === messageId)
+  }
+
+  async getNotificationOutboxById(id: string): Promise<SageNotificationOutbox | undefined> {
+    return this.notificationOutbox.find((n) => n.id === id)
+  }
+
+  async claimPendingNotificationForDispatch(input: {
+    maxAttempts?: number
+    dispatchOwner: string
+    leaseMs?: number
+  }): Promise<SageNotificationOutbox | undefined> {
+    const maxAttempts = input.maxAttempts ?? 1
+    const leaseMs = input.leaseMs ?? 5 * 60 * 1000
+    const now = new Date()
+    const pending = this.notificationOutbox.find(
+      (n) =>
+        (n.status === 'pending' || (n.status === 'dispatching' && n.leaseExpiresAt && new Date(n.leaseExpiresAt) < now)) &&
+        n.attemptCount < maxAttempts,
+    )
+    if (!pending) return undefined
+    pending.status = 'dispatching'
+    pending.dispatchOwner = input.dispatchOwner
+    pending.leaseExpiresAt = new Date(now.getTime() + leaseMs).toISOString()
+    pending.attemptCount += 1
+    return pending
+  }
+
+  async markNotificationDispatched(input: {
+    id: string
+    dispatchOwner: string
+    providerMessageId?: string
+    providerRequestId?: string
+  }): Promise<{ success: boolean }> {
+    const msg = this.notificationOutbox.find((n) => n.id === input.id && n.dispatchOwner === input.dispatchOwner)
+    if (!msg) return { success: false }
+    msg.status = 'dispatched'
+    msg.dispatchedAt = new Date().toISOString()
+    if (input.providerMessageId) msg.providerMessageId = input.providerMessageId
+    return { success: true }
+  }
+
+  async markNotificationFailed(input: {
+    id: string
+    dispatchOwner: string
+    errorCode?: string
+    errorMessage?: string
+  }): Promise<{ success: boolean }> {
+    const msg = this.notificationOutbox.find((n) => n.id === input.id && n.dispatchOwner === input.dispatchOwner)
+    if (!msg) return { success: false }
+    msg.status = 'failed'
+    msg.lastErrorCode = input.errorCode
+    msg.lastErrorMessage = input.errorMessage
+    return { success: true }
+  }
+
+  async releaseNotificationOutboxToPending(id: string): Promise<{ success: boolean }> {
+    const msg = this.notificationOutbox.find((n) => n.id === id && n.status === 'dispatching' && n.leaseExpiresAt && new Date(n.leaseExpiresAt) < new Date())
+    if (!msg) return { success: false }
+    msg.status = 'pending'
+    msg.dispatchOwner = undefined
+    msg.leaseExpiresAt = undefined
+    return { success: true }
+  }
+
+  async listPendingNotificationOutbox(workspaceId: string, orgId: string): Promise<SageNotificationOutbox[]> {
+    return this.notificationOutbox.filter(
+      (n) => n.workspaceId === workspaceId && n.orgId === orgId && n.status === 'pending',
+    )
+  }
+
+  async listNotificationOutboxByGrant(grantId: string, orgId: string): Promise<SageNotificationOutbox[]> {
+    return this.notificationOutbox.filter((n) => n.grantId === grantId && n.orgId === orgId)
   }
 }

@@ -44,6 +44,8 @@ import type {
   SageDeliveryRecipient,
   SageDeliveryRequest,
   SageDeliveryRevocationReasonCode,
+  SageNotificationOutbox,
+  SageNotificationOutboxIntent,
 } from './delivery-types'
 import {
   mapBoundaryFlag,
@@ -64,6 +66,7 @@ import {
   mapDeliveryApproval,
   mapDeliveryGrant,
   mapDeliveryReceipt,
+  mapNotificationOutbox,
   type SageBoundaryFlagRow,
   type SageDecisionRecordRow,
   type SageEvidenceAuthorizationRow,
@@ -73,6 +76,7 @@ import {
   type SageExportPackageRow,
   type SageExportRequestRow,
   type SageAuditOutboxRow,
+  type SageNotificationOutboxRow,
   type SageReviewNoteRow,
   type SageRoleAssignmentRow,
   type SageWorkspaceMemberRow,
@@ -1339,34 +1343,52 @@ export class PostgresSageRepository implements SageRepository {
     updatedAt: string
     auditEvent: SageAuditOutboxIntent
     receipt: SageDeliveryReceiptIntent
+    notification: SageNotificationOutboxIntent
   }): Promise<{ grant: SageDeliveryGrant; created: boolean } | undefined> {
     const g = input.grant
     const rc = input.receipt
-    // Atomic: flip approved request → issued, insert exactly one grant, enqueue
-    // the invitation_issued receipt + audit. Loser (request not approved, or a
-    // grant already exists) inserts nothing here.
+    const n = input.notification
+    // Atomic CTE (Pattern A): dependency chain ensures grant cannot exist without notification.
+    // 1. issued_req: claim approved request (if not approved or grant exists, returns zero)
+    // 2. notification: insert notification (fails transaction if message_id conflict)
+    // 3. grant_row: insert grant, depends on notification succeeding
+    // 4. outbox/receipt: depend on grant_row
+    // Guarantee: grant + notification commit together or not at all. No grant without notification.
     const { rows } = await this.sql.query<SageDeliveryGrantRow>(
       `with issued_req as (
          update sage_delivery_request
-           set status = 'issued', updated_at = $19
+           set status = 'issued', updated_at = $21
          where id = $3 and workspace_id = $2 and org_id = $1 and status = 'approved'
              and not exists (select 1 from sage_delivery_grant where delivery_request_id = $3)
          returning id
+       ),
+       notification as (
+         insert into sage_notification_outbox
+           (message_id, org_id, workspace_id, delivery_request_id,
+            recipient_id, provider, template, recipient_address_hash,
+            encrypted_payload, encryption_key_reference, status,
+            attempt_count, max_retries, created_at)
+         select $22, $1, $2, $3, $5, $23, $24, $25, $26, 'sage-notification:v1',
+                'pending', 0, 5, $11
+         from issued_req
+         returning id, delivery_request_id, provider, template, recipient_id
        ),
        grant_row as (
          insert into sage_delivery_grant
            (org_id, workspace_id, delivery_request_id, export_package_id,
             recipient_id, status, invitation_token_hash, invitation_expires_at,
             access_expires_at, max_accesses, access_count, issued_by, issued_at, updated_at)
-         select $1, $2, $3, $4, $5, 'issued', $6, $7, $8, $9, 0, $10, $11, $11 from issued_req
-         on conflict (delivery_request_id) do nothing
+         select $1, $2, notification.delivery_request_id, $4, notification.recipient_id,
+                'issued', $6, $7, $8, $9, 0, $10, $11, $11
+         from notification
          returning *
        ),
        outbox as (
          insert into sage_audit_outbox
            (event_id, org_id, workspace_id, actor_id, action, resource_type,
             resource_id, safe_payload_json, status, attempt_count, created_at)
-         select $12, $1, $2, $13, $14, $15, grant_row.id, $16::jsonb, 'pending', 0, $11 from grant_row
+         select $12, $1, $2, $13, $14, $15, grant_row.id, $16::jsonb, 'pending', 0, $11
+         from grant_row
          on conflict (event_id) do nothing
          returning event_id
        ),
@@ -1374,9 +1396,13 @@ export class PostgresSageRepository implements SageRepository {
          insert into sage_delivery_receipt
            (event_id, org_id, workspace_id, delivery_request_id, grant_id,
             package_id, recipient_id, event_type, safe_reason_code, occurred_at, created_at)
-         select $17, $1, $2, $3, grant_row.id, $4, $5, $18, $20, $11, $11 from grant_row
+         select $17, $1, $2, $3, grant_row.id, $4, grant_row.recipient_id, $18, $20, $11, $11
+         from grant_row
          on conflict (event_id) do nothing
          returning event_id
+       ),
+       verify_notification as (
+         select id from notification
        )
        select * from grant_row`,
       [
@@ -1400,6 +1426,12 @@ export class PostgresSageRepository implements SageRepository {
         rc.eventType,
         input.updatedAt,
         rc.safeReasonCode ?? null,
+        input.updatedAt,
+        n.messageId,
+        n.provider,
+        n.template,
+        n.recipientAddressHash,
+        n.encryptedPayload,
       ],
     )
     const row = firstOrUndefined(rows)
@@ -1748,5 +1780,182 @@ export class PostgresSageRepository implements SageRepository {
       [grantId, workspaceId, orgId],
     )
     return rows.map(mapDeliveryReceipt)
+  }
+
+  // ── Notification Outbox (Phase 8A.1) ──────────────────────────────────────
+  // Durable queue for invitation delivery. Enables crash recovery: if the
+  // process crashes after grant creation, the encrypted invitation payload can
+  // be recovered and resent to the recipient.
+
+  async enqueueNotificationOutbox(input: {
+    intent: SageNotificationOutboxIntent
+    orgId: string
+    workspaceId: string
+    recipientId: string
+  }): Promise<SageNotificationOutbox | undefined> {
+    const intent = input.intent
+    const { rows } = await this.sql.query<SageNotificationOutboxRow>(
+      `insert into sage_notification_outbox
+         (message_id, org_id, workspace_id, delivery_request_id, grant_id,
+          recipient_id, provider, template, recipient_address_hash,
+          encrypted_payload, encryption_key_reference, status,
+          attempt_count, max_retries, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', 0, 5, $12)
+       on conflict (message_id) do nothing
+       returning *`,
+      [
+        intent.messageId,
+        input.orgId,
+        input.workspaceId,
+        intent.deliveryRequestId,
+        intent.grantId,
+        input.recipientId,
+        intent.provider,
+        intent.template,
+        intent.recipientAddressHash,
+        intent.encryptedPayload,
+        'sage-notification:v1',
+        intent.createdAt,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (row) return mapNotificationOutbox(row)
+
+    // Already enqueued (idempotent)
+    const existing = await this.getNotificationOutboxByMessageId(intent.messageId)
+    return existing
+  }
+
+  async getNotificationOutboxByMessageId(messageId: string): Promise<SageNotificationOutbox | undefined> {
+    const { rows } = await this.sql.query<SageNotificationOutboxRow>(
+      `select * from sage_notification_outbox where message_id = $1`,
+      [messageId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapNotificationOutbox(row) : undefined
+  }
+
+  async getNotificationOutboxById(id: string): Promise<SageNotificationOutbox | undefined> {
+    const { rows } = await this.sql.query<SageNotificationOutboxRow>(
+      `select * from sage_notification_outbox where id = $1`,
+      [id],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapNotificationOutbox(row) : undefined
+  }
+
+  /**
+   * Claim a pending notification message for dispatch.
+   * Uses lease/fence pattern identical to Phase 7 audit-outbox.
+   * Only one owner can hold a message at a time (checked at UPDATE time).
+   */
+  async claimPendingNotificationForDispatch(input: {
+    maxAttempts?: number
+    dispatchOwner: string
+    leaseMs?: number
+  }): Promise<SageNotificationOutbox | undefined> {
+    const maxAttempts = input.maxAttempts ?? 1
+    const leaseMs = input.leaseMs ?? 5 * 60 * 1000 // 5 minutes
+    const now = new Date().toISOString()
+    const leaseExpires = new Date(Date.parse(now) + leaseMs).toISOString()
+
+    const { rows } = await this.sql.query<SageNotificationOutboxRow>(
+      `update sage_notification_outbox
+       set status = 'dispatching', dispatch_owner = $2, lease_expires_at = $3, attempt_count = attempt_count + 1
+       where id = (
+         select id from sage_notification_outbox
+         where (status = 'pending' or (status = 'dispatching' and lease_expires_at < now()))
+           and attempt_count < $4
+         order by created_at asc
+         limit 1
+         for update skip locked
+       )
+       returning *`,
+      [null, input.dispatchOwner, leaseExpires, maxAttempts],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapNotificationOutbox(row) : undefined
+  }
+
+  /**
+   * Mark a notification as dispatched (successfully sent by provider).
+   * Validates that the claiming owner still holds the lease.
+   */
+  async markNotificationDispatched(input: {
+    id: string
+    dispatchOwner: string
+    providerMessageId?: string
+    providerRequestId?: string
+  }): Promise<{ success: boolean }> {
+    const now = new Date().toISOString()
+    const { rows } = await this.sql.query<{ id: string }>(
+      `update sage_notification_outbox
+       set status = 'dispatched', dispatched_at = $2, provider_message_id = coalesce($3, provider_message_id)
+       where id = $1 and dispatch_owner = $4
+       returning id`,
+      [input.id, now, input.providerMessageId ?? null, input.dispatchOwner],
+    )
+    return { success: rows.length > 0 }
+  }
+
+  /**
+   * Mark a notification as failed (provider rejected or unreachable).
+   * Validates that the claiming owner still holds the lease.
+   */
+  async markNotificationFailed(input: {
+    id: string
+    dispatchOwner: string
+    errorCode?: string
+    errorMessage?: string
+  }): Promise<{ success: boolean }> {
+    const { rows } = await this.sql.query<{ id: string }>(
+      `update sage_notification_outbox
+       set status = 'failed', last_error_code = $3, last_error_message = $4
+       where id = $1 and dispatch_owner = $2
+       returning id`,
+      [input.id, input.dispatchOwner, input.errorCode ?? null, input.errorMessage ?? null],
+    )
+    return { success: rows.length > 0 }
+  }
+
+  /**
+   * Release a notification message back to pending (dispatcher crashed or lease expired).
+   * Called when a dispatcher crashes and a stale lease is detected.
+   */
+  async releaseNotificationOutboxToPending(id: string): Promise<{ success: boolean }> {
+    const { rows } = await this.sql.query<{ id: string }>(
+      `update sage_notification_outbox
+       set status = 'pending', dispatch_owner = null, lease_expires_at = null
+       where id = $1 and status = 'dispatching' and lease_expires_at < now()
+       returning id`,
+      [id],
+    )
+    return { success: rows.length > 0 }
+  }
+
+  async listPendingNotificationOutbox(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageNotificationOutbox[]> {
+    const { rows } = await this.sql.query<SageNotificationOutboxRow>(
+      `select * from sage_notification_outbox
+       where workspace_id = $1 and org_id = $2 and status = 'pending'
+       order by created_at asc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapNotificationOutbox)
+  }
+
+  async listNotificationOutboxByGrant(
+    grantId: string,
+    orgId: string,
+  ): Promise<SageNotificationOutbox[]> {
+    const { rows } = await this.sql.query<SageNotificationOutboxRow>(
+      `select * from sage_notification_outbox
+       where grant_id = $1 and org_id = $2
+       order by created_at asc`,
+      [grantId, orgId],
+    )
+    return rows.map(mapNotificationOutbox)
   }
 }

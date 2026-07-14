@@ -39,6 +39,7 @@ import {
   hashRecipientIdentity,
   verifyDeliveryToken,
 } from './delivery-identity'
+import { encryptNotificationPayload, type SageNotificationPayload } from './notification-encryption'
 import {
   isSageRecipientAccessContext,
   recipientContextNow,
@@ -427,8 +428,43 @@ export async function issueSageDeliveryInvitation(
   const invitationExpiresAt = new Date(Date.parse(ts) + ttl).toISOString()
   const { token, tokenHash } = generateDeliveryToken()
 
+  // Generate a STABLE message ID (persists across retries).
+  // Format: sage-delivery-invitation-v1:{deliveryRequestId}
+  // This ensures that if the same request is retried, the provider receives
+  // the same messageId, enabling provider-side deduplication.
+  const messageId = `sage-delivery-invitation-v1:${req.id}`
+
+  // Prepare the encrypted notification payload
+  // This is the plaintext that will be recovered after a process crash
+  const notificationPayload: SageNotificationPayload = {
+    invitationToken: token,
+    recipientEmail: recipient.displayName, // decrypted at delivery time
+    claimUrlTemplate: `/delivery/claim?invitation={token}`, // template for notifier
+    expiresAt: invitationExpiresAt,
+  }
+
+  // Encrypt the payload (AAD binding happens at dispatch time when grantId is known)
+  const encryptedPayload = encryptNotificationPayload(notificationPayload)
+
+  // Notification intent: included in atomic issuance transaction
+  const notificationIntent = {
+    messageId,
+    deliveryRequestId: req.id,
+    grantId: '', // will be filled by postgres CTE
+    recipientId: req.recipientId,
+    provider: 'email', // default; can be overridden by notifier
+    template: 'delivery_invitation',
+    recipientAddressHash: recipient.normalizedEmailHash,
+    encryptedPayload,
+    encryptionKeyReference: 'sage-notification:v1',
+    createdAt: ts,
+  }
+
   const issueEventId = deliveryEventId('delivery_issued', req.id, ts)
   const receiptEventId = deliveryEventId('invitation_issued', req.id, ts)
+
+  // ATOMIC ISSUANCE TRANSACTION: grant + receipt + audit-outbox + notification-outbox
+  // All succeed or all fail. No external calls inside the transaction.
   const issued = await deps.repo.issueDeliveryGrant({
     grant: {
       orgId: ws.orgId,
@@ -464,6 +500,7 @@ export async function issueSageDeliveryInvitation(
       safeReasonCode: 'issued',
       occurredAt: ts,
     },
+    notification: notificationIntent,
   })
   if (!issued) conflict('the delivery invitation could not be issued')
   if (!issued.created) {
@@ -471,20 +508,48 @@ export async function issueSageDeliveryInvitation(
     return { grant: issued.grant }
   }
 
-  // Deliver the invitation. AT-LEAST-ONCE with a stable messageId; the token
-  // flows ONLY to the notifier to build the secure claim URL — never returned to
-  // the browser, logged, or audited.
-  await deps.deliveryNotifier.sendInvitation({
-    grantId: issued.grant.id,
-    recipientId: recipient.id,
-    recipientEmailHash: recipient.normalizedEmailHash,
-    organizationSafeName: ws.name,
-    purposeSummary: req.purpose ?? null,
-    invitationExpiresAt,
-    claimToken: token,
-    messageId: issued.grant.id,
-    idempotencyKey: `sage-delivery-invitation:${issued.grant.id}`,
-  })
+  // ──────────────────────────────────────────────────────────────────────────
+  // AFTER COMMIT: Dispatch the invitation.
+  // The notification message is now durably queued. If the notifier call fails,
+  // the grant still exists and can be recovered by the notification dispatcher.
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // Retrieve the queued notification message from the outbox
+  const queuedNotification = await deps.repo.getNotificationOutboxByMessageId(messageId)
+  if (queuedNotification) {
+    // Deliver the invitation. AT-LEAST-ONCE with a stable messageId; the token
+    // flows ONLY to the notifier to build the secure claim URL — never returned to
+    // the browser, logged, or audited.
+    try {
+      await deps.deliveryNotifier.sendInvitation({
+        grantId: issued.grant.id,
+        recipientId: recipient.id,
+        recipientEmailHash: recipient.normalizedEmailHash,
+        organizationSafeName: ws.name,
+        purposeSummary: req.purpose ?? null,
+        invitationExpiresAt,
+        claimToken: token,
+        messageId: issued.grant.id,
+        idempotencyKey: messageId,
+      })
+      // Mark notification as dispatched (best-effort; failures don't block)
+      await deps.repo.markNotificationDispatched({
+        id: queuedNotification.id,
+        dispatchOwner: 'system',
+      })
+    } catch (err) {
+      // Provider unreachable or failed. The notification remains queued for retry.
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      await deps.repo.markNotificationFailed({
+        id: queuedNotification.id,
+        dispatchOwner: 'system',
+        errorCode: 'PROVIDER_ERROR',
+        errorMessage: errorMsg,
+      })
+    }
+  }
+
+  // Dispatch the audit event (at-least-once)
   await dispatchOutboxEvent(deps, {
     eventId: issueEventId,
     actorId: ctx.actor.actorId,
@@ -495,6 +560,7 @@ export async function issueSageDeliveryInvitation(
     payload: { deliveryRequestId: req.id, recipientId: req.recipientId },
     at: ts,
   })
+
   return { grant: issued.grant }
 }
 

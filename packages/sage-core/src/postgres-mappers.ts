@@ -43,6 +43,8 @@ import type {
   SageDeliveryRequest,
   SageDeliveryRequestStatus,
   SageDeliveryRevocationReasonCode,
+  SageNotificationOutbox,
+  SageNotificationStatus,
 } from './delivery-types'
 
 // ─── Timestamp normalization ─────────────────────────────────────────────────
@@ -709,5 +711,63 @@ export function mapDeliveryReceipt(row: SageDeliveryReceiptRow): SageDeliveryRec
     safeReasonCode: textOrNull(row.safe_reason_code),
     occurredAt: toIso(row.occurred_at),
     createdAt: toIso(row.created_at),
+  }
+}
+
+// ─── Notification Outbox (Phase 8A.1) ────────────────────────────────────────
+
+export type SageNotificationOutboxRow = {
+  id: string
+  message_id: string
+  org_id: string
+  workspace_id: string
+  delivery_request_id: string
+  grant_id: string
+  recipient_id: string
+  provider: string
+  template: string
+  recipient_address_hash: string
+  encrypted_payload: string
+  encryption_key_reference: string
+  status: string
+  dispatch_owner: string | null
+  lease_expires_at: unknown
+  attempt_count: unknown
+  max_retries: unknown
+  provider_message_id: string | null
+  provider_request_id: string | null
+  last_error_code: string | null
+  last_error_message: string | null
+  created_at: unknown
+  dispatched_at: unknown | null
+  payload_destroyed_at: unknown | null
+}
+
+export function mapNotificationOutbox(row: SageNotificationOutboxRow): SageNotificationOutbox {
+  return {
+    id: row.id,
+    messageId: row.message_id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    deliveryRequestId: row.delivery_request_id,
+    grantId: row.grant_id,
+    recipientId: row.recipient_id,
+    provider: row.provider,
+    template: row.template,
+    recipientAddressHash: row.recipient_address_hash,
+    encryptedPayload: row.encrypted_payload,
+    encryptionKeyReference: row.encryption_key_reference,
+    status: (row.status as SageNotificationStatus) ?? 'pending',
+    dispatchOwner: textOrNull(row.dispatch_owner),
+    leaseExpiresAt: toIsoOrNull(row.lease_expires_at),
+    attemptCount: Number(row.attempt_count ?? 0),
+    maxRetries: Number(row.max_retries ?? 5),
+    providerMessageId: textOrNull(row.provider_message_id),
+    providerRequestId: textOrNull(row.provider_request_id),
+    lastErrorCode: textOrNull(row.last_error_code),
+    lastErrorMessage: textOrNull(row.last_error_message),
+    createdAt: toIso(row.created_at),
+    dispatchedAt: toIsoOrNull(row.dispatched_at),
+    payloadDestroyedAt: toIsoOrNull(row.payload_destroyed_at),
   }
 }

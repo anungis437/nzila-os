@@ -161,3 +161,54 @@ export type SageDeliveryReceiptIntent = {
   safeReasonCode?: string | null
   occurredAt: string
 }
+
+// ── Notification Outbox (Phase 8A.1) ──────────────────────────────────────────
+// Durable notification queue for invitation issuance. Enables crash-safe delivery:
+// the plaintext token is held encrypted in this table and can be recovered after
+// a process crash, allowing the recipient to be notified with the same invitation.
+export const SAGE_NOTIFICATION_STATUSES = ['pending', 'dispatching', 'dispatched', 'failed'] as const
+export type SageNotificationStatus = (typeof SAGE_NOTIFICATION_STATUSES)[number]
+
+export type SageNotificationOutbox = {
+  id: string
+  messageId: string
+  orgId: string
+  workspaceId: string
+  deliveryRequestId: string
+  grantId: string
+  recipientId: string
+  provider: string
+  template: string
+  recipientAddressHash: string
+  encryptedPayload: string // enc:v1:... format; never plaintext
+  encryptionKeyReference: string
+  status: SageNotificationStatus
+  dispatchOwner?: string | null
+  leaseExpiresAt?: string | null
+  attemptCount: number
+  maxRetries: number
+  providerMessageId?: string | null
+  providerRequestId?: string | null
+  lastErrorCode?: string | null
+  lastErrorMessage?: string | null
+  createdAt: string
+  dispatchedAt?: string | null
+  payloadDestroyedAt?: string | null
+}
+
+/**
+ * Intent to enqueue a notification message in the durable outbox.
+ * Called within the same transaction as the grant creation.
+ */
+export type SageNotificationOutboxIntent = {
+  messageId: string
+  deliveryRequestId: string
+  grantId: string
+  recipientId: string
+  provider: string
+  template: string
+  recipientAddressHash: string
+  encryptedPayload: string
+  encryptionKeyReference?: string
+  createdAt: string
+}
