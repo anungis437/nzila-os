@@ -115,6 +115,7 @@ export const SageExportPackageResponse = z.object({
   excludedCount: z.number(),
   generatedBy: z.string(),
   generatedAt: z.string(),
+  availabilityStatus: z.string().optional(),
 })
 export type SageExportPackageResponse = z.infer<typeof SageExportPackageResponse>
 

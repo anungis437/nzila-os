@@ -46,6 +46,21 @@ import type {
   SageNotificationOutbox,
   SageNotificationStatus,
 } from './delivery-types'
+import type {
+  SageDestructionRequestStatus,
+  SageDestructionDecision,
+  SageDestructionResult,
+  SageExportDestructionApproval,
+  SageExportDestructionAttempt,
+  SageDestructionAttemptStatus,
+  SageExportDestructionEvidence,
+  SageExportDestructionRequest,
+  SageExportLegalHold,
+  SageExportRetentionAssignment,
+  SageLegalHoldStatus,
+  SageRetentionBasis,
+  SageRetentionPolicy,
+} from './records-types'
 
 // ─── Timestamp normalization ─────────────────────────────────────────────────
 // timestamptz columns arrive as Date (node-postgres default) or ISO string.
@@ -273,6 +288,11 @@ export type SageExportPackageRow = {
   generated_by: string
   generated_at: unknown
   created_at: unknown
+  availability_status?: string | null
+  destroyed_at?: unknown
+  destroyed_by?: string | null
+  destruction_request_id?: string | null
+  destruction_evidence_id?: string | null
 }
 
 export type SageAuditOutboxRow = {
@@ -496,6 +516,11 @@ export function mapExportPackage(row: SageExportPackageRow): SageExportPackage {
     generatedBy: row.generated_by,
     generatedAt: toIso(row.generated_at),
     createdAt: toIso(row.created_at),
+    availabilityStatus: (row.availability_status as SageExportPackage['availabilityStatus']) ?? 'available',
+    destroyedAt: toIsoOrNull(row.destroyed_at),
+    destroyedBy: row.destroyed_by ?? null,
+    destructionRequestId: row.destruction_request_id ?? null,
+    destructionEvidenceId: row.destruction_evidence_id ?? null,
   }
 }
 
@@ -773,5 +798,309 @@ export function mapNotificationOutbox(row: SageNotificationOutboxRow): SageNotif
     createdAt: toIso(row.created_at),
     dispatchedAt: toIsoOrNull(row.dispatched_at),
     payloadDestroyedAt: toIsoOrNull(row.payload_destroyed_at),
+  }
+}
+
+// ─── Phase 8B: records-lifecycle rows + mappers ──────────────────────────────
+
+export type SageRetentionPolicyRow = {
+  id: string
+  org_id: string
+  policy_code: string
+  version: unknown
+  name: string
+  description: string | null
+  retention_basis: string
+  retention_duration_days: unknown
+  effective_from: unknown
+  effective_to: unknown
+  is_active: unknown
+  created_by: string
+  created_at: unknown
+}
+
+export function mapRetentionPolicy(row: SageRetentionPolicyRow): SageRetentionPolicy {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    policyCode: row.policy_code,
+    version: Number(row.version),
+    name: row.name,
+    description: row.description ?? null,
+    retentionBasis: row.retention_basis as SageRetentionBasis,
+    retentionDurationDays: Number(row.retention_duration_days),
+    effectiveFrom: toIso(row.effective_from),
+    effectiveTo: toIsoOrNull(row.effective_to),
+    isActive: Boolean(row.is_active),
+    createdBy: row.created_by,
+    createdAt: toIso(row.created_at),
+  }
+}
+
+export type SageExportRetentionAssignmentRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  export_package_id: string
+  retention_policy_id: string
+  policy_code: string
+  policy_version: unknown
+  retention_basis: string
+  retention_started_at: unknown
+  retain_until: unknown
+  assigned_by: string
+  assigned_at: unknown
+  retention_basis_source_type?: string | null
+  retention_basis_source_id?: string | null
+  retention_basis_source_timestamp?: unknown
+}
+
+export function mapRetentionAssignment(
+  row: SageExportRetentionAssignmentRow,
+): SageExportRetentionAssignment {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    exportPackageId: row.export_package_id,
+    retentionPolicyId: row.retention_policy_id,
+    policyCode: row.policy_code,
+    policyVersion: Number(row.policy_version),
+    retentionBasis: row.retention_basis as SageRetentionBasis,
+    retentionStartedAt: toIso(row.retention_started_at),
+    retainUntil: toIso(row.retain_until),
+    assignedBy: row.assigned_by,
+    assignedAt: toIso(row.assigned_at),
+    retentionBasisSourceType: (row.retention_basis_source_type as SageRetentionBasis) ?? (row.retention_basis as SageRetentionBasis),
+    retentionBasisSourceId: row.retention_basis_source_id ?? row.export_package_id,
+    retentionBasisSourceTimestamp: row.retention_basis_source_timestamp
+      ? toIso(row.retention_basis_source_timestamp)
+      : toIso(row.retention_started_at),
+  }
+}
+
+export type SageExportLegalHoldRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  export_package_id: string
+  hold_code: string
+  status: string
+  reason: string
+  placed_by: string
+  placed_at: unknown
+  released_by: string | null
+  released_at: unknown
+  release_reason: string | null
+}
+
+export function mapLegalHold(row: SageExportLegalHoldRow): SageExportLegalHold {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    exportPackageId: row.export_package_id,
+    holdCode: row.hold_code,
+    status: row.status as SageLegalHoldStatus,
+    reason: row.reason,
+    placedBy: row.placed_by,
+    placedAt: toIso(row.placed_at),
+    releasedBy: row.released_by ?? null,
+    releasedAt: toIsoOrNull(row.released_at),
+    releaseReason: row.release_reason ?? null,
+  }
+}
+
+export type SageExportDestructionRequestRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  export_package_id: string
+  requested_by: string
+  reason: string
+  status: string
+  package_content_hash: string
+  package_manifest_hash: string
+  storage_reference_hash: string
+  retention_policy_code: string
+  retention_policy_version: unknown
+  retain_until: unknown
+  active_hold_count: unknown
+  active_hold_set_digest?: string | null
+  execution_owner: string | null
+  lease_expires_at: unknown
+  deletion_started_at?: unknown
+  current_attempt_id?: string | null
+  destruction_evidence_id: string | null
+  requested_at: unknown
+  updated_at: unknown
+}
+
+export function mapDestructionRequest(
+  row: SageExportDestructionRequestRow,
+): SageExportDestructionRequest {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    exportPackageId: row.export_package_id,
+    requestedBy: row.requested_by,
+    reason: row.reason,
+    status: row.status as SageDestructionRequestStatus,
+    packageContentHash: row.package_content_hash,
+    packageManifestHash: row.package_manifest_hash,
+    storageReferenceHash: row.storage_reference_hash,
+    retentionPolicyCode: row.retention_policy_code,
+    retentionPolicyVersion: Number(row.retention_policy_version),
+    retainUntil: toIso(row.retain_until),
+    activeHoldCount: Number(row.active_hold_count),
+    activeHoldSetDigest: row.active_hold_set_digest ?? null,
+    executionOwner: row.execution_owner ?? null,
+    leaseExpiresAt: toIsoOrNull(row.lease_expires_at),
+    deletionStartedAt: toIsoOrNull(row.deletion_started_at),
+    currentAttemptId: row.current_attempt_id ?? null,
+    destructionEvidenceId: row.destruction_evidence_id ?? null,
+    requestedAt: toIso(row.requested_at),
+    updatedAt: toIso(row.updated_at),
+  }
+}
+
+export type SageExportDestructionApprovalRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  destruction_request_id: string
+  decision: string
+  approver_id: string
+  rationale: string | null
+  approved_package_content_hash: string
+  approved_manifest_hash: string
+  approved_storage_reference_hash: string
+  approved_retention_policy_code: string
+  approved_retention_policy_version: unknown
+  approved_retain_until: unknown
+  approved_active_hold_count: unknown
+  approved_active_hold_set_digest?: string | null
+  decided_at: unknown
+}
+
+export function mapDestructionApproval(
+  row: SageExportDestructionApprovalRow,
+): SageExportDestructionApproval {
+  return {
+    id: row.id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    destructionRequestId: row.destruction_request_id,
+    decision: row.decision as SageDestructionDecision,
+    approverId: row.approver_id,
+    rationale: row.rationale ?? null,
+    approvedPackageContentHash: row.approved_package_content_hash,
+    approvedManifestHash: row.approved_manifest_hash,
+    approvedStorageReferenceHash: row.approved_storage_reference_hash,
+    approvedRetentionPolicyCode: row.approved_retention_policy_code,
+    approvedRetentionPolicyVersion: Number(row.approved_retention_policy_version),
+    approvedRetainUntil: toIso(row.approved_retain_until),
+    approvedActiveHoldCount: Number(row.approved_active_hold_count),
+    approvedActiveHoldSetDigest: row.approved_active_hold_set_digest ?? null,
+    decidedAt: toIso(row.decided_at),
+  }
+}
+
+export type SageExportDestructionEvidenceRow = {
+  id: string
+  event_id: string
+  org_id: string
+  workspace_id: string
+  destruction_request_id: string
+  export_package_id: string
+  object_id: string | null
+  storage_provider: string
+  storage_reference_hash: string
+  pre_destruction_content_hash: string
+  pre_destruction_manifest_hash: string
+  deletion_attempted_at: unknown
+  deletion_verified_at: unknown
+  verification_method: string | null
+  result: string
+  provider_request_id: string | null
+  safe_error_code: string | null
+  executed_by: string
+  created_at: unknown
+}
+
+export function mapDestructionEvidence(
+  row: SageExportDestructionEvidenceRow,
+): SageExportDestructionEvidence {
+  return {
+    id: row.id,
+    eventId: row.event_id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    destructionRequestId: row.destruction_request_id,
+    exportPackageId: row.export_package_id,
+    objectId: row.object_id ?? null,
+    storageProvider: row.storage_provider,
+    storageReferenceHash: row.storage_reference_hash,
+    preDestructionContentHash: row.pre_destruction_content_hash,
+    preDestructionManifestHash: row.pre_destruction_manifest_hash,
+    deletionAttemptedAt: toIsoOrNull(row.deletion_attempted_at),
+    deletionVerifiedAt: toIsoOrNull(row.deletion_verified_at),
+    verificationMethod: row.verification_method ?? null,
+    result: row.result as SageDestructionResult,
+    providerRequestId: row.provider_request_id ?? null,
+    safeErrorCode: row.safe_error_code ?? null,
+    executedBy: row.executed_by,
+    createdAt: toIso(row.created_at),
+  }
+}
+
+export type SageExportDestructionAttemptRow = {
+  id: string
+  attempt_id: string
+  org_id: string
+  workspace_id: string
+  destruction_request_id: string
+  export_package_id: string
+  object_id: string | null
+  execution_owner: string
+  provider_idempotency_key: string
+  status: string
+  pre_delete_presence_verified: boolean | null
+  pre_delete_verified_at: unknown
+  delete_started_at: unknown
+  provider_result: string | null
+  provider_request_id: string | null
+  post_delete_absence_verified: boolean | null
+  post_delete_verified_at: unknown
+  safe_error_code: string | null
+  created_at: unknown
+  updated_at: unknown
+}
+
+export function mapDestructionAttempt(
+  row: SageExportDestructionAttemptRow,
+): SageExportDestructionAttempt {
+  return {
+    id: row.id,
+    attemptId: row.attempt_id,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    destructionRequestId: row.destruction_request_id,
+    exportPackageId: row.export_package_id,
+    objectId: row.object_id ?? null,
+    executionOwner: row.execution_owner,
+    providerIdempotencyKey: row.provider_idempotency_key,
+    status: row.status as SageDestructionAttemptStatus,
+    preDeletePresenceVerified: row.pre_delete_presence_verified ?? null,
+    preDeleteVerifiedAt: toIsoOrNull(row.pre_delete_verified_at),
+    deleteStartedAt: toIsoOrNull(row.delete_started_at),
+    providerResult: row.provider_result ?? null,
+    providerRequestId: row.provider_request_id ?? null,
+    postDeleteAbsenceVerified: row.post_delete_absence_verified ?? null,
+    postDeleteVerifiedAt: toIsoOrNull(row.post_delete_verified_at),
+    safeErrorCode: row.safe_error_code ?? null,
+    createdAt: toIso(row.created_at),
+    updatedAt: toIso(row.updated_at),
   }
 }

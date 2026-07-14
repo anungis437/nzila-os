@@ -82,6 +82,7 @@ export function toExportPackageResponse(pkg: SageExportPackage): SageExportPacka
     excludedCount: pkg.excludedCount,
     generatedBy: pkg.generatedBy,
     generatedAt: pkg.generatedAt,
+    availabilityStatus: pkg.availabilityStatus ?? 'available',
   }
 }
 

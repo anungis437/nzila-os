@@ -189,6 +189,10 @@ export async function requestSageDelivery(
 
   const pkg = await deps.repo.getExportPackage(input.exportPackageId, ws.id, ws.orgId)
   if (!pkg) notFound('export package')
+  // Phase 8B: a destroyed package can never be newly delivered.
+  if ((pkg.availabilityStatus ?? 'available') === 'destroyed') {
+    conflict('the package has been destroyed and cannot be delivered')
+  }
   const recipient = await deps.repo.getDeliveryRecipient(input.recipientId, ws.id, ws.orgId)
   if (!recipient) notFound('delivery recipient')
   if (recipient.verificationStatus !== 'verified') {
@@ -416,6 +420,10 @@ export async function issueSageDeliveryInvitation(
   // minting an invitation.
   const pkg = await deps.repo.getExportPackage(req.exportPackageId, ws.id, ws.orgId)
   if (!pkg) notFound('export package')
+  // Phase 8B: never issue an invitation for a destroyed package.
+  if ((pkg.availabilityStatus ?? 'available') === 'destroyed') {
+    conflict('the package has been destroyed and cannot be delivered')
+  }
   if (
     pkg.contentHash !== approval.approvedPackageContentHash ||
     pkg.manifestHash !== approval.approvedManifestHash
@@ -880,6 +888,10 @@ export async function authorizeSageRecipientPackageAccess(
 
   const pkg = await deps.repo.getExportPackage(grant.exportPackageId, grant.workspaceId, grant.orgId)
   if (!pkg) await denyRecipientAccess(deps, grant, now, 'package_unavailable')
+  // Phase 8B: a destroyed package tombstone can never be recipient-downloaded.
+  if ((pkg!.availabilityStatus ?? 'available') === 'destroyed') {
+    await denyRecipientAccess(deps, grant, now, 'package_unavailable')
+  }
   const request = await deps.repo.getDeliveryRequest(
     grant.deliveryRequestId,
     grant.workspaceId,

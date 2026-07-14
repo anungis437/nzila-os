@@ -125,6 +125,11 @@ This is the final planning-only SAGE PR. The next PR must begin engineering impl
 > **Phase 8A started: verified external recipients, independently approved delivery grants, revocable grant-scoped
 > access, and durable delivery receipts implemented over immutable export packages.**
 
+> **Phase 8B started: versioned export-package retention, legal holds, independently approved destruction, verified
+> object deletion, and immutable destruction evidence. Destruction is default-deny (retain unless a retention policy
+> is assigned and elapsed with no active legal hold), requires two different named humans, deletes the stored object
+> bytes and independently verifies their absence before tombstoning the package, and records safe, hashed evidence.**
+
 ## 4. Definition of world-class SAGE
 
 World-class SAGE requires all of the following:

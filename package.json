@@ -201,6 +201,7 @@
     "validate:architecture": "tsx packages/platform-validation/src/architecture-audit.ts",
     "validate:claims": "tsx packages/platform-validation/src/claim-verification.ts",
     "validate:docs": "tsx packages/platform-validation/src/doc-consistency.ts",
+    "verify:migrations": "tsx tooling/db/migration-manifest.ts verify",
     "validate:labor-continuity": "node tooling/scripts/validate-labor-continuity-governance.mjs",
     "validate:cognition": "node tooling/scripts/validate-institutional-cognition-convergence.mjs",
     "validate:maturity-elevation": "node tooling/scripts/validate-maturity-convergence.mjs",

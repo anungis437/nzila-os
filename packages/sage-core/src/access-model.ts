@@ -75,6 +75,31 @@ const ROLE_PERMISSIONS: Record<SageApplicationRole, readonly SagePermission[]> =
     SAGE_PERMISSIONS.EXPORT_DELIVERY_REVOKE,
     SAGE_PERMISSIONS.EXPORT_DELIVERY_READ,
   ],
+  // Phase 8B — records lifecycle. Each authority is deliberately isolated:
+  // records management (retention + destruction request) is separate from
+  // legal-hold authority, from destruction approval, and from execution.
+  // A records_manager may request destruction but can never approve it.
+  records_manager: [
+    SAGE_PERMISSIONS.WORKSPACE_READ,
+    SAGE_PERMISSIONS.EXPORT_RETENTION_ASSIGN,
+    SAGE_PERMISSIONS.EXPORT_DESTRUCTION_REQUEST,
+    SAGE_PERMISSIONS.EXPORT_DESTRUCTION_READ,
+  ],
+  legal_hold_manager: [
+    SAGE_PERMISSIONS.WORKSPACE_READ,
+    SAGE_PERMISSIONS.EXPORT_LEGAL_HOLD_MANAGE,
+    SAGE_PERMISSIONS.EXPORT_DESTRUCTION_READ,
+  ],
+  destruction_approver: [
+    SAGE_PERMISSIONS.WORKSPACE_READ,
+    SAGE_PERMISSIONS.EXPORT_DESTRUCTION_APPROVE,
+    SAGE_PERMISSIONS.EXPORT_DESTRUCTION_READ,
+  ],
+  destruction_executor: [
+    SAGE_PERMISSIONS.WORKSPACE_READ,
+    SAGE_PERMISSIONS.EXPORT_DESTRUCTION_EXECUTE,
+    SAGE_PERMISSIONS.EXPORT_DESTRUCTION_READ,
+  ],
 }
 
 export type SageAccessContext = {

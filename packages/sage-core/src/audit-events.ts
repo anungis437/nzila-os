@@ -40,6 +40,16 @@ export const SAGE_AUDIT_ACTIONS = {
   DELIVERY_RECIPIENT_ACKNOWLEDGED: 'sage.delivery.recipient_acknowledged',
   DELIVERY_GRANT_REVOKED: 'sage.delivery.grant_revoked',
   DELIVERY_GRANT_EXPIRED: 'sage.delivery.grant_expired',
+  // Phase 8B — records lifecycle
+  EXPORT_RETENTION_ASSIGNED: 'sage.export.retention_assigned',
+  EXPORT_LEGAL_HOLD_PLACED: 'sage.export.legal_hold_placed',
+  EXPORT_LEGAL_HOLD_RELEASED: 'sage.export.legal_hold_released',
+  EXPORT_DESTRUCTION_REQUESTED: 'sage.export.destruction_requested',
+  EXPORT_DESTRUCTION_APPROVED: 'sage.export.destruction_approved',
+  EXPORT_DESTRUCTION_DENIED: 'sage.export.destruction_denied',
+  EXPORT_DESTRUCTION_STARTED: 'sage.export.destruction_started',
+  EXPORT_DESTRUCTION_VERIFIED: 'sage.export.destruction_verified',
+  EXPORT_DESTRUCTION_FAILED: 'sage.export.destruction_failed',
 } as const
 
 export type SageAuditAction = (typeof SAGE_AUDIT_ACTIONS)[keyof typeof SAGE_AUDIT_ACTIONS]
@@ -64,6 +74,13 @@ export const SAGE_AUDIT_RESOURCES = {
   DELIVERY_REQUEST: 'sage_delivery_request',
   DELIVERY_APPROVAL: 'sage_delivery_approval',
   DELIVERY_GRANT: 'sage_delivery_grant',
+  // Phase 8B — records lifecycle
+  RETENTION_POLICY: 'sage_retention_policy',
+  RETENTION_ASSIGNMENT: 'sage_export_retention_assignment',
+  LEGAL_HOLD: 'sage_export_legal_hold',
+  DESTRUCTION_REQUEST: 'sage_export_destruction_request',
+  DESTRUCTION_APPROVAL: 'sage_export_destruction_approval',
+  DESTRUCTION_EVIDENCE: 'sage_export_destruction_evidence',
 } as const
 
 export type SageAuditResource = (typeof SAGE_AUDIT_RESOURCES)[keyof typeof SAGE_AUDIT_RESOURCES]

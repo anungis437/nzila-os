@@ -1,0 +1,75 @@
+{
+  "description": "SHA-256 lock for released root migrations. A released migration may only change with an explicit `override` entry documenting why (see 0040).",
+  "lockedThrough": "0044_sage_phase_8b_destruction_attempts.sql",
+  "migrations": [
+    {
+      "file": "0023_trustcore_risk_register.sql",
+      "sha256": "faf396b84d761a1a1e44b73eca60edf6ae7e4391c89acedfbae0112d1dc3ece4"
+    },
+    {
+      "file": "0030_deal_engine_pilots_followups.sql",
+      "sha256": "1b18c896ee1dc47f46b3c132a0a2bd0cad8a0ece7dfbfc3a83ea0844d5ec7f63"
+    },
+    {
+      "file": "0031_institutional_intelligence_observatory_tables.sql",
+      "sha256": "157da437cfacc85e7aa29465f06dd48d8c71d9cee3c1f59a3877a71e58471075"
+    },
+    {
+      "file": "0032_sage_phase_1_access_domain_lock.sql",
+      "sha256": "50ec96de0e308b6cf3fd2da143a51da096ab0006a1465fa49fc9b53bbce68ec7"
+    },
+    {
+      "file": "0033_sage_phase_3_review_note.sql",
+      "sha256": "46284a84095ad76db52257aa12e57896a81c79de6454e2501b66b500017e9cea"
+    },
+    {
+      "file": "0034_sage_phase_6_governance_lifecycle.sql",
+      "sha256": "806d7fde650f7cfc1717b997bcf411db0f65248d2c6d35e232f74377a1a188b0"
+    },
+    {
+      "file": "0035_sage_phase_6_governance_authorization.sql",
+      "sha256": "4c543f7c6c67243869714b7bf331ec868afb2799e5966edb64c8fea79ef43724"
+    },
+    {
+      "file": "0036_sage_phase_7_export_packages.sql",
+      "sha256": "f6ffb058ced74b5609d3592013c4cc8a1387aeb78f2f3c26f955744a57c2cbde"
+    },
+    {
+      "file": "0037_sage_phase_7_export_audit_outbox.sql",
+      "sha256": "eee541a937613319ff8bfd1a89c5ff7b93eae14dcc7391502c2b5953ef6489ed"
+    },
+    {
+      "file": "0038_sage_phase_7_audit_outbox_claims.sql",
+      "sha256": "2ae63d387405fcf94c021211d6a871cb8c15927c56746e3cd9c72ee42e0f64fd"
+    },
+    {
+      "file": "0039_sage_phase_8a_recipient_delivery.sql",
+      "sha256": "4b8032f3c13df87a43cbbc93281cbe5d8e554d64bc0e438450a7126a11098b9e"
+    },
+    {
+      "file": "0040_sage_phase_8a_notification_outbox.sql",
+      "sha256": "c196519637d5e36806c236d3bf9d2141f0cc204b21b1f253f6ab19a6df796ab2",
+      "override": {
+        "reason": "The canonical 0040 (as merged in PR #644) is structurally un-applyable to PostgreSQL: it references an undefined assert_immutable_except() function in a CREATE TRIGGER, declares composite foreign keys with no matching unique constraint on sage_workspace/sage_delivery_recipient, uses text columns for uuid foreign keys, and uses non-IMMUTABLE now() in an index predicate. Because it cannot be applied, it was never applied to any persistent environment (no CI/deploy step applies root migrations/*.sql; the sage tables are absent from the drizzle schema). The amendment repairs the unapplied canonical chain rather than creating environment drift.",
+        "evidence": "Empirically confirmed by applying the canonical 0040 (git 097b7339f) to PostgreSQL (PGlite): it fails with 'there is no unique constraint matching given keys for referenced table \"sage_workspace\"'. No applier of root migrations/*.sql exists (platform-automation applies only migrations/platform/*.sql; drizzle-kit targets packages/db). See PR #645 audit.",
+        "approvedBy": "pending-human-governance-approval"
+      }
+    },
+    {
+      "file": "0041_sage_phase_8a_notification_lifecycle.sql",
+      "sha256": "1c2e3f6a071899d2ecebd568cc13cf1bb88e68da290533af3e8510da01ab5b7d"
+    },
+    {
+      "file": "0042_sage_phase_8a_notification_payload_destruction.sql",
+      "sha256": "e0b11e865c9dbf6c1bc999f41fcc609497eedd5c1b459e57d5f0ee3f8f0f13a4"
+    },
+    {
+      "file": "0043_sage_phase_8b_records_lifecycle.sql",
+      "sha256": "9d57116a2d7bc153bef0377f439dcef6749397b24dc6210e3f4c0e912f8951e3"
+    },
+    {
+      "file": "0044_sage_phase_8b_destruction_attempts.sql",
+      "sha256": "d18088a233ceaea97814c007c0e44c02bbf61cd4762a1a6b4dce395f827d0e42"
+    }
+  ]
+}

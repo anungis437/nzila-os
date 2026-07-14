@@ -85,6 +85,7 @@ import {
 import type { SageRepository } from './repository'
 import type { SageAuditSink } from './audit-sink'
 import type { SageDeliveryNotifier, SageDeliveryRateLimiter } from './delivery-notifier'
+import type { SageExportPackageStorage } from './records-types'
 import { contextNow, type SageServiceContext } from './service-context'
 import { conflict, forbidden, integrityError, invalidInput, notFound, orgBoundary, permissionDenied } from './service-errors'
 import { randomUUID } from 'node:crypto'
@@ -98,6 +99,8 @@ export type SageServiceDeps = {
   deliveryRateLimiter?: SageDeliveryRateLimiter
   /** Optional post-commit fast path; it must use durable outbox claims. */
   deliveryNotificationDispatcher?: { run(): Promise<unknown> }
+  /** Phase 8B: privileged storage-deletion port. Destruction fails closed without it. */
+  exportPackageStorage?: SageExportPackageStorage
 }
 
 function requirePermission(ctx: SageServiceContext, permission: string): void {
@@ -2110,6 +2113,15 @@ export async function getSageExportPackageContent(
   })
   const pkg = await deps.repo.getExportPackage(input.packageId, ws.id, ws.orgId)
   if (!pkg) notFound('export package')
+
+  // Phase 8B: a destroyed package is a tombstone — never returns bytes.
+  if ((pkg.availabilityStatus ?? 'available') === 'destroyed') {
+    await emitDurableAccessEvent(deps, ctx, SAGE_AUDIT_ACTIONS.EXPORT_PACKAGE_ACCESS_DENIED, pkg.id, ws.id, {
+      exportRequestId: pkg.exportRequestId,
+      reason: 'package_destroyed',
+    })
+    notFound('export package')
+  }
 
   const access = await loadSageAccessContext(deps, ctx, ws.id)
   const isGenerator = resolveSagePermission(access, SAGE_PERMISSIONS.EXPORT_PACKAGE_GENERATE)

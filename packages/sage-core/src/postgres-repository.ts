@@ -48,6 +48,16 @@ import type {
   SageNotificationOutbox,
   SageNotificationOutboxIntent,
 } from './delivery-types'
+import type {
+  SageDestructionDecision,
+  SageExportDestructionApproval,
+  SageExportDestructionAttempt,
+  SageExportDestructionEvidence,
+  SageExportDestructionRequest,
+  SageExportLegalHold,
+  SageExportRetentionAssignment,
+  SageRetentionPolicy,
+} from './records-types'
 import {
   mapBoundaryFlag,
   mapDecisionRecord,
@@ -68,6 +78,13 @@ import {
   mapDeliveryGrant,
   mapDeliveryReceipt,
   mapNotificationOutbox,
+  mapRetentionPolicy,
+  mapRetentionAssignment,
+  mapLegalHold,
+  mapDestructionRequest,
+  mapDestructionApproval,
+  mapDestructionEvidence,
+  mapDestructionAttempt,
   type SageBoundaryFlagRow,
   type SageDecisionRecordRow,
   type SageEvidenceAuthorizationRow,
@@ -87,6 +104,13 @@ import {
   type SageDeliveryApprovalRow,
   type SageDeliveryGrantRow,
   type SageDeliveryReceiptRow,
+  type SageRetentionPolicyRow,
+  type SageExportRetentionAssignmentRow,
+  type SageExportLegalHoldRow,
+  type SageExportDestructionRequestRow,
+  type SageExportDestructionApprovalRow,
+  type SageExportDestructionEvidenceRow,
+  type SageExportDestructionAttemptRow,
 } from './postgres-mappers'
 import { conflict } from './service-errors'
 
@@ -2034,5 +2058,916 @@ export class PostgresSageRepository implements SageRepository {
       [grantId, orgId],
     )
     return rows.map(mapNotificationOutbox)
+  }
+
+  // ── Phase 8B: records lifecycle ────────────────────────────────────────────
+  private auditInsertParams(intent: SageAuditOutboxIntent) {
+    return {
+      eventId: intent.eventId,
+      actorId: intent.actorId,
+      action: intent.action,
+      resourceType: intent.resourceType,
+      safePayload: JSON.stringify(intent.safePayload),
+    }
+  }
+
+  async createRetentionPolicy(
+    input: Omit<SageRetentionPolicy, 'id'>,
+  ): Promise<SageRetentionPolicy> {
+    const { rows } = await this.sql.query<SageRetentionPolicyRow>(
+      `insert into sage_retention_policy
+         (org_id, policy_code, version, name, description, retention_basis,
+          retention_duration_days, effective_from, effective_to, is_active, created_by, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       returning *`,
+      [
+        input.orgId,
+        input.policyCode,
+        input.version,
+        input.name,
+        input.description ?? null,
+        input.retentionBasis,
+        input.retentionDurationDays,
+        input.effectiveFrom,
+        input.effectiveTo ?? null,
+        input.isActive,
+        input.createdBy,
+        input.createdAt,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) conflict('a retention policy with this code and version already exists')
+    return mapRetentionPolicy(row)
+  }
+
+  async getRetentionPolicy(id: string, orgId: string): Promise<SageRetentionPolicy | undefined> {
+    const { rows } = await this.sql.query<SageRetentionPolicyRow>(
+      `select * from sage_retention_policy where id = $1 and org_id = $2`,
+      [id, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapRetentionPolicy(row) : undefined
+  }
+
+  async getActiveRetentionPolicyByCode(
+    orgId: string,
+    policyCode: string,
+  ): Promise<SageRetentionPolicy | undefined> {
+    const { rows } = await this.sql.query<SageRetentionPolicyRow>(
+      `select * from sage_retention_policy
+       where org_id = $1 and policy_code = $2 and is_active = true
+       order by version desc
+       limit 1`,
+      [orgId, policyCode],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapRetentionPolicy(row) : undefined
+  }
+
+  async listRetentionPolicies(orgId: string): Promise<SageRetentionPolicy[]> {
+    const { rows } = await this.sql.query<SageRetentionPolicyRow>(
+      `select * from sage_retention_policy where org_id = $1
+       order by policy_code asc, version desc`,
+      [orgId],
+    )
+    return rows.map(mapRetentionPolicy)
+  }
+
+  async assignRetentionPolicy(input: {
+    assignment: Omit<SageExportRetentionAssignment, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<{ assignment: SageExportRetentionAssignment; created: boolean }> {
+    const a = input.assignment
+    const ev = this.auditInsertParams(input.auditEvent)
+    const { rows } = await this.sql.query<SageExportRetentionAssignmentRow>(
+      `with inserted as (
+         insert into sage_export_retention_assignment
+           (org_id, workspace_id, export_package_id, retention_policy_id, policy_code,
+            policy_version, retention_basis, retention_started_at, retain_until, assigned_by, assigned_at,
+            retention_basis_source_type, retention_basis_source_id, retention_basis_source_timestamp)
+         values ($1::text, $2::uuid, $3::uuid, $4::uuid, $5::text, $6::integer, $7::text, $8::timestamptz,
+                 $9::timestamptz, $10::text, $11::timestamptz, $17::text, $18::text, $19::timestamptz)
+         on conflict (export_package_id) do nothing
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $12, $1, $2, $13, $14, $15, $3, $16::jsonb, 'pending', 0, $11
+         from inserted
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from inserted`,
+      [
+        a.orgId,
+        a.workspaceId,
+        a.exportPackageId,
+        a.retentionPolicyId,
+        a.policyCode,
+        a.policyVersion,
+        a.retentionBasis,
+        a.retentionStartedAt,
+        a.retainUntil,
+        a.assignedBy,
+        a.assignedAt,
+        ev.eventId,
+        ev.actorId,
+        ev.action,
+        ev.resourceType,
+        ev.safePayload,
+        a.retentionBasisSourceType,
+        a.retentionBasisSourceId,
+        a.retentionBasisSourceTimestamp,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (row) return { assignment: mapRetentionAssignment(row), created: true }
+    const existing = await this.getRetentionAssignment(a.exportPackageId, a.workspaceId, a.orgId)
+    if (!existing) conflict('retention assignment could not be created')
+    return { assignment: existing, created: false }
+  }
+
+  async getRetentionAssignment(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportRetentionAssignment | undefined> {
+    const { rows } = await this.sql.query<SageExportRetentionAssignmentRow>(
+      `select * from sage_export_retention_assignment
+       where export_package_id = $1 and workspace_id = $2 and org_id = $3`,
+      [exportPackageId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapRetentionAssignment(row) : undefined
+  }
+
+  async placeLegalHold(input: {
+    hold: Omit<SageExportLegalHold, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportLegalHold> {
+    const h = input.hold
+    const ev = this.auditInsertParams(input.auditEvent)
+    const { rows } = await this.sql.query<SageExportLegalHoldRow>(
+      `with inserted as (
+         insert into sage_export_legal_hold
+           (org_id, workspace_id, export_package_id, hold_code, status, reason, placed_by, placed_at)
+         select $1, $2, $3, $4, 'active', $5, $6, $7
+         where not exists (
+           select 1 from sage_export_destruction_request
+           where export_package_id = $3
+             and status in ('deletion_started', 'destroyed')
+         )
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $8, $1, $2, $9, $10, $11, $3, $12::jsonb, 'pending', 0, $7
+         from inserted
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from inserted`,
+      [
+        h.orgId,
+        h.workspaceId,
+        h.exportPackageId,
+        h.holdCode,
+        h.reason,
+        h.placedBy,
+        h.placedAt,
+        ev.eventId,
+        ev.actorId,
+        ev.action,
+        ev.resourceType,
+        ev.safePayload,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) conflict('legal hold could not be placed: destruction has begun for this package')
+    return mapLegalHold(row)
+  }
+
+  async releaseLegalHold(input: {
+    holdId: string
+    workspaceId: string
+    orgId: string
+    releasedBy: string
+    releasedAt: string
+    releaseReason: string
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportLegalHold | undefined> {
+    const ev = this.auditInsertParams(input.auditEvent)
+    const { rows } = await this.sql.query<SageExportLegalHoldRow>(
+      `with released as (
+         update sage_export_legal_hold
+           set status = 'released', released_by = $4, released_at = $5, release_reason = $6
+         where id = $1 and workspace_id = $2 and org_id = $3 and status = 'active'
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $7, $3, $2, $8, $9, $10, released.export_package_id, $11::jsonb, 'pending', 0, $5
+         from released
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from released`,
+      [
+        input.holdId,
+        input.workspaceId,
+        input.orgId,
+        input.releasedBy,
+        input.releasedAt,
+        input.releaseReason,
+        ev.eventId,
+        ev.actorId,
+        ev.action,
+        ev.resourceType,
+        ev.safePayload,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapLegalHold(row) : undefined
+  }
+
+  async getLegalHold(
+    holdId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportLegalHold | undefined> {
+    const { rows } = await this.sql.query<SageExportLegalHoldRow>(
+      `select * from sage_export_legal_hold where id = $1 and workspace_id = $2 and org_id = $3`,
+      [holdId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapLegalHold(row) : undefined
+  }
+
+  async listLegalHolds(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportLegalHold[]> {
+    const { rows } = await this.sql.query<SageExportLegalHoldRow>(
+      `select * from sage_export_legal_hold
+       where export_package_id = $1 and workspace_id = $2 and org_id = $3
+       order by placed_at asc`,
+      [exportPackageId, workspaceId, orgId],
+    )
+    return rows.map(mapLegalHold)
+  }
+
+  async countActiveLegalHolds(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<number> {
+    const { rows } = await this.sql.query<CountRow>(
+      `select count(*)::int as count from sage_export_legal_hold
+       where export_package_id = $1 and workspace_id = $2 and org_id = $3 and status = 'active'`,
+      [exportPackageId, workspaceId, orgId],
+    )
+    return toCount(rows)
+  }
+
+  async createDestructionRequest(input: {
+    request: Omit<SageExportDestructionRequest, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportDestructionRequest | undefined> {
+    const r = input.request
+    const ev = this.auditInsertParams(input.auditEvent)
+    const { rows } = await this.sql.query<SageExportDestructionRequestRow>(
+      `with inserted as (
+         insert into sage_export_destruction_request
+           (org_id, workspace_id, export_package_id, requested_by, reason, status,
+            package_content_hash, package_manifest_hash, storage_reference_hash,
+            retention_policy_code, retention_policy_version, retain_until, active_hold_count,
+            active_hold_set_digest, requested_at, updated_at)
+         select $1::text, $2::uuid, $3::uuid, $4::text, $5::text, 'requested', $6::text, $7::text, $8::text,
+                $9::text, $10::integer, $11::timestamptz, $12::integer, $19::text, $13::timestamptz, $13::timestamptz
+         where not exists (
+           select 1 from sage_export_destruction_request
+           where export_package_id = $3
+             and status in ('requested', 'approved', 'executing', 'executing_preflight', 'deletion_started')
+         )
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $14, $1, $2, $15, $16, $17, inserted.id, $18::jsonb, 'pending', 0, $13
+         from inserted
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from inserted`,
+      [
+        r.orgId,
+        r.workspaceId,
+        r.exportPackageId,
+        r.requestedBy,
+        r.reason,
+        r.packageContentHash,
+        r.packageManifestHash,
+        r.storageReferenceHash,
+        r.retentionPolicyCode,
+        r.retentionPolicyVersion,
+        r.retainUntil,
+        r.activeHoldCount,
+        r.requestedAt,
+        ev.eventId,
+        ev.actorId,
+        ev.action,
+        ev.resourceType,
+        ev.safePayload,
+        r.activeHoldSetDigest ?? null,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionRequest(row) : undefined
+  }
+
+  async getDestructionRequest(
+    requestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest | undefined> {
+    const { rows } = await this.sql.query<SageExportDestructionRequestRow>(
+      `select * from sage_export_destruction_request
+       where id = $1 and workspace_id = $2 and org_id = $3`,
+      [requestId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionRequest(row) : undefined
+  }
+
+  async listDestructionRequests(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest[]> {
+    const { rows } = await this.sql.query<SageExportDestructionRequestRow>(
+      `select * from sage_export_destruction_request
+       where workspace_id = $1 and org_id = $2
+       order by requested_at desc`,
+      [workspaceId, orgId],
+    )
+    return rows.map(mapDestructionRequest)
+  }
+
+  async decideDestructionRequest(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    decision: SageDestructionDecision
+    updatedAt: string
+    approval: Omit<SageExportDestructionApproval, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    { request: SageExportDestructionRequest; approval: SageExportDestructionApproval } | undefined
+  > {
+    const ap = input.approval
+    const ev = this.auditInsertParams(input.auditEvent)
+    const nextStatus = input.decision === 'approved' ? 'approved' : 'denied'
+    const { rows } = await this.sql.query<SageExportDestructionApprovalRow>(
+      `with decided as (
+         update sage_export_destruction_request
+           set status = $4, updated_at = $5
+         where id = $1 and workspace_id = $2 and org_id = $3 and status = 'requested'
+         returning id
+       ),
+       approval as (
+         insert into sage_export_destruction_approval
+           (org_id, workspace_id, destruction_request_id, decision, approver_id, rationale,
+            approved_package_content_hash, approved_manifest_hash, approved_storage_reference_hash,
+            approved_retention_policy_code, approved_retention_policy_version,
+            approved_retain_until, approved_active_hold_count, approved_active_hold_set_digest, decided_at)
+         select $3::text, $2::uuid, decided.id, $6::text, $7::text, $8::text, $9::text, $10::text, $11::text,
+                $12::text, $13::integer, $14::timestamptz, $15::integer, $22::text, $16::timestamptz
+         from decided
+         on conflict (destruction_request_id) do nothing
+         returning *
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $17, $3, $2, $18, $19, $20, $1, $21::jsonb, 'pending', 0, $5
+         from approval
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from approval`,
+      [
+        input.destructionRequestId,
+        input.workspaceId,
+        input.orgId,
+        nextStatus,
+        input.updatedAt,
+        ap.decision,
+        ap.approverId,
+        ap.rationale ?? null,
+        ap.approvedPackageContentHash,
+        ap.approvedManifestHash,
+        ap.approvedStorageReferenceHash,
+        ap.approvedRetentionPolicyCode,
+        ap.approvedRetentionPolicyVersion,
+        ap.approvedRetainUntil,
+        ap.approvedActiveHoldCount,
+        ap.decidedAt,
+        ev.eventId,
+        ev.actorId,
+        ev.action,
+        ev.resourceType,
+        ev.safePayload,
+        ap.approvedActiveHoldSetDigest ?? null,
+      ],
+    )
+    const approvalRow = firstOrUndefined(rows)
+    if (!approvalRow) return undefined
+    const request = await this.getDestructionRequest(
+      input.destructionRequestId,
+      input.workspaceId,
+      input.orgId,
+    )
+    if (!request) return undefined
+    return { request, approval: mapDestructionApproval(approvalRow) }
+  }
+
+  async getDestructionApproval(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionApproval | undefined> {
+    const { rows } = await this.sql.query<SageExportDestructionApprovalRow>(
+      `select * from sage_export_destruction_approval
+       where destruction_request_id = $1 and workspace_id = $2 and org_id = $3`,
+      [destructionRequestId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionApproval(row) : undefined
+  }
+
+  async claimDestructionForExecution(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    leaseMs: number
+    now: string
+  }): Promise<SageExportDestructionRequest | undefined> {
+    const leaseExpiresAt = new Date(Date.parse(input.now) + input.leaseMs).toISOString()
+    const { rows } = await this.sql.query<SageExportDestructionRequestRow>(
+      `update sage_export_destruction_request
+         set status = 'executing_preflight', execution_owner = $4, lease_expires_at = $5, updated_at = $6
+       where id = $1 and workspace_id = $2 and org_id = $3
+         and (status = 'approved'
+              or (status = 'executing_preflight' and (lease_expires_at is null or lease_expires_at < $6)))
+       returning *`,
+      [
+        input.destructionRequestId,
+        input.workspaceId,
+        input.orgId,
+        input.executionOwner,
+        leaseExpiresAt,
+        input.now,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionRequest(row) : undefined
+  }
+
+  async getOpenDestructionRequestForPackage(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest | undefined> {
+    const { rows } = await this.sql.query<SageExportDestructionRequestRow>(
+      `select * from sage_export_destruction_request
+       where export_package_id = $1 and workspace_id = $2 and org_id = $3
+         and status in ('requested', 'approved', 'executing', 'executing_preflight', 'deletion_started')
+       order by requested_at desc
+       limit 1`,
+      [exportPackageId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionRequest(row) : undefined
+  }
+
+  async createDestructionAttempt(input: {
+    attempt: Omit<SageExportDestructionAttempt, 'id'>
+    executionOwner: string
+    updatedAt: string
+  }): Promise<SageExportDestructionAttempt | undefined> {
+    const a = input.attempt
+    const { rows } = await this.sql.query<SageExportDestructionAttemptRow>(
+      `with req as (
+         update sage_export_destruction_request
+           set current_attempt_id = $1, updated_at = $10
+         where id = $4 and workspace_id = $3 and org_id = $2
+           and status = 'executing_preflight' and execution_owner = $7
+         returning id
+       ),
+       inserted as (
+         insert into sage_export_destruction_attempt
+           (attempt_id, org_id, workspace_id, destruction_request_id, export_package_id, object_id,
+            execution_owner, provider_idempotency_key, status, created_at, updated_at)
+         select $1, $2, $3, $4, $5, $6, $7, $8, 'prepared', $9, $10
+         from req
+         on conflict (attempt_id) do nothing
+         returning *
+       )
+       select * from inserted`,
+      [
+        a.attemptId,
+        a.orgId,
+        a.workspaceId,
+        a.destructionRequestId,
+        a.exportPackageId,
+        a.objectId ?? null,
+        input.executionOwner,
+        a.providerIdempotencyKey,
+        a.createdAt,
+        input.updatedAt,
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionAttempt(row) : undefined
+  }
+
+  async getDestructionAttemptById(
+    attemptId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionAttempt | undefined> {
+    const { rows } = await this.sql.query<SageExportDestructionAttemptRow>(
+      `select * from sage_export_destruction_attempt
+       where attempt_id = $1 and workspace_id = $2 and org_id = $3`,
+      [attemptId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionAttempt(row) : undefined
+  }
+
+  async getLatestDestructionAttemptByRequest(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionAttempt | undefined> {
+    const { rows } = await this.sql.query<SageExportDestructionAttemptRow>(
+      `select * from sage_export_destruction_attempt
+       where destruction_request_id = $1 and workspace_id = $2 and org_id = $3
+       order by created_at desc
+       limit 1`,
+      [destructionRequestId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionAttempt(row) : undefined
+  }
+
+  async markAttemptPresenceVerified(input: {
+    attemptId: string
+    executionOwner: string
+    present: boolean
+    at: string
+  }): Promise<{ success: boolean }> {
+    const { rows } = await this.sql.query<{ attempt_id: string }>(
+      `update sage_export_destruction_attempt
+         set pre_delete_presence_verified = $3, pre_delete_verified_at = $4, updated_at = $4
+       where attempt_id = $1 and execution_owner = $2 and status = 'prepared'
+       returning attempt_id`,
+      [input.attemptId, input.executionOwner, input.present, input.at],
+    )
+    return { success: rows.length > 0 }
+  }
+
+  async beginDeletion(input: {
+    destructionRequestId: string
+    attemptId: string
+    workspaceId: string
+    orgId: string
+    exportPackageId: string
+    executionOwner: string
+    at: string
+  }): Promise<
+    { request: SageExportDestructionRequest; attempt: SageExportDestructionAttempt } | undefined
+  > {
+    // ATOMIC point of no return: the request → deletion_started transition and
+    // the final "no active legal hold" check happen in a single statement.
+    const { rows } = await this.sql.query<SageExportDestructionAttemptRow>(
+      `with req as (
+         update sage_export_destruction_request
+           set status = 'deletion_started', deletion_started_at = $7, updated_at = $7
+         where id = $1 and workspace_id = $3 and org_id = $4
+           and status = 'executing_preflight' and execution_owner = $6
+           and not exists (
+             select 1 from sage_export_legal_hold
+             where export_package_id = $5 and org_id = $4 and status = 'active'
+           )
+         returning id
+       ),
+       att as (
+         update sage_export_destruction_attempt
+           set status = 'deletion_started', delete_started_at = $7, updated_at = $7
+         from req
+         where sage_export_destruction_attempt.attempt_id = $2
+           and sage_export_destruction_attempt.execution_owner = $6
+           and sage_export_destruction_attempt.status = 'prepared'
+         returning sage_export_destruction_attempt.*
+       )
+       select * from att`,
+      [
+        input.destructionRequestId,
+        input.attemptId,
+        input.workspaceId,
+        input.orgId,
+        input.exportPackageId,
+        input.executionOwner,
+        input.at,
+      ],
+    )
+    const attemptRow = firstOrUndefined(rows)
+    if (!attemptRow) return undefined
+    const request = await this.getDestructionRequest(input.destructionRequestId, input.workspaceId, input.orgId)
+    if (!request) return undefined
+    return { request, attempt: mapDestructionAttempt(attemptRow) }
+  }
+
+  async recordAttemptProviderResult(input: {
+    attemptId: string
+    executionOwner: string
+    providerResult: string
+    providerRequestId?: string | null
+    safeErrorCode?: string | null
+    status: 'provider_accepted' | 'failed'
+    at: string
+  }): Promise<{ success: boolean }> {
+    const { rows } = await this.sql.query<{ attempt_id: string }>(
+      `update sage_export_destruction_attempt
+         set provider_result = $3, provider_request_id = $4, safe_error_code = $5, status = $6, updated_at = $7
+       where attempt_id = $1 and execution_owner = $2
+       returning attempt_id`,
+      [
+        input.attemptId,
+        input.executionOwner,
+        input.providerResult,
+        input.providerRequestId ?? null,
+        input.safeErrorCode ?? null,
+        input.status,
+        input.at,
+      ],
+    )
+    return { success: rows.length > 0 }
+  }
+
+  async recordAttemptAbsenceVerified(input: {
+    attemptId: string
+    executionOwner: string
+    absent: boolean
+    at: string
+  }): Promise<{ success: boolean }> {
+    const { rows } = await this.sql.query<{ attempt_id: string }>(
+      `update sage_export_destruction_attempt
+         set post_delete_absence_verified = $3, post_delete_verified_at = $4,
+             status = case when $3 then 'absence_verified' else status end, updated_at = $4
+       where attempt_id = $1 and execution_owner = $2
+       returning attempt_id`,
+      [input.attemptId, input.executionOwner, input.absent, input.at],
+    )
+    return { success: rows.length > 0 }
+  }
+
+  async completeDestruction(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    attemptId: string
+    exportPackageId: string
+    destroyedBy: string
+    updatedAt: string
+    evidence: Omit<SageExportDestructionEvidence, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    | {
+        request: SageExportDestructionRequest
+        evidence: SageExportDestructionEvidence
+        package: SageExportPackage
+      }
+    | undefined
+  > {
+    const e = input.evidence
+    const ev = this.auditInsertParams(input.auditEvent)
+    const { rows } = await this.sql.query<SageExportDestructionEvidenceRow>(
+      `with evidence as (
+         insert into sage_export_destruction_evidence
+           (event_id, org_id, workspace_id, destruction_request_id, export_package_id, object_id,
+            storage_provider, storage_reference_hash, pre_destruction_content_hash,
+            pre_destruction_manifest_hash, deletion_attempted_at, deletion_verified_at,
+            verification_method, result, provider_request_id, safe_error_code, executed_by, created_at)
+         select $7::text, $3::text, $2::uuid, $1::uuid, $8::uuid, $9::text, $10::text, $11::text, $12::text,
+                $13::text, $14::timestamptz, $15::timestamptz, $16::text, $17::text, $18::text, $19::text, $20::text, $21::timestamptz
+         where exists (
+           select 1 from sage_export_destruction_request
+           where id = $1 and workspace_id = $2 and org_id = $3
+             and status = 'deletion_started' and execution_owner = $4
+         )
+         and exists (
+           select 1 from sage_export_package
+           where id = $8 and workspace_id = $2 and org_id = $3 and availability_status = 'available'
+         )
+         returning *
+       ),
+       req as (
+         update sage_export_destruction_request
+           set status = 'destroyed', destruction_evidence_id = evidence.id,
+               execution_owner = null, lease_expires_at = null, updated_at = $5
+         from evidence
+         where sage_export_destruction_request.id = $1
+         returning sage_export_destruction_request.id
+       ),
+       att as (
+         update sage_export_destruction_attempt
+           set status = 'completed', updated_at = $5
+         from evidence
+         where sage_export_destruction_attempt.attempt_id = $27
+         returning sage_export_destruction_attempt.attempt_id
+       ),
+       pkg as (
+         update sage_export_package
+           set availability_status = 'destroyed', destroyed_at = $5, destroyed_by = $6,
+               destruction_request_id = $1, destruction_evidence_id = evidence.id
+         from evidence
+         where sage_export_package.id = $8
+         returning sage_export_package.id
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $22, $3, $2, $23, $24, $25, $1, $26::jsonb, 'pending', 0, $5
+         from evidence
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from evidence`,
+      [
+        input.destructionRequestId,
+        input.workspaceId,
+        input.orgId,
+        input.executionOwner,
+        input.updatedAt,
+        input.destroyedBy,
+        e.eventId,
+        e.exportPackageId,
+        e.objectId ?? null,
+        e.storageProvider,
+        e.storageReferenceHash,
+        e.preDestructionContentHash,
+        e.preDestructionManifestHash,
+        e.deletionAttemptedAt ?? null,
+        e.deletionVerifiedAt ?? null,
+        e.verificationMethod ?? null,
+        e.result,
+        e.providerRequestId ?? null,
+        e.safeErrorCode ?? null,
+        e.executedBy,
+        e.createdAt,
+        ev.eventId,
+        ev.actorId,
+        ev.action,
+        ev.resourceType,
+        ev.safePayload,
+        input.attemptId,
+      ],
+    )
+    const evidenceRow = firstOrUndefined(rows)
+    if (!evidenceRow) return undefined
+    const request = await this.getDestructionRequest(
+      input.destructionRequestId,
+      input.workspaceId,
+      input.orgId,
+    )
+    const pkg = await this.getExportPackage(input.exportPackageId, input.workspaceId, input.orgId)
+    if (!request || !pkg) return undefined
+    return { request, evidence: mapDestructionEvidence(evidenceRow), package: pkg }
+  }
+
+  async failDestruction(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    attemptId?: string
+    attemptStatus?: 'failed' | 'indeterminate'
+    updatedAt: string
+    evidence: Omit<SageExportDestructionEvidence, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    { request: SageExportDestructionRequest; evidence: SageExportDestructionEvidence } | undefined
+  > {
+    const e = input.evidence
+    const ev = this.auditInsertParams(input.auditEvent)
+    const { rows } = await this.sql.query<SageExportDestructionEvidenceRow>(
+      `with evidence as (
+         insert into sage_export_destruction_evidence
+           (event_id, org_id, workspace_id, destruction_request_id, export_package_id, object_id,
+            storage_provider, storage_reference_hash, pre_destruction_content_hash,
+            pre_destruction_manifest_hash, deletion_attempted_at, deletion_verified_at,
+            verification_method, result, provider_request_id, safe_error_code, executed_by, created_at)
+         select $6, $3, $2, $1, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+         where exists (
+           select 1 from sage_export_destruction_request
+           where id = $1 and workspace_id = $2 and org_id = $3
+             and status in ('executing_preflight', 'deletion_started') and execution_owner = $4
+         )
+         returning *
+       ),
+       att as (
+         update sage_export_destruction_attempt
+           set status = $27, updated_at = $5
+         from evidence
+         where sage_export_destruction_attempt.attempt_id = $26
+         returning sage_export_destruction_attempt.attempt_id
+       ),
+       req as (
+         update sage_export_destruction_request
+           set status = 'failed', destruction_evidence_id = evidence.id,
+               execution_owner = null, lease_expires_at = null, updated_at = $5
+         from evidence
+         where sage_export_destruction_request.id = $1
+         returning sage_export_destruction_request.id
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $21, $3, $2, $22, $23, $24, $1, $25::jsonb, 'pending', 0, $5
+         from evidence
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select * from evidence`,
+      [
+        input.destructionRequestId,
+        input.workspaceId,
+        input.orgId,
+        input.executionOwner,
+        input.updatedAt,
+        e.eventId,
+        e.exportPackageId,
+        e.objectId ?? null,
+        e.storageProvider,
+        e.storageReferenceHash,
+        e.preDestructionContentHash,
+        e.preDestructionManifestHash,
+        e.deletionAttemptedAt ?? null,
+        e.deletionVerifiedAt ?? null,
+        e.verificationMethod ?? null,
+        e.result,
+        e.providerRequestId ?? null,
+        e.safeErrorCode ?? null,
+        e.executedBy,
+        e.createdAt,
+        ev.eventId,
+        ev.actorId,
+        ev.action,
+        ev.resourceType,
+        ev.safePayload,
+        input.attemptId ?? '',
+        input.attemptStatus ?? 'failed',
+      ],
+    )
+    const evidenceRow = firstOrUndefined(rows)
+    if (!evidenceRow) return undefined
+    const request = await this.getDestructionRequest(
+      input.destructionRequestId,
+      input.workspaceId,
+      input.orgId,
+    )
+    if (!request) return undefined
+    return { request, evidence: mapDestructionEvidence(evidenceRow) }
+  }
+
+  async getDestructionEvidenceByRequest(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionEvidence | undefined> {
+    const { rows } = await this.sql.query<SageExportDestructionEvidenceRow>(
+      `select * from sage_export_destruction_evidence
+       where destruction_request_id = $1 and workspace_id = $2 and org_id = $3
+       order by created_at desc
+       limit 1`,
+      [destructionRequestId, workspaceId, orgId],
+    )
+    const row = firstOrUndefined(rows)
+    return row ? mapDestructionEvidence(row) : undefined
   }
 }

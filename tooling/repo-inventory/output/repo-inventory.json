@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-14T00:00:00.000Z",
+  "generatedAt": "2026-07-15T00:00:00.000Z",
   "appCount": 26,
   "packageCount": 222,
   "workspacePackageCount": 254,
   "workflowCount": 52,
-  "contractTestCount": 269,
-  "tsTestFileCount": 2454,
+  "contractTestCount": 271,
+  "tsTestFileCount": 2460,
   "pythonTestFileCount": 32,
   "apps": [
     {
@@ -529,7 +529,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 168
+      "codeFileCount": 182
     },
     {
       "name": "test-scaffold-gp",

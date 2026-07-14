@@ -1188,3 +1188,119 @@ describe('service integration with PostgresSageRepository', () => {
     expect(audit.has(SAGE_AUDIT_ACTIONS.WORKSPACE_CREATED)).toBe(true)
   })
 })
+
+// ─── Phase 8B: records-lifecycle SQL structure ───────────────────────────────
+describe('PostgresSageRepository — records lifecycle SQL', () => {
+  const auditEvent = {
+    eventId: 'ev-1',
+    actorId: 'actor-1',
+    action: SAGE_AUDIT_ACTIONS.EXPORT_RETENTION_ASSIGNED,
+    resourceType: 'sage_export_retention_assignment' as const,
+    safePayload: { a: 1 },
+  }
+
+  it('assigns retention with an idempotent, tenant-scoped, audit-atomic CTE', async () => {
+    const sql = new FakeSqlClient().enqueue([
+      {
+        id: 'ra-1', org_id: 'org-1', workspace_id: 'ws-1', export_package_id: 'pkg-1',
+        retention_policy_id: 'pol-1', policy_code: 'std', policy_version: 1, retention_basis: 'created_at',
+        retention_started_at: '2020-01-01T00:00:00.000Z', retain_until: '2020-01-02T00:00:00.000Z',
+        assigned_by: 'actor-1', assigned_at: '2020-01-01T00:00:00.000Z',
+      },
+    ])
+    const repo = new PostgresSageRepository(sql)
+    const result = await repo.assignRetentionPolicy({
+      assignment: {
+        orgId: 'org-1', workspaceId: 'ws-1', exportPackageId: 'pkg-1', retentionPolicyId: 'pol-1',
+        policyCode: 'std', policyVersion: 1, retentionBasis: 'created_at',
+        retentionStartedAt: '2020-01-01T00:00:00.000Z', retainUntil: '2020-01-02T00:00:00.000Z',
+        assignedBy: 'actor-1', assignedAt: '2020-01-01T00:00:00.000Z',
+        retentionBasisSourceType: 'created_at', retentionBasisSourceId: 'pkg-1',
+        retentionBasisSourceTimestamp: '2020-01-01T00:00:00.000Z',
+      },
+      auditEvent,
+    })
+    expect(result.created).toBe(true)
+    const text = sql.lastCall.text
+    expect(text).toContain('insert into sage_export_retention_assignment')
+    expect(text).toContain('on conflict (export_package_id) do nothing')
+    expect(text).toContain('insert into sage_audit_outbox')
+    // Parameterized only.
+    expect(sql.lastCall.params.length).toBeGreaterThan(0)
+    expect(text).not.toMatch(/\$\{/)
+  })
+
+  it('releases a legal hold with a fenced active→released CAS', async () => {
+    const sql = new FakeSqlClient().enqueue([
+      {
+        id: 'h-1', org_id: 'org-1', workspace_id: 'ws-1', export_package_id: 'pkg-1', hold_code: 'c',
+        status: 'released', reason: 'r', placed_by: 'a', placed_at: '2020-01-01T00:00:00.000Z',
+        released_by: 'b', released_at: '2020-02-01T00:00:00.000Z', release_reason: 'done',
+      },
+    ])
+    const repo = new PostgresSageRepository(sql)
+    await repo.releaseLegalHold({
+      holdId: 'h-1', workspaceId: 'ws-1', orgId: 'org-1', releasedBy: 'b',
+      releasedAt: '2020-02-01T00:00:00.000Z', releaseReason: 'done',
+      auditEvent: { ...auditEvent, action: SAGE_AUDIT_ACTIONS.EXPORT_LEGAL_HOLD_RELEASED, resourceType: 'sage_export_legal_hold' },
+    })
+    const text = sql.lastCall.text
+    expect(text).toContain('update sage_export_legal_hold')
+    expect(text).toContain("status = 'active'")
+    expect(text).toContain('where id = $1 and workspace_id = $2 and org_id = $3')
+  })
+
+  it('creates a destruction request only when no open request exists (guarded insert)', async () => {
+    const sql = new FakeSqlClient().enqueue([])
+    const repo = new PostgresSageRepository(sql)
+    await repo.createDestructionRequest({
+      request: {
+        orgId: 'org-1', workspaceId: 'ws-1', exportPackageId: 'pkg-1', requestedBy: 'a', reason: 'x',
+        status: 'requested', packageContentHash: 'c', packageManifestHash: 'm', storageReferenceHash: 's',
+        retentionPolicyCode: 'std', retentionPolicyVersion: 1, retainUntil: '2020-01-02T00:00:00.000Z',
+        activeHoldCount: 0, activeHoldSetDigest: 'd', executionOwner: null, leaseExpiresAt: null,
+        deletionStartedAt: null, currentAttemptId: null, destructionEvidenceId: null,
+        requestedAt: '2020-01-03T00:00:00.000Z', updatedAt: '2020-01-03T00:00:00.000Z',
+      },
+      auditEvent: { ...auditEvent, action: SAGE_AUDIT_ACTIONS.EXPORT_DESTRUCTION_REQUESTED, resourceType: 'sage_export_destruction_request' },
+    })
+    const text = sql.lastCall.text
+    expect(text).toContain('insert into sage_export_destruction_request')
+    expect(text).toContain("status in ('requested', 'approved', 'executing', 'executing_preflight', 'deletion_started')")
+  })
+
+  it('completes destruction atomically: evidence + request → destroyed + package tombstone', async () => {
+    const sql = new FakeSqlClient().enqueue([
+      {
+        id: 'e-1', event_id: 'ev', org_id: 'org-1', workspace_id: 'ws-1', destruction_request_id: 'dr-1',
+        export_package_id: 'pkg-1', object_id: null, storage_provider: 'sage-internal', storage_reference_hash: 'h',
+        pre_destruction_content_hash: 'c', pre_destruction_manifest_hash: 'm', deletion_attempted_at: null,
+        deletion_verified_at: '2020-01-04T00:00:00.000Z', verification_method: 'probe', result: 'verified_destroyed',
+        provider_request_id: null, safe_error_code: null, executed_by: 'sys', created_at: '2020-01-04T00:00:00.000Z',
+      },
+    ])
+      .enqueue([{ id: 'dr-1', org_id: 'org-1', workspace_id: 'ws-1', export_package_id: 'pkg-1', requested_by: 'a', reason: 'x', status: 'destroyed', package_content_hash: 'c', package_manifest_hash: 'm', storage_reference_hash: 'h', retention_policy_code: 'std', retention_policy_version: 1, retain_until: '2020-01-02T00:00:00.000Z', active_hold_count: 0, execution_owner: null, lease_expires_at: null, destruction_evidence_id: 'e-1', requested_at: '2020-01-03T00:00:00.000Z', updated_at: '2020-01-04T00:00:00.000Z' }])
+      .enqueue([{ id: 'pkg-1', org_id: 'org-1', workspace_id: 'ws-1', export_request_id: 'r-1', status: 'generated', package_type: 'internal_review_bundle', manifest_json: '{}', manifest_hash: 'm', content_hash: 'c', storage_reference: 'ref', media_type: 'application/json', size_bytes: 1, policy_version: 'v', item_count: 1, excluded_count: 0, generated_by: 'a', generated_at: '2020-01-01T00:00:00.000Z', created_at: '2020-01-01T00:00:00.000Z', availability_status: 'destroyed' }])
+    const repo = new PostgresSageRepository(sql)
+    const result = await repo.completeDestruction({
+      destructionRequestId: 'dr-1', workspaceId: 'ws-1', orgId: 'org-1', executionOwner: 'owner-1',
+      attemptId: 'att-1', exportPackageId: 'pkg-1', destroyedBy: 'sys', updatedAt: '2020-01-04T00:00:00.000Z',
+      evidence: {
+        eventId: 'ev', orgId: 'org-1', workspaceId: 'ws-1', destructionRequestId: 'dr-1', exportPackageId: 'pkg-1',
+        objectId: null, storageProvider: 'sage-internal', storageReferenceHash: 'h', preDestructionContentHash: 'c',
+        preDestructionManifestHash: 'm', deletionAttemptedAt: null, deletionVerifiedAt: '2020-01-04T00:00:00.000Z',
+        verificationMethod: 'probe', result: 'verified_destroyed', providerRequestId: null, safeErrorCode: null,
+        executedBy: 'sys', createdAt: '2020-01-04T00:00:00.000Z',
+      },
+      auditEvent: { ...auditEvent, action: SAGE_AUDIT_ACTIONS.EXPORT_DESTRUCTION_VERIFIED, resourceType: 'sage_export_destruction_evidence' },
+    })
+    expect(result?.package.availabilityStatus).toBe('destroyed')
+    const text = sql.calls[0].text
+    expect(text).toContain('insert into sage_export_destruction_evidence')
+    expect(text).toContain("status = 'destroyed'")
+    expect(text).toContain("availability_status = 'destroyed'")
+    // Fenced by execution owner + only an available package is tombstoned.
+    expect(text).toContain("status = 'deletion_started' and execution_owner = $4")
+    expect(text).toContain("availability_status = 'available'")
+  })
+})

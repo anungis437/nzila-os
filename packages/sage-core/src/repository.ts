@@ -34,6 +34,16 @@ import type {
   SageNotificationOutbox,
   SageNotificationOutboxIntent,
 } from './delivery-types'
+import type {
+  SageDestructionDecision,
+  SageExportDestructionApproval,
+  SageExportDestructionAttempt,
+  SageExportDestructionEvidence,
+  SageExportDestructionRequest,
+  SageExportLegalHold,
+  SageExportRetentionAssignment,
+  SageRetentionPolicy,
+} from './records-types'
 import { conflict } from './service-errors'
 
 export interface SageRepository {
@@ -399,6 +409,204 @@ export interface SageRepository {
     grantId: string,
     orgId: string,
   ): Promise<SageNotificationOutbox[]>
+
+  // ── Phase 8B: records lifecycle (retention, legal holds, destruction) ───────
+  createRetentionPolicy(input: Omit<SageRetentionPolicy, 'id'>): Promise<SageRetentionPolicy>
+  getRetentionPolicy(id: string, orgId: string): Promise<SageRetentionPolicy | undefined>
+  /** Highest active version for a policy code, or undefined if none is active. */
+  getActiveRetentionPolicyByCode(
+    orgId: string,
+    policyCode: string,
+  ): Promise<SageRetentionPolicy | undefined>
+  listRetentionPolicies(orgId: string): Promise<SageRetentionPolicy[]>
+
+  /** Assign the one authoritative retention policy for a package (idempotent per package). */
+  assignRetentionPolicy(input: {
+    assignment: Omit<SageExportRetentionAssignment, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<{ assignment: SageExportRetentionAssignment; created: boolean }>
+  getRetentionAssignment(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportRetentionAssignment | undefined>
+
+  placeLegalHold(input: {
+    hold: Omit<SageExportLegalHold, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportLegalHold>
+  /** CAS active → released, fenced by an unreleased hold. Frozen origin facts. */
+  releaseLegalHold(input: {
+    holdId: string
+    workspaceId: string
+    orgId: string
+    releasedBy: string
+    releasedAt: string
+    releaseReason: string
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportLegalHold | undefined>
+  getLegalHold(
+    holdId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportLegalHold | undefined>
+  listLegalHolds(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportLegalHold[]>
+  countActiveLegalHolds(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<number>
+
+  /** Create a destruction request (at most one open request per package). */
+  createDestructionRequest(input: {
+    request: Omit<SageExportDestructionRequest, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportDestructionRequest | undefined>
+  getDestructionRequest(
+    requestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest | undefined>
+  listDestructionRequests(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest[]>
+  /** CAS 'requested' → approved|denied + append the frozen approval + audit. */
+  decideDestructionRequest(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    decision: SageDestructionDecision
+    updatedAt: string
+    approval: Omit<SageExportDestructionApproval, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    | { request: SageExportDestructionRequest; approval: SageExportDestructionApproval }
+    | undefined
+  >
+  getDestructionApproval(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionApproval | undefined>
+
+  /** CAS approved → executing_preflight (or reclaim a stale lease), fenced by owner. */
+  claimDestructionForExecution(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    leaseMs: number
+    now: string
+  }): Promise<SageExportDestructionRequest | undefined>
+  /** Atomically: request → destroyed, tombstone the package, append evidence — fenced by owner + attempt. */
+  completeDestruction(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    attemptId: string
+    exportPackageId: string
+    destroyedBy: string
+    updatedAt: string
+    evidence: Omit<SageExportDestructionEvidence, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    | {
+        request: SageExportDestructionRequest
+        evidence: SageExportDestructionEvidence
+        package: SageExportPackage
+      }
+    | undefined
+  >
+  /** Fenced: request → failed and append safe failure evidence. Package stays available. */
+  failDestruction(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    attemptId?: string
+    attemptStatus?: 'failed' | 'indeterminate'
+    updatedAt: string
+    evidence: Omit<SageExportDestructionEvidence, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    { request: SageExportDestructionRequest; evidence: SageExportDestructionEvidence } | undefined
+  >
+  getDestructionEvidenceByRequest(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionEvidence | undefined>
+
+  // ── Phase 8B closure hardening: crash-safe destruction execution ────────────
+  /** The open (in-flight) destruction request for a package, if any. */
+  getOpenDestructionRequestForPackage(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest | undefined>
+  /** Persist the durable destruction attempt (prepared) BEFORE any external delete, binding it to the request. */
+  createDestructionAttempt(input: {
+    attempt: Omit<SageExportDestructionAttempt, 'id'>
+    executionOwner: string
+    updatedAt: string
+  }): Promise<SageExportDestructionAttempt | undefined>
+  getDestructionAttemptById(
+    attemptId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionAttempt | undefined>
+  getLatestDestructionAttemptByRequest(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionAttempt | undefined>
+  /** Record the pre-delete presence probe result on the attempt. */
+  markAttemptPresenceVerified(input: {
+    attemptId: string
+    executionOwner: string
+    present: boolean
+    at: string
+  }): Promise<{ success: boolean }>
+  /**
+   * ATOMIC point of no return: verify the request is in preflight for this owner
+   * AND that NO active legal hold exists, then move request → deletion_started
+   * and attempt → deletion_started. Returns undefined if an active hold appeared
+   * or the lease was lost.
+   */
+  beginDeletion(input: {
+    destructionRequestId: string
+    attemptId: string
+    workspaceId: string
+    orgId: string
+    exportPackageId: string
+    executionOwner: string
+    at: string
+  }): Promise<
+    { request: SageExportDestructionRequest; attempt: SageExportDestructionAttempt } | undefined
+  >
+  /** Record the safe provider result on the attempt. */
+  recordAttemptProviderResult(input: {
+    attemptId: string
+    executionOwner: string
+    providerResult: string
+    providerRequestId?: string | null
+    safeErrorCode?: string | null
+    status: 'provider_accepted' | 'failed'
+    at: string
+  }): Promise<{ success: boolean }>
+  /** Record the post-delete absence verification on the attempt. */
+  recordAttemptAbsenceVerified(input: {
+    attemptId: string
+    executionOwner: string
+    absent: boolean
+    at: string
+  }): Promise<{ success: boolean }>
 }
 
 let counter = 0
@@ -431,6 +639,14 @@ export class InMemorySageRepository implements SageRepository {
   private deliveryReceipts: SageDeliveryReceipt[] = []
   // Phase 8A.1 — notification outbox
   private notificationOutbox: SageNotificationOutbox[] = []
+  // Phase 8B — records lifecycle
+  private retentionPolicies = new Map<string, SageRetentionPolicy>()
+  private retentionAssignments = new Map<string, SageExportRetentionAssignment>()
+  private legalHolds = new Map<string, SageExportLegalHold>()
+  private destructionRequests = new Map<string, SageExportDestructionRequest>()
+  private destructionApprovals: SageExportDestructionApproval[] = []
+  private destructionEvidence: SageExportDestructionEvidence[] = []
+  private destructionAttempts: SageExportDestructionAttempt[] = []
 
   async createWorkspace(input: Omit<SageWorkspace, 'id'>): Promise<SageWorkspace> {
     const ws: SageWorkspace = { ...input, id: nextId('ws') }
@@ -1555,5 +1771,495 @@ export class InMemorySageRepository implements SageRepository {
 
   async listNotificationOutboxByGrant(grantId: string, orgId: string): Promise<SageNotificationOutbox[]> {
     return this.notificationOutbox.filter((n) => n.grantId === grantId && n.orgId === orgId)
+  }
+
+  // ── Phase 8B: records lifecycle ────────────────────────────────────────────
+  async createRetentionPolicy(input: Omit<SageRetentionPolicy, 'id'>): Promise<SageRetentionPolicy> {
+    const existing = [...this.retentionPolicies.values()].find(
+      (p) => p.orgId === input.orgId && p.policyCode === input.policyCode && p.version === input.version,
+    )
+    if (existing) conflict('a retention policy with this code and version already exists')
+    const policy: SageRetentionPolicy = { ...input, id: nextId('retpol') }
+    this.retentionPolicies.set(policy.id, policy)
+    return policy
+  }
+
+  async getRetentionPolicy(id: string, orgId: string): Promise<SageRetentionPolicy | undefined> {
+    const p = this.retentionPolicies.get(id)
+    return p && p.orgId === orgId ? p : undefined
+  }
+
+  async getActiveRetentionPolicyByCode(
+    orgId: string,
+    policyCode: string,
+  ): Promise<SageRetentionPolicy | undefined> {
+    return [...this.retentionPolicies.values()]
+      .filter((p) => p.orgId === orgId && p.policyCode === policyCode && p.isActive)
+      .sort((a, b) => b.version - a.version)[0]
+  }
+
+  async listRetentionPolicies(orgId: string): Promise<SageRetentionPolicy[]> {
+    return [...this.retentionPolicies.values()]
+      .filter((p) => p.orgId === orgId)
+      .sort((a, b) => a.policyCode.localeCompare(b.policyCode) || b.version - a.version)
+  }
+
+  async assignRetentionPolicy(input: {
+    assignment: Omit<SageExportRetentionAssignment, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<{ assignment: SageExportRetentionAssignment; created: boolean }> {
+    const existing = [...this.retentionAssignments.values()].find(
+      (a) => a.exportPackageId === input.assignment.exportPackageId,
+    )
+    if (existing) return { assignment: existing, created: false }
+    const assignment: SageExportRetentionAssignment = { ...input.assignment, id: nextId('retassign') }
+    this.retentionAssignments.set(assignment.id, assignment)
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: assignment.orgId,
+      workspaceId: assignment.workspaceId,
+      resourceId: assignment.exportPackageId,
+      createdAt: assignment.assignedAt,
+    })
+    return { assignment, created: true }
+  }
+
+  async getRetentionAssignment(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportRetentionAssignment | undefined> {
+    return [...this.retentionAssignments.values()].find(
+      (a) => a.exportPackageId === exportPackageId && a.workspaceId === workspaceId && a.orgId === orgId,
+    )
+  }
+
+  async placeLegalHold(input: {
+    hold: Omit<SageExportLegalHold, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportLegalHold> {
+    const hold: SageExportLegalHold = { ...input.hold, id: nextId('hold') }
+    this.legalHolds.set(hold.id, hold)
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: hold.orgId,
+      workspaceId: hold.workspaceId,
+      resourceId: hold.exportPackageId,
+      createdAt: hold.placedAt,
+    })
+    return hold
+  }
+
+  async getOpenDestructionRequestForPackage(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest | undefined> {
+    return [...this.destructionRequests.values()].find(
+      (r) =>
+        r.exportPackageId === exportPackageId &&
+        r.workspaceId === workspaceId &&
+        r.orgId === orgId &&
+        (r.status === 'requested' ||
+          r.status === 'approved' ||
+          r.status === 'executing' ||
+          r.status === 'executing_preflight' ||
+          r.status === 'deletion_started'),
+    )
+  }
+
+  async releaseLegalHold(input: {
+    holdId: string
+    workspaceId: string
+    orgId: string
+    releasedBy: string
+    releasedAt: string
+    releaseReason: string
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportLegalHold | undefined> {
+    const hold = this.legalHolds.get(input.holdId)
+    // CAS: only an active hold in this tenant can be released.
+    if (!hold || hold.workspaceId !== input.workspaceId || hold.orgId !== input.orgId) return undefined
+    if (hold.status !== 'active') return undefined
+    hold.status = 'released'
+    hold.releasedBy = input.releasedBy
+    hold.releasedAt = input.releasedAt
+    hold.releaseReason = input.releaseReason
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: hold.orgId,
+      workspaceId: hold.workspaceId,
+      resourceId: hold.exportPackageId,
+      createdAt: input.releasedAt,
+    })
+    return hold
+  }
+
+  async getLegalHold(
+    holdId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportLegalHold | undefined> {
+    const h = this.legalHolds.get(holdId)
+    return h && h.workspaceId === workspaceId && h.orgId === orgId ? h : undefined
+  }
+
+  async listLegalHolds(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportLegalHold[]> {
+    return [...this.legalHolds.values()]
+      .filter((h) => h.exportPackageId === exportPackageId && h.workspaceId === workspaceId && h.orgId === orgId)
+      .sort((a, b) => a.placedAt.localeCompare(b.placedAt))
+  }
+
+  async countActiveLegalHolds(
+    exportPackageId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<number> {
+    return [...this.legalHolds.values()].filter(
+      (h) =>
+        h.exportPackageId === exportPackageId &&
+        h.workspaceId === workspaceId &&
+        h.orgId === orgId &&
+        h.status === 'active',
+    ).length
+  }
+
+  async createDestructionRequest(input: {
+    request: Omit<SageExportDestructionRequest, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<SageExportDestructionRequest | undefined> {
+    const open = [...this.destructionRequests.values()].find(
+      (r) =>
+        r.exportPackageId === input.request.exportPackageId &&
+        (r.status === 'requested' || r.status === 'approved' || r.status === 'executing'),
+    )
+    if (open) return undefined
+    const request: SageExportDestructionRequest = { ...input.request, id: nextId('destroyreq') }
+    this.destructionRequests.set(request.id, request)
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: request.orgId,
+      workspaceId: request.workspaceId,
+      resourceId: request.id,
+      createdAt: request.requestedAt,
+    })
+    return request
+  }
+
+  async getDestructionRequest(
+    requestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest | undefined> {
+    const r = this.destructionRequests.get(requestId)
+    return r && r.workspaceId === workspaceId && r.orgId === orgId ? r : undefined
+  }
+
+  async listDestructionRequests(
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionRequest[]> {
+    return [...this.destructionRequests.values()]
+      .filter((r) => r.workspaceId === workspaceId && r.orgId === orgId)
+      .sort((a, b) => b.requestedAt.localeCompare(a.requestedAt))
+  }
+
+  async decideDestructionRequest(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    decision: SageDestructionDecision
+    updatedAt: string
+    approval: Omit<SageExportDestructionApproval, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    { request: SageExportDestructionRequest; approval: SageExportDestructionApproval } | undefined
+  > {
+    const req = this.destructionRequests.get(input.destructionRequestId)
+    // CAS: only a 'requested' request in this tenant may be decided.
+    if (!req || req.workspaceId !== input.workspaceId || req.orgId !== input.orgId) return undefined
+    if (req.status !== 'requested') return undefined
+    if (this.destructionApprovals.some((a) => a.destructionRequestId === req.id)) return undefined
+    req.status = input.decision === 'approved' ? 'approved' : 'denied'
+    req.updatedAt = input.updatedAt
+    const approval: SageExportDestructionApproval = { ...input.approval, id: nextId('destroyappr') }
+    this.destructionApprovals.push(approval)
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: req.orgId,
+      workspaceId: req.workspaceId,
+      resourceId: req.id,
+      createdAt: input.updatedAt,
+    })
+    return { request: req, approval }
+  }
+
+  async getDestructionApproval(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionApproval | undefined> {
+    return this.destructionApprovals.find(
+      (a) => a.destructionRequestId === destructionRequestId && a.workspaceId === workspaceId && a.orgId === orgId,
+    )
+  }
+
+  async claimDestructionForExecution(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    leaseMs: number
+    now: string
+  }): Promise<SageExportDestructionRequest | undefined> {
+    const req = this.destructionRequests.get(input.destructionRequestId)
+    if (!req || req.workspaceId !== input.workspaceId || req.orgId !== input.orgId) return undefined
+    const nowMs = Date.parse(input.now)
+    const leaseExpired = req.leaseExpiresAt ? Date.parse(req.leaseExpiresAt) < nowMs : true
+    // Claim an approved request, or reclaim a stale preflight lease (never a
+    // request that has already passed the point of no return).
+    const claimable =
+      req.status === 'approved' || (req.status === 'executing_preflight' && leaseExpired)
+    if (!claimable) return undefined
+    req.status = 'executing_preflight'
+    req.executionOwner = input.executionOwner
+    req.leaseExpiresAt = new Date(nowMs + input.leaseMs).toISOString()
+    req.updatedAt = input.now
+    return req
+  }
+
+  async createDestructionAttempt(input: {
+    attempt: Omit<SageExportDestructionAttempt, 'id'>
+    executionOwner: string
+    updatedAt: string
+  }): Promise<SageExportDestructionAttempt | undefined> {
+    const req = this.destructionRequests.get(input.attempt.destructionRequestId)
+    // Fenced: only the preflight lease owner may open an attempt.
+    if (!req || req.status !== 'executing_preflight' || req.executionOwner !== input.executionOwner) {
+      return undefined
+    }
+    if (this.destructionAttempts.some((a) => a.attemptId === input.attempt.attemptId)) return undefined
+    const attempt: SageExportDestructionAttempt = { ...input.attempt, id: nextId('attempt') }
+    this.destructionAttempts.push(attempt)
+    req.currentAttemptId = attempt.attemptId
+    req.updatedAt = input.updatedAt
+    return attempt
+  }
+
+  async getDestructionAttemptById(
+    attemptId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionAttempt | undefined> {
+    return this.destructionAttempts.find(
+      (a) => a.attemptId === attemptId && a.workspaceId === workspaceId && a.orgId === orgId,
+    )
+  }
+
+  async getLatestDestructionAttemptByRequest(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionAttempt | undefined> {
+    return [...this.destructionAttempts]
+      .filter(
+        (a) =>
+          a.destructionRequestId === destructionRequestId &&
+          a.workspaceId === workspaceId &&
+          a.orgId === orgId,
+      )
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
+  }
+
+  async markAttemptPresenceVerified(input: {
+    attemptId: string
+    executionOwner: string
+    present: boolean
+    at: string
+  }): Promise<{ success: boolean }> {
+    const a = this.destructionAttempts.find(
+      (x) => x.attemptId === input.attemptId && x.executionOwner === input.executionOwner,
+    )
+    if (!a || a.status !== 'prepared') return { success: false }
+    a.preDeletePresenceVerified = input.present
+    a.preDeleteVerifiedAt = input.at
+    a.updatedAt = input.at
+    return { success: true }
+  }
+
+  async beginDeletion(input: {
+    destructionRequestId: string
+    attemptId: string
+    workspaceId: string
+    orgId: string
+    exportPackageId: string
+    executionOwner: string
+    at: string
+  }): Promise<
+    { request: SageExportDestructionRequest; attempt: SageExportDestructionAttempt } | undefined
+  > {
+    const req = this.destructionRequests.get(input.destructionRequestId)
+    if (!req || req.workspaceId !== input.workspaceId || req.orgId !== input.orgId) return undefined
+    if (req.status !== 'executing_preflight' || req.executionOwner !== input.executionOwner) return undefined
+    const attempt = this.destructionAttempts.find(
+      (a) => a.attemptId === input.attemptId && a.executionOwner === input.executionOwner,
+    )
+    if (!attempt || attempt.status !== 'prepared') return undefined
+    // ATOMIC no-hold check at the point of no return: any active hold aborts.
+    const activeHold = [...this.legalHolds.values()].some(
+      (h) => h.exportPackageId === input.exportPackageId && h.orgId === input.orgId && h.status === 'active',
+    )
+    if (activeHold) return undefined
+    req.status = 'deletion_started'
+    req.deletionStartedAt = input.at
+    req.updatedAt = input.at
+    attempt.status = 'deletion_started'
+    attempt.deleteStartedAt = input.at
+    attempt.updatedAt = input.at
+    return { request: req, attempt }
+  }
+
+  async recordAttemptProviderResult(input: {
+    attemptId: string
+    executionOwner: string
+    providerResult: string
+    providerRequestId?: string | null
+    safeErrorCode?: string | null
+    status: 'provider_accepted' | 'failed'
+    at: string
+  }): Promise<{ success: boolean }> {
+    const a = this.destructionAttempts.find(
+      (x) => x.attemptId === input.attemptId && x.executionOwner === input.executionOwner,
+    )
+    if (!a) return { success: false }
+    a.providerResult = input.providerResult
+    a.providerRequestId = input.providerRequestId ?? null
+    a.safeErrorCode = input.safeErrorCode ?? null
+    a.status = input.status
+    a.updatedAt = input.at
+    return { success: true }
+  }
+
+  async recordAttemptAbsenceVerified(input: {
+    attemptId: string
+    executionOwner: string
+    absent: boolean
+    at: string
+  }): Promise<{ success: boolean }> {
+    const a = this.destructionAttempts.find(
+      (x) => x.attemptId === input.attemptId && x.executionOwner === input.executionOwner,
+    )
+    if (!a) return { success: false }
+    a.postDeleteAbsenceVerified = input.absent
+    a.postDeleteVerifiedAt = input.at
+    if (input.absent) a.status = 'absence_verified'
+    a.updatedAt = input.at
+    return { success: true }
+  }
+
+  async completeDestruction(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    attemptId: string
+    exportPackageId: string
+    destroyedBy: string
+    updatedAt: string
+    evidence: Omit<SageExportDestructionEvidence, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    | {
+        request: SageExportDestructionRequest
+        evidence: SageExportDestructionEvidence
+        package: SageExportPackage
+      }
+    | undefined
+  > {
+    const req = this.destructionRequests.get(input.destructionRequestId)
+    // Fenced: only the lease owner of a deletion_started request may complete it.
+    if (!req || req.workspaceId !== input.workspaceId || req.orgId !== input.orgId) return undefined
+    if (req.status !== 'deletion_started' || req.executionOwner !== input.executionOwner) return undefined
+    const attempt = this.destructionAttempts.find(
+      (a) => a.attemptId === input.attemptId && a.executionOwner === input.executionOwner,
+    )
+    if (!attempt) return undefined
+    const pkg = this.exportPackages.get(input.exportPackageId)
+    if (!pkg || pkg.workspaceId !== input.workspaceId || pkg.orgId !== input.orgId) return undefined
+    if (pkg.availabilityStatus === 'destroyed') return undefined
+    const evidence: SageExportDestructionEvidence = { ...input.evidence, id: nextId('destroyevid') }
+    this.destructionEvidence.push(evidence)
+    req.status = 'destroyed'
+    req.destructionEvidenceId = evidence.id
+    req.executionOwner = undefined
+    req.leaseExpiresAt = undefined
+    req.updatedAt = input.updatedAt
+    attempt.status = 'completed'
+    attempt.updatedAt = input.updatedAt
+    pkg.availabilityStatus = 'destroyed'
+    pkg.destroyedAt = input.updatedAt
+    pkg.destroyedBy = input.destroyedBy
+    pkg.destructionRequestId = req.id
+    pkg.destructionEvidenceId = evidence.id
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: req.orgId,
+      workspaceId: req.workspaceId,
+      resourceId: req.id,
+      createdAt: input.updatedAt,
+    })
+    return { request: req, evidence, package: pkg }
+  }
+
+  async failDestruction(input: {
+    destructionRequestId: string
+    workspaceId: string
+    orgId: string
+    executionOwner: string
+    attemptId?: string
+    attemptStatus?: 'failed' | 'indeterminate'
+    updatedAt: string
+    evidence: Omit<SageExportDestructionEvidence, 'id'>
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    { request: SageExportDestructionRequest; evidence: SageExportDestructionEvidence } | undefined
+  > {
+    const req = this.destructionRequests.get(input.destructionRequestId)
+    if (!req || req.workspaceId !== input.workspaceId || req.orgId !== input.orgId) return undefined
+    if (
+      (req.status !== 'executing_preflight' && req.status !== 'deletion_started') ||
+      req.executionOwner !== input.executionOwner
+    ) {
+      return undefined
+    }
+    const evidence: SageExportDestructionEvidence = { ...input.evidence, id: nextId('destroyevid') }
+    this.destructionEvidence.push(evidence)
+    req.status = 'failed'
+    req.destructionEvidenceId = evidence.id
+    req.executionOwner = undefined
+    req.leaseExpiresAt = undefined
+    req.updatedAt = input.updatedAt
+    if (input.attemptId) {
+      const attempt = this.destructionAttempts.find((a) => a.attemptId === input.attemptId)
+      if (attempt) {
+        attempt.status = input.attemptStatus ?? 'failed'
+        attempt.updatedAt = input.updatedAt
+      }
+    }
+    this.enqueueAuditOutboxInternal(input.auditEvent, {
+      orgId: req.orgId,
+      workspaceId: req.workspaceId,
+      resourceId: req.id,
+      createdAt: input.updatedAt,
+    })
+    return { request: req, evidence }
+  }
+
+  async getDestructionEvidenceByRequest(
+    destructionRequestId: string,
+    workspaceId: string,
+    orgId: string,
+  ): Promise<SageExportDestructionEvidence | undefined> {
+    return this.destructionEvidence.find(
+      (e) => e.destructionRequestId === destructionRequestId && e.workspaceId === workspaceId && e.orgId === orgId,
+    )
   }
 }

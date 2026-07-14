@@ -1,18 +1,49 @@
 -- SAGE Phase 8A.1 – Notification Outbox
 -- Durable invitation notification with encrypted payload recovery
 
+-- Shared immutability trigger function used by the SAGE outbox/lifecycle tables.
+-- A generic append-only guard: any UPDATE that changes a column NOT named in the
+-- trigger's argument list (TG_ARGV) is rejected. Defined here (first use) so the
+-- 0040–0042 triggers that reference it resolve when the migration chain is
+-- applied to a live PostgreSQL database.
+create or replace function assert_immutable_except() returns trigger as $$
+declare
+  allowed text[] := tg_argv;
+  old_json jsonb := to_jsonb(old);
+  new_json jsonb := to_jsonb(new);
+  k text;
+begin
+  for k in select jsonb_object_keys(old_json) loop
+    if (old_json -> k) is distinct from (new_json -> k) and not (k = any(allowed)) then
+      raise exception 'sage: column % is immutable on %', k, tg_table_name
+        using errcode = 'restrict_violation';
+    end if;
+  end loop;
+  return new;
+end;
+$$ language plpgsql;
+
+-- Composite foreign-key targets used by the notification outbox below. The
+-- referenced tables (sage_workspace, sage_delivery_recipient) only had single-
+-- column primary keys, so these unique indexes are required for the composite
+-- FKs to resolve when the chain is applied to a live PostgreSQL database.
+create unique index if not exists sage_workspace_org_id_uidx
+  on sage_workspace (org_id, id);
+create unique index if not exists sage_delivery_recipient_scoped_uidx
+  on sage_delivery_recipient (id, workspace_id, org_id);
+
 create table if not exists sage_notification_outbox (
   id uuid primary key default gen_random_uuid(),
   
   -- Idempotency and deduplication
   message_id text not null unique,
   org_id text not null,
-  workspace_id text not null,
+  workspace_id uuid not null,
   
   -- Foreign keys
-  delivery_request_id text not null,
+  delivery_request_id uuid not null,
   grant_id uuid not null references sage_delivery_grant (id),
-  recipient_id text not null,
+  recipient_id uuid not null,
   
   -- Notification provider and template
   provider text not null,
@@ -66,7 +97,7 @@ create index idx_sage_notification_outbox_status_lease on sage_notification_outb
   lease_expires_at,
   created_at,
   id
-) where status = 'pending' or (status = 'dispatching' and lease_expires_at < now());
+) where status in ('pending', 'dispatching');
 
 create index idx_sage_notification_outbox_grant on sage_notification_outbox (
   grant_id,

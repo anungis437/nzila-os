@@ -33,6 +33,8 @@ import {
 } from '../../components/exports/create-export-request-form'
 import { ExportRequestList } from '../../components/exports/export-request-list'
 import { ExportPackageList } from '../../components/exports/export-package-list'
+import { RecordsLifecyclePanel } from '../../components/exports/records-lifecycle-panel'
+import { listDestructionRequestsForScope } from '../../../../lib/sage/records-service'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -48,10 +50,11 @@ export default async function SageExportsPage({
   params: Promise<{ workspaceId: string }>
   searchParams: Promise<{ orgId?: string }>
 }) {
-  const [{ workspaceId }, sp, t] = await Promise.all([
+  const [{ workspaceId }, sp, t, tRecords] = await Promise.all([
     params,
     searchParams,
     getTranslations('sageExports'),
+    getTranslations('sageRecords'),
   ])
   const result = await getPageOrgContext(sp)
   if (result.status === 'unauthenticated') notFound()
@@ -70,6 +73,8 @@ export default async function SageExportsPage({
     listSageExportRequestsForScope(ctx, workspaceId),
     listSageExportPackagesForScope(ctx, workspaceId),
   ])
+
+  const destructionRequests = await listDestructionRequestsForScope(ctx, { workspaceId })
 
   const evidenceOptions: ExportResourceOption[] = (items?.items ?? [])
     .filter((i) => !i.excludedFromExternalReview)
@@ -152,6 +157,18 @@ export default async function SageExportsPage({
           workspaceId={workspaceId}
           generatableRequestIds={generatableRequestIds}
           packages={packageRows}
+        />
+      </section>
+
+      <section aria-labelledby="sage-records-section" className="space-y-3">
+        <h2 id="sage-records-section" className="text-lg font-semibold text-gray-900">
+          {tRecords('title')}
+        </h2>
+        <RecordsLifecyclePanel
+          workspaceId={workspaceId}
+          currentActorId={ctx.actorId}
+          packages={packageRows.map((p) => ({ id: p.id, availabilityStatus: p.availabilityStatus }))}
+          destructionRequests={destructionRequests ?? []}
         />
       </section>
     </main>

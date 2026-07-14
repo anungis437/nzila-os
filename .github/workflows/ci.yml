@@ -108,6 +108,76 @@ jobs:
             !**/.turbo/**
           retention-days: 30
 
+  sage-live-postgres:
+    runs-on: ubuntu-latest
+    name: SAGE Live PostgreSQL (records lifecycle)
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Released migrations are immutable: fail if a locked migration changed
+      # without a documented override in migrations/migration-manifest.json.
+      - name: Verify migration immutability manifest
+        run: pnpm verify:migrations
+
+      # Applies the real migrations/0032..0044 chain to an in-process PostgreSQL
+      # (PGlite/WASM) and drives the destruction lifecycle end-to-end. No service
+      # database is required — the migrations execute exactly as they will in prod.
+      - name: Run SAGE records live-PostgreSQL suite
+        run: pnpm --filter @nzila/sage-core exec vitest run src/records-live-postgres.test.ts
+
+  sage-postgres-concurrency:
+    runs-on: ubuntu-latest
+    name: SAGE PostgreSQL Concurrency and RLS
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sage_test
+          POSTGRES_PASSWORD: sage_test
+          POSTGRES_DB: sage_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sage_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Proves the SERVER-level behaviour PGlite cannot: independent sessions,
+      # SKIP LOCKED, transaction isolation, concurrent legal-hold vs destruction
+      # commits, real non-owner roles + RLS, connection-level app.tenant_id
+      # tenancy, and crash/reconnect recovery — against an official postgres:16.
+      - name: Run SAGE PostgreSQL concurrency + RLS suite
+        run: pnpm --filter @nzila/sage-core exec vitest run src/records-postgres-server.test.ts
+        env:
+          SAGE_PG_TEST_URL: postgresql://sage_test:sage_test@localhost:5432/sage_test
+
   build:
     runs-on: ubuntu-latest
     name: Build All
