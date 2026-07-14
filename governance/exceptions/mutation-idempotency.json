@@ -212,6 +212,12 @@
       "owner": "platform-team",
       "justification": "SAGE Phase 8A recipient acknowledgment: idempotent by unique event_id in sage_delivery_receipt (on conflict do nothing). Idempotency-Key header pattern does not apply to recipient-session operations.",
       "expiresOn": "2027-07-01"
+    },
+    {
+      "path": "apps/platform-admin/app/api/internal/sage/notifications/dispatch/route.ts",
+      "owner": "platform-team",
+      "justification": "Protected SAGE scheduler endpoint. Each attempt is claimed from the durable outbox with a fenced lease and uses a stable provider idempotency key, so replaying the scheduler request cannot create a second issuance or a second live claim.",
+      "expiresOn": "2027-07-01"
     }
   ]
 }

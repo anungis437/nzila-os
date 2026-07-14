@@ -79,7 +79,7 @@ export default function DeliveryGrantPage({ params }: { params: Promise<{ grantI
     <main className="mx-auto max-w-md space-y-6 p-6">
       <h1 className="text-xl font-semibold text-gray-900">Secure delivery</h1>
       <p className="text-sm text-gray-600">
-        This access is intended only for the verified recipient. Access may be revoked or expire. The package is
+        This mailbox-verified access is intended only for the person controlling the invited email address. Access may be revoked or expire. The package is
         integrity-checked before download.
       </p>
       <div className="space-y-3">

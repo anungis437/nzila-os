@@ -3,6 +3,7 @@
  */
 export * from './types'
 export { checkRateLimit, rateLimitHeaders } from './rateLimit'
+export { checkDistributedRateLimit, type DistributedRateLimitResult } from './distributed-rate-limit'
 export { auditedAction } from './audited-action'
 export type {
   AuditedActionInput,

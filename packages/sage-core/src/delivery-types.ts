@@ -161,3 +161,66 @@ export type SageDeliveryReceiptIntent = {
   safeReasonCode?: string | null
   occurredAt: string
 }
+
+// ── Notification Outbox (Phase 8A.1) ──────────────────────────────────────────
+// Durable notification queue for invitation issuance. Enables crash-safe delivery:
+// the plaintext token is held encrypted in this table and can be recovered after
+// a process crash, allowing the recipient to be notified with the same invitation.
+export const SAGE_NOTIFICATION_STATUSES = ['pending', 'dispatching', 'dispatched', 'dead_letter'] as const
+export type SageNotificationStatus = (typeof SAGE_NOTIFICATION_STATUSES)[number]
+
+export type SageNotificationOutbox = {
+  id: string
+  messageId: string
+  orgId: string
+  workspaceId: string
+  deliveryRequestId: string
+  grantId: string
+  recipientId: string
+  provider: string
+  template: string
+  recipientAddressHash: string
+  encryptedPayload: string // enc:v1:... format; never plaintext
+  encryptionKeyReference: string
+  status: SageNotificationStatus
+  dispatchOwner?: string | null
+  leaseExpiresAt?: string | null
+  attemptCount: number
+  maxRetries: number
+  providerMessageId?: string | null
+  providerRequestId?: string | null
+  lastErrorCode?: string | null
+  lastErrorMessage?: string | null
+  nextAttemptAt?: string | null
+  deadLetteredAt?: string | null
+  createdAt: string
+  dispatchedAt?: string | null
+  payloadDestroyedAt?: string | null
+}
+
+/**
+ * Intent to enqueue a notification message in the durable outbox.
+ * Called within the same transaction as the grant creation.
+ */
+export type SageNotificationOutboxIntent = {
+  messageId: string
+  deliveryRequestId: string
+  grantId: string
+  recipientId: string
+  provider: string
+  template: string
+  recipientAddressHash: string
+  encryptedPayload: string
+  encryptionKeyReference?: string
+  createdAt: string
+}
+
+/**
+ * The single authoritative durable issuance for a delivery request. The grant
+ * and its encrypted notification are read together so retries cannot mint or
+ * use fresh invitation material after a crash or lost response.
+ */
+export type SageDeliveryIssuance = {
+  grant: SageDeliveryGrant
+  notification: SageNotificationOutbox
+}

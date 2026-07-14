@@ -17,6 +17,7 @@ import type { SageDeliveryNotifier, SageDeliveryInvitationMessage } from './deli
 import type { SageRecipientAccessContext } from './recipient-context'
 import type { SageDeliveryGrant } from './delivery-types'
 import type { SageExportPackage } from './types'
+import { NotificationDispatcher } from './notification-dispatcher'
 import {
   acknowledgeSageDelivery,
   approveSageDelivery,
@@ -204,7 +205,10 @@ beforeEach(() => {
   repo = new InMemorySageRepository()
   sink = new RecordingSink()
   notifier = new CapturingNotifier()
-  deps = { repo, audit: sink, deliveryNotifier: notifier }
+  const dispatcher = new NotificationDispatcher(repo, notifier, { query: async () => ({ rows: [] }) }, {
+    dispatcherInstanceId: 'delivery-test-dispatcher',
+  })
+  deps = { repo, audit: sink, deliveryNotifier: notifier, deliveryNotificationDispatcher: dispatcher }
 })
 
 describe('delivery — separation of duties & authorization', () => {
@@ -424,5 +428,89 @@ describe('delivery — acknowledgment, expiry, receipts', () => {
     const blob = JSON.stringify(receipts) + JSON.stringify(sink.records)
     expect(blob).not.toContain(RECIPIENT_EMAIL)
     expect(blob).not.toContain(token)
+  })
+})
+
+describe('delivery — replay-first issuance', () => {
+  async function issueTwice() {
+    const c = await setup()
+    const { recipient, req } = await requestApprove(c)
+    const first = await issueSageDeliveryInvitation(deps, ctxFor(c.approver), { workspaceId: c.ws, deliveryRequestId: req.id })
+    const issuance = await repo.getDeliveryIssuanceByRequestId({ orgId: c.org, workspaceId: c.ws, deliveryRequestId: req.id })
+    const receiptCount = (await repo.listDeliveryReceipts(first.grant.id, c.ws, c.org)).length
+    const auditCount = sink.records.length
+    const sentCount = notifier.sent.length
+    const second = await issueSageDeliveryInvitation(deps, ctxFor(c.approver), { workspaceId: c.ws, deliveryRequestId: req.id })
+    return { c, recipient, req, first, second, issuance: issuance!, receiptCount, auditCount, sentCount }
+  }
+
+  it('returns the authoritative grant after a simulated lost response', async () => {
+    const { first, second } = await issueTwice()
+    expect(second.grant.id).toBe(first.grant.id)
+  })
+
+  it('does not create a second notification, receipt, or audit event on replay', async () => {
+    const { c, first, receiptCount, auditCount, sentCount } = await issueTwice()
+    expect((await repo.listNotificationOutboxByGrant(first.grant.id, c.org))).toHaveLength(1)
+    expect((await repo.listDeliveryReceipts(first.grant.id, c.ws, c.org))).toHaveLength(receiptCount)
+    expect(sink.records).toHaveLength(auditCount)
+    expect(notifier.sent).toHaveLength(sentCount)
+  })
+
+  it('reuses the original encrypted invitation instead of generating or sending a fresh token', async () => {
+    const { c, req, issuance } = await issueTwice()
+    const current = await repo.getDeliveryIssuanceByRequestId({ orgId: c.org, workspaceId: c.ws, deliveryRequestId: req.id })
+    expect(current?.notification.messageId).toBe(issuance.notification.messageId)
+    expect(current?.notification.encryptedPayload).toBe(issuance.notification.encryptedPayload)
+    expect(current?.notification.status).toBe('dispatched')
+  })
+
+  it('rejects recipient identity-hash drift without side effects', async () => {
+    const { c, req } = await issueTwice()
+    const recipient = await repo.getDeliveryRecipient(req.recipientId, c.ws, c.org)
+    recipient!.identitySubject = 'changed-subject'
+    await expect(issueSageDeliveryInvitation(deps, ctxFor(c.approver), { workspaceId: c.ws, deliveryRequestId: req.id })).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('rejects package content-hash drift without side effects', async () => {
+    const { c, req } = await issueTwice()
+    const pkg = await repo.getExportPackage(req.exportPackageId, c.ws, c.org)
+    pkg!.contentHash = 'different-content-hash'
+    await expect(issueSageDeliveryInvitation(deps, ctxFor(c.approver), { workspaceId: c.ws, deliveryRequestId: req.id })).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('rejects manifest-hash drift without side effects', async () => {
+    const { c, req } = await issueTwice()
+    const pkg = await repo.getExportPackage(req.exportPackageId, c.ws, c.org)
+    pkg!.manifestHash = 'different-manifest-hash'
+    await expect(issueSageDeliveryInvitation(deps, ctxFor(c.approver), { workspaceId: c.ws, deliveryRequestId: req.id })).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('rejects policy-version drift without side effects', async () => {
+    const { c, req } = await issueTwice()
+    const pkg = await repo.getExportPackage(req.exportPackageId, c.ws, c.org)
+    pkg!.policyVersion = 'different-policy-version'
+    await expect(issueSageDeliveryInvitation(deps, ctxFor(c.approver), { workspaceId: c.ws, deliveryRequestId: req.id })).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('rejects notification message and grant binding drift', async () => {
+    const { c, req, issuance } = await issueTwice()
+    issuance.notification.messageId = 'sage-delivery-invitation:wrong-grant'
+    await expect(issueSageDeliveryInvitation(deps, ctxFor(c.approver), { workspaceId: c.ws, deliveryRequestId: req.id })).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('rejects a retry whose requested invitation expiry differs from the committed invitation', async () => {
+    const { c, req } = await issueTwice()
+    await expect(issueSageDeliveryInvitation(deps, ctxFor(c.approver), {
+      workspaceId: c.ws,
+      deliveryRequestId: req.id,
+      invitationTtlMs: 60_000,
+    })).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+
+  it('rejects an existing notification without its compatible grant', async () => {
+    const { c, req, issuance } = await issueTwice()
+    issuance.notification.grantId = 'different-grant'
+    await expect(repo.getDeliveryIssuanceByRequestId({ orgId: c.org, workspaceId: c.ws, deliveryRequestId: req.id })).rejects.toMatchObject({ code: 'CONFLICT' })
   })
 })

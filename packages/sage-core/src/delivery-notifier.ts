@@ -38,6 +38,16 @@ export interface SageDeliveryNotifyResult {
   providerMessageId?: string | null
 }
 
+export class SageDeliveryNotificationError extends Error {
+  constructor(
+    public readonly classification: 'transient' | 'permanent',
+    message: string,
+  ) {
+    super(message)
+    this.name = 'SageDeliveryNotificationError'
+  }
+}
+
 /**
  * Port implemented by the platform runtime. Delivery is AT-LEAST-ONCE with a
  * stable messageId; implementations must NOT claim exactly-once email delivery,

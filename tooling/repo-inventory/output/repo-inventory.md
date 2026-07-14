@@ -1,17 +1,17 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-07-10 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-07-14 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
 | Apps | 26 |
-| Packages (packages/*) | 221 |
-| Workspace Packages (apps|packages|services|tooling) | 253 |
+| Packages (packages/*) | 222 |
+| Workspace Packages (apps|packages|services|tooling) | 254 |
 | GitHub Workflows | 52 |
-| Contract Test Files | 268 |
-| TS/JS Test Files | 2419 |
+| Contract Test Files | 269 |
+| TS/JS Test Files | 2454 |
 | Python Test Files | 32 |
 
 ## Apps
@@ -32,7 +32,7 @@
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 105 |  |
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 35 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 110 | Partner portal for managing deals, commissions, certifications, and go-to-market |
-| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 64 | Internal admin console for managing platform services — events, knowledge, ontol |
+| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 168 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade management — deals, listings, shipments, and commission track |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
@@ -41,7 +41,7 @@
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 27 |  |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 92 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 93 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 100 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 458 | Africa-first music distribution, streaming, and royalty management platform. |
 

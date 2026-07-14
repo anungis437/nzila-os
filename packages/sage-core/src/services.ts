@@ -96,6 +96,8 @@ export type SageServiceDeps = {
   deliveryNotifier?: SageDeliveryNotifier
   /** Phase 8A: optional recipient claim/access rate limiter (edge also enforces). */
   deliveryRateLimiter?: SageDeliveryRateLimiter
+  /** Optional post-commit fast path; it must use durable outbox claims. */
+  deliveryNotificationDispatcher?: { run(): Promise<unknown> }
 }
 
 function requirePermission(ctx: SageServiceContext, permission: string): void {

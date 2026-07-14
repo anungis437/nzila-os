@@ -40,6 +40,13 @@ import {
   verifyDeliveryToken,
 } from './delivery-identity'
 import {
+  encryptNotificationPayload,
+  notificationEncryptionKeyReference,
+  notificationPayloadAad,
+  type SageNotificationPayload,
+} from './notification-encryption'
+import { randomUUID } from 'node:crypto'
+import {
   isSageRecipientAccessContext,
   recipientContextNow,
   type SageRecipientAccessContext,
@@ -400,7 +407,6 @@ export async function issueSageDeliveryInvitation(
 
   const req = await deps.repo.getDeliveryRequest(input.deliveryRequestId, ws.id, ws.orgId)
   if (!req) notFound('delivery request')
-  if (req.status !== 'approved') conflict('only an approved delivery request can be issued')
   const approval = await deps.repo.getDeliveryApproval(req.id, ws.id, ws.orgId)
   if (!approval || approval.decision !== 'approved') conflict('the delivery approval is missing')
   const recipient = await deps.repo.getDeliveryRecipient(req.recipientId, ws.id, ws.orgId)
@@ -417,6 +423,48 @@ export async function issueSageDeliveryInvitation(
     conflict('the package changed after approval; issuance is blocked')
   }
 
+  const recipientIdentityHash = hashRecipientIdentity({
+    identityProvider: recipient.identityProvider,
+    identitySubject: recipient.identitySubject,
+    normalizedEmailHash: recipient.normalizedEmailHash,
+  })
+  const existingIssuance = await deps.repo.getDeliveryIssuanceByRequestId({
+    orgId: ws.orgId,
+    workspaceId: ws.id,
+    deliveryRequestId: req.id,
+  })
+  if (existingIssuance) {
+    const { grant, notification } = existingIssuance
+    const incompatibilities: string[] = []
+    if (grant.deliveryRequestId !== req.id) incompatibilities.push('delivery request')
+    if (grant.exportPackageId !== req.exportPackageId) incompatibilities.push('package id')
+    if (grant.recipientId !== req.recipientId) incompatibilities.push('recipient id')
+    if (recipientIdentityHash !== req.recipientIdentityHash || recipientIdentityHash !== approval.approvedRecipientIdentityHash) incompatibilities.push('recipient identity hash')
+    if (pkg.contentHash !== req.packageContentHash || pkg.contentHash !== approval.approvedPackageContentHash) incompatibilities.push('package content hash')
+    if (pkg.manifestHash !== req.packageManifestHash || pkg.manifestHash !== approval.approvedManifestHash) incompatibilities.push('package manifest hash')
+    if (pkg.policyVersion !== req.policyVersion || pkg.policyVersion !== approval.approvedPolicyVersion) incompatibilities.push('policy version')
+    if (grant.accessExpiresAt !== approval.approvedAccessExpiresAt) incompatibilities.push('access expiry')
+    if (grant.maxAccesses !== approval.approvedMaxAccesses) incompatibilities.push('maximum accesses')
+    if (!grant.invitationTokenHash || Number.isNaN(Date.parse(grant.invitationExpiresAt))) incompatibilities.push('invitation token material')
+    if (input.invitationTtlMs !== undefined) {
+      const expectedInvitationExpiry = new Date(Date.parse(grant.issuedAt) + input.invitationTtlMs).toISOString()
+      if (grant.invitationExpiresAt !== expectedInvitationExpiry) incompatibilities.push('invitation expiry')
+    }
+    if (notification.grantId !== grant.id || notification.deliveryRequestId !== req.id || notification.recipientId !== req.recipientId) incompatibilities.push('notification binding')
+    if (notification.messageId !== `sage-delivery-invitation:${grant.id}`) incompatibilities.push('notification message identity')
+    if (notification.recipientAddressHash !== recipient.normalizedEmailHash) incompatibilities.push('notification recipient hash')
+    const testPlaintextFixture = process.env.NODE_ENV === 'test' && !notification.encryptedPayload.startsWith('enc:')
+    if ((!notification.encryptedPayload.startsWith('enc:v1:') && !testPlaintextFixture) || !notification.encryptionKeyReference) incompatibilities.push('notification encryption binding')
+    if (incompatibilities.length > 0) {
+      conflict(`delivery issuance replay is incompatible: ${incompatibilities.join(', ')}`)
+    }
+    // Authoritative replay: no new ID, token, payload, receipt, audit event, or send.
+    if (notification.status === 'pending') await deps.deliveryNotificationDispatcher?.run()
+    return { grant }
+  }
+
+  if (req.status !== 'approved') conflict('only an approved delivery request can be issued')
+
   // Fail closed: without a configured notifier we do NOT reveal the token.
   if (!deps.deliveryNotifier) {
     forbidden('the delivery notification provider is not configured')
@@ -425,12 +473,52 @@ export async function issueSageDeliveryInvitation(
   const ts = contextNow(ctx)
   const ttl = input.invitationTtlMs ?? DEFAULT_INVITATION_TTL_MS
   const invitationExpiresAt = new Date(Date.parse(ts) + ttl).toISOString()
+  const grantId = randomUUID()
   const { token, tokenHash } = generateDeliveryToken()
+
+  // Grant-scoped, stable message identity enables provider-side deduplication.
+  const messageId = `sage-delivery-invitation:${grantId}`
+
+  // Prepare the encrypted notification payload
+  // This is the plaintext that will be recovered after a process crash
+  const notificationPayload: SageNotificationPayload = {
+    invitationToken: token,
+    recipientEmail: '', // address resolution occurs only inside the notifier adapter
+    claimUrlTemplate: `/delivery/claim?invitation={token}`, // template for notifier
+    expiresAt: invitationExpiresAt,
+  }
+
+  // Bind ciphertext to the immutable grant/message pair before persisting it.
+  const encryptionKeyReference = notificationEncryptionKeyReference()
+  const encryptedPayload = encryptNotificationPayload(notificationPayload, notificationPayloadAad({
+    orgId: req.orgId,
+    workspaceId: req.workspaceId,
+    grantId,
+    messageId,
+  }), encryptionKeyReference)
+
+  // Notification intent: included in atomic issuance transaction
+  const notificationIntent = {
+    messageId,
+    deliveryRequestId: req.id,
+    grantId,
+    recipientId: req.recipientId,
+    provider: 'email', // default; can be overridden by notifier
+    template: 'delivery_invitation',
+    recipientAddressHash: recipient.normalizedEmailHash,
+    encryptedPayload,
+    encryptionKeyReference,
+    createdAt: ts,
+  }
 
   const issueEventId = deliveryEventId('delivery_issued', req.id, ts)
   const receiptEventId = deliveryEventId('invitation_issued', req.id, ts)
+
+  // ATOMIC ISSUANCE TRANSACTION: grant + receipt + audit-outbox + notification-outbox
+  // All succeed or all fail. No external calls inside the transaction.
   const issued = await deps.repo.issueDeliveryGrant({
     grant: {
+      id: grantId,
       orgId: ws.orgId,
       workspaceId: ws.id,
       deliveryRequestId: req.id,
@@ -464,27 +552,16 @@ export async function issueSageDeliveryInvitation(
       safeReasonCode: 'issued',
       occurredAt: ts,
     },
+    notification: notificationIntent,
   })
   if (!issued) conflict('the delivery invitation could not be issued')
-  if (!issued.created) {
-    // Idempotent: an invitation already exists — never mint or resend a token.
-    return { grant: issued.grant }
-  }
+  if (!issued.created) conflict('delivery issuance changed concurrently; retry the request')
 
-  // Deliver the invitation. AT-LEAST-ONCE with a stable messageId; the token
-  // flows ONLY to the notifier to build the secure claim URL — never returned to
-  // the browser, logged, or audited.
-  await deps.deliveryNotifier.sendInvitation({
-    grantId: issued.grant.id,
-    recipientId: recipient.id,
-    recipientEmailHash: recipient.normalizedEmailHash,
-    organizationSafeName: ws.name,
-    purposeSummary: req.purpose ?? null,
-    invitationExpiresAt,
-    claimToken: token,
-    messageId: issued.grant.id,
-    idempotencyKey: `sage-delivery-invitation:${issued.grant.id}`,
-  })
+  // The post-commit fast path and recovery worker both claim through
+  // NotificationDispatcher. They never call the provider directly here.
+  await deps.deliveryNotificationDispatcher?.run()
+
+  // Dispatch the audit event (at-least-once)
   await dispatchOutboxEvent(deps, {
     eventId: issueEventId,
     actorId: ctx.actor.actorId,
@@ -495,6 +572,7 @@ export async function issueSageDeliveryInvitation(
     payload: { deliveryRequestId: req.id, recipientId: req.recipientId },
     at: ts,
   })
+
   return { grant: issued.grant }
 }
 
@@ -649,7 +727,7 @@ export async function claimSageDeliveryInvitation(
 ): Promise<{ grant: SageDeliveryGrant; sessionToken: string }> {
   if (!input.token) invalidInput('an invitation token is required')
   if (!input.verifiedEmail || !input.verifiedEmail.includes('@')) {
-    invalidInput('a verified recipient email is required')
+    invalidInput('an email-verified recipient address is required')
   }
   const now = input.now ?? new Date().toISOString()
 
@@ -673,7 +751,7 @@ export async function claimSageDeliveryInvitation(
   if (!recipient) forbidden('the invitation is invalid or has expired')
 
   // Identity binding: the claimer must control the recipient's verified email.
-  // A different verified recipient's email cannot claim this grant.
+  // A different email-verified mailbox cannot claim this grant.
   const normalizedEmailHash = hashNormalizedEmail(input.verifiedEmail)
   const claimerIdentityHash = hashRecipientIdentity({
     identityProvider: recipient.identityProvider,
