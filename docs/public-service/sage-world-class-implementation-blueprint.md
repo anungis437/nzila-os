@@ -1,5 +1,14 @@
 # SAGE World-Class Implementation Blueprint
 
+> Recipient delivery assurance verifies control of an invited email mailbox. It
+> does not assert legal, government-issued, or in-person identity verification.
+
+> **Invitation delivery semantics.** SAGE notification attempts are at-least-once
+> with a stable, grant-scoped message identity; no exactly-once provider delivery
+> claim is made. Invitation ciphertext is tenant-bound with authenticated data,
+> versioned by persisted key reference, and destroyed when dispatch succeeds or
+> reaches the terminal dead-letter state. Only safe operational metadata remains.
+
 > **Internal implementation blueprint. Not public copy. Not a product availability claim. Not for external use unless separately reviewed and approved.**
 
 ## Template metadata

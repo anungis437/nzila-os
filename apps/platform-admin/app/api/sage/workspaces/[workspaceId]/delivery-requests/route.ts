@@ -4,7 +4,7 @@
  * GET  /api/sage/workspaces/[workspaceId]/delivery-requests — list requests
  * POST /api/sage/workspaces/[workspaceId]/delivery-requests — request delivery
  *
- * The request names one existing immutable package + one verified recipient and
+ * The request names one existing immutable package + one email-verified recipient and
  * a bounded access window/count. The frozen package/recipient hashes are derived
  * server-side; the body is `.strict()` and cannot supply them.
  */

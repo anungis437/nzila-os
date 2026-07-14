@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-10T00:00:00.000Z",
+  "generatedAt": "2026-07-14T00:00:00.000Z",
   "appCount": 26,
-  "packageCount": 221,
-  "workspacePackageCount": 253,
+  "packageCount": 222,
+  "workspacePackageCount": 254,
   "workflowCount": 52,
-  "contractTestCount": 268,
-  "tsTestFileCount": 2419,
+  "contractTestCount": 269,
+  "tsTestFileCount": 2454,
   "pythonTestFileCount": 32,
   "apps": [
     {
@@ -500,6 +500,7 @@
       "dependsOnPlatformShell": true,
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
+        "comms-email",
         "config",
         "db",
         "decision-core",
@@ -523,11 +524,12 @@
         "platform-reasoning-engine",
         "platform-semantic-search",
         "platform-shell",
+        "sage-core",
         "schema-core",
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 64
+      "codeFileCount": 168
     },
     {
       "name": "test-scaffold-gp",
@@ -747,7 +749,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 92
+      "codeFileCount": 93
     },
     {
       "name": "weekone",

@@ -69,12 +69,12 @@ export default function DeliveryClaimPage() {
   return (
     <main className="mx-auto max-w-md space-y-6 p-6">
       <h1 className="text-xl font-semibold text-gray-900">Secure delivery</h1>
-      <p className="text-sm text-gray-600">This access is intended only for the verified recipient. Access may be revoked or expire.</p>
+      <p className="text-sm text-gray-600">This mailbox-verified access is intended only for the person controlling the invited email address. Access may be revoked or expire.</p>
 
       {state.phase === 'need-email' && (
         <form onSubmit={submit} className="space-y-3">
           <label htmlFor="verifiedEmail" className="block text-sm font-medium text-gray-700">
-            Confirm your verified email
+            Confirm control of your invited email address
           </label>
           <input
             id="verifiedEmail"

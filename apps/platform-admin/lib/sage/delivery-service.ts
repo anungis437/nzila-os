@@ -31,6 +31,7 @@ import {
   type SageDeliveryRevocationReasonCode,
   type SageRecipientAccessContext,
   type SageServiceDeps,
+  NotificationDispatcher,
 } from '@nzila/sage-core'
 import {
   buildCacheKey,
@@ -43,6 +44,8 @@ import {
 import { createSageRuntime, createSageServiceContext, type SageActorScope } from './runtime'
 import { getSageIdempotencyCache } from './idempotency'
 import { getSageDeliveryNotifier } from './delivery-notifier-adapter'
+import { getConfiguredSageDeliveryRateLimiter } from './delivery-claims'
+import { createSagePlatformSqlClient } from './sql-adapter'
 import {
   toDeliveryGrantResponse,
   toDeliveryReceiptResponse,
@@ -56,28 +59,8 @@ import type {
   SageDeliveryRequestResponse,
 } from './delivery-schemas'
 
-// ── Runtime deps (adds notifier + rate limiter) ────────────────────────────────
-
-const rateBuckets = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT = 10
-const RATE_WINDOW_MS = 60_000
-
-function defaultRateLimiter(): SageDeliveryRateLimiter {
-  return {
-    async check(key: string) {
-      const now = Date.now()
-      const bucket = rateBuckets.get(key)
-      if (!bucket || now > bucket.resetAt) {
-        rateBuckets.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS })
-        return { allowed: true }
-      }
-      if (bucket.count >= RATE_LIMIT) {
-        return { allowed: false, retryAfterSeconds: Math.ceil((bucket.resetAt - now) / 1000) }
-      }
-      bucket.count += 1
-      return { allowed: true }
-    },
-  }
+function getConfiguredRateLimiter(): SageDeliveryRateLimiter {
+  return getConfiguredSageDeliveryRateLimiter()
 }
 
 export interface DeliveryDepsOverrides {
@@ -87,20 +70,26 @@ export interface DeliveryDepsOverrides {
 }
 
 function deliveryDeps(scope: SageActorScope, overrides?: DeliveryDepsOverrides): SageServiceDeps {
+  const runtime = createSageRuntime(scope)
+  const notifier = overrides?.notifier ?? getSageDeliveryNotifier()
   return {
-    ...createSageRuntime(scope),
-    deliveryNotifier: overrides?.notifier ?? getSageDeliveryNotifier(),
-    deliveryRateLimiter: overrides?.rateLimiter ?? defaultRateLimiter(),
+    ...runtime,
+    deliveryNotifier: notifier,
+    deliveryRateLimiter: overrides?.rateLimiter ?? getConfiguredRateLimiter(),
+    ...(notifier
+      ? { deliveryNotificationDispatcher: new NotificationDispatcher(runtime.repo, notifier, createSagePlatformSqlClient()) }
+      : {}),
   }
 }
 
 /** Recipient-side deps (no org scope; recipient never gets a SageServiceContext). */
 function recipientDeps(overrides?: DeliveryDepsOverrides): SageServiceDeps {
   const scope: SageActorScope = { actorId: 'sage-recipient', orgId: 'sage-recipient', orgRole: 'none', authenticationType: 'internal_system' }
+  const runtime = createSageRuntime(scope)
   return {
-    ...createSageRuntime(scope),
+    ...runtime,
     deliveryNotifier: overrides?.notifier ?? getSageDeliveryNotifier(),
-    deliveryRateLimiter: overrides?.rateLimiter ?? defaultRateLimiter(),
+    deliveryRateLimiter: overrides?.rateLimiter ?? getConfiguredRateLimiter(),
   }
 }
 

@@ -2,7 +2,7 @@
  * Platform Admin — SAGE delivery recipients API
  *
  * GET  /api/sage/workspaces/[workspaceId]/delivery-recipients — list recipients
- * POST /api/sage/workspaces/[workspaceId]/delivery-recipients — create a verified recipient
+ * POST /api/sage/workspaces/[workspaceId]/delivery-recipients — create an email-verified recipient
  *
  * Org-scoped; orgId/createdBy derived from the session. Delivery-request
  * authority + human-actor assurance enforced in-service. Body is `.strict()`.
