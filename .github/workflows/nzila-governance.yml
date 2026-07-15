@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Secret Scan (Gitleaks + TruffleHog)
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Dependency Audit
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -96,7 +96,7 @@ jobs:
     name: Trivy Container Scan
     if: ${{ inputs.run-trivy != false }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Run Trivy (filesystem mode) [BLOCKING]
         uses: aquasecurity/trivy-action@v0.36.0 # pin to release tag, not mutable @master
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     name: SBOM Generation
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # Generate CycloneDX SBOM using Trivy — works natively with pnpm workspaces
       # (unlike @cyclonedx/cyclonedx-npm which requires npm's `npm ls`)
@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Contract Tests
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -198,7 +198,7 @@ jobs:
     runs-on: ubuntu-latest
     name: UE Evidence Pack + Verify
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -245,7 +245,7 @@ jobs:
     runs-on: ubuntu-latest
     name: ABR Security Gates + Evidence
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -388,7 +388,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Supply Chain Waiver Expiry
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -431,7 +431,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Evidence Pack Generation
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -525,7 +525,7 @@ jobs:
     name: Evidence Seal Verification
     needs: [evidence-pack]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -554,7 +554,7 @@ jobs:
     name: Red-Team Adversarial
     if: ${{ inputs.run-red-team == true || github.event_name == 'schedule' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -593,7 +593,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Gate Authority
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0

@@ -221,7 +221,7 @@ jobs:
     name: Pre-Deploy Gates
     environment: ${{ needs.plan.outputs.environment }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -394,7 +394,7 @@ jobs:
       frontend_digest: ${{ steps.digests.outputs.frontend_digest }}
       backend_digest: ${{ steps.digests.outputs.backend_digest }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Assert build identity is configured (fail-closed)
         env:
@@ -503,7 +503,7 @@ jobs:
     name: Deploy UnionEyes (env-scoped, digest-pinned)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # BR-4: environment-scoped deployment identity. This job sets
       # `environment: ${{ needs.plan.outputs.environment }}`, so the

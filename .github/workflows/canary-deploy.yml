@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Pre-Canary Gates
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
       - uses: actions/setup-node@v6
         with:
@@ -81,7 +81,7 @@ jobs:
       canary_revision: ${{ steps.deploy.outputs.revision }}
       stable_revision: ${{ steps.baseline.outputs.revision }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Assert production deployment identity is configured (fail-closed)
         env:
@@ -201,7 +201,7 @@ jobs:
     outputs:
       healthy: ${{ steps.health.outputs.healthy }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Azure login (OIDC, production-scoped)
         uses: azure/login@v3

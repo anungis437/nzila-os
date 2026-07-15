@@ -59,7 +59,7 @@ jobs:
       requested_apps: ${{ steps.plan.outputs.requested_apps }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -108,7 +108,7 @@ jobs:
     name: Pre-Deploy Validation
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -161,7 +161,7 @@ jobs:
         app: [web, console, partners, orchestrator-api, cfo, zonga, abr, flow, agrimo, cora, trade, mobility, mobility-client-portal, control-plane, platform-admin, nacp-exams]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Check if app should be built
         id: check
@@ -327,7 +327,7 @@ jobs:
       url: ${{ steps.deploy.outputs.url }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -529,7 +529,7 @@ jobs:
       name: ${{ needs.plan.outputs.environment }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Assert environment identity is configured (fail-closed)
         env:

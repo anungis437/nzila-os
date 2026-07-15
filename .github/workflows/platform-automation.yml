@@ -58,7 +58,7 @@ jobs:
       github.event.schedule == '0 6 * * *'
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v5
 
@@ -135,7 +135,7 @@ jobs:
       github.event.schedule == '0 6 * * *'
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Validate cost policy
         run: |
@@ -201,7 +201,7 @@ jobs:
       github.event.schedule == '0 6 * * *'
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Verify provisioning automation
         run: |
@@ -260,7 +260,7 @@ jobs:
       github.event.schedule == '0 * * * *'
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -317,7 +317,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v5
 

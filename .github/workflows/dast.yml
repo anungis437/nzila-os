@@ -42,7 +42,7 @@ jobs:
             url: https://nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: ZAP Baseline Scan — ${{ matrix.target.name }}
         uses: zaproxy/action-baseline@v0.14.0
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     name: OWASP ZAP API Scan
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: ZAP API Scan — orchestrator-api
         uses: zaproxy/action-api-scan@v0.9.0

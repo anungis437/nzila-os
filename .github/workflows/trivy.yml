@@ -46,7 +46,7 @@ jobs:
             stage: runtime
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -98,7 +98,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # ── Step 1: Blocking table-output scan (exit 1 on CRITICAL) ──────────
       - name: Run Trivy filesystem scan (blocking — CRITICAL)

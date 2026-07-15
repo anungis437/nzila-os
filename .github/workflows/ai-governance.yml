@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     name: AI Code Quality
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v5
 
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     name: SDK Boundary Check
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Check for direct provider imports in apps
         run: |
@@ -144,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     name: AI Safety Audit
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Verify PII redaction is enforced
         run: |
@@ -198,7 +198,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Governance Contract Tests
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v5
 

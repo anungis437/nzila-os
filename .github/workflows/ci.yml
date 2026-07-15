@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint & Typecheck
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -67,7 +67,7 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     name: SAGE Live PostgreSQL (records lifecycle)
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -155,7 +155,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -183,7 +183,7 @@ jobs:
     name: Build All
     needs: [lint-and-typecheck, test]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -265,7 +265,7 @@ jobs:
     name: IaC Security Scan
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install Checkov
         run: pip install checkov
@@ -295,7 +295,7 @@ jobs:
     name: Governance Gates
     needs: [lint-and-typecheck, test]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -364,7 +364,7 @@ jobs:
         run: pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts
 
       - name: Ensure main branch is fetched for DORA metrics
-        # actions/checkout@v5 with fetch-depth: 0 pulls all history for the PR
+        # actions/checkout@v7 with fetch-depth: 0 pulls all history for the PR
         # ref but does NOT set up origin/main as a tracked remote ref on PR
         # runs. Without origin/main, the DORA collector falls back to HEAD
         # (the PR branch) and undercounts merges. Fetching main explicitly and
@@ -471,7 +471,7 @@ jobs:
     runs-on: ubuntu-latest
     name: ML Tooling Gates
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -528,7 +528,7 @@ jobs:
     name: AI Eval Gate
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -560,7 +560,7 @@ jobs:
     name: Contract Tests (Architectural Invariants)
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -580,7 +580,7 @@ jobs:
     name: Operating Layer Gate
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -600,7 +600,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ops Documentation Pack
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -620,7 +620,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Schema Drift Detection
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -650,7 +650,7 @@ jobs:
     name: Red-Team Adversarial
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -671,7 +671,7 @@ jobs:
     name: Hash Chain Drift
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -695,7 +695,7 @@ jobs:
     name: Enterprise Hardening Gate
     needs: [lint-and-typecheck, test, contract-tests]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
@@ -751,7 +751,7 @@ jobs:
     needs: [build]
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install k6
         run: |

@@ -37,7 +37,7 @@ jobs:
       NZILA_ATTESTATION_EVIDENCE: github://${{ github.repository }}/runs/${{ github.run_id }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
         uses: actions/setup-node@v6

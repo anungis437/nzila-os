@@ -44,7 +44,7 @@ jobs:
       github.event.inputs.report_type == 'evidence-collection' ||
       github.event.inputs.report_type == 'full-audit'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v5
 
@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     name: OPA Policy Validation
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install OPA
         run: |
@@ -214,7 +214,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Secret Hygiene Audit
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v5
 
@@ -270,7 +270,7 @@ jobs:
         github.event.inputs.report_type == 'full-audit'
       )
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Generate compliance dashboard
         run: |
