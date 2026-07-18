@@ -268,7 +268,11 @@ describe('union-eyes api route import matrix', () => {
   });
 
   it('keeps the route inventory stable enough to matter', () => {
-    const relativePaths = routeFiles.map((filePath) => relative(API_ROOT, filePath));
+    // Normalize to forward slashes so this assertion is platform-portable
+    // (path.relative uses '\\' on Windows).
+    const relativePaths = routeFiles.map((filePath) =>
+      relative(API_ROOT, filePath).replace(/\\/g, '/'),
+    );
     expect(relativePaths).toContain('version/route.ts');
     expect(relativePaths).toContain('ready/route.ts');
     expect(relativePaths).toContain('auth_core/health/route.ts');
