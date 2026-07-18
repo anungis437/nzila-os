@@ -23,18 +23,80 @@ function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+async function resolveAuditOrgId(event: AbrAuditEvent): Promise<string> {
+  const candidateOrgId = isUuid(event.orgId) ? event.orgId : null;
+  const runtimeAllowsFallback =
+    (process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true' ||
+    (process.env.NODE_ENV ?? '').toLowerCase() !== 'production';
+
+  if (candidateOrgId) {
+    const exists = await platformDb.execute(sql`
+      select id::text as id
+      from orgs
+      where id = ${candidateOrgId}::uuid
+      limit 1
+    `);
+    if ((exists[0] as { id?: string } | undefined)?.id) {
+      return candidateOrgId;
+    }
+    if (!runtimeAllowsFallback) {
+      throw new Error('Audit org UUID is not present in orgs');
+    }
+  }
+
+  const membershipRows = await platformDb.execute(sql`
+    select organization_id::text as organization_id
+    from user_management.organization_users
+    where user_id = ${event.actorUserId}
+      and is_active = true
+    order by is_primary desc, created_at asc
+    limit 1
+  `);
+  const membershipOrgId = (membershipRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
+
+  if (membershipOrgId && isUuid(membershipOrgId)) {
+    const membershipOrgExists = await platformDb.execute(sql`
+      select id::text as id
+      from orgs
+      where id = ${membershipOrgId}::uuid
+      limit 1
+    `);
+    if ((membershipOrgExists[0] as { id?: string } | undefined)?.id) {
+      return membershipOrgId;
+    }
+    if (!runtimeAllowsFallback) {
+      throw new Error('Membership org UUID is not present in orgs');
+    }
+  }
+
+  const fallbackRows = await platformDb.execute(sql`
+    select id::text as id
+    from orgs
+    order by created_at asc
+    limit 1
+  `);
+  const fallbackOrgId = (fallbackRows[0] as { id?: string } | undefined)?.id ?? null;
+  if (fallbackOrgId) {
+    return fallbackOrgId;
+  }
+
+  throw new Error('Unable to resolve platform org UUID for audit event');
+}
+
 const defaultAuditWriter: AuditWriter = async (event) => {
+  const resolvedOrgId = await resolveAuditOrgId(event);
+
   const previousRows = await platformDb.execute(sql`
     select hash
     from audit_events
-    where org_id = ${event.orgId}
+    where org_id = ${resolvedOrgId}
     order by created_at desc
     limit 1
   `);
   const previousHash = (previousRows[0] as { hash?: string } | undefined)?.hash ?? null;
 
   const payload = {
-    orgId: event.orgId,
+    orgId: resolvedOrgId,
     actorClerkUserId: event.actorUserId,
     action: event.action,
     targetType: event.entityType,
@@ -56,7 +118,7 @@ const defaultAuditWriter: AuditWriter = async (event) => {
       hash,
       previous_hash
     ) values (
-      ${event.orgId},
+      ${resolvedOrgId},
       ${event.actorUserId},
       ${null},
       ${event.action},

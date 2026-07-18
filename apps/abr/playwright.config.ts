@@ -32,6 +32,8 @@ export default defineConfig({
       NODE_ENV: 'development',
       PLAYWRIGHT_TEST_AUTH: 'true',
       ABR_DEMO_ORG_ID: 'metro-university',
+      AUTH_SECRET: 'playwright-proof-auth-secret-32-bytes-minimum',
+      NEXTAUTH_SECRET: 'playwright-proof-auth-secret-32-bytes-minimum',
       AZURE_AD_CLIENT_ID: 'playwright-proof-client-id',
       AZURE_AD_CLIENT_SECRET: 'playwright-proof-client-secret',
       AZURE_AD_TENANT_ID: 'playwright-proof-tenant-id',
