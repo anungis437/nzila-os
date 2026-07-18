@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "courtlens.review-packet.v1",
+  "projectionVersion": "v1",
+  "locale": "en-CA",
+  "packetGeneratedAt": "2026-07-18T16:41:00.990Z",
+  "packet": {
+    "matterId": "inc_1784392707429_mdx4hh",
+    "orgId": "metro-university",
+    "statusLabel": "New Intake",
+    "title": "Gap 3 externalizable matter",
+    "practiceArea": "housing",
+    "subIssue": "eviction",
+    "urgencyLabel": "high",
+    "assignedTo": null,
+    "openedAt": "2026-07-18 12:38:27.429-04",
+    "dueAt": null,
+    "intakeFacts": {
+      "clientGoal": null,
+      "hearingDate": null,
+      "deadlineDate": null,
+      "riskFlags": {
+        "risk_safety": false,
+        "risk_lockout": false,
+        "risk_eviction": false,
+        "risk_harassment": false,
+        "risk_bank_freeze": false,
+        "risk_garnishment": false,
+        "risk_income_loss": false,
+        "risk_retaliation": false,
+        "risk_unsafe_work": false,
+        "risk_homelessness": false,
+        "risk_identity_theft": false,
+        "risk_utility_shutoff": false,
+        "risk_essential_services": false
+      },
+      "clientProfile": {
+        "clientName": null,
+        "householdSize": null,
+        "consentStatus": "pending"
+      }
+    },
+    "documentReadiness": {
+      "aiSummaryStatus": "approved",
+      "referralStatus": "none",
+      "isPacketExternalizable": true,
+      "hasReviewerNotes": false,
+      "hasTimelineEvents": true
+    },
+    "reviewerNotes": [],
+    "timeline": [
+      {
+        "happenedAt": "2026-07-18 12:38:27.43-04",
+        "type": "created",
+        "description": "created"
+      },
+      {
+        "happenedAt": "2026-07-18 12:38:27.431-04",
+        "type": "courtlens_event",
+        "description": "courtlens event"
+      },
+      {
+        "happenedAt": "2026-07-18 12:38:27.45-04",
+        "type": "courtlens_event",
+        "description": "courtlens event"
+      },
+      {
+        "happenedAt": "2026-07-18 12:38:27.454-04",
+        "type": "courtlens_event",
+        "description": "courtlens event"
+      }
+    ],
+    "legalBoundaryNotice": "AI-generated content in this review packet is draft-only and requires human reviewer approval before external use. This platform does not provide legal advice."
+  },
+  "trace": {
+    "sourceState": {
+      "eventCount": 4,
+      "noteCount": 0,
+      "timelineCount": 4,
+      "incidentUpdatedAt": "2026-07-18 12:38:27.429-04"
+    }
+  }
+}

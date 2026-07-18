@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-07-18T17:25:00.000Z",
+  "classification": "IMPLEMENTED_NOT_PROVEN",
+  "proven": [
+    "dedicated review-packet route",
+    "domain-local packet projection and serializers",
+    "HTTP success matrix for English JSON and French Markdown",
+    "HTTP denial matrix for permission, tenancy, format, and locale failures",
+    "fixture teardown and post-cleanup verification",
+    "sanitized browser proof with downloads, hashes, trace, HAR, and screenshots",
+    "locale-provider fix for French client strings",
+    "credential sanitization of durable proof artifacts"
+  ],
+  "remainingGaps": [
+    "clean committed Git provenance",
+    "baseline-versus-Gap-3 fast-suite differential",
+    "durable audit readbacks",
+    "audit-failure doctrine proof",
+    "full validation ledger across lint, typecheck, build, contract, and docs gates"
+  ],
+  "durableArtifacts": [
+    "artifacts/courtlens-gap3-browser/browser-proof-summary.json",
+    "artifacts/courtlens-gap3-browser/browser-proof-trace.zip",
+    "artifacts/courtlens-gap3-browser/browser-proof.har",
+    "artifacts/courtlens-gap3-browser/authorized-en-json.bin",
+    "artifacts/courtlens-gap3-browser/authorized-fr-markdown.bin",
+    "artifacts/courtlens-gap3-browser/authorized-en-page.png",
+    "artifacts/courtlens-gap3-browser/authorized-fr-page.png",
+    "artifacts/courtlens-gap3-browser/denied-same-tenant.png",
+    "artifacts/courtlens-gap3-browser/denied-cross-tenant.png",
+    "artifacts/courtlens-gap3-closure/credential-sanitization.json",
+    "artifacts/courtlens-gap3-closure/canonical-schema-report.json",
+    "artifacts/courtlens-gap3-closure/live/en-json-body.json",
+    "artifacts/courtlens-gap3-closure/live/en-json-headers.txt",
+    "artifacts/courtlens-gap3-closure/live/fr-md-body.md",
+    "artifacts/courtlens-gap3-closure/live/fr-md-headers.txt",
+    "artifacts/courtlens-gap3-fixture/cleanup-report.json"
+  ]
+}

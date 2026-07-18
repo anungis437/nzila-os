@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-07-18T17:00:00.000Z",
+  "abrUsers": {
+    "canonicalSource": "apps/abr/modules/incidents/service.ts::ensureTables",
+    "bootstrapDdl": "CREATE TABLE IF NOT EXISTS abr_users (id text PRIMARY KEY, org_id text NOT NULL, role text NOT NULL, email text NOT NULL, name text NOT NULL, active boolean NOT NULL DEFAULT true, created_at timestamptz NOT NULL DEFAULT now())",
+    "migrationFile": null,
+    "liveSchemaMatch": true,
+    "liveColumns": [
+      "id text not null",
+      "org_id text not null",
+      "role text not null",
+      "email text not null",
+      "name text not null",
+      "active boolean not null default true",
+      "created_at timestamptz not null default now()"
+    ],
+    "liveIndexes": [
+      "abr_users_pkey on (id)"
+    ],
+    "whyItWasAbsentEarlier": "The table is bootstrap-created on demand by ABR service startup paths; until those code paths execute against a local database, the table does not exist.",
+    "foreignKeys": [],
+    "constraints": ["primary key (id)"]
+  },
+  "membershipResolver": {
+    "canonicalSource": "apps/abr/modules/auth/abr-user-lookup.ts",
+    "lookupShape": "select role, active from abr_users where id = $userId and org_id = $orgId limit 1"
+  },
+  "platformAuth": {
+    "canonicalTables": [
+      "packages/db/src/schema/auth.ts",
+      "migrations/2026-04-23_multi_mode_auth.sql",
+      "apps/union-eyes/db/migrations/0095_ms_celebrations_auth_users.sql",
+      "apps/union-eyes/db/migrations/0101_auth_password_reset_tokens.sql"
+    ],
+    "userManagementTablesObserved": [
+      "users",
+      "organization_users",
+      "user_sessions",
+      "auth_audit_log"
+    ],
+    "liveSchemaMatch": true
+  },
+  "courtLensIncidentTables": {
+    "canonicalSource": "apps/abr/modules/incidents/service.ts::ensureTables",
+    "tables": [
+      "abr_organizations",
+      "abr_users",
+      "abr_incidents",
+      "abr_incident_events",
+      "abr_remediation_actions",
+      "abr_notes",
+      "abr_learning_assignments",
+      "abr_metrics_daily"
+    ]
+  }
+}

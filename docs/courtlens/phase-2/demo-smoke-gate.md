@@ -9,6 +9,7 @@ The no-external-demo-until-passed gate for CourtLens Phase 2. This document is t
 - Phase 2A–2F CourtLens surface only.
 - Public intake, tenant matter queue, tenant matter detail, reviewer workflow controls.
 - Both the read paths (queue, detail) and the write paths (public intake, AI packet status, referral status, matter status transition).
+- Dedicated review-packet export route: `GET /api/courtlens/matters/:matterId/review-packet` (`json|markdown`).
 
 ## Demo Environment Assumptions
 
@@ -113,10 +114,14 @@ The no-external-demo-until-passed gate for CourtLens Phase 2. This document is t
 ## Pass/Fail Criteria
 
 ### Automated (all currently PASS)
-- Full `@nzila/abr` test suite: **297/297** across 20 test files.
+- Full `@nzila/abr` test suite: **332/332** across 23 test files.
 - `pnpm --filter @nzila/abr typecheck`: clean.
 - `pnpm validate:docs`: 0 errors.
 - End-to-end smoke test in `modules/incidents/__tests__/smoke-e2e.test.ts` passes: intake → queue → detail → role-gated redaction → AI approval (with forge attempt rejected) → full referral chain → FSM advance → cross-tenant isolation.
+- Dedicated review-packet tests pass:
+  - projection/serializer tests: `modules/incidents/__tests__/courtlens-review-packet.test.ts`
+  - route auth/format/gate tests: `app/api/courtlens/matters/[matterId]/review-packet/__tests__/route.test.ts`
+  - matter detail contract compatibility: `app/api/courtlens/matters/__tests__/route.test.ts`
 
 ### Human/manual (must be completed by demo owner before external walkthrough)
 - Counsel review of customer-facing legal-boundary copy on `PublicIntakeForm`, `MatterQueue`, `MatterDetail`, and `ReviewerActions`.
@@ -146,9 +151,59 @@ To be performed against a running demo environment before external stakeholder d
 
 Any step failing = smoke test FAIL = demo blocked.
 
+## Review-Packet Smoke Procedure (Manual)
+
+Execute these exact checks for Gap 3 proof:
+
+1. Authorized English JSON export:
+  - Sign in as reviewer with `export.read` in same tenant.
+  - Call `GET /api/courtlens/matters/{matterId}/review-packet?format=json&locale=en-CA`.
+  - Verify `200`, JSON MIME type, quoted attachment filename.
+
+2. Authorized French Markdown export:
+  - Call `GET /api/courtlens/matters/{matterId}/review-packet?format=markdown&locale=fr-CA`.
+  - Verify `200`, markdown MIME type, quoted attachment filename, FR legal-boundary notice.
+
+3. Non-externalizable rejection:
+  - Use a matter with non-approved packet state.
+  - Verify `409 REVIEW_PACKET_NOT_EXTERNALIZABLE` and no packet body.
+
+4. Unauthorized-role rejection:
+  - Use role lacking `export.read`.
+  - Verify `403` and sanitized denial response.
+
+5. Cross-tenant rejection:
+  - Request another org's matter ID under current org.
+  - Verify `404 MATTER_NOT_FOUND` with no existence leak.
+
+6. Exported-content inspection:
+  - Confirm exported JSON/Markdown excludes `payloadJson`, raw event payloads, hidden role fields, and secrets.
+
+7. Audit-record inspection:
+  - Confirm `courtlens.review_packet.exported` and `courtlens.review_packet.export_denied` entries contain only sanitized metadata.
+
+8. Governance-event inspection (only if applicable):
+  - Confirm no bridge terminal event is emitted for this wave unless doctrine explicitly classifies this export as terminal.
+
 ## Final Demo Readiness Verdict
 
 **YELLOW — internal-only demo allowed, external stakeholder demo blocked.**
+
+## Gap 3 Closure Run (2026-07-18)
+
+Status: **BLOCKED for final proof elevation**.
+
+What passed in closure run:
+- Dedicated review-packet route hardening implemented and validated (headers, locale allow-list, filename sanitization, markdown structural handling, audit-failure doctrine).
+- Focused packet and route tests pass.
+- CourtLens page + export control tests pass (including no-auto-export behavior).
+- ABR full test suite, typecheck, lint, build, docs validation, governance audit, and contract suite passed in the captured run.
+
+Blocking dependency preventing `PROVEN`:
+- Live authenticated export scenario could not be executed in the active local runtime because valid authenticated reviewer session material was unavailable in this environment, and synthetic seed-cookie replay could not establish authenticated context.
+
+Consequence:
+- Gap 3 remains open for runtime proof despite implementation quality and automated validation passing.
 
 ### What is proven
 - The full technical value chain works end-to-end (automated smoke test passes).

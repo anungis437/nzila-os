@@ -1,0 +1,16 @@
+{
+  "cleanedAt": "2026-07-18T17:20:33.955Z",
+  "matterIds": [
+    "inc_1784395192106_8ypnd6",
+    "inc_1784395192111_gnk8mh",
+    "inc_1784395192145_q8bnqv"
+  ],
+  "reviewerSessionAlias": "reviewer-seed-session",
+  "sameTenantDeniedSessionAlias": "same-tenant-denied-seed-session",
+  "crossTenantSessionAlias": "cross-tenant-seed-session",
+  "reviewerSessionTokenHash": "<redacted>",
+  "sameTenantDeniedSessionTokenHash": "<redacted>",
+  "crossTenantSessionTokenHash": "<redacted>",
+  "sessionRevocationResult": "deleted from user_management.user_sessions",
+  "sessionIdentifiersRedacted": true
+}

@@ -5,7 +5,8 @@
 - Phase 2C.5: auth contract documented.
 - Phase 2C.6: session-derived role + membership verification (auth blockers closed).
 - Phase 2D: **read-only tenant matter queue and detail pages implemented (this document)**.
-- Phase 2E (interactive reviewer workflow): not started.
+- Phase 2E: reviewer mutation controls implemented.
+- Phase 2I: **minimal review-packet export controls implemented** on matter detail.
 
 ## Routes Added
 
@@ -45,13 +46,26 @@ Auth chain (per page render):
 
 ## Read-Only Boundary
 
-Phase 2D explicitly does **not** include:
+Phase 2D/2I explicitly does **not** include:
 - Public intake UI (Phase 2E+).
 - AI review packet generation UI (Phase 3+).
 - Reviewer approval/rejection controls (Phase 2E).
 - Referral action controls (Phase 2E).
 - Assignment or transition UI (Phase 2E).
 - Any mutation.
+
+Phase 2I adds only a minimal attachment export trigger on the existing detail page:
+- JSON export button
+- Markdown export button
+- informational unavailable/denied state text
+
+Sensitive download trigger behavior:
+- Export is user-gesture only (button click).
+- No `next/link` prefetch path is used for export requests.
+- Page render does not issue background export fetches.
+- Export request is initiated from a direct `fetch` call only after explicit user action.
+
+No new workflow page, no PDF generation, no storage pipeline, and no lifecycle mutation is added by this export control.
 
 The queue page displays operational summaries and links to detail. The detail page displays redacted fields exactly as returned by `buildMatterDetailView`. Neither page renders inputs, forms, or mutation buttons.
 
@@ -75,6 +89,21 @@ The UI does not attempt to reconstruct hidden fields, bypass role gating, or inf
 - The detail page renders the server-provided `legalBoundaryNotice` at the bottom of the matter view.
 - Empty state copy reinforces the operational-infrastructure framing without linking to incomplete flows.
 - No output claims to give legal conclusions, predict outcomes, or provide advice.
+- Export controls include legal-boundary framing and do not claim legal advice, filing completion, or eligibility decision.
+
+## Review-Packet Export UI (Phase 2I)
+
+Detail page includes `ReviewPacketExportControls` with server-derived conditions:
+
+- Rendered only when actor has `export.read` permission.
+- Non-externalizable packets show a localized unavailable state.
+- Export requests call dedicated endpoint: `GET /api/courtlens/matters/:matterId/review-packet?format=json|markdown&locale=...`.
+- UI does not infer authorization or eligibility; API remains authoritative.
+
+Localization:
+
+- EN and FR keys exist under `courtlens.reviewPacketExport`.
+- Bilingual parity is enforced by `messages/__tests__/bilingual-parity.test.ts`.
 
 ## Rate-Limit / Error Handling
 

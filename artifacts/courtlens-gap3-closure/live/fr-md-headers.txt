@@ -1,0 +1,24 @@
+HTTP/1.1 200 OK
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.blob.core.windows.net; connect-src 'self'; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+Cross-Origin-Embedder-Policy: credentialless
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+X-DNS-Prefetch-Control: on
+X-Permitted-Cross-Domain-Policies: none
+set-cookie: authjs.csrf-token=<redacted>; Path=/; HttpOnly; SameSite=Lax
+set-cookie: authjs.callback-url=<redacted>; Path=/; HttpOnly; SameSite=Lax
+x-request-id: fac297d9-cba9-49ec-9a91-caa839c0adca
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+cache-control: private, no-store
+content-disposition: attachment; filename="courtlens-review-packet-inc_1784392707429_mdx4hh-20260718T164110Z.md"
+content-type: text/markdown; charset=utf-8
+Date: Sat, 18 Jul 2026 16:41:10 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+

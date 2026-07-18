@@ -5,6 +5,7 @@
 - Phase 2C.5: auth contract documented (this document).
 - Phase 2C.6: **auth blockers closed** — trusted role + membership verification in place.
 - Phase 2D (tenant UI): unblocked from an auth perspective, subject to the residual limitations listed below.
+- Phase 2I: **review packet export implemented** via a dedicated endpoint (`GET /api/courtlens/matters/:matterId/review-packet`).
 
 ## Routes
 
@@ -64,6 +65,62 @@ Errors:
 - `400` missing org context or matter ID
 - `403` missing `incident.read` permission
 - `404` matter not found (also returned for cross-tenant lookups — no existence leak)
+
+### `GET /api/courtlens/matters/:matterId/review-packet?format=json|markdown&locale=en-CA|fr-CA`
+Authenticated. Returns an attachment payload for a deterministic CourtLens review-packet export.
+
+Design constraints:
+- Dedicated export endpoint; matter detail contract is unchanged.
+- Export projection is built in CourtLens domain code (`modules/incidents/courtlens-review-packet.ts`).
+- Existing redaction path is reused (`buildMatterDetailView` / `applyIncidentRedaction`).
+
+Authorization and tenancy:
+- Uses `requireVerifiedOrgAccess` and `requireVerifiedPermission`.
+- Requires `export.read` permission.
+- Uses org-scoped `getMatterDetail` lookup; cross-tenant lookups return non-leaky `404 MATTER_NOT_FOUND`.
+
+Format validation:
+- `format` is required and must be `json` or `markdown`.
+- Unsupported or missing formats return `400 INVALID_REVIEW_PACKET_FORMAT` with `allowed` values.
+
+Locale validation:
+- `locale` is optional; default is `en-CA`.
+- When provided, locale must be `en-CA` or `fr-CA`.
+- Unsupported locales return `400 INVALID_REVIEW_PACKET_LOCALE` with `allowed` values.
+
+Externalization gate:
+- Export is allowed only when `isPacketExternalizable` is true.
+- Non-externalizable packets return `409 REVIEW_PACKET_NOT_EXTERNALIZABLE`.
+- No partial packet body is returned on denial.
+
+Response headers:
+- JSON: `application/json; charset=utf-8`
+- Markdown: `text/markdown; charset=utf-8`
+- `Content-Disposition: attachment; filename="courtlens-review-packet-<safe-matter-id>-<timestamp>.<ext>"`
+- `Cache-Control: private, no-store`
+- `X-Content-Type-Options: nosniff`
+
+Filename safety:
+- Matter identifiers are sanitized for attachment use.
+- Disallows path separators, traversal patterns, control characters, and unsafe punctuation.
+- Collapses repeated separators and bounds identifier length to prevent header abuse.
+
+Markdown safety:
+- User-authored note/timeline text is rendered inside indented text blocks.
+- Structural markdown lines from user text cannot create trusted top-level sections.
+- Control characters are stripped from exported text.
+
+Audit behavior:
+- Every allowed/denied attempt logs a sanitized audit event (`courtlens.review_packet.exported` or `courtlens.review_packet.export_denied`).
+- Audit metadata includes actor/org/matter, format, locale, role source, externalizable state, packet version, byte count, and sha256 digest.
+- Packet body, notes content, intake narrative, raw payloads, and PII are never logged.
+- Success-path audit write doctrine: fail closed. If persistence throws on the success path, route returns `503 AUDIT_WRITE_FAILED` and no packet body is returned.
+- Denial-path audit write doctrine: best-effort logging; denial response semantics are preserved.
+
+Governance/evidence behavior:
+- No governance bridge terminal evidence event is emitted in this wave.
+- Rationale: the current CourtLens doctrine and implemented ABR export doctrine do not yet classify this specific packet download as a distinct lifecycle terminal event requiring evidence sealing.
+- Sanitized route-level audit remains authoritative until doctrine explicitly declares this export path terminal.
 
 ## Auth / Org-Scope / Role Contract
 

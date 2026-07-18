@@ -1,7 +1,8 @@
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales } from "@/lib/locales";
+import enMessages from "../../messages/en-CA.json";
+import frMessages from "../../messages/fr-CA.json";
 
 type Params = { locale: string };
 
@@ -16,7 +17,7 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as "en-CA" | "fr-CA")) {
     notFound();
   }
-  const messages = await getMessages();
+  const messages = locale === "fr-CA" ? frMessages : enMessages;
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       {children}
