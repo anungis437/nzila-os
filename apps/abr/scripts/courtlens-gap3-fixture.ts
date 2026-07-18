@@ -1,10 +1,11 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { eq, inArray, sql } from 'drizzle-orm';
 
-import { db } from '@nzila/db/client';
+import { platformDb } from '@nzila/db/platform';
 import { authUserSessions, authUsers } from '@nzila/db/schema';
 import { createSession } from '@nzila/platform-auth/password';
 
@@ -71,7 +72,7 @@ function assertLocalOnly(): void {
 }
 
 async function ensureLocalAuthUser(userId: string, email: string): Promise<void> {
-  const existing = await db
+  const existing = await platformDb
     .select({ userId: authUsers.userId })
     .from(authUsers)
     .where(eq(authUsers.userId, userId))
@@ -83,7 +84,7 @@ async function ensureLocalAuthUser(userId: string, email: string): Promise<void>
 }
 
 async function upsertAbrMembership(userId: string, orgId: string, role: string, email: string, name: string): Promise<void> {
-  await db.execute(sql`
+  await platformDb.execute(sql`
     INSERT INTO abr_users (id, org_id, role, email, name, active)
     VALUES (${userId}, ${orgId}, ${role}, ${email}, ${name}, true)
     ON CONFLICT (id) DO UPDATE SET
@@ -118,6 +119,11 @@ async function seed(): Promise<FixtureManifest> {
   process.env.PLAYWRIGHT_TEST_AUTH ??= 'true';
   process.env.ABR_DEMO_ORG_ID ??= TARGET_ORG;
 
+  const existingManifestRaw = await fs.readFile(MANIFEST_PATH, 'utf8').catch(() => null);
+  if (existingManifestRaw) {
+    return JSON.parse(existingManifestRaw) as FixtureManifest;
+  }
+
   await listIncidentUsers(TARGET_ORG);
   await listIncidentUsers(CROSS_TENANT_ORG);
 
@@ -137,7 +143,7 @@ async function seed(): Promise<FixtureManifest> {
     title: 'Gap 3 non-externalizable matter',
     category: 'service_delivery',
     severity: 'high',
-    intakeChannel: 'tenant_staff',
+    intakeChannel: 'web',
     summary: 'Synthetic internal matter reserved for denial-path export proof.',
     practiceArea: 'housing',
     subIssue: 'eviction',
@@ -147,7 +153,7 @@ async function seed(): Promise<FixtureManifest> {
     title: 'Gap 3 externalizable matter',
     category: 'service_delivery',
     severity: 'high',
-    intakeChannel: 'tenant_staff',
+    intakeChannel: 'web',
     summary: 'Synthetic approved matter used for export proof.',
     practiceArea: 'housing',
     subIssue: 'eviction',
@@ -159,7 +165,7 @@ async function seed(): Promise<FixtureManifest> {
     title: 'Gap 3 cross-tenant matter',
     category: 'service_delivery',
     severity: 'medium',
-    intakeChannel: 'tenant_staff',
+    intakeChannel: 'web',
     summary: 'Synthetic cross-tenant matter used for denial proof.',
     practiceArea: 'employment',
     subIssue: 'termination',
@@ -200,25 +206,38 @@ async function cleanup(): Promise<void> {
     sql` OR `,
   );
 
-  await db.execute(sql`
+  await platformDb.execute(sql`
     DELETE FROM abr_notes WHERE ${matterPredicate}
   `);
-  await db.execute(sql`
+  await platformDb.execute(sql`
     DELETE FROM abr_remediation_actions WHERE ${matterPredicate}
   `);
-  await db.execute(sql`
+  await platformDb.execute(sql`
     DELETE FROM abr_incident_events WHERE ${matterPredicate}
   `);
-  await db.execute(sql`
+  const deletedIncidents = await platformDb.execute(sql`
     DELETE FROM abr_incidents WHERE ${sql.join(matterIds.map((matterId) => sql`id = ${matterId}`), sql` OR `)}
+    RETURNING id
   `);
-  await db.delete(authUserSessions).where(inArray(authUserSessions.sessionId, [
+  const deletedSessions = await platformDb.delete(authUserSessions).where(inArray(authUserSessions.sessionId, [
     manifest.reviewerSessionId,
     manifest.sameTenantDeniedSessionId,
     manifest.crossTenantSessionId,
-  ]));
-  await db.execute(sql`
+  ])).returning({ sessionId: authUserSessions.sessionId });
+  const deletedAbrUsers = await platformDb.execute(sql`
     DELETE FROM abr_users WHERE ${abrUserPredicate}
+    RETURNING id
+  `);
+
+  const remainingIncidents = await platformDb.execute(sql`
+    select count(*)::int as count
+    from abr_incidents
+    where ${sql.join(matterIds.map((matterId) => sql`id = ${matterId}`), sql` OR `)}
+  `);
+  const remainingAbrUsers = await platformDb.execute(sql`
+    select count(*)::int as count
+    from abr_users
+    where ${abrUserPredicate}
   `);
 
   await fs.writeFile(
@@ -226,6 +245,11 @@ async function cleanup(): Promise<void> {
     `${JSON.stringify({
       cleanedAt: new Date().toISOString(),
       matterIds,
+      deletedIncidentCount: deletedIncidents.length,
+      deletedAbrUserCount: deletedAbrUsers.length,
+      deletedSessionCount: deletedSessions.length,
+      remainingIncidentCount: Number((remainingIncidents[0] as { count?: number } | undefined)?.count ?? 0),
+      remainingAbrUserCount: Number((remainingAbrUsers[0] as { count?: number } | undefined)?.count ?? 0),
       reviewerSessionAlias: 'reviewer-seed-session',
       sameTenantDeniedSessionAlias: 'same-tenant-denied-seed-session',
       crossTenantSessionAlias: 'cross-tenant-seed-session',
@@ -262,7 +286,11 @@ async function main() {
   }, null, 2));
 }
 
-main().catch((error) => {
-  console.error('[courtlens-gap3-fixture] failed:', error);
-  process.exit(1);
-});
+export { assertLocalOnly, seed, cleanup, main };
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    console.error('[courtlens-gap3-fixture] failed:', error);
+    process.exit(1);
+  });
+}

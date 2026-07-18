@@ -25,13 +25,23 @@ function contentTypeForFormat(format: ReviewPacketFormat): string {
     : 'text/markdown; charset=utf-8';
 }
 
-function tryLogAuditEvent(event: Parameters<typeof logAuditEvent>[0]): { ok: true } | { ok: false } {
+async function tryLogAuditEvent(event: Parameters<typeof logAuditEvent>[0]): Promise<{ ok: true } | { ok: false }> {
   try {
-    logAuditEvent(event);
+    await logAuditEvent(event);
     return { ok: true };
   } catch {
     return { ok: false };
   }
+}
+
+function auditWriteFailureResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      error: 'Review packet export is temporarily unavailable',
+      code: 'AUDIT_WRITE_FAILED',
+    },
+    { status: 503 },
+  );
 }
 
 export async function GET(
@@ -45,12 +55,13 @@ export async function GET(
 
     const permission = requireVerifiedPermission(authz.context, 'export.read');
     if (!permission.ok) {
-      tryLogAuditEvent({
+      const auditResult = await tryLogAuditEvent({
         action: 'courtlens.review_packet.export_denied',
         actorUserId: authz.context.userId,
         orgId: authz.context.orgId,
         entityType: 'matter',
         details: {
+          matterId: (await params).matterId,
           reason: 'insufficient_permission',
           role: authz.context.role,
           membershipSource: authz.context.membershipSource,
@@ -58,6 +69,9 @@ export async function GET(
           locale: normalizeReviewPacketLocale(searchParams.get('locale')),
         },
       });
+      if (!auditResult.ok) {
+        return auditWriteFailureResponse();
+      }
       return permission.response;
     }
 
@@ -71,7 +85,7 @@ export async function GET(
 
     const rawFormat = searchParams.get('format');
     if (!isReviewPacketFormat(rawFormat)) {
-      tryLogAuditEvent({
+      const auditResult = await tryLogAuditEvent({
         action: 'courtlens.review_packet.export_denied',
         actorUserId: authz.context.userId,
         orgId: authz.context.orgId,
@@ -85,6 +99,9 @@ export async function GET(
           membershipSource: authz.context.membershipSource,
         },
       });
+      if (!auditResult.ok) {
+        return auditWriteFailureResponse();
+      }
       return NextResponse.json(
         {
           error: 'Invalid review packet format',
@@ -97,7 +114,7 @@ export async function GET(
 
     const rawLocale = searchParams.get('locale');
     if (rawLocale !== null && !isReviewPacketLocale(rawLocale)) {
-      tryLogAuditEvent({
+      const auditResult = await tryLogAuditEvent({
         action: 'courtlens.review_packet.export_denied',
         actorUserId: authz.context.userId,
         orgId: authz.context.orgId,
@@ -111,6 +128,9 @@ export async function GET(
           membershipSource: authz.context.membershipSource,
         },
       });
+      if (!auditResult.ok) {
+        return auditWriteFailureResponse();
+      }
 
       return NextResponse.json(
         {
@@ -130,7 +150,7 @@ export async function GET(
     });
 
     if (!result) {
-      tryLogAuditEvent({
+      const auditResult = await tryLogAuditEvent({
         action: 'courtlens.review_packet.export_denied',
         actorUserId: authz.context.userId,
         orgId: authz.context.orgId,
@@ -144,6 +164,9 @@ export async function GET(
           membershipSource: authz.context.membershipSource,
         },
       });
+      if (!auditResult.ok) {
+        return auditWriteFailureResponse();
+      }
       return NextResponse.json(
         { error: 'Matter not found', code: 'MATTER_NOT_FOUND' },
         { status: 404 },
@@ -158,7 +181,7 @@ export async function GET(
     );
 
     if (!packet.packet.documentReadiness.isPacketExternalizable) {
-      tryLogAuditEvent({
+      const auditResult = await tryLogAuditEvent({
         action: 'courtlens.review_packet.export_denied',
         actorUserId: authz.context.userId,
         orgId: authz.context.orgId,
@@ -174,6 +197,9 @@ export async function GET(
           packetSchemaVersion: packet.schemaVersion,
         },
       });
+      if (!auditResult.ok) {
+        return auditWriteFailureResponse();
+      }
       return NextResponse.json(
         {
           error: 'Review packet is not available for export',
@@ -191,7 +217,7 @@ export async function GET(
     const byteCount = new TextEncoder().encode(serialized).length;
     const contentHash = createHash('sha256').update(serialized, 'utf8').digest('hex');
 
-    const auditResult = tryLogAuditEvent({
+    const auditResult = await tryLogAuditEvent({
       action: 'courtlens.review_packet.exported',
       actorUserId: authz.context.userId,
       orgId: authz.context.orgId,
@@ -211,13 +237,7 @@ export async function GET(
     });
 
     if (!auditResult.ok) {
-      return NextResponse.json(
-        {
-          error: 'Review packet export is temporarily unavailable',
-          code: 'AUDIT_WRITE_FAILED',
-        },
-        { status: 503 },
-      );
+      return auditWriteFailureResponse();
     }
 
     return new NextResponse(serialized, {

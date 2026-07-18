@@ -60,7 +60,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const incidents = await listIncidents(authz.orgId);
 
-    logAuditEvent({
+    await logAuditEvent({
       action: 'incident.list',
       actorUserId: authz.userId,
       orgId: authz.orgId,
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       emitAuditPayload: true,
     });
 
-    logAuditEvent({
+    await logAuditEvent({
       action: 'incident.create',
       actorUserId: authz.userId,
       orgId: authz.orgId,

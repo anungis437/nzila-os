@@ -31,7 +31,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const items = await listMatterQueueForOrg(authz.context.orgId);
 
-    logAuditEvent({
+    await logAuditEvent({
       action: 'courtlens.matter_queue.listed',
       actorUserId: authz.context.userId,
       orgId: authz.context.orgId,
