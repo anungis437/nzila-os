@@ -24,7 +24,7 @@
     "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@types/dompurify": "^3.2.0",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.4.11",
     "gray-matter": "^4.0.3",
     "next": "16.2.6",
     "next-intl": "^4.9.1",
