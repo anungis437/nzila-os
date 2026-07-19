@@ -412,4 +412,60 @@ describe('CourtLensMatterDetailPage — Phase 2D', () => {
     expect(container.innerHTML).not.toContain('MUST_NOT_APPEAR');
     expect(container.innerHTML).not.toContain('payloadJson');
   });
+
+  it('renders review packet export controls when export permission exists and packet is externalizable', async () => {
+    mocks.auth.mockResolvedValue({ userId: 'user_1' });
+    mocks.verifyAbrOrgMembership.mockResolvedValue({
+      ok: true, role: 'investigator', source: 'abr_users_lookup',
+    });
+    mocks.hasPermission.mockImplementation((_role: string, permission: string) => permission !== 'dashboard.read');
+    mocks.getMatterDetail.mockResolvedValue({
+      matter: { id: 'inc-1', orgId: 'metro-university' },
+      detail: { incident: {}, events: [], actions: [], notes: [], timeline: [] },
+    });
+    mocks.buildMatterDetailView.mockReturnValue({
+      ...baseView,
+      isPacketExternalizable: true,
+      aiSummaryStatus: 'approved',
+    });
+    const { default: Page } = await import('../[matterId]/page');
+
+    const el = await Page({
+      params: asyncParams({ locale: 'en-CA', matterId: 'inc-1' }),
+      searchParams: asyncParams({}),
+    });
+    render(el);
+
+    expect(screen.getByTestId('review-packet-export-controls')).toBeDefined();
+    expect(screen.getByText('Export review packet')).toBeDefined();
+    expect(screen.getByRole('button', { name: 'JSON' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Markdown' })).toBeDefined();
+  });
+
+  it('renders non-externalizable export state when export permission exists but packet is blocked', async () => {
+    mocks.auth.mockResolvedValue({ userId: 'user_1' });
+    mocks.verifyAbrOrgMembership.mockResolvedValue({
+      ok: true, role: 'investigator', source: 'abr_users_lookup',
+    });
+    mocks.hasPermission.mockImplementation((_role: string, permission: string) => permission !== 'dashboard.read');
+    mocks.getMatterDetail.mockResolvedValue({
+      matter: { id: 'inc-1', orgId: 'metro-university' },
+      detail: { incident: {}, events: [], actions: [], notes: [], timeline: [] },
+    });
+    mocks.buildMatterDetailView.mockReturnValue({
+      ...baseView,
+      isPacketExternalizable: false,
+      aiSummaryStatus: 'needs_verification',
+    });
+    const { default: Page } = await import('../[matterId]/page');
+
+    const el = await Page({
+      params: asyncParams({ locale: 'en-CA', matterId: 'inc-1' }),
+      searchParams: asyncParams({}),
+    });
+    render(el);
+
+    expect(screen.getByTestId('review-packet-unavailable')).toBeDefined();
+    expect(screen.getByText(/not available for export until human approval/i)).toBeDefined();
+  });
 });
