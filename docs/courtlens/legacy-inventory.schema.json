@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nzila.dev/schemas/courtlens/legacy-inventory-row.schema.json",
+  "title": "CourtLens legacy inventory row",
+  "description": "Schema for one row in docs/courtlens/legacy-inventory.csv. Produced by scripts/courtlens/build_legacy_inventory.py. Every row must eventually be reviewed via docs/courtlens/legacy-inventory-review.json before the refactor branch may open a PR.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "legacyPath",
+    "category",
+    "disposition",
+    "phase",
+    "targetPath",
+    "usesBase44",
+    "usesUpload",
+    "usesAppLanguageContext",
+    "securityNotes",
+    "dependencyOfPath",
+    "notes"
+  ],
+  "properties": {
+    "legacyPath": {
+      "type": "string",
+      "description": "POSIX relative path from the legacy root (Downloads/court-lens-ready-extracted). Unique across the inventory.",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "description": "Grouping bucket assigned by the generator's categorize() rules.",
+      "pattern": "^(pages/(top-level|org|platform|parent|public|[a-z0-9_-]+)|components/courtlens/(top-level|[a-z0-9_-]+)|components/other|src/other|out-of-scope)$"
+    },
+    "disposition": {
+      "type": "string",
+      "enum": ["port", "defer", "discard", "duplicate", "review-required"],
+      "description": "Decision on how the legacy file relates to the Nzila apps/abr rewrite. 'review-required' is the mandatory default for unmapped files — humans must resolve every one before Phase 1 ships."
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["", "1", "2", "3", "4", "5"],
+      "description": "REQUIRED for disposition=port. MUST be empty for any other disposition."
+    },
+    "targetPath": {
+      "type": "string",
+      "description": "REQUIRED for disposition=port; must be a workspace-relative path under apps/abr/**. MUST be empty otherwise."
+    },
+    "usesBase44": {
+      "type": "boolean",
+      "description": "True when the file references the base44 SDK — must be rewritten to Nzila services (platform-auth / drizzle / audit-log)."
+    },
+    "usesUpload": {
+      "type": "boolean",
+      "description": "True when the file uses upload/blob primitives — Phase 2+ blob storage + antivirus + size limits are prerequisites."
+    },
+    "usesAppLanguageContext": {
+      "type": "boolean",
+      "description": "True when the file consumes AppLanguageContext — replaced by next-intl in apps/abr; port must rewrite the i18n binding."
+    },
+    "securityNotes": {
+      "type": "string",
+      "description": "Semicolon-delimited security signals detected by the content scanner (privilege/consent/retention, PII, upload, base44)."
+    },
+    "dependencyOfPath": {
+      "type": "string",
+      "description": "Optional. When populated, records the legacyPath of the parent file that pulls this one in via import (populated by a follow-up import-graph pass, empty in v0.1.0)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Human-authored notes carried forward by _FILE_OVERRIDES in the generator. Free-form."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "disposition": { "const": "port" } } },
+      "then": {
+        "properties": {
+          "targetPath": { "minLength": 1 },
+          "phase": { "enum": ["1", "2", "3", "4", "5"] }
+        }
+      },
+      "else": {
+        "properties": {
+          "targetPath": { "const": "" },
+          "phase": { "const": "" }
+        }
+      }
+    }
+  ]
+}
