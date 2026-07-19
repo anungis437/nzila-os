@@ -22,7 +22,6 @@ from scripts.courtlens.build_review_ledger import (
     read_csv_rows,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -41,10 +40,7 @@ def _make_row(
     phase: str = "",
     target: str = "",
 ) -> str:
-    return (
-        f"{legacy_path},cat,{disposition},{phase},{target},"
-        "false,false,false,,,"
-    )
+    return f"{legacy_path},cat,{disposition},{phase},{target}," "false,false,false,,,"
 
 
 @pytest.fixture()
@@ -96,15 +92,9 @@ def test_phase1_candidate_definition_is_strict(synthetic_csv: Path) -> None:
     metrics = compute_metrics(entries)
 
     # port@2 exists in the fixture but must be excluded.
-    port_rows = [
-        e for e in entries if e["proposedDisposition"] == "port"
-    ]
+    port_rows = [e for e in entries if e["proposedDisposition"] == "port"]
     assert len(port_rows) == 3  # all port rows
-    phase1_rows = [
-        e
-        for e in port_rows
-        if e["proposedPhase"] == PHASE_1_LABEL
-    ]
+    phase1_rows = [e for e in port_rows if e["proposedPhase"] == PHASE_1_LABEL]
     assert len(phase1_rows) == 2
     assert metrics["phase1Metrics"]["phase1PortCandidates"] == len(phase1_rows)
 
@@ -120,10 +110,7 @@ def test_reviewed_and_unreviewed_sum_to_row_count(synthetic_csv: Path) -> None:
     rows = read_csv_rows(synthetic_csv)
     entries = build_entries(rows, {})
     metrics = compute_metrics(entries)
-    assert (
-        metrics["reviewedCount"] + metrics["unreviewedCount"]
-        == metrics["rowCount"]
-    )
+    assert metrics["reviewedCount"] + metrics["unreviewedCount"] == metrics["rowCount"]
 
 
 # ---------------------------------------------------------------------------
@@ -164,9 +151,9 @@ def test_phase1_reviewed_and_approved_track_independently(
 
     p1 = metrics["phase1Metrics"]
     assert p1["phase1PortCandidates"] == 2  # a and b are both proposed port@1
-    assert p1["phase1Reviewed"] == 2         # both reviewed
-    assert p1["phase1Approved"] == 1         # only a stayed port@1
-    assert p1["phase1Unresolved"] == 0       # both reviewed
+    assert p1["phase1Reviewed"] == 2  # both reviewed
+    assert p1["phase1Approved"] == 1  # only a stayed port@1
+    assert p1["phase1Unresolved"] == 0  # both reviewed
 
 
 def test_phase1_unresolved_counts_only_unreviewed_candidates(
@@ -256,6 +243,5 @@ def test_phase1_count_smaller_than_total_when_non_port_rows_present(
     assert metrics["rowCount"] == 3
     assert metrics["phase1Metrics"]["phase1PortCandidates"] == 1
     assert (
-        metrics["phase1Metrics"]["phase1PortCandidates"]
-        < metrics["rowCount"]
+        metrics["phase1Metrics"]["phase1PortCandidates"] < metrics["rowCount"]
     ), "Phase 1 candidate count must never equal the total inventory rows."

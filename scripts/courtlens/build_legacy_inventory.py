@@ -144,7 +144,9 @@ def security_notes_for(signals: ContentSignals) -> str:
 
     notes: list[str] = []
     if signals.has_privilege_terms:
-        notes.append("privilege/consent/retention terms present — legal review required")
+        notes.append(
+            "privilege/consent/retention terms present — legal review required"
+        )
     if signals.has_pii_terms:
         notes.append("client PII terms present — redaction contract required")
     if signals.uses_upload:
@@ -185,11 +187,7 @@ def categorize(rel_posix: str) -> str:
         return "pages/top-level"
 
     # src/components/courtlens/**
-    if (
-        len(parts) >= 3
-        and parts[1] == "components"
-        and parts[2] == "courtlens"
-    ):
+    if len(parts) >= 3 and parts[1] == "components" and parts[2] == "courtlens":
         if len(parts) == 4:
             return "components/courtlens/top-level"
         return f"components/courtlens/{parts[3]}"
@@ -220,7 +218,11 @@ _CATEGORY_DEFAULTS: dict[str, tuple[str, str, str]] = {
     "components/courtlens/billing": ("defer", "", ""),
     "components/courtlens/engagement": ("defer", "", ""),
     "components/courtlens/impact": ("defer", "", ""),
-    "components/courtlens/onboarding": ("discard", "", ""),  # Auth handled by platform-auth.
+    "components/courtlens/onboarding": (
+        "discard",
+        "",
+        "",
+    ),  # Auth handled by platform-auth.
     "components/courtlens/help": ("discard", "", ""),  # OTP/help duplicates.
     "components/courtlens/compliance": ("defer", "", ""),  # Legal-review-first.
     "components/other": ("discard", "", ""),  # Non-courtlens generic components.
@@ -533,8 +535,7 @@ def legacy_root_fingerprint(legacy_root: Path) -> str:
     """
 
     paths = sorted(
-        p.relative_to(legacy_root).as_posix()
-        for p in iter_source_files(legacy_root)
+        p.relative_to(legacy_root).as_posix() for p in iter_source_files(legacy_root)
     )
     digest = hashlib.sha256()
     for path in paths:
