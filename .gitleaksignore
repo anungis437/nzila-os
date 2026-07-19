@@ -1,0 +1,17 @@
+# Gitleaks fingerprint allowlist for known-safe findings.
+#
+# Format (gitleaks 8.x): {filepath}:{rule-id}:{line}
+#
+# Each entry MUST be reviewed and documented. Do NOT add fingerprints without
+# a security review comment explaining why the finding is a false positive.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# apps/abr/e2e/courtlens-review-packet.spec.mjs:33
+# Rule: nzila-database-url-with-password
+# Match: postgresql://nzila:nzila_dev@localhost:5433/nzila_automation (env fallback)
+# Justification: The rule description explicitly states "not localhost"; the
+#   regex is broader than the description and flags the local-dev fallback used
+#   only when DATABASE_URL is unset. No real secret is exposed — the literal
+#   is a well-known development password published in dev.ps1 / docker-compose.
+# Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
+apps/abr/e2e/courtlens-review-packet.spec.mjs:nzila-database-url-with-password:33
