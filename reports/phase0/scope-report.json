@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T00:00:00Z",
+  "planningBranchHead": "b8cbea6fbe92d91c555fa370a8ec99c98237c494",
+  "baseRef": "integration/courtlens-gap3-product-line-v2",
+  "baseSha": "c191c5db39e5b877f14b4cd2cc2a5840183416c1",
+  "gitDiffFileCount": 17,
+  "gitDiffFiles": [
+    "docs/courtlens/gap3-product-commit-disposition.json",
+    "docs/courtlens/legacy-inventory-review.json",
+    "docs/courtlens/legacy-inventory-review.schema.json",
+    "docs/courtlens/legacy-inventory.csv",
+    "docs/courtlens/legacy-inventory.manifest.json",
+    "docs/courtlens/legacy-inventory.schema.json",
+    "docs/courtlens/phase-1-fr-review-ledger.schema.json",
+    "docs/courtlens/refactor-branch-base.json",
+    "docs/courtlens/refactor-plan.md",
+    "scripts/courtlens/__init__.py",
+    "scripts/courtlens/build_legacy_inventory.py",
+    "scripts/courtlens/build_review_ledger.py",
+    "scripts/courtlens/build_scope_report.py",
+    "scripts/courtlens/tests/__init__.py",
+    "scripts/courtlens/tests/conftest.py",
+    "scripts/courtlens/tests/test_build_legacy_inventory.py",
+    "scripts/courtlens/tests/test_build_review_ledger.py"
+  ],
+  "githubPr": {
+    "number": null,
+    "fileCount": null,
+    "files": []
+  },
+  "githubPrFileCount": null,
+  "controlledExclusions": [
+    "reports/phase0/scope-report.json"
+  ],
+  "reconciliation": {
+    "verdict": "DEFERRED_PR_NOT_OPEN",
+    "unmatchedInDiff": [],
+    "unmatchedInGitHub": [],
+    "notes": "GitHub PR file list not provided. Re-run with --github-pr-file-count and --github-pr-files after the PR is opened to close the reconciliation."
+  }
+}
