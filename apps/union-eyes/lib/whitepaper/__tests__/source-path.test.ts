@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { existsSync } = vi.hoisted(() => ({ existsSync: vi.fn() }));
@@ -38,6 +40,9 @@ describe('lib/whitepaper/source-path', () => {
     process.env.WHITEPAPER_DOCS_ROOT = '/custom/root';
     existsSync.mockReturnValue(false);
     const result = resolveRuntimeWhitepaperSourcePath('p.pdf');
-    expect(result).toBe('/custom/root/p.pdf');
+    // Use path.join so the expected value is native to the current platform
+    // (Windows produces "\custom\root\p.pdf" from path.join under the source's
+    // path.join call, so we compare via path.join here too).
+    expect(result).toBe(path.join('/custom/root', 'p.pdf'));
   });
 });
