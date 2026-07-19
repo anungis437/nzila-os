@@ -17,3 +17,16 @@
 #   file (Phase 0 CI incident 2026-07-19).
 # Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
 apps/abr/e2e/courtlens-review-packet.spec.mjs:nzila-database-url-with-password:33
+
+# ─────────────────────────────────────────────────────────────────────────────
+# .gitleaksignore:11 (historical, commit d94ef09b1)
+# Rule: nzila-database-url-with-password
+# Justification: The prior justification comment for the entry above (line 11)
+#   previously quoted the exact literal it was allowlisting, which caused
+#   Gitleaks to re-flag the .gitleaksignore file itself. That comment was
+#   redacted in commit 4abe95f54, but the historical scan range still hits
+#   the introducing commit d94ef09b1. This fingerprint allowlists the
+#   historical occurrence on that specific path+rule+line. No secret is
+#   exposed — see the entry above for the underlying dev-only fallback.
+# Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
+.gitleaksignore:nzila-database-url-with-password:11
