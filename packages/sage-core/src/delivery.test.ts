@@ -207,6 +207,11 @@ beforeEach(() => {
   notifier = new CapturingNotifier()
   const dispatcher = new NotificationDispatcher(repo, notifier, { query: async () => ({ rows: [] }) }, {
     dispatcherInstanceId: 'delivery-test-dispatcher',
+    // Freeze the dispatcher clock to the test's NOW so the invitation-expiry
+    // check does not compare against real wall time (which drifts past the TTL
+    // once these fixtures are older than 72h and causes every notification to
+    // be dead-lettered before it can be dispatched to the test notifier).
+    now: () => new Date(NOW),
   })
   deps = { repo, audit: sink, deliveryNotifier: notifier, deliveryNotificationDispatcher: dispatcher }
 })
