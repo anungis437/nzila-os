@@ -381,7 +381,7 @@ jobs:
 
       - name: Create monthly evidence PR
         if: steps.pack-state.outputs.exists != 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(evidence): add monthly evidence pack ${{ steps.resolve-month.outputs.target_month }}"
           title: "chore(evidence): monthly evidence pack ${{ steps.resolve-month.outputs.target_month }}"
