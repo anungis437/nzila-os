@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-28T14:55:54.781Z",
-  "workflowCount": 50,
+  "generatedAt": "2026-07-19T11:34:35.708Z",
+  "workflowCount": 52,
   "inventoryAppCount": 27,
   "canonical": [
     "gitops-deploy.yml",

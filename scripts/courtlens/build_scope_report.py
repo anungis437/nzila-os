@@ -74,7 +74,9 @@ def reconcile(
         p for p in diff_set if p not in gh_set and p not in excl_set
     )
     unmatched_in_gh = sorted(p for p in gh_set if p not in diff_set)
-    verdict = "RECONCILED" if not (unmatched_in_diff or unmatched_in_gh) else "DIVERGENT"
+    verdict = (
+        "RECONCILED" if not (unmatched_in_diff or unmatched_in_gh) else "DIVERGENT"
+    )
     return {
         "verdict": verdict,
         "unmatchedInDiff": unmatched_in_diff,
@@ -125,7 +127,9 @@ def build(
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
-    parser.add_argument("--base-ref", required=True, help="e.g. main or an integration branch")
+    parser.add_argument(
+        "--base-ref", required=True, help="e.g. main or an integration branch"
+    )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument(
         "--controlled-exclusion",

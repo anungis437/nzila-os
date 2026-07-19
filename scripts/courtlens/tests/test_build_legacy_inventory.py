@@ -26,7 +26,6 @@ from scripts.courtlens.build_legacy_inventory import (
     validate_rows,
 )
 
-
 # ---------------------------------------------------------------------------
 # Synthetic tree
 # ---------------------------------------------------------------------------
@@ -152,9 +151,7 @@ def test_security_notes_aggregate_multiple() -> None:
 
 
 def test_security_notes_empty_when_no_signals() -> None:
-    assert security_notes_for(
-        ContentSignals(False, False, False, False, False)
-    ) == ""
+    assert security_notes_for(ContentSignals(False, False, False, False, False)) == ""
 
 
 # ---------------------------------------------------------------------------
@@ -195,9 +192,7 @@ def test_default_for_platform_pages_is_defer() -> None:
 
 
 def test_default_for_onboarding_is_discard() -> None:
-    assert (
-        default_for("components/courtlens/onboarding")[0] == "discard"
-    )
+    assert default_for("components/courtlens/onboarding")[0] == "discard"
 
 
 # ---------------------------------------------------------------------------
@@ -217,8 +212,7 @@ def test_build_row_defaults_unknown_to_review_required(
     synthetic_legacy: Path,
 ) -> None:
     path = (
-        synthetic_legacy
-        / "src/components/courtlens/experimental/PlaygroundThing.jsx"
+        synthetic_legacy / "src/components/courtlens/experimental/PlaygroundThing.jsx"
     )
     row = build_row(synthetic_legacy, path)
     assert row.disposition == "review-required"
@@ -277,23 +271,17 @@ def test_validate_rejects_port_without_phase() -> None:
 
 def test_validate_rejects_non_port_with_phase() -> None:
     with pytest.raises(ValidationError, match="Non-port row must not have phase"):
-        validate_rows(
-            [_mk(disposition="defer", phase="2", targetPath="")]
-        )
+        validate_rows([_mk(disposition="defer", phase="2", targetPath="")])
 
 
 def test_validate_rejects_non_port_with_target() -> None:
     with pytest.raises(ValidationError, match="Non-port row must not have targetPath"):
-        validate_rows(
-            [_mk(disposition="defer", phase="", targetPath="apps/abr/x.tsx")]
-        )
+        validate_rows([_mk(disposition="defer", phase="", targetPath="apps/abr/x.tsx")])
 
 
 def test_validate_rejects_illegal_disposition() -> None:
     with pytest.raises(ValidationError, match="Invalid disposition"):
-        validate_rows(
-            [_mk(disposition="ship", phase="", targetPath="")]
-        )
+        validate_rows([_mk(disposition="ship", phase="", targetPath="")])
 
 
 # ---------------------------------------------------------------------------
@@ -350,14 +338,12 @@ def test_generate_manifest_reports_scope_delta(
     assert manifest["scope"]["actualRowCount"] == len(_read_csv(csv_path))
     assert (
         manifest["scope"]["scopeDelta"]
-        == manifest["scope"]["actualRowCount"]
-        - manifest["scope"]["expectedJsxCount"]
+        == manifest["scope"]["actualRowCount"] - manifest["scope"]["expectedJsxCount"]
     )
     assert "byCategory" in manifest["counts"]
     assert "byDisposition" in manifest["counts"]
-    assert (
-        manifest["unreviewedCount"]
-        == manifest["counts"]["byDisposition"].get("review-required", 0)
+    assert manifest["unreviewedCount"] == manifest["counts"]["byDisposition"].get(
+        "review-required", 0
     )
 
 
@@ -415,12 +401,8 @@ def test_generate_is_deterministic(synthetic_legacy: Path, tmp_path: Path) -> No
     manifest_a = dir_a / "manifest.json"
     manifest_b = dir_b / "manifest.json"
 
-    generate(
-        synthetic_legacy, csv_a, manifest_a, generated_at="2026-07-18T00:00:00Z"
-    )
-    generate(
-        synthetic_legacy, csv_b, manifest_b, generated_at="2026-07-18T00:00:00Z"
-    )
+    generate(synthetic_legacy, csv_a, manifest_a, generated_at="2026-07-18T00:00:00Z")
+    generate(synthetic_legacy, csv_b, manifest_b, generated_at="2026-07-18T00:00:00Z")
 
     assert csv_a.read_bytes() == csv_b.read_bytes(), "CSV must be byte-identical"
     assert json.loads(manifest_a.read_text(encoding="utf-8")) == json.loads(
