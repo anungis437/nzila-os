@@ -4,8 +4,8 @@
   "generatorVersion": "0.2.0",
   "csvBodySha256": "9668c0102676613bca8f43e166fc040506c34722466346cafcaa6b0cd590d261",
   "rowCount": 380,
-  "reviewedCount": 0,
-  "unreviewedCount": 380,
+  "reviewedCount": 3,
+  "unreviewedCount": 377,
   "dispositionCounts": {
     "defer": 146,
     "discard": 73,
@@ -15,9 +15,9 @@
   },
   "phase1Metrics": {
     "phase1PortCandidates": 3,
-    "phase1Reviewed": 0,
-    "phase1Approved": 0,
-    "phase1Unresolved": 3
+    "phase1Reviewed": 3,
+    "phase1Approved": 3,
+    "phase1Unresolved": 0
   },
   "entries": [
     {
@@ -181,12 +181,12 @@
       "proposedDisposition": "port",
       "proposedPhase": "1",
       "proposedTargetPath": "apps/abr/app/[locale]/dashboard/courtlens/_ui/badges.tsx",
-      "reviewed": false,
-      "approvedDisposition": null,
-      "approvedPhase": null,
-      "approvedTargetPath": null,
-      "reviewer": null,
-      "reviewedAt": null,
+      "reviewed": true,
+      "approvedDisposition": "port",
+      "approvedPhase": "1",
+      "approvedTargetPath": "apps/abr/app/[locale]/dashboard/courtlens/_ui/badges.tsx",
+      "reviewer": "platform-lead",
+      "reviewedAt": "2026-07-19T16:49:46.007Z",
       "notes": ""
     },
     {
@@ -1442,12 +1442,12 @@
       "proposedDisposition": "port",
       "proposedPhase": "1",
       "proposedTargetPath": "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/CaseTimelinePanel.tsx",
-      "reviewed": false,
-      "approvedDisposition": null,
-      "approvedPhase": null,
-      "approvedTargetPath": null,
-      "reviewer": null,
-      "reviewedAt": null,
+      "reviewed": true,
+      "approvedDisposition": "port",
+      "approvedPhase": "1",
+      "approvedTargetPath": "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/CaseTimelinePanel.tsx",
+      "reviewer": "platform-lead",
+      "reviewedAt": "2026-07-19T16:49:46.007Z",
       "notes": ""
     },
     {
@@ -1520,12 +1520,12 @@
       "proposedDisposition": "port",
       "proposedPhase": "1",
       "proposedTargetPath": "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/RiskPanel.tsx",
-      "reviewed": false,
-      "approvedDisposition": null,
-      "approvedPhase": null,
-      "approvedTargetPath": null,
-      "reviewer": null,
-      "reviewedAt": null,
+      "reviewed": true,
+      "approvedDisposition": "port",
+      "approvedPhase": "1",
+      "approvedTargetPath": "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/RiskPanel.tsx",
+      "reviewer": "platform-lead",
+      "reviewedAt": "2026-07-19T16:49:46.007Z",
       "notes": ""
     },
     {
