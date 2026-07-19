@@ -1,0 +1,158 @@
+{
+  "$schema": "https://nzila.dev/schemas/courtlens/refactor-branch-base.schema.json",
+  "title": "CourtLens refactor branch-base contract (Phase 0)",
+  "description": "Frozen record of which product commits the CourtLens refactor branch will inherit and which will be excluded. Consumed by future PR 1 (refactor/courtlens-from-legacy) as the authoritative starting point.",
+  "planningBranch": "docs/courtlens-refactor-phase0",
+  "planningBranchHead": "6b6d3736dd3692112690165823a0702e1b6deea9",
+  "proposedRefactorBranch": "refactor/courtlens-from-legacy",
+  "baseline": {
+    "branch": "main",
+    "sha": "6b6d3736dd3692112690165823a0702e1b6deea9",
+    "mergeBaseWithPlanningBranch": "6b6d3736dd3692112690165823a0702e1b6deea9",
+    "rationale": "Planning branch is cut from main and contains zero product commits. The refactor branch will branch from this same SHA so nothing on proof/courtlens-gap3-final leaks in automatically."
+  },
+  "inheritedProductCommits": [],
+  "excludedEvidenceOnlyCommits": [
+    {
+      "sha": "c7d5318bb",
+      "subject": "feat(gap3): finalize CourtLens Gap 3 evidence with canonical audit-integrity proof",
+      "reason": "Adds only artifacts/courtlens-gap3-final/**, reports/gap3/**, and apps/abr/scripts/gap3/audit-integrity-proof.ts. No product code. Refactor branch does not inherit or reuse Gap 3 evidence."
+    },
+    {
+      "sha": "42f145b4b",
+      "subject": "chore(courtlens/gap3): seal v2 audit-chain evidence + manifest",
+      "reason": "Adds only artifacts/courtlens-gap3-final-v2/**, reports/gap3-v2/**, docs/gap3/canonical-audit-hash-v1.md, and apps/abr/scripts/gap3-v2/production-hash-vectors.ts. No product code."
+    },
+    {
+      "sha": "f526f9c9b",
+      "subject": "docs(courtlens/gap3): 21-item closure report v2 (IMPLEMENTED_NOT_PROVEN)",
+      "reason": "Single-file docs report. No product code, no schema, no tests."
+    }
+  ],
+  "mixedCommitsRequiringCherryPickReview": [
+    {
+      "sha": "d7adb10ff",
+      "subject": "feat(abr): close CourtLens Gap 3 implementation and proof tooling",
+      "productFiles": [
+        "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/ReviewPacketExportControls.tsx",
+        "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/page.tsx",
+        "apps/abr/app/[locale]/layout.tsx",
+        "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/route.ts",
+        "apps/abr/messages/en-CA.json",
+        "apps/abr/messages/fr-CA.json",
+        "apps/abr/modules/incidents/courtlens-review-packet.ts",
+        "apps/abr/next-env.d.ts"
+      ],
+      "proofFiles": [
+        "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/__tests__/ReviewPacketExportControls.test.tsx",
+        "apps/abr/app/[locale]/dashboard/courtlens/matters/__tests__/pages.test.tsx",
+        "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/__tests__/route.test.ts",
+        "apps/abr/e2e/courtlens-review-packet.spec.mjs",
+        "apps/abr/modules/incidents/__tests__/courtlens-review-packet.test.ts",
+        "apps/abr/playwright.config.ts",
+        "apps/abr/scripts/courtlens-gap3-fixture.ts"
+      ],
+      "docFiles": [
+        "docs/courtlens/phase-2/demo-smoke-gate.md",
+        "docs/courtlens/phase-2/tenant-matter-queue-api.md",
+        "docs/courtlens/phase-2/tenant-matter-ui.md"
+      ],
+      "cherryPickDecision": "exclude-from-refactor-branch",
+      "cherryPickRationale": "Phase 1 will re-establish the review-packet route in a separate, later PR after Phase 1 UI ships. The refactor branch stays focused on read-only badges + panels; taking review-packet along would blur the Phase 1 boundary and inherit the Gap 3 audit conventions that Phase 0 has not yet ratified."
+    },
+    {
+      "sha": "41e884a44",
+      "subject": "fix(abr): harden CourtLens review-packet audit persistence and proof coverage",
+      "productFiles": [
+        "apps/abr/app/api/abr/incidents/[id]/actions/route.ts",
+        "apps/abr/app/api/abr/incidents/[id]/assign/route.ts",
+        "apps/abr/app/api/abr/incidents/[id]/route.ts",
+        "apps/abr/app/api/abr/incidents/[id]/transition/route.ts",
+        "apps/abr/app/api/abr/incidents/route.ts",
+        "apps/abr/app/api/courtlens/matters/[matterId]/ai-summary-status/route.ts",
+        "apps/abr/app/api/courtlens/matters/[matterId]/referral-status/route.ts",
+        "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/route.ts",
+        "apps/abr/app/api/courtlens/matters/[matterId]/route.ts",
+        "apps/abr/app/api/courtlens/matters/[matterId]/transition/route.ts",
+        "apps/abr/app/api/courtlens/matters/route.ts",
+        "apps/abr/app/api/courtlens/public-intake/route.ts",
+        "apps/abr/lib/audit-log.ts"
+      ],
+      "proofFiles": [
+        "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/__tests__/route.db.integration.test.ts",
+        "apps/abr/scripts/__tests__/courtlens-gap3-fixture.test.ts",
+        "apps/abr/scripts/courtlens-gap3-fixture.ts"
+      ],
+      "cherryPickDecision": "exclude-from-refactor-branch",
+      "cherryPickRationale": "Audit-persistence changes here are entangled with the Gap 3 review-packet route. Phase 1 does not add any new audit-writing surfaces; the current on-main audit-log.ts is sufficient. If Phase 1 needs any of these changes it must arrive via a separate reviewed PR, not by inheritance."
+    },
+    {
+      "sha": "a622c8fbe",
+      "subject": "fix(abr): separate vitest/playwright runners and stabilize audit org resolution",
+      "productFiles": ["apps/abr/lib/audit-log.ts"],
+      "proofFiles": [
+        "apps/abr/package.json",
+        "apps/abr/playwright.config.ts",
+        "apps/abr/vitest.config.ts"
+      ],
+      "cherryPickDecision": "review-required-before-refactor-branch",
+      "cherryPickRationale": "The vitest/playwright runner split is genuinely useful; Phase 1 needs SOME Playwright setup. However, importing it as a cherry-pick means importing the associated audit-log changes too. Recommend: re-derive the vitest/playwright split from scratch in the refactor branch rather than cherry-pick."
+    },
+    {
+      "sha": "802f7834a",
+      "subject": "fix(abr,audit): persist canonical hash timestamp + version for independent recomputation (CourtLens Gap 3)",
+      "productFiles": [
+        "apps/abr/lib/audit-log.ts",
+        "packages/db/src/schema/operations.ts",
+        "packages/db/drizzle/0032_audit_events_canonical_hash.sql"
+      ],
+      "proofFiles": ["apps/abr/lib/__tests__/audit-log.canonical.test.ts"],
+      "cherryPickDecision": "exclude-from-refactor-branch",
+      "cherryPickRationale": "Adds columns and hashing convention driven by Gap 3 requirements. Phase 1 does not add or change any audit event; DB migration 0032 belongs to the review-packet track, not to Phase 1."
+    },
+    {
+      "sha": "f2188d74b",
+      "subject": "fix(union-eyes,sage-core): repair pre-existing test failures uncovered during Gap 3 workspace validation",
+      "productFiles": [
+        "packages/sage-core/src/notification-dispatcher.ts"
+      ],
+      "proofFiles": [
+        "apps/union-eyes/app/api/__tests__/all-routes-import-matrix.test.ts",
+        "apps/union-eyes/app/api/__tests__/route-invocation-helpers.ts",
+        "apps/union-eyes/lib/__tests__/insights-parser.test.ts",
+        "apps/union-eyes/lib/whitepaper/__tests__/source-path.test.ts",
+        "packages/sage-core/src/delivery.test.ts"
+      ],
+      "cherryPickDecision": "candidate-for-independent-pr",
+      "cherryPickRationale": "This commit legitimately fixes pre-existing test flakiness in union-eyes and sage-core. It is orthogonal to CourtLens Phase 1. Recommend landing it as a standalone PR against main before the refactor branch opens, so both the proof branch and the refactor branch inherit it cleanly."
+    },
+    {
+      "sha": "c5288b080",
+      "subject": "chore(db): regenerate schema snapshot for audit_events.occurred_at + hash_version",
+      "productFiles": ["tooling/db/schema-snapshot.json"],
+      "proofFiles": [],
+      "cherryPickDecision": "excluded-with-parent",
+      "cherryPickRationale": "Snapshot corresponds to the 802f7834a migration. Excluded automatically because the migration is excluded."
+    }
+  ],
+  "excludedRuntimeArtifactPaths": [
+    "artifacts/courtlens-gap3-*/**",
+    "artifacts/courtlens-gap3-final-v2/**",
+    "reports/gap3/**",
+    "reports/gap3-v2/**",
+    "docs/gap3/**",
+    "docs/courtlens/phase-2/**"
+  ],
+  "verificationCommands": [
+    "git rev-parse HEAD",
+    "git rev-parse main",
+    "git merge-base HEAD main",
+    "git log --oneline main..proof/courtlens-gap3-final",
+    "for sha in $(git log --format=%H main..proof/courtlens-gap3-final); do git show --stat --format=%s $sha; done"
+  ],
+  "maintainerApproval": {
+    "state": "pending",
+    "approvers": [],
+    "notes": "This file is Phase 0 output. It becomes the frozen contract for PR 1 only when a maintainer explicitly approves it in the Phase 0 review PR."
+  }
+}
