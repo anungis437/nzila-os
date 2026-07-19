@@ -8,10 +8,12 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # apps/abr/e2e/courtlens-review-packet.spec.mjs:33
 # Rule: nzila-database-url-with-password
-# Match: postgresql://nzila:nzila_dev@localhost:5433/nzila_automation (env fallback)
+# Match: <REDACTED — see referenced file line 33 for the local-dev fallback URL>
 # Justification: The rule description explicitly states "not localhost"; the
 #   regex is broader than the description and flags the local-dev fallback used
 #   only when DATABASE_URL is unset. No real secret is exposed — the literal
 #   is a well-known development password published in dev.ps1 / docker-compose.
+#   Comment intentionally redacted to prevent Gitleaks from self-matching this
+#   file (Phase 0 CI incident 2026-07-19).
 # Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
 apps/abr/e2e/courtlens-review-packet.spec.mjs:nzila-database-url-with-password:33
