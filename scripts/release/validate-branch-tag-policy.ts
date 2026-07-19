@@ -15,6 +15,7 @@ const BRANCH_PATTERNS: RegExp[] = [
   /^test\/.+/,
   /^ci\/.+/,
   /^hotfix\/.+/,
+  /^integration\/.+/,
   /^release\/[0-9]+\.[0-9]+\.[0-9]+$/,
   /^dependabot\/.+/,
   /^renovate\/.+/,

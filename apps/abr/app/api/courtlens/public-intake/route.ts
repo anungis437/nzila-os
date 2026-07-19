@@ -52,7 +52,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const confirmation = await createMatterFromPublicIntake(input);
 
     // Audit the public intake submission (tenant-scoped, no client PII in log)
-    logAuditEvent({
+    await logAuditEvent({
       action: 'courtlens.public_intake.submitted',
       actorUserId: 'public',
       orgId: input.tenantSlug,

@@ -206,6 +206,20 @@
       "groupTransition": "Matter status (ABR FSM)",
       "transitionReason": "Reviewer advanced matter"
     },
+    "reviewPacketExport": {
+      "title": "Export review packet",
+      "subtitle": "Export a reviewer-safe review packet in a deterministic format.",
+      "jsonLabel": "JSON",
+      "markdownLabel": "Markdown",
+      "packetUnavailable": "Review packet export is not available for your current access.",
+      "packetNotExternalizable": "Review packet is not available for export until human approval is complete.",
+      "exportFailed": "Review packet export failed. Please try again.",
+      "exportSuccess": "Review packet export is ready.",
+      "loading": "Preparing export…",
+      "generatedTimestamp": "Generated",
+      "packetVersion": "Packet version",
+      "legalBoundaryNotice": "This export is operational infrastructure and not legal advice."
+    },
     "errors": {
       "publicIntakeInvalid": "Some information was missing or invalid. Please review the form and resubmit.",
       "publicIntakeRateLimit": "Too many submissions. Please wait a moment and try again.",

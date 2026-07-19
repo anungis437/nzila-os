@@ -8,6 +8,7 @@ import { verifyAbrOrgMembership } from '@/lib/trusted-auth';
 import { hasPermission, type AbrPermission } from '@/lib/rbac';
 import { getMatterDetail, buildMatterDetailView } from '@/modules/incidents/matter-service';
 import { ReviewerActions } from './ReviewerActions';
+import { ReviewPacketExportControls } from './ReviewPacketExportControls';
 
 /**
  * CourtLens tenant matter detail page — Phase 2D (read-only) + Phase 2E (reviewer actions).
@@ -55,8 +56,9 @@ export default async function CourtLensMatterDetailPage({
   const view = buildMatterDetailView(result.matter, result.detail!, membership.role);
 
   // Server-derived permission set for the reviewer actions component.
-  const candidatePermissions: readonly AbrPermission[] = ['incident.update', 'incident.transition'];
+  const candidatePermissions: readonly AbrPermission[] = ['incident.update', 'incident.transition', 'export.read'];
   const permissions = candidatePermissions.filter((p) => hasPermission(membership.role, p));
+  const canExportPacket = permissions.includes('export.read');
 
   return (
     <div className="space-y-6" data-testid="courtlens-matter-detail">
@@ -223,6 +225,17 @@ export default async function CourtLensMatterDetailPage({
           status={result.matter.status}
           permissions={permissions}
         />
+      </Card>
+
+      <Card>
+        <div className="p-6">
+          <ReviewPacketExportControls
+            matterId={result.matter.id}
+            locale={locale}
+            canExport={canExportPacket}
+            isPacketExternalizable={view.isPacketExternalizable}
+          />
+        </div>
       </Card>
     </div>
   );
