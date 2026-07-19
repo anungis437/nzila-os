@@ -207,6 +207,9 @@ beforeEach(() => {
   notifier = new CapturingNotifier()
   const dispatcher = new NotificationDispatcher(repo, notifier, { query: async () => ({ rows: [] }) }, {
     dispatcherInstanceId: 'delivery-test-dispatcher',
+    // Fix the dispatcher clock to the same NOW used by service contexts so
+    // invitation expiry is evaluated against test time, not wall-clock time.
+    now: () => new Date(NOW),
   })
   deps = { repo, audit: sink, deliveryNotifier: notifier, deliveryNotificationDispatcher: dispatcher }
 })

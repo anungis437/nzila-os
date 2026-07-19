@@ -43,12 +43,13 @@ vi.mock('node:fs', () => ({
   default: {
     readFileSync: (p: string) => {
       if (p.includes('union_eyes_insights_markdown_library')) return state.library;
-      const m = p.match(/fr-CA\/([^/]+)\.md$/);
+      // Accept both POSIX and Windows separators — path.join uses '\\' on Windows.
+      const m = p.match(/fr-CA[\\/]([^\\/]+)\.md$/);
       if (m && state.localized[m[1]]) return state.localized[m[1]];
       throw new Error(`unexpected readFileSync: ${p}`);
     },
     existsSync: (p: string) => {
-      const m = p.match(/fr-CA\/([^/]+)\.md$/);
+      const m = p.match(/fr-CA[\\/]([^\\/]+)\.md$/);
       return Boolean(m && state.localized[m[1]]);
     },
   },

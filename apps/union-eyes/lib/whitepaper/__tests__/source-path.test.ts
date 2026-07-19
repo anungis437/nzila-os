@@ -1,3 +1,5 @@
+import nodePath from 'node:path';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { existsSync } = vi.hoisted(() => ({ existsSync: vi.fn() }));
@@ -38,6 +40,8 @@ describe('lib/whitepaper/source-path', () => {
     process.env.WHITEPAPER_DOCS_ROOT = '/custom/root';
     existsSync.mockReturnValue(false);
     const result = resolveRuntimeWhitepaperSourcePath('p.pdf');
-    expect(result).toBe('/custom/root/p.pdf');
+    // Use nodePath.join so the expected value uses the host-platform separator
+    // (path.join produces '\\' on Windows, '/' on POSIX).
+    expect(result).toBe(nodePath.join('/custom/root', 'p.pdf'));
   });
 });

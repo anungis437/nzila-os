@@ -48,7 +48,9 @@ export function collectRouteFiles(dir: string): string[] {
 }
 
 export function routeSlug(apiRoot: string, absolutePath: string): string {
-  return relative(apiRoot, absolutePath).replace(/\/route\.ts$/, '').replace(/\\/g, '/');
+  // Normalize backslashes to forward slashes FIRST so this works on Windows,
+  // where path.relative returns 'a\\b\\route.ts' rather than 'a/b/route.ts'.
+  return relative(apiRoot, absolutePath).replace(/\\/g, '/').replace(/\/route\.ts$/, '');
 }
 
 export function routeParamsFromSlug(slug: string): Record<string, string | string[]> {
