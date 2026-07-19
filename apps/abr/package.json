@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --config vitest.config.ts",
+    "test:unit-integration": "vitest run --config vitest.config.ts",
+    "test:playwright:list": "playwright test --config playwright.config.ts --list",
+    "test:playwright:courtlens-gap3": "playwright test --config playwright.config.ts",
     "clean": "rm -rf .next .turbo node_modules",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --config vitest.config.ts --coverage"
   },
   "dependencies": {
     "@nzila/ai-sdk": "workspace:*",
