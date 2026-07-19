@@ -1,0 +1,114 @@
+{
+  "$schema": "https://nzila.dev/schemas/courtlens/refactor-branch-base.schema.json",
+  "title": "CourtLens refactor branch-base contract (Phase 0 v2)",
+  "description": "Frozen record of which product commits the CourtLens refactor branch will inherit and which will be excluded. Consumed by future PR 1 (refactor/courtlens-from-legacy) as the authoritative starting point. This v2 revision supersedes the v1 branch/contract that was based directly on main (pre-Gap-3) — see supersedes[] for provenance.",
+  "planningBranch": "docs/courtlens-refactor-phase0-v2",
+  "planningBranchHead": "SELF_REFERENTIAL_SEE_GIT_REV_PARSE",
+  "planningBranchHeadNote": "The authoritative tip of this planning branch is whatever `git rev-parse docs/courtlens-refactor-phase0-v2` returns on origin. This JSON deliberately does not encode its own commit SHA to avoid a chicken-and-egg amend cycle; the machine-readable branch tip and diff scope live in reports/phase0/scope-report.json which is regenerated on every planning-branch commit.",
+  "proposedRefactorBranch": "refactor/courtlens-from-legacy",
+  "baseline": {
+    "branch": "integration/courtlens-gap3-product-line",
+    "sha": "1d0388c25c5813476aaf07b87f2c2a5564a59cff",
+    "mergeBaseWithMain": "6b6d3736dd3692112690165823a0702e1b6deea9",
+    "mergeBaseWithMainSubject": "docs(sage): complete final implementation proof",
+    "rationale": "In session on 2026-07-18 the maintainer selected Option A: use the CourtLens Gap-3 product line as the approved current-product baseline, but rebuild it as a clean product-only integration branch that excludes the three evidence-only commits (c7d5318bb, 42f145b4b, f526f9c9b). This planning branch is cut from the integration branch tip so every downstream refactor branch inherits the same product surface without inheriting Gap 3 proof/evidence."
+  },
+  "inheritedProductCommits": [
+    {
+      "originalSha": "d7adb10ff45f252d27c61f39e99c4ccfb809b04a",
+      "replayedSha": "0cc948a620993251df4a3ff6bea1e83d18080051",
+      "sourceBranch": "proof/courtlens-gap3-closure",
+      "subject": "feat(abr): close CourtLens Gap 3 implementation and proof tooling",
+      "role": "Introduces the CourtLens review-packet route, matter-detail server components, i18n messages, and the Gap 3 fixture. Baseline product surface for Phase 1."
+    },
+    {
+      "originalSha": "41e884a44",
+      "replayedSha": "bf1f40de8b0b4d297bad7247397a71c4522d191b",
+      "sourceBranch": "proof/courtlens-gap3-final",
+      "subject": "fix(abr): harden CourtLens review-packet audit persistence and proof coverage",
+      "role": "Hardens audit-log writes on the CourtLens API surface and adds integration tests for review-packet persistence."
+    },
+    {
+      "originalSha": "a622c8fbe",
+      "replayedSha": "353013d76ba23fa586bd1ab24ca693b74aa996b1",
+      "sourceBranch": "proof/courtlens-gap3-final",
+      "subject": "fix(abr): separate vitest/playwright runners and stabilize audit org resolution",
+      "role": "Splits abr test runners so Playwright specs no longer execute inside Vitest, and stabilizes audit organization resolution."
+    },
+    {
+      "originalSha": "802f7834a",
+      "replayedSha": "74bacc34af36eb5220b3e93f5abcc6bc72dda620",
+      "sourceBranch": "proof/courtlens-gap3-final",
+      "subject": "fix(abr,audit): persist canonical hash timestamp + version for independent recomputation (CourtLens Gap 3)",
+      "role": "Adds occurred_at and hash_version columns on audit_events + drizzle migration 0032. Required for independent recomputation of the canonical audit hash chain."
+    },
+    {
+      "originalSha": "f2188d74b",
+      "replayedSha": "2c8154e54ac1118ecc84c76e1cf9fd4adb29a62d",
+      "sourceBranch": "proof/courtlens-gap3-final",
+      "subject": "fix(union-eyes,sage-core): repair pre-existing test failures uncovered during Gap 3 workspace validation",
+      "role": "Fixes pre-existing test failures in union-eyes route matrix, insights parser, whitepaper source path, sage-core delivery, and injects a clock into NotificationDispatcher. Orthogonal to CourtLens but required for a green workspace."
+    },
+    {
+      "originalSha": "c5288b080",
+      "replayedSha": "1d0388c25c5813476aaf07b87f2c2a5564a59cff",
+      "sourceBranch": "proof/courtlens-gap3-final",
+      "subject": "chore(db): regenerate schema snapshot for audit_events.occurred_at + hash_version",
+      "role": "Regenerates tooling/db/schema-snapshot.json to match migration 0032."
+    }
+  ],
+  "excludedEvidenceOnlyCommits": [
+    {
+      "sha": "c7d5318bb",
+      "subject": "feat(gap3): finalize CourtLens Gap 3 evidence with canonical audit-integrity proof",
+      "reason": "Adds only artifacts/courtlens-gap3-final/**, reports/gap3/**, and apps/abr/scripts/gap3/audit-integrity-proof.ts. No product code."
+    },
+    {
+      "sha": "42f145b4b",
+      "subject": "chore(courtlens/gap3): seal v2 audit-chain evidence + manifest",
+      "reason": "Adds only artifacts/courtlens-gap3-final-v2/**, reports/gap3-v2/**, docs/gap3/canonical-audit-hash-v1.md, and apps/abr/scripts/gap3-v2/production-hash-vectors.ts. No product code."
+    },
+    {
+      "sha": "f526f9c9b",
+      "subject": "docs(courtlens/gap3): 21-item closure report v2 (IMPLEMENTED_NOT_PROVEN)",
+      "reason": "Single-file docs report. No product code, no schema, no tests."
+    }
+  ],
+  "excludedRuntimeArtifactPaths": [
+    "artifacts/courtlens-gap3-*/**",
+    "artifacts/courtlens-gap3-final-v2/**",
+    "reports/gap3/**",
+    "reports/gap3-v2/**",
+    "docs/gap3/**"
+  ],
+  "verificationCommands": [
+    "git rev-parse HEAD",
+    "git rev-parse main",
+    "git merge-base HEAD main",
+    "git rev-parse integration/courtlens-gap3-product-line",
+    "git log --oneline main..integration/courtlens-gap3-product-line",
+    "git log --oneline main..proof/courtlens-gap3-final",
+    "git diff --name-only integration/courtlens-gap3-product-line..HEAD"
+  ],
+  "supersedes": {
+    "branch": "docs/courtlens-refactor-phase0",
+    "remote": "origin/docs/courtlens-refactor-phase0",
+    "commits": [
+      "07fd3fb2e",
+      "74b3e5ab3",
+      "70b327b81"
+    ],
+    "reason": "v1 was based on pre-Gap-3 main and bundled three logically-separate changes (Windows lint-staged fix, union-eyes/sage test hardening, CourtLens Phase 0 artifacts). v1 is preserved as forensic reference and MUST NOT be opened as a Phase 0 PR. v1 is superseded by this v2 branch."
+  },
+  "companionBranches": [
+    {
+      "branch": "chore/windows-lint-staged-fix",
+      "purpose": "Extracts the Windows lint-staged spawn fix from v1 commit 07fd3fb2e onto main. Independently reviewable prerequisite tooling PR."
+    }
+  ],
+  "maintainerApproval": {
+    "state": "pending",
+    "approvers": [],
+    "notes": "Maintainer selected Option A (product-only integration branch) in-session on 2026-07-18. Formal signature (approver name, timestamp) must be recorded on the Phase 0 PR before Phase 1 opens. Every entry of docs/courtlens/legacy-inventory-review.json with phase = phase-1 must also have reviewed=true, a reviewer, reviewedAt, notes, and disposition/target set before Phase 1 opens."
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-07-18T23:59:45Z",
+  "planningBranch": "docs/courtlens-refactor-phase0-v2",
+  "integrationBaseline": "integration/courtlens-gap3-product-line",
+  "integrationBaselineSha": "1d0388c25c5813476aaf07b87f2c2a5564a59cff",
+  "mergeBaseWithMain": "6b6d3736dd3692112690165823a0702e1b6deea9",
+  "fileCount": 24,
+  "groups": {
+    "docs.courtlens": {
+      "files": [
+        "docs/courtlens/legacy-inventory-review.json",
+        "docs/courtlens/legacy-inventory-review.schema.json",
+        "docs/courtlens/legacy-inventory.csv",
+        "docs/courtlens/legacy-inventory.manifest.json",
+        "docs/courtlens/legacy-inventory.schema.json",
+        "docs/courtlens/phase-1-fr-review-ledger.schema.json",
+        "docs/courtlens/refactor-branch-base.json",
+        "docs/courtlens/refactor-plan.md"
+      ],
+      "count": 8
+    },
+    "docs.ops.generated": {
+      "files": [
+        "docs/ops/ownership-registry.md",
+        "docs/ops/release-governance/release-governance-audit.md"
+      ],
+      "count": 2
+    },
+    "scripts.courtlens": {
+      "files": [
+        "scripts/courtlens/__init__.py",
+        "scripts/courtlens/build_legacy_inventory.py",
+        "scripts/courtlens/tests/__init__.py",
+        "scripts/courtlens/tests/conftest.py",
+        "scripts/courtlens/tests/test_build_legacy_inventory.py"
+      ],
+      "count": 5
+    },
+    "docs.documentationIndex.generated": {
+      "files": [
+        "docs/documentation-index.md"
+      ],
+      "count": 1
+    },
+    "reports.generated": {
+      "files": [
+        "reports/doc-consistency.json",
+        "reports/doc-consistency.md",
+        "reports/documentation-index.json",
+        "reports/ownership-registry.json",
+        "reports/release-governance-audit.json",
+        "reports/release-secret-audit.json",
+        "reports/repo-excellence-audit.json",
+        "reports/repo-excellence-audit.md"
+      ],
+      "count": 8
+    }
+  },
+  "unexpectedFiles": [],
+  "verdict": "PHASE_0_ONLY",
+  "allowedPatterns": [
+    "docs/courtlens/**",
+    "scripts/courtlens/**",
+    "docs/ops/**",
+    "docs/documentation-index*",
+    "reports/**"
+  ]
+}
