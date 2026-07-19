@@ -74,7 +74,7 @@ export async function POST(
       );
     }
 
-    logAuditEvent({
+    await logAuditEvent({
       action: 'courtlens.matter.referral_status.updated',
       actorUserId: authz.context.userId,
       orgId: authz.context.orgId,

@@ -54,7 +54,7 @@ export async function POST(
       return NextResponse.json({ error: 'Not found', code: 'INCIDENT_NOT_FOUND' }, { status: 404 });
     }
 
-    logAuditEvent({
+    await logAuditEvent({
       action: 'incident.action.create',
       actorUserId: authz.userId,
       orgId: authz.orgId,

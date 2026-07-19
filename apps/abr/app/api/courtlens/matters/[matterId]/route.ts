@@ -54,7 +54,7 @@ export async function GET(
 
     const view = buildMatterDetailView(result.matter, result.detail!, authz.context.role);
 
-    logAuditEvent({
+    await logAuditEvent({
       action: 'courtlens.matter.viewed',
       actorUserId: authz.context.userId,
       orgId: authz.context.orgId,
