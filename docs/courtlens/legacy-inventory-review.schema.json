@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nzila.dev/schemas/courtlens/legacy-inventory-review.schema.json",
+  "title": "CourtLens legacy inventory review ledger",
+  "description": "Human review state paired with docs/courtlens/legacy-inventory.csv. Every legacyPath in the CSV must have exactly one entry here. An entry with reviewed=false blocks Phase 1 open. Phase 1 candidates are strictly the entries where proposedDisposition='port' AND proposedPhase='1'; this is NOT equivalent to rowCount.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedFrom",
+    "generatorVersion",
+    "csvBodySha256",
+    "rowCount",
+    "reviewedCount",
+    "unreviewedCount",
+    "dispositionCounts",
+    "phase1Metrics",
+    "entries"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedFrom": { "type": "string" },
+    "generatorVersion": { "type": "string" },
+    "csvBodySha256": { "type": "string" },
+    "rowCount": { "type": "integer", "minimum": 0 },
+    "reviewedCount": { "type": "integer", "minimum": 0 },
+    "unreviewedCount": { "type": "integer", "minimum": 0 },
+    "dispositionCounts": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "phase1Metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase1PortCandidates",
+        "phase1Reviewed",
+        "phase1Approved",
+        "phase1Unresolved"
+      ],
+      "properties": {
+        "phase1PortCandidates": { "type": "integer", "minimum": 0 },
+        "phase1Reviewed": { "type": "integer", "minimum": 0 },
+        "phase1Approved": { "type": "integer", "minimum": 0 },
+        "phase1Unresolved": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "legacyPath",
+          "proposedDisposition",
+          "proposedPhase",
+          "proposedTargetPath",
+          "reviewed",
+          "approvedDisposition",
+          "approvedPhase",
+          "approvedTargetPath",
+          "reviewer",
+          "reviewedAt",
+          "notes"
+        ],
+        "properties": {
+          "legacyPath": { "type": "string", "minLength": 1 },
+          "proposedDisposition": {
+            "type": "string",
+            "enum": ["port", "defer", "discard", "duplicate", "review-required"]
+          },
+          "proposedPhase": { "type": "string", "enum": ["", "1", "2", "3", "4", "5"] },
+          "proposedTargetPath": { "type": "string" },
+          "reviewed": { "type": "boolean" },
+          "approvedDisposition": {
+            "type": ["string", "null"],
+            "enum": [null, "port", "defer", "discard", "duplicate"]
+          },
+          "approvedPhase": { "type": ["string", "null"], "enum": [null, "1", "2", "3", "4", "5"] },
+          "approvedTargetPath": { "type": ["string", "null"] },
+          "reviewer": { "type": ["string", "null"], "description": "GitHub handle of the human reviewer." },
+          "reviewedAt": {
+            "type": ["string", "null"],
+            "description": "RFC3339 timestamp of when the entry was reviewed."
+          },
+          "notes": { "type": "string" }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "reviewed": { "const": true } } },
+            "then": {
+              "required": ["approvedDisposition", "reviewer", "reviewedAt"],
+              "properties": {
+                "approvedDisposition": { "not": { "const": "review-required" } }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

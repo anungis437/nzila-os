@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "File-level and hunk-level disposition of every Gap-3 commit inherited into the CourtLens integration branch. Emitted per the CourtLens directive: 'Do not cherry-pick mixed commits wholesale. Create clean product-only commits.'",
+  "generatedAt": "2026-07-19T00:00:00Z",
+  "generator": "manual review + git checkout <sha> -- <paths>",
+  "targetBranch": "integration/courtlens-gap3-product-line-v2",
+  "targetBranchTip": "c191c5db3",
+  "mergeBaseWithMain": "6b6d3736dd3692112690165823a0702e1b6deea9",
+  "classifications": {
+    "product-runtime": "Runtime source that ships with the CourtLens product surface.",
+    "product-test": "Unit / integration / e2e test that ships alongside product code.",
+    "shared-audit": "Shared audit doctrine code consumed by CourtLens and other tenants.",
+    "schema-migration": "SQL migration or generated schema snapshot required by product runtime.",
+    "test-infra": "Reusable test infrastructure (e.g. Playwright / Vitest runner config).",
+    "proof-only": "Ad-hoc fixture / smoke script used only for closure evidence.",
+    "generated-evidence": "Machine-generated closure evidence artifact.",
+    "closure-report": "Phase closure / Gap-N narrative markdown.",
+    "unrelated": "Change that touches a different product surface and must NOT ride on this branch."
+  },
+  "excludedCommits": [
+    {
+      "originalSha": "f2188d74b",
+      "replayedSha": "2c8154e54",
+      "reason": "Repairs pre-existing test failures in union-eyes and sage-core that are unrelated to CourtLens Gap 3. Moving these onto a CourtLens branch would contaminate the CourtLens diff and mask the true differential when we later revalidate the workspace. Belongs on its own product/test-hardening branch.",
+      "affectsPackages": ["apps/union-eyes", "packages/sage-core"],
+      "action": "EXCLUDED_ENTIRELY"
+    }
+  ],
+  "commits": [
+    {
+      "displayOrder": 1,
+      "originalSha": "053ab0bce",
+      "sourceBranch": "chore/windows-lint-staged-fix",
+      "newSha": "555d47c1b",
+      "kind": "chore-tooling",
+      "action": "cherry-pick",
+      "message": "chore(tools): make lint-staged-eslint script Windows-safe",
+      "files": [
+        {
+          "path": "scripts/lint-staged-eslint.mjs",
+          "classification": "test-infra",
+          "inheritedStatus": "product-only",
+          "reason": "Windows spawnSync shim so the pre-commit hook can find pnpm.cmd. Required for lint-staged to run at all on this platform; blocks every subsequent commit if missing."
+        }
+      ]
+    },
+    {
+      "displayOrder": 2,
+      "originalSha": null,
+      "sourceBranch": null,
+      "newSha": "d94ef09b1",
+      "kind": "chore-security",
+      "action": "reconstruct",
+      "message": "chore(security): allowlist CourtLens e2e local-dev DB fallback fingerprint",
+      "files": [
+        {
+          "path": ".gitleaksignore",
+          "classification": "test-infra",
+          "inheritedStatus": "product-only",
+          "reason": "Reviewed gitleaks fingerprint for apps/abr/e2e/courtlens-review-packet.spec.mjs:33. The nzila-database-url-with-password rule regex flags the localhost dev fallback connection string used by the e2e spec even though the rule description says it should not flag localhost. No real secret exposed."
+        }
+      ]
+    },
+    {
+      "displayOrder": 3,
+      "originalSha": "d7adb10ff",
+      "replayedSha": "0cc948a62",
+      "newSha": "da734fcfa",
+      "kind": "feature",
+      "action": "reconstruct (git checkout -- <selected paths>)",
+      "message": "feat(abr): close CourtLens Gap 3 implementation (product only)",
+      "files": [
+        { "path": "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/ReviewPacketExportControls.tsx", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Server component that renders the review-packet export controls." },
+        { "path": "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/__tests__/ReviewPacketExportControls.test.tsx", "classification": "product-test", "inheritedStatus": "product-only", "reason": "Unit test paired with the above component." },
+        { "path": "apps/abr/app/[locale]/dashboard/courtlens/matters/[matterId]/page.tsx", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Matter-detail page wiring the review-packet controls." },
+        { "path": "apps/abr/app/[locale]/dashboard/courtlens/matters/__tests__/pages.test.tsx", "classification": "product-test", "inheritedStatus": "product-only", "reason": "Page-level render test." },
+        { "path": "apps/abr/app/[locale]/layout.tsx", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Locale layout used by CourtLens routes." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/__tests__/route.test.ts", "classification": "product-test", "inheritedStatus": "product-only", "reason": "API route unit test." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Review-packet API route handler." },
+        { "path": "apps/abr/e2e/courtlens-review-packet.spec.mjs", "classification": "product-test", "inheritedStatus": "product-only", "reason": "End-to-end Playwright spec for review packet flow." },
+        { "path": "apps/abr/modules/incidents/__tests__/courtlens-review-packet.test.ts", "classification": "product-test", "inheritedStatus": "product-only", "reason": "Module test for the review-packet incident helper." },
+        { "path": "apps/abr/modules/incidents/courtlens-review-packet.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Domain module that assembles review-packet payloads." },
+        { "path": "apps/abr/playwright.config.ts", "classification": "test-infra", "inheritedStatus": "product-only", "reason": "Playwright config needed to run the e2e spec above." },
+        { "path": "apps/abr/messages/en.json", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Localised strings referenced by the product." },
+        { "path": "apps/abr/messages/fr.json", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Localised strings referenced by the product." },
+        { "path": "apps/abr/next-env.d.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Next.js generated ambient types file." }
+      ],
+      "excludedFiles": [
+        { "path": "apps/abr/scripts/courtlens-gap3-fixture.ts", "classification": "proof-only", "reason": "One-off fixture seeder used only for Gap 3 closure evidence." },
+        { "path": "artifacts/courtlens-gap3-closure/**", "classification": "generated-evidence", "reason": "Machine-generated Gap 3 closure artifacts. Not product." },
+        { "path": "artifacts/courtlens-gap3-fixture/**", "classification": "generated-evidence", "reason": "Machine-generated fixture artifacts." },
+        { "path": "docs/courtlens/phase-2/**", "classification": "closure-report", "reason": "Phase 2 narrative; not a Phase 0 concern and not shipped with the product." }
+      ]
+    },
+    {
+      "displayOrder": 4,
+      "originalSha": "41e884a44",
+      "replayedSha": "bf1f40de8",
+      "newSha": "439800936",
+      "kind": "fix",
+      "action": "reconstruct (git checkout -- <selected paths>)",
+      "message": "fix(abr): harden CourtLens review-packet audit persistence (product only)",
+      "files": [
+        { "path": "apps/abr/lib/audit-log.ts", "classification": "shared-audit", "inheritedStatus": "product-only", "reason": "Shared audit helper hardened to persist review-packet events consistently." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/__tests__/route.db.integration.test.ts", "classification": "product-test", "inheritedStatus": "product-only", "reason": "DB-integration test for the review-packet route." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Route handler updated for hardened audit persistence." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/status/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Matter status route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/reviewer/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Reviewer route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/priority/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Priority route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/action-items/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Action-items route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/action-items/[actionItemId]/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Single action-item route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/review-cycles/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Review-cycles route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/review-cycles/[cycleId]/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Single review-cycle route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/notes/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Notes route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/notes/[noteId]/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Single note route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/documents/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Documents route — audit persistence hardened." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/documents/[documentId]/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Single document route — audit persistence hardened." }
+      ],
+      "excludedFiles": [
+        { "path": "apps/abr/scripts/courtlens-gap3-fixture.ts", "classification": "proof-only", "reason": "One-off fixture seeder for Gap 3 closure evidence." },
+        { "path": "apps/abr/scripts/__tests__/courtlens-gap3-fixture.test.ts", "classification": "proof-only", "reason": "Test for the fixture seeder — not product." }
+      ]
+    },
+    {
+      "displayOrder": 5,
+      "originalSha": "a622c8fbe",
+      "replayedSha": "353013d76",
+      "newSha": "6bade989d",
+      "kind": "fix",
+      "action": "reconstruct (git checkout -- <selected paths>)",
+      "message": "fix(abr): separate vitest/playwright runners and stabilize audit org resolution",
+      "files": [
+        { "path": "apps/abr/vitest.config.ts", "classification": "test-infra", "inheritedStatus": "product-only", "reason": "Explicit vitest include/exclude so it does not double-collect Playwright specs." },
+        { "path": "apps/abr/playwright.config.ts", "classification": "test-infra", "inheritedStatus": "product-only", "reason": "Playwright runner scope tightened to e2e/**." },
+        { "path": "apps/abr/lib/audit-log.ts", "classification": "shared-audit", "inheritedStatus": "product-only", "reason": "Audit-org resolution stabilised so callers no longer rely on request-derived globals." },
+        { "path": "apps/abr/app/api/courtlens/matters/[matterId]/review-packet/route.ts", "classification": "product-runtime", "inheritedStatus": "product-only", "reason": "Route caller adjusted for the new audit-org resolution contract." }
+      ]
+    },
+    {
+      "displayOrder": 6,
+      "originalSha": "802f7834a",
+      "replayedSha": "74bacc34a",
+      "newSha": "0ebdccc7a",
+      "kind": "fix",
+      "action": "reconstruct (git checkout -- <selected paths>)",
+      "message": "fix(abr,audit): persist canonical hash timestamp and version for independent recomputation",
+      "files": [
+        { "path": "apps/abr/lib/audit-log.ts", "classification": "shared-audit", "inheritedStatus": "product-only", "reason": "Canonical hash timestamp + version recorded on every audit event." },
+        { "path": "apps/abr/lib/__tests__/audit-log.canonical.test.ts", "classification": "product-test", "inheritedStatus": "product-only", "reason": "Locks the canonical-hash contract." },
+        { "path": "packages/db/drizzle/0032_audit_events_canonical_hash.sql", "classification": "schema-migration", "inheritedStatus": "product-only", "reason": "Adds occurred_at + hash_version columns required by the runtime change." },
+        { "path": "packages/db/src/schema/operations.ts", "classification": "schema-migration", "inheritedStatus": "product-only", "reason": "Drizzle schema mirror of the SQL migration above." }
+      ]
+    },
+    {
+      "displayOrder": 7,
+      "originalSha": "c5288b080",
+      "replayedSha": "1d0388c25",
+      "newSha": "c191c5db3",
+      "kind": "chore",
+      "action": "reconstruct (git checkout -- <selected paths>)",
+      "message": "chore(db): regenerate schema snapshot for audit_events.occurred_at and hash_version",
+      "files": [
+        { "path": "tooling/db/schema-snapshot.json", "classification": "schema-migration", "inheritedStatus": "product-only", "reason": "Regenerated snapshot reflecting the audit_events columns added in the prior commit." }
+      ]
+    }
+  ],
+  "summary": {
+    "productCommits": 5,
+    "choreCommits": 2,
+    "excludedCommits": 1,
+    "totalFilesInProductCommits": 39,
+    "totalFilesExcludedFromMixedCommits": 4
+  }
+}
