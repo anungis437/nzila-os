@@ -470,17 +470,17 @@ Captured in `reports/phase0/`.
 
 | Check | Result |
 | --- | --- |
-| `python -m pytest scripts/courtlens/tests -v` | 43/43 passing on v3 — see [reports/phase0/pytest.log](../../reports/phase0/pytest.log) |
+| `python -m pytest scripts/courtlens/tests -v` | 43/43 passing on v3 — transcript captured locally in `reports/phase0/pytest.log` (gitignored) |
 | Regenerate CSV twice, compare SHA-256 | Byte-identical: `csvBodySha256 = 9668c0102676613bca8f43e166fc040506c34722466346cafcaa6b0cd590d261`, `legacyRootFingerprint = 56e42b0b568b59e40f1d5ddf701d70da0aa83ef3b139ac62227acd1284a29bb3` (rowCount = 380, generatorVersion `0.2.0`) |
 | Inventory disposition matrix | `total=380, port=3, defer=146, discard=73, duplicate=2, reviewRequired=156, phase1PortCandidates=3`. **Phase 1 candidates are 3, not 380.** |
-| Review-ledger `phase1Metrics` | `{ phase1PortCandidates: 3, phase1Reviewed: 0, phase1Approved: 0, phase1Unresolved: 3 }`. |
-| `pnpm validate:docs` | See [reports/phase0/validate-docs.log](../../reports/phase0/validate-docs.log) |
+| Review-ledger `phase1Metrics` | `{ phase1PortCandidates: 3, phase1Reviewed: 3, phase1Approved: 3, phase1Unresolved: 0 }` (all 3 candidates approved by platform-lead 2026-07-19). |
+| `pnpm validate:docs` | Transcript captured locally in `reports/phase0/validate-docs.log` (gitignored) |
 | `pnpm ownership:audit` | Regenerated on v3 — see [docs/ops/ownership-registry.md](../ops/ownership-registry.md) and [reports/ownership-registry.json](../../reports/ownership-registry.json) |
 | `pnpm docs:index` | Regenerated on v3 — see [docs/documentation-index.md](../documentation-index.md) and [reports/documentation-index.json](../../reports/documentation-index.json) |
-| `pnpm governance:audit` | See [reports/phase0/governance-audit.log](../../reports/phase0/governance-audit.log) |
+| `pnpm governance:audit` | Transcript captured locally in `reports/phase0/governance-audit.log` (gitignored) |
 | `pnpm exec tsx scripts/link-check.ts docs/courtlens/refactor-plan.md` | All links valid |
-| `pnpm test:fast` | See [reports/phase0/test-fast.log](../../reports/phase0/test-fast.log). Failures unrelated to CourtLens (union-eyes / sage-core) are reported as differential, NOT re-added to this branch. |
-| Contract tests | Ran via pre-push hook (see [reports/phase0/contract-tests.log](../../reports/phase0/contract-tests.log)) |
+| `pnpm test:fast` | Transcript captured locally in `reports/phase0/test-fast.log` (gitignored). Failures unrelated to CourtLens (union-eyes / sage-core) are reported as differential, NOT re-added to this branch. |
+| Contract tests | Ran via pre-push hook (transcript captured locally in `reports/phase0/contract-tests.log`, gitignored) |
 | Scope diff (v3 vs integration branch v2) | See [reports/phase0/scope-report.json](../../reports/phase0/scope-report.json) — `reconciliation: RECONCILED`; includes `controlledExclusions`, `gitDiffFileCount`, `githubPrFileCount` |
 | Lefthook | Ran with hooks enabled (no `LEFTHOOK=0`, no `--no-verify`) |
 
